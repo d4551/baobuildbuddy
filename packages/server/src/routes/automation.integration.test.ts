@@ -7,17 +7,18 @@ import {
   setDefaultTimeout,
   test,
 } from "bun:test";
+import { API_ENDPOINTS, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import {
-  API_ENDPOINTS,
+  rpaRunEventSchema,
+  type RpaRunEvent,
+  type RpaRunExecutionEnvelope,
+} from "@bao/shared/schemas/rpa-events.schema";
+import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_SETTINGS_ID,
-  type EmailTransportSettings,
-  type RpaRunEvent,
-  type RpaRunExecutionEnvelope,
-  rpaRunEventSchema,
-  WS_ENDPOINTS,
-} from "@bao/shared";
+} from "@bao/shared/types/settings-defaults";
 import { eq, inArray } from "drizzle-orm";
 import type { App } from "../app";
 import { db } from "../db/client";

@@ -2,7 +2,7 @@
  * Typed access boundary for the Eden Treaty `$api` instance.
  * All composables use this to access the Elysia server.
  */
-import type { NuxtApp } from "#app";
+import type { ClientApi } from "~/types/client-api";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 
 /**
@@ -10,7 +10,7 @@ import { useNuxtRuntimeApp } from "./nuxtRuntime";
  *
  * @returns The Nuxt runtime `$api` instance.
  */
-export function useApi(): NuxtApp["$api"] {
+export function useApi(): ClientApi {
   const { $api } = useNuxtRuntimeApp();
   return $api;
 }

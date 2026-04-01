@@ -1,3 +1,4 @@
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sqlite-core";
 
@@ -26,6 +27,7 @@ export const jobs = sqliteTable(
     tags: text("tags", { mode: "json" }).$type<string[]>(),
     companyLogo: text("company_logo"),
     applicationUrl: text("application_url"),
+    enrichment: text("enrichment", { mode: "json" }).$type<ScrapePersonaEnrichment>(),
     createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
   },

@@ -1,4 +1,4 @@
-import type { ScrapedJob } from "@bao/shared";
+import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 
 /**
  * Narrow page contract used by scraper providers.

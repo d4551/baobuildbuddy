@@ -45,6 +45,7 @@ Not sure where to start? Choose the guide that matches your goal:
 | Get BaoBuildBuddy running for the first time | [First-Time Setup Guide](docs/STARTER_GUIDE.md)             |
 | Set up local AI with Ollama               | [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)                 |
 | Learn the automation and RPA flows        | [Automation Guide](docs/AUTOMATION.md)                         |
+| Run the full proof and verification pass  | [Verification Runbook](docs/VERIFICATION_RUNBOOK.md)           |
 | Deploy to Railway                         | [Railway Deployment Guide](docs/RAILWAY.md)                    |
 | Install a desktop app (no dev setup)      | [Non-Technical Install](#non-technical-install)                |
 | Read the full technical reference         | Keep reading this file                                         |
@@ -57,7 +58,7 @@ Not sure where to start? Choose the guide that matches your goal:
 - **SQLite** is the notebook that remembers things.
 - **Playwright** is the robot browser.
 - **Bun** is the runtime, package manager, bundler, and test runner.
-- **Tauri** is the desktop wrapper.
+- **Tauri** is the desktop shell.
 
 ---
 
@@ -79,6 +80,7 @@ Not sure where to start? Choose the guide that matches your goal:
 - [Project Structure](#project-structure)
 - [Client Pages & Features](#client-pages--features)
 - [Validation & Quality Gates](#validation--quality-gates)
+- [Verification Runbook](#verification-runbook)
 - [Desktop Packaging (Tauri)](#desktop-packaging-tauri)
 - [Troubleshooting](#troubleshooting)
 - [Final Checklist](#final-checklist)
@@ -92,7 +94,7 @@ Not sure where to start? Choose the guide that matches your goal:
 
 | Required        | Purpose                               |
 |-----------------|---------------------------------------|
-| Bun (>=1.3.10)  | Runtime, package manager, test runner |
+| Bun (>=1.3.11)  | Runtime, package manager, test runner |
 | Git             | Source control                        |
 
 Optional: Rust + Cargo (for desktop builds), `curl`/`jq` (for diagnostics), at least one AI provider key.
@@ -101,7 +103,7 @@ Check your Bun version against the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.10"
+# -> "bun@1.3.11"
 ```
 
 ### Automated setup (recommended)
@@ -171,8 +173,23 @@ Want BaoBuildBuddy to use AI on your own computer without cloud API keys?
 3. Download a first model: `ollama pull llama3.2`
 4. Open BaoBuildBuddy and go to **Settings > AI Providers**.
 5. Set the local endpoint to `http://localhost:11434/v1` and leave the model blank for auto-detect.
+6. Use the built-in test button before saving. The settings and setup flows now surface concrete local diagnostics such as unreachable endpoint, timeout, empty model list, and invalid selected model.
 
 For the full beginner walkthrough, see [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SETUP.md).
+
+---
+
+## Verification Runbook
+
+For the current step-by-step proof flow covering:
+
+- format, lint, test, and build gates
+- full routed page screenshots with a report
+- export verification for resume / cover letter / portfolio
+- desktop runtime verification
+- Tauri 2 host-matching release generation plus staged multi-platform verification
+
+use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md).
 
 ---
 
@@ -223,7 +240,7 @@ flowchart LR
   end
 
   subgraph Server["@bao/server"]
-    API["17 route modules"]
+    API["Typed route modules"]
     WSHandlers["ws/chat · interview · automation"]
     Svcs["Services layer"]
   end
@@ -277,7 +294,7 @@ flowchart TD
   EdenClient -->|"type import"| ServerTypes
   ApiPrefix --> App["packages/server/src/app"]
   App --> Middleware["cors · swagger · rate-limit · logger · errorHandler · authGuard"]
-  App --> Routes["17 route modules from route-modules"]
+  App --> Routes["Typed route modules from route-modules.ts"]
   App --> WebSockets["ws: chat · interview · automation"]
   App --> Shared
   App --> ServerTypes
@@ -468,7 +485,7 @@ bun run dev:client
 | Dev (stack)                 | `bun run dev:stack`                                    | Alias to `scripts/dev-stack.ts`                     |
 | Dev server                  | `bun run dev:server`                                   | Start API server only                               |
 | Dev client                  | `bun run dev:client`                                   | Start Nuxt client only                              |
-| Dev desktop                 | `bun run dev:desktop`                                  | Start Tauri desktop wrapper                         |
+| Dev desktop                 | `bun run dev:desktop`                                  | Start Tauri desktop shell                           |
 | Build                       | `bun run build`                                        | Build server and client                             |
 | Build desktop               | `bun run build:desktop`                                | Build Tauri installer for current host; merges into `packages/desktop/releases` without deleting other OS artifacts |
 | Typecheck                   | `bun run typecheck`                                    | TypeScript checking across all packages             |
@@ -486,7 +503,7 @@ bun run dev:client
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
 | Release refresh (all staged OSes) | `bun run release:refresh:all-os`                | Assemble staged release artifacts + checksums       |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
-| Server type contract        | `bun run --filter '@bao/server' build:types`           | Generate dist-types for client typecheck            |
+| Server type contract        | `bun run --cwd packages/server build:types`            | Generate dist-types for client typecheck            |
 | Validate ARIA               | `bun run validate:aria`                                | Interactive labeling + dialog semantics             |
 | Validate layout tokens      | `bun run validate:ui-layout-tokens`                    | Block hardcoded width/grid literals                 |
 | Validate UI                 | `bun run validate:ui`                                  | WCAG contrast + hardcoded color checks              |
@@ -680,20 +697,27 @@ The AI subsystem is in `packages/server/src/services/ai/`:
 | `ai-service.ts`          | Routes requests to the active provider                        |
 | `provider-interface.ts`  | Common interface for all providers                            |
 | `local-provider.ts`      | Connects to Ollama, LM Studio, etc.                           |
-| `openai-provider.ts`     | OpenAI API adapter                                            |
-| `gemini-provider.ts`     | Google Gemini API adapter                                     |
-| `claude-provider.ts`     | Anthropic Claude API adapter                                  |
-| `huggingface-provider.ts`| HuggingFace Inference API adapter                             |
+| `openai-provider.ts`     | OpenAI API integration                                        |
+| `gemini-provider.ts`     | Google Gemini API integration                                 |
+| `claude-provider.ts`     | Anthropic Claude API integration                              |
+| `huggingface-provider.ts`| HuggingFace Inference API integration                         |
 | `context-manager.ts`     | Manages conversation history and context windows              |
 | `prompts.ts`             | Prompt templates for resume review, interviews, cover letters |
 
 ### Provider selection
 
-1. Local provider is used when `LOCAL_MODEL_ENDPOINT` and `LOCAL_MODEL_NAME` are set.
-2. Cloud adapters are selected based on which API keys are configured.
-3. The context manager handles conversation state and prompt construction.
+1. The settings row persists a canonical `aiRouting` map keyed by purpose: `chat`, `interviewQuestions`, `interviewFeedback`, `resume`, `coverLetter`, `emailResponse`, `jobMatch`, `scrapeEnrichment`, and `automationFieldMapping`.
+2. Each AI route/service call now passes an explicit purpose so provider and model selection happens server-side per workflow instead of through one global preference.
+3. Local inference is centered on `http://localhost:11434/v1` and supports blank-model auto-detect; diagnostics report unreachable endpoints, timeouts, empty `/models` responses, and invalid configured models.
+4. The context manager still owns conversation state and prompt construction for chat surfaces.
 
 All AI calls are server-owned. The client communicates through API routes and WebSocket endpoints, never directly to providers.
+
+### Source-of-truth policy
+
+- Edit hand-maintained source, docs, schemas, and config under `packages/*`, `docs/`, and `scripts/`.
+- Treat `.nuxt`, `.output`, `dist-types`, desktop release payloads, and other packaged/generated artifacts as derived outputs.
+- Regenerate derived outputs after source changes; do not hand-edit them.
 
 ---
 
@@ -874,11 +898,11 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
     |   |   |   |   +-- portfolio.schema, skill-mapping.schema
     |   |   |   +-- constants/      Runtime, API, automation, AI, and UI contract constants
     |   |   |   +-- utils/          Shared parsing, validation, and formatting helpers
-    |   |   |   +-- public-api.ts   Package export surface
+    |   |   |   +-- constants/, schemas/, types/, utils/  Direct subpath export surface
     |   +-- scraper/                Bun automation runtime
     |       +-- src/scripts/        Bun/TS automation entrypoints
     |       +-- src/providers/      Playwright scraper extractors
-    |       +-- src/job-apply/      ATS adapter runtime
+|       +-- src/job-apply/      ATS integration runtime
     |       +-- src/runtime/        IO/protocol/browser helpers
     |       +-- package.json
     +-- scripts/
@@ -1042,6 +1066,12 @@ bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
 ```
 
+Release truth:
+
+- `bun run build:desktop` regenerates only the current host desktop artifact.
+- Fresh native installer regeneration is host-specific. A macOS machine cannot honestly claim fresh Windows or Linux installer generation from a local run.
+- To regenerate every native installer, run the matching `release:desktop:*` command on each target host or through the CI matrix, then assemble the staged outputs.
+
 Assemble multi-platform release set:
 
 ```bash
@@ -1142,6 +1172,8 @@ bun run release:desktop:linux-x64 -- --output-root .desktop-release-artifacts --
 bun run release:desktop:linux-arm64 -- --output-root .desktop-release-artifacts --release
 ```
 
+Do not describe that as "everything regenerated" unless each target command actually ran on its matching host or in CI on that target platform.
+
 **Optional installable variants (defaults are on; set `false` to omit):**
 ```bash
 DESKTOP_RELEASE_MACOS_ARCHITECTURES=aarch64,x86_64,universal bun run release:desktop:macos -- --output-root .desktop-release-artifacts --release
@@ -1157,6 +1189,12 @@ bun run release:refresh:all-os
 This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance. The GitHub Actions desktop workflow now gates every native packaging job behind `bun ci`, `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`, then runs `bun run verify:desktop-runtime` and `bun run verify:desktop-releases -- --release` on each native host before artifact upload. MSI, AppImage, and Linux `.sig` outputs are **on by default** (unset env uses defaults); set workflow-dispatch inputs, repository variables, or `DESKTOP_RELEASE_*=false` to turn them off. Extra macOS architectures still use `DESKTOP_RELEASE_MACOS_ARCHITECTURES`.
 
 `--release` on macOS **always** runs `xcrun stapler validate` on the staged DMG (notarization ticket). For a **non-stapled** tree (typical local ad-hoc sign), run `bun run verify:desktop-releases` **without** `--release` so payload and checksum checks still run; use `--release` only when the DMG is stapled like a shipping build.
+
+For the step-by-step proof flow, including production-preview screenshots, PDF first-page rendering with `pdftoppm`, and Quick Look verification for DOCX exports, follow [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md). For the current staged desktop artifact set in this repository, the direct verifier command is:
+
+```bash
+bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
+```
 
 **Output locations:**
 - Raw build output: `packages/desktop/src-tauri/target/release/bundle`

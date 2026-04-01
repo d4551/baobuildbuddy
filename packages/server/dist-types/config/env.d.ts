@@ -1,3 +1,7 @@
+export declare const isProductionRuntime: () => boolean;
+export declare const isTestRuntime: boolean;
+export declare const isBunExecutablePath: (execPath?: string) => boolean;
+export declare const shouldUsePrettyLogTransport: (nodeEnv?: string | undefined, execPath?: string, testMode?: string | undefined) => boolean;
 /**
  * Resolves the current server runtime configuration from environment variables.
  */

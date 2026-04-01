@@ -1,708 +1,307 @@
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
-  API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED,
-  API_ERROR_AUTOMATION_RUN_NOT_FOUND,
-  API_ERROR_INVALID_RUN_ID,
-  API_ERROR_RUN_NOT_FOUND,
-  API_ERROR_SCHEDULED_RUN_NOT_FOUND,
-  AUTOMATION_RUN_HISTORY_LIMIT,
-  AUTOMATION_RUN_STATUSES,
-  AUTOMATION_RUN_TYPES,
-  AUTOMATION_SCRAPE_TARGETS,
-  type AutomationScrapeTarget,
-  type EmailResponseRequest,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
-  jsonObjectSchema,
-  type RpaRunExecutionEnvelope,
-  RUN_ID_MIN_LENGTH,
-  RUN_ID_SAFE_PATTERN_SOURCE,
-  rpaRunErrorCodeSchema,
-  rpaRunExecutionEnvelopeSchema,
-  SCHEMA_MAX_LENGTH_EMAIL,
-  SCHEMA_MAX_LENGTH_EMAIL_MESSAGE,
-  SCHEMA_MAX_LENGTH_SHORT,
-  settle,
-} from "@bao/shared";
-import { and, desc, eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
-
-import { config } from "../config/env";
-import { db } from "../db/client";
-import { automationRuns } from "../db/schema/automation-runs";
-import { resumes } from "../db/schema/resumes";
-import { applicationAutomationService } from "../services/automation/application-automation-service";
-import { mapAutomationRouteError, toRouteError } from "../utils/automation-route-error";
-import { createServerLogger } from "../utils/logger";
+} from "@bao/shared/constants/http";
+import { StandardSchemaV1 } from "baobox";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { automationRateLimit } from "../utils/rate-limit";
-
-const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
-
-const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
-  AUTOMATION_RUN_TYPES;
-const [
-  AUTOMATION_STATUS_PENDING,
-  AUTOMATION_STATUS_RUNNING,
+import {
+  handleAutomationCapabilitiesRoute,
+  handleAutomationRunByIdRoute,
+  handleEmailResponseRoute,
+  handleJobApplyRoute,
+  handleScheduledEmailResponseRoute,
+  handleScheduledJobApplyRoute,
+  handleScheduledScrapeRoute,
+  handleScrapeRoute,
+  handleVerifyAutomationContext,
+} from "./automation-route-actions";
+import {
+  type AutomationRunIdParams,
+  type AutomationRunQuery,
+  type EmailResponseBody,
+  type JobApplyBody,
+  type RouteSetState,
+  type ScheduledEmailResponseBody,
+  type ScheduledJobApplyBody,
+  type ScheduledScrapeBody,
+  type ScrapeBody,
+  automationRunEnvelopeBodySchema,
+  automationRunIdParamsSchema,
+  automationRunQuerySchema,
   AUTOMATION_STATUS_SUCCESS,
-  AUTOMATION_STATUS_ERROR,
-] = AUTOMATION_RUN_STATUSES;
-const [
-  SCRAPE_TARGET_STUDIOS,
-  SCRAPE_TARGET_HITMARKER,
-  SCRAPE_TARGET_GRACKLE,
-  SCRAPE_TARGET_WORKWITHINDIES,
-  SCRAPE_TARGET_REMOTEGAMEJOBS,
-  SCRAPE_TARGET_GAMESJOBSDIRECT,
-  SCRAPE_TARGET_POCKETGAMER,
-] = AUTOMATION_SCRAPE_TARGETS;
+  capabilityAuditReportBodySchema,
+  emailResponseBodySchema,
+  jobApplyBodySchema,
+  routeErrorBodySchema,
+  scheduledEmailResponseBodySchema,
+  scheduledJobApplyBodySchema,
+  scheduledScrapeBodySchema,
+  scrapeBodySchema,
+} from "./automation-route-contracts";
+import { listAutomationRuns } from "./automation-route-support";
+import { toRouteError } from "../utils/automation-route-error";
 
-const automationRoutesLogger = createServerLogger("automation-routes");
-const AUTOMATION_VERIFY_RESUME_ID = "automation-verify-resume";
+const hasText = (value: string | undefined): value is string =>
+  typeof value === "string" && value.trim().length > 0;
 
-const AUTOMATION_TYPE_SCHEMA = t.Union([
-  t.Literal(AUTOMATION_TYPE_SCRAPE),
-  t.Literal(AUTOMATION_TYPE_JOB_APPLY),
-  t.Literal(AUTOMATION_TYPE_EMAIL),
-]);
-const AUTOMATION_STATUS_SCHEMA = t.Union([
-  t.Literal(AUTOMATION_STATUS_PENDING),
-  t.Literal(AUTOMATION_STATUS_RUNNING),
-  t.Literal(AUTOMATION_STATUS_SUCCESS),
-  t.Literal(AUTOMATION_STATUS_ERROR),
-]);
-const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
-  t.Literal("professional"),
-  t.Literal("friendly"),
-  t.Literal("concise"),
-]);
-const SCRAPE_TARGET_SCHEMA = t.Union([
-  t.Literal(SCRAPE_TARGET_STUDIOS),
-  t.Literal(SCRAPE_TARGET_HITMARKER),
-  t.Literal(SCRAPE_TARGET_GRACKLE),
-  t.Literal(SCRAPE_TARGET_WORKWITHINDIES),
-  t.Literal(SCRAPE_TARGET_REMOTEGAMEJOBS),
-  t.Literal(SCRAPE_TARGET_GAMESJOBSDIRECT),
-  t.Literal(SCRAPE_TARGET_POCKETGAMER),
-]);
-const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
-const nullableRunErrorSchema = t.Union([
-  t.String({ minLength: 1 }),
-  t.Object({
-    code: t.String({ minLength: 1 }),
-    message: t.String({ minLength: 1 }),
-    source: t.String({ minLength: 1 }),
-    details: t.Optional(t.Record(t.String(), t.Unknown())),
-  }),
-  t.Null(),
-]);
-const automationRunEnvelopeBodySchema = t.Object({
-  id: t.String(),
-  type: AUTOMATION_TYPE_SCHEMA,
-  status: AUTOMATION_STATUS_SCHEMA,
-  jobId: t.Nullable(t.String()),
-  userId: t.Nullable(t.String()),
-  input: nullableJsonRecordBodySchema,
-  output: t.Union([nullableJsonRecordBodySchema, t.Null()]),
-  screenshots: t.Nullable(t.Array(t.String())),
-  error: nullableRunErrorSchema,
-  progress: t.Nullable(t.Number()),
-  currentStep: t.Nullable(t.Number()),
-  totalSteps: t.Nullable(t.Number()),
-  startedAt: t.Nullable(t.String()),
-  completedAt: t.Nullable(t.String()),
-  createdAt: t.String(),
-  updatedAt: t.String(),
-  exitCode: t.Nullable(t.Number()),
-  timedOut: t.Boolean(),
-  aborted: t.Boolean(),
-  executionMs: t.Nullable(t.Number()),
-});
+const hasMessage = (value: object): value is { message: string } =>
+  "message" in value && typeof value.message === "string" && value.message.length > 0;
 
-const routeErrorBodySchema = t.Object({
-  error: t.Object({
-    code: t.String({ minLength: 1 }),
-    message: t.String({ minLength: 1 }),
-    details: t.Optional(t.Record(t.String(), t.Unknown())),
-  }),
-});
-const capabilityAuditEntryBodySchema = t.Object({
-  id: t.String({ minLength: 1 }),
-  category: t.Union([t.Literal("job_apply"), t.Literal("scrape")]),
-  name: t.String({ minLength: 1 }),
-  target: t.Union([SCRAPE_TARGET_SCHEMA, t.Null()]),
-  implemented: t.Boolean(),
-  configured: t.Boolean(),
-  enabled: t.Boolean(),
-  manualRunAvailable: t.Boolean(),
-  scheduledRunAvailable: t.Boolean(),
-  runHistoryAvailable: t.Boolean(),
-  liveUpdatesAvailable: t.Boolean(),
-  issues: t.Array(t.String({ minLength: 1 })),
-});
-const capabilityAuditReportBodySchema = t.Object({
-  generatedAt: t.String({ minLength: 1 }),
-  summary: t.Object({
-    total: t.Number(),
-    configured: t.Number(),
-    manualRunAvailable: t.Number(),
-    scheduledRunAvailable: t.Number(),
-    runHistoryAvailable: t.Number(),
-    liveUpdatesAvailable: t.Number(),
-  }),
-  capabilities: t.Array(capabilityAuditEntryBodySchema),
-});
-
-type AutomationDbRow = typeof automationRuns.$inferSelect;
-type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
-type JobApplyRequestBody = {
-  jobUrl: string;
-  resumeId: string;
-  coverLetterId?: string;
-  jobId?: string;
-  customAnswers?: Record<string, string>;
-};
-type RunScrapeRequestBody = {
-  target: AutomationScrapeTarget;
-};
-type ScheduleJobApplyRequestBody = JobApplyRequestBody & {
-  runAt: string;
-};
-type ScheduleEmailResponseRequestBody = EmailResponseRequest & {
-  runAt: string;
-};
-type ScheduleScrapeRequestBody = {
-  target: AutomationScrapeTarget;
-  runAt: string;
-};
-
-const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYPES)[number] =>
-  AUTOMATION_RUN_TYPES.some((runType) => runType === value);
-
-const isAutomationRunStatus = (value: string): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
-  AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
-
-const toJsonObject = (value: unknown): AutomationJsonObject | null => {
-  const parsed = jsonObjectSchema.safeParse(value);
-  if (parsed.success) {
-    return parsed.data;
-  }
-  return null;
-};
-
-const toBooleanFlag = (value: unknown): boolean => value === true || value === 1 || value === "1";
-
-const normalizeRunError = (value: unknown): RpaRunExecutionEnvelope["error"] => {
-  if (typeof value === "string" && value.trim().length > 0) {
-    return value;
-  }
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
+const readValidationErrorMessage = (error: unknown): string => {
+  if (typeof error !== "object" || error === null) {
+    return "Request validation failed.";
   }
 
-  const code = "code" in value && typeof value.code === "string" ? value.code.trim() : "";
-  const message =
-    "message" in value && typeof value.message === "string" ? value.message.trim() : "";
-  const parsedCode = rpaRunErrorCodeSchema.safeParse(code);
-  const source =
-    "source" in value && typeof value.source === "string" && value.source.trim().length > 0
-      ? value.source.trim()
-      : "automation-routes";
-
-  if (!(parsedCode.success && message)) {
-    return null;
-  }
-
-  const details = "details" in value ? toJsonObject(value.details) : undefined;
-
-  return {
-    code: parsedCode.data,
-    message,
-    source,
-    ...(details ? { details } : {}),
-  };
-};
-
-const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope => {
-  const normalizedCandidate = {
-    id: run.id,
-    type: isAutomationRunType(run.type) ? run.type : AUTOMATION_TYPE_SCRAPE,
-    status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_PENDING,
-    jobId: run.jobId,
-    userId: run.userId,
-    input: toJsonObject(run.input),
-    output: toJsonObject(run.output),
-    screenshots: run.screenshots ?? null,
-    error: normalizeRunError(run.error),
-    progress: run.progress ?? null,
-    currentStep: run.currentStep ?? null,
-    totalSteps: run.totalSteps ?? null,
-    startedAt: run.startedAt ?? null,
-    completedAt: run.completedAt ?? null,
-    createdAt: run.createdAt,
-    updatedAt: run.updatedAt,
-    exitCode: run.exitCode ?? null,
-    timedOut: toBooleanFlag(run.timedOut),
-    aborted: toBooleanFlag(run.aborted),
-    executionMs: run.executionMs ?? null,
-  } satisfies RpaRunExecutionEnvelope;
-
-  const parsed = rpaRunExecutionEnvelopeSchema.safeParse(normalizedCandidate);
-  if (parsed.success) {
-    return parsed.data;
-  }
-
-  return {
-    ...normalizedCandidate,
-    status: AUTOMATION_STATUS_ERROR,
-    error: {
-      code: "OUTPUT_VALIDATION_ERROR",
-      message: API_ERROR_AUTOMATION_PAYLOAD_VALIDATION_FAILED,
-      source: "automation-routes",
-      details: {
-        issueCount: parsed.error.issues.length,
-      },
-    },
-  };
-};
-
-const readAutomationRunById = async (runId: string): Promise<RpaRunExecutionEnvelope | null> => {
-  const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
-  if (rows.length === 0) {
-    return null;
-  }
-  return normalizeAutomationRun(rows[0]);
-};
-
-const ensureAutomationVerifyContext = async (): Promise<{ resumeId: string }> => {
-  const timestamp = new Date().toISOString();
-  await db
-    .insert(resumes)
-    .values({
-      id: AUTOMATION_VERIFY_RESUME_ID,
-      name: "Automation Verify Resume",
-      personalInfo: {
-        name: "Automation Verify Candidate",
-        email: "verify@example.test",
-        location: "Remote",
-        portfolio: "https://example.test/portfolio",
-      },
-      summary:
-        "Deterministic packaged-runtime verification resume used for end-to-end automation validation.",
-      experience: [
-        {
-          title: "Gameplay Engineer",
-          company: "Bao Verify Studio",
-          location: "Remote",
-          startDate: "2024-01",
-          endDate: "",
-          current: true,
-          description:
-            "Built deterministic automation flows, packaging checks, and UI verification systems.",
-        },
-      ],
-      education: [],
-      skills: {
-        technical: ["TypeScript", "Bun", "Playwright"],
-      },
-      projects: [],
-      gamingExperience: {
-        roles: ["Raid Leader"],
-      },
-      updatedAt: timestamp,
-    })
-    .onConflictDoUpdate({
-      target: resumes.id,
-      set: {
-        name: "Automation Verify Resume",
-        updatedAt: timestamp,
-      },
-    });
-
-  return {
-    resumeId: AUTOMATION_VERIFY_RESUME_ID,
-  };
-};
-
-const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): void => {
-  applicationAutomationService.runJobApply(runId, payload).then(
-    () => undefined,
-    (error: unknown) => {
-      automationRoutesLogger.error(
-        `[automation] job-apply execution failed for runId=${runId}`,
-        error,
-      );
-    },
-  );
+  return hasMessage(error) ? error.message : "Request validation failed.";
 };
 
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
-export const automationRoutes = new Elysia({ prefix: "/automation", tags: ["Automation"] })
+export const automationRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.automationBase),
+  tags: ["Automation"],
+})
   .use(automationRateLimit)
-  .get(
-    "/verify/context",
-    async ({ set }) => {
-      if (!config.enableAutomationVerification) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
-      }
+  .onError(({ code, error, set }) => {
+    if (code !== "VALIDATION") {
+      return;
+    }
 
-      set.status = HTTP_STATUS_OK;
-      return ensureAutomationVerifyContext();
-    },
-    {
-      response: {
-        [HTTP_STATUS_OK]: t.Object({
-          resumeId: t.String({ minLength: 1 }),
+    set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
+    return toRouteError("OUTPUT_VALIDATION_ERROR", readValidationErrorMessage(error));
+  })
+  .get("/verify/context", async ({ set }) => handleVerifyAutomationContext(set), {
+    response: {
+      [HTTP_STATUS_OK]: StandardSchemaV1(
+        Type.Object({
+          resumeId: Type.String({ minLength: 1 }),
         }),
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-      },
+      ),
+      [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
     },
-  )
+  })
   .post(
     "/job-apply",
-    async ({ body, set }) => {
-      const payload: JobApplyRequestBody = body;
-      const createRunResult = await settle(applicationAutomationService.createJobApplyRun(payload));
-      if (createRunResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(createRunResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
+    async ({ body, set }: { body: JobApplyBody; set: RouteSetState }) => {
+      if (!(hasText(body.jobUrl) && hasText(body.resumeId))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "jobUrl and resumeId are required.");
       }
 
-      const runId = createRunResult.value;
-      runJobApplyInBackground(runId, payload);
-
-      const run = await readAutomationRunById(runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
+      return handleJobApplyRoute(
+        {
+          jobUrl: body.jobUrl,
+          resumeId: body.resumeId,
+          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+          ...(body.jobId ? { jobId: body.jobId } : {}),
+          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+        },
+        set,
+      );
     },
     {
-      body: t.Object({
-        jobUrl: t.String({ minLength: 1, error: "Job URL is required" }),
-        resumeId: t.String({ minLength: 1 }),
-        coverLetterId: t.Optional(t.String({ minLength: 1 })),
-        jobId: t.Optional(t.String({ minLength: 1 })),
-        customAnswers: t.Optional(t.Record(t.String(), t.String())),
-      }),
+      body: StandardSchemaV1(jobApplyBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/job-apply/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleJobApplyRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledJobApplyRun(
-          {
-            jobUrl: payload.jobUrl,
-            resumeId: payload.resumeId,
-            ...(payload.coverLetterId ? { coverLetterId: payload.coverLetterId } : {}),
-            ...(payload.jobId ? { jobId: payload.jobId } : {}),
-            ...(payload.customAnswers ? { customAnswers: payload.customAnswers } : {}),
-          },
-          payload.runAt,
-        ),
+    async ({ body, set }: { body: ScheduledJobApplyBody; set: RouteSetState }) => {
+      if (!(hasText(body.jobUrl) && hasText(body.resumeId) && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "jobUrl, resumeId, and runAt are required.");
+      }
+
+      return handleScheduledJobApplyRoute(
+        {
+          jobUrl: body.jobUrl,
+          resumeId: body.resumeId,
+          runAt: body.runAt,
+          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+          ...(body.jobId ? { jobId: body.jobId } : {}),
+          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+        },
+        set,
       );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
     },
     {
-      body: t.Object({
-        jobUrl: t.String({ minLength: 1, error: "Job URL is required" }),
-        resumeId: t.String({ minLength: 1 }),
-        coverLetterId: t.Optional(t.String({ minLength: 1 })),
-        jobId: t.Optional(t.String({ minLength: 1 })),
-        customAnswers: t.Optional(t.Record(t.String(), t.String())),
-        runAt: t.String({ minLength: 1 }),
-      }),
+      body: StandardSchemaV1(scheduledJobApplyBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/email-response",
-    async ({ body, set }) => {
-      const payload: EmailResponseRequest = body;
-      const emailResponseResult = await settle(
-        applicationAutomationService.runEmailResponse(payload),
-      );
-      if (emailResponseResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(emailResponseResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
+    async ({ body, set }: { body: EmailResponseBody; set: RouteSetState }) => {
+      if (!(hasText(body.subject) && hasText(body.message))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "subject and message are required.");
       }
 
-      set.status = HTTP_STATUS_OK;
-      return emailResponseResult.value;
+      return handleEmailResponseRoute(
+        {
+          subject: body.subject,
+          message: body.message,
+          ...(body.sender ? { sender: body.sender } : {}),
+          ...(body.tone ? { tone: body.tone } : {}),
+          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+          ...(body.deliverAfterGeneration !== undefined
+            ? { deliverAfterGeneration: body.deliverAfterGeneration }
+            : {}),
+        },
+        set,
+      );
     },
     {
-      body: t.Object({
-        subject: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
-        sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-        recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-        deliverAfterGeneration: t.Optional(t.Boolean()),
-      }),
+      body: StandardSchemaV1(emailResponseBodySchema),
       response: {
-        [HTTP_STATUS_OK]: t.Object({
-          runId: t.String(),
-          status: t.Literal(AUTOMATION_STATUS_SUCCESS),
-          reply: t.String(),
-          provider: t.String(),
-          model: t.String(),
-          delivered: t.Boolean(),
-          recipientEmail: t.Optional(t.String()),
-          deliveredAt: t.Optional(t.String()),
-          messageId: t.Optional(t.String()),
-        }),
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(
+          Type.Object({
+            runId: Type.String(),
+            status: Type.Literal(AUTOMATION_STATUS_SUCCESS),
+            reply: Type.String(),
+            provider: Type.String(),
+            model: Type.String(),
+            delivered: Type.Boolean(),
+            recipientEmail: Type.Optional(Type.String()),
+            deliveredAt: Type.Optional(Type.String()),
+            messageId: Type.Optional(Type.String()),
+          }),
+        ),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/email-response/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleEmailResponseRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledEmailResponseRun(
-          {
-            subject: payload.subject,
-            message: payload.message,
-            ...(payload.sender ? { sender: payload.sender } : {}),
-            ...(payload.tone ? { tone: payload.tone } : {}),
-            ...(payload.recipientEmail ? { recipientEmail: payload.recipientEmail } : {}),
-            ...(payload.deliverAfterGeneration !== undefined
-              ? { deliverAfterGeneration: payload.deliverAfterGeneration }
-              : {}),
-          },
-          payload.runAt,
-        ),
+    async ({ body, set }: { body: ScheduledEmailResponseBody; set: RouteSetState }) => {
+      if (!(hasText(body.subject) && hasText(body.message) && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "subject, message, and runAt are required.");
+      }
+
+      return handleScheduledEmailResponseRoute(
+        {
+          subject: body.subject,
+          message: body.message,
+          runAt: body.runAt,
+          ...(body.sender ? { sender: body.sender } : {}),
+          ...(body.tone ? { tone: body.tone } : {}),
+          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+          ...(body.deliverAfterGeneration !== undefined
+            ? { deliverAfterGeneration: body.deliverAfterGeneration }
+            : {}),
+        },
+        set,
       );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
-      }
-
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
     },
     {
-      body: t.Object({
-        subject: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
-        sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-        recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-        deliverAfterGeneration: t.Optional(t.Boolean()),
-        runAt: t.String({ minLength: 1 }),
-      }),
+      body: StandardSchemaV1(scheduledEmailResponseBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/scrape",
-    async ({ body, set }) => {
-      const payload: RunScrapeRequestBody = body;
-      const runResult = await settle(applicationAutomationService.runScrape(payload.target));
-      if (runResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(runResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
+    async ({ body, set }: { body: ScrapeBody; set: RouteSetState }) => {
+      if (!body.target) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "target is required.");
       }
 
-      const run = await readAutomationRunById(runResult.value);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
+      return handleScrapeRoute({ target: body.target }, set);
     },
     {
-      body: t.Object({
-        target: SCRAPE_TARGET_SCHEMA,
-      }),
+      body: StandardSchemaV1(scrapeBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
   .post(
     "/scrape/schedule",
-    async ({ body, set }) => {
-      const payload: ScheduleScrapeRequestBody = body;
-      const scheduleResult = await settle(
-        applicationAutomationService.createScheduledScrapeRun(payload.target, payload.runAt),
-      );
-      if (scheduleResult.status === "rejected") {
-        const mapped = mapAutomationRouteError(scheduleResult.reason);
-        set.status = mapped.status;
-        return mapped.body;
+    async ({ body, set }: { body: ScheduledScrapeBody; set: RouteSetState }) => {
+      if (!(body.target && hasText(body.runAt))) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "target and runAt are required.");
       }
 
-      const run = await readAutomationRunById(scheduleResult.value.runId);
-      if (!run) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
+      return handleScheduledScrapeRoute({ target: body.target, runAt: body.runAt }, set);
     },
     {
-      body: t.Object({
-        target: SCRAPE_TARGET_SCHEMA,
-        runAt: t.String({ minLength: 1 }),
-      }),
+      body: StandardSchemaV1(scheduledScrapeBodySchema),
       response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
       },
     },
   )
-  .get(
-    "/capabilities",
-    async ({ set }) => {
-      const auditResult = await settle(applicationAutomationService.getRpaCapabilityAudit());
-      if (auditResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit.");
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return auditResult.value;
+  .get("/capabilities", async ({ set }) => handleAutomationCapabilitiesRoute(set), {
+    response: {
+      [HTTP_STATUS_OK]: StandardSchemaV1(capabilityAuditReportBodySchema),
+      [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
     },
-    {
-      response: {
-        [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    },
-  )
-  .get(
-    "/runs",
-    async ({ query }) => {
-      const filterConditions = [];
-      if (query.type) {
-        filterConditions.push(eq(automationRuns.type, query.type));
-      }
-      if (query.status) {
-        filterConditions.push(eq(automationRuns.status, query.status));
-      }
-
-      const rows =
-        filterConditions.length > 0
-          ? await db
-              .select()
-              .from(automationRuns)
-              .where(and(...filterConditions))
-              .orderBy(desc(automationRuns.createdAt))
-              .limit(AUTOMATION_RUN_HISTORY_LIMIT)
-          : await db
-              .select()
-              .from(automationRuns)
-              .orderBy(desc(automationRuns.createdAt))
-              .limit(AUTOMATION_RUN_HISTORY_LIMIT);
-
-      return rows.map(normalizeAutomationRun);
-    },
-    {
-      response: t.Array(automationRunEnvelopeBodySchema),
-      query: t.Object({
-        type: t.Optional(AUTOMATION_TYPE_SCHEMA),
-        status: t.Optional(AUTOMATION_STATUS_SCHEMA),
-      }),
-    },
-  )
+  })
+  .get("/runs", async ({ query }: { query: AutomationRunQuery }) => listAutomationRuns(query), {
+    response: StandardSchemaV1(Type.Array(automationRunEnvelopeBodySchema)),
+    query: StandardSchemaV1(automationRunQuerySchema),
+  })
   .get(
     "/runs/:id",
-    async ({ params, set }) => {
-      if (params.id.length < RUN_ID_MIN_LENGTH || !RUN_ID_PATTERN.test(params.id)) {
+    async ({ params, set }: { params: AutomationRunIdParams; set: RouteSetState }) => {
+      if (!hasText(params.id)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_INVALID_RUN_ID);
+        return toRouteError("OUTPUT_VALIDATION_ERROR", "id is required.");
       }
 
-      const run = await readAutomationRunById(params.id);
-      if (!run) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
-      }
-
-      set.status = HTTP_STATUS_OK;
-      return run;
+      return handleAutomationRunByIdRoute(params.id, set);
     },
     {
-      params: t.Object({
-        id: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
-      }),
+      params: StandardSchemaV1(automationRunIdParamsSchema),
       response: {
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
+        [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
+        [HTTP_STATUS_OK]: StandardSchemaV1(automationRunEnvelopeBodySchema),
       },
     },
   );

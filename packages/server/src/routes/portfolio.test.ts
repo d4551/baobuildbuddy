@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -15,23 +16,23 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.portfolioRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.portfolioRoutes);
 });
 
 afterAll(() => {});
 
 function registerPortfolioBaselineTests(): void {
-  test("GET /api/portfolio returns or auto-creates portfolio", async () => {
-    const res = await requestJson<{ id: string }>(app, "GET", "/api/portfolio");
+  test("GET portfolio returns or auto-creates portfolio", async () => {
+    const res = await requestJson<{ id: string }>(app, "GET", API_ENDPOINTS.portfolio);
     expect(res.status).toBe(200);
     expect(res.body.id).toBeDefined();
   });
 
-  test("PUT /api/portfolio updates metadata", async () => {
+  test("PUT portfolio updates metadata", async () => {
     const res = await requestJson<{ metadata: Record<string, unknown> }>(
       app,
       "PUT",
-      "/api/portfolio",
+      API_ENDPOINTS.portfolio,
       { metadata: { title: "My Portfolio" } },
     );
     expect(res.status).toBe(200);
@@ -40,11 +41,11 @@ function registerPortfolioBaselineTests(): void {
 }
 
 function registerPortfolioProjectMutationTests(): void {
-  test("POST /api/portfolio/projects creates project", async () => {
+  test("POST portfolio projects creates project", async () => {
     const res = await requestJson<{ id: string; title: string }>(
       app,
       "POST",
-      "/api/portfolio/projects",
+      API_ENDPOINTS.portfolioProjects,
       {
         title: "Test Game Project",
         description: "A test project",
@@ -59,11 +60,11 @@ function registerPortfolioProjectMutationTests(): void {
 }
 
 function registerPortfolioProjectOrderingTests(): void {
-  test("POST /api/portfolio/projects creates a second project for reorder coverage", async () => {
+  test("POST portfolio projects creates a second project for reorder coverage", async () => {
     const res = await requestJson<{ id: string; title: string }>(
       app,
       "POST",
-      "/api/portfolio/projects",
+      API_ENDPOINTS.portfolioProjects,
       {
         title: "Combat Sandbox",
         description: "A combat prototype focused on enemy readability.",
@@ -75,11 +76,11 @@ function registerPortfolioProjectOrderingTests(): void {
     secondProjectId = res.body.id;
   });
 
-  test("POST /api/portfolio/projects/reorder persists the requested project order", async () => {
+  test("POST portfolio projects reorder persists the requested project order", async () => {
     const reorderResponse = await requestJson<{ projects: Array<{ id: string }> }>(
       app,
       "POST",
-      "/api/portfolio/projects/reorder",
+      API_ENDPOINTS.portfolioProjectsReorder,
       {
         orderedIds: [secondProjectId, projectId],
       },
@@ -93,22 +94,22 @@ function registerPortfolioProjectOrderingTests(): void {
 }
 
 function registerPortfolioProjectLifecycleTests(): void {
-  test("PUT /api/portfolio/projects/:id updates project", async () => {
+  test("PUT portfolio project detail updates project", async () => {
     const res = await requestJson<{ title: string }>(
       app,
       "PUT",
-      `/api/portfolio/projects/${projectId}`,
+      `${API_ENDPOINTS.portfolioProjects}/${projectId}`,
       { title: "Updated Project Title" },
     );
     expect(res.status).toBe(200);
     expect(res.body.title).toBe("Updated Project Title");
   });
 
-  test("DELETE /api/portfolio/projects/:id removes project", async () => {
+  test("DELETE portfolio project detail removes project", async () => {
     const res = await requestJson<{ success: boolean }>(
       app,
       "DELETE",
-      `/api/portfolio/projects/${projectId}`,
+      `${API_ENDPOINTS.portfolioProjects}/${projectId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
@@ -116,9 +117,9 @@ function registerPortfolioProjectLifecycleTests(): void {
 }
 
 function registerPortfolioExportTests(): void {
-  test("POST /api/portfolio/export returns a PDF attachment", async () => {
+  test("POST portfolio export returns a PDF attachment", async () => {
     const response = await app.handle(
-      new Request("http://localhost/api/portfolio/export", {
+      new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "pdf" }),
@@ -130,9 +131,9 @@ function registerPortfolioExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
-  test("POST /api/portfolio/export returns a DOCX attachment", async () => {
+  test("POST portfolio export returns a DOCX attachment", async () => {
     const response = await app.handle(
-      new Request("http://localhost/api/portfolio/export", {
+      new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ format: "docx" }),
@@ -146,11 +147,11 @@ function registerPortfolioExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
-  test("DELETE /api/portfolio/projects/:id removes the second project", async () => {
+  test("DELETE portfolio project detail removes the second project", async () => {
     const res = await requestJson<{ success: boolean }>(
       app,
       "DELETE",
-      `/api/portfolio/projects/${secondProjectId}`,
+      `${API_ENDPOINTS.portfolioProjects}/${secondProjectId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);

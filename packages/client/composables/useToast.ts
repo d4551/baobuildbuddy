@@ -1,4 +1,4 @@
-import { STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 
 const DEFAULT_TOAST_DURATION_MS = 5_000;
 const ERROR_TOAST_DURATION_MS = 8_000;

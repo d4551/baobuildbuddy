@@ -15,9 +15,10 @@ flowchart LR
   UI --> AutomationWs["/api/ws/automation"]
   AutomationRoutes --> Service["application-automation-service.ts"]
   ScraperRoutes --> ScraperService["scraper-service.ts"]
-  Service --> Runner["automation/rpa-runner.ts"]
-  ScraperService --> Runner
-  Runner --> Scripts["packages/scraper/src/scripts/*.ts"]
+  Service --> RunnerProtocol["automation/rpa-runner-protocol.ts"]
+  Service --> RunnerProcess["automation/rpa-runner-process.ts"]
+  ScraperService --> RunnerProcess
+  RunnerProcess --> Scripts["packages/scraper/src/scripts/*.ts"]
   Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
   Runtime --> Shared["@bao/shared automation contracts"]
   Service --> Scheduler["pending automation_runs + in-memory timers"]
@@ -29,7 +30,8 @@ flowchart LR
 ```
 
 **Key files:**
-- `packages/server/src/services/automation/rpa-runner.ts` -- resolves script IDs and spawns Bun entrypoints
+- `packages/server/src/services/automation/rpa-runner-protocol.ts` -- coordinates protocol execution for RPA scripts
+- `packages/server/src/services/automation/rpa-runner-process.ts` -- spawns Bun entrypoints and streams process output
 - `packages/scraper/src/scripts` -- individual automation scripts
 - `@bao/shared` -- script IDs, input schemas, and normalized row schemas
 
@@ -118,6 +120,8 @@ The email automation has two stages (immediate or scheduled):
 
 1. **Draft:** Generate a reply with the configured AI provider.
 2. **Deliver:** Optionally send through SMTP.
+
+The AI draft step now resolves through the shared per-purpose routing table with the `emailResponse` purpose, while the smart field mapper uses `automationFieldMapping`. That keeps automation AI selection aligned with the same server-owned settings contract used by chat, resume, interview, and cover-letter workflows.
 
 ```mermaid
 flowchart LR
@@ -219,7 +223,7 @@ Automation pages use the same SSR-first layout/token model as the rest of the ap
 | NDJSON runner contract tests           | `packages/server/src/services/automation/rpa-runner.test.ts` |
 | Scraper service integration tests      | `packages/server/src/services/scraper-service.test.ts`  |
 | Playwright extractor tests (fixtures)  | `packages/scraper/src/providers/provider-extractors.test.ts` |
-| ATS adapter selection tests            | `packages/scraper/src/job-apply/adapters.test.ts`       |
+| ATS integration selection tests        | `packages/scraper/src/job-apply/adapters.test.ts`       |
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assembledAt": "2026-03-20T17:38:15.115Z",
+  "assembledAt": "2026-04-01T14:54:39.802Z",
   "sourceRoot": ".desktop-release-artifacts",
   "targets": {
     "macos": {
@@ -13,12 +13,16 @@
       "tauriTarget": "aarch64-apple-darwin",
       "artifactNames": ["BaoBuildBuddy_0.1.0_aarch64.dmg"],
       "buildCommands": [
-        "~/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin --verbose",
-        "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin --verbose",
+        "~/.bun/bin/bun tauri build --no-bundle --target aarch64-apple-darwin",
+        "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin",
         "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
       ],
-      "builtAt": "2026-03-20T17:38:15.007Z",
-      "ci": { "workflow": null, "runId": null, "runAttempt": null }
+      "builtAt": "2026-04-01T14:54:39.663Z",
+      "ci": {
+        "workflow": null,
+        "runId": null,
+        "runAttempt": null
+      }
     },
     "linux-arm64": {
       "schemaVersion": 1,
@@ -31,7 +35,11 @@
       "artifactNames": ["BaoBuildBuddy_0.1.0_arm64.deb", "BaoBuildBuddy-0.1.0-1.aarch64.rpm"],
       "buildCommands": ["stage-only existing bundled artifacts for aarch64-unknown-linux-gnu"],
       "builtAt": "2026-03-18T00:00:00.000Z",
-      "ci": { "workflow": null, "runId": null, "runAttempt": null }
+      "ci": {
+        "workflow": null,
+        "runId": null,
+        "runAttempt": null
+      }
     },
     "windows": {
       "schemaVersion": 1,
@@ -49,7 +57,11 @@
         "stage-only repaired existing bundled artifacts for x86_64-pc-windows-msvc"
       ],
       "builtAt": "2026-03-18T00:00:00.000Z",
-      "ci": { "workflow": null, "runId": null, "runAttempt": null }
+      "ci": {
+        "workflow": null,
+        "runId": null,
+        "runAttempt": null
+      }
     }
   }
 }

@@ -2,6 +2,17 @@
 
 Canonical installer output manifest for this repository baseline
 
+## Matching-host rule
+
+Desktop release generation is intentionally matching-host only:
+
+- macOS hosts generate `macos`
+- Windows hosts generate `windows`
+- Linux x64 hosts generate `linux-x64`
+- Linux ARM64 hosts generate `linux-arm64`
+
+Cross-host generation is blocked by `scripts/build-desktop-release.ts`. Use matching CI runners or matching local machines for the full release matrix. For the complete proof flow, including runtime verification and release verification, see [docs/VERIFICATION_RUNBOOK.md](../../../docs/VERIFICATION_RUNBOOK.md).
+
 ## Quality Gate Before Packaging
 
 For the full validation sequence and script verification commands, see [README.md § Release Validation Workflow](../../../README.md#release-validation-workflow). Packaging docs in this file assume those quality gates succeed without masked diagnostics.
@@ -11,7 +22,7 @@ This repository now treats native matching-host Tauri bundles as the only canoni
 Optional SSR/page validation before packaging (when validating UI render contracts):
 
 ```bash
-PORT=4105 bun run --filter '@bao/client' preview
+PORT=4105 bun run --cwd packages/client preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 
@@ -99,7 +110,7 @@ The canonical release flow performs:
 - **AppImage count:** The canonical contract includes **one** AppImage (Linux x64 only). Linux ARM64 intentionally omits AppImage (linuxdeploy instability). The Linux x64 CI job fails if AppImage is enabled but no `*.AppImage` is staged.
 - **AppImage from macOS:** Use GitHub Actions (`desktop-release` workflow) or a real **x86_64 Linux** machine. Docker `--platform linux/amd64` on Apple Silicon often hits QEMU limitations and can abort the Tauri CLI mid-build.
 - **Linux bundled server layout:** On Linux targets, `prepare-desktop-runtime.ts` ships `server/bao-desktop-server` and `bin/bao-bun` as POSIX shell launchers plus adjacent `*.payload.gz` blobs (gzip of the Bun binaries) so linuxdeploy does not run `ldd` on those payloads during AppImage creation. Manifest paths are unchanged; Rust `Command::new` still launches them.
-- **Local commands:** Prefer `bun run test` (workspace-scoped) for CI parity. A bare `bun test` at the repo root uses [bunfig.toml](../../../bunfig.toml) (`preload` for server test env, `pathIgnorePatterns` for desktop `target/` when supported). Stale `packages/server/dist/**/*.test.js` from old builds duplicates server tests—`bun run --filter '@bao/server' build` clears `dist` first. After `prepare:desktop-runtime`, staged scraper sources omit `*.test.ts` so they are not shipped into app bundles.
+- **Local commands:** Prefer `bun run test` (workspace-scoped) for CI parity. A bare `bun test` at the repo root uses [bunfig.toml](../../../bunfig.toml) (`preload` for server test env, `pathIgnorePatterns` for desktop `target/` when supported). Stale `packages/server/dist/**/*.test.js` from old builds duplicates server tests—`bun run --cwd packages/server build` clears `dist` first. After `prepare:desktop-runtime`, staged scraper sources omit `*.test.ts` so they are not shipped into app bundles.
 
 Windows note: the packaged runtime is `x64` only. There is no `x86` / `i686` desktop artifact. The canonical release set ships both the NSIS setup installer and a portable `.zip` that keeps the executable, bundled `gen/runtime` tree, and WebView2 bootstrapper together.
 
@@ -163,7 +174,7 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-setup.exe`
 - `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-portable.zip`
-- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64-en-US.msi` (omit with `DESKTOP_RELEASE_WINDOWS_MSI=false`)
+- `windows/${APP_PRODUCT_NAME}_<VERSION>_x64_en-US.msi` (omit with `DESKTOP_RELEASE_WINDOWS_MSI=false`)
 
 ## Integrity
 
@@ -173,6 +184,13 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 - Run `bun run verify:desktop-releases -- --release` to validate version alignment, required Tauri icons, staged artifact names, bundle signatures, DMG integrity, matching-host provenance, **stapler / notarization** on macOS DMGs, and checksum matches for **every target listed in `provenance.json`** when you omit `--targets`. Omitted platforms are skipped until their artifacts are staged again.
 - Omit `--release` when the staged macOS DMG is **not** stapled (e.g. local unsigned or ad-hoc builds): you still get DMG mount/payload and checksum verification without requiring a notarization ticket.
 - For the full four-target matrix after assembling all host builds, pass explicit targets, for example: `bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release`.
+- For the current repository snapshot, the staged artifact buckets are `macos`, `windows`, and `linux-arm64`, so the direct verifier command is:
+
+```bash
+bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
+```
+
+This validates the exact checked-in DMG, NSIS setup, Windows portable zip, Linux ARM64 deb, Linux ARM64 rpm, signatures, manifests, provenance, and checksums without pretending the current host rebuilt every platform.
 - **Local `bun run build:desktop` (or `release:desktop:*`) updates only the current host’s bucket under `packages/desktop/releases/`** and merges into `provenance.json` / `sha256.txt` while **leaving other canonical targets on disk** (default). To delete every platform not present in this refresh, pass `--replace-release-tree` to `scripts/refresh-desktop-releases.ts`. Commit refreshed binaries only when you intend to ship that platform’s new build.
 
 ## Signing prerequisites

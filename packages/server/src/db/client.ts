@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { SQLITE_BUSY_TIMEOUT_MS } from "@bao/shared";
+import { SQLITE_BUSY_TIMEOUT_MS } from "@bao/shared/constants/database";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { config } from "../config/env";
 import { resolveDatabasePath } from "../config/paths";
@@ -11,6 +11,7 @@ import {
   coverLetters,
   gamification,
   interviewSessions,
+  jobTaxonomyKeywords,
   jobs,
   portfolioProjects,
   portfolios,
@@ -18,6 +19,7 @@ import {
   savedJobs,
   settings,
   skillMappings,
+  studioClassificationRules,
   studios,
   userProfile,
 } from "./schema/schema-modules";
@@ -30,6 +32,7 @@ const schema = {
   coverLetters,
   gamification,
   interviewSessions,
+  jobTaxonomyKeywords,
   jobs,
   portfolioProjects,
   portfolios,
@@ -37,15 +40,16 @@ const schema = {
   savedJobs,
   settings,
   skillMappings,
+  studioClassificationRules,
   studios,
   userProfile,
 };
 
-const dbPath = resolveDatabasePath(Bun.env.DB_PATH ?? config.dbPath);
+const dbPath = resolveDatabasePath(config.dbPath);
 const sqlite = new Database(dbPath);
+sqlite.exec(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS};`);
 sqlite.exec("PRAGMA journal_mode = WAL;");
 sqlite.exec("PRAGMA foreign_keys = ON;");
-sqlite.exec(`PRAGMA busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS};`);
 
 export const db = drizzle({ client: sqlite, schema });
 export { sqlite };

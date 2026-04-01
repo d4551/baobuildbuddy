@@ -1,4 +1,4 @@
-import { escapeRegExp } from "@bao/shared";
+import { escapeRegExp } from "@bao/shared/utils/string";
 import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
 
 type ScrollSpyOptions = {

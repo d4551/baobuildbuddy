@@ -1,15 +1,12 @@
-import {
-  type AIResponse,
-  API_ERROR_AI_STREAMING_FAILED,
-  type GenerateOptions,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
+import { HUGGING_FACE_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
-
 const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[] => {
   const messages: ChatMessage[] = [];
   if (systemPrompt) {
@@ -18,6 +15,8 @@ const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[]
   messages.push({ role: "user", content: prompt });
   return messages;
 };
+
+const HUGGING_FACE_INFERENCE_PROVIDER = "hf-inference" as const;
 
 /**
  * Hugging Face AI Provider
@@ -29,19 +28,28 @@ export class HuggingFaceProvider extends BaseAIProvider {
   model: string;
   private client: HfInference;
 
-  constructor(apiKey?: string, model = "Qwen/Qwen2.5-Coder-32B-Instruct") {
+  constructor(apiKey?: string, model?: string) {
     super(apiKey);
-    this.model = model;
+    this.model =
+      typeof model === "string" && model.trim().length > 0 ? model : HUGGING_FACE_DEFAULT_MODEL;
     this.client = new HfInference(apiKey);
+  }
+
+  private resolveModel(options?: GenerateOptions): string {
+    return typeof options?.model === "string" && options.model.trim().length > 0
+      ? options.model.trim()
+      : this.model;
   }
 
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const model = this.resolveModel(options);
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const responseResult = await settle(
       this.client.chatCompletion({
-        model: this.model,
+        provider: HUGGING_FACE_INFERENCE_PROVIDER,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 1024,
         temperature: options?.temperature ?? 0.7,
@@ -52,7 +60,7 @@ export class HuggingFaceProvider extends BaseAIProvider {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
@@ -64,17 +72,19 @@ export class HuggingFaceProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content,
       timing: this.createTimingMetrics(startTime),
     };
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
+    const model = this.resolveModel(options);
     const messages = buildChatMessages(prompt, options?.systemPrompt);
 
     const stream = this.client.chatCompletionStream({
-      model: this.model,
+      provider: HUGGING_FACE_INFERENCE_PROVIDER,
+      model,
       messages,
       max_tokens: options?.maxTokens ?? 1024,
       temperature: options?.temperature ?? 0.7,

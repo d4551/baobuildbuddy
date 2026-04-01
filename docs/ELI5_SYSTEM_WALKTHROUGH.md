@@ -51,7 +51,7 @@ flowchart TD
   end
 
   subgraph ServerLayer["Server (Elysia)"]
-    Routes["17 route modules"]
+    Routes["Typed route modules"]
     Services["Services"]
     WSHandlers["WebSocket handlers"]
   end
@@ -216,7 +216,7 @@ Each package owns one job:
 | `packages/server`    | API, orchestration, persistence               |
 | `packages/shared`    | Types, schemas, constants, validation         |
 | `packages/scraper`   | Job scraping and RPA browser execution        |
-| `packages/desktop`   | Desktop wrapper and installers                |
+| `packages/desktop`   | Desktop shell and installers                  |
 
 This split keeps one package from trying to do everything.
 

@@ -23,7 +23,7 @@ const coreLayoutPagePaths = new Set([
   "packages/client/pages/automation/index.vue",
   "packages/client/pages/automation/email.vue",
   "packages/client/pages/automation/job-apply.vue",
-  "packages/client/pages/automation/runs.vue",
+  "packages/client/pages/automation/runs/index.vue",
   "packages/client/pages/automation/runs/[id].vue",
   "packages/client/pages/automation/scraper.vue",
   "packages/client/pages/settings.vue",

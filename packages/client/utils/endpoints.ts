@@ -1,4 +1,4 @@
-import { API_ENDPOINT_PREFIX } from "@bao/shared";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 
 const ABSOLUTE_HTTP_URL_PATTERN = /^https?:\/\//i;
 const ABSOLUTE_WS_URL_PATTERN = /^wss?:\/\//i;
@@ -21,9 +21,35 @@ export function resolveApiBase(configuredBase: string, requestUrl: URL): string 
 }
 
 /**
+ * Resolves the route client base used by Eden Treaty.
+ *
+ * Treaty route helpers already include the canonical API endpoint prefix, so
+ * the base must stop at the parent path or requests will drift to a duplicated
+ * API segment.
+ *
+ * @param configuredBase Runtime-configured API base.
+ * @param requestUrl Current request URL.
+ * @returns Absolute route client base without a trailing slash.
+ */
+export function resolveApiRouteBase(configuredBase: string, requestUrl: URL): string {
+  const resolvedBase = resolveApiBase(configuredBase, requestUrl);
+  const parsedUrl = new URL(resolvedBase);
+  const normalizedPath = parsedUrl.pathname.replace(TRAILING_SLASH_PATTERN, "");
+  const routeBasePath =
+    normalizedPath === API_ENDPOINT_PREFIX
+      ? "/"
+      : normalizedPath.endsWith(API_ENDPOINT_PREFIX)
+        ? normalizedPath.slice(0, -API_ENDPOINT_PREFIX.length) || "/"
+        : parsedUrl.pathname;
+
+  parsedUrl.pathname = routeBasePath;
+  return parsedUrl.toString().replace(TRAILING_SLASH_PATTERN, "");
+}
+
+/**
  * Resolves an API endpoint URL against the configured runtime API base.
  *
- * When the base already ends in `/api`, endpoint paths that include `/api` are de-duplicated.
+ * When the base already ends in the API prefix, matching endpoint paths are de-duplicated.
  *
  * @param configuredBase Runtime-configured API base.
  * @param requestUrl Current request URL.

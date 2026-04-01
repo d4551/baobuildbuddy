@@ -1,112 +1,20 @@
-import {
-  type CompanyBoardATSType,
-  type CompanyBoardConfig,
-  generateId,
-  type JobProviderSettings,
-  safeParseJson,
-  settle,
-} from "@bao/shared";
+import type { CompanyBoardConfig, JobProviderSettings } from "@bao/shared/types/settings-contracts";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
-
-interface ATSJob extends Record<string, unknown> {
-  id?: string;
-  title?: string;
-  text?: string;
-  name?: string;
-  content?: string;
-  description?: string;
-  descriptionPlain?: string;
-  location?: { name?: string; city?: string } | string;
-  offices?: Array<{ name?: string }>;
-  categories?: { location?: string };
-  absolute_url?: string;
-  hostedUrl?: string;
-  applyUrl?: string;
-  url?: string;
-  ref?: string;
-  updated_at?: string;
-  created_at?: string;
-  createdAt?: number | string;
-  releasedDate?: string;
-}
-
-type ATSResponseFields = {
-  jobs?: ATSJob[];
-  content?: ATSJob[];
-  postings?: ATSJob[];
-  results?: ATSJob[];
-  data?: ATSJob[];
-};
-
-type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
+import {
+  type ATSResponse,
+  isAtsResponse,
+  resolveBoardUrl,
+  resolveHashFragment,
+  resolveJobs,
+  resolveLocation,
+  toISODate,
+} from "./company-board-support";
 
 const REMOTE_PATTERN = /remote/i;
-
-const resolveLocation = (location: ATSJob["location"]): string => {
-  if (typeof location === "string") {
-    return location;
-  }
-  return location?.name ?? location?.city ?? "";
-};
-
-const toISODate = (value?: string | number): string => {
-  if (typeof value === "number") {
-    return new Date(value).toISOString();
-  }
-  if (typeof value === "string" && value.length > 0) {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
-  }
-  return new Date().toISOString();
-};
-
-const sanitizeHashFragment = (value: string): string =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-_]/g, "");
-
-const resolveHashFragment = (job: ATSJob): string => {
-  const candidate =
-    job.id ??
-    job.url ??
-    job.absolute_url ??
-    job.hostedUrl ??
-    job.applyUrl ??
-    job.ref ??
-    job.title ??
-    job.name ??
-    job.text ??
-    generateId();
-
-  return sanitizeHashFragment(String(candidate)) || generateId();
-};
-
-const resolveJobs = (data: ATSResponse, keys: ReadonlyArray<keyof ATSResponseFields>): ATSJob[] => {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  for (const key of keys) {
-    const candidate = data[key];
-    if (Array.isArray(candidate)) {
-      return candidate;
-    }
-  }
-
-  return [];
-};
-
-const resolveBoardUrl = (
-  providerType: CompanyBoardATSType,
-  token: string,
-  settings: JobProviderSettings,
-): string => {
-  const template = settings.companyBoardApiTemplates[providerType];
-  return template.replaceAll("{token}", token);
-};
 
 /**
  * Provider that normalizes a single ATS board payload into `RawJob[]`.
@@ -153,8 +61,10 @@ export class CompanyBoardProvider implements JobProvider {
     if (parsed === null) {
       return [];
     }
-    const data = parsed as ATSResponse;
-    return this.parseJobs(data, providerSettings);
+    if (!isAtsResponse(parsed)) {
+      return [];
+    }
+    return this.parseJobs(parsed, providerSettings);
   }
 
   private parseJobs(data: ATSResponse, providerSettings: JobProviderSettings): RawJob[] {

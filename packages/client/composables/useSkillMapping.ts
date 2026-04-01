@@ -1,23 +1,18 @@
-import type {
-  CareerPathway,
-  ReadinessAssessment,
-  SkillMapping,
-  SkillReadinessFeedbackId,
-  SkillReadinessImprovementId,
-  SkillReadinessNextStepId,
-} from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import {
-  asNumber,
-  asString,
-  asStringArray,
-  isRecord,
   SKILL_READINESS_FEEDBACK_IDS,
   SKILL_READINESS_IMPROVEMENT_IDS,
   SKILL_READINESS_NEXT_STEP_IDS,
-  STATE_KEYS,
-} from "@bao/shared";
+  type CareerPathway,
+  type ReadinessAssessment,
+  type SkillMapping,
+  type SkillReadinessFeedbackId,
+  type SkillReadinessImprovementId,
+  type SkillReadinessNextStepId,
+} from "@bao/shared/types/skill-mapping";
+import { asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { toSkillMapping } from "./api-normalizers";
+import { toSkillMapping } from "./api-normalizer-skills";
 import { assertApiResponse, withLoadingState } from "./async-flow";
 
 type ApiClient = ReturnType<typeof useApi>;
@@ -39,6 +34,20 @@ interface SkillMappingContext {
 const SKILL_READINESS_FEEDBACK_ID_SET = new Set<string>(SKILL_READINESS_FEEDBACK_IDS);
 const SKILL_READINESS_IMPROVEMENT_ID_SET = new Set<string>(SKILL_READINESS_IMPROVEMENT_IDS);
 const SKILL_READINESS_NEXT_STEP_ID_SET = new Set<string>(SKILL_READINESS_NEXT_STEP_IDS);
+
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!(isRecord(response) && "data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
+};
 
 function isSkillReadinessFeedbackId(value: string): value is SkillReadinessFeedbackId {
   return SKILL_READINESS_FEEDBACK_ID_SET.has(value);
@@ -231,8 +240,10 @@ function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
 function createSkillMappingActions(context: SkillMappingContext) {
   const fetchMappings = async () =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.mappings.get();
-      assertApiResponse(error, context.t("apiErrors.skills.fetchMappingsFailed"));
+      const data = await readApiData(
+        context.api.skills.mappings.get(),
+        context.t("apiErrors.skills.fetchMappingsFailed"),
+      );
       context.mappings.value = Array.isArray(data)
         ? data
             .map((entry) => toSkillMapping(entry))
@@ -242,18 +253,20 @@ function createSkillMappingActions(context: SkillMappingContext) {
 
   const createMapping = async (mappingData: CreateMappingInput) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.mappings.post(mappingData);
-      assertApiResponse(error, context.t("apiErrors.skills.createMappingFailed"));
+      await readApiData(
+        context.api.skills.mappings.post(mappingData),
+        context.t("apiErrors.skills.createMappingFailed"),
+      );
       await fetchMappings();
-      return data;
     });
 
   const updateMapping = async (id: string, updates: UpdateMappingInput) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.mappings({ id }).put(updates);
-      assertApiResponse(error, context.t("apiErrors.skills.updateMappingFailed"));
+      await readApiData(
+        context.api.skills.mappings({ id }).put(updates),
+        context.t("apiErrors.skills.updateMappingFailed"),
+      );
       await fetchMappings();
-      return data;
     });
 
   const deleteMapping = async (id: string) =>
@@ -274,8 +287,10 @@ function createSkillMappingActions(context: SkillMappingContext) {
 function createSkillInsightActions(context: SkillMappingContext) {
   const fetchPathways = async () =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.pathways.get();
-      assertApiResponse(error, context.t("apiErrors.skills.fetchPathwaysFailed"));
+      const data = await readApiData(
+        context.api.skills.pathways.get(),
+        context.t("apiErrors.skills.fetchPathwaysFailed"),
+      );
       context.pathways.value = Array.isArray(data)
         ? data
             .map((entry) => toCareerPathway(entry))
@@ -285,34 +300,39 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const fetchReadiness = async () =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.readiness.get();
-      assertApiResponse(error, context.t("apiErrors.skills.fetchReadinessFailed"));
+      const data = await readApiData(
+        context.api.skills.readiness.get(),
+        context.t("apiErrors.skills.fetchReadinessFailed"),
+      );
       context.readiness.value = toReadinessAssessment(data);
     });
 
   const aiAnalyze = async (skills: string[]) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills["ai-analyze"].post({
-        gameExperience: { skills },
-      });
-      assertApiResponse(error, context.t("apiErrors.skills.analyzeFailed"));
-      return data;
+      return readApiData(
+        context.api.skills["ai-analyze"].post({
+          gameExperience: { skills },
+        }),
+        context.t("apiErrors.skills.analyzeFailed"),
+      );
     });
 
   const extractFromText = async (text: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills["ai-analyze"].post({
-        resume: { experience: text },
-      });
-      assertApiResponse(error, context.t("apiErrors.skills.extractFailed"));
-      return data;
+      return readApiData(
+        context.api.skills["ai-analyze"].post({
+          resume: { experience: text },
+        }),
+        context.t("apiErrors.skills.extractFailed"),
+      );
     });
 
   const compareWithJob = async (jobId: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.skills.readiness.get({ query: { jobId } });
-      assertApiResponse(error, context.t("apiErrors.skills.compareFailed"));
-      return data;
+      return readApiData(
+        context.api.skills.readiness.get({ query: { jobId } }),
+        context.t("apiErrors.skills.compareFailed"),
+      );
     });
 
   return {

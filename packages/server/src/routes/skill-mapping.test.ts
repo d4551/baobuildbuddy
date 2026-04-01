@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import {
   SKILL_READINESS_FEEDBACK_IDS,
   SKILL_READINESS_IMPROVEMENT_IDS,
@@ -6,11 +7,11 @@ import {
   type SkillReadinessFeedbackId,
   type SkillReadinessImprovementId,
   type SkillReadinessNextStepId,
-} from "@bao/shared";
+} from "@bao/shared/types/skill-mapping";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
-const SKILL_MAPPINGS_ROUTE = "/api/skills/mappings";
+const SKILL_MAPPINGS_ROUTE = API_ENDPOINTS.skillMappings;
 
 const buildSkillMappingsCategoryPath = (category: string): string => {
   const query = new URLSearchParams({ category });
@@ -27,7 +28,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.skillMappingRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.skillMappingRoutes);
 });
 
 afterAll(() => {});
@@ -43,13 +44,13 @@ const createSkillMapping = async (): Promise<string> => {
 };
 
 describe("skill-mapping list routes", () => {
-  test("GET /api/skills/mappings returns list", async () => {
+  test("GET skill mappings returns list", async () => {
     const res = await requestJson<unknown[]>(app, "GET", SKILL_MAPPINGS_ROUTE);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  test("GET /api/skills/mappings?category=technical filters", async () => {
+  test("GET skill mappings category filters", async () => {
     const res = await requestJson<unknown[]>(
       app,
       "GET",
@@ -61,7 +62,7 @@ describe("skill-mapping list routes", () => {
 });
 
 describe("skill-mapping readiness route", () => {
-  test("GET /api/skills/readiness returns typed readiness ids", async () => {
+  test("GET skill readiness returns typed readiness ids", async () => {
     const res = await requestJson<{
       categories: {
         technical: { feedbackId: SkillReadinessFeedbackId };
@@ -71,7 +72,7 @@ describe("skill-mapping readiness route", () => {
       };
       improvementSuggestions: SkillReadinessImprovementId[];
       nextSteps: SkillReadinessNextStepId[];
-    }>(app, "GET", "/api/skills/readiness");
+    }>(app, "GET", API_ENDPOINTS.skillReadiness);
 
     expect(res.status).toBe(200);
     expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.technical.feedbackId);
@@ -92,7 +93,7 @@ describe("skill-mapping readiness route", () => {
 });
 
 describe("skill-mapping mutation routes", () => {
-  test("POST /api/skills/mappings creates mapping", async () => {
+  test("POST skill mappings creates mapping", async () => {
     const res = await requestJson<{
       id: string;
       gameExpression: string;
@@ -108,24 +109,24 @@ describe("skill-mapping mutation routes", () => {
     expect(res.body.id).toBeDefined();
   });
 
-  test("PUT /api/skills/mappings/:id updates", async () => {
+  test("PUT skill mapping detail updates", async () => {
     const mappingId = await createSkillMapping();
     const res = await requestJson<{ transferableSkill: string }>(
       app,
       "PUT",
-      `/api/skills/mappings/${mappingId}`,
+      `${SKILL_MAPPINGS_ROUTE}/${mappingId}`,
       { transferableSkill: "System performance tuning" },
     );
     expect(res.status).toBe(200);
     expect(res.body.transferableSkill).toBe("System performance tuning");
   });
 
-  test("DELETE /api/skills/mappings/:id removes", async () => {
+  test("DELETE skill mapping detail removes", async () => {
     const mappingId = await createSkillMapping();
     const res = await requestJson<{ message: string; id: string }>(
       app,
       "DELETE",
-      `/api/skills/mappings/${mappingId}`,
+      `${SKILL_MAPPINGS_ROUTE}/${mappingId}`,
     );
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Skill mapping deleted");

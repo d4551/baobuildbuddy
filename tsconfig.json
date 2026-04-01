@@ -4,5 +4,5 @@
     "noEmit": true,
     "types": ["bun-types"]
   },
-  "include": ["scripts/**/*.ts"]
+  "include": ["drizzle.config.ts", "scripts/**/*.ts"]
 }

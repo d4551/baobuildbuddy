@@ -1,5 +1,6 @@
-import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
-import { DEFAULT_SETTINGS_ID } from "@bao/shared";
+import type { AIRouting } from "@bao/shared/types/ai";
+import type { AutomationSettings, EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "settings";
     schema: undefined;
@@ -137,6 +138,25 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
         }, {}, {
             length: number | undefined;
         }>;
+        aiRouting: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "ai_routing";
+            tableName: "settings";
+            dataType: "json";
+            columnType: "SQLiteTextJson";
+            data: AIRouting;
+            driverParam: string;
+            notNull: false;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            $type: AIRouting;
+        }>;
         preferredProvider: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "preferred_provider";
             tableName: "settings";
@@ -218,7 +238,7 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
             tableName: "settings";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: import("@bao/shared").BrandSettings;
+            data: import("@bao/shared/types/settings-contracts").BrandSettings;
             driverParam: string;
             notNull: false;
             hasDefault: true;
@@ -230,7 +250,7 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: import("@bao/shared").BrandSettings;
+            $type: import("@bao/shared/types/settings-contracts").BrandSettings;
         }>;
         notifications: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "notifications";

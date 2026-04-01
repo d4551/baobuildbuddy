@@ -1,7 +1,19 @@
-import type { CoverLetterData } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import {
+  API_ENDPOINTS,
+  buildCoverLetterDetailEndpoint,
+  buildCoverLetterExportEndpoint,
+} from "@bao/shared/constants/endpoints";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { toCoverLetterData } from "./api-normalizers";
+import { toCoverLetterData } from "./api-normalizer-cover-letter";
+import {
+  downloadApiFile,
+  type ClientApiRequestRuntime,
+  requestApi,
+  useClientApiRequestRuntime,
+} from "./api-request";
 
 interface CreateCoverLetterInput {
   company: string;
@@ -13,7 +25,7 @@ interface CreateCoverLetterInput {
 
 type UpdateCoverLetterInput = Partial<CreateCoverLetterInput>;
 
-interface GenerateCoverLetterInput {
+export interface GenerateCoverLetterInput {
   company: string;
   position: string;
   resumeId?: string;
@@ -22,8 +34,18 @@ interface GenerateCoverLetterInput {
   jobInfo?: Record<string, unknown>;
 }
 
+export type GenerateCoverLetterResult =
+  | {
+      message: string;
+      content: CoverLetterData["content"];
+    }
+  | {
+      message: string;
+      coverLetter: CoverLetterData;
+    };
+
 interface CoverLetterContext {
-  api: ReturnType<typeof useApi>;
+  runtime: ClientApiRequestRuntime;
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: ReturnType<typeof useI18n>["t"];
   loading: ReturnType<typeof useState<boolean>>;
@@ -31,15 +53,69 @@ interface CoverLetterContext {
   currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
 }
 
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!(isRecord(response) || Array.isArray(response))) {
+    throw new Error(fallbackMessage);
+  }
+  if (isRecord(response) && "error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  if (isRecord(response) && "data" in response) {
+    return response.data;
+  }
+  return response;
+};
+
+const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const content: CoverLetterData["content"] = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (typeof entry === "string") {
+      content[key] = entry;
+    }
+  }
+
+  return Object.keys(content).length > 0 ? content : null;
+};
+
+const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const message = typeof value.message === "string" ? value.message : "";
+  const content = toCoverLetterContent(value.content);
+  if (content) {
+    return { message, content };
+  }
+
+  const coverLetter = toCoverLetterData(value.coverLetter);
+  if (!coverLetter) {
+    return null;
+  }
+
+  return {
+    message,
+    coverLetter,
+  };
+};
+
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"].get();
+  const data = await readApiData(
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
+      method: "GET",
+    }),
+    context.t("coverLetterPage.toasts.fetchFailed"),
+  );
   context.loading.value = false;
-
-  if (error) {
-    context.toast.error(context.t("coverLetterPage.toasts.fetchFailed"));
-    return;
-  }
 
   const rows = Array.isArray(data) ? data : [];
   context.coverLetters.value = rows
@@ -52,13 +128,13 @@ async function getCoverLetter(
   id: string,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"]({ id }).get();
+  const data = await readApiData(
+    requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
+      method: "GET",
+    }),
+    context.t("coverLetterDetailPage.toasts.loadFailed"),
+  );
   context.loading.value = false;
-
-  if (error || !data) {
-    context.toast.error(context.t("coverLetterDetailPage.toasts.loadFailed"));
-    return null;
-  }
 
   const normalized = toCoverLetterData(data);
   if (!normalized) {
@@ -73,51 +149,56 @@ async function getCoverLetter(
 async function createCoverLetter(
   context: CoverLetterContext,
   letterData: CreateCoverLetterInput,
-): Promise<unknown> {
+): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"].post(letterData);
+  const data = await readApiData(
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
+      method: "POST",
+      body: letterData,
+    }),
+    context.t("coverLetterPage.toasts.generateFailed"),
+  );
   context.loading.value = false;
 
-  if (error) {
+  const normalized = toCoverLetterData(data);
+  if (!normalized) {
     context.toast.error(context.t("coverLetterPage.toasts.generateFailed"));
     return null;
   }
 
   await fetchCoverLetters(context);
-  return data;
+  return normalized;
 }
 
 async function updateCoverLetter(
   context: CoverLetterContext,
   id: string,
   updates: UpdateCoverLetterInput,
-): Promise<unknown> {
+): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"]({ id }).put(updates);
+  const data = await readApiData(
+    requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
+      method: "PUT",
+      body: updates,
+    }),
+    context.t("coverLetterDetailPage.toasts.saveFailed"),
+  );
   context.loading.value = false;
-
-  if (error || !data) {
-    context.toast.error(context.t("coverLetterDetailPage.toasts.saveFailed"));
-    return null;
-  }
 
   const normalized = toCoverLetterData(data);
   if (normalized) {
     context.currentLetter.value = normalized;
   }
   await fetchCoverLetters(context);
-  return data;
+  return normalized;
 }
 
 async function deleteCoverLetter(context: CoverLetterContext, id: string): Promise<void> {
   context.loading.value = true;
-  const { error } = await context.api["cover-letters"]({ id }).delete();
+  await requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
+    method: "DELETE",
+  });
   context.loading.value = false;
-
-  if (error) {
-    context.toast.error(context.t("coverLetterPage.toasts.deleteFailed"));
-    return;
-  }
 
   if (context.currentLetter.value?.id === id) {
     context.currentLetter.value = null;
@@ -128,38 +209,39 @@ async function deleteCoverLetter(context: CoverLetterContext, id: string): Promi
 async function generateCoverLetter(
   context: CoverLetterContext,
   generationData: GenerateCoverLetterInput,
-): Promise<unknown> {
+): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
-  const { data, error } = await context.api["cover-letters"].generate.post(generationData);
+  const data = await readApiData(
+    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLettersGenerate, {
+      method: "POST",
+      body: generationData,
+    }),
+    context.t("coverLetterPage.toasts.generateFailed"),
+  );
   context.loading.value = false;
-
-  if (error) {
-    context.toast.error(context.t("coverLetterPage.toasts.generateFailed"));
-    return null;
-  }
 
   if (generationData.save) {
     await fetchCoverLetters(context);
   }
-  return data;
+  return toGenerateCoverLetterResult(data);
 }
 
 async function exportDocument(
   context: CoverLetterContext,
   id: string,
   format?: string,
-): Promise<unknown> {
+): Promise<void> {
   context.loading.value = true;
-  const payload = format ? { format } : {};
-  const { data, error } = await context.api["cover-letters"]({ id }).export.post(payload);
+  await downloadApiFile(
+    context.runtime,
+    buildCoverLetterExportEndpoint(id),
+    {
+      method: "POST",
+      body: format ? { format } : {},
+    },
+    `cover-letter-${id}.${format === "docx" ? "docx" : "pdf"}`,
+  );
   context.loading.value = false;
-
-  if (error) {
-    context.toast.error(context.t("coverLetterDetailPage.toasts.exportFailed"));
-    return null;
-  }
-
-  return data;
 }
 
 /**
@@ -167,7 +249,7 @@ async function exportDocument(
  */
 export function useCoverLetter() {
   const context: CoverLetterContext = {
-    api: useApi(),
+    runtime: useClientApiRequestRuntime(),
     toast: useNuxtApp().$toast,
     t: useI18n().t,
     coverLetters: useState<CoverLetterData[]>(STATE_KEYS.COVERLETTERS_LIST, () => []),

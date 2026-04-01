@@ -2,16 +2,30 @@ import {
   API_ERROR_SCRAPE_JOBS_FAILED,
   API_ERROR_SCRAPE_STUDIOS_FAILED,
   API_ERROR_UNKNOWN,
+} from "@bao/shared/constants/api-errors";
+import { isAutomationScrapePortalId } from "@bao/shared/constants/automation";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  isAutomationScrapePortalId,
-  settle,
-} from "@bao/shared";
-import { Elysia, t } from "elysia";
+} from "@bao/shared/constants/http";
+import { settle } from "@bao/shared/utils/promise";
+import { StandardSchemaV1 } from "baobox";
+import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
+import {
+  type RouteSetState,
+  type ScraperPortalParams,
+  scraperPortalParamsSchema,
+} from "./scraper-route-contracts";
 
-export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] })
-  .post("/studios", async ({ set }) => {
+const SCRAPER_BASE_PATH = API_ENDPOINTS.scraperBase;
+
+export const scraperRoutes = new Elysia({
+  prefix: toApiScopedPath(SCRAPER_BASE_PATH),
+  tags: ["Scraper"],
+})
+  .post(toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios), async ({ set }) => {
     const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
     if (scrapeStudiosResult.status === "rejected") {
       set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -26,8 +40,8 @@ export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] 
     return scrapeStudiosResult.value;
   })
   .post(
-    "/jobs/:portalId",
-    async ({ params, set }) => {
+    toApiChildPath(SCRAPER_BASE_PATH, `${API_ENDPOINTS.scraperJobsBase}/:portalId`),
+    async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -51,8 +65,6 @@ export const scraperRoutes = new Elysia({ prefix: "/scraper", tags: ["Scraper"] 
       return scrapeJobsResult.value;
     },
     {
-      params: t.Object({
-        portalId: t.String({ minLength: 1 }),
-      }),
+      params: StandardSchemaV1(scraperPortalParamsSchema),
     },
   );

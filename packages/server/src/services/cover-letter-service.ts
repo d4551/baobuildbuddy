@@ -1,11 +1,12 @@
-import type { CoverLetterData, CoverLetterTemplate } from "@bao/shared";
+import { API_ERROR_CREATE_COVER_LETTER } from "@bao/shared/constants/api-errors";
 import {
-  API_ERROR_CREATE_COVER_LETTER,
   COVER_LETTER_DEFAULT_TEMPLATE,
-  generateId,
   isCoverLetterTemplate,
-  isRecord,
-} from "@bao/shared";
+  type CoverLetterTemplate,
+} from "@bao/shared/constants/cover-letter";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
+import { isRecord } from "@bao/shared/utils/type-guards";
+import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/schema-modules";
@@ -39,21 +40,25 @@ const toContentRecord = (
 const normalizeTemplate = (value: string | null | undefined): CoverLetterTemplate =>
   isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;
 
+const buildCoverLetterUpdateData = (data: Partial<CoverLetterData>, now: string) => ({
+  updatedAt: now,
+  ...(data.company !== undefined ? { company: data.company } : {}),
+  ...(data.position !== undefined ? { position: data.position } : {}),
+  ...(data.jobInfo !== undefined ? { jobInfo: data.jobInfo } : {}),
+  ...(data.content !== undefined ? { content: toContentRecord(data.content) } : {}),
+  ...(data.template !== undefined ? { template: normalizeTemplate(data.template) } : {}),
+});
+
 export class CoverLetterService {
   private toCoverLetterData(row: typeof coverLetters.$inferSelect): CoverLetterData {
-    const result: CoverLetterData = {
+    return {
       id: row.id,
       company: row.company,
       position: row.position,
       content: toCoverLetterContent(row.content),
       template: normalizeTemplate(row.template),
+      ...(row.jobInfo ? { jobInfo: row.jobInfo } : {}),
     };
-
-    if (row.jobInfo) {
-      result.jobInfo = row.jobInfo;
-    }
-
-    return result;
   }
 
   /**
@@ -115,18 +120,10 @@ export class CoverLetterService {
       return null;
     }
 
-    const now = new Date().toISOString();
-    const updateData: Partial<typeof coverLetters.$inferInsert> = {
-      updatedAt: now,
-    };
-
-    if (data.company !== undefined) updateData.company = data.company;
-    if (data.position !== undefined) updateData.position = data.position;
-    if (data.jobInfo !== undefined) updateData.jobInfo = data.jobInfo;
-    if (data.content !== undefined) updateData.content = toContentRecord(data.content);
-    if (data.template !== undefined) updateData.template = normalizeTemplate(data.template);
-
-    await db.update(coverLetters).set(updateData).where(eq(coverLetters.id, id));
+    await db
+      .update(coverLetters)
+      .set(buildCoverLetterUpdateData(data, new Date().toISOString()))
+      .where(eq(coverLetters.id, id));
 
     return await this.getCoverLetter(id);
   }

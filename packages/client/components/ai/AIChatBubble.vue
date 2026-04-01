@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import type { ChatMessage } from "@bao/shared";
-import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
-import { CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS } from "~/constants/chat";
+import {
+  CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,
+  CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
+  CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
+  type ChatDensity,
+} from "~/constants/chat";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
@@ -15,6 +20,7 @@ const props = withDefaults(
     isLatestAssistantMessage?: boolean;
     contextChips?: string[];
     contextChipsAria?: string;
+    density?: ChatDensity;
   }>(),
   {
     locale: DEFAULT_APP_LANGUAGE,
@@ -22,6 +28,7 @@ const props = withDefaults(
     isLatestAssistantMessage: false,
     contextChips: () => [],
     contextChipsAria: "",
+    density: "comfortable",
   },
 );
 
@@ -43,8 +50,13 @@ const avatarLabel = computed(() =>
     : props.userLabel,
 );
 const chatBubbleClass = computed(() =>
-  isAssistant.value ? "chat-bubble-secondary" : "chat-bubble-primary",
+  isAssistant.value
+    ? "border border-base-300 bg-base-200 text-base-content shadow-sm"
+    : "chat-bubble-primary shadow-sm",
 );
+const messageWidthClass = computed(() => CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY[props.density]);
+const bubbleSizeClass = computed(() => CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY[props.density]);
+const avatarSizeClass = computed(() => CHAT_AVATAR_SIZE_CLASS_BY_DENSITY[props.density]);
 const formattedTime = computed(() => formatChatTimestamp(props.message.timestamp, props.locale));
 const messageTitle = computed(() => (isAssistant.value ? props.assistantLabel : props.userLabel));
 const userAvatarInitial = computed(() => {
@@ -90,22 +102,11 @@ const ariaLabel = computed(() => {
       :class="avatarClass"
       :aria-label="avatarLabel"
     >
-      <div class="w-10 rounded-full bg-secondary text-secondary-content flex items-center justify-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
+      <div
+        class="flex items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content"
+        :class="avatarSizeClass"
+      >
+        <IconLightbulb class="h-6 w-6" />
       </div>
     </div>
     <div
@@ -113,11 +114,14 @@ const ariaLabel = computed(() => {
       class="chat-image avatar placeholder"
       :aria-label="userLabel"
     >
-      <div class="flex w-10 items-center justify-center rounded-full bg-primary text-primary-content">
+      <div
+        class="flex items-center justify-center rounded-full bg-primary text-primary-content"
+        :class="avatarSizeClass"
+      >
         <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
       </div>
     </div>
-    <div class="chat-header mb-1" :class="CHAT_MESSAGE_WIDTH_CLASS">
+    <div class="chat-header mb-1" :class="messageWidthClass">
       {{ messageTitle }}
       <time
         v-if="formattedTime"
@@ -129,7 +133,7 @@ const ariaLabel = computed(() => {
     </div>
     <div
       class="chat-bubble whitespace-pre-wrap break-words"
-      :class="[chatBubbleClass, CHAT_BUBBLE_SIZE_CLASS, CHAT_MESSAGE_WIDTH_CLASS]"
+      :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
       <ul
         v-if="props.contextChips.length > 0"

@@ -2,18 +2,22 @@ import {
   API_ERROR_AUTH_SETUP_TOKEN_INVALID,
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
   API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
+} from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
   API_MESSAGE_SAVE_API_KEY_ONCE,
+} from "@bao/shared/constants/api-messages";
+import {
   AUTH_KEY_PREFIX,
   AUTH_KEY_RANDOM_BYTES,
   AUTH_SETUP_TOKEN_HEADER,
-  DEFAULT_PROFILE_ID,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_FORBIDDEN,
-} from "@bao/shared";
+} from "@bao/shared/constants/auth";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "../config/env";
 import {
@@ -23,11 +27,13 @@ import {
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
 import { resolveRateLimitClientKey } from "../utils/rate-limit";
+import {
+  authBootstrapBody,
+  type AuthBootstrapBody,
+  type RouteSetState,
+} from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /=+$/u;
-const authBootstrapBodySchema = t.Object({
-  setupToken: t.Optional(t.String({ minLength: 1 })),
-});
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes))
@@ -54,8 +60,11 @@ function generateApiKey(): string {
   return `${AUTH_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
-export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
-  .get("/status", async () => {
+export const authRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.authBase),
+  tags: ["Auth"],
+})
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus), async () => {
     if (config.disableAuth) {
       return {
         configured: false,
@@ -73,7 +82,7 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
       setupTokenConfigured: config.authSetupToken !== null,
     };
   })
-  .get("/configured", async () => {
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured), async () => {
     if (config.disableAuth) {
       return { configured: false };
     }
@@ -92,8 +101,16 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
         }),
       )
       .post(
-        "/init",
-        async ({ body, request, status }) => {
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
+        async ({
+          body,
+          request,
+          set,
+        }: {
+          body: AuthBootstrapBody;
+          request: Request;
+          set: RouteSetState;
+        }) => {
           if (config.disableAuth) {
             return { configured: false, message: API_MESSAGE_AUTH_DISABLED };
           }
@@ -110,21 +127,24 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
 
           const expectedSetupToken = config.authSetupToken;
           if (!expectedSetupToken) {
-            return status(HTTP_STATUS_FORBIDDEN, {
+            set.status = HTTP_STATUS_FORBIDDEN;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
-            });
+            };
           }
 
           const providedSetupToken = resolveSetupToken(request, body);
           if (!providedSetupToken) {
-            return status(HTTP_STATUS_BAD_REQUEST, {
+            set.status = HTTP_STATUS_BAD_REQUEST;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
-            });
+            };
           }
           if (providedSetupToken !== expectedSetupToken) {
-            return status(HTTP_STATUS_FORBIDDEN, {
+            set.status = HTTP_STATUS_FORBIDDEN;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_INVALID,
-            });
+            };
           }
 
           const apiKey = generateApiKey();
@@ -140,7 +160,7 @@ export const authRoutes = new Elysia({ prefix: "/auth", tags: ["Auth"] })
           };
         },
         {
-          body: authBootstrapBodySchema,
+          body: authBootstrapBody,
         },
       ),
   );

@@ -1,9 +1,12 @@
-import type { AutomationStats, CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { DEFAULT_PROFILE_ID, isRecord } from "@bao/shared";
-import {
-  STATISTICS_AUTOMATION_RUNS_LIMIT,
-  STATISTICS_SKILL_COVERAGE_TARGET,
-} from "@bao/shared/constants/statistics";
+import type {
+  AutomationStats,
+  CareerProgress,
+  DashboardStats,
+  WeeklyActivity,
+} from "@bao/shared/types/search";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { isRecord } from "@bao/shared/utils/type-guards";
+import { STATISTICS_AUTOMATION_RUNS_LIMIT } from "@bao/shared/constants/statistics";
 import { count, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -16,22 +19,11 @@ import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
-
-type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };
-
-const parseActionHistory = (value: unknown): ActionHistoryEntry[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  return value
-    .filter(isRecord)
-    .map((entry) => ({
-      action: typeof entry.action === "string" ? entry.action : "other",
-      xpGained: typeof entry.xpGained === "number" ? entry.xpGained : 0,
-      timestamp: typeof entry.timestamp === "string" ? entry.timestamp : "",
-    }))
-    .filter((entry) => entry.timestamp.length > 0);
-};
+import {
+  buildCareerProgress,
+  buildWeeklyActivity,
+  parseActionHistory,
+} from "./statistics-service-activity";
 
 export class StatisticsService {
   private async runBestEffort(operation: () => Promise<void>): Promise<void> {
@@ -234,67 +226,29 @@ export class StatisticsService {
   }
 
   async getWeeklyActivity(): Promise<WeeklyActivity> {
-    // Get gamification stats for action history
     const gamRows = await db
       .select()
       .from(gamification)
       .where(eq(gamification.id, DEFAULT_PROFILE_ID));
     const stats = gamRows[0]?.stats;
     const actionHistory = isRecord(stats) ? parseActionHistory(stats.actionHistory) : [];
-
-    const now = new Date();
-    const days: Array<{ date: string; actions: number; xpEarned: number }> = [];
-    const categoryCounts: Record<string, number> = {};
-
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split("T")[0];
-
-      const dayActions = actionHistory.filter((a) => a.timestamp?.startsWith(dateStr));
-      const xpEarned = dayActions.reduce((sum, a) => sum + (a.xpGained || 0), 0);
-
-      days.push({ date: dateStr, actions: dayActions.length, xpEarned });
-
-      for (const a of dayActions) {
-        const cat = a.action || "other";
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-      }
-    }
-
-    const topCategory =
-      Object.entries(categoryCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || "none";
-
-    const totalXP = days.reduce((sum, d) => sum + d.xpEarned, 0);
-
-    return { days, topCategory, totalXP };
+    return buildWeeklyActivity(actionHistory);
   }
 
   async getCareerProgress(): Promise<CareerProgress> {
-    let skillCoverage = 0;
+    let mappedSkills = 0;
     await this.runBestEffort(async () => {
       const skillResult = await db.select({ count: count() }).from(skillMappings);
-      const mappedSkills = skillResult[0]?.count || 0;
-      skillCoverage = Math.min(
-        100,
-        Math.round((mappedSkills / STATISTICS_SKILL_COVERAGE_TARGET) * 100),
-      );
+      mappedSkills = skillResult[0]?.count || 0;
     });
 
-    let applicationSuccessRate = 0;
+    let applicationStatuses: string[] = [];
     await this.runBestEffort(async () => {
       const allApps = await db.select().from(applications);
-      const offered = allApps.filter((a) => a.status === "offered").length;
-      if (allApps.length > 0) {
-        applicationSuccessRate = Math.round((offered / allApps.length) * 100);
-      }
+      applicationStatuses = allApps.map((application) => application.status || "");
     });
 
-    return {
-      skillCoverage,
-      applicationSuccessRate,
-      interviewTrend: [],
-    };
+    return buildCareerProgress(mappedSkills, applicationStatuses);
   }
 }
 

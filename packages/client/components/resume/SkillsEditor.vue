@@ -3,187 +3,82 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 const props = defineProps<{
-  modelValue: {
-    technical: string[];
-    soft: string[];
-    gaming?: string[];
-  };
+  modelValue: string[];
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [value: typeof props.modelValue];
+  "update:modelValue": [value: string[]];
 }>();
 const { t } = useI18n();
 
-const localValue = ref({
-  technical: [...(props.modelValue.technical || [])],
-  soft: [...(props.modelValue.soft || [])],
-  gaming: [...(props.modelValue.gaming || [])],
-});
-
-const newSkill = ref({
-  technical: "",
-  soft: "",
-  gaming: "",
-});
+const localValue = ref<string[]>([...props.modelValue]);
+const newSkill = ref("");
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    localValue.value = {
-      technical: [...(newValue.technical || [])],
-      soft: [...(newValue.soft || [])],
-      gaming: [...(newValue.gaming || [])],
-    };
+    localValue.value = [...newValue];
   },
   { deep: true },
 );
 
-function updateValue() {
-  emit("update:modelValue", {
-    technical: [...localValue.value.technical],
-    soft: [...localValue.value.soft],
-    gaming: [...localValue.value.gaming],
-  });
+function emitValue(): void {
+  emit("update:modelValue", [...localValue.value]);
 }
 
-function addSkill(category: "technical" | "soft" | "gaming") {
-  const skill = newSkill.value[category].trim();
-  if (!skill) return;
-
-  if (!localValue.value[category].includes(skill)) {
-    localValue.value[category].push(skill);
-    newSkill.value[category] = "";
-    updateValue();
+function addSkill(): void {
+  const trimmedSkill = newSkill.value.trim();
+  if (trimmedSkill.length === 0) {
+    return;
   }
+
+  localValue.value.push(trimmedSkill);
+  newSkill.value = "";
+  emitValue();
 }
 
-function removeSkill(category: "technical" | "soft" | "gaming", index: number) {
-  localValue.value[category].splice(index, 1);
-  updateValue();
+function removeSkill(index: number): void {
+  localValue.value.splice(index, 1);
+  emitValue();
 }
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Technical Skills -->
-    <fieldset class="fieldset">
-      <div class="label">
-        <span class="font-bold">{{ t("resumeComponentSkills.technicalTitle") }}</span>
-      </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <div
-          v-for="(skill, index) in localValue.technical"
-          :key="index"
-          class="badge badge-primary gap-2"
-        >
-          {{ skill }}
-          <button
-            type="button"
-            class="btn btn-ghost btn-xs btn-circle"
-            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.technicalTitle'), skill })"
-            @click="removeSkill('technical', index)"
-          >
-            <CloseIcon class="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-      <div class="join">
-        <input
-          v-model="newSkill.technical"
-          type="text"
-          :placeholder="t('resumeComponentSkills.technicalPlaceholder')"
-          class="input flex-1 join-item"
-          @keyup.enter="addSkill('technical')"
-          :aria-label="t('resumeComponentSkills.technicalAria')"/>
+  <div class="space-y-4 p-6">
+    <h2 class="text-lg font-semibold">{{ t("resumePage.skills.title") }}</h2>
+    <div class="mb-4 flex gap-2">
+      <input
+        v-model="newSkill"
+        type="text"
+        :placeholder="t('resumePage.skills.inputPlaceholder')"
+        class="input input-sm flex-1"
+        :aria-label="t('resumePage.skills.inputAria')"
+        @keyup.enter="addSkill"
+      />
+      <button
+        class="btn btn-sm btn-primary"
+        :aria-label="t('resumePage.skills.addButtonAria')"
+        @click="addSkill"
+      >
+        {{ t("resumePage.skills.addButton") }}
+      </button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <div
+        v-for="(skill, index) in localValue"
+        :key="`${skill}-${index}`"
+        class="badge badge-lg gap-2"
+      >
+        {{ skill }}
         <button
-          class="btn btn-primary join-item"
-          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.technicalTitle') })"
-          @click="addSkill('technical')"
+          type="button"
+          class="btn btn-ghost btn-xs btn-circle"
+          :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
+          @click="removeSkill(index)"
         >
-          {{ t("resumeComponentSkills.addButton") }}
+          <CloseIcon class="h-3 w-3" />
         </button>
       </div>
-    </fieldset>
-
-    <!-- Soft Skills -->
-    <fieldset class="fieldset">
-      <div class="label">
-        <span class="font-bold">{{ t("resumeComponentSkills.softTitle") }}</span>
-      </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <div
-          v-for="(skill, index) in localValue.soft"
-          :key="index"
-          class="badge badge-secondary gap-2"
-        >
-          {{ skill }}
-          <button
-            type="button"
-            class="btn btn-ghost btn-xs btn-circle"
-            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.softTitle'), skill })"
-            @click="removeSkill('soft', index)"
-          >
-            <CloseIcon class="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-      <div class="join">
-        <input
-          v-model="newSkill.soft"
-          type="text"
-          :placeholder="t('resumeComponentSkills.softPlaceholder')"
-          class="input flex-1 join-item"
-          @keyup.enter="addSkill('soft')"
-          :aria-label="t('resumeComponentSkills.softAria')"/>
-        <button
-          class="btn btn-secondary join-item"
-          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.softTitle') })"
-          @click="addSkill('soft')"
-        >
-          {{ t("resumeComponentSkills.addButton") }}
-        </button>
-      </div>
-    </fieldset>
-
-    <!-- Gaming Skills -->
-    <fieldset class="fieldset">
-      <div class="label">
-        <span class="font-bold">{{ t("resumeComponentSkills.gamingTitle") }}</span>
-      </div>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <div
-          v-for="(skill, index) in localValue.gaming"
-          :key="index"
-          class="badge badge-accent gap-2"
-        >
-          {{ skill }}
-          <button
-            type="button"
-            class="btn btn-ghost btn-xs btn-circle"
-            :aria-label="t('resumeComponentSkills.removeSkillAria', { category: t('resumeComponentSkills.gamingTitle'), skill })"
-            @click="removeSkill('gaming', index)"
-          >
-            <CloseIcon class="h-3 w-3" />
-          </button>
-        </div>
-      </div>
-      <div class="join">
-        <input
-          v-model="newSkill.gaming"
-          type="text"
-          :placeholder="t('resumeComponentSkills.gamingPlaceholder')"
-          class="input flex-1 join-item"
-          @keyup.enter="addSkill('gaming')"
-          :aria-label="t('resumeComponentSkills.gamingAria')"/>
-        <button
-          class="btn btn-accent join-item"
-          :aria-label="t('resumeComponentSkills.addSkillAria', { category: t('resumeComponentSkills.gamingTitle') })"
-          @click="addSkill('gaming')"
-        >
-          {{ t("resumeComponentSkills.addButton") }}
-        </button>
-      </div>
-    </fieldset>
+    </div>
   </div>
 </template>

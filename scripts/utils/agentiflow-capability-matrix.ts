@@ -88,7 +88,8 @@ const AUTOMATION_RUNTIME_SCRIPT_PATHS = [
   "packages/scraper/src/scripts/job-apply.ts",
   "packages/scraper/src/job-apply/runtime.ts",
   "packages/scraper/src/runtime/protocol.ts",
-  "packages/server/src/services/automation/rpa-runner.ts",
+  "packages/server/src/services/automation/rpa-runner-protocol.ts",
+  "packages/server/src/services/automation/rpa-runner-process.ts",
   "packages/server/src/services/automation/application-automation-service.ts",
 ] as const;
 const AUTOMATION_SERVER_CONTRACT_PATHS = [

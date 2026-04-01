@@ -1,248 +1,39 @@
 <script setup lang="ts">
-import {
-  APP_ROUTE_BUILDERS,
-  APP_ROUTES,
-  isEmailTransportConfigured,
-  isValidEmail,
-  type RpaRunExecutionEnvelope,
-} from "@bao/shared";
-import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
+import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { getErrorMessage } from "~/utils/errors";
-import { formatDateWithLocale } from "~/utils/locale-format";
-
-type EmailResponseTone = "professional" | "friendly" | "concise";
-
-interface EmailFormState {
-  subject: string;
-  message: string;
-  sender: string;
-  tone: EmailResponseTone;
-  recipientEmail: string;
-  deliverAfterGeneration: boolean;
-  runAt: string;
-}
-
-const DATE_FORMAT_OPTIONS = {
-  dateStyle: "medium",
-  timeStyle: "short",
-} as const satisfies Intl.DateTimeFormatOptions;
-
-const { t, locale, fallbackLocale } = useI18n();
-const { triggerEmailResponse, scheduleEmailResponse } = useAutomation();
-const { settings, fetchSettings } = useSettings();
-
-const toneOptions: readonly EmailResponseTone[] = ["professional", "friendly", "concise"] as const;
-
-const form = reactive<EmailFormState>({
-  subject: "",
-  message: "",
-  sender: "",
-  tone: "professional",
-  recipientEmail: "",
-  deliverAfterGeneration: false,
-  runAt: "",
-});
-
-const pendingAction = ref<"generate" | "schedule" | null>(null);
-const submitError = ref("");
-const lastResult = ref<{
-  runId: string;
-  reply: string;
-  provider: string;
-  model: string;
-  delivered: boolean;
-  recipientEmail?: string;
-  deliveredAt?: string;
-  messageId?: string;
-} | null>(null);
-const scheduledRun = ref<RpaRunExecutionEnvelope | null>(null);
-
 const {
-  status: emailSettingsStatus,
-  error: emailSettingsError,
-  refresh: refreshEmailSettings,
-} = await useAsyncData("automation-email-settings", async () => {
-  if (!settings.value) {
-    await fetchSettings();
-  }
-  return true;
+  t,
+  form,
+  toneOptions,
+  pendingAction,
+  submitError,
+  lastResult,
+  scheduledRun,
+  emailSettingsError,
+  refreshEmailSettings,
+  emailSettingsPending,
+  emailDeliveryConfigured,
+  pending,
+  canSubmit,
+  toLocalizedDateTime,
+  resolveScheduledRunAt,
+  submitEmailResponse,
+  submitScheduledEmailResponse,
+} = useAutomationEmailPage();
+
+useSeoMeta({
+  title: t("automation.email.title"),
+  description: t("automation.email.pageDescription"),
 });
-
-const emailSettingsPending = computed(
-  () => emailSettingsStatus.value === "pending" || emailSettingsStatus.value === "idle",
-);
-
-const emailDeliveryConfigured = computed(() =>
-  isEmailTransportConfigured(
-    settings.value?.emailTransportSettings,
-    settings.value?.hasEmailTransportPassword ?? false,
-  ),
-);
-
-const resolvedRecipientEmail = computed(() => {
-  const explicitRecipient = form.recipientEmail.trim();
-  if (explicitRecipient.length > 0) {
-    return explicitRecipient;
-  }
-
-  const sender = form.sender.trim();
-  return isValidEmail(sender) ? sender : "";
-});
-
-const pending = computed(() => pendingAction.value !== null);
-const canSubmit = computed(() => form.subject.trim().length > 0 && form.message.trim().length > 0);
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const toLocalizedDateTime = (value: string): string => {
-  const formatted = formatDateWithLocale(
-    value,
-    locale.value,
-    fallbackLocale.value,
-    DATE_FORMAT_OPTIONS,
-  );
-  return formatted ?? value;
-};
-
-const resolveScheduledRunAt = (run: RpaRunExecutionEnvelope): string => {
-  const runInput = run.input;
-  if (!runInput || !isRecord(runInput)) {
-    return run.createdAt;
-  }
-  const scheduleValue = runInput.schedule;
-  if (!isRecord(scheduleValue)) {
-    return run.createdAt;
-  }
-  return typeof scheduleValue.runAt === "string" && scheduleValue.runAt.length > 0
-    ? scheduleValue.runAt
-    : run.createdAt;
-};
-
-function toIsoTimestamp(dateTimeLocal: string): string | null {
-  const parsed = new Date(dateTimeLocal);
-  if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
-    return null;
-  }
-  return parsed.toISOString();
-}
-
-function validateDeliverySettings(): boolean {
-  if (!form.deliverAfterGeneration) {
-    return true;
-  }
-
-  if (!emailDeliveryConfigured.value) {
-    submitError.value = t("automation.email.deliveryUnavailableDescription");
-    return false;
-  }
-
-  if (!isValidEmail(resolvedRecipientEmail.value)) {
-    submitError.value = t("automation.email.invalidRecipient");
-    return false;
-  }
-
-  return true;
-}
-
-async function submitEmailResponse(): Promise<void> {
-  submitError.value = "";
-  lastResult.value = null;
-  scheduledRun.value = null;
-
-  if (!validateDeliverySettings()) {
-    return;
-  }
-
-  pendingAction.value = "generate";
-
-  const responseResult = await settlePromise(
-    triggerEmailResponse({
-      subject: form.subject.trim(),
-      message: form.message.trim(),
-      tone: form.tone,
-      ...(form.sender.trim() ? { sender: form.sender.trim() } : {}),
-      ...(resolvedRecipientEmail.value ? { recipientEmail: resolvedRecipientEmail.value } : {}),
-      deliverAfterGeneration: form.deliverAfterGeneration,
-    }),
-    t("automation.email.submitErrorFallback"),
-  );
-  pendingAction.value = null;
-
-  if (!responseResult.ok) {
-    submitError.value = getErrorMessage(
-      responseResult.error,
-      t("automation.email.submitErrorFallback"),
-    );
-    return;
-  }
-
-  const response = responseResult.value;
-  lastResult.value = {
-    runId: response.runId,
-    reply: response.reply,
-    provider: response.provider,
-    model: response.model,
-    delivered: response.delivered,
-    recipientEmail: response.recipientEmail,
-    deliveredAt: response.deliveredAt,
-    messageId: response.messageId,
-  };
-}
-
-async function submitScheduledEmailResponse(): Promise<void> {
-  submitError.value = "";
-  lastResult.value = null;
-  scheduledRun.value = null;
-
-  if (!validateDeliverySettings()) {
-    return;
-  }
-
-  const runAt = toIsoTimestamp(form.runAt);
-  if (!runAt) {
-    submitError.value = t("automation.email.schedule.invalidRunAt");
-    return;
-  }
-
-  pendingAction.value = "schedule";
-  const scheduleResult = await settlePromise(
-    scheduleEmailResponse({
-      subject: form.subject.trim(),
-      message: form.message.trim(),
-      tone: form.tone,
-      ...(form.sender.trim() ? { sender: form.sender.trim() } : {}),
-      ...(resolvedRecipientEmail.value ? { recipientEmail: resolvedRecipientEmail.value } : {}),
-      deliverAfterGeneration: form.deliverAfterGeneration,
-      runAt,
-    }),
-    t("automation.email.submitErrorFallback"),
-  );
-  pendingAction.value = null;
-
-  if (!scheduleResult.ok) {
-    submitError.value = getErrorMessage(
-      scheduleResult.error,
-      t("automation.email.submitErrorFallback"),
-    );
-    return;
-  }
-
-  scheduledRun.value = scheduleResult.value;
-}
-
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("automation.email.title"),
-    description: t("automation.email.pageDescription"),
-  });
-}
 </script>
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-email-title">
-    <PageHeaderBlock title-id="automation-email-title" :title="t('automation.email.title')">
+    <PageHeroHeader
+      title-id="automation-email-title"
+      :title="t('automation.email.title')"
+      :description="t('automation.email.pageDescription')"
+    >
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automationRuns"
@@ -252,7 +43,7 @@ if (import.meta.server) {
           {{ t("automation.email.openRunsButton") }}
         </NuxtLink>
       </template>
-    </PageHeaderBlock>
+    </PageHeroHeader>
 
     <LoadingSkeleton v-if="emailSettingsPending" :lines="6" />
 
@@ -406,10 +197,11 @@ if (import.meta.server) {
       </div>
     </div>
 
-    <div v-if="submitError" role="alert" class="alert alert-error">
-      <h3 class="font-semibold">{{ t("automation.email.submitErrorTitle") }}</h3>
-      <p>{{ submitError }}</p>
-    </div>
+    <BootstrapErrorAlert
+      v-if="submitError"
+      :title="t('automation.email.submitErrorTitle')"
+      :message="submitError"
+    />
 
     <div v-if="scheduledRun" class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">

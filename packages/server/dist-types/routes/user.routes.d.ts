@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const userRoutes: Elysia<"/user", {
+export declare const userRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,8 +15,8 @@ export declare const userRoutes: Elysia<"/user", {
     parser: {};
     response: {};
 }, {
-    user: {
-        profile: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -55,25 +55,25 @@ export declare const userRoutes: Elysia<"/user", {
         };
     };
 } & {
-    user: {
-        profile: {
+    [x: string]: {
+        [x: string]: {
             put: {
-                body: {
+                body: {} & {
                     name?: string | undefined;
                     email?: string | undefined;
                     location?: string | undefined;
+                    summary?: string | undefined;
+                    gamingExperience?: Record<string, unknown> | undefined;
                     website?: string | undefined;
                     phone?: string | undefined;
-                    github?: string | undefined;
-                    summary?: string | undefined;
-                    gamingExperience?: {} | undefined;
-                    softSkills?: string[] | undefined;
                     linkedin?: string | undefined;
+                    github?: string | undefined;
                     currentRole?: string | undefined;
                     currentCompany?: string | undefined;
                     yearsExperience?: number | undefined;
                     technicalSkills?: string[] | undefined;
-                    careerGoals?: {} | undefined;
+                    softSkills?: string[] | undefined;
+                    careerGoals?: Record<string, unknown> | undefined;
                 };
                 params: {};
                 query: unknown;

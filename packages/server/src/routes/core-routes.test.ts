@@ -4,14 +4,20 @@ import { join } from "node:path";
 import {
   API_ERROR_AUTH_SETUP_TOKEN_INVALID,
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
+} from "@bao/shared/constants/api-errors";
+import {
+  API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
+  buildGamificationChallengeCompleteEndpoint,
+} from "@bao/shared/constants/endpoints";
+import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
   API_MESSAGE_SAVE_API_KEY_ONCE,
-  AUTH_API_KEY_PREFIX_PATTERN,
-  DEFAULT_PROFILE_ID,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_FORBIDDEN,
-} from "@bao/shared";
+} from "@bao/shared/constants/api-messages";
+import { AUTH_API_KEY_PREFIX_PATTERN } from "@bao/shared/constants/auth";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { requestJson } from "../test-utils";
 
 type SearchCountSnapshot = {
@@ -145,7 +151,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" })
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
     .use(routesModules[0].authRoutes)
     .use(routesModules[1].searchRoutes)
     .use(routesModules[2].userRoutes)
@@ -154,8 +160,10 @@ beforeAll(async () => {
 });
 
 describe("search routes", () => {
-  test("GET /api/search returns empty results for short queries", async () => {
-    const shortSearchUrl = `/api/search?${new URLSearchParams({ q: SEARCH_QUERY_SHORT })}`;
+  test("GET search returns empty results for short queries", async () => {
+    const shortSearchUrl = `${API_ENDPOINTS.search}?${new URLSearchParams({
+      q: SEARCH_QUERY_SHORT,
+    })}`;
     const res = await requestJson<SearchResponse>(app, "GET", shortSearchUrl);
     expect(res.status).toBe(200);
     expect(res.body.query).toBe(SEARCH_QUERY_SHORT);
@@ -164,8 +172,8 @@ describe("search routes", () => {
     expect(res.body.totalTime).toBeGreaterThanOrEqual(0);
   });
 
-  test("GET /api/search filters by requested types", async () => {
-    const filteredSearchUrl = `/api/search?${new URLSearchParams({
+  test("GET search filters by requested types", async () => {
+    const filteredSearchUrl = `${API_ENDPOINTS.search}?${new URLSearchParams({
       q: SEARCH_FILTER_QUERY,
       types: SEARCH_FILTER_TYPES,
     })}`;
@@ -176,8 +184,8 @@ describe("search routes", () => {
     expect(typeof res.body.counts.studios).toBe("number");
   });
 
-  test("GET /api/search/autocomplete returns empty results for short prefix", async () => {
-    const shortAutocompleteUrl = `/api/search/autocomplete?${new URLSearchParams({
+  test("GET search autocomplete returns empty results for short prefix", async () => {
+    const shortAutocompleteUrl = `${API_ENDPOINTS.searchAutocomplete}?${new URLSearchParams({
       prefix: AUTOCOMPLETE_SHORT_PREFIX,
     })}`;
     const res = await requestJson<Array<{ text: string; type: string }>>(
@@ -189,8 +197,8 @@ describe("search routes", () => {
     expect(res.body).toEqual([]);
   });
 
-  test("GET /api/search/autocomplete returns suggestions for valid prefix", async () => {
-    const roleAutocompleteUrl = `/api/search/autocomplete?${new URLSearchParams({
+  test("GET search autocomplete returns suggestions for valid prefix", async () => {
+    const roleAutocompleteUrl = `${API_ENDPOINTS.searchAutocomplete}?${new URLSearchParams({
       prefix: AUTOCOMPLETE_ROLE_PREFIX,
     })}`;
     const res = await requestJson<Array<{ text: string; type: string }>>(
@@ -205,8 +213,8 @@ describe("search routes", () => {
 });
 
 describe("auth routes", () => {
-  test("GET /api/auth/status returns auth mode", async () => {
-    const res = await requestJson<AuthStatusResponse>(app, "GET", "/api/auth/status");
+  test("GET auth status returns auth mode", async () => {
+    const res = await requestJson<AuthStatusResponse>(app, "GET", API_ENDPOINTS.authStatus);
     expect(res.status).toBe(200);
     expect(typeof res.body.authRequired).toBe("boolean");
     expect(typeof res.body.configured).toBe("boolean");
@@ -216,24 +224,33 @@ describe("auth routes", () => {
 });
 
 describe("auth init routes", () => {
-  test("POST /api/auth/init requires a valid setup token before initializing API key", async () => {
-    const status = await requestJson<AuthStatusResponse>(app, "GET", "/api/auth/status");
+  test("POST auth init requires a valid setup token before initializing API key", async () => {
+    const status = await requestJson<AuthStatusResponse>(app, "GET", API_ENDPOINTS.authStatus);
 
     if (status.body.authRequired) {
       expect(status.body.bootstrapRequired).toBe(true);
       expect(status.body.setupTokenConfigured).toBe(true);
 
-      const missingToken = await requestJson<{ error: string }>(app, "POST", "/api/auth/init");
+      const missingToken = await requestJson<{ error: string }>(
+        app,
+        "POST",
+        API_ENDPOINTS.authInit,
+      );
       expect(missingToken.status).toBe(HTTP_STATUS_BAD_REQUEST);
       expect(missingToken.body.error).toBe(API_ERROR_AUTH_SETUP_TOKEN_REQUIRED);
 
-      const invalidToken = await requestJson<{ error: string }>(app, "POST", "/api/auth/init", {
-        setupToken: "wrong-token",
-      });
+      const invalidToken = await requestJson<{ error: string }>(
+        app,
+        "POST",
+        API_ENDPOINTS.authInit,
+        {
+          setupToken: "wrong-token",
+        },
+      );
       expect(invalidToken.status).toBe(HTTP_STATUS_FORBIDDEN);
       expect(invalidToken.body.error).toBe(API_ERROR_AUTH_SETUP_TOKEN_INVALID);
 
-      const res = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {
+      const res = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {
         setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
       });
       expect(res.status).toBe(200);
@@ -241,7 +258,7 @@ describe("auth init routes", () => {
       expect(res.body.apiKey).toMatch(AUTH_API_KEY_PREFIX_PATTERN);
       expect(res.body.message).toBe(API_MESSAGE_SAVE_API_KEY_ONCE);
 
-      const second = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {
+      const second = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {
         setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
       });
       expect(second.status).toBe(200);
@@ -249,7 +266,7 @@ describe("auth init routes", () => {
       expect(second.body.message).toBe(API_MESSAGE_API_KEY_ALREADY_CONFIGURED);
       expect(second.body.apiKey).toBeUndefined();
     } else {
-      const res = await requestJson<AuthInitResponse>(app, "POST", "/api/auth/init", {});
+      const res = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {});
       expect(res.status).toBe(200);
       expect(res.body.apiKey).toBeUndefined();
       expect(res.body.message).toBe(API_MESSAGE_AUTH_DISABLED);
@@ -259,11 +276,11 @@ describe("auth init routes", () => {
 });
 
 describe("auth configured routes", () => {
-  test("GET /api/auth/configured reflects key configuration state", async () => {
+  test("GET auth configured reflects key configuration state", async () => {
     const configured = await requestJson<{ configured: boolean }>(
       app,
       "GET",
-      "/api/auth/configured",
+      API_ENDPOINTS.authConfigured,
     );
     expect(configured.status).toBe(200);
     expect(typeof configured.body.configured).toBe("boolean");
@@ -271,15 +288,15 @@ describe("auth configured routes", () => {
 });
 
 describe("user routes", () => {
-  test("GET /api/user/profile auto-creates the default profile", async () => {
-    const profile = await requestJson<UserProfileResponse>(app, "GET", "/api/user/profile");
+  test("GET user profile auto-creates the default profile", async () => {
+    const profile = await requestJson<UserProfileResponse>(app, "GET", API_ENDPOINTS.userProfile);
     expect(profile.status).toBe(200);
     expect(profile.body.id).toBe(DEFAULT_PROFILE_ID);
     expect(profile.body.name).toBe("");
   });
 
-  test("PUT /api/user/profile updates and persists profile values", async () => {
-    const updated = await requestJson<UserProfileResponse>(app, "PUT", "/api/user/profile", {
+  test("PUT user profile updates and persists profile values", async () => {
+    const updated = await requestJson<UserProfileResponse>(app, "PUT", API_ENDPOINTS.userProfile, {
       name: "Core Route Audit",
       email: "audit@example.com",
       currentRole: "QA Auditor",
@@ -289,7 +306,7 @@ describe("user routes", () => {
     expect(updated.body.name).toBe("Core Route Audit");
     expect(updated.body.email).toBe("audit@example.com");
 
-    const readback = await requestJson<UserProfileResponse>(app, "GET", "/api/user/profile");
+    const readback = await requestJson<UserProfileResponse>(app, "GET", API_ENDPOINTS.userProfile);
     expect(readback.status).toBe(200);
     expect(readback.body.name).toBe("Core Route Audit");
     expect(readback.body.email).toBe("audit@example.com");
@@ -297,11 +314,11 @@ describe("user routes", () => {
 });
 
 describe("gamification routes", () => {
-  test("GET /api/gamification/progress returns base progress", async () => {
+  test("GET gamification progress returns base progress", async () => {
     const res = await requestJson<GamificationProgressResponse>(
       app,
       "GET",
-      "/api/gamification/progress",
+      API_ENDPOINTS.gamificationProgress,
     );
     expect(res.status).toBe(200);
     expect(res.body.xp).toBeGreaterThanOrEqual(0);
@@ -310,7 +327,7 @@ describe("gamification routes", () => {
     expect(res.body.currentStreak).toBeGreaterThanOrEqual(0);
   });
 
-  test("POST /api/gamification/award-xp accepts positive XP grant", async () => {
+  test("POST gamification award xp accepts positive XP grant", async () => {
     const res = await requestJson<{
       xp: number;
       level: number;
@@ -318,7 +335,7 @@ describe("gamification routes", () => {
       levelUp: { oldLevel: number; newLevel: number; newTitle: string } | null;
       reason: string;
       message: string;
-    }>(app, "POST", "/api/gamification/award-xp", {
+    }>(app, "POST", API_ENDPOINTS.gamificationAwardXp, {
       amount: 25,
       reason: "audit",
     });
@@ -330,11 +347,11 @@ describe("gamification routes", () => {
     expect(res.body.message).toContain("XP");
   });
 
-  test("GET /api/gamification/challenges returns today's challenge list", async () => {
+  test("GET gamification challenges returns today's challenge list", async () => {
     const res = await requestJson<GamificationChallengesResponse>(
       app,
       "GET",
-      "/api/gamification/challenges",
+      API_ENDPOINTS.gamificationChallenges,
     );
     expect(res.status).toBe(200);
     expect(res.body.challenges.length).toBeGreaterThan(0);
@@ -343,11 +360,11 @@ describe("gamification routes", () => {
     expect(typeof res.body.date).toBe("string");
   });
 
-  test("POST /api/gamification/challenges/:id/complete rejects unknown challenge id", async () => {
+  test("POST gamification challenge completion rejects unknown challenge id", async () => {
     const res = await requestJson<GamificationChallengeCompleteResponse>(
       app,
       "POST",
-      "/api/gamification/challenges/does-not-exist/complete",
+      buildGamificationChallengeCompleteEndpoint("does-not-exist"),
     );
     expect(res.status).toBe(200);
     expect(res.body.completed).toBe(false);
@@ -355,24 +372,24 @@ describe("gamification routes", () => {
 });
 
 describe("stats routes", () => {
-  test("GET /api/stats/dashboard returns aggregate values", async () => {
-    const res = await requestJson<DashboardStatsResponse>(app, "GET", "/api/stats/dashboard");
+  test("GET stats dashboard returns aggregate values", async () => {
+    const res = await requestJson<DashboardStatsResponse>(app, "GET", API_ENDPOINTS.statsDashboard);
     expect(res.status).toBe(200);
     expect(typeof res.body.profile.completeness).toBe("number");
     expect(typeof res.body.jobs.saved).toBe("number");
     expect(Array.isArray(res.body.automation.recentRuns)).toBe(true);
   });
 
-  test("GET /api/stats/weekly returns 7-day activity view", async () => {
-    const res = await requestJson<WeeklyActivityResponse>(app, "GET", "/api/stats/weekly");
+  test("GET stats weekly returns 7-day activity view", async () => {
+    const res = await requestJson<WeeklyActivityResponse>(app, "GET", API_ENDPOINTS.statsWeekly);
     expect(res.status).toBe(200);
     expect(res.body.days.length).toBe(7);
     expect(typeof res.body.topCategory).toBe("string");
     expect(typeof res.body.totalXP).toBe("number");
   });
 
-  test("GET /api/stats/career returns skill coverage metrics", async () => {
-    const res = await requestJson<CareerProgressResponse>(app, "GET", "/api/stats/career");
+  test("GET stats career returns skill coverage metrics", async () => {
+    const res = await requestJson<CareerProgressResponse>(app, "GET", API_ENDPOINTS.statsCareer);
     expect(res.status).toBe(200);
     expect(typeof res.body.skillCoverage).toBe("number");
     expect(typeof res.body.applicationSuccessRate).toBe("number");

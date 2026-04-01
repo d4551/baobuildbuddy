@@ -1,18 +1,15 @@
+import { APP_BRAND } from "@bao/shared/constants/branding";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import {
-  APP_BRAND,
   APP_BRAND_TAGLINE,
-  APP_LANGUAGE_CODES,
   DECIMAL_RADIX,
   DEFAULT_APP_DESCRIPTION,
-  DEFAULT_APP_LANGUAGE,
-  DEFAULT_CLIENT_DEV_PORT,
   DEFAULT_I18N_LOCALE_COOKIE_KEY,
   DEFAULT_QUERY_RETRY_COUNT,
   DEFAULT_QUERY_STALE_TIME_MS,
-  DEFAULT_SERVER_PORT,
+  LOCALES_DIRECTORY_SEGMENT,
   LOCALE_CHUNK_NAME_PREFIX,
   LOCALE_FILE_EXTENSION,
-  LOCALES_DIRECTORY_SEGMENT,
   MODULE_PATH_SEPARATOR,
   NODE_MODULES_PATH_SEGMENT,
   NUXT_COMPATIBILITY_DATE,
@@ -20,10 +17,15 @@ import {
   QUERY_REFETCH_ON_FOCUS_DISABLED,
   VITE_BUILD_TARGET,
   WINDOWS_PATH_SEPARATOR,
-} from "@bao/shared";
+} from "@bao/shared/constants/client-config";
+import { DEFAULT_CLIENT_DEV_PORT, DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
+import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import { defineNuxtConfig } from "nuxt/config";
+import { buildApiProxyWildcardTarget, normalizeApiProxyTarget } from "./utils/api-proxy-target";
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
 const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
+const API_ENDPOINT_WILDCARD = `${API_ENDPOINT_PREFIX}/**`;
 const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
 const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
 const configuredServerPort = process.env.SERVER_PORT || process.env.PORT;
@@ -37,13 +39,14 @@ const resolvedDevServerPort =
     ? configuredClientPort
     : DEFAULT_CLIENT_PORT;
 const defaultLocalApiProxy = `http://localhost:${resolvedApiServerPort}`;
-const apiBaseProxy =
-  configuredApiProxy ||
-  (configuredApiBase && configuredApiBase !== "/" ? configuredApiBase : undefined) ||
-  defaultLocalApiProxy;
 const HTTPS_URL_PATTERN = /^https?:\/\//u;
-const absoluteApiProxyBase =
-  apiBaseProxy && HTTPS_URL_PATTERN.test(apiBaseProxy) ? apiBaseProxy : undefined;
+const absoluteConfiguredApiBase =
+  configuredApiBase && HTTPS_URL_PATTERN.test(configuredApiBase) ? configuredApiBase : undefined;
+const apiProxyCandidate = configuredApiProxy || absoluteConfiguredApiBase || defaultLocalApiProxy;
+const normalizedApiProxyTarget = normalizeApiProxyTarget(apiProxyCandidate);
+const apiProxyWildcardTarget = normalizedApiProxyTarget
+  ? buildApiProxyWildcardTarget(normalizedApiProxyTarget)
+  : undefined;
 const DEFAULT_APP_TITLE = `${APP_BRAND.name} - ${APP_BRAND_TAGLINE}`;
 const DEFAULT_I18N_LOCALE = DEFAULT_APP_LANGUAGE;
 const DEFAULT_SUPPORTED_LOCALES = [...APP_LANGUAGE_CODES];
@@ -170,7 +173,7 @@ const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
 const shouldPrerenderApplicationRoutes =
-  Boolean(absoluteApiProxyBase) ||
+  Boolean(apiProxyWildcardTarget) ||
   Boolean(configuredApiBase && HTTPS_URL_PATTERN.test(configuredApiBase));
 
 export default defineNuxtConfig({
@@ -195,12 +198,12 @@ export default defineNuxtConfig({
     componentIslands: false,
   },
   hooks: {
-    "prerender:routes": ({ routes }) => {
+    "prerender:routes": (context: { routes: Set<string> }) => {
       if (shouldPrerenderApplicationRoutes) {
         return;
       }
 
-      routes.clear();
+      context.routes.clear();
     },
   },
 
@@ -257,19 +260,19 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "bun",
-    ...(apiBaseProxy
+    ...(normalizedApiProxyTarget
       ? {
           devProxy: {
-            "/api": {
-              target: apiBaseProxy,
+            [API_ENDPOINT_PREFIX]: {
+              target: normalizedApiProxyTarget,
               changeOrigin: true,
             },
           },
-          ...(absoluteApiProxyBase
+          ...(apiProxyWildcardTarget
             ? {
                 routeRules: {
-                  "/api/**": {
-                    proxy: `${absoluteApiProxyBase}/api/**`,
+                  [API_ENDPOINT_WILDCARD]: {
+                    proxy: apiProxyWildcardTarget,
                   },
                 },
               }

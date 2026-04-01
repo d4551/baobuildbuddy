@@ -1,10 +1,7 @@
-import {
-  type AIResponse,
-  API_ERROR_AI_STREAMING_FAILED,
-  type GenerateOptions,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
+import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";
 import { BaseAIProvider } from "./provider-interface";
 
@@ -22,8 +19,15 @@ export class OpenAIProvider extends BaseAIProvider {
     this.client = new OpenAI({ apiKey });
   }
 
+  private resolveModel(options?: GenerateOptions): string {
+    return typeof options?.model === "string" && options.model.trim().length > 0
+      ? options.model.trim()
+      : this.model;
+  }
+
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
+    const model = this.resolveModel(options);
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
     // Add system message if provided
@@ -41,7 +45,7 @@ export class OpenAIProvider extends BaseAIProvider {
 
     const responseResult = await settle(
       this.client.chat.completions.create({
-        model: this.model,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
@@ -52,7 +56,7 @@ export class OpenAIProvider extends BaseAIProvider {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
@@ -63,7 +67,7 @@ export class OpenAIProvider extends BaseAIProvider {
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content: text,
       usage: response.usage
         ? {
@@ -76,6 +80,7 @@ export class OpenAIProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
+    const model = this.resolveModel(options);
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
     // Add system message if provided
@@ -93,7 +98,7 @@ export class OpenAIProvider extends BaseAIProvider {
 
     const streamResult = await settle(
       this.client.chat.completions.create({
-        model: this.model,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,

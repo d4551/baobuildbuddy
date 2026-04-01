@@ -68,7 +68,7 @@
       }
     },
     {
-      "includes": ["**/packages/client/locales/*.ts"],
+      "includes": ["**/packages/client/locales/**/*.ts"],
       "linter": {
         "rules": {
           "security": {

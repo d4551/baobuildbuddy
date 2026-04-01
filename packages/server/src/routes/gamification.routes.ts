@@ -1,20 +1,32 @@
-import {
-  API_ERROR_CHALLENGE_NOT_FOUND,
-  API_MESSAGE_CHALLENGE_COMPLETED,
-  HTTP_STATUS_CREATED,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared";
-import { Elysia, t } from "elysia";
+import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
+import { Elysia } from "elysia";
 import { gamificationService } from "../services/gamification-service";
+import {
+  awardXpBody,
+  challengeIdParams,
+  type AwardXpBody,
+  type ChallengeIdParams,
+  type RouteSetState,
+} from "./gamification-route-contracts";
 
-export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["Gamification"] })
+export const gamificationRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase),
+  tags: ["Gamification"],
+})
   .get("/progress", async () => {
     return gamificationService.getProgress();
   })
   .post(
     "/award-xp",
-    async ({ body }) => {
+    async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
+      if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { error: "amount and reason are required." };
+      }
+
       const levelUp = await gamificationService.awardXP(body.amount, body.reason);
       const progress = await gamificationService.getProgress();
 
@@ -30,10 +42,7 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
       };
     },
     {
-      body: t.Object({
-        amount: t.Number({ minimum: 0, maximum: 10000 }),
-        reason: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-      }),
+      body: awardXpBody,
     },
   )
   .get("/achievements", async () => {
@@ -53,7 +62,12 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
   })
   .post(
     "/challenges/:id/complete",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
+      if (!params.id) {
+        set.status = HTTP_STATUS_BAD_REQUEST;
+        return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
+      }
+
       const completed = await gamificationService.completeChallenge(params.id);
 
       if (!completed) {
@@ -72,9 +86,7 @@ export const gamificationRoutes = new Elysia({ prefix: "/gamification", tags: ["
       };
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
+      params: challengeIdParams,
     },
   )
   .get("/weekly", async () => {

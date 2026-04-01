@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const portfolioRoutes: Elysia<"/portfolio", {
+export declare const portfolioRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,30 +15,28 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
     parser: {};
     response: {};
 }, {
-    portfolio: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").PortfolioData;
+                200: import("@bao/shared/types/portfolio").PortfolioData;
             };
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         put: {
             body: {
-                metadata: {
-                    [x: string]: unknown;
-                };
-            };
+                metadata: Record<string, unknown>;
+            } & {};
             params: {};
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared").PortfolioData;
+                200: import("@bao/shared/types/portfolio").PortfolioData;
                 422: {
                     type: "validation";
                     on: string;
@@ -52,28 +50,29 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             post: {
                 body: {
+                    title: string;
+                    description: string;
+                } & {
+                    role?: string | undefined;
+                    sortOrder?: number | undefined;
                     technologies?: string[] | undefined;
                     platforms?: string[] | undefined;
-                    featured?: boolean | undefined;
+                    tags?: string[] | undefined;
                     image?: string | undefined;
                     liveUrl?: string | undefined;
                     githubUrl?: string | undefined;
-                    tags?: string[] | undefined;
-                    role?: string | undefined;
+                    featured?: boolean | undefined;
                     engines?: string[] | undefined;
-                    sortOrder?: number | undefined;
-                    title: string;
-                    description: string;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").PortfolioProject | {
+                    200: import("@bao/shared/types/portfolio").PortfolioProject | {
                         error: string;
                     };
                     422: {
@@ -90,18 +89,18 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             reorder: {
                 post: {
                     body: {
                         orderedIds: string[];
-                    };
+                    } & {};
                     params: {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").PortfolioData | {
+                        200: import("@bao/shared/types/portfolio").PortfolioData | {
                             error: string;
                         };
                         422: {
@@ -119,31 +118,31 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
+                        role?: string | undefined;
+                        sortOrder?: number | undefined;
                         title?: string | undefined;
                         description?: string | undefined;
                         technologies?: string[] | undefined;
                         platforms?: string[] | undefined;
-                        featured?: boolean | undefined;
+                        tags?: string[] | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
                         githubUrl?: string | undefined;
-                        tags?: string[] | undefined;
-                        role?: string | undefined;
+                        featured?: boolean | undefined;
                         engines?: string[] | undefined;
-                        sortOrder?: number | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared").PortfolioProject | {
+                        200: import("@bao/shared/types/portfolio").PortfolioProject | {
                             error: string;
                         };
                         422: {
@@ -161,14 +160,14 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         projects: {
             ":id": {
                 delete: {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -196,10 +195,10 @@ export declare const portfolioRoutes: Elysia<"/portfolio", {
         };
     };
 } & {
-    portfolio: {
+    [x: string]: {
         export: {
             post: {
-                body: {
+                body: {} & {
                     format?: string | undefined;
                 };
                 params: {};

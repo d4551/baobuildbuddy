@@ -9,7 +9,7 @@ export interface StudioAnalytics {
         count: number;
     }>;
 }
-export declare const studioRoutes: Elysia<"/studios", {
+export declare const studioRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -25,11 +25,11 @@ export declare const studioRoutes: Elysia<"/studios", {
     parser: {};
     response: {};
 }, {
-    studios: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
-            query: {
+            query: {} & {
                 type?: string | undefined;
                 size?: string | undefined;
                 remoteWork?: string | undefined;
@@ -51,6 +51,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                     culture: Record<string, unknown> | null;
                     interviewStyle: string | null;
                     remoteWork: boolean | null;
+                    enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                     createdAt: string;
                     updatedAt: string;
                 }[];
@@ -67,13 +68,13 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -91,6 +92,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                         culture: Record<string, unknown> | null;
                         interviewStyle: string | null;
                         remoteWork: boolean | null;
+                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {
@@ -110,24 +112,25 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         post: {
             body: {
+                name: string;
+            } & {
                 type?: string | undefined;
-                description?: string | undefined;
                 location?: string | undefined;
+                description?: string | undefined;
+                technologies?: string[] | undefined;
+                platforms?: string[] | undefined;
                 website?: string | undefined;
                 size?: string | undefined;
-                technologies?: string[] | undefined;
+                culture?: Record<string, unknown> | undefined;
                 remoteWork?: boolean | undefined;
-                platforms?: string[] | undefined;
                 genres?: string[] | undefined;
-                culture?: {} | undefined;
                 founded?: string | undefined;
                 benefits?: string[] | undefined;
-                socialMedia?: {} | undefined;
+                socialMedia?: Record<string, string> | undefined;
                 notableGames?: string[] | undefined;
-                name: string;
             };
             params: {};
             query: unknown;
@@ -146,9 +149,9 @@ export declare const studioRoutes: Elysia<"/studios", {
                     technologies: string[];
                     genres: string[];
                     platforms: string[];
-                    culture: {} | null;
+                    culture: Record<string, unknown> | null;
                     benefits: string[];
-                    socialMedia: {} | null;
+                    socialMedia: Record<string, string> | null;
                     notableGames: string[];
                 };
                 422: {
@@ -164,29 +167,29 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             put: {
-                body: {
+                body: {} & {
                     name?: string | undefined;
                     type?: string | undefined;
-                    description?: string | undefined;
                     location?: string | undefined;
+                    description?: string | undefined;
+                    technologies?: string[] | undefined;
+                    platforms?: string[] | undefined;
                     website?: string | undefined;
                     size?: string | undefined;
-                    technologies?: string[] | undefined;
+                    culture?: Record<string, unknown> | undefined;
                     remoteWork?: boolean | undefined;
-                    platforms?: string[] | undefined;
                     genres?: string[] | undefined;
-                    culture?: {} | undefined;
                     founded?: string | undefined;
                     benefits?: string[] | undefined;
-                    socialMedia?: {} | undefined;
+                    socialMedia?: Record<string, string> | undefined;
                     notableGames?: string[] | undefined;
                 };
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -204,6 +207,7 @@ export declare const studioRoutes: Elysia<"/studios", {
                         culture: Record<string, unknown> | null;
                         interviewStyle: string | null;
                         remoteWork: boolean | null;
+                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {
@@ -223,13 +227,13 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         ":id": {
             delete: {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -256,7 +260,7 @@ export declare const studioRoutes: Elysia<"/studios", {
         };
     };
 } & {
-    studios: {
+    [x: string]: {
         analytics: {
             get: {
                 body: unknown;

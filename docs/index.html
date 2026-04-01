@@ -1,24 +1,18 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="corporate">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BaoBuildBuddy | AI Help For Videogame Job Seekers</title>
     <meta name="description" content="BaoBuildBuddy helps videogame job seekers find roles, tailor applications, set up Ollama, and move through repetitive application steps faster." />
-    <!-- Preconnect block -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-    
-    <!-- CSS / Frameworks -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5.0.50/daisyui.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="./assets/docs.generated.css" rel="stylesheet" />
     
     <style>
       :root {
         --font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
         --font-body: "DM Sans", "Inter", "Segoe UI", sans-serif;
-        --font-mono: "JetBrains Mono", monospace;
+        --font-mono:
+          "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
         --section-max-width: 80rem;
       }
       body {
@@ -152,69 +146,69 @@
 
       /* ── WCAG 2.1 AA contrast fixes for light theme ── */
       /* badge-soft text colors darkened to meet 4.5:1 on their tinted backgrounds */
-      [data-theme="light"] .badge-soft.badge-warning {
+      [data-theme="corporate"] .badge-soft.badge-warning {
         color: oklch(0.42 0.16 75);
       }
-      [data-theme="light"] .badge-soft.badge-success {
+      [data-theme="corporate"] .badge-soft.badge-success {
         color: oklch(0.40 0.15 155);
       }
-      [data-theme="light"] .badge-soft.badge-info {
+      [data-theme="corporate"] .badge-soft.badge-info {
         color: oklch(0.40 0.14 245);
       }
-      [data-theme="light"] .badge-soft.badge-accent {
+      [data-theme="corporate"] .badge-soft.badge-accent {
         color: oklch(0.42 0.15 165);
       }
-      [data-theme="light"] .badge-soft.badge-secondary {
+      [data-theme="corporate"] .badge-soft.badge-secondary {
         color: oklch(0.42 0.17 330);
       }
       /* badge-ghost: add visible border for 3:1 non-text contrast in both modes */
       .badge-ghost {
         border: 1px solid oklch(var(--color-base-content) / 0.22);
       }
-      [data-theme="light"] .badge-ghost {
+      [data-theme="corporate"] .badge-ghost {
         color: oklch(var(--color-base-content) / 0.72);
       }
       /* btn-ghost: ensure 3:1 interactive-boundary contrast in light mode */
-      [data-theme="light"] .btn-ghost {
+      [data-theme="corporate"] .btn-ghost {
         color: oklch(var(--color-base-content) / 0.78);
       }
-      [data-theme="light"] .btn-ghost:hover,
-      [data-theme="light"] .btn-ghost:focus-visible {
+      [data-theme="corporate"] .btn-ghost:hover,
+      [data-theme="corporate"] .btn-ghost:focus-visible {
         background-color: oklch(var(--color-base-content) / 0.1);
       }
       /* btn-neutral btn-outline: enforce dark border on light backgrounds */
-      [data-theme="light"] .btn-outline.btn-neutral {
+      [data-theme="corporate"] .btn-outline.btn-neutral {
         border-color: oklch(var(--color-neutral) / 0.6);
         color: oklch(0.28 0.02 270);
       }
 
       /* ── WCAG 2.1 AA contrast fixes for dark theme ── */
       /* btn-neutral: add visible border so button boundary meets 3:1 on dark bg */
-      [data-theme="dark"] .btn-neutral {
+      [data-theme="business"] .btn-neutral {
         border: 1px solid oklch(var(--color-base-content) / 0.18);
       }
-      [data-theme="dark"] .btn-neutral:hover,
-      [data-theme="dark"] .btn-neutral:focus-visible {
+      [data-theme="business"] .btn-neutral:hover,
+      [data-theme="business"] .btn-neutral:focus-visible {
         border-color: oklch(var(--color-base-content) / 0.30);
         background-color: oklch(var(--color-neutral) / 0.85);
       }
       /* btn-neutral btn-outline: boost border + text visibility in dark mode */
-      [data-theme="dark"] .btn-outline.btn-neutral {
+      [data-theme="business"] .btn-outline.btn-neutral {
         border-color: oklch(var(--color-base-content) / 0.35);
         color: oklch(var(--color-base-content) / 0.85);
       }
-      [data-theme="dark"] .btn-outline.btn-neutral:hover,
-      [data-theme="dark"] .btn-outline.btn-neutral:focus-visible {
+      [data-theme="business"] .btn-outline.btn-neutral:hover,
+      [data-theme="business"] .btn-outline.btn-neutral:focus-visible {
         border-color: oklch(var(--color-base-content) / 0.5);
         background-color: oklch(var(--color-base-content) / 0.08);
       }
       /* badge-soft badge-neutral: lighten bg + text so it's visible on dark bg */
-      [data-theme="dark"] .badge-soft.badge-neutral {
+      [data-theme="business"] .badge-soft.badge-neutral {
         background-color: oklch(var(--color-base-content) / 0.12);
         color: oklch(var(--color-base-content) / 0.82);
       }
       /* badge-outline: boost border for 3:1 non-text contrast in dark mode */
-      [data-theme="dark"] .badge-outline {
+      [data-theme="business"] .badge-outline {
         border-color: oklch(var(--color-base-content) / 0.30);
         color: oklch(var(--color-base-content) / 0.82);
       }
@@ -238,18 +232,18 @@
     <header class="fixed inset-x-0 top-0 z-50 border-b border-base-300 bg-base-100/88 backdrop-blur">
       <div class="navbar page-shell min-h-16 px-4 sm:min-h-20 sm:px-6 lg:px-8">
       <div class="navbar-start">
-        <div class="dropdown lg:hidden">
-          <button tabindex="0" type="button" class="btn btn-ghost btn-circle btn-sm mr-2" aria-label="Open navigation menu">
+        <details class="dropdown lg:hidden">
+          <summary class="btn btn-ghost btn-circle btn-sm mr-2 list-none" aria-label="Open navigation menu">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-          </button>
-          <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-20 mt-3 w-56 p-2 shadow-lg border border-base-300">
+          </summary>
+          <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box z-20 mt-3 w-56 p-2 shadow-lg border border-base-300">
             <li><a href="#downloads">Downloads</a></li>
             <li><a href="#ollama">Set Up Ollama</a></li>
             <li><a href="#how-it-helps">How It Helps</a></li>
           </ul>
-        </div>
+        </details>
         <a href="#" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
           <svg viewBox="0 0 64 64" class="w-8 h-8" aria-hidden="true" role="presentation">
             <circle cx="32" cy="32" r="30" fill="#2d3570" />
@@ -276,8 +270,8 @@
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
         <!-- Theme Toggle -->
-        <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="Toggle dark and light mode">
-          <input type="checkbox" id="theme-toggle" aria-label="Toggle theme" />
+        <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="Toggle theme">
+          <input type="checkbox" id="theme-toggle" class="theme-controller" value="business" aria-label="Toggle theme" />
           <svg aria-hidden="true" class="swap-off fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
           <svg aria-hidden="true" class="swap-on fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
         </label>
@@ -711,12 +705,12 @@
       const htmlEl = document.documentElement;
       const tKey = "bao.builders.theme";
 
-      const currentTheme = localStorage.getItem(tKey) || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      const currentTheme = localStorage.getItem(tKey) || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "business" : "corporate");
       htmlEl.setAttribute("data-theme", currentTheme);
-      themeToggle.checked = currentTheme === "dark";
+      themeToggle.checked = currentTheme === "business";
 
       themeToggle.addEventListener("change", (e) => {
-        const newTheme = e.target.checked ? "dark" : "light";
+        const newTheme = e.target.checked ? "business" : "corporate";
         htmlEl.setAttribute("data-theme", newTheme);
         localStorage.setItem(tKey, newTheme);
       });
@@ -750,46 +744,46 @@
           {
             directoryId: "windows",
             name: "BaoBuildBuddy_0.1.0_x64-setup.exe",
-            size: 61676251,
+            size: 62135430,
           },
           {
             directoryId: "windows",
             name: "BaoBuildBuddy_0.1.0_x64-portable.zip",
-            size: 92205362,
+            size: 92715954,
           },
         ],
         macos: [
           {
             directoryId: "macos",
             name: "BaoBuildBuddy_0.1.0_aarch64.dmg",
-            size: 69559720,
+            size: 69768452,
           },
         ],
         linux: [
           {
             directoryId: "linux-x64",
             name: "BaoBuildBuddy_0.1.0_amd64.AppImage",
-            size: 160725496,
+            size: 158759416,
           },
           {
             directoryId: "linux-x64",
             name: "BaoBuildBuddy_0.1.0_amd64.deb",
-            size: 88323130,
+            size: 86357636,
           },
           {
             directoryId: "linux-x64",
             name: "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
-            size: 88343267,
+            size: 86385304,
           },
           {
             directoryId: "linux-arm64",
             name: "BaoBuildBuddy_0.1.0_arm64.deb",
-            size: 88254768,
+            size: 86631074,
           },
           {
             directoryId: "linux-arm64",
             name: "BaoBuildBuddy-0.1.0-1.aarch64.rpm",
-            size: 88281933,
+            size: 86656472,
           },
         ],
       };

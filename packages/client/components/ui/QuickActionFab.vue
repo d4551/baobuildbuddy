@@ -2,7 +2,7 @@
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { FAB_QUICK_ACTIONS } from "~/constants/dashboard";
+import { FAB_QUICK_ACTIONS } from "~/constants/dashboard-pipeline";
 import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
 
 const { t } = useI18n();
@@ -178,9 +178,7 @@ onUnmounted(() => {
       @click="toggleQuickActions"
     >
       <CloseIcon v-if="isOpen" class="h-6 w-6" />
-      <svg v-else class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
+      <IconPlus v-else class="h-6 w-6" />
     </button>
 
     <Transition

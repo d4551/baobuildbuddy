@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES, SCORE_PASS_THRESHOLD, SCORE_WARNING_THRESHOLD } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -13,12 +13,10 @@ const { getJob, saveJob, unsaveJob, applyToJob, savedJobs } = useJobs();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("jobDetail.breadcrumbs.detailFallback"),
-    description: t("jobsPage.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("jobDetail.breadcrumbs.detailFallback"),
+  description: t("jobsPage.seoDescription"),
+});
 
 const showApplyModal = ref(false);
 const applicationNotes = ref("");
@@ -110,12 +108,6 @@ async function handleApply() {
   $toast.success(t("jobDetail.toasts.applicationSubmitted"));
 }
 
-function getMatchScoreColor(score: number) {
-  if (score >= SCORE_PASS_THRESHOLD) return "text-success";
-  if (score >= SCORE_WARNING_THRESHOLD) return "text-warning";
-  return "text-error";
-}
-
 function formatDate(date: string): string {
   return (
     formatDateWithLocale(date, locale.value, fallbackLocale.value, {
@@ -130,10 +122,20 @@ async function startJobInterview() {
   if (!job.value) return;
   await router.push(buildInterviewJobNavigation(job.value.id, "jobs"));
 }
+
+const jobHeroDescription = computed(() => job.value?.company ?? "");
+const formatExperienceLabel = (value: string): string => jobExperienceLabel(t, value);
+const formatStudioTypeLabel = (value: string): string => studioTypeLabel(t, value);
+const formatPlatformLabel = (value: string): string => platformLabel(t, value);
+const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value);
 </script>
 
 <template>
-  <PageScaffold width-token="content" spacing-token="comfortable">
+  <PageScaffold
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="job-detail-title"
+  >
     <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
 
     <LoadingSkeleton v-if="jobDetailPending" :lines="10" />
@@ -146,268 +148,53 @@ async function startJobInterview() {
       @retry="() => refreshJobDetail()"
     />
 
-    <div
+    <EmptyState
       v-else-if="jobDetailStatus === 'success' && !job && jobId"
-      class="alert alert-info alert-soft"
-      role="status"
-    >
-      <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <div>
-        <p class="font-medium">{{ t("jobDetail.notFoundTitle") }}</p>
-        <p class="text-sm text-base-content/70">{{ t("jobDetail.notFoundBody") }}</p>
-      </div>
-      <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-sm btn-ghost shrink-0" :aria-label="t('jobDetail.backToJobsAria')">
-        {{ t("jobDetail.backToJobs") }}
-      </NuxtLink>
-    </div>
+      title-key="jobDetail.notFoundTitle"
+      description-key="jobDetail.notFoundBody"
+      cta-label-key="jobDetail.backToJobs"
+      :cta-to="APP_ROUTES.jobs"
+    />
 
-    <div v-else-if="jobDetailStatus === 'success' && !jobId" class="alert alert-warning alert-soft" role="status">
-      <span>{{ t("jobDetail.invalidId") }}</span>
-    </div>
+    <EmptyState
+      v-else-if="jobDetailStatus === 'success' && !jobId"
+      title-key="jobDetail.invalidIdTitle"
+      description-key="jobDetail.invalidIdBody"
+      cta-label-key="jobDetail.backToJobs"
+      :cta-to="APP_ROUTES.jobs"
+    />
 
     <SectionGrid v-else-if="job" grid-token="threeColumnLg">
-      <!-- Main Content -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Job Header -->
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex-1">
-                <h1 class="text-3xl font-bold mb-2">{{ job.title }}</h1>
-                <p class="text-xl text-base-content/70 mb-4">{{ job.company }}</p>
+      <JobDetailMainContent
+        :job="job"
+        :is-saved="isSaved"
+        title-id="job-detail-title"
+        :hero-description="jobHeroDescription"
+        :t="t"
+        :job-experience-label="formatExperienceLabel"
+        @save="handleSaveToggle"
+        @apply="showApplyModal = true"
+        @interview="startJobInterview"
+      />
 
-                <div class="flex flex-wrap gap-2">
-                  <span class="badge">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {{ job.location }}
-                  </span>
-
-                  <span v-if="job.remote" class="badge badge-success">
-                    {{ t("jobDetail.remoteBadge") }}
-                  </span>
-
-                  <span v-if="job.experienceLevel" class="badge badge-outline">
-                    {{ jobExperienceLabel(t, job.experienceLevel) }}
-                  </span>
-
-                  <span v-if="job.salary" class="badge badge-primary">
-                    {{ job.salary }}
-                  </span>
-                </div>
-              </div>
-
-              <div v-if="job.matchScore" class="text-center">
-                <div
-                  class="radial-progress"
-                  :class="getMatchScoreColor(job.matchScore)"
-                  :style="`--value:${job.matchScore}; --size:5rem;`"
-                  role="progressbar"
-                  :aria-label="t('jobDetail.scoreProgressAria')"
-                  :aria-valuenow="job.matchScore"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                >
-                  <span class="text-lg font-bold">{{ job.matchScore }}%</span>
-                </div>
-                <p class="text-xs text-base-content/60 mt-1">{{ t("jobDetail.matchScoreLabel") }}</p>
-              </div>
-            </div>
-
-            <div class="card-actions mt-4">
-              <button class="btn btn-secondary btn-outline" :aria-label="t('jobDetail.interviewAria')" @click="startJobInterview">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ t("jobDetail.interviewButton") }}
-              </button>
-
-              <button
-                class="btn btn-primary"
-                :aria-label="t('jobDetail.applyAria')"
-                @click="showApplyModal = true"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {{ t("jobDetail.applyButton") }}
-              </button>
-
-              <button
-                class="btn btn-outline"
-                :class="{ 'btn-success': isSaved }"
-                :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
-                @click="handleSaveToggle"
-              >
-                <svg class="w-5 h-5" :stroke="isSaved ? 'currentColor' : 'currentColor'" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                {{ isSaved ? t("jobDetail.savedButton") : t("jobDetail.saveButton") }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Job Description -->
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("jobDetail.descriptionTitle") }}</h2>
-            <div class="prose max-w-none">
-              <p class="whitespace-pre-wrap">{{ job.description }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="job.requirements?.length" class="divider divider-primary">{{ t("jobDetail.requirementsTitle") }}</div>
-
-        <!-- Requirements -->
-        <div v-if="job.requirements?.length" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("jobDetail.requirementsTitle") }}</h2>
-            <ul class="list">
-              <li class="list-row px-0 py-2" v-for="(req, idx) in job.requirements" :key="idx">
-                {{ req }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div v-if="job.technologies?.length" class="divider divider-primary">{{ t("jobDetail.technologiesTitle") }}</div>
-
-        <!-- Technologies -->
-        <div v-if="job.technologies?.length" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title">{{ t("jobDetail.technologiesTitle") }}</h2>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="tech in job.technologies"
-                :key="tech"
-                class="badge badge-lg badge-primary"
-              >
-                {{ tech }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sidebar -->
-      <div class="space-y-6">
-        <!-- Company Info -->
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("jobDetail.companyInfoTitle") }}</h2>
-
-            <div class="space-y-3">
-              <div v-if="job.company">
-                <p class="text-xs text-base-content/60">{{ t("jobDetail.companyLabel") }}</p>
-                <p class="font-medium">{{ job.company }}</p>
-              </div>
-
-              <div v-if="job.studioType">
-                <p class="text-xs text-base-content/60">{{ t("jobDetail.studioTypeLabel") }}</p>
-                <p class="font-medium">{{ studioTypeLabel(t, job.studioType) }}</p>
-              </div>
-
-              <div v-if="job.url">
-                <p class="text-xs text-base-content/60">{{ t("jobDetail.websiteLabel") }}</p>
-                <a :href="job.url" target="_blank" rel="noopener noreferrer" class="link link-primary" :aria-label="t('jobDetail.visitWebsiteAria', { company: job.company })">
-                  {{ t("jobDetail.visitWebsiteButton") }}
-                </a>
-              </div>
-
-              <div v-if="job.postedDate">
-                <p class="text-xs text-base-content/60">{{ t("jobDetail.postedLabel") }}</p>
-                <p class="font-medium">{{ formatDate(job.postedDate) }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-        <!-- Platforms -->
-        <div v-if="job.platforms?.length" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("jobDetail.platformsTitle") }}</h2>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="platform in job.platforms"
-                :key="platform"
-                class="badge"
-              >
-                {{ platformLabel(t, platform) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Genres -->
-        <div v-if="job.gameGenres?.length" class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("jobDetail.genresTitle") }}</h2>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="genre in job.gameGenres"
-                :key="genre"
-                class="badge"
-              >
-                {{ gameGenreLabel(t, genre) }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <JobDetailSidebar
+        :job="job"
+        :t="t"
+        :studio-type-label="formatStudioTypeLabel"
+        :platform-label="formatPlatformLabel"
+        :game-genre-label="formatGameGenreLabel"
+        :format-date="formatDate"
+      />
     </SectionGrid>
 
-    <!-- Apply Modal -->
-    <AppModalFrame
+    <JobApplyDialog
       v-model:open="showApplyModal"
+      v-model:application-notes="applicationNotes"
       :title-id="JOB_APPLY_DIALOG_TITLE_ID"
-      size-token="compact"
-      :close-aria-label="t('jobDetail.closeApplyDialogAria')"
-      :close-backdrop-label="t('jobDetail.closeButton')"
-    >
-      <h3 :id="JOB_APPLY_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
-        {{ t("jobDetail.applyDialogTitle", { title: job?.title }) }}
-      </h3>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
-        <textarea
-          v-model="applicationNotes"
-          class="textarea w-full"
-          rows="5"
-          :placeholder="t('jobDetail.applicationNotesPlaceholder')"
-          :aria-label="t('jobDetail.applicationNotesAria')"
-        ></textarea>
-      </fieldset>
-
-      <div class="modal-action">
-        <button
-          type="button"
-          class="btn btn-ghost"
-          :aria-label="t('jobDetail.cancelApplyAria')"
-          @click="showApplyModal = false"
-        >
-          {{ t("jobDetail.cancelButton") }}
-        </button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          :aria-label="t('jobDetail.submitApplyAria')"
-          :disabled="applying"
-          @click="handleApply"
-        >
-          <span v-if="applying" class="loading loading-spinner loading-xs"></span>
-          {{ t("jobDetail.submitButton") }}
-        </button>
-      </div>
-    </AppModalFrame>
+      :applying="applying"
+      :t="t"
+      :job-title="job?.title"
+      @submit="handleApply"
+    />
   </PageScaffold>
 </template>

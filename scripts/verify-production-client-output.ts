@@ -7,9 +7,10 @@ const CLIENT_OUTPUT_SERVER = join(REPO_ROOT, "packages", "client", ".output", "s
 const CLIENT_OUTPUT_PUBLIC = join(REPO_ROOT, "packages", "client", ".output", "public");
 
 const pathExists = async (absolutePath: string): Promise<boolean> =>
-  readdir(absolutePath)
-    .then(() => true)
-    .catch(() => false);
+  readdir(absolutePath).then(
+    () => true,
+    () => false,
+  );
 
 const collectMapFilesRecursive = async (
   directoryPath: string,
@@ -65,7 +66,7 @@ const main = async (): Promise<void> => {
   );
 };
 
-await main().catch(async (error: unknown) => {
+await main().then(undefined, async (error: unknown) => {
   await writeError(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });

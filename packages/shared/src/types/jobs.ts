@@ -2,6 +2,42 @@
  * Job system types for gaming industry careers
  */
 
+import type { AIProviderType } from "./ai";
+
+/**
+ * AI-generated hiring and interview context derived from a scraped job or studio.
+ */
+export interface ScrapePersonaEnrichment {
+  summary: string;
+  hiringSignals: string[];
+  interviewFocusAreas: string[];
+  candidatePitchAngles: string[];
+  provider?: AIProviderType;
+  model?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Summary of AI enrichment completed during one scrape operation.
+ */
+export interface ScrapeEnrichmentRunSummary {
+  enabled: boolean;
+  enrichedRecords: number;
+  warnings: string[];
+  provider?: AIProviderType;
+  model?: string;
+}
+
+/**
+ * Canonical result envelope returned by scraper routes and persisted by automation runs.
+ */
+export interface ScraperOperationResult {
+  scraped: number;
+  upserted: number;
+  errors: string[];
+  enrichment: ScrapeEnrichmentRunSummary;
+}
+
 export interface Job {
   id: string;
   title: string;
@@ -32,6 +68,7 @@ export interface Job {
   teamSize?: TeamSize;
   cultureInfo?: CultureInfo;
   gamingRelevance?: number;
+  enrichment?: ScrapePersonaEnrichment;
 }
 
 export interface SalaryRange {

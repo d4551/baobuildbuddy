@@ -1,111 +1,18 @@
-import {
-  AI_DEFAULT_TEMPERATURE,
-  API_ERROR_START_INTERVIEW,
-  API_ERROR_STUDIO_ID_REQUIRED,
-  DECIMAL_RADIX,
-  INTERVIEW_DEFAULT_EXPERIENCE_LEVEL,
-  INTERVIEW_DEFAULT_FOCUS_AREAS,
-  INTERVIEW_DEFAULT_QUESTION_COUNT,
-  INTERVIEW_DEFAULT_ROLE_TYPE,
-  INTERVIEW_MAX_QUESTION_COUNT,
-  INTERVIEW_UNKNOWN_STUDIO_NAME,
-  isRecord,
-  resolveBrandSettings,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_MESSAGE,
-  SCORE_PASS_THRESHOLD,
-  SCORE_WARNING_THRESHOLD,
-  safeParseJson,
-  settle,
-  toApiScopedPath,
-  WS_ENDPOINTS,
-} from "@bao/shared";
+import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
-import { interviewSessions } from "../db/schema/interviews";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
-import type { AIService } from "../services/ai/ai-service";
-import { interviewService } from "../services/interview-service";
-
-type AIServiceInstance = AIService;
-type InterviewSocket = { send: (data: string) => void };
-type JsonRecord = Record<string, unknown>;
-type InterviewSessionRow = typeof interviewSessions.$inferSelect;
-type InterviewSessionQuestion = { id: string; question: string; type: string };
-
-async function getAIService(): Promise<AIServiceInstance> {
-  const { AIService } = await import("../services/ai/ai-service");
-  const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-  return AIService.fromSettings(settingsRows[0]);
-}
-
-type InterviewMessage = {
-  type: string;
-  sessionId?: string;
-  content?: string;
-  studioId?: string;
-  config?: Record<string, unknown>;
-};
-
-type WsQuestion = {
-  id: string;
-  question: string;
-  category: string;
-  difficulty: "easy" | "medium" | "hard";
-};
-
-type InterviewFeedback = {
-  score: number;
-  strengths: string[];
-  improvements: string[];
-  summary: string;
-};
-
-type FeedbackSummary = {
-  score: number;
-  strengths: string[];
-  improvements: string[];
-};
-
-const isQuestionRecord = (
-  value: unknown,
-): value is { id: string; question: string; type: string } =>
-  isRecord(value) &&
-  typeof value.id === "string" &&
-  typeof value.question === "string" &&
-  typeof value.type === "string";
-
-const getFeedbackSummary = (value: unknown): FeedbackSummary => {
-  if (!isRecord(value)) {
-    return { score: 0, strengths: [], improvements: [] };
-  }
-
-  const rawScore = value.score;
-  const score = typeof rawScore === "number" && Number.isFinite(rawScore) ? rawScore : 0;
-  const strengths = Array.isArray(value.strengths)
-    ? value.strengths.filter((entry): entry is string => typeof entry === "string")
-    : [];
-  const improvements = Array.isArray(value.improvements)
-    ? value.improvements.filter((entry): entry is string => typeof entry === "string")
-    : [];
-
-  return {
-    score,
-    strengths,
-    improvements,
-  };
-};
+import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
+import {
+  interviewWebSocketBodySchema,
+  type InterviewWebSocketBody,
+} from "./interview-ws-contracts";
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
-  body: t.Object({
-    type: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    content: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE })),
-    studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    config: t.Optional(t.Record(t.String(), t.Unknown())),
-  }),
+  body: StandardSchemaV1(interviewWebSocketBodySchema),
   async open(ws) {
     const settingsRows = await db
       .select()
@@ -119,25 +26,41 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
       }),
     );
   },
-  async message(ws, data) {
-    switch (data.type) {
+  async message(ws, data: InterviewWebSocketBody) {
+    const messageType = data.type;
+    if (!messageType) {
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          message: "Missing message type.",
+        }),
+      );
+      return;
+    }
+
+    const normalizedData = {
+      ...data,
+      type: messageType,
+    };
+
+    switch (messageType) {
       case "start_session": {
-        await handleStartSession(ws, data);
+        await handleStartSession(ws, normalizedData);
         break;
       }
       case "submit_response": {
-        await handleSubmitResponse(ws, data);
+        await handleSubmitResponse(ws, normalizedData);
         break;
       }
       case "end_session": {
-        await handleEndSession(ws, data);
+        await handleEndSession(ws, normalizedData);
         break;
       }
       default: {
         ws.send(
           JSON.stringify({
             type: "error",
-            message: `Unknown message type: ${data.type}`,
+            message: `Unknown message type: ${messageType}`,
           }),
         );
       }
@@ -147,345 +70,3 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
     // Connection closed
   },
 });
-
-function createInterviewFeedbackSummary(feedback: Partial<InterviewFeedback>): InterviewFeedback {
-  return {
-    score: typeof feedback.score === "number" ? feedback.score : 0,
-    strengths: Array.isArray(feedback.strengths) ? feedback.strengths : [],
-    improvements: Array.isArray(feedback.improvements) ? feedback.improvements : [],
-    summary: typeof feedback.summary === "string" ? feedback.summary : "Response recorded.",
-  };
-}
-
-function mapWsConfigToInterviewConfig(config: Record<string, unknown>): Record<string, unknown> {
-  const role =
-    typeof config.role === "string" && config.role.trim()
-      ? config.role
-      : INTERVIEW_DEFAULT_ROLE_TYPE;
-  const level =
-    typeof config.level === "string" && config.level.trim()
-      ? config.level
-      : INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-  let questionCount = INTERVIEW_DEFAULT_QUESTION_COUNT;
-  if (typeof config.questionCount === "number" && Number.isFinite(config.questionCount)) {
-    questionCount = Math.max(
-      1,
-      Math.min(Math.floor(config.questionCount), INTERVIEW_MAX_QUESTION_COUNT),
-    );
-  } else if (typeof config.questionCount === "string") {
-    const parsed = Number.parseInt(config.questionCount, DECIMAL_RADIX);
-    if (Number.isFinite(parsed))
-      questionCount = Math.max(1, Math.min(parsed, INTERVIEW_MAX_QUESTION_COUNT));
-  }
-  return {
-    roleType: role,
-    role,
-    experienceLevel: level,
-    level,
-    questionCount,
-    includeTechnical: true,
-    includeBehavioral: true,
-    includeStudioSpecific: true,
-    focusAreas: [...INTERVIEW_DEFAULT_FOCUS_AREAS],
-  };
-}
-
-function toWsQuestions(
-  questions: Array<{ id: string; question: string; type: string; difficulty: string }>,
-): WsQuestion[] {
-  return questions.map((q) => ({
-    id: q.id,
-    question: q.question,
-    category: q.type === "studio-specific" ? "cultural" : q.type,
-    difficulty:
-      q.difficulty === "easy" || q.difficulty === "medium" || q.difficulty === "hard"
-        ? q.difficulty
-        : "medium",
-  }));
-}
-
-function parseFeedback(response: string): InterviewFeedback {
-  const parsed = safeParseJson(response);
-  if (parsed && isRecord(parsed)) {
-    return createInterviewFeedbackSummary({
-      score: typeof parsed.score === "number" ? parsed.score : undefined,
-      strengths: Array.isArray(parsed.strengths)
-        ? parsed.strengths.filter((entry): entry is string => typeof entry === "string")
-        : undefined,
-      improvements: Array.isArray(parsed.improvements)
-        ? parsed.improvements.filter((entry): entry is string => typeof entry === "string")
-        : undefined,
-      summary: typeof parsed.summary === "string" ? parsed.summary : undefined,
-    });
-  }
-
-  return {
-    score: 70,
-    strengths: ["Response provided"],
-    improvements: ["Add more detail"],
-    summary: "Response recorded, with a request for more detail.",
-  };
-}
-
-function sendInterviewError(socket: InterviewSocket, message: string): void {
-  socket.send(JSON.stringify({ type: "error", message }));
-}
-
-async function getInterviewSessionById(sessionId: string): Promise<InterviewSessionRow | null> {
-  const sessionRows = await db
-    .select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.id, sessionId));
-  return sessionRows[0] ?? null;
-}
-
-function getSessionResponses(session: InterviewSessionRow): JsonRecord[] {
-  if (!Array.isArray(session.responses)) {
-    return [];
-  }
-  return session.responses.filter(isRecord);
-}
-
-function getSessionQuestions(session: InterviewSessionRow): InterviewSessionQuestion[] {
-  if (!Array.isArray(session.questions)) {
-    return [];
-  }
-  return session.questions.filter(isQuestionRecord);
-}
-
-function createFeedbackPrompt(
-  content: string,
-  currentQuestion: InterviewSessionQuestion | undefined,
-): string {
-  return `You are an interview coach. Evaluate this interview response.
-
-Question: ${currentQuestion?.question || "Unknown question"}
-Category: ${currentQuestion?.type || "general"}
-Candidate Response: ${content}
-
-Return a JSON object:
-{"score": 0-100, "strengths": ["..."], "improvements": ["..."], "summary": "one sentence feedback"}
-
-Only return the JSON object.`;
-}
-
-function getDefaultFeedback(): InterviewFeedback {
-  return {
-    score: 70,
-    strengths: ["Response provided"],
-    improvements: ["Configure AI for detailed feedback"],
-    summary: "Response recorded. Configure an AI provider for detailed feedback.",
-  };
-}
-
-function getAiFallbackFeedback(): InterviewFeedback {
-  return {
-    score: 65,
-    strengths: ["Attempted answer"],
-    improvements: ["More detail needed"],
-    summary: "Response recorded.",
-  };
-}
-
-async function evaluateInterviewResponse(
-  content: string,
-  currentQuestion: InterviewSessionQuestion | undefined,
-): Promise<InterviewFeedback> {
-  const aiServiceResult = await settle(getAIService());
-  if (aiServiceResult.status === "rejected") {
-    return getDefaultFeedback();
-  }
-
-  const prompt = createFeedbackPrompt(content, currentQuestion);
-  const feedbackResult = await settle(
-    aiServiceResult.value.generate(prompt, { temperature: AI_DEFAULT_TEMPERATURE }),
-  );
-  if (feedbackResult.status === "rejected") {
-    return getAiFallbackFeedback();
-  }
-
-  return parseFeedback(feedbackResult.value.content);
-}
-
-function buildSessionResponseRecord(
-  questionIndex: number,
-  currentQuestion: InterviewSessionQuestion | undefined,
-  content: string,
-  feedback: InterviewFeedback,
-): JsonRecord {
-  return {
-    questionIndex,
-    question: currentQuestion?.question,
-    answer: content,
-    feedback,
-    timestamp: new Date().toISOString(),
-    questionCategory: currentQuestion?.type,
-  };
-}
-
-function getRecommendations(avgScore: number): string[] {
-  if (avgScore >= SCORE_PASS_THRESHOLD) {
-    return ["Strong performance! Focus on refining edge cases."];
-  }
-  if (avgScore >= SCORE_WARNING_THRESHOLD) {
-    return [
-      "Good foundation. Practice more specific examples.",
-      "Review common follow-up questions.",
-    ];
-  }
-  return [
-    "Consider more structured practice.",
-    "Research the company more thoroughly.",
-    "Prepare concrete examples from your experience.",
-  ];
-}
-
-function buildFinalAnalysis(session: InterviewSessionRow, responses: JsonRecord[]) {
-  const totalScore = responses.reduce((sum, responseRecord) => {
-    const { score } = getFeedbackSummary(responseRecord.feedback);
-    return Number.isFinite(score) ? sum + score : sum;
-  }, 0);
-
-  const answeredQuestions = responses.length;
-  const avgScore = answeredQuestions > 0 ? Math.round(totalScore / answeredQuestions) : 0;
-  const responseStrengths = responses.flatMap((responseRecord) => {
-    const { strengths } = getFeedbackSummary(responseRecord.feedback);
-    return strengths;
-  });
-  const responseImprovements = responses.flatMap((responseRecord) => {
-    const { improvements } = getFeedbackSummary(responseRecord.feedback);
-    return improvements;
-  });
-  const totalQuestions = Array.isArray(session.questions) ? session.questions.length : 0;
-  const strengths = Array.from(new Set(responseStrengths)).slice(0, 5);
-  const weaknesses = Array.from(new Set(responseImprovements)).slice(0, 5);
-
-  return {
-    overallScore: avgScore,
-    totalQuestions,
-    answeredQuestions,
-    strengths,
-    weaknesses,
-    recommendations: getRecommendations(avgScore),
-  };
-}
-
-async function handleStartSession(socket: InterviewSocket, data: InterviewMessage) {
-  const studioId = data.studioId;
-  if (!studioId) {
-    socket.send(JSON.stringify({ type: "error", message: API_ERROR_STUDIO_ID_REQUIRED }));
-    return;
-  }
-
-  const config = mapWsConfigToInterviewConfig(data.config || {});
-  const sessionResult = await settle(interviewService.startSession(studioId, config));
-  if (sessionResult.status === "rejected") {
-    socket.send(
-      JSON.stringify({
-        type: "error",
-        message:
-          sessionResult.reason instanceof Error
-            ? sessionResult.reason.message
-            : API_ERROR_START_INTERVIEW,
-      }),
-    );
-    return;
-  }
-
-  const session = sessionResult.value;
-  const studioName = session.interviewerPersona?.studioName ?? INTERVIEW_UNKNOWN_STUDIO_NAME;
-  const role = session.config.roleType ?? INTERVIEW_DEFAULT_ROLE_TYPE;
-  const level = session.config.experienceLevel ?? INTERVIEW_DEFAULT_EXPERIENCE_LEVEL;
-  const questionCount = session.config.questionCount ?? INTERVIEW_DEFAULT_QUESTION_COUNT;
-  const wsQuestions = toWsQuestions(session.questions);
-
-  socket.send(
-    JSON.stringify({
-      type: "session_started",
-      sessionId: session.id,
-      studioName,
-      questions: wsQuestions,
-      config: { role, level, questionCount },
-    }),
-  );
-}
-
-async function handleSubmitResponse(socket: InterviewSocket, data: InterviewMessage) {
-  const sessionId = data.sessionId;
-  const content = data.content;
-
-  if (!(sessionId && content)) {
-    sendInterviewError(socket, "sessionId and content are required");
-    return;
-  }
-
-  const session = await getInterviewSessionById(sessionId);
-  if (!session) {
-    sendInterviewError(socket, "Session not found");
-    return;
-  }
-
-  const responses = getSessionResponses(session);
-  const questions = getSessionQuestions(session);
-  const questionIndex = responses.length;
-  const currentQuestion = questions[questionIndex];
-  const feedback = await evaluateInterviewResponse(content, currentQuestion);
-  const newResponse = buildSessionResponseRecord(questionIndex, currentQuestion, content, feedback);
-
-  const nextQuestion = questions[questionIndex + 1] ?? null;
-  const responseIndex = questionIndex + 1;
-  const isComplete = responses.length + 1 >= questions.length;
-
-  responses.push(newResponse);
-  await db
-    .update(interviewSessions)
-    .set({ responses, updatedAt: new Date().toISOString() })
-    .where(eq(interviewSessions.id, sessionId));
-
-  socket.send(
-    JSON.stringify({
-      type: "response_feedback",
-      sessionId,
-      feedback,
-      questionIndex,
-      isComplete,
-      nextQuestion: isComplete ? null : nextQuestion,
-      responseIndex,
-    }),
-  );
-}
-
-async function handleEndSession(socket: InterviewSocket, data: InterviewMessage) {
-  const sessionId = data.sessionId;
-  if (!sessionId) {
-    sendInterviewError(socket, "sessionId is required");
-    return;
-  }
-
-  const session = await getInterviewSessionById(sessionId);
-  if (!session) {
-    sendInterviewError(socket, "Session not found");
-    return;
-  }
-
-  const responses = getSessionResponses(session);
-  const finalAnalysis = buildFinalAnalysis(session, responses);
-
-  await db
-    .update(interviewSessions)
-    .set({
-      status: "completed",
-      endTime: Date.now(),
-      finalAnalysis,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(interviewSessions.id, sessionId));
-
-  socket.send(
-    JSON.stringify({
-      type: "session_complete",
-      sessionId,
-      finalAnalysis,
-    }),
-  );
-}

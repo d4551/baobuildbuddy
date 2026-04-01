@@ -1,21 +1,30 @@
-import type { GameStudio } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { API_ENDPOINTS, buildStudioDetailEndpoint } from "@bao/shared/constants/endpoints";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
-import { toGameStudio } from "./api-normalizers";
-import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
-
-type ApiClient = ReturnType<typeof useApi>;
-type CreateStudioInput = NonNullable<Parameters<ApiClient["studios"]["post"]>[0]>;
-type StudioRoute = ReturnType<ApiClient["studios"]>;
-type UpdateStudioInput = NonNullable<Parameters<StudioRoute["put"]>[0]>;
+import {
+  requestApi,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "./api-request";
+import { toGameStudio } from "./api-normalizer-studios";
+import { requireValue, withLoadingState } from "./async-flow";
+import { requireApiResponsePayload } from "~/utils/api-response";
 
 interface StudioContext {
-  api: ApiClient;
   t: ReturnType<typeof useI18n>["t"];
+  runtime: ClientApiRequestRuntime;
   loading: ReturnType<typeof useState<boolean>>;
   studios: ReturnType<typeof useState<GameStudio[]>>;
   currentStudio: ReturnType<typeof useState<GameStudio | null>>;
 }
+
+type CreateStudioInput = {
+  [key: string]: unknown;
+};
+type UpdateStudioInput = {
+  [key: string]: unknown;
+};
 
 const toStudioList = (value: unknown): GameStudio[] =>
   Array.isArray(value)
@@ -24,18 +33,35 @@ const toStudioList = (value: unknown): GameStudio[] =>
         .filter((entry): entry is GameStudio => entry !== null)
     : [];
 
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  return requireApiResponsePayload(response, fallbackMessage);
+};
+
 function createReadStudioActions(context: StudioContext) {
   const searchStudios = async (query?: Record<string, string>) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.studios.get({ query: query || {} });
-      assertApiResponse(error, context.t("apiErrors.studios.searchFailed"));
+      const data = await readApiData(
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
+          method: "GET",
+          query: query || {},
+        }),
+        context.t("apiErrors.studios.searchFailed"),
+      );
       context.studios.value = toStudioList(data);
     });
 
   const getStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.studios({ id }).get();
-      assertApiResponse(error, context.t("apiErrors.studios.fetchFailed"));
+      const data = await readApiData(
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
+          method: "GET",
+        }),
+        context.t("apiErrors.studios.fetchFailed"),
+      );
       const normalized = requireValue(
         toGameStudio(data),
         context.t("apiErrors.studios.invalidPayload"),
@@ -46,8 +72,12 @@ function createReadStudioActions(context: StudioContext) {
 
   const getAnalytics = async () =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.studios.analytics.get();
-      assertApiResponse(error, context.t("apiErrors.studios.fetchAnalyticsFailed"));
+      const data = await readApiData(
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studiosAnalytics, {
+          method: "GET",
+        }),
+        context.t("apiErrors.studios.fetchAnalyticsFailed"),
+      );
       return data;
     });
 
@@ -64,16 +94,30 @@ function createWriteStudioActions(
 ) {
   const createStudio = async (studioData: CreateStudioInput) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.studios.post(studioData);
-      assertApiResponse(error, context.t("apiErrors.studios.createFailed"));
+      const data = await readApiData(
+        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
+          method: "POST",
+          body: studioData,
+        }),
+        context.t("apiErrors.studios.createFailed"),
+      );
+      const normalized = requireValue(
+        toGameStudio(data),
+        context.t("apiErrors.studios.invalidPayload"),
+      );
       await searchStudios();
-      return data;
+      return normalized;
     });
 
   const updateStudio = async (id: string, updates: UpdateStudioInput) =>
     withLoadingState(context.loading, async () => {
-      const { data, error } = await context.api.studios({ id }).put(updates);
-      assertApiResponse(error, context.t("apiErrors.studios.updateFailed"));
+      const data = await readApiData(
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
+          method: "PUT",
+          body: updates,
+        }),
+        context.t("apiErrors.studios.updateFailed"),
+      );
       const normalized = requireValue(
         toGameStudio(data),
         context.t("apiErrors.studios.invalidPayload"),
@@ -85,8 +129,12 @@ function createWriteStudioActions(
 
   const deleteStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
-      const { error } = await context.api.studios({ id }).delete();
-      assertApiResponse(error, context.t("apiErrors.studios.deleteFailed"));
+      await readApiData(
+        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
+          method: "DELETE",
+        }),
+        context.t("apiErrors.studios.deleteFailed"),
+      );
       if (context.currentStudio.value?.id === id) {
         context.currentStudio.value = null;
       }
@@ -105,8 +153,8 @@ function createWriteStudioActions(
  */
 export function useStudio() {
   const context: StudioContext = {
-    api: useApi(),
     t: useI18n().t,
+    runtime: useClientApiRequestRuntime(),
     studios: useState<GameStudio[]>(STATE_KEYS.STUDIOS_LIST, () => []),
     currentStudio: useState<GameStudio | null>(STATE_KEYS.STUDIO_CURRENT, () => null),
     loading: useState(STATE_KEYS.STUDIO_LOADING, () => false),

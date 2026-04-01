@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import {
-  DASHBOARD_PIPELINE_STATUS_KEYS,
-  type DashboardPipelineStatus,
-  type DashboardPipelineStepViewModel,
-} from "~/constants/dashboard";
+import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
+import type {
+  DashboardPipelineStatus,
+  DashboardPipelineStepViewModel,
+} from "~/constants/dashboard-contracts";
 
 interface WorkPipelineProps {
   readonly title: string;

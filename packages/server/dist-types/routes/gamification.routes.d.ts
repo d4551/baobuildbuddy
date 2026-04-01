@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const gamificationRoutes: Elysia<"/gamification", {
+export declare const gamificationRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -15,7 +15,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
     parser: {};
     response: {};
 }, {
-    gamification: {
+    [x: string]: {
         progress: {
             get: {
                 body: unknown;
@@ -23,30 +23,39 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").UserGamificationData;
+                    200: import("@bao/shared/types/gamification").UserGamificationData;
                 };
             };
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         "award-xp": {
             post: {
                 body: {
                     reason: string;
                     amount: number;
-                };
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
                     200: {
+                        error: string;
+                        xp?: undefined;
+                        level?: undefined;
+                        leveledUp?: undefined;
+                        levelUp?: undefined;
+                        reason?: undefined;
+                        message?: undefined;
+                    } | {
                         xp: number;
                         level: number;
                         leveledUp: boolean;
-                        levelUp: import("@bao/shared").LevelUpResult | null;
+                        levelUp: import("@bao/shared/types/gamification").LevelUpResult | null;
                         reason: string;
                         message: string;
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";
@@ -62,7 +71,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         achievements: {
             get: {
                 body: unknown;
@@ -70,13 +79,13 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").Achievement[];
+                    200: import("@bao/shared/types/gamification").Achievement[];
                 };
             };
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         challenges: {
             get: {
                 body: unknown;
@@ -86,7 +95,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 response: {
                     200: {
                         date: string;
-                        challenges: import("@bao/shared").DailyChallenge[];
+                        challenges: import("@bao/shared/types/gamification").DailyChallenge[];
                         completedCount: number;
                         totalCount: number;
                     };
@@ -95,7 +104,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         challenges: {
             ":id": {
                 complete: {
@@ -103,7 +112,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -136,7 +145,7 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         weekly: {
             get: {
                 body: unknown;
@@ -144,23 +153,13 @@ export declare const gamificationRoutes: Elysia<"/gamification", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        challengesCompleted: number;
-                        xpEarned: number;
-                        actionsCount: number;
-                        days: {
-                            date: string;
-                            actions: number;
-                            xpEarned: number;
-                        }[];
-                        topCategory: string;
-                    };
+                    200: import("../services/gamification-definitions").WeeklyProgressResult;
                 };
             };
         };
     };
 } & {
-    gamification: {
+    [x: string]: {
         monthly: {
             get: {
                 body: unknown;

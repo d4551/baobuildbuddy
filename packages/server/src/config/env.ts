@@ -1,12 +1,8 @@
+import { basename } from "node:path";
+import { API_ERROR_INVALID_PORT } from "@bao/shared/constants/api-errors";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { DEFAULT_CORS_ORIGINS } from "@bao/shared/constants/cors";
 import {
-  API_ERROR_INVALID_PORT,
-  DECIMAL_RADIX,
-  DEFAULT_CLIENT_DEV_PORT,
-  DEFAULT_CORS_ORIGINS,
-  DEFAULT_DB_PATH_TILDE,
-  DEFAULT_HOST,
-  DEFAULT_LOG_LEVEL,
-  DEFAULT_SERVER_PORT,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MAX,
   ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MIN,
@@ -26,11 +22,39 @@ import {
   ENV_SMART_FIELD_MAPPER_RETRY_DELAY_MS_MAX,
   ENV_SMART_FIELD_MAPPER_RETRY_DELAY_MS_MIN,
   ENV_SMART_FIELD_MAPPER_USER_AGENT_DEFAULT,
-  LOOPBACK_HOST,
-  LOOPBACK_HOST_IPV4,
+} from "@bao/shared/constants/env-bounds";
+import { DEFAULT_DB_PATH_TILDE } from "@bao/shared/constants/paths";
+import {
+  DEFAULT_CLIENT_DEV_PORT,
+  DEFAULT_SERVER_PORT,
   MAX_PORT,
   MIN_PORT,
-} from "@bao/shared";
+} from "@bao/shared/constants/ports";
+import {
+  DEFAULT_HOST,
+  DEFAULT_LOG_LEVEL,
+  LOOPBACK_HOST,
+  LOOPBACK_HOST_IPV4,
+} from "@bao/shared/constants/runtime";
+
+export const isProductionRuntime = (): boolean => process.env.NODE_ENV === "production";
+
+export const isTestRuntime = process.env.NODE_ENV === "test" || process.env.BAO_TEST_MODE === "1";
+
+const BUN_EXECUTABLE_NAMES = new Set(["bun", "bun.exe"]);
+
+export const isBunExecutablePath = (execPath: string = process.execPath): boolean =>
+  BUN_EXECUTABLE_NAMES.has(basename(execPath).toLowerCase());
+
+export const shouldUsePrettyLogTransport = (
+  nodeEnv: string | undefined = process.env.NODE_ENV,
+  execPath: string = process.execPath,
+  testMode: string | undefined = process.env.BAO_TEST_MODE,
+): boolean =>
+  nodeEnv !== "production" &&
+  nodeEnv !== "test" &&
+  testMode !== "1" &&
+  isBunExecutablePath(execPath);
 
 const configuredServerPort = [Bun.env.SERVER_PORT, Bun.env.PORT].find(
   (value) => value?.trim().length,
@@ -88,7 +112,7 @@ function parseCorsOrigins(value?: string): string[] {
 
 const resolveCorsOrigins = (serverPort: number, clientPort: number): string[] => {
   const parsedCorsOrigins = parseCorsOrigins(Bun.env.CORS_ORIGINS);
-  if (process.env.NODE_ENV === "production") {
+  if (isProductionRuntime()) {
     return parsedCorsOrigins;
   }
 

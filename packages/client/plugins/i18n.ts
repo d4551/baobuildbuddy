@@ -1,4 +1,4 @@
-import { DEFAULT_APP_LANGUAGE } from "@bao/shared";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import { createI18n } from "vue-i18n";
 import { type AvailableLocale, I18N_MESSAGE_CATALOG } from "~/constants/i18n-catalog";
 

@@ -2,13 +2,13 @@ import { describe, expect, setDefaultTimeout, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import {
   createJobApplyFixtureSelectorMap,
   type SubmittedJobApplyFixturePayload,
   startJobApplyFixtureServer,
 } from "../../test-support/automation/job-apply-fixture";
-import { runRpaScript } from "./rpa-runner";
+import { runRpaScript } from "./rpa-runner-protocol";
 
 const TEMP_DIRECTORY_PREFIX = "bao-job-apply-script-";
 const TEST_RESUME_FILE_NAME = "candidate-resume.pdf";

@@ -1,0 +1,57 @@
+<script setup lang="ts">
+import { useI18n } from "vue-i18n";
+
+defineProps<{
+  name: string;
+  currentRole: string;
+}>();
+
+const emit = defineEmits<{
+  "update:name": [value: string];
+  "update:current-role": [value: string];
+  next: [];
+}>();
+
+const { t } = useI18n();
+
+function updateTextValue(event: Event, emitEvent: "update:name" | "update:current-role"): void {
+  const target = event.target;
+  if (target instanceof HTMLInputElement) {
+    emit(emitEvent, target.value);
+  }
+}
+</script>
+
+<template>
+  <div class="space-y-4">
+    <h2 class="text-lg font-semibold">{{ t("setup.profileTitle") }}</h2>
+    <label class="floating-label w-full">
+      <span>{{ t("setup.nameLegend") }}</span>
+      <input
+        :value="name"
+        type="text"
+        :placeholder="t('setup.namePlaceholder')"
+        class="input w-full"
+        :aria-label="t('setup.nameAria')"
+        @input="updateTextValue($event, 'update:name')"
+      />
+    </label>
+    <label class="floating-label w-full">
+      <span>{{ t("setup.currentRoleLegend") }}</span>
+      <input
+        :value="currentRole"
+        type="text"
+        :placeholder="t('setup.currentRolePlaceholder')"
+        class="input w-full"
+        :aria-label="t('setup.currentRoleAria')"
+        @input="updateTextValue($event, 'update:current-role')"
+      />
+    </label>
+
+    <div class="flex justify-end">
+      <button class="btn btn-primary" :aria-label="t('setup.nextToLocalAiAria')" @click="emit('next')">
+        {{ t("setup.nextButton") }}
+      </button>
+    </div>
+  </div>
+</template>

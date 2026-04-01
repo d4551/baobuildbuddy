@@ -2,7 +2,7 @@
  * Lever ATS provider.
  */
 
-import { safeParseJson } from "@bao/shared";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 

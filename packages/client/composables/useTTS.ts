@@ -1,4 +1,4 @@
-import type { VoiceSettings } from "@bao/shared";
+import type { VoiceSettings } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import { resolveSpeechLocale, resolveSpeechSynthesis } from "~/utils/speech";
 

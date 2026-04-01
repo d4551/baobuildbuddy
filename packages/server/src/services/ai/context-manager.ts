@@ -6,13 +6,12 @@ import {
   AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
   AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
   AI_CHAT_HISTORY_FETCH_LIMIT,
-  type AIChatContextDomain,
-  type BrandSettings,
-  type ChatMessage,
-  DEFAULT_PROFILE_ID,
-  resolveBrandSettings,
-  settle,
-} from "@bao/shared";
+} from "@bao/shared/constants/ai-chat";
+import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import type { AIChatContextDomain, ChatMessage } from "@bao/shared/types/ai";
+import type { BrandSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { settle } from "@bao/shared/utils/promise";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -23,7 +22,8 @@ import { portfolioProjects } from "../../db/schema/portfolios";
 import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
-import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts";
+import { getContextManagerFollowUps } from "./context-manager-followups";
+import { buildDomainSystemPrompts, GAMING_INDUSTRY_CONTEXT } from "./prompts-system";
 
 interface ConversationContext {
   systemPrompt: string;
@@ -37,6 +37,14 @@ const JOB_SEARCH_DOMAIN_PATTERN = /\b(job|apply|salary|remote|position|company|h
 const INTERVIEW_DOMAIN_PATTERN = /\b(interview|question|answer|practice|mock|prepare)\b/;
 const PORTFOLIO_DOMAIN_PATTERN = /\b(portfolio|project|showcase|demo|sample)\b/;
 const SKILLS_DOMAIN_PATTERN = /\b(skill|mapping|transfer|learn|career\s*path|gap)\b/;
+const DOMAIN_PATTERN_ORDER: Array<[AIChatContextDomain, RegExp]> = [
+  ["automation", AUTOMATION_DOMAIN_PATTERN],
+  ["resume", RESUME_DOMAIN_PATTERN],
+  ["job_search", JOB_SEARCH_DOMAIN_PATTERN],
+  ["interview", INTERVIEW_DOMAIN_PATTERN],
+  ["portfolio", PORTFOLIO_DOMAIN_PATTERN],
+  ["skills", SKILLS_DOMAIN_PATTERN],
+];
 
 export class ConversationContextManager {
   private isChatRole(value: string): value is ChatMessage["role"] {
@@ -48,14 +56,7 @@ export class ConversationContextManager {
    */
   inferDomain(message: string): AIChatContextDomain {
     const lower = message.toLowerCase();
-    // Automation must be checked BEFORE job_search since "apply" overlaps
-    if (AUTOMATION_DOMAIN_PATTERN.test(lower)) return "automation";
-    if (RESUME_DOMAIN_PATTERN.test(lower)) return "resume";
-    if (JOB_SEARCH_DOMAIN_PATTERN.test(lower)) return "job_search";
-    if (INTERVIEW_DOMAIN_PATTERN.test(lower)) return "interview";
-    if (PORTFOLIO_DOMAIN_PATTERN.test(lower)) return "portfolio";
-    if (SKILLS_DOMAIN_PATTERN.test(lower)) return "skills";
-    return "general";
+    return DOMAIN_PATTERN_ORDER.find(([, pattern]) => pattern.test(lower))?.[0] ?? "general";
   }
 
   /**
@@ -138,17 +139,11 @@ export class ConversationContextManager {
     runtimeBrand: BrandSettings,
   ): string {
     const domainSystemPrompts = buildDomainSystemPrompts(runtimeBrand);
-    let systemPrompt = domainSystemPrompts[domain] || domainSystemPrompts.general;
-
-    if (profile) {
-      systemPrompt += `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`;
-    }
-
-    if (domainContext) {
-      systemPrompt += `\n\nRelevant Data:\n${domainContext}`;
-    }
-
-    return `${systemPrompt}\n\n${GAMING_INDUSTRY_CONTEXT}`;
+    const userContext = profile
+      ? `\n\nUser Context:\nName: ${profile.name || "Not set"}\nCurrent Role: ${profile.currentRole || "Not set"}\nYears Experience: ${profile.yearsExperience || "Not set"}\nLocation: ${profile.location || "Not set"}`
+      : "";
+    const relevantData = domainContext ? `\n\nRelevant Data:\n${domainContext}` : "";
+    return `${domainSystemPrompts[domain] || domainSystemPrompts.general}${userContext}${relevantData}\n\n${GAMING_INDUSTRY_CONTEXT}`;
   }
 
   /**
@@ -171,22 +166,15 @@ export class ConversationContextManager {
   private getDomainContextLoader(
     domain: AIChatContextDomain,
   ): (() => Promise<string | null>) | null {
-    switch (domain) {
-      case "resume":
-        return () => this.loadResumeContext();
-      case "job_search":
-        return () => this.loadJobSearchContext();
-      case "interview":
-        return () => this.loadInterviewContext();
-      case "portfolio":
-        return () => this.loadPortfolioContext();
-      case "skills":
-        return () => this.loadSkillsContext();
-      case "automation":
-        return () => this.loadAutomationContext();
-      default:
-        return null;
-    }
+    const loaders = {
+      automation: () => this.loadAutomationContext(),
+      interview: () => this.loadInterviewContext(),
+      job_search: () => this.loadJobSearchContext(),
+      portfolio: () => this.loadPortfolioContext(),
+      resume: () => this.loadResumeContext(),
+      skills: () => this.loadSkillsContext(),
+    } as const;
+    return domain === "general" ? null : loaders[domain];
   }
 
   private async loadResumeContext(): Promise<string | null> {
@@ -272,45 +260,7 @@ export class ConversationContextManager {
    * Generate follow-up suggestions based on domain and last response
    */
   generateFollowUps(domain: AIChatContextDomain): string[] {
-    const followUps: Record<AIChatContextDomain, string[]> = {
-      resume: [
-        "Can you help me improve my summary section?",
-        "What skills should I highlight for this role?",
-        "How can I quantify my achievements better?",
-      ],
-      job_search: [
-        "What studios are hiring for my skills?",
-        "How does my profile match this role?",
-        "What salary should I expect?",
-      ],
-      interview: [
-        "Give me a practice question for this role",
-        "How should I answer behavioral questions?",
-        "What questions should I ask the interviewer?",
-      ],
-      portfolio: [
-        "How can I improve my project descriptions?",
-        "What projects should I add to stand out?",
-        "How should I organize my portfolio?",
-      ],
-      skills: [
-        "What skills am I missing for this career path?",
-        "How do my gaming skills translate professionally?",
-        "What should I learn next?",
-      ],
-      automation: [
-        "What's the status of my last application?",
-        "Show my automation run history",
-        "Apply to another job",
-      ],
-      general: [
-        "Help me with my resume",
-        "Find jobs that match my profile",
-        "Prepare me for an interview",
-      ],
-    };
-
-    return followUps[domain] || followUps.general;
+    return getContextManagerFollowUps(domain);
   }
 }
 

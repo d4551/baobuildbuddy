@@ -1,4 +1,4 @@
-import { toErrorMessage } from "@bao/shared";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
@@ -35,16 +35,16 @@ const AUTH_INIT_FAILED_ERROR_KEY = "apiErrors.auth.initFailed";
 export function useAuth(): UseAuthState {
   const api = useApi();
   const nuxtApp = useNuxtRuntimeApp();
-  const authNotConfigured: AuthStatus = {
-    authRequired: false,
+  const authStatusErrorFallback: AuthStatus = {
+    authRequired: true,
     configured: false,
-    bootstrapRequired: false,
+    bootstrapRequired: true,
     setupTokenConfigured: false,
   };
 
   async function checkAuthStatus(): Promise<AuthStatus> {
     const { data, error } = await api.auth.status.get();
-    if (error) return authNotConfigured;
+    if (error) return authStatusErrorFallback;
     return {
       authRequired: data?.authRequired ?? true,
       configured: data?.configured ?? false,
@@ -62,7 +62,7 @@ export function useAuth(): UseAuthState {
     if (error) {
       throw new Error(toErrorMessage(error, AUTH_INIT_FAILED_ERROR_KEY));
     }
-    const payload = data ?? {};
+    const payload: unknown = data ?? {};
     if (!isRecord(payload)) {
       return { configured: false };
     }

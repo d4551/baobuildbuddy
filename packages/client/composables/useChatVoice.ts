@@ -1,10 +1,11 @@
-import type { AIChatVoiceErrorCode, ChatMessage } from "@bao/shared";
 import {
   AI_CHAT_VOICE_AUTO_SPEAK_DEFAULT,
   AI_CHAT_VOICE_DEFAULT_ID,
   AI_CHAT_VOICE_ERROR_MESSAGE_KEYS,
-  STATE_KEYS,
-} from "@bao/shared";
+  type AIChatVoiceErrorCode,
+} from "@bao/shared/constants/ai-voice";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import type { Ref } from "vue";
 import { computed, getCurrentScope, onScopeDispose, watch } from "vue";
 import { resolveSpeechLocale } from "../utils/speech";

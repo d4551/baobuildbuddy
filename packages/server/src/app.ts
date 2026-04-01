@@ -1,15 +1,16 @@
+import { APP_BRAND } from "@bao/shared/constants/branding";
 import {
-  API_ENDPOINT_PREFIX,
   API_ENDPOINTS,
-  APP_BRAND,
-  HTTP_STATUS_OK,
+  API_ENDPOINT_PREFIX,
   OPENAPI_VERSION,
-  settle,
   toApiScopedPath,
-} from "@bao/shared";
+} from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { settle } from "@bao/shared/utils/promise";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { Elysia, t } from "elysia";
+import Type, { StandardSchemaV1 } from "baobox";
+import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
@@ -104,17 +105,27 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
     }),
   )
   .model({
-    HealthResponse: t.Object({
-      status: t.String(),
-      timestamp: t.String(),
-      database: t.String(),
-      uptime: t.Number(),
-    }),
-    ErrorResponse: t.Object({
-      error: t.String(),
-      code: t.Optional(t.String()),
-      fields: t.Optional(t.Array(t.Unknown())),
-    }),
+    HealthResponse: StandardSchemaV1(
+      Type.Object(
+        {
+          status: Type.String(),
+          timestamp: Type.String(),
+          database: Type.String(),
+          uptime: Type.Number(),
+        },
+        { required: ["status", "timestamp", "database", "uptime"] },
+      ),
+    ),
+    ErrorResponse: StandardSchemaV1(
+      Type.Object(
+        {
+          error: Type.String(),
+          code: Type.Optional(Type.String()),
+          fields: Type.Optional(Type.Array(Type.String())),
+        },
+        { required: ["error"] },
+      ),
+    ),
   })
   .use(rateLimit({ duration: RATE_LIMIT_GLOBAL_DURATION_MS, max: RATE_LIMIT_GLOBAL_MAX_REQUESTS }))
   .use(logger)

@@ -2,11 +2,14 @@ import {
   API_ERROR_INVALID_AUTOMATION_CONFIG,
   API_ERROR_MISSING_JOB_PROVIDERS,
   API_ERROR_MISSING_SETTINGS_ROW,
+} from "@bao/shared/constants/api-errors";
+import {
   automationSettingsSchema,
-  DEFAULT_SETTINGS_ID,
-  type JobProviderSettings,
   jobProviderSettingsSchema,
-} from "@bao/shared";
+} from "@bao/shared/schemas/settings.schema";
+import type { JobProviderSettings } from "@bao/shared/types/settings-contracts";
+import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
+import { normalizeJobProviderSettings } from "@bao/shared/types/settings-normalization";
 import { eq } from "drizzle-orm";
 import { db } from "../../../db/client";
 import { settings } from "../../../db/schema/settings";
@@ -36,5 +39,5 @@ export async function loadJobProviderSettings(): Promise<JobProviderSettings> {
     throw new Error(API_ERROR_MISSING_JOB_PROVIDERS);
   }
 
-  return jobProviderParsed.data;
+  return normalizeJobProviderSettings(jobProviderParsed.data);
 }

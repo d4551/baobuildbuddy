@@ -17,7 +17,7 @@ export declare const MIME_TYPE_PDF = "application/pdf";
 /**
  * Canonical DOCX content-type value used by Word document export endpoints.
  */
-import { MIME_TYPE_DOCX } from "@bao/shared";
+import { MIME_TYPE_DOCX } from "@bao/shared/constants/export-layout";
 export { MIME_TYPE_DOCX };
 /**
  * Canonical generic binary content-type fallback value.

@@ -2,7 +2,7 @@
 
 Canonical stack definitions (Drizzle, Nuxt, Eden—not Prisma/htmx): [`STACK-CONTRACT.md`](./STACK-CONTRACT.md).
 
-This matrix is the current traceability artifact for the last full audit pass.
+This matrix is the current route-to-service/UI/test traceability reference for the repository.
 
 ## Layouts and shared UI
 
@@ -28,7 +28,7 @@ This matrix is the current traceability artifact for the last full audit pass.
 | Studios | `packages/client/pages/studios/index.vue`, `[id].vue`, `analytics.vue` |
 | Interview | `packages/client/pages/interview/index.vue`, `session.vue`, `history.vue` |
 | Skills | `packages/client/pages/skills/index.vue`, `pathways.vue` |
-| Automation | `packages/client/pages/automation/index.vue`, `email.vue`, `job-apply.vue`, `scraper.vue`, `runs.vue`, `runs/[id].vue` |
+| Automation | `packages/client/pages/automation/index.vue`, `email.vue`, `job-apply.vue`, `scraper.vue`, `runs/index.vue`, `runs/[id].vue` |
 | AI | `packages/client/pages/ai/chat.vue`, `ai/dashboard.vue` |
 | Settings | `packages/client/pages/settings.vue` |
 | Gamification | `packages/client/pages/gamification.vue` |
@@ -53,7 +53,7 @@ The server and tests use `node:fs`, `node:path`, and related modules where Bun p
 | `/api/portfolio` (`portfolio.routes.ts`) | `portfolioService`, `exportService`, `gamificationService` | `portfolios`, `portfolio_projects` | `packages/client/pages/portfolio/index.vue`, `packages/client/pages/portfolio/preview.vue` | `packages/server/src/routes/portfolio.test.ts` |
 | `/api/cover-letters` (`cover-letter.routes.ts`) | direct repository ops, `AIService`, `exportService` | `coverLetters`, `resumes`, `settings`, `userProfile` | `packages/client/pages/cover-letter/index.vue`, `packages/client/pages/cover-letter/[id].vue` | `packages/server/src/routes/cover-letter.test.ts` |
 | `/api/interview` (`interview.routes.ts`) | `interviewService` | `interview_sessions` | `packages/client/pages/interview/index.vue`, `packages/client/pages/interview/session.vue`, `packages/client/pages/interview/history.vue` | `packages/server/src/interview.test.ts` (server package root, not under `routes/`) |
-| `/api/automation` (`automation.routes.ts`) | `applicationAutomationService`, `emailDeliveryService`, logger helpers, rate limiting + screenshot mapping | `automationRuns` | `packages/client/pages/automation/index.vue`, `packages/client/pages/automation/job-apply.vue`, `packages/client/pages/automation/email.vue`, `packages/client/pages/automation/scraper.vue`, `packages/client/pages/automation/runs.vue`, `packages/client/pages/automation/runs/[id].vue` | `packages/server/src/routes/automation.test.ts` |
+| `/api/automation` (`automation.routes.ts`) | `applicationAutomationService`, `emailDeliveryService`, logger helpers, rate limiting + screenshot mapping | `automationRuns` | `packages/client/pages/automation/index.vue`, `packages/client/pages/automation/job-apply.vue`, `packages/client/pages/automation/email.vue`, `packages/client/pages/automation/scraper.vue`, `packages/client/pages/automation/runs/index.vue`, `packages/client/pages/automation/runs/[id].vue` | `packages/server/src/routes/automation.test.ts` |
 | `/api/automation/screenshots` (`automation-screenshots.routes.ts`) | filesystem + run table lookup | `automationRuns` and screenshot artifacts in `AUTOMATION_SCREENSHOT_DIR` | embedded image routes consumed by automation run detail pages | `packages/server/src/routes/automation-screenshots.test.ts` |
 | `/api/scraper` (`scraper.routes.ts`) | `scraperService` | `jobs`, `studios` via scraper upserts | `packages/client/pages/automation/scraper.vue` | `packages/server/src/routes/scraper.test.ts` |
 | `/api/ai` (`ai.routes.ts`) | `AIService`, `contextManager`, `applicationAutomationService` | `chatHistory`, `jobs`, `resumes`, `settings`, `userProfile` | `packages/client/pages/ai/chat.vue`, `packages/client/pages/ai/dashboard.vue` | `packages/server/src/routes/ai.test.ts` |
@@ -62,3 +62,9 @@ The server and tests use `node:fs`, `node:path`, and related modules where Bun p
 | `/api/settings` (`settings.routes.ts`) | settings + JSON export service hooks | `settings` | `packages/client/pages/settings.vue` | `packages/server/src/routes/settings.test.ts` |
 | `/api/stats` (`stats.routes.ts`) | `statisticsService` | aggregated reads across jobs, resumes, interviews, gamification | profile and dashboard surfaces that show aggregate progress | `packages/server/src/routes/core-routes.test.ts` |
 | `/api/search` + `/api/automation` + `/api/ai` composition points | cross-domain orchestration from shared route handlers | multiple tables used by composed services | validated by route-level translation in `packages/client/` surfaces above | core-route + dedicated route tests |
+
+## AI routing notes
+
+- `settings.aiRouting` is now the canonical server-side routing contract for AI provider/model selection.
+- High-value purpose mappings currently exercised in code paths: `chat`, `interviewQuestions`, `interviewFeedback`, `resume`, `coverLetter`, `emailResponse`, `jobMatch`, and `automationFieldMapping`.
+- Local provider readiness is surfaced through `providerDiagnostics` on the settings payload and `/api/ai/models` provider health metadata.

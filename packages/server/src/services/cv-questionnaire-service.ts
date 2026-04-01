@@ -1,18 +1,18 @@
-import type { ResumeData } from "@bao/shared";
 import {
   AI_DEFAULT_TEMPERATURE,
   AI_DEFAULT_TEMPERATURE_CREATIVE,
   AI_MAX_TOKENS_CV_ANALYSIS,
   AI_MAX_TOKENS_CV_QUESTION,
-  API_ERROR_PARSE_RESUME_SYNTHESIS,
-  isRecord,
-  safeParseJson,
-} from "@bao/shared";
+} from "@bao/shared/constants/ai-generation";
+import { API_ERROR_PARSE_RESUME_SYNTHESIS } from "@bao/shared/constants/api-errors";
+import type { ResumeData } from "@bao/shared/types/resume";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
-import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts";
+import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts-cv";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
@@ -65,6 +65,7 @@ export class CvQuestionnaireService {
     );
 
     const response = await ai.generate(prompt, {
+      purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
       maxTokens: AI_MAX_TOKENS_CV_QUESTION,
     });
@@ -98,6 +99,7 @@ export class CvQuestionnaireService {
     const prompt = cvQuestionnaireSynthesizePrompt(questionsAndAnswers);
 
     const response = await ai.generate(prompt, {
+      purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE,
       maxTokens: AI_MAX_TOKENS_CV_ANALYSIS,
     });

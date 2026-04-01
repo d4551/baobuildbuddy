@@ -1,12 +1,18 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
+    title?: string;
     message: string;
-    retryLabel: string;
-    retryAriaLabel: string;
+    retryLabel?: string;
+    retryAriaLabel?: string;
     severity?: "error" | "warning";
   }>(),
-  { severity: "error" },
+  {
+    title: "",
+    retryLabel: "",
+    retryAriaLabel: "",
+    severity: "error",
+  },
 );
 
 const emit = defineEmits<{
@@ -17,6 +23,10 @@ const alertClass = computed(() =>
   props.severity === "warning"
     ? "alert alert-warning sm:alert-horizontal"
     : "alert alert-error sm:alert-horizontal",
+);
+
+const hasRetry = computed(
+  () => props.retryLabel.trim().length > 0 && props.retryAriaLabel.trim().length > 0,
 );
 </script>
 
@@ -36,8 +46,16 @@ const alertClass = computed(() =>
         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
-    <span>{{ message }}</span>
+    <div class="min-w-0 flex-1">
+      <h3 v-if="title" class="font-semibold">
+        {{ title }}
+      </h3>
+      <p :class="title ? 'text-sm' : undefined">
+        {{ message }}
+      </p>
+    </div>
     <button
+      v-if="hasRetry"
       type="button"
       class="btn btn-sm btn-ghost shrink-0"
       :aria-label="retryAriaLabel"

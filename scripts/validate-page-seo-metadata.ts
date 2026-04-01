@@ -1,4 +1,5 @@
 import { writeError, writeOutput } from "./utils/cli-output";
+import { shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -11,19 +12,12 @@ type SeoBlock = {
   offset: number;
 };
 
-const corePagePaths = [
-  "packages/client/pages/index.vue",
-  "packages/client/pages/setup.vue",
-  "packages/client/pages/resume/index.vue",
-  "packages/client/pages/jobs/index.vue",
-  "packages/client/pages/interview/index.vue",
-  "packages/client/pages/studios/index.vue",
-  "packages/client/pages/automation/index.vue",
-  "packages/client/pages/settings.vue",
-] as const;
+const projectRoot = process.cwd();
+const clientPagesRoot = "packages/client/pages";
 
-const seoComposableToken = "useServerSeoMeta";
+const seoComposableCallPattern = /\buseSeoMeta\s*\(/u;
 const seoComposableClosePattern = /\}\s*\)\s*;/u;
+const serverSeoComposableCallPattern = /\buseServerSeoMeta\s*\(/u;
 const humanTextPattern = /\p{L}/u;
 
 const getLineFromOffset = (text: string, offset: number): number => {
@@ -41,15 +35,13 @@ const getLineFromOffset = (text: string, offset: number): number => {
 };
 
 const findSeoBlock = (fileContent: string): SeoBlock | null => {
-  const seoComposableOffset = fileContent.indexOf(seoComposableToken);
-  if (seoComposableOffset === -1) {
+  const seoComposableMatch = seoComposableCallPattern.exec(fileContent);
+  if (!seoComposableMatch || seoComposableMatch.index === undefined) {
     return null;
   }
+  const seoComposableOffset = seoComposableMatch.index;
 
-  const openParenthesisOffset = fileContent.indexOf(
-    "(",
-    seoComposableOffset + seoComposableToken.length,
-  );
+  const openParenthesisOffset = fileContent.indexOf("(", seoComposableOffset);
   if (openParenthesisOffset === -1) {
     return null;
   }
@@ -71,6 +63,9 @@ const findSeoBlock = (fileContent: string): SeoBlock | null => {
     offset: openBraceOffset + 1,
   };
 };
+
+const usesServerOnlySeoComposable = (fileContent: string): boolean =>
+  serverSeoComposableCallPattern.test(fileContent);
 
 const resolveSeoPropertyValue = (
   seoBody: string,
@@ -116,8 +111,21 @@ const isStaticLiteralSeoValue = (value: string): boolean => {
   return false;
 };
 
-const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
-  const fileContent = await Bun.file(filePath).text();
+export const collectPageSeoViolationsForContent = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => {
+  if (usesServerOnlySeoComposable(fileContent)) {
+    return [
+      {
+        filePath,
+        line: 1,
+        message:
+          "Page uses useServerSeoMeta(). Use useSeoMeta() so SSR metadata stays aligned after browser hydration.",
+      },
+    ];
+  }
+
   const seoBlock = findSeoBlock(fileContent);
 
   if (!seoBlock) {
@@ -126,7 +134,7 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
         filePath,
         line: 1,
         message:
-          "Missing useServerSeoMeta call. Core pages must define SSR title and description metadata.",
+          "Missing useSeoMeta call. Core pages must define SSR and hydrated title/description metadata.",
       },
     ];
   }
@@ -138,7 +146,7 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
       violations.push({
         filePath,
         line: getLineFromOffset(fileContent, seoBlock.offset),
-        message: `Missing "${propertyName}" in useServerSeoMeta payload.`,
+        message: `Missing "${propertyName}" in useSeoMeta payload.`,
       });
       continue;
     }
@@ -157,9 +165,20 @@ const collectFileViolations = async (filePath: string): Promise<Violation[]> => 
   return violations;
 };
 
+const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
+  const fileContent = await Bun.file(filePath).text();
+  return collectPageSeoViolationsForContent(filePath, fileContent);
+};
+
 const collectViolations = async (): Promise<Violation[]> => {
+  const glob = new Bun.Glob(`${clientPagesRoot}/**/*.vue`);
+  const scannedPaths = await Array.fromAsync(glob.scan({ cwd: projectRoot, onlyFiles: true }));
+  const pagePaths = scannedPaths
+    .map((pathValue) => pathValue.replace(/\\/gu, "/"))
+    .filter((pathValue) => !shouldIgnorePath(pathValue));
+
   const perFileViolations = await Promise.all(
-    corePagePaths.map((pathValue) => collectFileViolations(pathValue)),
+    pagePaths.map((pathValue) => collectFileViolations(pathValue)),
   );
   return perFileViolations.flat();
 };
@@ -167,7 +186,7 @@ const collectViolations = async (): Promise<Violation[]> => {
 const main = async (): Promise<void> => {
   const violations = await collectViolations();
   if (violations.length === 0) {
-    await writeOutput("Page SEO metadata validation passed for all core pages.");
+    await writeOutput("Page SEO metadata validation passed for all client pages.");
     return;
   }
 
@@ -181,4 +200,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

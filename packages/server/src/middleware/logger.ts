@@ -1,15 +1,16 @@
-import { API_ENDPOINTS, DEFAULT_LOG_LEVEL } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { DEFAULT_LOG_LEVEL } from "@bao/shared/constants/runtime";
 import { createPinoLogger } from "@bogeychan/elysia-logger";
+import { config, shouldUsePrettyLogTransport } from "../config/env";
 
 export const log = createPinoLogger({
-  level: Bun.env.LOG_LEVEL || DEFAULT_LOG_LEVEL,
-  transport:
-    Bun.env.NODE_ENV !== "production"
-      ? {
-          target: "pino-pretty",
-          options: { colorize: true },
-        }
-      : undefined,
+  level: config.logLevel || DEFAULT_LOG_LEVEL,
+  transport: shouldUsePrettyLogTransport()
+    ? {
+        target: "pino-pretty",
+        options: { colorize: true },
+      }
+    : undefined,
 });
 
 export const logger = log.into({

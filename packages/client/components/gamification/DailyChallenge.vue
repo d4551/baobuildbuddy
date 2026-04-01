@@ -29,9 +29,7 @@ const { t } = useI18n();
       :aria-label="t('dailyChallengeCard.completedBanner')"
     >
       <div class="flex items-center gap-2 text-success font-bold">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <IconCheckCircle class="h-12 w-12" />
         <span class="text-2xl">{{ t("dailyChallengeCard.completedBanner") }}</span>
       </div>
     </div>
@@ -40,9 +38,7 @@ const { t } = useI18n();
       <div class="flex justify-between items-start">
         <h2 class="card-title">{{ challenge.title }}</h2>
         <div class="badge badge-accent gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
+          <IconSparkles class="h-3 w-3" />
           {{ t("dashboard.dailyChallengeXpLabel", { xp: challenge.xpReward }) }}
         </div>
       </div>

@@ -1,6 +1,5 @@
-import type { AppDataTheme, AutomationSettings, BrandSettings, EmailTransportSettings } from "@bao/shared";
 import { Elysia } from "elysia";
-export declare const settingsRoutes: Elysia<"/settings", {
+export declare const settingsRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -24,9 +23,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
     macroFn: {};
     parser: {};
 }, {
-    settings: {};
-} & {
-    settings: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
@@ -34,10 +31,14 @@ export declare const settingsRoutes: Elysia<"/settings", {
             headers: unknown;
             response: {
                 200: {
-                    error: string;
-                } | {
-                    theme: AppDataTheme;
-                    brandSettings: BrandSettings;
+                    automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
+                    localModelEndpoint: string | null;
+                    aiRouting: import("@bao/shared/types/ai").AIRouting;
+                    providerDiagnostics: Partial<Record<"openai" | "huggingface" | "local" | "gemini" | "claude", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
+                    preferredProvider: string | null;
+                    preferredModel: string | null;
+                    theme: import("@bao/shared/constants/branding").AppDataTheme;
+                    brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
                     geminiApiKey: string | null;
                     openaiApiKey: string | null;
                     claudeApiKey: string | null;
@@ -48,33 +49,161 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     hasHuggingfaceToken: boolean;
                     hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
+                    jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
                     id: string;
-                    localModelEndpoint: string | null;
-                    localModelName: string | null;
-                    preferredProvider: string | null;
-                    preferredModel: string | null;
-                    language: string | null;
-                    notifications: Record<string, boolean> | null;
-                    automationSettings: AutomationSettings | null;
-                    emailTransportSettings: EmailTransportSettings | null;
                     createdAt: string;
                     updatedAt: string;
-                    error?: undefined;
+                    localModelName: string | null;
+                    language: string | null;
+                    notifications: Record<string, boolean> | null;
+                    emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
+                } | {
+                    error: string;
                 };
             };
         };
     };
 } & {
-    settings: {
+    [x: string]: {
         put: {
-            body: {
-                notifications?: {
+            body: {} & {
+                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
+                aiRouting?: ({
+                    chat: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    interviewQuestions: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    interviewFeedback: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    resume: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    coverLetter: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    emailResponse: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    jobMatch: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    scrapeEnrichment: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    automationFieldMapping: {
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                    } & {
+                        model?: string | undefined;
+                    };
+                } & {}) | undefined;
+                preferredProvider?: "openai" | "huggingface" | "local" | "gemini" | "claude" | undefined;
+                preferredModel?: string | undefined;
+                language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
+                brandSettings?: {
+                    readonly name?: string | undefined;
+                    readonly assistantName?: string | undefined;
+                    readonly apiName?: string | undefined;
+                    readonly logoPath?: string | undefined;
+                    readonly faviconPath?: string | undefined;
+                    readonly typography?: {
+                        readonly fontStylesheetUrl?: string | undefined;
+                        readonly displayFontFamily?: string | undefined;
+                        readonly bodyFontFamily?: string | undefined;
+                        readonly monoFontFamily?: string | undefined;
+                    } | undefined;
+                    readonly lightTheme?: {
+                        readonly base100?: string | undefined;
+                        readonly base200?: string | undefined;
+                        readonly base300?: string | undefined;
+                        readonly baseContent?: string | undefined;
+                        readonly primary?: string | undefined;
+                        readonly primaryContent?: string | undefined;
+                        readonly secondary?: string | undefined;
+                        readonly secondaryContent?: string | undefined;
+                        readonly accent?: string | undefined;
+                        readonly accentContent?: string | undefined;
+                        readonly neutral?: string | undefined;
+                        readonly neutralContent?: string | undefined;
+                        readonly info?: string | undefined;
+                        readonly infoContent?: string | undefined;
+                        readonly success?: string | undefined;
+                        readonly successContent?: string | undefined;
+                        readonly warning?: string | undefined;
+                        readonly warningContent?: string | undefined;
+                        readonly error?: string | undefined;
+                        readonly errorContent?: string | undefined;
+                        readonly radiusSelector?: string | undefined;
+                        readonly radiusField?: string | undefined;
+                        readonly radiusBox?: string | undefined;
+                        readonly sizeSelector?: string | undefined;
+                        readonly sizeField?: string | undefined;
+                        readonly border?: string | undefined;
+                        readonly depth?: string | undefined;
+                        readonly noise?: string | undefined;
+                    } | undefined;
+                    readonly darkTheme?: {
+                        readonly base100?: string | undefined;
+                        readonly base200?: string | undefined;
+                        readonly base300?: string | undefined;
+                        readonly baseContent?: string | undefined;
+                        readonly primary?: string | undefined;
+                        readonly primaryContent?: string | undefined;
+                        readonly secondary?: string | undefined;
+                        readonly secondaryContent?: string | undefined;
+                        readonly accent?: string | undefined;
+                        readonly accentContent?: string | undefined;
+                        readonly neutral?: string | undefined;
+                        readonly neutralContent?: string | undefined;
+                        readonly info?: string | undefined;
+                        readonly infoContent?: string | undefined;
+                        readonly success?: string | undefined;
+                        readonly successContent?: string | undefined;
+                        readonly warning?: string | undefined;
+                        readonly warningContent?: string | undefined;
+                        readonly error?: string | undefined;
+                        readonly errorContent?: string | undefined;
+                        readonly radiusSelector?: string | undefined;
+                        readonly radiusField?: string | undefined;
+                        readonly radiusBox?: string | undefined;
+                        readonly sizeSelector?: string | undefined;
+                        readonly sizeField?: string | undefined;
+                        readonly border?: string | undefined;
+                        readonly depth?: string | undefined;
+                        readonly noise?: string | undefined;
+                    } | undefined;
+                    readonly content?: {
+                        readonly tagline?: string | undefined;
+                        readonly defaultTitle?: string | undefined;
+                        readonly defaultDescription?: string | undefined;
+                        readonly contentOverrides?: Record<string, string> | undefined;
+                    } | undefined;
+                } | undefined;
+                notifications?: ({} & {
                     achievements?: boolean | undefined;
                     dailyChallenges?: boolean | undefined;
                     levelUp?: boolean | undefined;
                     jobAlerts?: boolean | undefined;
-                } | undefined;
-                automationSettings?: {
+                }) | undefined;
+                automationSettings?: ({} & {
                     headless?: boolean | undefined;
                     defaultTimeout?: number | undefined;
                     screenshotRetention?: number | undefined;
@@ -83,163 +212,80 @@ export declare const settingsRoutes: Elysia<"/settings", {
                     enableSmartSelectors?: boolean | undefined;
                     autoSaveScreenshots?: boolean | undefined;
                     speech?: {
-                        locale: string;
-                        stt: {
-                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
+                        readonly locale: string;
+                        readonly stt: {
+                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
                             model: string;
                             endpoint: string;
                         };
-                        tts: {
+                        readonly tts: {
+                            voice: string;
                             format: "mp3" | "wav";
-                            provider: "openai" | "huggingface" | "local" | "browser" | "custom";
+                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
                             model: string;
                             endpoint: string;
-                            voice: string;
                         };
                     } | undefined;
                     jobProviders?: {
-                        companyBoardApiTemplates: {
-                            greenhouse: string;
-                            lever: string;
-                            recruitee: string;
-                            workable: string;
-                            ashby: string;
-                            smartrecruiters: string;
-                            teamtailor: string;
-                            workday: string;
+                        readonly providerTimeoutMs: number;
+                        readonly companyBoardResultLimit: number;
+                        readonly gamingBoardResultLimit: number;
+                        readonly unknownLocationLabel: string;
+                        readonly unknownCompanyLabel: string;
+                        readonly hitmarkerEnabled: boolean;
+                        readonly hitmarkerApiBaseUrl: string;
+                        readonly hitmarkerDefaultQuery: string;
+                        readonly hitmarkerDefaultLocation: string;
+                        readonly greenhouseApiBaseUrl: string;
+                        readonly greenhouseMaxPages: number;
+                        readonly greenhouseBoards: {
+                            readonly board: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly leverApiBaseUrl: string;
+                        readonly leverMaxPages: number;
+                        readonly leverCompanies: {
+                            readonly slug: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly companyBoardApiTemplates: {
+                            readonly greenhouse: string;
+                            readonly lever: string;
+                            readonly recruitee: string;
+                            readonly workable: string;
+                            readonly ashby: string;
+                            readonly smartrecruiters: string;
+                            readonly teamtailor: string;
+                            readonly workday: string;
                         };
-                        providerTimeoutMs: number;
-                        companyBoardResultLimit: number;
-                        gamingBoardResultLimit: number;
-                        unknownLocationLabel: string;
-                        unknownCompanyLabel: string;
-                        hitmarkerEnabled: boolean;
-                        hitmarkerApiBaseUrl: string;
-                        hitmarkerDefaultQuery: string;
-                        hitmarkerDefaultLocation: string;
-                        greenhouseApiBaseUrl: string;
-                        greenhouseMaxPages: number;
-                        greenhouseBoards: {
-                            enabled: boolean;
-                            board: string;
-                            company: string;
+                        readonly companyBoards: {
+                            readonly name: string;
+                            readonly token: string;
+                            readonly type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
+                            readonly enabled: boolean;
+                            readonly priority: number;
                         }[];
-                        leverApiBaseUrl: string;
-                        leverMaxPages: number;
-                        leverCompanies: {
-                            enabled: boolean;
-                            company: string;
-                            slug: string;
-                        }[];
-                        companyBoards: {
-                            name: string;
-                            type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
-                            token: string;
-                            enabled: boolean;
-                            priority: number;
-                        }[];
-                        gamingPortals: {
-                            name: string;
-                            id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
-                            source: string;
-                            enabled: boolean;
-                            fallbackUrl: string;
+                        readonly gamingPortals: {
+                            readonly id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
+                            readonly name: string;
+                            readonly source: string;
+                            readonly fallbackUrl: string;
+                            readonly enabled: boolean;
                         }[];
                     } | undefined;
-                } | undefined;
-                emailTransportSettings?: {
-                    host?: string | undefined;
+                }) | undefined;
+                emailTransportSettings?: ({} & {
+                    authMethod?: "plain" | "login" | undefined;
                     port?: number | undefined;
+                    fromEmail?: string | undefined;
+                    host?: string | undefined;
                     security?: "tls" | "starttls" | "plain" | undefined;
                     username?: string | undefined;
-                    fromEmail?: string | undefined;
                     fromName?: string | undefined;
-                    authMethod?: "plain" | "login" | undefined;
                     connectionTimeoutSeconds?: number | undefined;
-                } | undefined;
-                preferredProvider?: "gemini" | "claude" | "openai" | "huggingface" | "local" | undefined;
-                preferredModel?: string | undefined;
-                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
-                language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
-                brandSettings?: {
-                    name?: string | undefined;
-                    assistantName?: string | undefined;
-                    apiName?: string | undefined;
-                    logoPath?: string | undefined;
-                    faviconPath?: string | undefined;
-                    content?: {
-                        tagline?: string | undefined;
-                        defaultTitle?: string | undefined;
-                        defaultDescription?: string | undefined;
-                        contentOverrides?: {} | undefined;
-                    } | undefined;
-                    typography?: {
-                        fontStylesheetUrl?: string | undefined;
-                        displayFontFamily?: string | undefined;
-                        bodyFontFamily?: string | undefined;
-                        monoFontFamily?: string | undefined;
-                    } | undefined;
-                    lightTheme?: {
-                        success?: string | undefined;
-                        base100?: string | undefined;
-                        base200?: string | undefined;
-                        base300?: string | undefined;
-                        baseContent?: string | undefined;
-                        primary?: string | undefined;
-                        primaryContent?: string | undefined;
-                        secondary?: string | undefined;
-                        secondaryContent?: string | undefined;
-                        accent?: string | undefined;
-                        accentContent?: string | undefined;
-                        neutral?: string | undefined;
-                        neutralContent?: string | undefined;
-                        info?: string | undefined;
-                        infoContent?: string | undefined;
-                        successContent?: string | undefined;
-                        warning?: string | undefined;
-                        warningContent?: string | undefined;
-                        error?: string | undefined;
-                        errorContent?: string | undefined;
-                        radiusSelector?: string | undefined;
-                        radiusField?: string | undefined;
-                        radiusBox?: string | undefined;
-                        sizeSelector?: string | undefined;
-                        sizeField?: string | undefined;
-                        border?: string | undefined;
-                        depth?: string | undefined;
-                        noise?: string | undefined;
-                    } | undefined;
-                    darkTheme?: {
-                        success?: string | undefined;
-                        base100?: string | undefined;
-                        base200?: string | undefined;
-                        base300?: string | undefined;
-                        baseContent?: string | undefined;
-                        primary?: string | undefined;
-                        primaryContent?: string | undefined;
-                        secondary?: string | undefined;
-                        secondaryContent?: string | undefined;
-                        accent?: string | undefined;
-                        accentContent?: string | undefined;
-                        neutral?: string | undefined;
-                        neutralContent?: string | undefined;
-                        info?: string | undefined;
-                        infoContent?: string | undefined;
-                        successContent?: string | undefined;
-                        warning?: string | undefined;
-                        warningContent?: string | undefined;
-                        error?: string | undefined;
-                        errorContent?: string | undefined;
-                        radiusSelector?: string | undefined;
-                        radiusField?: string | undefined;
-                        radiusBox?: string | undefined;
-                        sizeSelector?: string | undefined;
-                        sizeField?: string | undefined;
-                        border?: string | undefined;
-                        depth?: string | undefined;
-                        noise?: string | undefined;
-                    } | undefined;
-                } | undefined;
+                }) | undefined;
             };
             params: {};
             query: unknown;
@@ -263,12 +309,50 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 };
             };
         };
-    };
-} & {
-    settings: {
-        "api-keys": {
+    } & {
+        "job-taxonomy": {
             put: {
                 body: {
+                    readonly keywords: {
+                        readonly id: string;
+                        readonly category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                        readonly label: string;
+                        readonly synonyms: string[];
+                        readonly sortOrder: number;
+                        readonly enabled: boolean;
+                    }[];
+                    readonly studioRules: {
+                        readonly id: string;
+                        readonly studioType: import("@bao/shared/types/jobs").StudioType;
+                        readonly keyword: string;
+                        readonly sortOrder: number;
+                        readonly enabled: boolean;
+                    }[];
+                };
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        success: boolean;
+                        jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
+                    };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
+                    };
+                };
+            };
+        };
+    } & {
+        "api-keys": {
+            put: {
+                body: {} & {
                     geminiApiKey?: string | undefined;
                     openaiApiKey?: string | undefined;
                     claudeApiKey?: string | undefined;
@@ -296,14 +380,14 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 };
             };
         };
-    };
-} & {
-    settings: {
+    } & {
         "test-api-key": {
             post: {
                 body: {
+                    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     key: string;
-                    provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                } & {
+                    model?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -311,11 +395,27 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 response: {
                     200: {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                        error: string;
+                        provider: "local";
+                        diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+                        message: string | undefined;
+                        availableModels: readonly string[] | undefined;
+                        selectedModel: string | undefined;
+                        error?: undefined;
                     } | {
                         valid: boolean;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "gemini" | "claude";
+                        error: string;
+                        diagnosticCode?: undefined;
+                        message?: undefined;
+                        availableModels?: undefined;
+                        selectedModel?: undefined;
+                    } | {
+                        valid: boolean;
+                        provider: "openai" | "huggingface" | "gemini" | "claude";
+                        diagnosticCode: "healthy" | "error";
+                        message: string | undefined;
+                        availableModels?: undefined;
+                        selectedModel?: undefined;
                         error?: undefined;
                     };
                     422: {
@@ -330,9 +430,7 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 };
             };
         };
-    };
-} & {
-    settings: {
+    } & {
         export: {
             get: {
                 body: unknown;
@@ -340,60 +438,34 @@ export declare const settingsRoutes: Elysia<"/settings", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service").BaoExportData;
+                    200: import("../services/data-service-contracts").BaoExportData;
                 };
             };
         };
-    };
-} & {
-    settings: {
+    } & {
         import: {
             post: {
                 body: {
-                    portfolio: string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null;
-                    profile: string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null;
-                    settings: string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null;
-                    gamification: string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null;
-                    applications: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    resumes: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    chatHistory: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    coverLetters: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    interviewSessions: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    portfolioProjects: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    savedJobs: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
-                    skillMappings: (string | number | boolean | never[] | {
-                        [x: string]: never;
-                    } | null)[];
+                    portfolio: unknown;
+                    gamification: unknown;
+                    applications: unknown[];
+                    resumes: unknown[];
+                    settings: unknown;
+                    chatHistory: unknown[];
+                    coverLetters: unknown[];
+                    interviewSessions: unknown[];
+                    portfolioProjects: unknown[];
+                    savedJobs: unknown[];
+                    skillMappings: unknown[];
+                    profile: unknown;
                     version: "1.0";
                     exportedAt: string;
-                };
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service").ImportResult;
+                    200: import("../services/data-service-contracts").ImportResult;
                     422: {
                         type: "validation";
                         on: string;
@@ -413,11 +485,13 @@ export declare const settingsRoutes: Elysia<"/settings", {
     schema: {};
     standaloneSchema: {};
     response: {};
-} & {
+}, {
     derive: {};
     resolve: {};
     schema: {};
-}, {
+    standaloneSchema: {};
+    response: {};
+} & {
     derive: {};
     resolve: {};
     schema: {};

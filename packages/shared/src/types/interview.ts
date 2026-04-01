@@ -2,6 +2,8 @@
  * Mock interview system types
  */
 
+import type { ScrapePersonaEnrichment } from "./jobs";
+
 export interface GameStudio {
   id: string;
   name: string;
@@ -21,6 +23,7 @@ export interface GameStudio {
   category?: "AAA" | "Indie" | "Mobile" | "VR/AR" | "Platform" | "Esports" | "International";
   region?: string;
   benefits?: string[];
+  enrichment?: ScrapePersonaEnrichment;
 }
 
 export interface StudioCulture {
@@ -43,7 +46,9 @@ export interface InterviewConfig {
   technologies?: string[];
   voiceSettings?: VoiceSettings;
   interviewMode?: InterviewMode;
+  conversationStyle?: InterviewConversationStyle;
   targetJob?: InterviewTargetJob;
+  candidateContext?: InterviewCandidateContext;
 }
 
 export interface InterviewQuestion {
@@ -139,6 +144,20 @@ export interface VoiceSettings {
 export type InterviewMode = "studio" | "job";
 
 /**
+ * Interview pacing mode.
+ */
+export type InterviewConversationStyle = "natural" | "structured";
+
+/**
+ * Candidate artifacts used to ground interview questions and scoring.
+ */
+export interface InterviewCandidateContext {
+  resumeId?: string;
+  coverLetterId?: string;
+  portfolioId?: string;
+}
+
+/**
  * Job context passed into an interview session.
  */
 export interface InterviewTargetJob {
@@ -152,4 +171,5 @@ export interface InterviewTargetJob {
   source?: string;
   postedDate?: string;
   url?: string;
+  enrichment?: ScrapePersonaEnrichment;
 }

@@ -2,7 +2,7 @@
  * Rate limit configuration. Single source of truth for duration and max requests.
  */
 
-import { MS_PER_MINUTE } from "@bao/shared";
+import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 
 /** Rate limit window duration (1 minute). */
 export const RATE_LIMIT_DURATION_MS = MS_PER_MINUTE;
@@ -28,5 +28,8 @@ export const RATE_LIMIT_AUTH_BOOTSTRAP_MAX_REQUESTS = 5;
 /** Settings route rate limit window duration (1 minute). */
 export const RATE_LIMIT_SETTINGS_DURATION_MS = MS_PER_MINUTE;
 
-/** Max requests per window for settings routes. */
-export const RATE_LIMIT_SETTINGS_MAX_REQUESTS = 10;
+/** Max settings read requests per window. */
+export const RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS: number = RATE_LIMIT_GLOBAL_MAX_REQUESTS;
+
+/** Max settings mutation requests per window. */
+export const RATE_LIMIT_SETTINGS_WRITE_MAX_REQUESTS: number = 10;

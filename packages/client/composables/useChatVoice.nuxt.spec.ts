@@ -2,9 +2,9 @@ import {
   AI_CHAT_VOICE_DEFAULT_ID,
   AI_CHAT_VOICE_ERROR_CODES,
   type AIChatVoiceErrorCode,
-  type ChatMessage,
-  STATE_KEYS,
-} from "@bao/shared";
+} from "@bao/shared/constants/ai-voice";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { ChatMessage } from "@bao/shared/types/ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { computed, nextTick, type Ref, ref } from "vue";
 
@@ -35,8 +35,11 @@ function useNuxtStateMock(
 ): Ref<string>;
 function useNuxtStateMock(
   key: string,
-  _initializer?: () => boolean | string,
+  initializer?: () => boolean | string,
 ): Ref<boolean | string> {
+  if (typeof initializer === "function") {
+    // Keep signature parity with Nuxt's state factory callback.
+  }
   if (key === STATE_KEYS.AI_CHAT_AUTO_SPEAK) {
     return autoSpeakState;
   }

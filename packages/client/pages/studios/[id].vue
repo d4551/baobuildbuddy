@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -12,12 +12,10 @@ const router = useRouter();
 const { t } = useI18n();
 const { studio, loading: studioLoading, fetchStudioById } = useStudio();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("studioDetail.breadcrumbs.detail"),
-    description: t("studiosIndex.seoDescription"),
-  });
-}
+useSeoMeta({
+  title: t("studioDetail.breadcrumbs.detail"),
+  description: t("studiosIndex.seoDescription"),
+});
 
 const pageError = ref<string | null>(null);
 const studioId = computed(() => {
@@ -41,6 +39,11 @@ const breadcrumbs = computed(() => [
   { label: t("studioDetail.breadcrumbs.studios"), to: APP_ROUTES.studios },
   { label: studio.value?.name || t("studioDetail.breadcrumbs.detail") },
 ]);
+const detailTitle = computed(() => studio.value?.name || t("studioDetail.breadcrumbs.detail"));
+const detailDescription = computed(
+  () => studio.value?.description?.trim() || t("studioDetail.noDescription"),
+);
+const studioSummaryTitle = computed(() => t("studioDetail.sections.info"));
 
 function showErrorToast(message: string) {
   if (import.meta.client) {
@@ -94,74 +97,118 @@ function studioDetailLocation(location: string | undefined): string {
 </script>
 
 <template>
-  <PageScaffold width-token="content" spacing-token="comfortable">
-    <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
-
-    <div v-if="pageError" class="alert alert-error mb-6" role="alert" :aria-label="t('studioDetail.errorBannerAria')">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>{{ pageError }}</span>
-      <button class="btn btn-sm btn-ghost" :aria-label="t('studioDetail.retryAria')" @click="refreshStudio()">
-        {{ t("studioDetail.retryButton") }}
-      </button>
-    </div>
-
-    <LoadingSkeleton v-else-if="loading" :lines="10" />
-
-    <SectionGrid v-else-if="studio" grid-token="threeColumnLg">
-      <!-- Main Content -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Header -->
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <div class="flex items-start gap-4">
-              <div class="avatar placeholder">
-                <div class="bg-neutral text-neutral-content rounded-full w-20">
-                  <span class="text-3xl">{{ studioInitial }}</span>
+  <PageScaffold
+    tag="section"
+    width-token="content"
+    spacing-token="comfortable"
+    labelled-by="studio-detail-title"
+  >
+    <div class="space-y-3">
+      <AppBreadcrumbs :crumbs="breadcrumbs" />
+      <PageHeroHeader
+        title-id="studio-detail-title"
+        :title="detailTitle"
+        :description="detailDescription"
+        density="comfortable"
+      >
+        <template #actions>
+          <button
+            class="btn btn-primary"
+            :disabled="!studio"
+            :aria-label="t('studioDetail.practiceInterviewAria')"
+            @click="startPracticeInterview"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ t("studioDetail.practiceInterviewButton") }}
+          </button>
+          <a
+            v-if="studio?.website"
+            :href="studio.website"
+            target="_blank"
+            rel="noreferrer"
+            class="btn btn-outline"
+            :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
+          >
+            <IconGlobe class="h-5 w-5" />
+            {{ t("studioDetail.visitWebsiteButton") }}
+          </a>
+        </template>
+        <template #aside>
+          <div class="card card-border bg-base-100 shadow-sm">
+            <div class="card-body">
+              <div class="flex items-start gap-4">
+                <div class="avatar placeholder">
+                  <div class="w-20 rounded-full bg-neutral text-neutral-content">
+                    <span class="text-3xl">{{ studioInitial }}</span>
+                  </div>
+                </div>
+                <div class="min-w-0 flex-1 space-y-3">
+                  <div>
+                    <h2 class="card-title text-lg">{{ studioSummaryTitle }}</h2>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span class="badge badge-primary">{{ studioTypeLabel(t, studio?.type) }}</span>
+                    <span class="badge">{{ studioSizeLabel(t, studio?.size) }}</span>
+                    <span v-if="studio?.remoteWork" class="badge badge-success">
+                      {{ t("studioDetail.remoteFriendlyBadge") }}
+                    </span>
+                  </div>
+                  <div class="stats stats-vertical w-full bg-base-200 sm:stats-horizontal">
+                    <div class="stat">
+                      <div class="stat-title">{{ t("studioDetail.info.locationLabel") }}</div>
+                      <div class="stat-value text-base">
+                        {{ studioDetailLocation(studio?.location) }}
+                      </div>
+                      <div class="stat-desc">{{ t("studioDetail.sections.info") }}</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-title">{{ t("studioDetail.info.companySizeLabel") }}</div>
+                      <div class="stat-value text-base">
+                        {{ studioSizeLabel(t, studio?.size) }}
+                      </div>
+                      <div class="stat-desc">{{ t("studioDetail.info.studioTypeLabel") }}</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-title">{{ t("studioDetail.info.remoteWorkLabel") }}</div>
+                      <div class="stat-value text-base">
+                        {{ remoteWorkLabel(studio?.remoteWork) }}
+                      </div>
+                      <div class="stat-desc">{{ studioTypeLabel(t, studio?.type) }}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="flex-1">
-                <h1 class="text-3xl font-bold mb-2">{{ studio.name }}</h1>
-                <p class="text-base-content/70 mb-3">{{ studio.description || t("studioDetail.noDescription") }}</p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
-                  <span class="badge">{{ studioSizeLabel(t, studio.size) }}</span>
-                  <span v-if="studio.remoteWork" class="badge badge-success">
-                    {{ t("studioDetail.remoteFriendlyBadge") }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-actions mt-4">
-              <button class="btn btn-primary" :aria-label="t('studioDetail.practiceInterviewAria')" @click="startPracticeInterview">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ t("studioDetail.practiceInterviewButton") }}
-              </button>
-
-              <a
-                v-if="studio.website"
-                :href="studio.website"
-                target="_blank"
-                rel="noreferrer"
-                class="btn btn-outline"
-                :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-                {{ t("studioDetail.visitWebsiteButton") }}
-              </a>
             </div>
           </div>
-        </div>
+        </template>
+      </PageHeroHeader>
+    </div>
 
-        <!-- Culture -->
-        <div class="card bg-base-200">
+    <LoadingSkeleton v-if="loading" :lines="10" />
+
+    <BootstrapErrorAlert
+      v-else-if="pageError"
+      :title="t('studioDetail.breadcrumbs.detail')"
+      :message="pageError"
+      :retry-label="t('studioDetail.retryButton')"
+      :retry-aria-label="t('studioDetail.retryAria')"
+      @retry="() => refreshStudio()"
+    />
+
+    <EmptyState
+      v-else-if="!studio"
+      title-key="studioDetail.emptyTitle"
+      description-key="studioDetail.emptyDescription"
+      cta-label-key="studioDetail.retryButton"
+      :cta-to="APP_ROUTES.studios"
+    />
+
+    <SectionGrid v-else grid-token="threeColumnLg">
+      <div class="space-y-6 lg:col-span-2">
+        <div class="card card-border bg-base-100 shadow-sm">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
             <div class="space-y-3">
@@ -169,21 +216,18 @@ function studioDetailLocation(location: string | undefined): string {
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.workStyleLabel") }}</p>
                 <p>{{ cultureWorkStyle }}</p>
               </div>
-
               <div v-if="cultureEnvironment">
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.environmentLabel") }}</p>
                 <p>{{ cultureEnvironment }}</p>
               </div>
-
               <div v-if="cultureValues.length > 0">
                 <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.valuesLabel") }}</p>
-                <div class="flex flex-wrap gap-2 mt-1">
+                <div class="mt-1 flex flex-wrap gap-2">
                   <span v-for="value in cultureValues" :key="value" class="badge badge-outline badge-sm">
                     {{ value }}
                   </span>
                 </div>
               </div>
-
               <p v-else class="text-sm text-base-content/70">
                 {{ t("studioDetail.culture.noValues") }}
               </p>
@@ -191,24 +235,18 @@ function studioDetailLocation(location: string | undefined): string {
           </div>
         </div>
 
-        <!-- Interview Style -->
-        <div v-if="studio.interviewStyle" class="card bg-base-200">
+        <div v-if="studio.interviewStyle" class="card card-border bg-base-100 shadow-sm">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.interviewProcess") }}</h2>
             <p>{{ studio.interviewStyle }}</p>
           </div>
         </div>
 
-        <!-- Technologies -->
-        <div v-if="studio.technologies?.length" class="card bg-base-200">
+        <div v-if="studio.technologies?.length" class="card card-border bg-base-100 shadow-sm">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
             <div class="flex flex-wrap gap-2">
-              <span
-                v-for="tech in studio.technologies"
-                :key="tech"
-                class="badge badge-lg badge-primary"
-              >
+              <span v-for="tech in studio.technologies" :key="tech" class="badge badge-primary badge-lg">
                 {{ tech }}
               </span>
             </div>
@@ -216,44 +254,13 @@ function studioDetailLocation(location: string | undefined): string {
         </div>
       </div>
 
-      <!-- Sidebar -->
       <div class="space-y-6">
-        <!-- Info -->
-        <div class="card bg-base-200">
-          <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("studioDetail.sections.info") }}</h2>
-
-            <div class="space-y-3">
-              <div>
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.info.locationLabel") }}</p>
-                <p class="font-medium">{{ studioDetailLocation(studio.location) }}</p>
-              </div>
-
-              <div>
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.info.studioTypeLabel") }}</p>
-                <p class="font-medium">{{ studioTypeLabel(t, studio.type) }}</p>
-              </div>
-
-              <div>
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.info.companySizeLabel") }}</p>
-                <p class="font-medium">{{ studioSizeLabel(t, studio.size) }}</p>
-              </div>
-
-              <div>
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.info.remoteWorkLabel") }}</p>
-                <p class="font-medium">{{ remoteWorkLabel(studio.remoteWork) }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notable Games -->
-        <div v-if="studio.games?.length" class="card bg-base-200">
+        <div v-if="studio.games?.length" class="card card-border bg-base-100 shadow-sm">
           <div class="card-body">
             <h2 class="card-title text-lg">{{ t("studioDetail.sections.notableGames") }}</h2>
             <ul class="space-y-2">
               <li v-for="game in studio.games" :key="game" class="flex items-center gap-2">
-                <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
                 {{ game }}

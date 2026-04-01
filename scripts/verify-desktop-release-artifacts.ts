@@ -906,7 +906,7 @@ const captureCommand = (command: readonly string[], timeoutMs: number): Promise<
       });
     };
 
-    settleCapture().catch((error: unknown) => {
+    settleCapture().then(undefined, (error: unknown) => {
       clearTimeout(timeout);
       resolveCommand({
         exitCode: 1,
@@ -1947,7 +1947,7 @@ const main = async (): Promise<void> => {
   await writeOutput("desktop-release:verify passed.");
 };
 
-await main().catch(async (error: unknown) => {
+await main().then(undefined, async (error: unknown) => {
   await writeError(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });

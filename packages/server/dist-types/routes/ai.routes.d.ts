@@ -1,34 +1,5 @@
 import { Elysia } from "elysia";
-type MatchJobsResponse = {
-    message: string;
-    matches: Array<{
-        jobId: string;
-        title: string;
-        company: string;
-        location: string | null;
-        remote: boolean;
-        score: number;
-        strengths: string[];
-        concerns: string[];
-        highlightSkills: string[];
-    }>;
-    recommendations: string[];
-};
-type CoverLetterSections = {
-    introduction: string;
-    body: string;
-    conclusion: string;
-};
-type ResumeAnalysisResult = {
-    score: number;
-    strengths: string[];
-    improvements: string[];
-    keywords: string[];
-};
-/**
- * AI route group for chat, content generation, matching, and automation triggers.
- */
-export declare const aiRoutes: Elysia<"/ai", {
+export declare const aiRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -52,30 +23,23 @@ export declare const aiRoutes: Elysia<"/ai", {
     macroFn: {};
     parser: {};
 }, {
-    ai: {};
+    [x: string]: {};
 } & {
-    ai: {
+    [x: string]: {
         chat: {
             post: {
                 body: {
+                    message: string;
+                } & {
                     sessionId?: string | undefined;
-                    context?: {
-                        domain?: string | undefined;
-                        entity?: {
-                            label?: string | undefined;
-                            id: string;
-                            type: string;
-                        } | undefined;
+                    context?: ({
                         source: string;
                         route: {
-                            name?: string | undefined;
                             path: string;
-                            params: {
-                                [x: string]: string;
-                            };
-                            query: {
-                                [x: string]: string;
-                            };
+                            params: Record<string, string>;
+                            query: Record<string, string>;
+                        } & {
+                            name?: string | undefined;
                         };
                         state: {
                             hasResumes: boolean;
@@ -88,9 +52,16 @@ export declare const aiRoutes: Elysia<"/ai", {
                             interviewSessionCount: number;
                             hasPortfolioProjects: boolean;
                             portfolioProjectCount: number;
-                        };
-                    } | undefined;
-                    message: string;
+                        } & {};
+                    } & {
+                        domain?: string | undefined;
+                        entity?: ({
+                            id: string;
+                            type: string;
+                        } & {
+                            label?: string | undefined;
+                        }) | undefined;
+                    }) | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -100,7 +71,7 @@ export declare const aiRoutes: Elysia<"/ai", {
                         message: string;
                         sessionId: string | null | undefined;
                         timestamp: string;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         followUps: string[];
                         contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
@@ -121,12 +92,13 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "analyze-resume": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     resumeId: string;
+                } & {
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -144,8 +116,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         message: string;
                         resumeId: string;
                         jobId: string | null;
-                        analysis: ResumeAnalysisResult;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        analysis: import("./ai-route-contracts").ResumeAnalysisResult;
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         error?: undefined;
                     };
@@ -163,14 +135,15 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "generate-cover-letter": {
             post: {
                 body: {
-                    jobId?: string | undefined;
                     resumeId: string;
                     company: string;
                     position: string;
+                } & {
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -184,8 +157,8 @@ export declare const aiRoutes: Elysia<"/ai", {
                         model?: undefined;
                     } | {
                         message: string;
-                        content: CoverLetterSections;
-                        provider: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                        content: import("./ai-route-contracts").CoverLetterSections;
+                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                         model: string;
                         error?: undefined;
                     };
@@ -203,19 +176,19 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "match-jobs": {
             post: {
-                body: {
+                body: {} & {
                     skills?: string[] | undefined;
                     resumeId?: string | undefined;
-                    preferences?: {} | undefined;
+                    preferences?: Record<string, string | number | boolean> | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: MatchJobsResponse | {
+                    200: import("./ai-route-contracts").MatchJobsResponse | {
                         error: string;
                     };
                     422: {
@@ -232,7 +205,7 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         models: {
             get: {
                 body: unknown;
@@ -240,39 +213,24 @@ export declare const aiRoutes: Elysia<"/ai", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
+                    200: import("../services/ai/control-plane").AIControlPlaneState | {
                         providers: {
-                            id: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            id: "openai" | "huggingface" | "local" | "gemini" | "claude";
                             nameKey: string;
                             descriptionKey: string;
-                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
+                            iconId: "openai" | "huggingface" | "local" | "gemini" | "claude";
                             models: string[];
                             available: boolean;
                             health: "unconfigured";
                         }[];
                         error: string;
-                        preferredProvider?: undefined;
-                        configuredProviders?: undefined;
-                    } | {
-                        providers: {
-                            id: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            nameKey: string;
-                            descriptionKey: string;
-                            iconId: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                            models: string[];
-                            available: boolean;
-                            health: "healthy" | "degraded" | "down" | "unconfigured";
-                        }[];
-                        preferredProvider: "gemini" | "claude" | "openai" | "huggingface" | "local";
-                        configuredProviders: ("gemini" | "claude" | "openai" | "huggingface" | "local")[];
-                        error?: undefined;
                     };
                 };
             };
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         usage: {
             get: {
                 body: unknown;
@@ -296,15 +254,16 @@ export declare const aiRoutes: Elysia<"/ai", {
         };
     };
 } & {
-    ai: {
+    [x: string]: {
         "automation-action": {
             post: {
                 body: {
+                    resumeId: string;
+                    action: string;
+                    jobUrl: string;
+                } & {
                     jobId?: string | undefined;
                     coverLetterId?: string | undefined;
-                    resumeId: string;
-                    jobUrl: string;
-                    action: string;
                 };
                 params: {};
                 query: unknown;
@@ -355,4 +314,3 @@ export declare const aiRoutes: Elysia<"/ai", {
     resolve: {};
     schema: {};
 }>;
-export {};

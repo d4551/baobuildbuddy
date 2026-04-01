@@ -1,5 +1,6 @@
 import enUS from "../packages/client/locales/en-US";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = {
   filePath: string;
@@ -43,15 +44,6 @@ type TemplateCharacterWindow = {
 const projectRoot = process.cwd();
 const sourceRoots = ["packages/client", "packages/shared/src"] as const;
 const sourceExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs"]);
-const ignoredDirectoryNames = new Set([
-  "node_modules",
-  ".git",
-  ".nuxt",
-  ".output",
-  "dist",
-  "dist-types",
-  "coverage",
-]);
 
 const translationCallPattern = /(?:\b\$?t)\(\s*(['"`])([^'"`]+)\1/gu;
 const staticAttributePattern =
@@ -69,9 +61,6 @@ const tagOpenToken = "<";
 const tagCloseToken = ">";
 const closingTagPrefix = "</";
 const declarationTagPrefix = "<!";
-
-const shouldIgnorePath = (pathValue: string): boolean =>
-  pathValue.split("/").some((segment) => ignoredDirectoryNames.has(segment));
 
 const hasSourceExtension = (pathValue: string): boolean => {
   for (const extension of sourceExtensions) {
@@ -132,20 +121,6 @@ const collectLocalePaths = (value: unknown): Set<string> => {
     }
   }
   return keys;
-};
-
-const getLineFromOffset = (text: string, offset: number): number => {
-  if (offset <= 0) {
-    return 1;
-  }
-
-  let line = 1;
-  for (let index = 0; index < offset; index += 1) {
-    if (text.charCodeAt(index) === 10) {
-      line += 1;
-    }
-  }
-  return line;
 };
 
 const scanSourceRoot = async (sourceRoot: (typeof sourceRoots)[number]): Promise<string[]> => {

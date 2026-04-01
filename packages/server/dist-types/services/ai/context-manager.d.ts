@@ -1,4 +1,5 @@
-import { type AIChatContextDomain, type BrandSettings, type ChatMessage } from "@bao/shared";
+import type { AIChatContextDomain, ChatMessage } from "@bao/shared/types/ai";
+import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 interface ConversationContext {
     systemPrompt: string;
     messages: Array<Pick<ChatMessage, "role" | "content">>;

@@ -144,7 +144,7 @@ fn main() {
     let app = match builder.build(tauri::generate_context!()) {
         Ok(app) => app,
         Err(error) => {
-            let message = format!("BaoBuildBuddy desktop wrapper failed to initialize: {error}");
+            let message = format!("BaoBuildBuddy desktop host failed to initialize: {error}");
             report_pre_app_failure("builder failure", message.as_str());
             return;
         }
@@ -182,7 +182,7 @@ fn initialize_runtime(app: &tauri::App) -> io::Result<()> {
             }
 
             println!(
-                "BaoBuildBuddy desktop wrapper: bundled ui active, server on http://{}:{}",
+                "BaoBuildBuddy desktop host: bundled ui active, server on http://{}:{}",
                 runtime.manifest.server_host, runtime.manifest.server_port
             );
         }
@@ -194,7 +194,7 @@ fn initialize_runtime(app: &tauri::App) -> io::Result<()> {
 
             wait_for_services(&startup)?;
             println!(
-                "BaoBuildBuddy desktop wrapper: server on http://{}:{}, ui on http://{}:{}",
+                "BaoBuildBuddy desktop host: server on http://{}:{}, ui on http://{}:{}",
                 startup.host, startup.server_port, startup.host, startup.client_port
             );
         }

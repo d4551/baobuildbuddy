@@ -8,6 +8,7 @@ This guide helps you run AI features on your own computer using Ollama, without 
 2. Download a model: `ollama pull llama3.2`
 3. Open BaoBuildBuddy > **Settings > AI Providers**.
 4. Set the endpoint to `http://localhost:11434/v1`, leave the model blank for auto-detect, then test and save.
+5. If the test fails, BaoBuildBuddy now returns the exact local failure mode instead of a generic error.
 
 ---
 
@@ -91,6 +92,23 @@ If you see a prompt and can ask a question, Ollama is working. Type `/bye` or pr
 
 The app defaults already match Ollama's local OpenAI-compatible endpoint, so many users only need to install Ollama and test the connection.
 
+## What the test button checks
+
+The local provider readiness check now uses the same contract in both **Setup** and **Settings**:
+
+- Endpoint reachable
+- `/v1/models` returns at least one model
+- The selected model exists when you enter one manually
+- The request does not time out
+
+Expected diagnostic outcomes:
+
+- `unreachable`: the endpoint could not be contacted
+- `timeout`: the endpoint did not respond in time
+- `empty-model-list`: the server responded, but no models were available
+- `invalid-model`: the configured model was not returned by the server
+- `healthy`: the endpoint is ready and BaoBuildBuddy can route local AI requests to it
+
 ## Step 6: Try a real feature
 
 After saving your settings, test one of these:
@@ -111,6 +129,12 @@ If any of those works, your local AI setup is complete.
 - The endpoint is `http://localhost:11434/v1`
 - You clicked "test" after saving
 
+If the UI reports `unreachable` or `timeout`, verify directly:
+
+```bash
+curl -fsS http://localhost:11434/v1/models
+```
+
 ### The connection works but replies fail
 
 Usually the model isn't downloaded yet:
@@ -122,6 +146,14 @@ ollama pull llama3.2
 ### The model field is empty
 
 That's fine. BaoBuildBuddy auto-detects the model from Ollama when the endpoint is set and the server has models available.
+
+### The UI says `invalid-model`
+
+Leave the model blank to use auto-detect, or update it to one of the IDs returned by:
+
+```bash
+curl -fsS http://localhost:11434/v1/models | jq '.data[].id'
+```
 
 ### It feels slow
 

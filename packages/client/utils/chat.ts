@@ -1,5 +1,5 @@
-import type { ChatMessage } from "@bao/shared";
-import { generateId } from "@bao/shared";
+import type { ChatMessage } from "@bao/shared/types/ai";
+import { generateId } from "@bao/shared/utils/validation";
 
 /** Render-ready chat row with a stable key and normalized payload. */
 export interface ChatMessageRenderRow {

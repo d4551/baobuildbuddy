@@ -1,4 +1,4 @@
-import { type CompanyBoardConfig, type JobProviderSettings } from "@bao/shared";
+import type { CompanyBoardConfig, JobProviderSettings } from "@bao/shared/types/settings-contracts";
 import type { JobProvider, RawJob } from "./provider-interface";
 /**
  * Provider that normalizes a single ATS board payload into `RawJob[]`.

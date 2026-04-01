@@ -1,4 +1,4 @@
-import { DEFAULT_PROFILE_ID } from "@bao/shared";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 

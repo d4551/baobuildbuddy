@@ -1,13 +1,5 @@
-import { type SkillMapping } from "@bao/shared";
 import { Elysia } from "elysia";
-type SkillAnalysisResponse = {
-    message: string;
-    detectedSkills: string[];
-    suggestedMappings: Record<string, unknown>[];
-    recommendations: string[];
-    provider?: string;
-};
-export declare const skillMappingRoutes: Elysia<"/skills", {
+export declare const skillMappingRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -31,14 +23,14 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     macroFn: {};
     parser: {};
 }, {
-    skills: {};
+    [x: string]: {};
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     search?: string | undefined;
                     category?: string | undefined;
                 };
@@ -71,26 +63,25 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             post: {
                 body: {
-                    confidence?: number | undefined;
-                    category?: string | undefined;
-                    industryApplications?: string[] | undefined;
-                    evidence?: {
-                        [x: string]: unknown;
-                    }[] | undefined;
-                    demandLevel?: string | undefined;
-                    aiGenerated?: boolean | undefined;
                     gameExpression: string;
                     transferableSkill: string;
+                } & {
+                    category?: string | undefined;
+                    industryApplications?: string[] | undefined;
+                    evidence?: Record<string, unknown>[] | undefined;
+                    confidence?: number | undefined;
+                    demandLevel?: string | undefined;
+                    aiGenerated?: boolean | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SkillMapping;
+                    200: import("@bao/shared/types/skill-mapping").SkillMapping;
                     422: {
                         type: "validation";
                         on: string;
@@ -105,29 +96,27 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             ":id": {
                 put: {
-                    body: {
-                        confidence?: number | undefined;
+                    body: {} & {
                         category?: string | undefined;
                         gameExpression?: string | undefined;
                         transferableSkill?: string | undefined;
                         industryApplications?: string[] | undefined;
-                        evidence?: {
-                            [x: string]: unknown;
-                        }[] | undefined;
+                        evidence?: Record<string, unknown>[] | undefined;
+                        confidence?: number | undefined;
                         demandLevel?: string | undefined;
                         aiGenerated?: boolean | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: SkillMapping | {
+                        200: import("@bao/shared/types/skill-mapping").SkillMapping | {
                             error: string;
                         };
                         422: {
@@ -145,38 +134,25 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         mappings: {
             ":id": {
                 delete: {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            readonly message: "Skill mapping deleted";
-                            readonly id: string;
-                        } & ({
-                            readonly message: "Skill mapping deleted";
-                            readonly id: string;
-                        } | {
+                        [x: number]: {
                             error: string;
-                        });
-                        410: {
-                            readonly error: "Skill mapping already deleted";
-                            readonly id: string;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
+                            id: string;
+                            message?: undefined;
+                        } | {
+                            message: string;
+                            id: string;
+                            error?: undefined;
                         };
                     };
                 };
@@ -184,7 +160,7 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         pathways: {
             get: {
                 body: unknown;
@@ -192,34 +168,34 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").CareerPathway[];
+                    200: import("@bao/shared/types/skill-mapping").CareerPathway[];
                 };
             };
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         readiness: {
             get: {
                 body: unknown;
                 params: {};
-                query: {
+                query: {} & {
                     jobId?: string | undefined;
                 };
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared").ReadinessAssessment | {
+                    200: import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
                         jobId: string;
                         overallScore: number;
                         categories: {
-                            technical: import("@bao/shared").CategoryAssessment;
-                            softSkills: import("@bao/shared").CategoryAssessment;
-                            industryKnowledge: import("@bao/shared").CategoryAssessment;
-                            portfolio: import("@bao/shared").CategoryAssessment;
+                            technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            softSkills: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            industryKnowledge: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            portfolio: import("@bao/shared/types/skill-mapping").CategoryAssessment;
                         };
-                        improvementSuggestions: import("@bao/shared").SkillReadinessImprovementId[];
-                        nextSteps: import("@bao/shared").SkillReadinessNextStepId[];
-                        targetRoleReadiness?: import("@bao/shared").RoleReadiness[];
+                        improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
+                        nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
+                        targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
                     };
                     422: {
                         type: "validation";
@@ -235,19 +211,25 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
         };
     };
 } & {
-    skills: {
+    [x: string]: {
         "ai-analyze": {
             post: {
-                body: {
-                    resume?: {} | undefined;
-                    gameExperience?: {} | undefined;
+                body: {} & {
+                    resume?: Record<string, unknown> | undefined;
+                    gameExperience?: Record<string, unknown> | undefined;
                     autoCreateMappings?: boolean | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SkillAnalysisResponse;
+                    200: {
+                        message: string;
+                        detectedSkills: string[];
+                        suggestedMappings: Record<string, unknown>[];
+                        recommendations: string[];
+                        provider?: string;
+                    };
                     422: {
                         type: "validation";
                         on: string;
@@ -282,4 +264,3 @@ export declare const skillMappingRoutes: Elysia<"/skills", {
     resolve: {};
     schema: {};
 }>;
-export {};

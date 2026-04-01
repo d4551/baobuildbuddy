@@ -1,4 +1,4 @@
-import { APP_ROUTES } from "@bao/shared";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path === APP_ROUTES.setup) return;

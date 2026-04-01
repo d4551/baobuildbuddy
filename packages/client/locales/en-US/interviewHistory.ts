@@ -1,0 +1,56 @@
+const interviewHistory = {
+  interviewHistory: {
+    title: "Interview History",
+    subtitle:
+      "Review prior interview runs, compare scores over time, and reopen full feedback for each session.",
+    allSessionsTitle: "All Sessions",
+    studioFilterAria: "Filter sessions by studio",
+    allStudiosOption: "All studios",
+    emptyState: "No interview sessions found.",
+    emptyStateTitle: "No interview sessions found",
+    emptyStateDescription:
+      "Start a new interview from a scraped job or studio drill to populate your practice history.",
+    tableAriaLabel: "Interview sessions",
+    timelineAriaLabel: "Interview sessions timeline view",
+    viewButton: "View",
+    viewSessionAria: "View interview session {id}",
+    loadingDetails: "Loading session details...",
+    retryButtonLabel: "Retry",
+    retryAria: "Retry loading interview session details",
+    detailsTitle: "Session Details",
+    closeDetailsAria: "Close session details panel",
+    detailStudioLabel: "Studio",
+    detailRoleLabel: "Role",
+    detailScoreLabel: "Overall Score",
+    timelineScoreAria: "Interview score: {score} percent",
+    detailScoreAria: "Interview score: {score} percent",
+    questionsLabel: "Questions",
+    questionAria: "Interview question {index}",
+    questionHeader: "Q{index}: {score}%",
+    overallFeedbackLabel: "Overall Feedback",
+    selectPrompt: "Select a session to view details",
+    selectPromptTitle: "Choose a session",
+    selectPromptDescription:
+      "Open any interview run from the list to inspect scores, answers, and AI feedback.",
+    fetchErrorFallback: "Failed to load interview sessions",
+    sessionNotFound: "Session not found",
+    detailLoadErrorFallback: "Failed to load session details",
+    fetchErrorTitle: "Could not load interview sessions",
+    notAvailable: "N/A",
+    minutesLabel: "{count} min",
+    viewModes: {
+      table: "Table",
+      timeline: "Timeline",
+    },
+    columns: {
+      date: "Date",
+      studio: "Studio",
+      role: "Role",
+      score: "Score",
+      duration: "Duration",
+      actions: "Actions",
+    },
+  },
+} as const;
+
+export default interviewHistory;

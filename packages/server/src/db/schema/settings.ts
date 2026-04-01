@@ -1,15 +1,21 @@
-import type { AutomationSettings, EmailTransportSettings } from "@bao/shared";
 import {
   AI_PROVIDER_DEFAULT_ORDER,
+  DEFAULT_AI_ROUTING,
+  LOCAL_AI_DEFAULT_ENDPOINT,
+  LOCAL_AI_DEFAULT_MODEL,
+} from "@bao/shared/constants/ai-provider";
+import { DEFAULT_BRAND_SETTINGS, THEME_NAMES } from "@bao/shared/constants/branding";
+import type { AIRouting } from "@bao/shared/types/ai";
+import type {
+  AutomationSettings,
+  EmailTransportSettings,
+} from "@bao/shared/types/settings-contracts";
+import {
   DEFAULT_AUTOMATION_SETTINGS,
-  DEFAULT_BRAND_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
   DEFAULT_SETTINGS_ID,
-  LOCAL_AI_DEFAULT_ENDPOINT,
-  LOCAL_AI_DEFAULT_MODEL,
-  THEME_NAMES,
-} from "@bao/shared";
+} from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -21,6 +27,9 @@ export const settings = sqliteTable("settings", {
   huggingfaceToken: text("huggingface_token"),
   localModelEndpoint: text("local_model_endpoint").default(LOCAL_AI_DEFAULT_ENDPOINT),
   localModelName: text("local_model_name").default(LOCAL_AI_DEFAULT_MODEL),
+  aiRouting: text("ai_routing", { mode: "json" })
+    .$type<AIRouting>()
+    .default(sql.raw(`'${JSON.stringify(DEFAULT_AI_ROUTING).replaceAll("'", "''")}'`)),
   preferredProvider: text("preferred_provider").default(AI_PROVIDER_DEFAULT_ORDER[0]),
   preferredModel: text("preferred_model"),
   theme: text("theme").default(THEME_NAMES.light),

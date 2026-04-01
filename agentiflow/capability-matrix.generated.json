@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-03-20T17:57:17.995Z",
+  "generatedAt": "2026-03-31T20:37:57.441Z",
   "repository": {
     "name": "bao-build-buddy",
-    "packageManager": "bun@1.3.10",
+    "packageManager": "bun@1.3.11",
     "workspaceGlobs": ["packages/*"]
   },
   "stack": {
@@ -54,7 +54,8 @@
       "packages/scraper/src/scripts/job-apply.ts",
       "packages/scraper/src/job-apply/runtime.ts",
       "packages/scraper/src/runtime/protocol.ts",
-      "packages/server/src/services/automation/rpa-runner.ts",
+      "packages/server/src/services/automation/rpa-runner-protocol.ts",
+      "packages/server/src/services/automation/rpa-runner-process.ts",
       "packages/server/src/services/automation/application-automation-service.ts"
     ],
     "serverContracts": [
@@ -67,8 +68,8 @@
       "packages/client/pages/automation/email.vue",
       "packages/client/pages/automation/index.vue",
       "packages/client/pages/automation/job-apply.vue",
-      "packages/client/pages/automation/runs.vue",
       "packages/client/pages/automation/runs/[id].vue",
+      "packages/client/pages/automation/runs/index.vue",
       "packages/client/pages/automation/scraper.vue"
     ]
   },

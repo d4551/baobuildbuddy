@@ -1,5 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { API_ERROR_SCRAPE_JOBS_FAILED, API_ERROR_SCRAPE_STUDIOS_FAILED } from "@bao/shared";
+import {
+  API_ERROR_SCRAPE_JOBS_FAILED,
+  API_ERROR_SCRAPE_STUDIOS_FAILED,
+} from "@bao/shared/constants/api-errors";
+import {
+  API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
+  buildScraperJobsEndpoint,
+} from "@bao/shared/constants/endpoints";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 
@@ -13,6 +21,13 @@ const successfulScraperResult: ScraperOperationResult = {
   scraped: 2,
   upserted: 2,
   errors: [],
+  enrichment: {
+    enabled: true,
+    enrichedRecords: 2,
+    warnings: [],
+    provider: "local",
+    model: "deterministic-test-model",
+  },
 };
 
 const successfulScrapeJobsForPortal = (): Promise<ScraperOperationResult> =>
@@ -34,7 +49,7 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.scraperRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.scraperRoutes);
   originalScrapeStudios = scraperService.scrapeStudios.bind(scraperService);
   originalScrapeJobsForPortal = scraperService.scrapeJobsForPortal.bind(scraperService);
 });
@@ -53,25 +68,30 @@ afterAll(() => {
 });
 
 function registerStudioScraperRouteTests(): void {
-  test("POST /api/scraper/studios returns scrape result contract on success", async () => {
+  test("POST scraper studios returns scrape result contract on success", async () => {
     scraperService.scrapeStudios = () => Promise.resolve(successfulScraperResult);
 
-    const result = await requestJson<ScraperOperationResult>(app, "POST", "/api/scraper/studios");
+    const result = await requestJson<ScraperOperationResult>(
+      app,
+      "POST",
+      API_ENDPOINTS.scraperStudios,
+    );
 
     expect(result.status).toBe(200);
     expect(result.body.scraped).toBe(2);
     expect(result.body.upserted).toBe(2);
     expect(Array.isArray(result.body.errors)).toBe(true);
     expect(result.body.errors).toEqual([]);
+    expect(result.body.enrichment.enrichedRecords).toBe(2);
   });
 
-  test("POST /api/scraper/studios forwards service errors as API error payload", async () => {
+  test("POST scraper studios forwards service errors as API error payload", async () => {
     scraperService.scrapeStudios = failedScrapeStudios;
 
     const result = await requestJson<{ error: string; details: string }>(
       app,
       "POST",
-      "/api/scraper/studios",
+      API_ENDPOINTS.scraperStudios,
     );
 
     expect(result.status).toBe(500);
@@ -81,28 +101,29 @@ function registerStudioScraperRouteTests(): void {
 }
 
 function registerJobScraperRouteTests(): void {
-  test("POST /api/scraper/jobs/hitmarker returns scrape result contract on success", async () => {
+  test("POST scraper jobs hitmarker returns scrape result contract on success", async () => {
     scraperService.scrapeJobsForPortal = successfulScrapeJobsForPortal;
 
     const result = await requestJson<ScraperOperationResult>(
       app,
       "POST",
-      "/api/scraper/jobs/hitmarker",
+      API_ENDPOINTS.scraperJobsHitmarker,
     );
 
     expect(result.status).toBe(200);
     expect(result.body.scraped).toBe(2);
     expect(result.body.upserted).toBe(2);
     expect(result.body.errors).toEqual([]);
+    expect(result.body.enrichment.model).toBe("deterministic-test-model");
   });
 
-  test("POST /api/scraper/jobs/grackle forwards service errors as API error payload", async () => {
+  test("POST scraper jobs grackle forwards service errors as API error payload", async () => {
     scraperService.scrapeJobsForPortal = failedScrapeJobs;
 
     const result = await requestJson<{ error: string; details: string }>(
       app,
       "POST",
-      "/api/scraper/jobs/grackle",
+      buildScraperJobsEndpoint("grackle"),
     );
 
     expect(result.status).toBe(500);
@@ -110,11 +131,11 @@ function registerJobScraperRouteTests(): void {
     expect(result.body.details).toContain("portal scrape script failed");
   });
 
-  test("POST /api/scraper/jobs/:portalId rejects unsupported portals", async () => {
+  test("POST scraper jobs portal rejects unsupported portals", async () => {
     const result = await requestJson<{ error: string; details: string }>(
       app,
       "POST",
-      "/api/scraper/jobs/not-a-portal",
+      `${API_ENDPOINTS.scraperJobsBase}/not-a-portal`,
     );
 
     expect(result.status).toBe(400);

@@ -1,0 +1,61 @@
+import type { AIProviderType } from "@bao/shared/types/ai";
+import type { settings as settingsTable } from "../db/schema/settings";
+type SettingsRow = typeof settingsTable.$inferSelect;
+export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
+    automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
+    localModelEndpoint: string | null;
+    aiRouting: import("@bao/shared/types/ai").AIRouting;
+    providerDiagnostics: Partial<Record<"openai" | "huggingface" | "local" | "gemini" | "claude", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
+    preferredProvider: string | null;
+    preferredModel: string | null;
+    theme: import("@bao/shared/constants/branding").AppDataTheme;
+    brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
+    geminiApiKey: string | null;
+    openaiApiKey: string | null;
+    claudeApiKey: string | null;
+    huggingfaceToken: string | null;
+    hasGeminiKey: boolean;
+    hasOpenaiKey: boolean;
+    hasClaudeKey: boolean;
+    hasHuggingfaceToken: boolean;
+    hasEmailTransportPassword: boolean;
+    hasLocalKey: boolean;
+    jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    localModelName: string | null;
+    language: string | null;
+    notifications: Record<string, boolean> | null;
+    emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
+}>;
+export declare const testProviderConnection: (body: {
+    provider: AIProviderType;
+    key: string;
+    model?: string;
+}) => Promise<{
+    valid: boolean;
+    provider: "local";
+    diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+    message: string | undefined;
+    availableModels: readonly string[] | undefined;
+    selectedModel: string | undefined;
+    error?: undefined;
+} | {
+    valid: boolean;
+    provider: "openai" | "huggingface" | "gemini" | "claude";
+    error: string;
+    diagnosticCode?: undefined;
+    message?: undefined;
+    availableModels?: undefined;
+    selectedModel?: undefined;
+} | {
+    valid: boolean;
+    provider: "openai" | "huggingface" | "gemini" | "claude";
+    diagnosticCode: "healthy" | "error";
+    message: string | undefined;
+    availableModels?: undefined;
+    selectedModel?: undefined;
+    error?: undefined;
+}>;
+export {};

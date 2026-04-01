@@ -1,123 +1,117 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import type { ResumePersonalFields } from "./resume-page-contracts";
 
 const props = defineProps<{
-  modelValue: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    location?: string;
-    website?: string;
-    linkedin?: string;
-    github?: string;
-  };
+  modelValue: ResumePersonalFields;
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [value: typeof props.modelValue];
+  "update:modelValue": [value: ResumePersonalFields];
 }>();
 const { t } = useI18n();
 
-const localValue = ref({ ...props.modelValue });
-
-watch(
-  localValue,
-  (newValue) => {
-    emit("update:modelValue", { ...newValue });
-  },
-  { deep: true },
-);
+const localValue = reactive<ResumePersonalFields>({
+  ...props.modelValue,
+});
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    localValue.value = { ...newValue };
+    Object.assign(localValue, newValue);
   },
   { deep: true },
 );
+
+function emitValue(): void {
+  emit("update:modelValue", { ...localValue });
+}
 </script>
 
 <template>
-  <fieldset class="fieldset border border-base-300 rounded-lg p-6">
-    <legend class="fieldset-legend">{{ t("resumeComponentPersonalInfo.title") }}</legend>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label for="personal-name" class="label">{{ t("resumeComponentPersonalInfo.nameLabel") }}</label>
+  <div class="space-y-4 p-6">
+    <h2 class="text-lg font-semibold">{{ t("resumePage.personal.title") }}</h2>
+    <SectionGrid grid-token="twoColumn">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.fullNameLegend") }}</legend>
         <input
-          id="personal-name"
           v-model="localValue.name"
           type="text"
-          :placeholder="t('resumeComponentPersonalInfo.namePlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.nameAria')"/>
-      </div>
-
-      <div>
-        <label for="personal-email" class="label">{{ t("resumeComponentPersonalInfo.emailLabel") }}</label>
+          required
+          minlength="2"
+          class="input validator w-full"
+          :aria-label="t('resumePage.personal.fullNameAria')"
+          @input="emitValue"
+        />
+        <p class="validator-hint">{{ t("resumePage.personal.fullNameHint") }}</p>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.emailLegend") }}</legend>
         <input
-          id="personal-email"
           v-model="localValue.email"
           type="email"
-          :placeholder="t('resumeComponentPersonalInfo.emailPlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.emailAria')"/>
-      </div>
-
-      <div>
-        <label for="personal-phone" class="label">{{ t("resumeComponentPersonalInfo.phoneLabel") }}</label>
+          required
+          class="input validator w-full"
+          :aria-label="t('resumePage.personal.emailAria')"
+          @input="emitValue"
+        />
+        <p class="validator-hint">{{ t("resumePage.personal.emailHint") }}</p>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.phoneLegend") }}</legend>
         <input
-          id="personal-phone"
           v-model="localValue.phone"
           type="tel"
-          :placeholder="t('resumeComponentPersonalInfo.phonePlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.phoneAria')"/>
-      </div>
-
-      <div>
-        <label for="personal-location" class="label">{{ t("resumeComponentPersonalInfo.locationLabel") }}</label>
+          pattern="^[+0-9()\\-\\s]{7,20}$"
+          class="input validator w-full"
+          :aria-label="t('resumePage.personal.phoneAria')"
+          @input="emitValue"
+        />
+        <p class="validator-hint">{{ t("resumePage.personal.phoneHint") }}</p>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.locationLegend") }}</legend>
         <input
-          id="personal-location"
           v-model="localValue.location"
           type="text"
-          :placeholder="t('resumeComponentPersonalInfo.locationPlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.locationAria')"/>
-      </div>
-
-      <div>
-        <label for="personal-website" class="label">{{ t("resumeComponentPersonalInfo.websiteLabel") }}</label>
+          class="input w-full"
+          :aria-label="t('resumePage.personal.locationAria')"
+          @input="emitValue"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.linkedInLegend") }}</legend>
         <input
-          id="personal-website"
-          v-model="localValue.website"
+          v-model="localValue.linkedIn"
           type="url"
-          :placeholder="t('resumeComponentPersonalInfo.websitePlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.websiteAria')"/>
-      </div>
-
-      <div>
-        <label for="personal-linkedin" class="label">{{ t("resumeComponentPersonalInfo.linkedinLabel") }}</label>
+          class="input w-full"
+          :aria-label="t('resumePage.personal.linkedInAria')"
+          @input="emitValue"
+        />
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">{{ t("resumePage.personal.portfolioLegend") }}</legend>
         <input
-          id="personal-linkedin"
-          v-model="localValue.linkedin"
+          v-model="localValue.portfolio"
           type="url"
-          :placeholder="t('resumeComponentPersonalInfo.linkedinPlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.linkedinAria')"/>
-      </div>
-
-      <div class="md:col-span-2">
-        <label for="personal-github" class="label">{{ t("resumeComponentPersonalInfo.githubLabel") }}</label>
-        <input
-          id="personal-github"
-          v-model="localValue.github"
-          type="url"
-          :placeholder="t('resumeComponentPersonalInfo.githubPlaceholder')"
-          class="input"
-          :aria-label="t('resumeComponentPersonalInfo.githubAria')"/>
-      </div>
-    </div>
-  </fieldset>
+          class="input w-full"
+          :aria-label="t('resumePage.personal.portfolioAria')"
+          @input="emitValue"
+        />
+      </fieldset>
+    </SectionGrid>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">{{ t("resumePage.personal.summaryLegend") }}</legend>
+      <textarea
+        v-model="localValue.summary"
+        required
+        minlength="50"
+        class="textarea validator w-full"
+        rows="4"
+        :aria-label="t('resumePage.personal.summaryAria')"
+        @input="emitValue"
+      ></textarea>
+      <p class="validator-hint">{{ t("resumePage.personal.summaryHint") }}</p>
+    </fieldset>
+  </div>
 </template>

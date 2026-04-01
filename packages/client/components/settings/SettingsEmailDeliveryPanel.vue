@@ -1,0 +1,235 @@
+<script setup lang="ts">
+import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
+import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+
+defineProps<{
+  emailDeliveryConfigured: boolean;
+  hasStoredPassword: boolean;
+  resolvedBrandName: string;
+  securityOptionLabels: ReadonlyArray<{ value: string; label: string }>;
+  authModeOptionLabels: ReadonlyArray<{ value: string; label: string }>;
+}>();
+
+const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
+  required: true,
+});
+const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
+  required: true,
+});
+
+const emit = defineEmits<{
+  saveSettings: [];
+  savePassword: [];
+  clearPassword: [];
+}>();
+
+const { t } = useI18n();
+</script>
+
+<template>
+  <div class="card card-border bg-base-100">
+    <div class="card-body">
+      <SettingsPanelHeader
+        :title="t('settings.emailDelivery.title')"
+        :description="t('settings.emailDelivery.subtitle')"
+      >
+        <template #meta>
+          <span
+            class="badge"
+            :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+          >
+            {{
+              emailDeliveryConfigured
+                ? t("settings.emailDelivery.configuredBadge")
+                : t("settings.emailDelivery.incompleteBadge")
+            }}
+          </span>
+        </template>
+      </SettingsPanelHeader>
+
+      <div class="space-y-4">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">
+            {{ t("settings.emailDelivery.hostLegend") }}
+          </legend>
+          <input
+            v-model="emailTransportForm.host"
+            class="input w-full"
+            type="text"
+            :placeholder="t('settings.emailDelivery.hostPlaceholder')"
+            :aria-label="t('settings.emailDelivery.hostAria')"
+          />
+        </fieldset>
+
+        <SectionGrid grid-token="twoColumn">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.portLegend") }}
+            </legend>
+            <input
+              v-model.number="emailTransportForm.port"
+              class="input w-full"
+              type="number"
+              min="1"
+              max="65535"
+              :aria-label="t('settings.emailDelivery.portAria')"
+            />
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.timeoutLegend") }}
+            </legend>
+            <input
+              v-model.number="emailTransportForm.connectionTimeoutSeconds"
+              class="input w-full"
+              type="number"
+              min="1"
+              max="120"
+              :aria-label="t('settings.emailDelivery.timeoutAria')"
+            />
+          </fieldset>
+        </SectionGrid>
+
+        <SectionGrid grid-token="twoColumn">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.securityLegend") }}
+            </legend>
+            <select
+              v-model="emailTransportForm.security"
+              class="select w-full"
+              :aria-label="t('settings.emailDelivery.securityAria')"
+            >
+              <option
+                v-for="option in securityOptionLabels"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.authLegend") }}
+            </legend>
+            <select
+              v-model="emailTransportForm.authMethod"
+              class="select w-full"
+              :aria-label="t('settings.emailDelivery.authAria')"
+            >
+              <option
+                v-for="option in authModeOptionLabels"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </fieldset>
+        </SectionGrid>
+
+        <SectionGrid grid-token="twoColumn">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.usernameLegend") }}
+            </legend>
+            <input
+              v-model="emailTransportForm.username"
+              class="input w-full"
+              type="text"
+              :placeholder="
+                t('settings.emailDelivery.usernamePlaceholder')
+              "
+              :aria-label="t('settings.emailDelivery.usernameAria')"
+            />
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t("settings.emailDelivery.fromNameLegend") }}
+            </legend>
+            <input
+              v-model="emailTransportForm.fromName"
+              class="input w-full"
+              type="text"
+              :placeholder="
+                t('settings.emailDelivery.fromNamePlaceholder', {
+                  brand: resolvedBrandName,
+                })
+              "
+              :aria-label="t('settings.emailDelivery.fromNameAria')"
+            />
+          </fieldset>
+        </SectionGrid>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">
+            {{ t("settings.emailDelivery.fromEmailLegend") }}
+          </legend>
+          <input
+            v-model="emailTransportForm.fromEmail"
+            class="input w-full"
+            type="email"
+            :placeholder="
+              t('settings.emailDelivery.fromEmailPlaceholder')
+            "
+            :aria-label="t('settings.emailDelivery.fromEmailAria')"
+          />
+          <p class="label">
+            {{ t("settings.emailDelivery.fromEmailHint") }}
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">
+            {{ t("settings.emailDelivery.passwordLegend") }}
+          </legend>
+          <input
+            v-model="emailTransportPasswordDraft"
+            class="input w-full"
+            type="password"
+            :placeholder="t('settings.emailDelivery.passwordPlaceholder')"
+            :aria-label="t('settings.emailDelivery.passwordAria')"
+          />
+          <p class="label">
+            {{
+              hasStoredPassword
+                ? t("settings.emailDelivery.passwordStoredHint")
+                : t("settings.emailDelivery.passwordHint")
+            }}
+          </p>
+        </fieldset>
+      </div>
+
+      <div class="card-actions justify-end gap-2 mt-2">
+        <button
+          class="btn btn-outline"
+          :disabled="!hasStoredPassword"
+          :aria-label="t('settings.emailDelivery.clearPasswordAria')"
+          @click="emit('clearPassword')"
+        >
+          {{ t("settings.emailDelivery.clearPasswordButton") }}
+        </button>
+        <button
+          class="btn btn-secondary"
+          :aria-label="t('settings.emailDelivery.savePasswordAria')"
+          @click="emit('savePassword')"
+        >
+          {{ t("settings.emailDelivery.savePasswordButton") }}
+        </button>
+        <button
+          class="btn btn-primary"
+          :aria-label="t('settings.emailDelivery.saveAria')"
+          @click="emit('saveSettings')"
+        >
+          {{ t("settings.emailDelivery.saveButton") }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>

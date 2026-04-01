@@ -1,3 +1,7 @@
+type AutomationScriptRunnerConfig = {
+    executablePath: string | null;
+    entrypointPath: string | null;
+};
 /**
  * Expand a path that starts with ~ to the current user home directory.
  */
@@ -8,7 +12,9 @@ export declare function expandHomeDirectory(pathValue: string): string;
 export declare function resolveDatabasePath(rawPath?: string): string;
 export declare const defaultDatabasePath: string;
 export declare const AUTOMATION_SCREENSHOT_DIR: string;
+export declare const readAutomationScriptRunnerConfig: () => AutomationScriptRunnerConfig;
 /**
  * Absolute path to the shared scraper package used by automation services.
  */
 export declare const SCRAPER_DIR: string;
+export {};

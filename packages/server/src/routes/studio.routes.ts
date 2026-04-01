@@ -1,23 +1,24 @@
-import {
-  API_ERROR_STUDIO_NOT_FOUND,
-  API_MESSAGE_STUDIO_DELETED,
-  generateId,
-  HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_ITEMS_MEDIUM,
-  SCHEMA_MAX_ITEMS_SMALL,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_LABEL,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_TINY,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared";
+import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { generateId } from "@bao/shared/utils/validation";
+import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
+import {
+  type RouteSetState,
+  type StudioIdParams,
+  type StudioListRouteQuery,
+  type StudioMutationRouteBody,
+  type StudioUpdateRouteBody,
+  studioIdParamsSchema,
+  studioListQuerySchema,
+  studioMutationBodySchema,
+  studioUpdateBodySchema,
+} from "./studio-route-contracts";
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -27,10 +28,13 @@ export interface StudioAnalytics {
   topTechnologies: Array<{ name: string; count: number }>;
 }
 
-export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] })
+export const studioRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.studiosBase),
+  tags: ["Studios"],
+})
   .get(
     "/",
-    async ({ query }) => {
+    async ({ query }: { query: StudioListRouteQuery }) => {
       const { q = "", type, size, remoteWork } = query;
 
       let results = await db.select().from(studios).orderBy(desc(studios.createdAt));
@@ -65,17 +69,12 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return results;
     },
     {
-      query: t.Object({
-        q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        remoteWork: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-      }),
+      query: StandardSchemaV1(studioListQuerySchema),
     },
   )
   .get(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -84,14 +83,12 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return rows[0];
     },
     {
-      params: t.Object({
-        id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-      }),
+      params: StandardSchemaV1(studioIdParamsSchema),
     },
   )
   .post(
     "/",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
       const newStudio = {
         id: generateId(),
         name: body.name,
@@ -116,48 +113,20 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return newStudio;
     },
     {
-      body: t.Object({
-        name: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-        remoteWork: t.Optional(t.Boolean()),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-        genres: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        culture: t.Optional(t.Record(t.String(), t.Unknown())),
-        benefits: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        socialMedia: t.Optional(t.Record(t.String(), t.String())),
-        notableGames: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-      }),
+      body: StandardSchemaV1(studioMutationBodySchema),
     },
   )
   .put(
     "/:id",
-    async ({ params, body, set }) => {
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: StudioIdParams;
+      body: StudioUpdateRouteBody;
+      set: RouteSetState;
+    }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -174,49 +143,13 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return updated[0];
     },
     {
-      params: t.Object({ id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }),
-      body: t.Object({
-        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-        founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-        remoteWork: t.Optional(t.Boolean()),
-        technologies: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-        genres: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        platforms: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_SMALL,
-          }),
-        ),
-        culture: t.Optional(t.Record(t.String(), t.Unknown())),
-        benefits: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
-          }),
-        ),
-        socialMedia: t.Optional(t.Record(t.String(), t.String())),
-        notableGames: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-      }),
+      params: StandardSchemaV1(studioIdParamsSchema),
+      body: StandardSchemaV1(studioUpdateBodySchema),
     },
   )
   .delete(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -227,7 +160,7 @@ export const studioRoutes = new Elysia({ prefix: "/studios", tags: ["Studios"] }
       return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
     },
     {
-      params: t.Object({ id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }) }),
+      params: StandardSchemaV1(studioIdParamsSchema),
     },
   )
   .get("/analytics", async (): Promise<StudioAnalytics> => {

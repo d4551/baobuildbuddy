@@ -1,425 +1,110 @@
 <script setup lang="ts">
-import type { ReadinessAssessment, SkillReadinessFeedbackId } from "@bao/shared";
-import { APP_ROUTES, getGamificationPathwayIcon } from "@bao/shared";
+import { definePageMeta, useSeoMeta } from "#imports";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import {
-  SKILLS_READINESS_DIAL_SIZE_REM,
-  SKILLS_READINESS_MAX,
-  SKILLS_READINESS_MIN,
-  SKILLS_READINESS_THRESHOLD_HIGH,
-  SKILLS_READINESS_THRESHOLD_MEDIUM,
-} from "~/constants/skills";
+import { useSkillsPathwaysPage } from "~/composables/useSkillsPathwaysPage";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],
 });
-
-type ReadinessCategoryKey = "technical" | "softSkills" | "industryKnowledge" | "portfolio";
-
-interface ReadinessCategoryStat {
-  readonly key: ReadinessCategoryKey;
-  readonly score: number;
-  readonly feedbackId: SkillReadinessFeedbackId;
-}
-
-const READINESS_CATEGORY_LABEL_KEYS: Record<ReadinessCategoryKey, string> = {
-  technical: "skillsPathwaysPage.categories.technical",
-  softSkills: "skillsPathwaysPage.categories.softSkills",
-  industryKnowledge: "skillsPathwaysPage.categories.industryKnowledge",
-  portfolio: "skillsPathwaysPage.categories.portfolio",
-};
-const READINESS_CATEGORY_KEYS = [
-  "technical",
-  "softSkills",
-  "industryKnowledge",
-  "portfolio",
-] as const satisfies readonly ReadinessCategoryKey[];
-
-const api = useApi();
-const { $toast } = useNuxtApp();
 const { t } = useI18n();
+const page = useSkillsPathwaysPage();
 
-if (import.meta.server) {
-  useServerSeoMeta({
-    title: t("skillsPathwaysPage.seoTitle"),
-    description: t("skillsPathwaysPage.seoDescription"),
-  });
-}
-
-const { data, status, error, refresh } = await useAsyncData(
-  "skills-pathways-bootstrap",
-  async () => {
-    const [pathwaysResponse, readinessResponse] = await Promise.all([
-      api.skills.pathways.get(),
-      api.skills.readiness.get(),
-    ]);
-
-    if (pathwaysResponse.error) {
-      throw new Error(
-        getErrorMessage(pathwaysResponse.error, t("skillsPathwaysPage.errors.pathwaysLoadFailed")),
-      );
-    }
-    if (readinessResponse.error) {
-      throw new Error(
-        getErrorMessage(
-          readinessResponse.error,
-          t("skillsPathwaysPage.errors.readinessLoadFailed"),
-        ),
-      );
-    }
-
-    return {
-      pathways: pathwaysResponse.data,
-      readiness: readinessResponse.data,
-    };
-  },
-  {
-    lazy: false,
-    server: true,
-  },
-);
-
-const {
-  data: gamificationProgress,
-  status: gamificationStatus,
-  error: gamificationError,
-  refresh: refreshGamificationProgress,
-} = await useAsyncData(
-  "skills-pathways-gamification-progress",
-  async () => {
-    const progressResponse = await api.gamification.progress.get();
-    if (progressResponse.error) {
-      throw new Error(
-        getErrorMessage(
-          progressResponse.error,
-          t("skillsPathwaysPage.errors.gamificationLoadFailed"),
-        ),
-      );
-    }
-
-    return progressResponse.data;
-  },
-  {
-    lazy: false,
-    server: true,
-  },
-);
-
-const gamificationReady = computed(() => gamificationStatus.value === "success");
-
-const uiState = computed(() => {
-  if (status.value === "pending") return "loading";
-  if (status.value === "error") return "error";
-  if (status.value === "idle") return "loading";
-  return "success";
+useSeoMeta({
+  title: t("skillsPathwaysPage.seoTitle"),
+  description: t("skillsPathwaysPage.seoDescription"),
 });
-
-const breadcrumbs = computed(() => [
-  { label: t("nav.skills"), to: APP_ROUTES.skills },
-  { label: t("skillsPathwaysPage.title") },
-]);
-
-const gamificationLevel = computed(() =>
-  gamificationReady.value ? (gamificationProgress.value?.level ?? 1) : 0,
-);
-const gamificationXP = computed(() =>
-  gamificationReady.value ? (gamificationProgress.value?.xp ?? 0) : 0,
-);
-
-const readinessAssessment = computed<ReadinessAssessment | null>(
-  () => data.value?.readiness ?? null,
-);
-
-const sortedPathways = computed(() =>
-  [...(data.value?.pathways ?? [])].sort((left, right) => right.matchScore - left.matchScore),
-);
-
-const readinessCategories = computed<readonly ReadinessCategoryStat[]>(() => {
-  if (!readinessAssessment.value) return [];
-
-  return READINESS_CATEGORY_KEYS.map((key) => ({
-    key,
-    score: readinessAssessment.value?.categories[key].score ?? 0,
-    feedbackId: readinessAssessment.value?.categories[key].feedbackId ?? "empty",
-  }));
-});
-
-watch(
-  () => error.value,
-  (nextError) => {
-    if (import.meta.client && nextError) {
-      $toast.error(getErrorMessage(nextError, t("skillsPathwaysPage.errors.loadFailed")));
-    }
-  },
-);
-
-async function retryLoad(): Promise<void> {
-  await refresh();
-}
-
-function getReadinessColor(percentage: number): string {
-  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return "progress-success";
-  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return "progress-warning";
-  return "progress-error";
-}
-
-function getReadinessBadgeColor(percentage: number): string {
-  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return "badge-success";
-  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return "badge-warning";
-  return "badge-error";
-}
-
-function getCategoryLabel(key: ReadinessCategoryKey): string {
-  return t(READINESS_CATEGORY_LABEL_KEYS[key]);
-}
-
-function getCategoryFeedbackLabel(
-  categoryKey: ReadinessCategoryKey,
-  feedbackId: SkillReadinessFeedbackId,
-): string {
-  return t(`skillsPathwaysPage.readiness.feedback.${feedbackId}`, {
-    category: getCategoryLabel(categoryKey),
-  });
-}
-
-function getReadinessImprovementLabel(
-  item: ReadinessAssessment["improvementSuggestions"][number],
-): string {
-  return t(`skillsPathwaysPage.readiness.improvements.${item}`);
-}
-
-function getReadinessNextStepLabel(item: ReadinessAssessment["nextSteps"][number]): string {
-  return t(`skillsPathwaysPage.readiness.nextStepItems.${item}`);
-}
-
-function getPathwayIcon(pathwayId: string): string {
-  return getGamificationPathwayIcon(pathwayId);
-}
-
-function getReadinessDialStyle(score: number): Record<string, string> {
-  return {
-    "--value": String(score),
-    "--size": `${SKILLS_READINESS_DIAL_SIZE_REM}rem`,
-  };
-}
 </script>
 
 <template>
-  <section class="space-y-6">
-    <AppBreadcrumbs :crumbs="breadcrumbs" />
+  <PageScaffold tag="section" labelled-by="skills-pathways-title">
+    <AppBreadcrumbs :crumbs="page.breadcrumbs.value" />
 
-    <header class="flex flex-wrap items-start justify-between gap-3">
-      <div class="space-y-1">
-        <h1 class="text-3xl font-bold">{{ t("skillsPathwaysPage.title") }}</h1>
-        <p class="text-sm text-base-content/70">{{ t("skillsPathwaysPage.subtitle") }}</p>
-      </div>
-      <NuxtLink
-        v-if="gamificationReady"
-        :to="APP_ROUTES.gamification"
-        class="btn btn-ghost btn-sm gap-2"
-        :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
-      >
-        <span class="badge badge-primary badge-sm">
-          {{ t("skillsPathwaysPage.gamification.levelLabel", { level: gamificationLevel }) }}
+    <PageHeroHeader
+      title-id="skills-pathways-title"
+      :title="t('skillsPathwaysPage.title')"
+      :description="t('skillsPathwaysPage.subtitle')"
+    >
+      <template #actions>
+        <NuxtLink
+          v-if="page.gamificationReady.value"
+          :to="APP_ROUTES.gamification"
+          class="btn btn-ghost"
+          :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
+        >
+          <span class="badge badge-primary badge-sm">
+            {{ t("skillsPathwaysPage.gamification.levelLabel", { level: page.gamificationLevel.value }) }}
+          </span>
+          <span class="text-xs">{{
+            t("skillsPathwaysPage.gamification.xpLabel", { xp: page.gamificationXP.value })
+          }}</span>
+        </NuxtLink>
+        <span
+          v-else-if="
+            page.gamificationStatus.value === 'pending' ||
+              page.gamificationStatus.value === 'idle'
+          "
+          class="badge badge-ghost badge-sm"
+        >
+          {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
         </span>
-        <span class="text-xs">{{ t("skillsPathwaysPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
-      </NuxtLink>
-      <span
-        v-else-if="gamificationStatus === 'pending' || gamificationStatus === 'idle'"
-        class="badge badge-ghost badge-sm"
-      >
-        {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
-      </span>
-    </header>
+      </template>
+    </PageHeroHeader>
 
     <BootstrapErrorAlert
-      v-if="gamificationStatus === 'error'"
+      v-if="page.gamificationStatus.value === 'error'"
       severity="warning"
-      :message="getErrorMessage(gamificationError, t('skillsPathwaysPage.errors.gamificationLoadFailed'))"
+      :message="
+        getErrorMessage(
+          page.gamificationError.value,
+          t('skillsPathwaysPage.errors.gamificationLoadFailed'),
+        )
+      "
       :retry-label="t('skillsPathwaysPage.gamification.retryButton')"
       :retry-aria-label="t('skillsPathwaysPage.gamification.retryAria')"
-      @retry="() => refreshGamificationProgress()"
+      @retry="() => page.refreshGamificationProgress()"
     />
 
-    <LoadingSkeleton v-if="uiState === 'loading'" variant="cards" :lines="8" />
+    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="8" />
 
-    <div v-else-if="uiState === 'error'" class="alert alert-error" role="alert">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{{ getErrorMessage(error, t("skillsPathwaysPage.errors.loadFailed")) }}</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-ghost"
-        :aria-label="t('skillsPathwaysPage.retryAria')"
-        @click="retryLoad"
-      >
-        {{ t("skillsPathwaysPage.retryButtonLabel") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-else-if="page.uiState.value === 'error'"
+      :message="getErrorMessage(page.error.value, t('skillsPathwaysPage.errors.loadFailed'))"
+      :retry-label="t('skillsPathwaysPage.retryButtonLabel')"
+      :retry-aria-label="t('skillsPathwaysPage.retryAria')"
+      @retry="page.retryLoad"
+    />
+
+    <EmptyState
+      v-else-if="page.uiState.value === 'empty'"
+      title-key="skillsPathwaysPage.pathways.emptyStateTitle"
+      description-key="skillsPathwaysPage.pathways.emptyStateDescription"
+      cta-label-key="nav.skills"
+      :cta-to="APP_ROUTES.skills"
+    />
 
     <template v-else>
-      <section
-        v-if="readinessAssessment"
-        class="card bg-gradient-to-br from-primary to-secondary text-primary-content"
-      >
-        <div class="card-body gap-4">
-          <h2 class="card-title text-2xl">{{ t("skillsPathwaysPage.readiness.title") }}</h2>
+      <SkillsPathwaysReadinessCard
+        :readiness-assessment="page.readinessAssessment.value"
+        :readiness-categories="page.readinessCategories.value"
+        :readiness-min="page.readinessMin"
+        :readiness-max="page.readinessMax"
+        :get-category-label="page.getCategoryLabel"
+        :get-category-feedback-label="page.getCategoryFeedbackLabel"
+        :get-readiness-improvement-label="page.getReadinessImprovementLabel"
+        :get-readiness-next-step-label="page.getReadinessNextStepLabel"
+        :get-readiness-color="page.getReadinessColor"
+        :get-readiness-dial-style="page.getReadinessDialStyle"
+      />
 
-          <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div class="space-y-2">
-              <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
-              <div
-                class="radial-progress bg-primary-content/20 text-primary-content border-4 border-primary-content/20"
-                :style="getReadinessDialStyle(readinessAssessment.overallScore)"
-                role="progressbar"
-                :aria-valuenow="readinessAssessment.overallScore"
-                :aria-valuemin="SKILLS_READINESS_MIN"
-                :aria-valuemax="SKILLS_READINESS_MAX"
-                :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
-              >
-                <span class="text-2xl font-bold">{{ readinessAssessment.overallScore }}%</span>
-              </div>
-            </div>
-
-            <div class="space-y-3">
-              <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.categoryScoresLabel") }}</p>
-              <div
-                v-for="category in readinessCategories"
-                :key="category.key"
-                class="space-y-1"
-              >
-                <p class="text-sm">
-                  {{ getCategoryLabel(category.key) }}: {{ category.score }}%
-                </p>
-                <progress
-                  class="progress w-full"
-                  :class="getReadinessColor(category.score)"
-                  :value="category.score"
-                  :max="SKILLS_READINESS_MAX"
-                  :aria-label="t('skillsPathwaysPage.readiness.categoryScoreAria', { category: getCategoryLabel(category.key), score: category.score })"
-                ></progress>
-                <p class="text-xs opacity-85">
-                  {{ getCategoryFeedbackLabel(category.key, category.feedbackId) }}
-                </p>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide">
-                  {{ t("skillsPathwaysPage.readiness.topImprovementsTitle") }}
-                </p>
-                <ul class="list text-sm">
-                  <li
-                    v-for="item in readinessAssessment.improvementSuggestions"
-                    :key="item"
-                    class="list-row px-0 py-1"
-                  >
-                    <span>{{ getReadinessImprovementLabel(item) }}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-wide">
-                  {{ t("skillsPathwaysPage.readiness.nextStepsTitle") }}
-                </p>
-                <ul class="list text-sm">
-                  <li
-                    v-for="item in readinessAssessment.nextSteps"
-                    :key="item"
-                    class="list-row px-0 py-1"
-                  >
-                    <span>{{ getReadinessNextStepLabel(item) }}</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section v-else role="alert" class="alert alert-info alert-soft">
-        <span>{{ t("skillsPathwaysPage.readiness.emptyState") }}</span>
-      </section>
-
-      <section class="card bg-base-200">
-        <div class="card-body gap-4">
-          <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <article
-              v-for="pathway in sortedPathways"
-              :key="pathway.id"
-              class="card card-border bg-base-100"
-            >
-              <div class="card-body gap-3">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="text-2xl" aria-hidden="true">{{ getPathwayIcon(pathway.id) }}</span>
-                    <h3 class="card-title text-base">{{ pathway.title }}</h3>
-                  </div>
-                  <span class="badge badge-sm" :class="getReadinessBadgeColor(pathway.matchScore)">
-                    {{ pathway.matchScore }}%
-                  </span>
-                </div>
-
-                <p class="text-sm text-base-content/70">{{ pathway.description }}</p>
-                <p v-if="pathway.detailedDescription" class="text-xs text-base-content/70">
-                  {{ pathway.detailedDescription }}
-                </p>
-
-                <div>
-                  <p class="text-xs font-semibold mb-1">{{ t("skillsPathwaysPage.pathways.requiredSkillsTitle") }}</p>
-                  <div class="flex flex-wrap gap-1">
-                    <span v-for="skill in pathway.requiredSkills" :key="skill" class="badge badge-xs">
-                      {{ skill }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="space-y-1">
-                  <div class="flex items-center justify-between text-xs">
-                    <span>{{ t("skillsPathwaysPage.pathways.matchScoreLabel") }}</span>
-                    <span class="font-semibold">{{ pathway.matchScore }}%</span>
-                  </div>
-                  <progress
-                    class="progress w-full"
-                    :class="getReadinessColor(pathway.matchScore)"
-                    :value="pathway.matchScore"
-                    :max="SKILLS_READINESS_MAX"
-                    :aria-label="
-                      t('skillsPathwaysPage.pathways.matchScoreAria', { score: pathway.matchScore, title: pathway.title })
-                    "
-                  ></progress>
-                </div>
-
-                <p class="text-xs">
-                  {{ t("skillsPathwaysPage.pathways.estimatedTimeLabel") }}
-                  <span class="font-semibold">{{ pathway.estimatedTimeToEntry }}</span>
-                </p>
-                <p class="text-xs">
-                  {{ t("skillsPathwaysPage.pathways.marketTrendLabel") }}
-                  <span class="font-semibold capitalize">
-                    {{ t(`skillsPathwaysPage.pathways.marketTrend.${pathway.jobMarketTrend}`) }}
-                  </span>
-                </p>
-              </div>
-            </article>
-          </div>
-
-          <div v-if="sortedPathways.length === 0" role="alert" class="alert alert-info alert-soft">
-            <span>{{ t("skillsPathwaysPage.pathways.emptyState") }}</span>
-          </div>
-        </div>
-      </section>
+      <SkillsPathwaysGrid
+        :pathways="page.sortedPathways.value"
+        :readiness-max="page.readinessMax"
+        :get-pathway-icon="page.getPathwayIcon"
+        :get-readiness-badge-color="page.getReadinessBadgeColor"
+        :get-readiness-color="page.getReadinessColor"
+      />
     </template>
-  </section>
+  </PageScaffold>
 </template>

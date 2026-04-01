@@ -2,7 +2,8 @@
  * Client error message extraction. Re-exports shared toErrorMessage with API_ERROR_UNEXPECTED as default fallback.
  * Use t("apiErrors.unexpected") or page-specific i18n keys when displaying user-facing fallbacks.
  */
-import { API_ERROR_UNEXPECTED, toErrorMessage as sharedToErrorMessage } from "@bao/shared";
+import { API_ERROR_UNEXPECTED } from "@bao/shared/constants/api-errors";
+import { toErrorMessage as sharedToErrorMessage } from "@bao/shared/utils/error-helpers";
 
 /**
  * Extracts a user-facing error message from unknown error values.

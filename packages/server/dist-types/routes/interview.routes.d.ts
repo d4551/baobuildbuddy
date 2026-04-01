@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
-type SessionPayload = Record<string, unknown>;
-export declare const interviewRoutes: Elysia<"/interview", {
+export declare const interviewRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -16,37 +15,16 @@ export declare const interviewRoutes: Elysia<"/interview", {
     parser: {};
     response: {};
 }, {
-    interview: {
+    [x: string]: {
         sessions: {
             post: {
-                body: {
+                body: {} & {
                     studioId?: string | undefined;
-                    config?: {
-                        technologies?: string[] | undefined;
-                        roleType?: string | undefined;
-                        roleCategory?: string | undefined;
-                        experienceLevel?: string | undefined;
-                        focusAreas?: string[] | undefined;
+                    config?: ({} & {
                         duration?: number | undefined;
-                        questionCount?: number | undefined;
-                        includeTechnical?: boolean | undefined;
-                        includeBehavioral?: boolean | undefined;
-                        includeStudioSpecific?: boolean | undefined;
-                        enableVoiceMode?: boolean | undefined;
-                        interviewMode?: "job" | "studio" | undefined;
-                        targetJob?: {
-                            source?: string | undefined;
-                            description?: string | undefined;
-                            url?: string | undefined;
-                            postedDate?: string | undefined;
-                            technologies?: string[] | undefined;
-                            requirements?: string[] | undefined;
-                            id: string;
-                            title: string;
-                            company: string;
-                            location: string;
-                        } | undefined;
-                        voiceSettings?: {
+                        technologies?: string[] | undefined;
+                        experienceLevel?: string | undefined;
+                        voiceSettings?: ({} & {
                             language?: string | undefined;
                             microphoneId?: string | undefined;
                             speakerId?: string | undefined;
@@ -54,8 +32,36 @@ export declare const interviewRoutes: Elysia<"/interview", {
                             rate?: number | undefined;
                             pitch?: number | undefined;
                             volume?: number | undefined;
-                        } | undefined;
-                    } | undefined;
+                        }) | undefined;
+                        roleType?: string | undefined;
+                        roleCategory?: string | undefined;
+                        focusAreas?: string[] | undefined;
+                        questionCount?: number | undefined;
+                        includeTechnical?: boolean | undefined;
+                        includeBehavioral?: boolean | undefined;
+                        includeStudioSpecific?: boolean | undefined;
+                        enableVoiceMode?: boolean | undefined;
+                        interviewMode?: "job" | "studio" | undefined;
+                        conversationStyle?: "natural" | "structured" | undefined;
+                        targetJob?: ({
+                            id: string;
+                            company: string;
+                            title: string;
+                            location: string;
+                        } & {
+                            source?: string | undefined;
+                            description?: string | undefined;
+                            requirements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                            postedDate?: string | undefined;
+                            url?: string | undefined;
+                        }) | undefined;
+                        candidateContext?: ({} & {
+                            resumeId?: string | undefined;
+                            portfolioId?: string | undefined;
+                            coverLetterId?: string | undefined;
+                        }) | undefined;
+                    }) | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -78,7 +84,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             get: {
                 body: unknown;
@@ -86,24 +92,26 @@ export declare const interviewRoutes: Elysia<"/interview", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: SessionPayload[];
+                    200: import("./interview-route-contracts").SessionPayload[];
                 };
             };
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 get: {
                     body: unknown;
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: SessionPayload;
+                        200: import("./interview-route-contracts").SessionPayload | {
+                            error: string;
+                        };
                         422: {
                             type: "validation";
                             on: string;
@@ -119,19 +127,20 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 response: {
                     post: {
                         body: {
+                            response: string;
+                        } & {
                             questionId?: string | undefined;
                             questionIndex?: number | undefined;
-                            response: string;
                         };
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -157,7 +166,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
+    [x: string]: {
         sessions: {
             ":id": {
                 complete: {
@@ -165,7 +174,7 @@ export declare const interviewRoutes: Elysia<"/interview", {
                         body: unknown;
                         params: {
                             id: string;
-                        };
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -191,8 +200,8 @@ export declare const interviewRoutes: Elysia<"/interview", {
         };
     };
 } & {
-    interview: {
-        stats: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -227,4 +236,3 @@ export declare const interviewRoutes: Elysia<"/interview", {
     standaloneSchema: {};
     response: {};
 }>;
-export {};

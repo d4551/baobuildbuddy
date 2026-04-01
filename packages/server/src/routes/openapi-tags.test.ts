@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { API_ENDPOINTS } from "@bao/shared";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { createTestDbPath, requestJson } from "../test-utils";
 
 type OpenApiOperation = {
@@ -13,28 +14,28 @@ type OpenApiSpec = {
 const OPENAPI_METHODS = ["get", "post", "put", "patch", "delete", "options", "head"] as const;
 
 const routeTagMatchers = [
-  { prefix: "/health", tag: "Health" },
-  { prefix: "/auth", tag: "Auth" },
-  { prefix: "/user", tag: "User" },
-  { prefix: "/settings", tag: "Settings" },
-  { prefix: "/jobs", tag: "Jobs" },
-  { prefix: "/resumes", tag: "Resumes" },
-  { prefix: "/cover-letters", tag: "Cover Letters" },
-  { prefix: "/portfolio", tag: "Portfolio" },
-  { prefix: "/interview", tag: "Interview" },
-  { prefix: "/studios", tag: "Studios" },
-  { prefix: "/scraper", tag: "Scraper" },
-  { prefix: "/ai", tag: "AI" },
-  { prefix: "/gamification", tag: "Gamification" },
-  { prefix: "/skills", tag: "Skill Mapping" },
-  { prefix: "/search", tag: "Search" },
-  { prefix: "/stats", tag: "Stats" },
-  { prefix: "/automation", tag: "Automation" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.health), tag: "Health" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.authBase), tag: "Auth" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.userBase), tag: "User" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.settings), tag: "Settings" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.jobsBase), tag: "Jobs" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.resumes), tag: "Resumes" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.coverLettersBase), tag: "Cover Letters" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase), tag: "Portfolio" },
+  { prefix: APP_ROUTES.interview, tag: "Interview" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.studiosBase), tag: "Studios" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.scraperBase), tag: "Scraper" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.aiBase), tag: "AI" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase), tag: "Gamification" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.skillsBase), tag: "Skill Mapping" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.searchBase), tag: "Search" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.statsBase), tag: "Stats" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.automationBase), tag: "Automation" },
 ] as const;
 
 const resolveExpectedTag = (path: string): string | null => {
-  const scopedPath = path.startsWith("/api/") ? path.slice("/api".length) : path;
-  if (scopedPath.startsWith("/docs/api")) {
+  const scopedPath = toApiScopedPath(path);
+  if (scopedPath === toApiScopedPath(API_ENDPOINTS.apiDocsUi)) {
     return null;
   }
 

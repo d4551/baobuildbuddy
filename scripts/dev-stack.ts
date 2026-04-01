@@ -19,6 +19,13 @@ import {
 
 type ProcessName = "server" | "client";
 type ManagedProcess = ReturnType<typeof Bun.spawn>;
+type DevStackRuntime = {
+  readonly serverPort: number;
+  readonly clientPort: number;
+  readonly clientHost: string;
+  readonly serverEnv: Record<string, string>;
+  readonly clientEnv: Record<string, string>;
+};
 
 const validatePort = (value: string | undefined, fallback: number): number => {
   const parsed = value ? Number.parseInt(value, DECIMAL_RADIX) : fallback;
@@ -43,31 +50,70 @@ const write = (value: string): void => {
   process.stdout.write(value);
 };
 
-const serverPort = validatePort(process.env.SERVER_PORT, DEFAULT_SERVER_PORT);
-const localhostHost = LOOPBACK_HOST;
-const clientHost = process.env.NUXT_HOST ?? LOOPBACK_HOST;
-const clientPort = validatePort(process.env.CLIENT_PORT, DEFAULT_CLIENT_DEV_PORT);
-const apiBase = `http://${localhostHost}:${toStringPort(serverPort)}`;
-const corsOrigins = [
-  `http://${LOOPBACK_HOST}:${toStringPort(serverPort)}`,
-  `http://${LOOPBACK_HOST_IPV4}:${toStringPort(serverPort)}`,
-  `http://${LOOPBACK_HOST}:${toStringPort(clientPort)}`,
-  `http://${LOOPBACK_HOST_IPV4}:${toStringPort(clientPort)}`,
-].join(",");
+const readCliFlagValue = (argv: readonly string[], flag: string): string | undefined => {
+  const inlinePrefix = `${flag}=`;
+  const inlineMatch = argv.find((argument) => argument.startsWith(inlinePrefix));
+  if (inlineMatch) {
+    const value = inlineMatch.slice(inlinePrefix.length);
+    return value.length > 0 ? value : undefined;
+  }
 
-const serverEnv = normalizeEnv(process.env);
-serverEnv.PORT = toStringPort(serverPort);
-serverEnv.SERVER_PORT = toStringPort(serverPort);
-serverEnv.HOST = process.env.HOST ?? DEFAULT_HOST;
-serverEnv.CORS_ORIGINS = corsOrigins;
+  const flagIndex = argv.indexOf(flag);
+  if (flagIndex === -1) {
+    return;
+  }
 
-const clientEnv = normalizeEnv(process.env);
-clientEnv.CLIENT_PORT = toStringPort(clientPort);
-clientEnv.NUXT_CLIENT_PORT = toStringPort(clientPort);
-clientEnv.SERVER_PORT = toStringPort(serverPort);
-clientEnv.CORS_ORIGINS = corsOrigins;
-clientEnv.NUXT_PUBLIC_API_BASE = apiBase;
-clientEnv.NUXT_PUBLIC_WS_BASE = apiBase;
+  const nextValue = argv[flagIndex + 1];
+  return nextValue && !nextValue.startsWith("--") ? nextValue : undefined;
+};
+
+export const createDevStackRuntime = (
+  argv: readonly string[],
+  environment: Record<string, string | undefined>,
+): DevStackRuntime => {
+  const serverPort = validatePort(
+    readCliFlagValue(argv, "--server-port") ?? environment.SERVER_PORT,
+    DEFAULT_SERVER_PORT,
+  );
+  const clientPort = validatePort(
+    readCliFlagValue(argv, "--client-port") ?? environment.CLIENT_PORT,
+    DEFAULT_CLIENT_DEV_PORT,
+  );
+  const clientHost =
+    readCliFlagValue(argv, "--client-host") ?? environment.NUXT_HOST ?? LOOPBACK_HOST;
+  const localhostHost = LOOPBACK_HOST;
+  const apiBase = `http://${localhostHost}:${toStringPort(serverPort)}`;
+  const corsOrigins = [
+    `http://${LOOPBACK_HOST}:${toStringPort(serverPort)}`,
+    `http://${LOOPBACK_HOST_IPV4}:${toStringPort(serverPort)}`,
+    `http://${LOOPBACK_HOST}:${toStringPort(clientPort)}`,
+    `http://${LOOPBACK_HOST_IPV4}:${toStringPort(clientPort)}`,
+  ].join(",");
+
+  const serverEnv = normalizeEnv(environment);
+  serverEnv.PORT = toStringPort(serverPort);
+  serverEnv.SERVER_PORT = toStringPort(serverPort);
+  serverEnv.HOST = environment.HOST ?? DEFAULT_HOST;
+  serverEnv.CORS_ORIGINS = corsOrigins;
+
+  const clientEnv = normalizeEnv(environment);
+  clientEnv.CLIENT_PORT = toStringPort(clientPort);
+  clientEnv.NUXT_CLIENT_PORT = toStringPort(clientPort);
+  clientEnv.SERVER_PORT = toStringPort(serverPort);
+  clientEnv.CORS_ORIGINS = corsOrigins;
+  clientEnv.NUXT_PUBLIC_API_BASE = apiBase;
+  clientEnv.NUXT_PUBLIC_WS_BASE = apiBase;
+
+  return {
+    serverPort,
+    clientPort,
+    clientHost,
+    serverEnv,
+    clientEnv,
+  };
+};
+
+const runtime = createDevStackRuntime(process.argv.slice(2), process.env);
 
 const trackedProcesses: ManagedProcess[] = [];
 let shuttingDown = false;
@@ -85,7 +131,10 @@ const spawnProcess = (args: string[], env: Record<string, string>): ManagedProce
 };
 
 const spawnServer = (): ManagedProcess => {
-  return spawnProcess(["--env-file=.env", "run", "--filter", "@bao/server", "dev"], serverEnv);
+  return spawnProcess(
+    ["--env-file=.env", "run", "--cwd", "packages/server", "dev"],
+    runtime.serverEnv,
+  );
 };
 
 const spawnClient = (): ManagedProcess => {
@@ -93,16 +142,16 @@ const spawnClient = (): ManagedProcess => {
     [
       "--env-file=.env",
       "run",
-      "--filter",
-      "@bao/client",
+      "--cwd",
+      "packages/client",
       "dev",
       "--",
       "--port",
-      toStringPort(clientPort),
+      toStringPort(runtime.clientPort),
       "--host",
-      clientHost,
+      runtime.clientHost,
     ],
-    clientEnv,
+    runtime.clientEnv,
   );
 };
 
@@ -207,34 +256,36 @@ const ensurePinchTabRunning = async (): Promise<string> => {
 
 const main = async (): Promise<void> => {
   const pinchtabUrl = await ensurePinchTabRunning();
-  serverEnv.PINCHTAB_URL = pinchtabUrl;
-  clientEnv.PINCHTAB_URL = pinchtabUrl;
+  runtime.serverEnv.PINCHTAB_URL = pinchtabUrl;
+  runtime.clientEnv.PINCHTAB_URL = pinchtabUrl;
 
-  write(`[bao/dev-stack] launching server on port ${toStringPort(serverPort)}\n`);
+  write(`[bao/dev-stack] launching server on port ${toStringPort(runtime.serverPort)}\n`);
   const server = spawnServer();
-  write(`[bao/dev-stack] launching client on port ${toStringPort(clientPort)}\n`);
+  write(`[bao/dev-stack] launching client on port ${toStringPort(runtime.clientPort)}\n`);
   const client = spawnClient();
 
-  trackProcess("server", server).catch((error: unknown) => {
+  trackProcess("server", server).then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to track server process: ${describeAsyncError(error)}\n`);
   });
-  trackProcess("client", client).catch((error: unknown) => {
+  trackProcess("client", client).then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to track client process: ${describeAsyncError(error)}\n`);
   });
 };
 
 process.once("SIGINT", () => {
-  shutdown("signal: SIGINT").catch((error: unknown) => {
+  shutdown("signal: SIGINT").then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to handle SIGINT shutdown: ${describeAsyncError(error)}\n`);
   });
 });
 process.once("SIGTERM", () => {
-  shutdown("signal: SIGTERM").catch((error: unknown) => {
+  shutdown("signal: SIGTERM").then(undefined, (error: unknown) => {
     write(`[bao/dev-stack] failed to handle SIGTERM shutdown: ${describeAsyncError(error)}\n`);
   });
 });
 
-main().catch((err: unknown) => {
-  write(`[bao/dev-stack] fatal: ${err instanceof Error ? err.message : String(err)}\n`);
-  process.exit(1);
-});
+if (import.meta.main) {
+  main().then(undefined, (err: unknown) => {
+    write(`[bao/dev-stack] fatal: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exit(1);
+  });
+}

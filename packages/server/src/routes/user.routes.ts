@@ -1,21 +1,20 @@
-import {
-  DEFAULT_PROFILE_ID,
-  SCHEMA_MAX_ITEMS_LARGE,
-  SCHEMA_MAX_ITEMS_XXLARGE,
-  SCHEMA_MAX_LENGTH_DESCRIPTION,
-  SCHEMA_MAX_LENGTH_EMAIL,
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_PHONE,
-  SCHEMA_MAX_LENGTH_SHORT,
-  SCHEMA_MAX_LENGTH_URL,
-} from "@bao/shared";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
+import {
+  userProfileUpdateBodySchema,
+  type UserProfileUpdateRouteBody,
+} from "./user-route-contracts";
 
-export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
-  .get("/profile", async () => {
+export const userRoutes = new Elysia({
+  prefix: toApiScopedPath(API_ENDPOINTS.userBase),
+  tags: ["User"],
+})
+  .get(toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile), async () => {
     const rows = await db.select().from(userProfile).where(eq(userProfile.id, DEFAULT_PROFILE_ID));
     if (rows.length === 0) {
       // Auto-create default profile
@@ -33,8 +32,8 @@ export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
     return rows[0];
   })
   .put(
-    "/profile",
-    async ({ body }) => {
+    toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
+    async ({ body }: { body: UserProfileUpdateRouteBody }) => {
       const existing = await db
         .select()
         .from(userProfile)
@@ -54,30 +53,6 @@ export const userRoutes = new Elysia({ prefix: "/user", tags: ["User"] })
       return updated[0];
     },
     {
-      body: t.Object({
-        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        email: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
-        phone: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_PHONE })),
-        location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        linkedin: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        github: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-        summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-        currentRole: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        currentCompany: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-        yearsExperience: t.Optional(t.Number({ minimum: 0, maximum: 80 })),
-        technicalSkills: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
-          }),
-        ),
-        softSkills: t.Optional(
-          t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
-            maxItems: SCHEMA_MAX_ITEMS_LARGE,
-          }),
-        ),
-        gamingExperience: t.Optional(t.Record(t.String(), t.Unknown())),
-        careerGoals: t.Optional(t.Record(t.String(), t.Unknown())),
-      }),
+      body: StandardSchemaV1(userProfileUpdateBodySchema),
     },
   );

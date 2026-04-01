@@ -1,0 +1,35 @@
+import Type, { type StaticParse } from "baobox";
+export declare const userProfileUpdateBodySchema: Type.TObject<{
+    readonly name: Type.TOptional<Type.TString>;
+    readonly email: Type.TOptional<Type.TString>;
+    readonly phone: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly linkedin: Type.TOptional<Type.TString>;
+    readonly github: Type.TOptional<Type.TString>;
+    readonly summary: Type.TOptional<Type.TString>;
+    readonly currentRole: Type.TOptional<Type.TString>;
+    readonly currentCompany: Type.TOptional<Type.TString>;
+    readonly yearsExperience: Type.TOptional<Type.TNumber>;
+    readonly technicalSkills: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly softSkills: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly gamingExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly careerGoals: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+}, never, Type.InferOptionalKeys<{
+    readonly name: Type.TOptional<Type.TString>;
+    readonly email: Type.TOptional<Type.TString>;
+    readonly phone: Type.TOptional<Type.TString>;
+    readonly location: Type.TOptional<Type.TString>;
+    readonly website: Type.TOptional<Type.TString>;
+    readonly linkedin: Type.TOptional<Type.TString>;
+    readonly github: Type.TOptional<Type.TString>;
+    readonly summary: Type.TOptional<Type.TString>;
+    readonly currentRole: Type.TOptional<Type.TString>;
+    readonly currentCompany: Type.TOptional<Type.TString>;
+    readonly yearsExperience: Type.TOptional<Type.TNumber>;
+    readonly technicalSkills: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly softSkills: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly gamingExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly careerGoals: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+}>>;
+export type UserProfileUpdateRouteBody = StaticParse<typeof userProfileUpdateBodySchema>;

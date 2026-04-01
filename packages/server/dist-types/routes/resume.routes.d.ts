@@ -1,6 +1,5 @@
-import { type ResumeData } from "@bao/shared";
 import { Elysia } from "elysia";
-export declare const resumeRoutes: Elysia<"/resumes", {
+export declare const resumeRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -16,148 +15,148 @@ export declare const resumeRoutes: Elysia<"/resumes", {
     parser: {};
     response: {};
 }, {
-    resumes: {
-        "from-questions": {
-            generate: {
-                post: {
-                    body: {
-                        experienceLevel?: string | undefined;
-                        studioName?: string | undefined;
-                        targetRole: string;
+    [x: string]: {
+        [x: string]: {
+            post: {
+                body: {
+                    targetRole: string;
+                } & {
+                    experienceLevel?: string | undefined;
+                    studioName?: string | undefined;
+                };
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        error: string;
+                        details: string;
+                        questions?: undefined;
+                    } | {
+                        questions: import("../services/cv-questionnaire-service").CvQuestion[];
+                        error?: undefined;
+                        details?: undefined;
                     };
-                    params: {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: {
-                            error: string;
-                            details: string;
-                            questions?: undefined;
-                        } | {
-                            questions: import("../services/cv-questionnaire-service").CvQuestion[];
-                            error?: undefined;
-                            details?: undefined;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
         };
     };
 } & {
-    resumes: {
-        "from-questions": {
-            synthesize: {
-                post: {
-                    body: {
-                        questionsAndAnswers: {
-                            id: string;
-                            category: string;
-                            question: string;
-                            answer: string;
-                        }[];
+    [x: string]: {
+        [x: string]: {
+            post: {
+                body: {
+                    questionsAndAnswers: ({
+                        id: string;
+                        category: string;
+                        question: string;
+                        answer: string;
+                    } & {})[];
+                } & {};
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: import("@bao/shared/types/resume").ResumeData | {
+                        error: string;
+                        details: string;
                     };
-                    params: {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: ResumeData | {
-                            error: string;
-                            details: string;
-                        };
-                        422: {
-                            type: "validation";
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+                    422: {
+                        type: "validation";
+                        on: string;
+                        summary?: string;
+                        message?: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
                     };
                 };
             };
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
             query: unknown;
             headers: unknown;
             response: {
-                200: ResumeData[];
+                200: import("@bao/shared/types/resume").ResumeData[];
             };
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         post: {
-            body: {
-                skills?: {
+            body: {} & {
+                skills?: ({} & {
                     gaming?: string[] | undefined;
                     technical?: string[] | undefined;
                     soft?: string[] | undefined;
-                } | undefined;
+                }) | undefined;
                 name?: string | undefined;
-                theme?: "light" | "dark" | undefined;
-                projects?: {
-                    link?: string | undefined;
-                    technologies?: string[] | undefined;
-                    title: string;
-                    description: string;
-                }[] | undefined;
-                personalInfo?: {
+                template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
+                personalInfo?: ({} & {
                     portfolio?: string | undefined;
                     name?: string | undefined;
                     email?: string | undefined;
                     location?: string | undefined;
                     website?: string | undefined;
                     phone?: string | undefined;
-                    linkedIn?: string | undefined;
                     github?: string | undefined;
-                } | undefined;
+                    linkedIn?: string | undefined;
+                }) | undefined;
                 summary?: string | undefined;
-                experience?: {
-                    description?: string | undefined;
+                experience?: ({
+                    company: string;
+                    title: string;
+                    startDate: string;
+                } & {
                     achievements?: string[] | undefined;
                     location?: string | undefined;
+                    description?: string | undefined;
                     technologies?: string[] | undefined;
                     endDate?: string | undefined;
-                    title: string;
-                    company: string;
-                    startDate: string;
-                }[] | undefined;
-                education?: {
-                    gpa?: string | undefined;
+                })[] | undefined;
+                education?: ({
                     degree: string;
+                    year: string;
                     field: string;
                     school: string;
-                    year: string;
-                }[] | undefined;
-                gamingExperience?: {
+                } & {
+                    gpa?: string | undefined;
+                })[] | undefined;
+                projects?: ({
+                    title: string;
+                    description: string;
+                } & {
+                    link?: string | undefined;
+                    technologies?: string[] | undefined;
+                })[] | undefined;
+                gamingExperience?: ({} & {
                     platforms?: string | undefined;
                     gameEngines?: string | undefined;
                     genres?: string | undefined;
                     shippedTitles?: string | undefined;
-                } | undefined;
-                template?: string | undefined;
+                }) | undefined;
+                theme?: "light" | "dark" | undefined;
                 isDefault?: boolean | undefined;
             };
             params: {};
             query: unknown;
             headers: unknown;
             response: {
-                200: ResumeData;
+                200: import("@bao/shared/types/resume").ResumeData;
                 422: {
                     type: "validation";
                     on: string;
@@ -171,17 +170,17 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: ResumeData | {
+                    200: import("@bao/shared/types/resume").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -198,67 +197,70 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             put: {
-                body: {
-                    skills?: {
+                body: {} & {
+                    skills?: ({} & {
                         gaming?: string[] | undefined;
                         technical?: string[] | undefined;
                         soft?: string[] | undefined;
-                    } | undefined;
+                    }) | undefined;
                     name?: string | undefined;
-                    theme?: "light" | "dark" | undefined;
-                    projects?: {
-                        link?: string | undefined;
-                        technologies?: string[] | undefined;
-                        title: string;
-                        description: string;
-                    }[] | undefined;
-                    personalInfo?: {
+                    template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
+                    personalInfo?: ({} & {
                         portfolio?: string | undefined;
                         name?: string | undefined;
                         email?: string | undefined;
                         location?: string | undefined;
                         website?: string | undefined;
                         phone?: string | undefined;
-                        linkedIn?: string | undefined;
                         github?: string | undefined;
-                    } | undefined;
+                        linkedIn?: string | undefined;
+                    }) | undefined;
                     summary?: string | undefined;
-                    experience?: {
-                        description?: string | undefined;
+                    experience?: ({
+                        company: string;
+                        title: string;
+                        startDate: string;
+                    } & {
                         achievements?: string[] | undefined;
                         location?: string | undefined;
+                        description?: string | undefined;
                         technologies?: string[] | undefined;
                         endDate?: string | undefined;
-                        title: string;
-                        company: string;
-                        startDate: string;
-                    }[] | undefined;
-                    education?: {
-                        gpa?: string | undefined;
+                    })[] | undefined;
+                    education?: ({
                         degree: string;
+                        year: string;
                         field: string;
                         school: string;
-                        year: string;
-                    }[] | undefined;
-                    gamingExperience?: {
+                    } & {
+                        gpa?: string | undefined;
+                    })[] | undefined;
+                    projects?: ({
+                        title: string;
+                        description: string;
+                    } & {
+                        link?: string | undefined;
+                        technologies?: string[] | undefined;
+                    })[] | undefined;
+                    gamingExperience?: ({} & {
                         platforms?: string | undefined;
                         gameEngines?: string | undefined;
                         genres?: string | undefined;
                         shippedTitles?: string | undefined;
-                    } | undefined;
-                    template?: string | undefined;
+                    }) | undefined;
+                    theme?: "light" | "dark" | undefined;
                     isDefault?: boolean | undefined;
                 };
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: ResumeData | {
+                    200: import("@bao/shared/types/resume").ResumeData | {
                         error: string;
                     };
                     422: {
@@ -275,13 +277,13 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             delete: {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -308,17 +310,17 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             export: {
                 post: {
-                    body: {
+                    body: {} & {
                         format?: string | undefined;
-                        template?: string | undefined;
+                        template?: "creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz" | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -344,16 +346,16 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             "ai-enhance": {
                 post: {
-                    body: {
+                    body: {} & {
                         section?: string | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -370,8 +372,8 @@ export declare const resumeRoutes: Elysia<"/resumes", {
                             suggestions?: undefined;
                             section?: undefined;
                         } | {
-                            resume: ResumeData;
-                            suggestions: import("@bao/shared").JsonArray;
+                            resume: import("@bao/shared/types/resume").ResumeData;
+                            suggestions: import("@bao/shared/utils/json").JsonArray;
                             section: string;
                             error?: undefined;
                             details?: undefined;
@@ -391,16 +393,16 @@ export declare const resumeRoutes: Elysia<"/resumes", {
         };
     };
 } & {
-    resumes: {
+    [x: string]: {
         ":id": {
             "ai-score": {
                 post: {
                     body: {
                         jobId: string;
-                    };
+                    } & {};
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {

@@ -15,6 +15,7 @@ This guide walks you through getting BaoBuildBuddy running locally for the first
 |------------------------------------------------|----------------------------------------------------------|
 | Understand the app in simple terms             | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
 | Set up local AI with Ollama                    | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
+| Run the full proof pass after setup            | [Verification Runbook](./VERIFICATION_RUNBOOK.md)         |
 | Do the full first-time local setup             | Keep reading below                                        |
 | Read the full technical reference              | [README.md](../README.md)                                 |
 
@@ -43,7 +44,7 @@ This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended pa
 
 | Tool                     | macOS (Homebrew)                               | Ubuntu / Debian                                      | Windows (winget)                    |
 |--------------------------|------------------------------------------------|------------------------------------------------------|-------------------------------------|
-| Bun (`bun@1.3.10`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
+| Bun (`bun@1.3.11`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
 | Git                      | `brew install git`                             | `sudo apt-get update && sudo apt-get install -y git`  | `winget install --id Git.Git -e`    |
 | Rust (for desktop builds)| `brew install rustup-init && rustup-init`      | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
@@ -69,7 +70,7 @@ Check the Bun version matches the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.10"
+# -> "bun@1.3.11"
 ```
 
 ---
@@ -236,10 +237,12 @@ bun run build
 
 For the full validation sequence, see [README.md > Validation & Quality Gates](../README.md#validation--quality-gates).
 
+For the complete post-setup proof flow, including page screenshots, export checks, runtime verification, and desktop artifact verification, use [VERIFICATION_RUNBOOK.md](./VERIFICATION_RUNBOOK.md).
+
 If port `3001` is already in use, run page verification against an alternate port:
 
 ```bash
-PORT=4105 bun run --filter '@bao/client' preview
+PORT=4105 bun run --cwd packages/client preview
 VERIFY_HOST=127.0.0.1 VERIFY_PORT=4105 bun run verify:pages
 ```
 

@@ -2,7 +2,7 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "RAILPACK",
-    "buildCommand": "bun run --filter '@bao/server' build:types && bun run --filter '@bao/client' build",
+    "buildCommand": "bun run --cwd packages/server build:types && bun run --cwd packages/client build",
     "watchPatterns": ["packages/client/**", "packages/shared/**", "package.json", "bun.lockb"]
   },
   "deploy": {

@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-export declare const authRoutes: Elysia<"/auth", {
+export declare const authRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -23,8 +23,8 @@ export declare const authRoutes: Elysia<"/auth", {
     macroFn: {};
     parser: {};
 }, {
-    auth: {
-        status: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -42,8 +42,8 @@ export declare const authRoutes: Elysia<"/auth", {
         };
     };
 } & {
-    auth: {
-        configured: {
+    [x: string]: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -58,10 +58,10 @@ export declare const authRoutes: Elysia<"/auth", {
         };
     };
 } & {
-    auth: {
-        init: {
+    [x: string]: {
+        [x: string]: {
             post: {
-                body: {
+                body: {} & {
                     setupToken?: string | undefined;
                 };
                 params: {};
@@ -71,19 +71,18 @@ export declare const authRoutes: Elysia<"/auth", {
                     200: {
                         configured: boolean;
                         message: string;
+                        error?: undefined;
+                        apiKey?: undefined;
+                    } | {
+                        error: string;
+                        configured?: undefined;
+                        message?: undefined;
                         apiKey?: undefined;
                     } | {
                         configured: boolean;
                         apiKey: string;
                         message: string;
-                    };
-                    400: {
-                        readonly error: "Setup token is required";
-                    };
-                    403: {
-                        readonly error: "Setup token bootstrap is unavailable";
-                    } | {
-                        readonly error: "Setup token is invalid";
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";

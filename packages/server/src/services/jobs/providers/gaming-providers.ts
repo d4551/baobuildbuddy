@@ -1,11 +1,8 @@
-import {
-  type GamingPortalConfig,
-  type GamingPortalId,
-  generateId,
-  safeParseJson,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+import type { GamingPortalConfig, GamingPortalId } from "@bao/shared/types/settings-contracts";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import { createServerLogger } from "../../../utils/logger";
 import { type ScrapedJob, scraperService } from "../../scraper-service";
 import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
@@ -58,6 +55,17 @@ const logProviderSkip = (providerName: string, reason: string, details?: unknown
   return [];
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isHitmarkerJob = (value: unknown): value is HitmarkerJob => isRecord(value);
+
+const isHitmarkerResponse = (value: unknown): value is HitmarkerResponse =>
+  (Array.isArray(value) && value.every(isHitmarkerJob)) ||
+  (isRecord(value) &&
+    ((Array.isArray(value.jobs) && value.jobs.every(isHitmarkerJob)) ||
+      (Array.isArray(value.data) && value.data.every(isHitmarkerJob))));
+
 const resolveHitmarkerJobs = (payload: HitmarkerResponse): HitmarkerJob[] =>
   Array.isArray(payload) ? payload : (payload.jobs ?? payload.data ?? []);
 
@@ -89,6 +97,114 @@ const resolvePortalConfig = (
   portalId: GamingPortalId,
 ): GamingPortalConfig | null => portals.find((portal) => portal.id === portalId) ?? null;
 
+const loadHitmarkerProviderSettings = async (providerName: string) => {
+  const providerSettingsResult = await settle(loadJobProviderSettings());
+  if (providerSettingsResult.status === "rejected") {
+    return {
+      ok: false as const,
+      jobs: logProviderFailure(providerName, "settings_unavailable", {
+        error: toErrorMessage(providerSettingsResult.reason),
+      }),
+    };
+  }
+
+  const providerSettings = providerSettingsResult.value;
+  if (!providerSettings.hitmarkerEnabled) {
+    return {
+      ok: false as const,
+      jobs: logProviderSkip(providerName, "provider_disabled"),
+    };
+  }
+
+  return {
+    ok: true as const,
+    providerSettings,
+  };
+};
+
+const fetchHitmarkerPayload = async (
+  providerName: string,
+  providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
+  filters?: JobFilters,
+) => {
+  const query = filters?.query || providerSettings.hitmarkerDefaultQuery;
+  const requestUrl = new URL(providerSettings.hitmarkerApiBaseUrl);
+  requestUrl.searchParams.set("search", query);
+  requestUrl.searchParams.set("limit", String(providerSettings.gamingBoardResultLimit));
+  const responseResult = await settle(
+    fetch(requestUrl.toString(), {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
+    }),
+  );
+  if (responseResult.status === "rejected") {
+    return {
+      ok: false as const,
+      jobs: logProviderFailure(providerName, "request_failed", {
+        error: toErrorMessage(responseResult.reason),
+        requestUrl: requestUrl.toString(),
+      }),
+    };
+  }
+  const response = responseResult.value;
+  if (!response.ok) {
+    return {
+      ok: false as const,
+      jobs: logProviderFailure(providerName, "response_not_ok", {
+        requestUrl: requestUrl.toString(),
+        status: response.status,
+      }),
+    };
+  }
+
+  const rawText = await response.text();
+  const parsed = safeParseJson(rawText);
+  if (parsed === null) {
+    return {
+      ok: false as const,
+      jobs: logProviderFailure(providerName, "invalid_json", {
+        requestUrl: requestUrl.toString(),
+      }),
+    };
+  }
+  if (!isHitmarkerResponse(parsed)) {
+    return {
+      ok: false as const,
+      jobs: logProviderFailure(providerName, "invalid_payload", {
+        requestUrl: requestUrl.toString(),
+      }),
+    };
+  }
+
+  return {
+    ok: true as const,
+    jobs: resolveHitmarkerJobs(parsed),
+    hitmarkerOrigin: new URL(providerSettings.hitmarkerApiBaseUrl).origin,
+  };
+};
+
+const mapHitmarkerJobs = (
+  jobs: HitmarkerJob[],
+  providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
+  hitmarkerOrigin: string,
+): RawJob[] =>
+  jobs.slice(0, providerSettings.gamingBoardResultLimit).map((job) => {
+    const location = job.location || providerSettings.hitmarkerDefaultLocation;
+
+    return {
+      id: generateId(),
+      title: job.title || "",
+      company: resolveCompanyName(job.company, providerSettings.unknownCompanyLabel),
+      location,
+      remote: REMOTE_LOCATION_PATTERN.test(location),
+      description: job.description || "",
+      url: job.url || `${hitmarkerOrigin}/jobs/${job.slug || job.id || generateId()}`,
+      source: "hitmarker",
+      postedDate: job.created_at || new Date().toISOString(),
+      contentHash: resolveHitmarkerContentHash(job),
+    };
+  });
+
 /**
  * Provider for Hitmarker gaming jobs.
  */
@@ -98,67 +214,24 @@ export class HitmarkerProvider implements JobProvider {
   enabled = true;
 
   async fetchJobs(filters?: JobFilters): Promise<RawJob[]> {
-    const providerSettingsResult = await settle(loadJobProviderSettings());
-    if (providerSettingsResult.status === "rejected") {
-      return logProviderFailure(this.name, "settings_unavailable", {
-        error: toErrorMessage(providerSettingsResult.reason),
-      });
+    const providerSettingsResult = await loadHitmarkerProviderSettings(this.name);
+    if (!providerSettingsResult.ok) {
+      return providerSettingsResult.jobs;
     }
-    const providerSettings = providerSettingsResult.value;
-    if (!providerSettings.hitmarkerEnabled) {
-      return logProviderSkip(this.name, "provider_disabled");
-    }
-    const query = filters?.query || providerSettings.hitmarkerDefaultQuery;
-    const requestUrl = new URL(providerSettings.hitmarkerApiBaseUrl);
-    requestUrl.searchParams.set("search", query);
-    requestUrl.searchParams.set("limit", String(providerSettings.gamingBoardResultLimit));
-    const responseResult = await settle(
-      fetch(requestUrl.toString(), {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-      }),
+    const payloadResult = await fetchHitmarkerPayload(
+      this.name,
+      providerSettingsResult.providerSettings,
+      filters,
     );
-    if (responseResult.status === "rejected") {
-      return logProviderFailure(this.name, "request_failed", {
-        error: toErrorMessage(responseResult.reason),
-        requestUrl: requestUrl.toString(),
-      });
-    }
-    const response = responseResult.value;
-    if (!response.ok) {
-      return logProviderFailure(this.name, "response_not_ok", {
-        requestUrl: requestUrl.toString(),
-        status: response.status,
-      });
+    if (!payloadResult.ok) {
+      return payloadResult.jobs;
     }
 
-    const rawText = await response.text();
-    const parsed = safeParseJson(rawText);
-    if (parsed === null) {
-      return logProviderFailure(this.name, "invalid_json", {
-        requestUrl: requestUrl.toString(),
-      });
-    }
-    const payload = parsed as HitmarkerResponse;
-    const jobs = resolveHitmarkerJobs(payload);
-    const hitmarkerOrigin = new URL(providerSettings.hitmarkerApiBaseUrl).origin;
-
-    return jobs.slice(0, providerSettings.gamingBoardResultLimit).map((job) => {
-      const location = job.location || providerSettings.hitmarkerDefaultLocation;
-
-      return {
-        id: generateId(),
-        title: job.title || "",
-        company: resolveCompanyName(job.company, providerSettings.unknownCompanyLabel),
-        location,
-        remote: REMOTE_LOCATION_PATTERN.test(location),
-        description: job.description || "",
-        url: job.url || `${hitmarkerOrigin}/jobs/${job.slug || job.id || generateId()}`,
-        source: "hitmarker",
-        postedDate: job.created_at || new Date().toISOString(),
-        contentHash: resolveHitmarkerContentHash(job),
-      };
-    });
+    return mapHitmarkerJobs(
+      payloadResult.jobs,
+      providerSettingsResult.providerSettings,
+      payloadResult.hitmarkerOrigin,
+    );
   }
 }
 

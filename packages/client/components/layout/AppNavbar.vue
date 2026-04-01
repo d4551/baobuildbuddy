@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { APP_LANGUAGE_LABELS, APP_ROUTES, type AppLanguageCode, THEME_NAMES } from "@bao/shared";
+import { THEME_NAMES } from "@bao/shared/constants/branding";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { APP_DRAWER_ID } from "~/constants/layout";
+import { resolveLocaleLabel } from "~/constants/i18n";
+import { APP_DRAWER_ID, SHELL_NAVBAR_CLASS } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
@@ -14,14 +16,7 @@ const userMenuRef = useTemplateRef<HTMLDetailsElement>("userMenu");
 const isUserMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
 const userMenuId = `app-navbar-user-menu-${useId()}`;
-
-const isAppLanguageCode = (localeCode: string): localeCode is AppLanguageCode =>
-  Object.hasOwn(APP_LANGUAGE_LABELS, localeCode);
-
-const getLocaleLabel = (localeCode: string): string => {
-  const directLabel = isAppLanguageCode(localeCode) ? APP_LANGUAGE_LABELS[localeCode] : undefined;
-  return directLabel || localeCode;
-};
+const getLocaleLabel = (localeCode: string): string => resolveLocaleLabel(t, localeCode);
 
 function closeUserMenu(): void {
   if (userMenuRef.value) {
@@ -46,7 +41,7 @@ function onThemeControllerChange(event: Event): void {
 </script>
 
 <template>
-  <nav class="navbar sticky top-0 z-10 border-b border-base-300 bg-base-200" :aria-label="t('a11y.appHeader')">
+  <nav class="navbar" :class="SHELL_NAVBAR_CLASS" :aria-label="t('a11y.appHeader')">
     <div class="navbar-start flex min-w-0 flex-1 items-center gap-2 lg:gap-4">
       <label
         :for="APP_DRAWER_ID"
@@ -112,7 +107,7 @@ function onThemeControllerChange(event: Event): void {
         </summary>
         <ul
           :id="userMenuId"
-          class="menu dropdown-content rounded-box z-50 mt-2 w-56 bg-base-200 p-2 shadow-lg"
+          class="menu menu-sm dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg"
           :aria-label="t('a11y.userMenu')"
         >
           <li>

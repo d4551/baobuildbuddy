@@ -1,269 +1,178 @@
 <script setup lang="ts">
+import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
-import CloseIcon from "~/components/ui/CloseIcon.vue";
-
-interface ExperienceItem {
-  id: string;
-  company: string;
-  title: string;
-  startDate: string;
-  endDate?: string;
-  description: string;
-  highlights: string[];
-}
 
 const props = defineProps<{
-  modelValue: ExperienceItem[];
+  modelValue: ResumeFormExperience[];
 }>();
 
 const emit = defineEmits<{
-  "update:modelValue": [value: ExperienceItem[]];
+  "update:modelValue": [value: ResumeFormExperience[]];
 }>();
 const { t } = useI18n();
 
-const localValue = ref<ExperienceItem[]>([...props.modelValue]);
-const editingId = ref<string | null>(null);
-const newHighlight = ref<Record<string, string>>({});
+function cloneExperienceItem(item: ResumeFormExperience): ResumeFormExperience {
+  return {
+    ...item,
+  };
+}
+
+function cloneExperienceList(items: readonly ResumeFormExperience[]): ResumeFormExperience[] {
+  return items.map(cloneExperienceItem);
+}
+
+const localValue = ref<ResumeFormExperience[]>(cloneExperienceList(props.modelValue));
 
 watch(
   () => props.modelValue,
   (newValue) => {
-    localValue.value = [...newValue];
+    localValue.value = cloneExperienceList(newValue);
   },
   { deep: true },
 );
 
-function updateValue() {
-  emit("update:modelValue", [...localValue.value]);
+function emitValue(): void {
+  emit("update:modelValue", cloneExperienceList(localValue.value));
 }
 
-function addItem() {
-  const newItem: ExperienceItem = {
-    id: Date.now().toString(),
-    company: "",
+function addExperience(): void {
+  localValue.value.push({
     title: "",
+    company: "",
+    location: "",
     startDate: "",
     endDate: "",
+    current: false,
     description: "",
-    highlights: [],
-  };
-  localValue.value.push(newItem);
-  editingId.value = newItem.id;
-  updateValue();
+  });
+  emitValue();
 }
 
-function removeItem(id: string) {
-  localValue.value = localValue.value.filter((item) => item.id !== id);
-  updateValue();
-}
-
-function toggleEdit(id: string) {
-  editingId.value = editingId.value === id ? null : id;
-}
-
-function addHighlight(itemId: string) {
-  const highlight = newHighlight.value[itemId]?.trim();
-  if (!highlight) return;
-
-  const item = localValue.value.find((i) => i.id === itemId);
-  if (item) {
-    item.highlights.push(highlight);
-    newHighlight.value[itemId] = "";
-    updateValue();
-  }
-}
-
-function removeHighlight(itemId: string, index: number) {
-  const item = localValue.value.find((i) => i.id === itemId);
-  if (item) {
-    item.highlights.splice(index, 1);
-    updateValue();
-  }
-}
-
-function moveUp(index: number) {
-  if (index > 0) {
-    const current = localValue.value[index];
-    const prev = localValue.value[index - 1];
-    if (current && prev) {
-      localValue.value[index] = prev;
-      localValue.value[index - 1] = current;
-      updateValue();
-    }
-  }
-}
-
-function moveDown(index: number) {
-  if (index < localValue.value.length - 1) {
-    const current = localValue.value[index];
-    const next = localValue.value[index + 1];
-    if (current && next) {
-      localValue.value[index] = next;
-      localValue.value[index + 1] = current;
-      updateValue();
-    }
-  }
+function removeExperience(index: number): void {
+  localValue.value.splice(index, 1);
+  emitValue();
 }
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div
-      v-for="(item, index) in localValue"
-      :key="item.id"
-      class="card bg-base-200"
-    >
-      <div class="card-body">
-        <div class="flex justify-between items-start">
-          <h3 class="card-title text-base">
-            {{ item.title || t("resumeComponentExperience.newItemTitle") }}
-          </h3>
-          <div class="flex gap-1">
+  <div class="card-body">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
+      <button
+        class="btn btn-sm btn-primary"
+        :aria-label="t('resumePage.experience.addButtonAria')"
+        @click="addExperience"
+      >
+        {{ t("resumePage.experience.addButton") }}
+      </button>
+    </div>
+    <div class="space-y-6">
+      <div
+        v-for="(experience, index) in localValue"
+        :key="`${experience.company}-${experience.title}-${index}`"
+        class="card bg-base-100"
+      >
+        <div class="card-body">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="font-semibold">
+              {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
+            </h3>
             <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentExperience.moveUpAria')"
-              @click="moveUp(index)"
-              :disabled="index === 0"
+              class="btn btn-error btn-xs"
+              :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
+              @click="removeExperience(index)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentExperience.moveDownAria')"
-              @click="moveDown(index)"
-              :disabled="index === localValue.length - 1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square"
-              :aria-label="t('resumeComponentExperience.toggleEditAria')"
-              @click="toggleEdit(item.id)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </button>
-            <button
-              class="btn btn-ghost btn-xs btn-square text-error"
-              :aria-label="t('resumeComponentExperience.removeItemAria')"
-              @click="removeItem(item.id)"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+              {{ t("resumePage.experience.removeButton") }}
             </button>
           </div>
-        </div>
-
-        <div v-if="editingId === item.id" class="space-y-3 mt-2">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentExperience.companyLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.experience.jobTitleLegend") }}</legend>
               <input
-                v-model="item.company"
+                v-model="experience.title"
                 type="text"
-                :placeholder="t('resumeComponentExperience.companyPlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentExperience.companyAria')"/>
+                required
+                minlength="2"
+                class="input validator w-full input-sm"
+                :aria-label="t('resumePage.experience.jobTitleAria')"
+                @input="emitValue"
+              />
+              <p class="validator-hint">{{ t("resumePage.experience.jobTitleHint") }}</p>
             </fieldset>
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentExperience.titleLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.experience.companyLegend") }}</legend>
               <input
-                v-model="item.title"
+                v-model="experience.company"
                 type="text"
-                :placeholder="t('resumeComponentExperience.titlePlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentExperience.titleAria')"/>
+                required
+                minlength="2"
+                class="input validator w-full input-sm"
+                :aria-label="t('resumePage.experience.companyAria')"
+                @input="emitValue"
+              />
+              <p class="validator-hint">{{ t("resumePage.experience.companyHint") }}</p>
             </fieldset>
             <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentExperience.startDateLabel") }}</div>
+              <legend class="fieldset-legend">{{ t("resumePage.experience.locationLegend") }}</legend>
               <input
-                v-model="item.startDate"
-                type="month"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentExperience.startDateAria')"/>
+                v-model="experience.location"
+                type="text"
+                class="input w-full input-sm"
+                :aria-label="t('resumePage.experience.locationAria')"
+                @input="emitValue"
+              />
             </fieldset>
-            <fieldset class="fieldset">
-              <div class="label text-sm">{{ t("resumeComponentExperience.endDateLabel") }}</div>
-              <input
-                v-model="item.endDate"
-                type="month"
-                :placeholder="t('resumeComponentExperience.endDatePlaceholder')"
-                class="input input-sm"
-                @input="updateValue"
-                :aria-label="t('resumeComponentExperience.endDateAria')"/>
-            </fieldset>
-          </div>
-
-          <fieldset class="fieldset">
-            <div class="label text-sm">{{ t("resumeComponentExperience.descriptionLabel") }}</div>
-            <textarea
-              v-model="item.description"
-              class="textarea"
-              rows="3"
-              :placeholder="t('resumeComponentExperience.descriptionPlaceholder')"
-              @input="updateValue"
-              :aria-label="t('resumeComponentExperience.descriptionAria')"></textarea>
-          </fieldset>
-
-          <fieldset class="fieldset">
-            <div class="label text-sm">{{ t("resumeComponentExperience.highlightsLabel") }}</div>
-            <div class="space-y-2">
-              <div
-                v-for="(highlight, hIndex) in item.highlights"
-                :key="hIndex"
-                class="flex gap-2 items-center"
-              >
-                <span class="text-sm flex-1">• {{ highlight }}</span>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-xs btn-square"
-                  :aria-label="t('resumeComponentExperience.removeHighlightAria', { highlight })"
-                  @click="removeHighlight(item.id, hIndex)"
-                >
-                  <CloseIcon class="h-3 w-3" />
-                </button>
-              </div>
-              <div class="join">
+            <div class="flex gap-2">
+              <fieldset class="fieldset flex-1">
+                <legend class="fieldset-legend">{{ t("resumePage.experience.startDateLegend") }}</legend>
                 <input
-                  v-model="newHighlight[item.id]"
-                  type="text"
-                  :placeholder="t('resumeComponentExperience.newHighlightPlaceholder')"
-                  class="input input-sm join-item flex-1"
-                  @keyup.enter="addHighlight(item.id)"
-                  :aria-label="t('resumeComponentExperience.newHighlightAria')"/>
-                <button
-                  class="btn btn-primary btn-sm join-item"
-                  :aria-label="t('resumeComponentExperience.addHighlightAria')"
-                  @click="addHighlight(item.id)"
-                >
-                  {{ t("resumeComponentExperience.addHighlightButton") }}
-                </button>
-              </div>
+                  v-model="experience.startDate"
+                  type="month"
+                  class="input w-full input-sm"
+                  :aria-label="t('resumePage.experience.startDateAria')"
+                  @input="emitValue"
+                />
+              </fieldset>
+              <fieldset class="fieldset flex-1">
+                <legend class="fieldset-legend">{{ t("resumePage.experience.endDateLegend") }}</legend>
+                <input
+                  v-model="experience.endDate"
+                  type="month"
+                  class="input w-full input-sm"
+                  :disabled="experience.current"
+                  :aria-label="t('resumePage.experience.endDateAria')"
+                  @input="emitValue"
+                />
+              </fieldset>
             </div>
+          </SectionGrid>
+          <fieldset class="fieldset">
+            <label class="label cursor-pointer justify-start gap-2">
+              <input
+                v-model="experience.current"
+                type="checkbox"
+                class="checkbox checkbox-sm"
+                :aria-label="t('resumePage.experience.currentAria')"
+                @change="emitValue"
+              />
+              <span class="label">{{ t("resumePage.experience.currentLabel") }}</span>
+            </label>
           </fieldset>
-        </div>
-
-        <div v-else class="text-sm text-base-content/70 mt-2">
-          <p class="font-medium">{{ item.company }}</p>
-          <p class="text-xs">{{ item.startDate }} - {{ item.endDate || t("resumeComponentExperience.presentValue") }}</p>
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
+            <textarea
+              v-model="experience.description"
+              required
+              minlength="20"
+              class="textarea validator w-full"
+              rows="3"
+              :aria-label="t('resumePage.experience.descriptionAria')"
+              @input="emitValue"
+            ></textarea>
+            <p class="validator-hint">{{ t("resumePage.experience.descriptionHint") }}</p>
+          </fieldset>
         </div>
       </div>
     </div>
-
-    <button class="btn btn-outline btn-block" :aria-label="t('resumeComponentExperience.addItemAria')" @click="addItem">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      {{ t("resumeComponentExperience.addItemButton") }}
-    </button>
   </div>
 </template>

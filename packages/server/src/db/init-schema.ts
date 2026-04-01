@@ -1,0 +1,293 @@
+import { DEFAULT_AI_ROUTING } from "@bao/shared/constants/ai-provider";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
+import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared/constants/cover-letter";
+import {
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
+} from "@bao/shared/constants/resume";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_EMAIL_TRANSPORT_SETTINGS,
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  DEFAULT_PROFILE_ID,
+  DEFAULT_SETTINGS_ID,
+} from "@bao/shared/types/settings-defaults";
+
+const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
+const DEFAULT_BRAND_SETTINGS_SQL = escapeSqlString(JSON.stringify(DEFAULT_BRAND_SETTINGS));
+const DEFAULT_NOTIFICATION_PREFERENCES_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_NOTIFICATION_PREFERENCES),
+);
+const DEFAULT_AUTOMATION_SETTINGS_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_AUTOMATION_SETTINGS),
+);
+const DEFAULT_AI_ROUTING_SQL = escapeSqlString(JSON.stringify(DEFAULT_AI_ROUTING));
+const DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL = escapeSqlString(
+  JSON.stringify(DEFAULT_EMAIL_TRANSPORT_SETTINGS),
+);
+
+export const TABLE_DEFINITIONS = [
+  `CREATE TABLE IF NOT EXISTS user_profile (
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
+      name TEXT NOT NULL DEFAULT '',
+      email TEXT,
+      phone TEXT,
+      location TEXT,
+      website TEXT,
+      linkedin TEXT,
+      github TEXT,
+      summary TEXT,
+      current_role TEXT,
+      current_company TEXT,
+      years_experience INTEGER,
+      technical_skills TEXT DEFAULT '[]',
+      soft_skills TEXT DEFAULT '[]',
+      gaming_experience TEXT DEFAULT '{}',
+      career_goals TEXT DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS settings (
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_SETTINGS_ID}',
+      gemini_api_key TEXT,
+      openai_api_key TEXT,
+      claude_api_key TEXT,
+      huggingface_token TEXT,
+      local_model_endpoint TEXT,
+      local_model_name TEXT,
+      ai_routing TEXT DEFAULT '${DEFAULT_AI_ROUTING_SQL}',
+      preferred_provider TEXT DEFAULT 'local',
+      preferred_model TEXT,
+      preferred_models TEXT,
+      theme TEXT DEFAULT 'corporate',
+      language TEXT DEFAULT 'en-US',
+      brand_settings TEXT DEFAULT '${DEFAULT_BRAND_SETTINGS_SQL}',
+      notifications TEXT DEFAULT '${DEFAULT_NOTIFICATION_PREFERENCES_SQL}',
+      automation_settings TEXT DEFAULT '${DEFAULT_AUTOMATION_SETTINGS_SQL}',
+      email_transport_settings TEXT DEFAULT '${DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL}',
+      email_transport_password TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS auth (
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
+      api_key TEXT
+    )`,
+  `CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      company TEXT NOT NULL,
+      location TEXT NOT NULL,
+      remote INTEGER DEFAULT 0,
+      hybrid INTEGER DEFAULT 0,
+      salary TEXT,
+      description TEXT,
+      requirements TEXT,
+      technologies TEXT,
+      experience_level TEXT,
+      type TEXT DEFAULT 'full-time',
+      posted_date TEXT,
+      url TEXT,
+      source TEXT,
+      studio_type TEXT,
+      game_genres TEXT,
+      platforms TEXT,
+      content_hash TEXT,
+      tags TEXT,
+      company_logo TEXT,
+      application_url TEXT,
+      enrichment TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS saved_jobs (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      saved_at TEXT NOT NULL
+    )`,
+  `CREATE TABLE IF NOT EXISTS applications (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      status TEXT DEFAULT 'applied',
+      applied_date TEXT NOT NULL,
+      notes TEXT DEFAULT '',
+      timeline TEXT DEFAULT '[]',
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS resumes (
+      id TEXT PRIMARY KEY,
+      name TEXT DEFAULT '${escapeSqlString(RESUME_DEFAULT_NAME)}',
+      personal_info TEXT,
+      summary TEXT,
+      experience TEXT DEFAULT '[]',
+      education TEXT DEFAULT '[]',
+      skills TEXT,
+      projects TEXT DEFAULT '[]',
+      gaming_experience TEXT,
+      template TEXT DEFAULT '${escapeSqlString(RESUME_TEMPLATE_DEFAULT)}',
+      theme TEXT DEFAULT '${escapeSqlString(RESUME_DEFAULT_THEME)}',
+      is_default INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS cover_letters (
+      id TEXT PRIMARY KEY,
+      company TEXT NOT NULL,
+      position TEXT NOT NULL,
+      job_info TEXT,
+      content TEXT DEFAULT '{}',
+      template TEXT DEFAULT '${escapeSqlString(COVER_LETTER_DEFAULT_TEMPLATE)}',
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS portfolios (
+      id TEXT PRIMARY KEY,
+      metadata TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS portfolio_projects (
+      id TEXT PRIMARY KEY,
+      portfolio_id TEXT NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      technologies TEXT DEFAULT '[]',
+      image TEXT,
+      live_url TEXT,
+      github_url TEXT,
+      tags TEXT DEFAULT '[]',
+      featured INTEGER DEFAULT 0,
+      role TEXT,
+      platforms TEXT,
+      engines TEXT,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS interview_sessions (
+      id TEXT PRIMARY KEY,
+      studio_id TEXT NOT NULL,
+      config TEXT,
+      questions TEXT DEFAULT '[]',
+      responses TEXT DEFAULT '[]',
+      final_analysis TEXT,
+      status TEXT DEFAULT 'preparing',
+      start_time INTEGER,
+      end_time INTEGER,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS studios (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      logo TEXT,
+      website TEXT,
+      location TEXT,
+      size TEXT,
+      type TEXT,
+      description TEXT,
+      games TEXT DEFAULT '[]',
+      technologies TEXT DEFAULT '[]',
+      culture TEXT,
+      interview_style TEXT,
+      remote_work INTEGER,
+      enrichment TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS gamification (
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
+      xp INTEGER DEFAULT 0,
+      level INTEGER DEFAULT 1,
+      achievements TEXT DEFAULT '[]',
+      daily_challenges TEXT DEFAULT '{}',
+      longest_streak INTEGER DEFAULT 0,
+      current_streak INTEGER DEFAULT 0,
+      last_active_date TEXT,
+      stats TEXT DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS skill_mappings (
+      id TEXT PRIMARY KEY,
+      game_expression TEXT NOT NULL,
+      transferable_skill TEXT NOT NULL,
+      industry_applications TEXT DEFAULT '[]',
+      evidence TEXT DEFAULT '[]',
+      confidence INTEGER DEFAULT 50,
+      category TEXT,
+      demand_level TEXT DEFAULT 'medium',
+      ai_generated INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS chat_history (
+      id TEXT PRIMARY KEY,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp TEXT NOT NULL,
+      session_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS automation_runs (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      job_id TEXT,
+      user_id TEXT,
+      input TEXT,
+      output TEXT,
+      screenshots TEXT,
+      error TEXT,
+      progress INTEGER DEFAULT 0,
+      current_step INTEGER,
+      total_steps INTEGER,
+      exit_code INTEGER,
+      timed_out INTEGER NOT NULL DEFAULT 0,
+      aborted INTEGER NOT NULL DEFAULT 0,
+      execution_ms INTEGER,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS job_taxonomy_keywords (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      label TEXT NOT NULL,
+      synonyms TEXT NOT NULL DEFAULT '[]',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+  `CREATE TABLE IF NOT EXISTS studio_classification_rules (
+      id TEXT PRIMARY KEY,
+      studio_type TEXT NOT NULL,
+      keyword TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`,
+] as const;
+
+export const INDEXES = [
+  "CREATE INDEX IF NOT EXISTS jobs_source_idx ON jobs(source)",
+  "CREATE INDEX IF NOT EXISTS jobs_posted_date_idx ON jobs(posted_date)",
+  "CREATE UNIQUE INDEX IF NOT EXISTS jobs_content_hash_idx ON jobs(content_hash)",
+  "CREATE INDEX IF NOT EXISTS saved_jobs_job_id_idx ON saved_jobs(job_id)",
+  "CREATE INDEX IF NOT EXISTS applications_job_id_idx ON applications(job_id)",
+  "CREATE INDEX IF NOT EXISTS portfolio_projects_portfolio_id_idx ON portfolio_projects(portfolio_id)",
+  "CREATE INDEX IF NOT EXISTS interview_sessions_studio_id_idx ON interview_sessions(studio_id)",
+  "CREATE INDEX IF NOT EXISTS chat_history_session_id_idx ON chat_history(session_id)",
+  "CREATE INDEX IF NOT EXISTS chat_history_timestamp_idx ON chat_history(timestamp)",
+  "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_category_idx ON job_taxonomy_keywords(category, sort_order)",
+  "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_enabled_idx ON job_taxonomy_keywords(enabled)",
+  "CREATE INDEX IF NOT EXISTS studio_classification_rules_type_idx ON studio_classification_rules(studio_type, sort_order)",
+  "CREATE INDEX IF NOT EXISTS studio_classification_rules_enabled_idx ON studio_classification_rules(enabled)",
+] as const;
+
+export { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID };

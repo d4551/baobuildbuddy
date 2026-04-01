@@ -1,18 +1,18 @@
-import type { ErrorEnvelope, JsonObject } from "@bao/shared";
+import { API_ERROR_AUTOMATION_PROCESS_FAILED } from "@bao/shared/constants/api-errors";
 import {
-  API_ERROR_AUTOMATION_PROCESS_FAILED,
   HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
-  type RpaRunErrorCode,
-} from "@bao/shared";
+} from "@bao/shared/constants/http";
+import type { ErrorEnvelope, RpaRunErrorCode } from "@bao/shared/schemas/error-envelope.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 import {
   AutomationConcurrencyLimitError,
   AutomationDependencyMissingError,
   AutomationRunNotFoundError,
   AutomationValidationError,
-} from "../services/automation/application-automation-service";
+} from "../services/automation/automation-errors";
 
 export type AutomationRouteErrorResult = {
   status: number;

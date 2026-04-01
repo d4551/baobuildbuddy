@@ -1,36 +1,15 @@
-import { type InterviewResponse, type InterviewSession } from "@bao/shared";
-type InterviewConfigInput = Record<string, unknown>;
-/**
- * Interview service layer for session lifecycle and studio-aware analysis.
- */
+import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
+import type { InterviewConfigInput } from "./interview-service-contracts";
 export declare class InterviewService {
-    /**
-     * Start a new studio-aware interview session.
-     */
     startSession(studioId: string, rawConfig?: InterviewConfigInput): Promise<InterviewSession>;
-    /**
-     * Fetch all interview sessions in reverse-chronological order.
-     */
     getSessions(): Promise<InterviewSession[]>;
-    /**
-     * Fetch one interview session.
-     */
     getSession(id: string): Promise<InterviewSession | null>;
     private selectQuestionForResponse;
     private buildAnalyzedResponse;
     private persistSessionResponses;
     private persistFinalAnalysis;
-    /**
-     * Add one candidate response and generate AI-backed feedback.
-     */
     addResponse(sessionId: string, response: InterviewResponse): Promise<InterviewSession | null>;
-    /**
-     * Mark interview session complete and run final AI summary generation.
-     */
     completeSession(id: string): Promise<InterviewSession | null>;
-    /**
-     * Get summary statistics for interview sessions.
-     */
     getStats(): Promise<{
         totalInterviews: number;
         completedInterviews: number;
@@ -42,4 +21,3 @@ export declare class InterviewService {
     }>;
 }
 export declare const interviewService: InterviewService;
-export {};

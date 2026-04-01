@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { generateId, settle } from "@bao/shared";
+import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { settle } from "@bao/shared/utils/promise";
+import { generateId } from "@bao/shared/utils/validation";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -109,7 +111,7 @@ beforeAll(async () => {
   seedModule.seedDatabase(dbModule.db);
 
   await db.insert(resumes).values({ id: resumeId });
-  app = new Elysia({ prefix: "/api" }).use(routesModule.automationRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.automationRoutes);
 });
 
 beforeEach(async () => {
@@ -141,10 +143,10 @@ afterAll(async () => {
 });
 
 function registerJobApplyValidationTest(): void {
-  test("POST /api/automation/job-apply validates required fields", async () => {
+  test("POST automation job apply validates required fields", async () => {
     const res = await requestStatusBody<{ error: { code: string; message: string } }>(
       "POST",
-      "/api/automation/job-apply",
+      API_ENDPOINTS.automationJobApply,
       {
         resumeId,
       },
@@ -160,11 +162,11 @@ function registerJobApplyValidationTest(): void {
 }
 
 function registerMissingResumeTest(): void {
-  test("POST /api/automation/job-apply rejects missing resume", async () => {
+  test("POST automation job apply rejects missing resume", async () => {
     const res = await requestJson<{ error: { code: string; message: string } }>(
       app,
       "POST",
-      "/api/automation/job-apply",
+      API_ENDPOINTS.automationJobApply,
       {
         jobUrl: "https://example.com/career/role",
         resumeId: "not-found-resume-id",
@@ -176,7 +178,7 @@ function registerMissingResumeTest(): void {
 }
 
 function registerJobApplyEnqueueTest(): void {
-  test("POST /api/automation/job-apply enqueues a run and returns run contract", async () => {
+  test("POST automation job apply enqueues a run and returns run contract", async () => {
     originalRunJobApply = applicationAutomationService.runJobApply.bind(
       applicationAutomationService,
     );
@@ -187,7 +189,7 @@ function registerJobApplyEnqueueTest(): void {
         const res = await requestJson<{ id: string; status: "running" }>(
           app,
           "POST",
-          "/api/automation/job-apply",
+          API_ENDPOINTS.automationJobApply,
           {
             jobUrl: "https://example.com/careers/engineering",
             resumeId,
@@ -219,11 +221,11 @@ function registerJobApplyEnqueueTest(): void {
 }
 
 function registerScheduleValidationTest(): void {
-  test("POST /api/automation/job-apply/schedule validates runAt", async () => {
+  test("POST automation job apply schedule validates runAt", async () => {
     const res = await requestJson<{ error: { code: string; message: string } }>(
       app,
       "POST",
-      "/api/automation/job-apply/schedule",
+      API_ENDPOINTS.automationJobApplySchedule,
       {
         jobUrl: "https://example.com/careers/engineering",
         resumeId,
@@ -237,13 +239,13 @@ function registerScheduleValidationTest(): void {
 }
 
 function registerScheduleCreationTest(): void {
-  test("POST /api/automation/job-apply/schedule creates a pending run", async () => {
+  test("POST automation job apply schedule creates a pending run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
       input: Record<string, unknown> | null;
-    }>(app, "POST", "/api/automation/job-apply/schedule", {
+    }>(app, "POST", API_ENDPOINTS.automationJobApplySchedule, {
       jobUrl: "https://example.com/careers/engineering",
       resumeId,
       runAt,
@@ -275,7 +277,7 @@ function registerScheduleCreationTest(): void {
 }
 
 function registerEmailResponseTest(): void {
-  test("POST /api/automation/email-response creates a successful email run", async () => {
+  test("POST automation email response creates a successful email run", async () => {
     originalRunEmailResponse = applicationAutomationService.runEmailResponse.bind(
       applicationAutomationService,
     );
@@ -289,7 +291,7 @@ function registerEmailResponseTest(): void {
       model: string;
       delivered: boolean;
       recipientEmail?: string;
-    }>(app, "POST", "/api/automation/email-response", {
+    }>(app, "POST", API_ENDPOINTS.automationEmailResponse, {
       subject: "Interview follow-up",
       message: "Thanks for the interview. Can we discuss next steps?",
       tone: "professional",
@@ -322,13 +324,13 @@ function registerEmailResponseTest(): void {
 }
 
 function registerScheduledEmailResponseTest(): void {
-  test("POST /api/automation/email-response/schedule creates a pending email run", async () => {
+  test("POST automation email response schedule creates a pending email run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
       input: Record<string, unknown> | null;
-    }>(app, "POST", "/api/automation/email-response/schedule", {
+    }>(app, "POST", API_ENDPOINTS.automationEmailResponseSchedule, {
       subject: "Interview follow-up",
       message: "Thanks again for the interview. I would love to continue the process.",
       tone: "friendly",
@@ -363,13 +365,13 @@ function registerScheduledEmailResponseTest(): void {
 }
 
 function registerScheduledScrapeRunTest(): void {
-  test("POST /api/automation/scrape/schedule creates a pending scrape run", async () => {
+  test("POST automation scrape schedule creates a pending scrape run", async () => {
     const runAt = new Date(Date.now() + 300_000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
       input: Record<string, unknown> | null;
-    }>(app, "POST", "/api/automation/scrape/schedule", {
+    }>(app, "POST", API_ENDPOINTS.automationScrapeSchedule, {
       target: "jobs_grackle",
       runAt,
     });
@@ -403,20 +405,27 @@ function registerScheduledScrapeRunTest(): void {
 }
 
 function registerImmediateScrapeRunTest(): void {
-  test("POST /api/automation/scrape executes a scrape run and persists history", async () => {
+  test("POST automation scrape executes a scrape run and persists history", async () => {
     originalScrapeJobsForTarget = scraperService.scrapeJobsForTarget.bind(scraperService);
     scraperService.scrapeJobsForTarget = () =>
       Promise.resolve({
         scraped: 4,
         upserted: 3,
         errors: [],
+        enrichment: {
+          enabled: true,
+          enrichedRecords: 3,
+          warnings: [],
+          provider: "local",
+          model: "deterministic-test-model",
+        },
       });
 
     const res = await requestJson<{
       id: string;
       status: "success";
       output: Record<string, unknown> | null;
-    }>(app, "POST", "/api/automation/scrape", {
+    }>(app, "POST", API_ENDPOINTS.automationScrape, {
       target: "jobs_grackle",
     }).finally(() => {
       if (originalScrapeJobsForTarget) {
@@ -428,6 +437,7 @@ function registerImmediateScrapeRunTest(): void {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("success");
     expect(res.body.output?.target).toBe("jobs_grackle");
+    expect(res.body.output?.enrichment).not.toBeNull();
     createdRunIds.push(res.body.id);
 
     const run = await db
@@ -443,12 +453,12 @@ function registerImmediateScrapeRunTest(): void {
 }
 
 function registerCapabilityAuditRouteTest(): void {
-  test("GET /api/automation/capabilities returns the full RPA capability audit", async () => {
+  test("GET automation capabilities returns the full RPA capability audit", async () => {
     const res = await requestJson<{
       generatedAt: string;
       summary: { total: number };
       capabilities: Array<{ id: string; target: string | null }>;
-    }>(app, "GET", "/api/automation/capabilities");
+    }>(app, "GET", API_ENDPOINTS.automationCapabilities);
 
     expect(res.status).toBe(200);
     expect(res.body.generatedAt.length).toBeGreaterThan(0);

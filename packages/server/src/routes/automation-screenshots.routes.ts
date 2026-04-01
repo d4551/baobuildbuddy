@@ -6,18 +6,24 @@ import {
   API_ERROR_SCREENSHOT_FILE_MISSING,
   API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE,
   API_ERROR_SCREENSHOT_NOT_FOUND,
-  DECIMAL_RADIX,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  RUN_ID_MIN_LENGTH,
-  RUN_ID_SAFE_PATTERN_SOURCE,
-  settle,
-} from "@bao/shared";
+} from "@bao/shared/constants/api-errors";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
+import { settle } from "@bao/shared/utils/promise";
+import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia, t } from "elysia";
+import Type from "baobox";
+import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
+import {
+  automationScreenshotParams,
+  type AutomationScreenshotParams,
+  type RouteSetState,
+} from "./automation-screenshot-route-contracts";
 import {
   type BinaryPayload,
   CACHE_CONTROL_PRIVATE_NO_STORE,
@@ -105,11 +111,11 @@ const readScreenshotPayload = async (filePath: string): Promise<BinaryPayload | 
  * Serves automation run screenshots from managed run directories.
  */
 export const automationScreenshotRoutes = new Elysia({
-  prefix: "/automation/screenshots",
+  prefix: toApiScopedPath(API_ENDPOINTS.automationScreenshotsBase),
   tags: ["Automation"],
 }).get(
   "/:runId/:index",
-  async ({ params, set }) => {
+  async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: API_ERROR_INVALID_SCREENSHOT_INDEX };
@@ -149,18 +155,19 @@ export const automationScreenshotRoutes = new Elysia({
     return createScreenshotResponse(contents, extension);
   },
   {
-    params: t.Object({
-      runId: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
-      index: t.String({ minLength: 1, pattern: "^(0|[1-9][0-9]*)$" }),
-    }),
+    params: automationScreenshotParams,
     response: {
-      200: t.Unknown(),
-      400: t.Object({
-        error: t.String(),
-      }),
-      404: t.Object({
-        error: t.String(),
-      }),
+      200: StandardSchemaV1(Type.Unknown()),
+      400: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
+      404: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
     },
   },
 );

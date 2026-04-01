@@ -1,0 +1,3089 @@
+const catalog = {
+  "meta": {
+    "title": "{brand} - Asistente de Carrera con IA",
+    "description": "Asistente de carrera con IA para la industria de videojuegos"
+  },
+  "app": {
+    "tagline": "Asistente de Carrera con IA para Desarrollo de Juegos"
+  },
+  "common": {
+    "localeNames": {
+      "enUS": "Inglés",
+      "esES": "Español",
+      "frFR": "Francés",
+      "jaJP": "Japonés"
+    },
+    "relativeTime": {
+      "justNow": "ahora mismo",
+      "minutesAgo": "hace {count}m",
+      "hoursAgo": "hace {count}h",
+      "daysAgo": "hace {count}d",
+      "weeksAgo": "hace {count}s"
+    }
+  },
+  "a11y": {
+    "toggleSidebar": "Alternar barra lateral",
+    "toggleTheme": "Alternar tema",
+    "openSettings": "Abrir configuración",
+    "primaryNavigation": "Navegación principal",
+    "mobilePrimaryNavigation": "Navegación principal móvil",
+    "toggleSidebarNavigation": "Alternar navegación de barra lateral",
+    "sidebarNavigation": "Navegación de barra lateral",
+    "closeSidebar": "Cerrar barra lateral",
+    "appHeader": "Encabezado de la aplicación",
+    "userMenu": "Menú de cuenta",
+    "skipToContent": "Saltar al contenido",
+    "breadcrumbs": "Ruta de navegación",
+    "notifications": "Notificaciones",
+    "dismissNotification": "Descartar notificación",
+    "localeSwitcher": "Cambiar idioma",
+    "localeOptionAria": "Cambiar idioma a {locale}"
+  },
+  "apiErrors": {
+    "jobs": {
+      "searchFailed": "Error al buscar empleos",
+      "fetchFailed": "Error al obtener empleo",
+      "saveFailed": "Error al guardar empleo",
+      "unsaveFailed": "Error al quitar empleo guardado",
+      "fetchSavedFailed": "Error al obtener empleos guardados",
+      "applyFailed": "Error al postularse al empleo",
+      "updateApplicationFailed": "Error al actualizar la postulación",
+      "fetchApplicationsFailed": "Error al obtener postulaciones",
+      "refreshFailed": "Error al actualizar empleos",
+      "fetchRecommendationsFailed": "Error al obtener recomendaciones de empleo"
+    },
+    "resumes": {
+      "fetchListFailed": "Error al obtener currículums",
+      "fetchFailed": "Error al obtener currículum",
+      "createFailed": "Error al crear currículum",
+      "updateFailed": "Error al actualizar currículum",
+      "deleteFailed": "Error al eliminar currículum",
+      "exportFailed": "Error al exportar currículum",
+      "exportOnePageFailed": "Error al exportar currículum de una página",
+      "enhanceFailed": "Error al mejorar currículum",
+      "scoreFailed": "Error al puntuar currículum",
+      "invalidPayload": "Datos de currículum no válidos"
+    },
+    "interview": {
+      "startFailed": "Error al iniciar sesión de entrevista",
+      "fetchSessionsFailed": "Error al obtener sesiones de entrevista",
+      "fetchSessionFailed": "Error al obtener sesión de entrevista",
+      "submitResponseFailed": "Error al enviar respuesta",
+      "completeFailed": "Error al completar sesión",
+      "fetchStatsFailed": "Error al obtener estadísticas de entrevista",
+      "invalidPayload": "Datos de sesión de entrevista no válidos"
+    },
+    "skills": {
+      "fetchMappingsFailed": "Error al obtener mapeos de habilidades",
+      "createMappingFailed": "Error al crear mapeo de habilidad",
+      "updateMappingFailed": "Error al actualizar mapeo de habilidad",
+      "deleteMappingFailed": "Error al eliminar mapeo de habilidad",
+      "fetchPathwaysFailed": "Error al obtener rutas de aprendizaje",
+      "fetchReadinessFailed": "Error al obtener preparación laboral",
+      "analyzeFailed": "Error al analizar habilidades",
+      "extractFailed": "Error al extraer habilidades del texto",
+      "compareFailed": "Error al comparar habilidades con el empleo"
+    },
+    "gamification": {
+      "fetchProgressFailed": "Error al obtener progreso",
+      "awardXPFailed": "Error al otorgar XP",
+      "fetchAchievementsFailed": "Error al obtener logros",
+      "fetchChallengesFailed": "Error al obtener desafíos",
+      "completeChallengeFailed": "Error al completar desafío",
+      "fetchWeeklyFailed": "Error al obtener progreso semanal",
+      "fetchMonthlyFailed": "Error al obtener estadísticas mensuales"
+    },
+    "studios": {
+      "searchFailed": "Error al buscar estudios",
+      "fetchFailed": "Error al obtener estudio",
+      "fetchAnalyticsFailed": "Error al obtener análisis del estudio",
+      "createFailed": "Error al crear estudio",
+      "updateFailed": "Error al actualizar estudio",
+      "deleteFailed": "Error al eliminar estudio",
+      "invalidPayload": "Datos de estudio no válidos"
+    },
+    "portfolio": {
+      "fetchFailed": "Error al obtener portafolio",
+      "updateFailed": "Error al actualizar portafolio",
+      "addProjectFailed": "Error al agregar proyecto",
+      "updateProjectFailed": "Error al actualizar proyecto",
+      "deleteProjectFailed": "Error al eliminar proyecto",
+      "reorderFailed": "Error al reordenar proyectos",
+      "exportFailed": "Error al exportar portafolio"
+    },
+    "settings": {
+      "fetchFailed": "Error al obtener configuración",
+      "updateFailed": "Error al actualizar configuración",
+      "updateApiKeysFailed": "Error al actualizar claves API",
+      "invalidPayload": "Datos de configuración no válidos",
+      "loadFailed": "Error al cargar configuración",
+      "missingResponse": "Respuesta de configuración faltante"
+    },
+    "user": {
+      "fetchProfileFailed": "Error al obtener perfil",
+      "updateProfileFailed": "Error al actualizar perfil",
+      "invalidPayload": "Datos de perfil de usuario no válidos"
+    },
+    "statistics": {
+      "fetchDashboardFailed": "Error al obtener estadísticas del panel",
+      "fetchWeeklyFailed": "Error al obtener actividad semanal",
+      "fetchCareerFailed": "Error al obtener progreso profesional"
+    },
+    "search": {
+      "searchFailed": "Error al buscar",
+      "autocompleteFailed": "Error al obtener sugerencias de autocompletado"
+    },
+    "ai": {
+      "sendMessageFailed": "Error al enviar mensaje",
+      "analyzeResumeFailed": "Error al analizar currículum",
+      "generateCoverLetterFailed": "Error al generar carta de presentación",
+      "matchJobsFailed": "Error al emparejar empleos",
+      "fetchModelsFailed": "Error al obtener modelos de IA",
+      "fetchUsageFailed": "Error al obtener uso de IA"
+    },
+    "auth": {
+      "initFailed": "Error al inicializar autenticación"
+    },
+    "unexpected": "Ha ocurrido un error inesperado"
+  },
+  "confirmDialog": {
+    "confirmButton": "Confirmar",
+    "cancelButton": "Cancelar"
+  },
+  "errorPage": {
+    "title": "{brand} encontró un error",
+    "fallbackMessage": "Algo salió mal.",
+    "statusLabel": "Estado",
+    "backToDashboardButton": "Volver al panel",
+    "resetButton": "Restablecer"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "jobs": "Empleos",
+    "resume": "Currículum",
+    "coverLetter": "Carta de Presentación",
+    "portfolio": "Portafolio",
+    "interview": "Entrevista",
+    "skills": "Habilidades",
+    "studios": "Estudios",
+    "aiChat": "Chat IA",
+    "automation": "Automatización",
+    "gamification": "Gamificación",
+    "settings": "Configuración",
+    "apiDocs": "Documentación de API",
+    "breadcrumbUnknown": "Página"
+  },
+  "apiDocs": {
+    "seoTitle": "Documentación de API",
+    "seoDescription": "Explora los endpoints disponibles y prueba solicitudes directamente desde la aplicación.",
+    "title": "Referencia de API",
+    "intro": "Revisa la superficie de tu API y ejecuta comprobaciones de endpoints en el probador integrado.",
+    "endpointNavigator": "Navegación de endpoints",
+    "groups": {
+      "untagged": "Sin etiqueta"
+    },
+    "state": {
+      "loading": "Cargando especificación de API",
+      "errorRetryable": "El servicio no está disponible temporalmente. Reintenta.",
+      "errorNonRetryable": "No se pudo cargar la documentación de la API.",
+      "unauthorized": "No tienes autorización para ver la documentación de la API.",
+      "empty": "No se encontraron endpoints de API."
+    },
+    "actions": {
+      "retry": "Reintentar"
+    },
+    "a11y": {
+      "endpointNavigation": "Navegación de endpoints"
+    },
+    "endpoint": {
+      "noDescription": "No se proporcionó descripción.",
+      "deprecated": "Obsoleto",
+      "methodLabel": "Método",
+      "operationIdLabel": "ID de operación",
+      "openTester": "Abrir probador",
+      "navigateAria": "Navegar a {method} {path}",
+      "openTesterAria": "Abrir probador para {method} {path}"
+    },
+    "tester": {
+      "title": "Probador de endpoint",
+      "lifecycleTitle": "Ciclo de vida de la solicitud",
+      "pathParametersIntro": "Parámetros de ruta",
+      "queryParametersIntro": "Parámetros de consulta",
+      "requestBodyIntro": "Cuerpo de solicitud",
+      "requestBodyAria": "Carga JSON del cuerpo de solicitud",
+      "noRequestBodyTemplate": "La especificación de OpenAPI no proporcionó una plantilla de cuerpo.",
+      "parameterLabel": "Parámetro {name}",
+      "send": "Enviar solicitud",
+      "sending": "Enviando",
+      "close": "Cerrar",
+      "closeAria": "Cerrar probador de endpoint",
+      "responseTitle": "Respuesta",
+      "responseStatusLabel": "Estado {status}: {text}",
+      "durationLabel": "Duración {duration} ms",
+      "errorFallback": "La solicitud falló sin un error detallado.",
+      "invalidPath": "Todos los parámetros de ruta son obligatorios.",
+      "requestFailure": "No se pudo ejecutar la solicitud.",
+      "requestErrorToast": "La solicitud falló",
+      "emptyResponseToast": "La solicitud terminó sin cuerpo de respuesta",
+      "requestSuccessToast": "Solicitud completada correctamente",
+      "emptyResponse": "La respuesta no devolvió cuerpo.",
+      "requestTraceTitle": "Seguimiento de solicitud",
+      "requestMethodLabel": "Método",
+      "steps": {
+        "configure": "Configurar",
+        "send": "Enviar",
+        "response": "Revisar respuesta"
+      },
+      "metadataTitle": "Metadatos de respuesta",
+      "metadata": {
+        "columns": {
+          "label": "Etiqueta",
+          "value": "Valor"
+        },
+        "responseStatus": "Estado",
+        "duration": "Duración",
+        "responseHeaders": "Encabezados de respuesta"
+      },
+      "responseHeadersLabel": "Encabezados de respuesta",
+      "noResponseHeaders": "No hay encabezados de respuesta."
+    }
+  },
+  "dashboard": {
+    "pageTitle": "Panel",
+    "seoDescription": "Seguimiento de oportunidades, progreso del currículum, práctica de entrevistas y señales de actividad en un panel operativo.",
+    "welcomeDescription": "Tu sistema operativo de carrera con IA para la industria de videojuegos.",
+    "welcomeHeading": {
+      "named": "¡Bienvenido, {name}!",
+      "fallback": "¡Bienvenido!"
+    },
+    "emptyStateTitle": "Inicia tu espacio de trabajo profesional",
+    "emptyStateDescription": "Completa la configuración, añade tu primer currículum y empieza a seguir oportunidades para llenar este panel.",
+    "onboardingChecklistTitle": "Completa estos pasos de incorporación",
+    "setupCtaLabel": "Completar Configuración",
+    "metricsSummaryLabel": "Resumen de {brand}",
+    "pipelineTitle": "Flujo de Carrera",
+    "pipelineDescription": "Mantén el impulso en descubrimiento, extracción, personalización de currículum, automatización de solicitudes y progresión de XP.",
+    "pipelineAria": "Flujo de trabajo de carrera",
+    "pipelineNextStepLabel": "Siguiente paso: {step}",
+    "dailyChallengeTitle": "Desafío Diario",
+    "recentActivityTitle": "Actividad Reciente",
+    "recentActivityEmptyLabel": "Sin actividad reciente",
+    "quickActionsTitle": "Acciones Rápidas",
+    "levelLabel": "Nivel",
+    "streakLabel": "días seguidos",
+    "retryButtonLabel": "Reintentar",
+    "retryAria": "Reintentar carga de datos del panel",
+    "loadErrorFallback": "Error al cargar datos del panel",
+    "activityFallback": "Actividad",
+    "heroPhrases": {
+      "findDreamRole": "Encuentra tu trabajo ideal",
+      "buildPortfolio": "Construye tu portafolio",
+      "prepareInterviews": "Prepárate para entrevistas",
+      "levelUpSkills": "Mejora tus habilidades profesionales"
+    },
+    "onboarding": {
+      "profile": "Perfil",
+      "aiProvider": "Proveedor de IA",
+      "resume": "Currículum",
+      "jobs": "Búsqueda de Empleo"
+    },
+    "pipeline": {
+      "steps": {
+        "search": "Buscar Empleos",
+        "scrape": "Extraer Ofertas Nuevas",
+        "customize": "Personalizar Currículum",
+        "apply": "Aplicar Automáticamente",
+        "gamify": "Ganar XP"
+      },
+      "status": {
+        "complete": "Completo",
+        "inProgress": "En progreso",
+        "pending": "Pendiente"
+      }
+    },
+    "stats": {
+      "savedJobsTitle": "Empleos Guardados",
+      "savedJobsCta": "Abrir espacio de empleos",
+      "resumesTitle": "Currículums",
+      "resumesCta": "Editar biblioteca de currículums",
+      "interviewSessionsTitle": "Sesiones de Entrevista",
+      "interviewSessionsCta": "Practicar flujo de entrevista",
+      "levelProgressAria": "Progreso del nivel actual",
+      "challengeProgressAria": "Progreso de completar el desafío diario"
+    },
+    "quickActions": {
+      "actions": {
+        "browseJobs": "Explorar Empleos",
+        "buildResume": "Crear Currículum",
+        "practiceInterview": "Practicar Entrevista",
+        "aiChat": "Chat IA"
+      }
+    },
+    "relativeTime": {
+      "minutesAgo": "hace {count}m",
+      "hoursAgo": "hace {count}h",
+      "daysAgo": "hace {count}d"
+    },
+    "errors": {
+      "profileLoadFallback": "Error al cargar el perfil de usuario",
+      "metricsLoadFallback": "Error al cargar métricas del panel",
+      "gamificationLoadFallback": "Error al cargar progreso de gamificación",
+      "challengesLoadFallback": "Error al cargar desafíos diarios"
+    }
+  },
+  "gamificationPage": {
+    "pageTitle": "Centro de Gamificación",
+    "metricsSummary": "Motor de progresión y desafíos de {brand}",
+    "seoTitle": "Centro de Gamificación de {brand}",
+    "seoDescription": "Seguimiento de progresión XP, completar desafíos diarios, rachas y desbloqueo de logros en una sola vista.",
+    "loadErrorFallback": "Error al cargar datos de gamificación",
+    "retryButtonLabel": "Reintentar",
+    "retryAria": "Reintentar carga de datos de gamificación",
+    "emptyStateTitle": "Sin datos de progresión aún",
+    "emptyStateDescription": "Completa tareas de configuración, inicia la práctica de entrevistas y realiza desafíos diarios para ganar XP y desbloquear logros.",
+    "emptyStateCta": "Abrir Panel",
+    "levelPrefix": "Nivel",
+    "xpUntilLevelLabel": "XP hasta el nivel",
+    "currentStreakTitle": "Racha Actual",
+    "longestStreakTitle": "Racha Más Larga",
+    "achievementsTitle": "Logros",
+    "achievementsUnlockedLabel": "Desbloqueados",
+    "achievementsLockedLabel": "Bloqueados",
+    "dailyChallengesTitle": "Desafíos Diarios",
+    "challengeClaimLabel": "Reclamar Recompensa",
+    "challengeClaimAria": "Reclamar recompensa para el desafío {challenge}",
+    "challengeDoneLabel": "Hecho",
+    "challengeCompletionToast": "Desafío completado",
+    "challengeCompleteErrorFallback": "Error al completar el desafío",
+    "streakDaysSuffix": "días seguidos",
+    "longestStreakDesc": "récord personal",
+    "noChallengesLabel": "No hay desafíos diarios disponibles.",
+    "a11y": {
+      "levelProgress": "Progresión de nivel",
+      "challengeProgress": "Progresión del desafío"
+    },
+    "achievementBadgeAria": "Logro: {name}. {description}"
+  },
+  "jobsPage": {
+    "seoTitle": "Bolsa de Empleo",
+    "seoDescription": "Busca y filtra roles de la industria de videojuegos por plataforma, tipo de estudio, género y nivel de experiencia.",
+    "title": "Bolsa de Empleo",
+    "emptyStateTitle": "No hay empleos que coincidan con tus filtros",
+    "emptyStateDescription": "Ajusta la búsqueda o los filtros para ampliar la vista actual de descubrimiento de empleos.",
+    "refreshButton": "Actualizar Empleos",
+    "refreshAria": "Actualizar feed de empleos",
+    "searchPlaceholder": "Buscar empleos por título, empresa o palabras clave...",
+    "searchAria": "Buscar empleos por título, empresa o palabras clave",
+    "clearSearchAria": "Borrar búsqueda de empleos",
+    "searchButton": "Buscar",
+    "searchButtonAria": "Ejecutar búsqueda de empleos",
+    "toggleFiltersButton": "Filtros",
+    "toggleFiltersAria": "Alternar panel de filtros",
+    "filtersTitle": "Filtros",
+    "clearFiltersButton": "Limpiar",
+    "clearFiltersAria": "Limpiar todos los filtros de empleos",
+    "locationLegend": "Ubicación",
+    "locationPlaceholder": "Ciudad, Provincia o País",
+    "locationAria": "Filtrar empleos por ubicación",
+    "remoteOnlyLabel": "Solo Remoto",
+    "remoteOnlyAria": "Filtrar solo empleos remotos",
+    "experienceLegend": "Nivel de Experiencia",
+    "experienceAria": "Filtrar por nivel de experiencia",
+    "studioTypeLegend": "Tipo de Estudio",
+    "studioTypeAria": "Filtrar por tipo de estudio",
+    "platformLegend": "Plataforma",
+    "platformAria": "Filtrar por plataforma",
+    "genreLegend": "Género",
+    "genreAria": "Filtrar por género de juego",
+    "options": {
+      "all": "Todos",
+      "allTypes": "Todos los Tipos",
+      "allPlatforms": "Todas las Plataformas",
+      "allGenres": "Todos los Géneros",
+      "experience": {
+        "entry": "Principiante",
+        "mid": "Medio"
+      },
+      "studioType": {
+        "mobile": "Móvil",
+        "platform": "Plataforma",
+        "unknown": "Desconocido"
+      },
+      "platform": {
+        "console": "Consola",
+        "mobile": "Móvil"
+      },
+      "genre": {
+        "action": "Acción",
+        "strategy": "Estrategia",
+        "puzzle": "Rompecabezas",
+        "simulation": "Simulación",
+        "sports": "Deportes",
+        "racing": "Carreras",
+        "platformer": "Plataformas",
+        "horror": "Terror",
+        "adventure": "Aventura",
+        "fighting": "Lucha",
+        "survival": "Supervivencia",
+        "cardGame": "Juego de Cartas"
+      }
+    },
+    "emptyState": "No se encontraron empleos. Prueba ajustando filtros o búsqueda.",
+    "openJobAria": "Abrir detalles del empleo {title} en {company}",
+    "remoteBadge": "Remoto",
+    "matchScoreAria": "Puntuación de coincidencia",
+    "matchBreakdown": {
+      "overallProgressAria": "Puntuación de coincidencia general: {score} por ciento",
+      "skillsMatchLabel": "Coincidencia de Habilidades",
+      "skillsProgressAria": "Progreso de coincidencia de habilidades",
+      "experienceMatchLabel": "Coincidencia de Experiencia",
+      "experienceProgressAria": "Progreso de coincidencia de experiencia",
+      "locationMatchLabel": "Coincidencia de Ubicación",
+      "locationProgressAria": "Progreso de coincidencia de ubicación"
+    },
+    "interviewButton": "Entrevista",
+    "interviewAria": "Iniciar entrevista para {title} en {company}",
+    "viewButton": "Ver",
+    "viewAria": "Ver detalles del empleo {title} en {company}",
+    "pagination": {
+      "navigationAria": "Paginación de empleos",
+      "previousAria": "Página anterior de empleos",
+      "nextAria": "Página siguiente de empleos",
+      "pageAria": "Ir a la página de empleos {page}",
+      "summary": "Mostrando {start}-{end} de {total} empleos"
+    },
+    "previousPageAria": "Página anterior",
+    "nextPageAria": "Página siguiente",
+    "pageAria": "Ir a la página {page}",
+    "toasts": {
+      "searchReward": "Progreso de búsqueda registrado (+{xp} XP)"
+    },
+    "date": {
+      "unknown": "Desconocido",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {count} días",
+      "weeksAgo": "hace {count} semanas",
+      "monthsAgo": "hace {count} meses"
+    }
+  },
+  "jobCard": {
+    "viewAria": "Ver empleo: {title} en {company}",
+    "saveAria": "Guardar empleo",
+    "unsaveAria": "Quitar de guardados",
+    "remoteBadge": "Remoto",
+    "hybridBadge": "Híbrido",
+    "matchBadge": "{score}% Coincidencia",
+    "matchBadgeAria": "Puntuación de coincidencia {score} por ciento",
+    "moreTechnologies": "+{count} más",
+    "relativeTime": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {count}d",
+      "weeksAgo": "hace {count}s",
+      "monthsAgo": "hace {count}mes"
+    }
+  },
+  "resumePreview": {
+    "pageTitle": "Vista Previa del Currículum",
+    "description": "Revisa el diseño imprimible del currículum antes de exportarlo o compartirlo.",
+    "defaultName": "Tu Nombre",
+    "present": "Actual",
+    "gpaLabel": "Promedio: {gpa}",
+    "printButton": "Imprimir",
+    "printAria": "Imprimir vista previa del currículum",
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar carga de la vista previa del currículum",
+    "loadError": "Error al cargar la vista previa del currículum.",
+    "notFound": "No se encontró el currículum. Selecciona uno para previsualizar.",
+    "notFoundTitle": "No se encontró el currículum",
+    "notFoundDescription": "Selecciona un currículum guardado desde el espacio de currículums para abrir esta vista previa.",
+    "website": "Sitio Web",
+    "websiteLinkAria": "Abrir sitio web personal",
+    "linkedinLinkAria": "Abrir perfil de LinkedIn",
+    "githubLinkAria": "Abrir perfil de GitHub",
+    "experience": "Experiencia",
+    "education": "Formación",
+    "skills": "Habilidades",
+    "technicalSkills": "Habilidades Técnicas",
+    "softSkills": "Habilidades Blandas",
+    "gamingIndustrySkills": "Habilidades de la Industria del Juego"
+  },
+  "skillsPage": {
+    "seoTitle": "Mapeador de Habilidades",
+    "seoDescription": "Traduce la experiencia en juegos en competencias profesionales con puntuación de confianza, mapeo de categorías y análisis asistido por IA.",
+    "title": "Mapeador de Habilidades",
+    "subtitle": "Convierte logros de juegos en señales claras de capacidad profesional.",
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar carga de mapeos de habilidades",
+    "description": "Mapea tus logros de juego a habilidades transferibles al trabajo, luego reutiliza estos mapeos en currículums y entrevistas.",
+    "gamification": {
+      "levelLabel": "Nvl {level}",
+      "openProgressAria": "Abrir progreso de gamificación"
+    },
+    "actions": {
+      "aiAnalyzeButton": "Analizar con IA",
+      "aiAnalyzeAria": "Ejecutar análisis IA de mapeos de habilidades",
+      "addMappingButton": "Añadir Mapeo",
+      "addMappingAria": "Añadir nuevo mapeo de habilidad"
+    },
+    "stats": {
+      "totalMappingsTitle": "Mapeos Totales",
+      "totalMappingsDesc": "Enlaces de habilidades transferibles guardados",
+      "averageConfidenceTitle": "Confianza Media",
+      "averageConfidenceDesc": "En todos los mapeos",
+      "aiGeneratedTitle": "Generado por IA",
+      "aiGeneratedDesc": "Creado desde análisis IA",
+      "categoriesUsedTitle": "Categorías Usadas",
+      "categoriesUsedDesc": "Cobertura de dominios de habilidades"
+    },
+    "insights": {
+      "pathwaysTitle": "Rutas de Habilidades",
+      "pathwaysDescription": "Convierte fortalezas mapeadas en rutas de crecimiento paso a paso y prioriza qué practicar.",
+      "totalMappingsLabel": "Mapeos totales",
+      "avgConfidenceLabel": "Confianza media",
+      "categoriesCoverageLabel": "Categorías cubiertas",
+      "pathwaysButtonAria": "Abrir panel de rutas de habilidades",
+      "pathwaysButton": "Abrir Rutas",
+      "topMappingsTitle": "Mejores Mapeos",
+      "topMappingsDescription": "Habilidades transferibles con mayor confianza, ordenadas por puntuación.",
+      "topMappingsAria": "Mejores mapeos de habilidades por confianza",
+      "topMappingsEmptyTitle": "Todavía no hay mapeos destacados",
+      "topMappingsEmptyDescription": "Añade o analiza mapeos para rellenar el resumen de habilidades con mayor confianza."
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por experiencia de juego, habilidad transferible o aplicación...",
+      "searchAria": "Buscar mapeos de habilidades",
+      "categoryGroupAria": "Filtrar mapeos por categoría",
+      "allAria": "Mostrar todas las categorías",
+      "allButton": "Todos",
+      "categoryAria": "Filtrar por categoría {category}",
+      "clearButton": "Limpiar Filtros",
+      "clearAria": "Limpiar filtros activos de mapeos"
+    },
+    "emptyStateTitle": "Todavía no hay mapeos de habilidades",
+    "emptyStateDescription": "Añade tu primer mapeo de juego a carrera para empezar a construir evidencia reutilizable para currículums y entrevistas.",
+    "filteredEmptyTitle": "Ningún mapeo coincide con estos filtros",
+    "filteredEmptyDescription": "Ajusta la búsqueda o los filtros de categoría para recuperar mapeos compatibles.",
+    "categories": {
+      "leadership": "Liderazgo",
+      "community": "Gestión de Comunidad",
+      "technical": "Habilidades Técnicas",
+      "creative": "Dirección Creativa",
+      "analytical": "Pensamiento Analítico",
+      "communication": "Comunicación",
+      "projectManagement": "Gestión de Proyectos"
+    },
+    "table": {
+      "ariaLabel": "Tabla de mapeos de habilidades",
+      "columns": {
+        "gamingExperience": "Experiencia de Juego",
+        "transferableSkill": "Habilidad Transferible",
+        "applications": "Aplicaciones Industriales",
+        "confidence": "Confianza",
+        "category": "Categoría",
+        "actions": "Acciones"
+      },
+      "confidenceAria": "Puntuación de confianza {confidence} por ciento",
+      "deleteButton": "Eliminar",
+      "deleteAria": "Eliminar mapeo de {skill}"
+    },
+    "mobile": {
+      "cardAria": "Tarjeta de mapeo de habilidad para {skill}"
+    },
+    "createModal": {
+      "title": "Añadir Mapeo de Habilidad",
+      "gameExpressionLegend": "Experiencia de Juego",
+      "gameExpressionPlaceholder": "ej. Lideré un grupo de raid de 40 personas hasta un primer mundial",
+      "gameExpressionAria": "Experiencia de juego",
+      "gameExpressionHint": "La experiencia de juego debe tener al menos 2 caracteres.",
+      "transferableSkillLegend": "Habilidad Transferible",
+      "transferableSkillPlaceholder": "ej. Liderazgo y Coordinación de Equipo",
+      "transferableSkillAria": "Habilidad transferible",
+      "transferableSkillHint": "La habilidad transferible debe tener al menos 2 caracteres.",
+      "categoryLegend": "Categoría",
+      "categoryAria": "Categoría de habilidad",
+      "applicationsLegend": "Aplicaciones Industriales",
+      "applicationPlaceholder": "ej. Gestión de proyectos",
+      "applicationAria": "Aplicación industrial",
+      "addApplicationButton": "Añadir",
+      "addApplicationAria": "Añadir aplicación industrial",
+      "removeApplicationAria": "Quitar aplicación {application}",
+      "confidenceLegend": "Nivel de Confianza: {confidence}%",
+      "confidenceAria": "Nivel de confianza",
+      "cancelButton": "Cancelar",
+      "cancelAria": "Cancelar creación de mapeo",
+      "createButton": "Añadir Mapeo",
+      "createAria": "Crear mapeo de habilidad",
+      "closeBackdropButton": "Cerrar",
+      "closeBackdropAria": "Cerrar diálogo de mapeo de habilidad"
+    },
+    "deleteDialog": {
+      "title": "Eliminar mapeo",
+      "message": "Este mapeo de habilidad se eliminará permanentemente.",
+      "confirmButton": "Eliminar",
+      "cancelButton": "Cancelar"
+    },
+    "toasts": {
+      "mappingAdded": "Mapeo de habilidad añadido",
+      "mappingAddedWithXp": "Mapeo de habilidad añadido (+{xp} XP)",
+      "mappingDeleted": "Mapeo de habilidad eliminado",
+      "analysisCompleted": "Habilidades analizadas correctamente",
+      "analysisCompletedWithXp": "Habilidades analizadas correctamente (+{xp} XP)"
+    },
+    "errors": {
+      "fetchFailed": "Error al obtener mapeos de habilidades",
+      "gameExpressionMinLength": "La experiencia de juego debe tener al menos 2 caracteres",
+      "transferableSkillMinLength": "La habilidad transferible debe tener al menos 2 caracteres",
+      "addFailed": "Error al añadir mapeo de habilidad",
+      "deleteFailed": "Error al eliminar mapeo de habilidad",
+      "analysisFailed": "Error al analizar habilidades",
+      "gamificationLoadFailed": "Error al cargar progreso de gamificación"
+    }
+  },
+  "skillsPathwaysPage": {
+    "seoTitle": "Rutas de Carrera",
+    "seoDescription": "Evalúa tu preparación profesional y descubre rutas de rol según tus habilidades transferibles mapeadas.",
+    "title": "Rutas de Carrera",
+    "subtitle": "Sigue tu preparación y explora rutas generadas desde tu evidencia de habilidades mapeadas.",
+    "retryButtonLabel": "Reintentar",
+    "retryAria": "Reintentar carga de rutas de carrera",
+    "categories": {
+      "technical": "Técnico",
+      "softSkills": "Habilidades Blandas",
+      "industryKnowledge": "Conocimiento de la Industria",
+      "portfolio": "Portafolio"
+    },
+    "readiness": {
+      "title": "Tu Preparación Profesional",
+      "overallReadinessLabel": "Preparación general",
+      "overallReadinessAria": "Puntuación de preparación general {score} por ciento",
+      "categoryScoresLabel": "Puntuaciones por categoría",
+      "categoryScoreAria": "Puntuación de preparación {category} {score} por ciento",
+      "topImprovementsTitle": "Principales mejoras",
+      "nextStepsTitle": "Próximos pasos",
+      "feedback": {
+        "empty": "Aún no hay datos de preparación para {category}.",
+        "early": "Etapa inicial en {category}. Enfócate en añadir más mapeos y evidencia.",
+        "developing": "Desarrollo en {category}. Sigue añadiendo ejemplos mapeados y evidencia.",
+        "good": "Buen nivel en {category}. Sigue profundizando para fortalecer esta área.",
+        "excellent": "Excelente nivel en {category}. Estás bien preparado en esta área."
+      },
+      "improvements": {
+        "imp_tech_map": "Mapea más habilidades técnicas de juego a habilidades técnicas profesionales.",
+        "imp_conf_up": "Aumenta la confianza de tus mapeos técnicos existentes.",
+        "imp_lead_comm": "Mapea más experiencias de liderazgo y comunicación.",
+        "imp_team_examples": "Añade ejemplos concretos de colaboración en equipo.",
+        "imp_industry_research": "Investiga más aplicaciones de industria para tus habilidades mapeadas.",
+        "imp_role_link": "Conecta habilidades mapeadas con roles objetivo concretos.",
+        "imp_evidence_add": "Añade evidencia a tus habilidades mapeadas con clips, capturas o documentos.",
+        "imp_portfolio_build": "Construye proyectos de portafolio para demostrar habilidades.",
+        "imp_achievements_doc": "Documenta logros medibles para tus mejores mapeos.",
+        "imp_transfer_strengthen": "Refuerza la transferencia técnica mapeando mecánicas de juego a conceptos de ingeniería.",
+        "imp_leadership_highlight": "Destaca experiencias de liderazgo y comunicación desde contextos de juego.",
+        "imp_coverage_broaden": "Amplía cobertura mapeando entre 10 y 15 habilidades diversas.",
+        "imp_examples_refine": "Refina tus mapeos actuales con ejemplos más específicos.",
+        "imp_certs_pursue": "Busca certificaciones que validen tus fortalezas técnicas.",
+        "imp_network_pro": "Haz networking con profesionales de tu industria objetivo."
+      },
+      "nextStepItems": {
+        "step_apply_roles": "Empieza a postular a roles objetivo.",
+        "step_network_industry": "Conecta con profesionales del sector.",
+        "step_prepare_interviews": "Prepárate para entrevistas técnicas.",
+        "step_polish_linkedin": "Optimiza tu perfil de LinkedIn.",
+        "step_complete_portfolio": "Completa tu portafolio con 3-5 proyectos sólidos.",
+        "step_map_skills_15": "Mapea 5 habilidades más para llegar a 15 o más.",
+        "step_evidence_top": "Añade evidencia a tus 10 habilidades principales.",
+        "step_research_targets": "Investiga empresas y roles objetivo.",
+        "step_map_skills_10": "Mapea 10 o más habilidades de juego a carrera.",
+        "step_start_portfolio": "Empieza a construir proyectos de portafolio.",
+        "step_evidence_abilities": "Añade evidencia para demostrar tus capacidades.",
+        "step_explore_pathways": "Explora rutas de carrera que encajen con tus habilidades.",
+        "step_map_skills_5": "Mapea tus primeras 5 habilidades de juego.",
+        "step_explore_categories": "Explora diferentes categorías de habilidades.",
+        "step_learn_careers": "Conoce opciones profesionales de la industria del juego.",
+        "step_setup_profile": "Configura tu perfil profesional."
+      },
+      "emptyState": "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
+      "emptyStateTitle": "Los datos de preparación aún no están disponibles",
+      "emptyStateDescription": "Añade más evidencia de habilidades mapeadas y vuelve a ejecutar el análisis para completar esta sección."
+    },
+    "pathways": {
+      "title": "Recomendaciones de Rutas",
+      "requiredSkillsTitle": "Habilidades requeridas",
+      "matchScoreLabel": "Puntuación de coincidencia",
+      "matchScoreAria": "Puntuación de coincidencia de ruta {title} {score} por ciento",
+      "estimatedTimeLabel": "Tiempo estimado para entrar:",
+      "marketTrendLabel": "Tendencia del mercado:",
+      "marketTrend": {
+        "growing": "En crecimiento",
+        "stable": "Estable",
+        "declining": "En declive"
+      },
+      "emptyState": "Sin rutas disponibles. Añade más habilidades mapeadas para generar recomendaciones.",
+      "emptyStateTitle": "Aún no hay rutas disponibles",
+      "emptyStateDescription": "Amplía las habilidades mapeadas para desbloquear mejores recomendaciones y cobertura de rutas."
+    },
+    "errors": {
+      "loadFailed": "Error al cargar datos de rutas de carrera",
+      "pathwaysLoadFailed": "Error al cargar recomendaciones de rutas",
+      "readinessLoadFailed": "Error al cargar evaluación de preparación",
+      "gamificationLoadFailed": "Error al cargar el progreso de gamificación en esta página"
+    },
+    "gamification": {
+      "openProgressAria": "Abrir progreso de gamificación",
+      "levelLabel": "Nvl {level}",
+      "retryAria": "Reintentar carga del progreso de gamificación",
+      "retryButton": "Reintentar",
+      "unavailableHint": "Progreso no disponible"
+    }
+  },
+  "resumePage": {
+    "seoTitle": "Constructor de Currículum",
+    "seoDescription": "Crea variantes de CV orientadas al rol, mide el progreso y conecta con flujos de carta, portafolio y entrevistas.",
+    "title": "Constructor de Currículum",
+    "subtitle": "Crea variantes de currículum por rol, mantén el contenido actualizado y pasa directamente a cartas de presentación, portafolio y entrevistas.",
+    "createButton": "Crear Currículum",
+    "createButtonAria": "Crear un nuevo currículum",
+    "guidedButton": "Constructor Guiado",
+    "guidedButtonAria": "Abrir constructor guiado de currículum",
+    "emptyState": "Sin currículums aún. Crea tu primer currículum para empezar.",
+    "filteredEmptyState": "Ningún currículum coincide con tu búsqueda.",
+    "defaultBadge": "Por defecto",
+    "editButton": "Editar",
+    "editButtonAria": "Editar currículum {name}",
+    "deleteButton": "Eliminar",
+    "deleteButtonAria": "Eliminar currículum {name}",
+    "backButton": "Volver a Currículums",
+    "backButtonAria": "Volver a la lista de currículums",
+    "aiEnhanceButton": "Mejorar con IA",
+    "aiEnhanceButtonAria": "Mejorar currículum con sugerencias de IA",
+    "aiScoreButton": "Puntuar Currículum",
+    "aiScoreButtonAria": "Analizar y puntuar este currículum",
+    "exportButton": "Exportar",
+    "exportButtonAria": "Exportar currículum",
+    "saveButton": "Guardar",
+    "saveButtonAria": "Guardar currículum",
+    "aiEnhancementTitle": "Mejora con IA en progreso",
+    "aiSteps": {
+      "analyzing": "Analizando",
+      "enhancing": "Mejorando",
+      "finalizing": "Finalizando"
+    },
+    "tabs": {
+      "tablistAria": "Secciones del editor de currículum",
+      "experience": "Experiencia",
+      "education": "Formación",
+      "skills": "Habilidades",
+      "projects": "Proyectos",
+      "gaming": "Juegos",
+      "selectAria": "Seleccionar sección {tab}"
+    },
+    "completion": {
+      "title": "Completado del Currículum",
+      "progressAria": "Progreso de completado del currículum",
+      "summary": "{completed} de {total} secciones completadas",
+      "jumpAria": "Ir a la sección {section}",
+      "nextStep": "Siguiente sección recomendada: {section}",
+      "complete": "Todas las secciones completadas. Tu currículum está listo para el toque final.",
+      "quickActions": {
+        "coverLetter": "Carta de Presentación",
+        "coverLetterAria": "Abrir constructor de carta con contexto de este currículum",
+        "portfolio": "Portafolio",
+        "portfolioAria": "Abrir constructor de portafolio",
+        "interview": "Preparación Entrevista",
+        "interviewAria": "Abrir centro de preparación de entrevistas"
+      }
+    },
+    "filters": {
+      "searchLegend": "Buscar Currículums",
+      "searchPlaceholder": "Buscar por nombre o plantilla",
+      "searchAria": "Buscar currículums",
+      "clearButton": "Limpiar Filtros",
+      "clearAria": "Limpiar filtros de currículum"
+    },
+    "pagination": {
+      "navigationAria": "Paginación de currículums",
+      "previousAria": "Página anterior de currículums",
+      "nextAria": "Página siguiente de currículums",
+      "pageAria": "Ir a la página de currículum {page}",
+      "summary": "Mostrando {start}-{end} de {total} currículums"
+    },
+    "personal": {
+      "title": "Información Personal",
+      "fullNameLegend": "Nombre Completo",
+      "fullNameAria": "Nombre completo",
+      "fullNameHint": "El nombre debe tener al menos 2 caracteres.",
+      "emailAria": "Dirección de email",
+      "emailHint": "Introduce una dirección de email válida.",
+      "phoneLegend": "Teléfono",
+      "phoneAria": "Número de teléfono",
+      "phoneHint": "Introduce un número de teléfono válido.",
+      "locationLegend": "Ubicación",
+      "locationAria": "Ubicación",
+      "linkedInLegend": "URL de LinkedIn",
+      "linkedInAria": "URL del perfil de LinkedIn",
+      "portfolioLegend": "URL del Portafolio",
+      "portfolioAria": "URL del portafolio",
+      "summaryLegend": "Resumen Profesional",
+      "summaryAria": "Resumen profesional",
+      "summaryHint": "El resumen debe tener al menos 50 caracteres."
+    },
+    "experience": {
+      "title": "Experiencia",
+      "addButton": "Añadir Experiencia",
+      "addButtonAria": "Añadir nueva entrada de experiencia",
+      "itemTitle": "Experiencia {index}",
+      "removeButton": "Quitar",
+      "removeButtonAria": "Quitar experiencia {index}",
+      "jobTitleLegend": "Puesto",
+      "jobTitleAria": "Puesto de la experiencia",
+      "jobTitleHint": "El puesto debe tener al menos 2 caracteres.",
+      "companyLegend": "Empresa",
+      "companyAria": "Empresa de la experiencia",
+      "companyHint": "La empresa debe tener al menos 2 caracteres.",
+      "locationLegend": "Ubicación",
+      "locationAria": "Ubicación de la experiencia",
+      "startDateLegend": "Fecha de Inicio",
+      "startDateAria": "Fecha de inicio de la experiencia",
+      "endDateLegend": "Fecha de Fin",
+      "endDateAria": "Fecha de fin de la experiencia",
+      "currentLabel": "Rol Actual",
+      "currentAria": "Marcar como rol actual",
+      "descriptionLegend": "Descripción",
+      "descriptionAria": "Descripción de la experiencia",
+      "descriptionHint": "La descripción debe tener al menos 50 caracteres."
+    },
+    "education": {
+      "title": "Formación",
+      "addButton": "Añadir Formación",
+      "addButtonAria": "Añadir nueva entrada de formación",
+      "itemTitle": "Formación {index}",
+      "removeButton": "Quitar",
+      "removeButtonAria": "Quitar formación {index}",
+      "degreeLegend": "Título",
+      "degreeAria": "Título",
+      "degreeHint": "El título debe tener al menos 2 caracteres.",
+      "schoolLegend": "Centro",
+      "schoolAria": "Nombre del centro",
+      "schoolHint": "El centro debe tener al menos 2 caracteres.",
+      "locationLegend": "Ubicación",
+      "locationAria": "Ubicación de la formación",
+      "graduationDateLegend": "Fecha de Graduación",
+      "graduationDateAria": "Fecha de graduación",
+      "gpaLegend": "Nota media (opcional)",
+      "gpaAria": "Nota media"
+    },
+    "skills": {
+      "title": "Habilidades",
+      "inputPlaceholder": "Escribe una habilidad y pulsa enter",
+      "inputAria": "Nueva habilidad",
+      "addButton": "Añadir Habilidad",
+      "addButtonAria": "Añadir habilidad",
+      "removeButtonAria": "Quitar habilidad {index}"
+    },
+    "projects": {
+      "title": "Proyectos",
+      "addButton": "Añadir Proyecto",
+      "addButtonAria": "Añadir proyecto",
+      "itemTitle": "Proyecto {index}",
+      "removeButton": "Quitar",
+      "removeButtonAria": "Quitar proyecto {index}",
+      "nameLegend": "Nombre del Proyecto",
+      "nameAria": "Nombre del proyecto",
+      "nameHint": "El nombre del proyecto debe tener al menos 2 caracteres.",
+      "urlLegend": "URL del Proyecto",
+      "urlAria": "URL del proyecto",
+      "descriptionLegend": "Descripción",
+      "descriptionAria": "Descripción del proyecto",
+      "descriptionHint": "La descripción debe tener al menos 30 caracteres."
+    },
+    "gaming": {
+      "title": "Contexto de Carrera en Juegos",
+      "description": "Captura detalles del dominio de juegos para mejorar la personalización y puntuación IA del currículum.",
+      "rolesLegend": "Roles Objetivo",
+      "rolesAria": "Roles objetivo en la industria del juego",
+      "rolesPlaceholder": "Ingeniero de Gameplay, Artista Técnico",
+      "genresLegend": "Géneros Preferidos",
+      "genresAria": "Géneros de juego preferidos",
+      "genresPlaceholder": "RPG, Acción, Estrategia",
+      "achievementsLegend": "Logros Clave",
+      "achievementsAria": "Logros en juegos",
+      "achievementsPlaceholder": "Títulos publicados, victorias en competiciones, hitos importantes"
+    },
+    "createModal": {
+      "title": "Crear Currículum",
+      "nameLegend": "Nombre del Currículum",
+      "namePlaceholder": "ej. Currículum Ingeniero de Gameplay",
+      "nameAria": "Nombre del currículum",
+      "templateLegend": "Plantilla",
+      "templateAria": "Plantilla de currículum",
+      "templates": {
+        "modern": "Moderno",
+        "classic": "Clásico",
+        "creative": "Creativo",
+        "minimal": "Minimalista",
+        "executive": "Ejecutivo",
+        "technical": "Técnico"
+      },
+      "cancelButton": "Cancelar",
+      "cancelAria": "Cancelar creación de currículum",
+      "createButton": "Crear Currículum",
+      "createAria": "Crear currículum",
+      "closeBackdropButton": "Cerrar",
+      "closeBackdropAria": "Cerrar diálogo de creación de currículum"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Currículum",
+      "message": "Esta acción no se puede deshacer. ¿Eliminar este currículum permanentemente?",
+      "confirmButton": "Eliminar",
+      "cancelButton": "Cancelar"
+    },
+    "toasts": {
+      "resumeNameMinLength": "El nombre del currículum debe tener al menos 2 caracteres",
+      "resumeCreated": "Currículum creado",
+      "resumeCreateFailed": "Error al crear currículum",
+      "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "invalidEmail": "Introduce una dirección de email válida",
+      "summaryMinLength": "El resumen debe tener al menos 50 caracteres",
+      "invalidExperience": "Cada experiencia requiere puesto, empresa y fechas válidas",
+      "invalidEducation": "Cada formación requiere título y centro",
+      "invalidProjects": "Cada proyecto requiere nombre y descripción",
+      "resumeSaved": "Currículum guardado",
+      "resumeSavedWithXp": "Currículum guardado (+{xp} XP)",
+      "resumeSaveFailed": "Error al guardar currículum",
+      "resumeDeleted": "Currículum eliminado",
+      "resumeDeleteFailed": "Error al eliminar currículum",
+      "resumeExported": "Currículum exportado",
+      "resumeExportFailed": "Error al exportar currículum",
+      "resumeEnhanced": "Currículum mejorado",
+      "resumeEnhancedWithXp": "Currículum mejorado (+{xp} XP)",
+      "aiSuggestionsReady": "Sugerencias de IA listas",
+      "aiSuggestionsReadyWithXp": "Sugerencias de IA listas (+{xp} XP)",
+      "resumeEnhanceFailed": "Error al mejorar currículum",
+      "resumeScored": "Currículum puntuado",
+      "resumeScoreFailed": "Error al puntuar currículum"
+    }
+  },
+  "resumeBuildPage": {
+    "title": "Crea tu CV con IA",
+    "subtitle": "Indica tu rol objetivo y estudio. Generaremos preguntas personalizadas y crearemos tu currículum.",
+    "seoTitle": "Constructor de CV con IA",
+    "seoDescription": "Genera preguntas de CV específicas por rol, respóndelas paso a paso y sintetiza un currículum listo para editar.",
+    "progressAria": "Progreso del constructor de currículum",
+    "generatingLabel": "Generando preguntas personalizadas...",
+    "synthesizingLabel": "Creando tu currículum...",
+    "toasts": {
+      "resumeCreated": "Currículum creado"
+    },
+    "errors": {
+      "emptyQuestions": "No se generaron preguntas. Inténtalo de nuevo.",
+      "generateQuestions": "Error al generar preguntas",
+      "createResume": "Error al crear currículum"
+    },
+    "experienceLevels": {
+      "any": "Cualquiera",
+      "entry": "Principiante",
+      "mid": "Medio",
+      "lead": "Líder"
+    },
+    "target": {
+      "title": "Rol y Estudio Objetivo",
+      "description": "¿Qué rol buscas? Opcionalmente selecciona un estudio para personalizar las preguntas.",
+      "roleLegend": "Rol Objetivo",
+      "roleLabel": "ej. Diseñador de Juegos en estudio AAA, Programador Junior",
+      "rolePlaceholder": "ej. Diseñador de Juegos en estudio AAA",
+      "roleAria": "Rol objetivo",
+      "studioLegend": "Estudio (opcional)",
+      "studioLabel": "Elige un estudio para personalizar preguntas",
+      "studioAria": "Selección de estudio",
+      "noStudioOption": "Ninguno seleccionado",
+      "studioNameLabel": "O escribe el nombre del estudio",
+      "studioNamePlaceholder": "ej. Epic Games",
+      "studioNameAria": "Nombre personalizado del estudio",
+      "experienceLegend": "Nivel de Experiencia (opcional)",
+      "experienceAria": "Nivel de experiencia",
+      "generateButton": "Generar Preguntas",
+      "generateAria": "Generar preguntas de CV personalizadas"
+    },
+    "questions": {
+      "title": "Pregunta {current} de {total}",
+      "changeTargetButton": "Cambiar objetivo",
+      "changeTargetAria": "Volver a la selección de objetivo",
+      "answerPlaceholder": "Tu respuesta para: {question}",
+      "answerAria": "Respuesta para la pregunta: {question}",
+      "backButton": "Atrás",
+      "backAria": "Pregunta anterior",
+      "nextButton": "Siguiente",
+      "nextAria": "Siguiente pregunta",
+      "createResumeButton": "Crear Currículum"
+    }
+  },
+  "coverLetterPage": {
+    "title": "Cartas de Presentación",
+    "subtitle": "Genera, busca y refina cartas de presentación por rol con un flujo consistente y plantillas reutilizables.",
+    "generateButton": "Generar Carta de Presentación",
+    "generateButtonAria": "Abrir diálogo de generación de carta",
+    "notAvailable": "N/D",
+    "emptyState": "Sin cartas aún. Genera tu primera para empezar.",
+    "emptyStateTitle": "Sin cartas aún",
+    "emptyStateDescription": "Genera tu primera para empezar.",
+    "filteredEmptyState": "Ninguna carta coincide con tus filtros activos.",
+    "stats": {
+      "totalTitle": "Total de Cartas",
+      "totalDesc": "Guardadas en tu espacio",
+      "filteredTitle": "Filtradas",
+      "filteredDesc": "Coinciden con búsqueda y filtros actuales",
+      "templatesTitle": "Tipos de Plantilla",
+      "templatesDesc": "Plantillas distintas usadas"
+    },
+    "templates": {
+      "professional": "Profesional",
+      "creative": "Creativa",
+      "gaming": "Juegos",
+      "executive": "Ejecutiva",
+      "technical": "Técnica"
+    },
+    "filters": {
+      "searchLegend": "Buscar",
+      "searchPlaceholder": "Buscar empresa, puesto o contenido",
+      "searchAria": "Buscar cartas de presentación",
+      "templateLegend": "Plantilla",
+      "templateAria": "Filtrar por plantilla",
+      "templateAll": "Todas las plantillas",
+      "sortLegend": "Ordenar",
+      "sortAria": "Ordenar cartas",
+      "sortNewest": "Más recientes primero",
+      "sortOldest": "Más antiguas primero",
+      "clearButton": "Limpiar Filtros",
+      "clearAria": "Limpiar filtros de cartas"
+    },
+    "pagination": {
+      "navigationAria": "Paginación de cartas",
+      "previousAria": "Página anterior de cartas",
+      "nextAria": "Página siguiente de cartas",
+      "pageAria": "Ir a la página de carta {page}",
+      "summary": "Mostrando {start}-{end} de {total} cartas"
+    },
+    "cards": {
+      "openAria": "Abrir carta para {position} en {company}",
+      "emptyPreview": "Sin vista previa disponible aún.",
+      "updatedAtLabel": "Actualizado",
+      "editButton": "Editar",
+      "editAria": "Editar carta para {position} en {company}",
+      "deleteButton": "Eliminar",
+      "deleteAria": "Eliminar carta para {position} en {company}"
+    },
+    "generate": {
+      "title": "Generar Carta de Presentación",
+      "subtitle": "Proporciona contexto del rol y genera un borrador para refinar.",
+      "companyLegend": "Empresa",
+      "companyPlaceholder": "ej. Riot Games",
+      "companyAria": "Empresa objetivo",
+      "companyHint": "El nombre de la empresa debe tener al menos {count} caracteres.",
+      "positionLegend": "Puesto",
+      "positionPlaceholder": "ej. Ingeniero de Gameplay Senior",
+      "positionAria": "Puesto objetivo",
+      "positionHint": "El puesto debe tener al menos {count} caracteres.",
+      "resumeLegend": "Currículum (opcional)",
+      "resumeAria": "Seleccionar contexto de currículum",
+      "resumeNoneOption": "Sin currículum seleccionado",
+      "jobDescriptionLegend": "Descripción del Puesto (opcional)",
+      "jobDescriptionPlaceholder": "Pega una descripción del puesto para mejor personalización.",
+      "jobDescriptionAria": "Contexto de descripción del puesto",
+      "jobDescriptionHint": "Cuando se proporcione, incluir al menos {count} caracteres.",
+      "templateLegend": "Plantilla",
+      "templateAria": "Plantilla de carta",
+      "cancelButton": "Cancelar",
+      "cancelAria": "Cancelar generación de carta",
+      "submitButton": "Generar",
+      "submitAria": "Generar carta de presentación",
+      "closeBackdropButton": "Cerrar",
+      "closeBackdropAria": "Cerrar fondo del diálogo de generación"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Carta de Presentación",
+      "message": "Esta carta se eliminará permanentemente.",
+      "confirmButton": "Eliminar",
+      "cancelButton": "Cancelar"
+    },
+    "toasts": {
+      "deleted": "Carta eliminada",
+      "deleteFailed": "Error al eliminar carta",
+      "fetchFailed": "Error al obtener cartas de presentación",
+      "companyMinLength": "El nombre de la empresa debe tener al menos {count} caracteres",
+      "positionMinLength": "El puesto debe tener al menos {count} caracteres",
+      "jobDescriptionMinLength": "La descripción del puesto debe tener al menos {count} caracteres cuando se proporcione",
+      "generated": "Carta generada",
+      "generatedWithoutRedirect": "Carta generada",
+      "generateFailed": "Error al generar carta"
+    }
+  },
+  "coverLetterDetailPage": {
+    "breadcrumbFallback": "Detalle de Carta",
+    "templates": {
+      "professional": "Profesional",
+      "creative": "Creativa",
+      "gaming": "Juegos",
+      "executive": "Ejecutiva",
+      "technical": "Técnica"
+    },
+    "actions": {
+      "regenerateButton": "Regenerar",
+      "regenerateAria": "Regenerar contenido de la carta",
+      "exportButton": "Exportar",
+      "exportAria": "Exportar contenido de la carta",
+      "saveButton": "Guardar",
+      "saveAria": "Guardar cambios de la carta"
+    },
+    "stats": {
+      "charactersTitle": "Caracteres",
+      "charactersDesc": "Longitud actual del editor",
+      "sectionsTitle": "Secciones",
+      "sectionsDesc": "Bloques de párrafo detectados",
+      "statusTitle": "Estado",
+      "statusDesc": "Seguimiento de cambios",
+      "statusSaved": "Guardado",
+      "statusUnsaved": "Sin guardar"
+    },
+    "details": {
+      "title": "Detalles de la Carta",
+      "companyLegend": "Empresa",
+      "companyPlaceholder": "Nombre de la empresa",
+      "companyAria": "Nombre de la empresa",
+      "companyHint": "El nombre de la empresa debe tener al menos {count} caracteres.",
+      "positionLegend": "Puesto",
+      "positionPlaceholder": "Título del puesto",
+      "positionAria": "Título del puesto",
+      "positionHint": "El puesto debe tener al menos {count} caracteres.",
+      "templateLegend": "Plantilla",
+      "templateAria": "Plantilla de carta"
+    },
+    "editor": {
+      "title": "Editor de Contenido",
+      "info": "Edita el borrador directamente. Regenera cuando quieras una versión nueva desde empresa, rol y plantilla actuales.",
+      "placeholder": "El contenido de la carta aparece aquí...",
+      "aria": "Editor de contenido de la carta",
+      "characterCount": "{count} caracteres",
+      "clearButton": "Limpiar",
+      "clearAria": "Limpiar contenido del editor",
+      "saveButton": "Guardar Cambios",
+      "saveAria": "Guardar cambios del editor"
+    },
+    "preview": {
+      "title": "Vista Previa",
+      "empty": "Sin contenido para previsualizar aún."
+    },
+    "regenerateDialog": {
+      "title": "Regenerar Contenido",
+      "message": "Esto reemplazará el contenido actual con un borrador nuevo generado.",
+      "confirmButton": "Regenerar",
+      "cancelButton": "Cancelar"
+    },
+    "export": {
+      "fallbackCompany": "empresa",
+      "fallbackPosition": "puesto",
+      "suffix": "carta-presentacion"
+    },
+    "toasts": {
+      "loadFailed": "Error al cargar la carta",
+      "companyMinLength": "El nombre de la empresa debe tener al menos {count} caracteres",
+      "positionMinLength": "El puesto debe tener al menos {count} caracteres",
+      "saved": "Carta guardada",
+      "saveFailed": "Error al guardar la carta",
+      "regenerated": "Carta regenerada",
+      "regenerateFailed": "Error al regenerar la carta",
+      "regenerateMissingContent": "Generación completada pero no devolvió contenido",
+      "exportEmpty": "Añade contenido antes de exportar",
+      "exported": "Carta exportada",
+      "exportFailed": "Error al exportar la carta"
+    }
+  },
+  "portfolioPage": {
+    "title": "Constructor de Portafolio",
+    "subtitle": "Organiza proyectos, reordena tus destacados y mantén un perfil de portafolio pulido para solicitudes en la industria del juego.",
+    "actions": {
+      "previewButton": "Vista Previa",
+      "previewAria": "Abrir vista previa del portafolio",
+      "exportButton": "Exportar",
+      "exportAria": "Exportar portafolio"
+    },
+    "preview": {
+      "pageTitle": "Vista Previa del Portafolio",
+      "description": "Revisa la presentación publicada de tu portafolio antes de exportarla o compartirla.",
+      "backButton": "Volver al Editor",
+      "backButtonAria": "Volver al editor del portafolio",
+      "exportPdfButton": "Exportar PDF",
+      "exportPdfAria": "Exportar vista previa del portafolio como PDF",
+      "retryButton": "Reintentar",
+      "retryAria": "Reintentar carga de la vista previa del portafolio",
+      "loadError": "Error al cargar la vista previa del portafolio.",
+      "defaultTitle": "Mi Portafolio",
+      "contactButton": "Contáctame",
+      "contactAria": "Contactar al propietario del portafolio por correo",
+      "websiteButton": "Visitar Sitio Web",
+      "websiteAria": "Abrir sitio web del portafolio",
+      "featuredProjectsTitle": "Proyectos Destacados",
+      "moreProjectsTitle": "Más Proyectos",
+      "viewButton": "Ver",
+      "emptyStateTitle": "No hay proyectos para mostrar",
+      "emptyStateDescription": "Añade proyectos en el editor del portafolio para llenar esta vista previa con trabajo destacado y de apoyo.",
+      "notFoundTitle": "No se encontró el portafolio",
+      "notFoundDescription": "Crea tu portafolio primero y luego vuelve a esta vista previa."
+    },
+    "stats": {
+      "projectsTitle": "Proyectos",
+      "projectsDesc": "Total de proyectos en tu portafolio",
+      "featuredTitle": "Destacados",
+      "featuredDesc": "Proyectos destacados",
+      "profileTitle": "Perfil",
+      "profileReady": "Listo",
+      "profileMissing": "Faltante",
+      "profileDesc": "Completitud del perfil del portafolio"
+    },
+    "filters": {
+      "searchLegend": "Buscar Proyectos",
+      "searchPlaceholder": "Buscar por título, descripción o tecnología",
+      "searchAria": "Buscar proyectos del portafolio",
+      "clearButton": "Limpiar Filtros",
+      "clearAria": "Limpiar filtros de búsqueda"
+    },
+    "pagination": {
+      "navigationAria": "Paginación de proyectos del portafolio",
+      "previousAria": "Página anterior de proyectos",
+      "nextAria": "Página siguiente de proyectos",
+      "pageAria": "Ir a la página de portafolio {page}",
+      "summary": "Mostrando {start}-{end} de {total} proyectos"
+    },
+    "profile": {
+      "title": "Información del Portafolio",
+      "titleLegend": "Título del Portafolio",
+      "titlePlaceholder": "ej. Juan Pérez - Desarrollador de Juegos",
+      "titleAria": "Título del portafolio",
+      "emailPlaceholder": "contacto{'@'}ejemplo.com",
+      "emailAria": "Email de contacto",
+      "websiteLegend": "Sitio Web",
+      "websitePlaceholder": "https://tusitio.com",
+      "websiteAria": "Sitio web del portafolio",
+      "bioLegend": "Biografía",
+      "bioPlaceholder": "Cuéntale al mundo sobre ti y tu experiencia en desarrollo de juegos...",
+      "bioAria": "Biografía del portafolio",
+      "saveButton": "Guardar Info del Portafolio",
+      "saveAria": "Guardar perfil del portafolio"
+    },
+    "projects": {
+      "title": "Proyectos",
+      "addButton": "Añadir Proyecto",
+      "addAria": "Abrir diálogo de creación de proyecto",
+      "emptyState": "Sin proyectos aún. Añade tu primer proyecto para mostrar tu trabajo.",
+      "filteredEmptyState": "Ningún proyecto coincide con tu búsqueda.",
+      "reorderCardAria": "Reordenar tarjeta del proyecto {title}",
+      "featuredBadge": "Destacado",
+      "openProjectButton": "Ver Proyecto",
+      "openProjectAria": "Abrir proyecto en vivo {title}",
+      "moveUpButton": "Arriba",
+      "moveUpAria": "Mover proyecto {title} arriba",
+      "moveDownButton": "Abajo",
+      "moveDownAria": "Mover proyecto {title} abajo",
+      "editButton": "Editar",
+      "editAria": "Editar proyecto {title}",
+      "deleteButton": "Eliminar",
+      "deleteAria": "Eliminar proyecto {title}"
+    },
+    "modal": {
+      "addTitle": "Añadir Proyecto",
+      "editTitle": "Editar Proyecto",
+      "projectTitleLegend": "Título del Proyecto",
+      "projectTitlePlaceholder": "ej. RPG Dungeon Crawler",
+      "projectTitleAria": "Título del proyecto",
+      "projectTitleHint": "El título del proyecto debe tener al menos {count} caracteres.",
+      "descriptionLegend": "Descripción",
+      "descriptionPlaceholder": "Describe tu proyecto, tu rol y logros clave...",
+      "descriptionAria": "Descripción del proyecto",
+      "descriptionHint": "La descripción debe tener al menos {count} caracteres.",
+      "projectUrlLegend": "URL del Proyecto (opcional)",
+      "projectUrlPlaceholder": "https://proyecto.ejemplo",
+      "projectUrlAria": "URL del proyecto",
+      "imageUrlLegend": "URL de Imagen (opcional)",
+      "imageUrlPlaceholder": "https://imagen.ejemplo/preview.png",
+      "imageUrlAria": "URL de imagen del proyecto",
+      "technologiesLegend": "Tecnologías",
+      "technologiesPlaceholder": "Añadir tecnología",
+      "technologiesAria": "Entrada de tecnología",
+      "addTechnologyButton": "Añadir",
+      "addTechnologyAria": "Añadir tecnología al proyecto",
+      "removeTechnologyAria": "Quitar tecnología {tech}",
+      "featuredLabel": "Proyecto Destacado",
+      "featuredAria": "Marcar proyecto como destacado",
+      "cancelButton": "Cancelar",
+      "cancelAria": "Cancelar cambios del proyecto",
+      "createButton": "Añadir Proyecto",
+      "updateButton": "Actualizar Proyecto",
+      "saveAria": "Guardar cambios del proyecto",
+      "closeBackdropButton": "Cerrar",
+      "closeBackdropAria": "Cerrar fondo del modal del proyecto"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Proyecto",
+      "message": "Este proyecto se eliminará permanentemente.",
+      "confirmButton": "Eliminar",
+      "cancelButton": "Cancelar"
+    },
+    "toasts": {
+      "saved": "Portafolio guardado",
+      "saveFailed": "Error al guardar portafolio",
+      "projectAdded": "Proyecto añadido",
+      "projectUpdated": "Proyecto actualizado",
+      "projectDeleted": "Proyecto eliminado",
+      "exported": "Portafolio exportado",
+      "exportFailed": "Error al exportar portafolio",
+      "projectTitleMinLength": "El título del proyecto debe tener al menos {count} caracteres",
+      "projectDescriptionMinLength": "La descripción del proyecto debe tener al menos {count} caracteres",
+      "projectIdMissing": "Falta el ID del proyecto",
+      "projectSaveFailed": "Error al guardar proyecto",
+      "projectDeleteFailed": "Error al eliminar proyecto",
+      "reordered": "Orden de proyectos actualizado",
+      "reorderFailed": "Error al reordenar proyectos",
+      "technologyDuplicate": "Tecnología ya añadida"
+    }
+  },
+  "portfolioProjectCard": {
+    "openLiveAria": "Abrir proyecto en vivo {title}",
+    "openLiveSrOnly": "Abrir proyecto en vivo",
+    "openGithubAria": "Abrir repositorio GitHub de {title}",
+    "openGithubSrOnly": "Abrir repositorio GitHub",
+    "featureAria": "Marcar {title} como destacado",
+    "unfeatureAria": "Quitar estado destacado de {title}",
+    "editAria": "Editar proyecto {title}",
+    "deleteAria": "Eliminar proyecto {title}"
+  },
+  "interviewChatComponent": {
+    "interviewerLabel": "Entrevistador",
+    "userLabel": "Tú",
+    "avatarLabelAi": "IA",
+    "avatarLabelUser": "T",
+    "responseLabel": "Tu Respuesta",
+    "questionProgress": "Pregunta {current} de {total}",
+    "responsePlaceholder": "Escribe tu respuesta aquí...",
+    "responseAria": "Respuesta de entrevista",
+    "submitHint": "Pulsa Ctrl+Enter para enviar",
+    "submitButton": "Enviar Respuesta",
+    "submitAria": "Enviar respuesta de entrevista",
+    "completeMessage": "Entrevista completada. Todas las preguntas han sido respondidas."
+  },
+  "interviewScoreCard": {
+    "title": "Análisis de rendimiento en entrevista",
+    "progressAria": "Puntuación general de entrevista {score} por ciento",
+    "overallScore": "Puntuación General",
+    "strengths": "Fortalezas",
+    "areasForImprovement": "Áreas de Mejora",
+    "recommendations": "Recomendaciones"
+  },
+  "dailyChallengeCard": {
+    "completedBanner": "¡Completado!",
+    "completeButton": "Completar Desafío",
+    "completedButton": "Completado",
+    "completeAria": "Completar desafío diario {title}"
+  },
+  "xpBar": {
+    "levelBadge": "Nivel {level}",
+    "progressAria": "Progreso XP {progress} por ciento"
+  },
+  "resumeComponentPersonalInfo": {
+    "title": "Información Personal",
+    "nameLabel": "Nombre Completo",
+    "namePlaceholder": "Juan Pérez",
+    "nameAria": "Nombre completo",
+    "emailPlaceholder": "juan{'@'}ejemplo.com",
+    "emailAria": "Dirección de email",
+    "phoneLabel": "Teléfono",
+    "phonePlaceholder": "+34 612 345 678",
+    "phoneAria": "Número de teléfono",
+    "locationLabel": "Ubicación",
+    "locationPlaceholder": "Madrid, España",
+    "locationAria": "Ubicación",
+    "websiteLabel": "Sitio Web",
+    "websitePlaceholder": "https://tusitio.com",
+    "websiteAria": "URL del sitio web",
+    "linkedinPlaceholder": "https://linkedin.com/in/juanperez",
+    "linkedinAria": "URL de LinkedIn",
+    "githubPlaceholder": "https://github.com/juanperez",
+    "githubAria": "URL de GitHub"
+  },
+  "resumeComponentExperience": {
+    "newItemTitle": "Nueva Experiencia",
+    "moveUpAria": "Mover experiencia arriba",
+    "moveDownAria": "Mover experiencia abajo",
+    "toggleEditAria": "Alternar editor de experiencia",
+    "removeItemAria": "Quitar entrada de experiencia",
+    "companyLabel": "Empresa",
+    "companyPlaceholder": "Nombre de la Empresa",
+    "companyAria": "Empresa de la experiencia",
+    "titleLabel": "Puesto",
+    "titlePlaceholder": "Puesto de Trabajo",
+    "titleAria": "Puesto de la experiencia",
+    "startDateLabel": "Fecha de Inicio",
+    "startDateAria": "Fecha de inicio de la experiencia",
+    "endDateLabel": "Fecha de Fin",
+    "endDatePlaceholder": "Actual",
+    "endDateAria": "Fecha de fin de la experiencia",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Breve descripción de tu rol...",
+    "descriptionAria": "Descripción de la experiencia",
+    "highlightsLabel": "Puntos Clave",
+    "removeHighlightAria": "Quitar punto {highlight}",
+    "newHighlightPlaceholder": "Añadir logro o responsabilidad",
+    "newHighlightAria": "Nuevo punto",
+    "addHighlightButton": "Añadir",
+    "addHighlightAria": "Añadir punto",
+    "presentValue": "Actual",
+    "addItemButton": "Añadir Experiencia",
+    "addItemAria": "Añadir entrada de experiencia"
+  },
+  "resumeComponentEducation": {
+    "newItemTitle": "Nueva Formación",
+    "moveUpAria": "Mover formación arriba",
+    "moveDownAria": "Mover formación abajo",
+    "toggleEditAria": "Alternar editor de formación",
+    "removeItemAria": "Quitar entrada de formación",
+    "institutionLabel": "Institución",
+    "institutionPlaceholder": "Nombre de la Universidad",
+    "institutionAria": "Nombre de la institución",
+    "degreeLabel": "Título",
+    "degreePlaceholder": "Licenciatura en Ciencias",
+    "degreeAria": "Título",
+    "fieldLabel": "Campo de Estudio",
+    "fieldPlaceholder": "Informática",
+    "fieldAria": "Campo de estudio",
+    "graduationDateLabel": "Fecha de Graduación",
+    "graduationDateAria": "Fecha de graduación",
+    "gpaLabel": "Nota media (opcional)",
+    "gpaAria": "Nota media",
+    "addItemButton": "Añadir Formación",
+    "addItemAria": "Añadir entrada de formación"
+  },
+  "resumeComponentSkills": {
+    "technicalTitle": "Habilidades Técnicas",
+    "technicalPlaceholder": "ej. Unity, C#, Unreal Engine",
+    "technicalAria": "Entrada de habilidad técnica",
+    "softTitle": "Habilidades Blandas",
+    "softPlaceholder": "ej. Liderazgo, Comunicación, Resolución de Problemas",
+    "softAria": "Entrada de habilidad blanda",
+    "gamingTitle": "Habilidades de la Industria del Juego",
+    "gamingPlaceholder": "ej. Diseño de Juegos, Diseño de Niveles, Sistemas Multijugador",
+    "gamingAria": "Entrada de habilidad de juegos",
+    "addButton": "Añadir",
+    "addSkillAria": "Añadir habilidad a {category}",
+    "removeSkillAria": "Quitar {skill} de {category}"
+  },
+  "jobDetail": {
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "jobs": "Empleos",
+      "detailFallback": "Detalle del Empleo"
+    },
+    "matchScoreLabel": "Puntuación de Coincidencia",
+    "remoteBadge": "Remoto",
+    "scoreProgressAria": "Progreso de puntuación de coincidencia",
+    "interviewAria": "Iniciar entrevista para este empleo",
+    "interviewButton": "Entrevista para este Empleo",
+    "applyAria": "Aplicar a este empleo",
+    "applyButton": "Aplicar Ahora",
+    "unsaveAria": "Quitar de guardados",
+    "saveAria": "Guardar este empleo",
+    "savedButton": "Guardado",
+    "saveButton": "Guardar Empleo",
+    "descriptionTitle": "Descripción del Empleo",
+    "requirementsTitle": "Requisitos",
+    "technologiesTitle": "Tecnologías",
+    "matchBreakdownTitle": "Desglose de Puntuación",
+    "companyInfoTitle": "Info de la Empresa",
+    "companyLabel": "Empresa",
+    "studioTypeLabel": "Tipo de Estudio",
+    "websiteLabel": "Sitio Web",
+    "visitWebsiteButton": "Visitar Sitio Web",
+    "visitWebsiteAria": "Abrir sitio web de {company}",
+    "postedLabel": "Publicado",
+    "notableGamesTitle": "Juegos Destacados",
+    "platformsTitle": "Plataformas",
+    "genresTitle": "Géneros",
+    "applyDialogAria": "Diálogo de aplicación al empleo",
+    "applyDialogTitle": "Aplicar a {title}",
+    "applicationNotesLegend": "Notas de Solicitud (Opcional)",
+    "applicationNotesPlaceholder": "Añade notas sobre esta solicitud...",
+    "applicationNotesAria": "Notas de solicitud",
+    "cancelApplyAria": "Cancelar solicitud",
+    "submitApplyAria": "Enviar solicitud",
+    "cancelButton": "Cancelar",
+    "submitButton": "Enviar Solicitud",
+    "closeApplyDialogAria": "Cerrar diálogo de aplicación",
+    "closeButton": "Cerrar",
+    "toasts": {
+      "saved": "Empleo guardado",
+      "unsaved": "Empleo quitado de guardados",
+      "applicationSubmitted": "Solicitud enviada"
+    },
+    "errors": {
+      "saveFailed": "Error al actualizar estado del empleo guardado",
+      "applyFailed": "Error al enviar la solicitud",
+      "loadFailed": "No se pudo cargar este empleo"
+    },
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar cargar el detalle del empleo",
+    "notFoundTitle": "Empleo no encontrado",
+    "notFoundBody": "Es posible que se haya eliminado o que el enlace no sea válido.",
+    "invalidIdTitle": "No hay un empleo seleccionado",
+    "invalidIdBody": "Elige un empleo de la lista para revisar sus detalles.",
+    "backToJobs": "Volver a empleos",
+    "backToJobsAria": "Volver a la lista de empleos",
+    "invalidId": "No hay ningún empleo seleccionado."
+  },
+  "studioDetail": {
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "studios": "Estudios",
+      "detail": "Detalle del Estudio"
+    },
+    "errorBannerAria": "Error de detalle del estudio",
+    "retryAria": "Reintentar carga de detalles del estudio",
+    "retryButton": "Reintentar",
+    "noDescription": "Sin descripción del estudio disponible.",
+    "unknownLocation": "Ubicación desconocida",
+    "unknownValue": "No proporcionado",
+    "noCultureWorkStyle": "Sin detalles de cultura proporcionados aún.",
+    "remoteFriendlyBadge": "Remoto Amigable",
+    "practiceInterviewAria": "Iniciar práctica de entrevista para este estudio",
+    "practiceInterviewButton": "Practicar Entrevista",
+    "visitWebsiteAria": "Abrir sitio web de {studio}",
+    "visitWebsiteButton": "Visitar Sitio Web",
+    "sections": {
+      "culture": "Cultura del Estudio",
+      "interviewProcess": "Proceso de Entrevista",
+      "technologies": "Tecnologías Usadas",
+      "info": "Info del Estudio",
+      "notableGames": "Juegos Destacados"
+    },
+    "culture": {
+      "workStyleLabel": "Estilo de Trabajo",
+      "environmentLabel": "Entorno",
+      "valuesLabel": "Valores Fundamentales",
+      "noValues": "Sin valores de cultura listados aún."
+    },
+    "info": {
+      "locationLabel": "Ubicación",
+      "studioTypeLabel": "Tipo de Estudio",
+      "companySizeLabel": "Tamaño de Empresa",
+      "remoteWorkLabel": "Trabajo Remoto"
+    },
+    "remoteLabels": {
+      "yes": "Sí"
+    },
+    "emptyTitle": "Estudio no disponible",
+    "emptyDescription": "Este perfil de estudio ya no está disponible. Vuelve al directorio y elige otro contexto de estudio.",
+    "errors": {
+      "invalidStudioId": "Identificador de estudio inválido.",
+      "notFound": "Estudio no encontrado.",
+      "loadFailed": "Error al cargar detalles del estudio."
+    }
+  },
+  "studiosIndex": {
+    "seoTitle": "Directorio de Estudios",
+    "seoDescription": "Explora perfiles de estudios, filtra atributos operativos y lanza práctica de entrevistas desde contexto de estudio.",
+    "title": "Directorio de Estudios",
+    "subtitle": "Explora perfiles de estudios, filtra por atributos operativos y pasa directamente a la práctica de entrevistas.",
+    "errorTitle": "Directorio de estudios no disponible",
+    "errorBannerAria": "Error del directorio de estudios",
+    "retryAria": "Reintentar carga de estudios",
+    "retryButton": "Reintentar",
+    "emptyState": "Ningún estudio coincide con tu búsqueda y filtros.",
+    "emptyTitle": "Ningún estudio coincide con estos filtros",
+    "emptyDescription": "Ajusta la búsqueda actual o la combinación de filtros para mostrar otro perfil de estudio.",
+    "stats": {
+      "totalTitle": "Total de Estudios",
+      "totalDesc": "Perfiles actualmente indexados",
+      "filteredTitle": "Resultados Filtrados",
+      "filteredDesc": "Coinciden con tus filtros actuales",
+      "remoteTitle": "Remoto Amigable",
+      "remoteDesc": "Estudios marcados como remoto amigable"
+    },
+    "filters": {
+      "searchLegend": "Buscar estudios",
+      "searchPlaceholder": "Buscar por nombre, descripción o ubicación",
+      "searchAria": "Buscar estudios",
+      "typeLegend": "Tipo de estudio",
+      "typeAria": "Filtrar estudios por tipo",
+      "sizeLegend": "Tamaño del estudio",
+      "sizeAria": "Filtrar estudios por tamaño",
+      "allTypesOption": "Todos los tipos",
+      "allSizesOption": "Todos los tamaños",
+      "remoteLabel": "Solo remoto amigable",
+      "remoteAria": "Mostrar solo estudios remoto amigables",
+      "clearButton": "Limpiar filtros",
+      "clearAria": "Limpiar búsqueda y filtros de estudios"
+    },
+    "options": {
+      "type": {
+        "mobile": "Móvil",
+        "platform": "Plataforma",
+        "publisher": "Editora",
+        "services": "Servicios",
+        "aiTech": "IA/Tecnología",
+        "midSize": "Mediano",
+        "unknown": "Desconocido"
+      },
+      "size": {
+        "range50To199": "50-199 empleados",
+        "range200To999": "200-999 empleados",
+        "range500Plus": "500+ empleados",
+        "range1000Plus": "1000+ empleados",
+        "notAvailable": "No disponible"
+      }
+    },
+    "list": {
+      "loadMoreButton": "Cargar más estudios",
+      "loadMoreAria": "Cargar más resultados de estudios"
+    },
+    "card": {
+      "remoteBadge": "Remoto",
+      "unknownType": "Tipo desconocido",
+      "unknownSize": "Tamaño desconocido",
+      "unknownLocation": "Ubicación desconocida",
+      "noDescription": "Sin descripción del estudio disponible.",
+      "previewButton": "Vista Previa",
+      "previewAria": "Vista previa del perfil del estudio {studio}",
+      "viewButton": "Ver Detalles",
+      "viewAria": "Ver detalles del estudio {studio}"
+    },
+    "preview": {
+      "dialogAria": "Diálogo de vista previa rápida del estudio",
+      "closeButtonAria": "Cerrar vista previa del estudio",
+      "closeButton": "Cerrar",
+      "closeBackdropAria": "Cerrar fondo de vista previa",
+      "closeBackdropButton": "Cerrar",
+      "remoteYes": "Sí",
+      "startInterviewButton": "Iniciar Entrevista",
+      "startInterviewAria": "Iniciar práctica de entrevista para {studio}",
+      "openDetailButton": "Abrir Perfil Completo",
+      "openDetailAria": "Abrir perfil completo del estudio {studio}",
+      "missingTitle": "Estudio No Disponible",
+      "missingDescription": "Esta vista previa del estudio ya no está disponible en los resultados. Actualiza o elige otro estudio.",
+      "stats": {
+        "interviewReadyTitle": "Listo para Entrevista",
+        "interviewReadyValue": "Activado",
+        "interviewReadyDesc": "Usa este estudio como contexto de entrevista",
+        "locationTitle": "Ubicación",
+        "locationDesc": "Región operativa principal",
+        "remoteTitle": "Trabajo Remoto",
+        "remoteDesc": "Estado de política remota"
+      }
+    },
+    "errors": {
+      "loadFailed": "Error al cargar estudios"
+    }
+  },
+  "studioAnalytics": {
+    "title": "Analíticas de Estudios",
+    "description": "Revisa la distribución de estudios, la cobertura de trabajo remoto y las tendencias tecnológicas compartidas del conjunto de estudios indexado.",
+    "errorBannerAria": "Error de analíticas de estudios",
+    "retryAria": "Reintentar carga de analíticas",
+    "retryButton": "Reintentar",
+    "openDirectoryAria": "Abrir el directorio de estudios",
+    "emptyTitle": "No hay analíticas de estudios disponibles",
+    "emptyDescription": "Actualiza los datos de estudios desde el directorio o el centro de extracción para rellenar las analíticas de este espacio.",
+    "progressAria": "Progreso de {label}",
+    "remoteWorkProgressAria": "Disponibilidad de trabajo remoto: {value} por ciento",
+    "overview": {
+      "totalStudiosTitle": "Total de Estudios",
+      "totalStudiosDesc": "En base de datos",
+      "remoteFriendlyTitle": "Remoto Amigable",
+      "remoteFriendlyDesc": "Ofrecen posiciones remotas",
+      "indieStudiosTitle": "Estudios Indie",
+      "percentageOfTotal": "{value}% del total"
+    },
+    "sections": {
+      "byTypeTitle": "Estudios por Tipo",
+      "bySizeTitle": "Estudios por Tamaño",
+      "topTechnologiesTitle": "Tecnologías Más Comunes",
+      "topTechnologiesDescription": "Tecnologías usadas en estudios de juegos",
+      "remoteAvailabilityTitle": "Disponibilidad de Trabajo Remoto",
+      "offerRemoteLabel": "Ofrecen Remoto",
+      "remoteFriendlyTitle": "Remoto Amigable",
+      "onSiteOnlyTitle": "Solo Presencial"
+    },
+    "errors": {
+      "loadFailed": "Error al cargar datos de analíticas"
+    }
+  },
+  "automation": {
+    "hub": {
+      "pageTitle": "Centro de Automatización",
+      "pageDescription": "Ejecuta y sigue flujos de automatización en extracción, solicitudes de empleo y respuestas por email.",
+      "title": "Automatización",
+      "viewRunsButton": "Ver Ejecuciones",
+      "pipelineTitle": "Flujo de Trabajo",
+      "pipelineDescription": "Pasa del descubrimiento de empleos a extracción, personalización, automatización y progresión XP en un solo flujo.",
+      "pipelineAria": "Flujo de trabajo de carrera",
+      "pipelineNextStepLabel": "Siguiente hito del flujo: {step}",
+      "loadErrorFallback": "Error al cargar métricas del centro de automatización",
+      "retryButtonLabel": "Reintentar",
+      "retryAria": "Reintentar carga de métricas del centro de automatización",
+      "stats": {
+        "totalRunsTitle": "Total de Ejecuciones",
+        "totalRunsDescription": "Ejecuciones de automatización registradas",
+        "todayRunsTitle": "Ejecuciones de Hoy",
+        "todayRunsDescription": "Iniciadas hoy",
+        "successRateTitle": "Tasa de Éxito",
+        "successRateDescription": "Historial de ejecuciones completadas"
+      },
+      "audit": {
+        "title": "Auditoría de Capacidades RPA",
+        "description": "Verifica qué flujos de automatización del navegador están implementados, configurados y son observables.",
+        "aria": "Auditoría de capacidades RPA",
+        "openScraperButton": "Abrir Centro de Extracción",
+        "openScraperAria": "Abrir el centro de extracción con destinos RPA ampliados",
+        "loadErrorFallback": "No se pudo cargar la auditoría de capacidades RPA.",
+        "available": "Disponible",
+        "needsConfig": "Requiere Configuración",
+        "unavailable": "No Disponible",
+        "type": {
+          "jobApply": "Flujo de solicitud de empleo",
+          "scrape": "Flujo de extracción"
+        },
+        "capabilities": {
+          "jobApply": "Solicitud de Empleo",
+          "studios": "Estudios"
+        },
+        "issueState": {
+          "ready": "Listo",
+          "needsAttention": "Requiere atención"
+        },
+        "issueSummaryAria": "Abrir incidencias de configuración para {capability}. {count} incidencia requiere atención.",
+        "issues": {
+          "providerSettingsUnavailable": "La configuración del proveedor de empleos no está disponible actualmente.",
+          "portalConfigurationMissing": "Añade una configuración de portal de videojuegos para {portalId}.",
+          "portalDisabled": "Activa {portalName} en la configuración del proveedor de empleos.",
+          "portalFallbackUrlMissing": "Añade una URL de respaldo para {portalName}."
+        },
+        "actions": {
+          "fixSetup": "Corregir Configuración",
+          "fixSetupAria": "Abrir configuración para corregir incidencias del scraping",
+          "openJobApply": "Abrir Solicitud",
+          "openJobApplyAria": "Abrir el flujo de automatización de solicitud de empleo",
+          "openScraper": "Abrir Scraper",
+          "openScraperAria": "Abrir el flujo de automatización del scraper"
+        },
+        "coverage": {
+          "manual": "Permite ejecución manual",
+          "scheduled": "Permite ejecución programada",
+          "history": "Registra historial de ejecuciones",
+          "live": "Ofrece actualizaciones en vivo"
+        },
+        "summary": {
+          "total": "Capacidades",
+          "totalDesc": "Flujos RPA implementados",
+          "configured": "Configuradas",
+          "configuredDesc": "Listas en el entorno actual",
+          "live": "Eventos en Vivo",
+          "liveDesc": "Emiten actualizaciones de progreso"
+        },
+        "tableAria": "Detalle de la auditoría de capacidades RPA",
+        "columns": {
+          "name": "Capacidad",
+          "configured": "Configurada",
+          "scheduled": "Programada",
+          "history": "Historial",
+          "live": "En Vivo",
+          "coverage": "Cobertura",
+          "issues": "Incidencias",
+          "actions": "Acciones"
+        }
+      },
+      "cards": {
+        "scraper": {
+          "title": "Flujos de Extracción",
+          "description": "Ejecuta extractores de estudios y empleos para actualizar datos.",
+          "button": "Abrir Centro de Extracción"
+        },
+        "jobApply": {
+          "title": "Solicitud de Empleo",
+          "description": "Inicia o programa una solicitud RPA usando tu currículum y carta guardados.",
+          "button": "Abrir Solicitud de Empleo"
+        },
+        "emailResponse": {
+          "title": "Respuesta por Email",
+          "description": "Genera respuestas de email asistidas por IA y sigue cada ejecución.",
+          "button": "Abrir Respuesta por Email"
+        },
+        "runHistory": {
+          "title": "Historial de Ejecuciones",
+          "description": "Inspecciona payloads completos, capturas y salida de ejecución.",
+          "button": "Abrir Historial"
+        }
+      }
+    },
+    "runs": {
+      "title": "Ejecuciones de Automatización",
+      "backButton": "Volver a Automatización",
+      "backToAutomation": "Volver al resumen de automatización",
+      "typeLabel": "Tipo",
+      "typeFilterAria": "Filtrar ejecuciones por tipo",
+      "allTypes": "Todos los tipos",
+      "statusLabel": "Estado",
+      "statusFilterAria": "Filtrar ejecuciones por estado",
+      "allStatuses": "Todos los estados",
+      "tableAriaLabel": "Historial de ejecuciones",
+      "emptyJobId": "N/D",
+      "emptyState": "No se encontraron ejecuciones.",
+      "loadingLabel": "Cargando ejecuciones...",
+      "loadErrorTitle": "No se pueden cargar ejecuciones",
+      "loadErrorFallback": "No se pudo cargar el historial.",
+      "openRunDetailAria": "Abrir detalles de ejecución {id}",
+      "openButton": "Abrir",
+      "liveBadge": "En vivo",
+      "liveBadgeAria": "Estado de ejecución en vivo",
+      "columns": {
+        "id": "ID de Ejecución",
+        "type": "Tipo",
+        "status": "Estado",
+        "progress": "Progreso",
+        "job": "Empleo",
+        "updated": "Actualizado",
+        "actions": "Acciones"
+      },
+      "typeOptions": {
+        "scrape": "Extractor",
+        "job_apply": "Solicitud de Empleo"
+      },
+      "statusOptions": {
+        "pending": "Pendiente",
+        "running": "En ejecución",
+        "success": "Éxito"
+      }
+    },
+    "jobApply": {
+      "title": "Automatización de Solicitudes",
+      "jobUrlLegend": "URL del Empleo",
+      "jobUrlPlaceholder": "https://ejemplo.com/empleos/123",
+      "jobUrlAria": "URL de la oferta de empleo",
+      "resumeLegend": "Currículum",
+      "resumeAria": "Seleccionar currículum",
+      "selectResumeOption": "Seleccionar currículum",
+      "resumeFallbackName": "Currículum {id}",
+      "coverLetterLegend": "Carta de Presentación (opcional)",
+      "coverLetterAria": "Seleccionar carta opcional",
+      "noCoverLetterOption": "Sin carta",
+      "unknownCompany": "Desconocido",
+      "unknownPosition": "Puesto",
+      "jobIdLegend": "ID de Empleo (opcional)",
+      "jobIdPlaceholder": "ID opcional para correlación",
+      "jobIdAria": "ID de empleo para correlación",
+      "runButton": "Ejecutar Solicitud",
+      "runButtonAria": "Ejecutar automatización de solicitud",
+      "submitErrorTitle": "Error al enviar",
+      "submitErrorFallback": "Error al iniciar automatización de solicitud",
+      "runStartedTitle": "Ejecución iniciada",
+      "runIdLabel": "ID de ejecución: {id}",
+      "statusLabel": "Estado: {status}",
+      "openRunDetailLink": "Abrir detalle",
+      "openRunDetailAria": "Abrir página de detalle de ejecución {id}",
+      "schedule": {
+        "legend": "Programar Ejecución",
+        "aria": "Programar hora de ejecución",
+        "hint": "Elige cuándo debe iniciar esta ejecución.",
+        "button": "Programar Ejecución",
+        "buttonAria": "Programar ejecución de automatización de solicitud",
+        "createdTitle": "Ejecución programada",
+        "scheduledForLabel": "Programada para: {date}",
+        "invalidRunAt": "Elige una fecha y hora futura válida."
+      },
+      "stream": {
+        "title": "Stream de ejecución en vivo",
+        "subtitle": "Sigue las actualizaciones de progreso mientras se ejecuta la automatización.",
+        "aria": "Resumen del estado de ejecución en vivo",
+        "runIdTitle": "ID de ejecución",
+        "statusTitle": "Estado",
+        "stateLabel": "Estado actual del stream",
+        "progressTitle": "Progreso",
+        "progressAria": "Progreso de la ejecución automatizada",
+        "currentStepLabel": "Paso {current} de {total}",
+        "retryButton": "Reintentar stream",
+        "retryAria": "Reintentar stream de ejecución",
+        "cancelButton": "Detener stream",
+        "cancelAria": "Detener suscripción al stream",
+        "errorTitle": "Error del stream",
+        "startErrorFallback": "No se pudo iniciar el stream en vivo para esta ejecución.",
+        "states": {
+          "idle": "Inactivo",
+          "loading": "Conectando al stream",
+          "success": "Completado",
+          "empty": "Ninguna ejecución seleccionada",
+          "errorRetryable": "Problema temporal del stream",
+          "errorNonRetryable": "Stream no disponible",
+          "unauthorized": "Sin autorización"
+        },
+        "steps": {
+          "queued": "En cola",
+          "running": "En ejecución",
+          "completed": "Completado"
+        },
+        "eventType": {
+          "progress": "Progreso",
+          "result": "Resultado"
+        },
+        "eventMessages": {
+          "resultSuccess": "La ejecución terminó correctamente.",
+          "resultError": "La ejecución terminó con error.",
+          "protocolError": "El runner reportó un error de protocolo."
+        },
+        "eventsAria": "Línea de tiempo de eventos en vivo",
+        "eventsTitle": "Eventos recientes",
+        "events": {
+          "empty": "Aún no hay eventos.",
+          "columns": {
+            "timestamp": "Marca de tiempo",
+            "stage": "Etapa",
+            "status": "Estado",
+            "message": "Mensaje"
+          }
+        }
+      }
+    },
+    "email": {
+      "title": "Automatización de Respuestas por Email",
+      "pageDescription": "Genera y sigue respuestas de email asistidas por IA a través del pipeline de automatización.",
+      "bootstrapError": "No se pudieron cargar los ajustes de automatización de email",
+      "bootstrapRetry": "Reintentar",
+      "bootstrapRetryAria": "Reintentar carga de ajustes de automatización de email",
+      "openRunsButton": "Ver Ejecuciones",
+      "openRunsAria": "Abrir página de ejecuciones",
+      "subjectLegend": "Asunto",
+      "subjectPlaceholder": "Seguimiento de entrevista para puesto de ingeniero de gameplay",
+      "subjectAria": "Asunto del email",
+      "subjectHint": "El asunto debe tener al menos 3 caracteres.",
+      "senderLegend": "Remitente (opcional)",
+      "senderPlaceholder": "reclutador{'@'}estudio.com",
+      "senderAria": "Email o nombre del remitente",
+      "recipientLegend": "Destinatario (opcional)",
+      "recipientPlaceholder": "respuesta{'@'}estudio.com",
+      "recipientAria": "Email destinatario para entrega saliente",
+      "recipientHint": "Déjalo vacío para reutilizar el email del remitente cuando la entrega esté habilitada.",
+      "toneLegend": "Tono",
+      "toneAria": "Tono de respuesta preferido",
+      "tones": {
+        "professional": "Profesional",
+        "friendly": "Amigable",
+        "concise": "Conciso"
+      },
+      "messageLegend": "Mensaje Entrante",
+      "messagePlaceholder": "Pega el mensaje de email entrante para redactar una respuesta.",
+      "messageAria": "Mensaje de email entrante",
+      "messageHint": "El mensaje debe tener al menos 10 caracteres.",
+      "deliverLabel": "Entregar después de generar",
+      "deliverAria": "Enviar la respuesta generada mediante la entrega de email configurada",
+      "deliveryConfiguredDescription": "Hay un transporte de entrega configurado. Actívalo para enviar el borrador inmediatamente.",
+      "deliveryUnavailableDescription": "Configura la entrega de email en Ajustes antes de enviar respuestas automáticamente.",
+      "configureDeliveryButton": "Configurar Entrega",
+      "configureDeliveryAria": "Abrir ajustes para configurar la entrega de email",
+      "schedule": {
+        "legend": "Programar Ejecución",
+        "hint": "Elige cuándo debe ejecutarse esta automatización de email.",
+        "aria": "Fecha y hora programadas para la automatización de email",
+        "button": "Programar Ejecución",
+        "buttonAria": "Programar automatización de email",
+        "invalidRunAt": "Elige una fecha y hora futuras para la ejecución programada.",
+        "createdTitle": "Ejecución de email programada",
+        "scheduledForLabel": "Programada para: {date}",
+        "statusLabel": "Estado: {status}"
+      },
+      "invalidRecipient": "Introduce una dirección de email válida para la entrega.",
+      "generateButton": "Generar Respuesta",
+      "generateAria": "Generar respuesta de email",
+      "generatedTitle": "Respuesta generada",
+      "deliveredTitle": "Respuesta enviada",
+      "generatedProvider": "Proveedor: {provider} ({model})",
+      "runIdLabel": "ID de ejecución: {id}",
+      "recipientLabel": "Destinatario: {email}",
+      "messageIdLabel": "ID del mensaje: {id}",
+      "replyLegend": "Borrador de Respuesta",
+      "replyAria": "Respuesta de email generada",
+      "openRunDetailButton": "Abrir Detalle",
+      "openRunDetailAria": "Abrir detalle de ejecución {id}",
+      "submitErrorTitle": "Error en la generación",
+      "submitErrorFallback": "Error al generar respuesta de email"
+    },
+    "runDetail": {
+      "title": "Detalle de Ejecución",
+      "backButton": "Atrás",
+      "backToRunsAria": "Volver a ejecuciones",
+      "breadcrumbs": {
+        "dashboard": "Panel",
+        "runs": "Ejecuciones de Automatización",
+        "detailFallback": "Detalle de Ejecución"
+      },
+      "loadErrorTitle": "Error al cargar ejecución",
+      "loadErrorFallback": "No se pudo cargar la ejecución.",
+      "loadingStatus": "Cargando...",
+      "inputSummaryEmpty": "Sin entrada registrada",
+      "inputSummary": "{count} campo | {count} campos",
+      "outputSummaryEmpty": "Sin salida",
+      "outputSummaryPresent": "Salida recibida",
+      "noInputPayload": "Sin payload de entrada",
+      "noOutputPayload": "Sin payload de salida",
+      "inputPayloadTitle": "Payload de Entrada",
+      "outputPayloadTitle": "Payload de Salida",
+      "screenshotsTitle": "Capturas",
+      "noScreenshots": "Sin capturas disponibles.",
+      "screenshotAlt": "Captura de automatización {index}",
+      "screenshotLinkLabel": "Abrir captura {index}",
+      "screenshotLoadError": "No se pudo previsualizar la captura {index}.",
+      "loadingAria": "Cargando detalle de ejecución",
+      "retryButton": "Reintentar",
+      "retryAria": "Reintentar carga del detalle de ejecución",
+      "progressSummary": "{percent}% completado",
+      "progressAria": "Progreso de la ejecución automatizada",
+      "states": {
+        "idle": "Inactivo",
+        "loading": "Cargando detalle de ejecución",
+        "success": "Ejecución cargada",
+        "empty": "Ejecución no encontrada",
+        "errorRetryable": "Error temporal al cargar la ejecución",
+        "errorNonRetryable": "No se pudo cargar el detalle de la ejecución",
+        "unauthorized": "Sin autorización"
+      },
+      "timeline": {
+        "aria": "Línea de tiempo de la ejecución",
+        "title": "Línea de tiempo de ejecución",
+        "empty": "No hay eventos de línea de tiempo disponibles.",
+        "stageProgress": "Actualización de progreso",
+        "stageResult": "Resultado de ejecución",
+        "stageError": "Error del runner",
+        "stageOutputStep": "Paso de salida",
+        "stageRunStatus": "Estado de ejecución",
+        "resultSuccess": "La ejecución terminó correctamente.",
+        "resultError": "La ejecución terminó con error.",
+        "columns": {
+          "time": "Hora",
+          "stage": "Etapa",
+          "status": "Estado",
+          "message": "Mensaje"
+        }
+      },
+      "stats": {
+        "inputTitle": "Entrada",
+        "inputDescription": "Campos del payload",
+        "outputTitle": "Salida",
+        "outputDescription": "Instantánea del resultado",
+        "statusTitle": "Estado",
+        "typeDescription": "Tipo: {type}",
+        "errorYes": "Sí",
+        "errorNone": "Sin error"
+      }
+    },
+    "scraper": {
+      "title": "Centro de Operaciones de Extracción",
+      "subtitle": "Actualiza datos de estudios y empleos, luego lanza la práctica de entrevistas desde los roles extraídos.",
+      "stepsAria": "Flujo de extracción",
+      "steps": {
+        "run": "Ejecutar Extractor",
+        "review": "Revisar Resultados",
+        "interview": "Entrevista contra Empleo"
+      },
+      "state": {
+        "idle": "Inactivo",
+        "running": "En ejecución",
+        "success": "Éxito"
+      },
+      "notRunYet": "Aún no ejecutado",
+      "unknownPostedDate": "Desconocido",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "hace {count}d",
+      "weeksAgo": "hace {count}s",
+      "monthsAgo": "hace {count}mes",
+      "lastRunLabel": "Última ejecución: {value}",
+      "studioCard": {
+        "title": "Extractor de Estudios",
+        "description": "Obtén los últimos perfiles de estudios y metadatos de entrevista.",
+        "runAria": "Ejecutar extractor de estudios",
+        "runButton": "Ejecutar Extractor de Estudios"
+      },
+      "jobCard": {
+        "title": "Extractor de Empleos",
+        "description": "Obtén las últimas ofertas de la industria del juego y sincronízalas con el tablón.",
+        "runAria": "Ejecutar extractor de empleos",
+        "runButton": "Ejecutar Extractor de Empleos"
+      },
+      "stats": {
+        "availableJobsTitle": "Empleos Extraídos Disponibles",
+        "availableJobsDescription": "Inventario actual listo para entrevista",
+        "enrichedJobsTitle": "Empleos Enriquecidos por IA",
+        "enrichedJobsDescription": "Filas con contexto de estudio y señales de contratación",
+        "jobStatusTitle": "Estado del Extractor de Empleos",
+        "jobStatusDescription": "Estado de la última ejecución",
+        "interviewEntryTitle": "Entrada a Entrevista",
+        "interviewEntryValue": "1 clic",
+        "interviewEntryDescription": "De fila extraída a configuración de sesión"
+      },
+      "table": {
+        "title": "Empleos Extraídos Listos para Entrevista",
+        "openBoardButton": "Abrir Bolsa de Empleo",
+        "emptyState": "Sin empleos aún. Ejecuta el extractor para poblar objetivos de entrevista.",
+        "aria": "Empleos extraídos disponibles para entrevista",
+        "interviewButton": "Entrevista para este Empleo",
+        "interviewAria": "Iniciar entrevista para {title} en {company}",
+        "actionsLabel": "Acciones",
+        "personaSummaryLabel": "Perfil:",
+        "columns": {
+          "role": "Rol",
+          "company": "Empresa",
+          "location": "Ubicación",
+          "posted": "Publicado"
+        }
+      },
+      "messages": {
+        "studioCompleted": "Extracción de estudios completada. Datos del directorio actualizados.",
+        "studioCompletedWithXp": "Extracción de estudios completada (+{xp} XP). Datos actualizados.",
+        "jobCompleted": "Extracción de empleos completada. Feed actualizado y listo para entrevistas.",
+        "jobCompletedWithXp": "Extracción de empleos completada (+{xp} XP). Feed actualizado y listo para entrevistas."
+      },
+      "schedule": {
+        "legend": "Programar Ejecución",
+        "hint": "Elige cuándo debe ejecutarse este extractor.",
+        "aria": "Fecha y hora programadas para la extracción",
+        "button": "Programar Ejecución",
+        "buttonAria": "Programar ejecución del extractor",
+        "invalidRunAt": "Elige una fecha y hora futuras para la ejecución programada.",
+        "createdTitle": "Ejecución de extracción programada",
+        "createdMessage": "La ejecución de extracción se programó correctamente.",
+        "scheduledForLabel": "Programada para: {date}",
+        "statusLabel": "Estado: {status}"
+      },
+      "openRunDetailButton": "Abrir Detalle",
+      "openRunDetailAria": "Abrir detalle de ejecución de automatización para {id}",
+      "toasts": {
+        "studioReward": "Extracción de estudios completada (+{xp} XP)",
+        "jobReward": "Extracción de empleos completada (+{xp} XP)"
+      },
+      "errors": {
+        "studioFailed": "Error en extractor de estudios",
+        "jobFailed": "Error en extractor de empleos",
+        "scheduleFailed": "Error al programar la extracción",
+        "rewardFailed": "Error al acreditar progreso del extractor",
+        "capabilitiesLoadFailed": "No se pudo cargar la auditoría de capacidades del extractor",
+        "capabilitiesRetry": "Reintentar",
+        "capabilitiesRetryAria": "Reintentar carga de la auditoría de capacidades del extractor",
+        "jobsFeedLoadFailed": "No se pudo actualizar el listado de empleos para esta página",
+        "jobsFeedRetry": "Reintentar",
+        "jobsFeedRetryAria": "Reintentar carga del listado de empleos del centro de extracción"
+      }
+    }
+  },
+  "aiProviderCatalog": {
+    "local": {
+      "name": "Modelo local",
+      "description": "RamaLama u Ollama con ejecución privada y local primero."
+    },
+    "gemini": {
+      "description": "Proveedor cloud principal para QA general y generación de contenido."
+    },
+    "claude": {
+      "description": "Proveedor de razonamiento de largo contexto para flujos analíticos."
+    },
+    "openai": {
+      "description": "Familia GPT para chat y generación en flujos generales."
+    },
+    "huggingface": {
+      "description": "Respaldo cloud con un catálogo amplio de modelos abiertos."
+    }
+  },
+  "setup": {
+    "title": "Bienvenido a {brand}",
+    "seoTitle": "Configuración de {brand}",
+    "seoDescription": "Completa tu perfil, configura proveedores de IA y lanza tu espacio de trabajo profesional.",
+    "bootstrapError": "No se pudieron cargar los datos de configuración",
+    "bootstrapRetry": "Reintentar",
+    "bootstrapRetryAria": "Reintentar carga de datos de configuración",
+    "stepsAriaLabel": "Progreso de configuración",
+    "steps": {
+      "profile": "Perfil",
+      "localAi": "IA Local",
+      "done": "Listo"
+    },
+    "profileTitle": "Cuéntanos sobre ti",
+    "nameLegend": "Tu Nombre",
+    "namePlaceholder": "Introduce tu nombre",
+    "nameAria": "Tu nombre",
+    "currentRoleLegend": "Rol Actual (opcional)",
+    "currentRolePlaceholder": "ej. Diseñador de Juegos, Artista 3D",
+    "currentRoleAria": "Rol actual",
+    "nextButton": "Siguiente",
+    "backButton": "Atrás",
+    "nextToLocalAiAria": "Continuar al paso de configuración de IA local",
+    "nextToDoneAria": "Continuar al paso de finalización",
+    "backToProfileAria": "Volver al paso de perfil",
+    "aiConfigTitle": "Configurar IA (Local primero)",
+    "localFirstInfo": "{brand} prefiere proveedores locales primero. Usa RamaLama u Ollama para uso privado y offline, y añade claves en la nube solo como respaldo.",
+    "localEndpointLegend": "Endpoint local",
+    "localEndpointAria": "Endpoint API del modelo local",
+    "localEndpointExamples": "Ejemplos: RamaLama /v1, Ollama /v1",
+    "localModelLegend": "Nombre del modelo local",
+    "localModelAria": "Nombre del modelo local",
+    "testLocalButton": "Probar Endpoint Local",
+    "testLocalAria": "Probar conectividad del endpoint local",
+    "cloudOptionalTitle": "Proveedores en la nube (opcional)",
+    "cloudProviderLegend": "Clave API de {provider}",
+    "cloudProviderPlaceholder": "Introduce credencial de {provider}",
+    "cloudProviderAria": "Credencial de API de {provider}",
+    "testProviderAria": "Probar credencial de API de {provider}",
+    "testButton": "Probar",
+    "doneTitle": "Todo listo",
+    "doneDescription": "{assistant} está listo para ayudarte con tu carrera en la industria del juego.",
+    "auth": {
+      "setupTokenTitle": "Autenticación segura de primer uso",
+      "setupTokenDescription": "Introduce el token de configuración del operador para emitir la primera clave API de este espacio.",
+      "setupTokenLegend": "Token de configuración",
+      "setupTokenPlaceholder": "Introduce el token de configuración",
+      "setupTokenAria": "Token de configuración para crear la primera clave API",
+      "setupTokenRequiredError": "Introduce el token de configuración para inicializar la primera clave API.",
+      "bootstrapUnavailableTitle": "Token de configuración no disponible",
+      "bootstrapUnavailableDescription": "Un operador debe definir BAO_AUTH_SETUP_TOKEN antes de poder inicializar la autenticación en esta instalación.",
+      "apiKeyLegend": "Clave API existente",
+      "apiKeyPlaceholder": "Pega tu clave API existente",
+      "apiKeyAria": "Clave API existente para este espacio",
+      "apiKeyRequiredError": "Pega la clave API existente para completar la configuración."
+    },
+    "successStatusAria": "Estado de finalización de la configuración",
+    "backToAiConfigAria": "Volver al paso de configuración de IA",
+    "launchAria": "Finalizar configuración y lanzar aplicación",
+    "launchButton": "Lanzar {brand}",
+    "providerReachable": "{provider} es accesible",
+    "providerTestFailed": "Prueba de {provider} fallida",
+    "providerTestErrorFallback": "Error al probar proveedor",
+    "ollamaCommandCopyAria": "Copiar el comando de Ollama",
+    "ollamaCommandCopyTitle": "Copiar comando de Ollama",
+    "ollamaCommandCopied": "Comando de Ollama copiado",
+    "ollamaCommandCopyFailed": "No se pudo copiar el comando de Ollama",
+    "completeToast": "Configuración completada",
+    "completeErrorFallback": "Error al completar configuración"
+  },
+  "aiDashboard": {
+    "title": "Panel de IA",
+    "subtitle": "Gestiona la disponibilidad de proveedores, prueba conectividad y configura tu modelo preferido en una superficie de control centralizada.",
+    "stats": {
+      "totalRequestsTitle": "Total de Solicitudes",
+      "totalRequestsDesc": "Mensajes enviados a través de servicios de IA",
+      "successRateTitle": "Tasa de Éxito",
+      "successRateDesc": "Respuestas del asistente respecto a las solicitudes",
+      "averageResponseTitle": "Tiempo de Respuesta Medio",
+      "averageResponseDesc": "Latencia medida en solicitudes de chat",
+      "sessionsTitle": "Sesiones",
+      "sessionsDesc": "Proveedor activo: {provider}"
+    },
+    "preference": {
+      "title": "Preferencia de Proveedor",
+      "description": "Elige el proveedor principal y modelo por defecto para chat y generación con IA.",
+      "providerLegend": "Proveedor",
+      "providerAria": "Proveedor de IA preferido",
+      "modelLegend": "Modelo",
+      "modelAria": "Modelo de IA preferido",
+      "selectProviderOption": "Seleccionar proveedor",
+      "selectModelOption": "Seleccionar modelo",
+      "providerNotConfiguredOption": "{provider} (No configurado)",
+      "saveButton": "Guardar Preferencia",
+      "saveAria": "Guardar proveedor y modelo preferidos",
+      "refreshButton": "Actualizar",
+      "refreshAria": "Actualizar datos del panel de IA"
+    },
+    "providerCard": {
+      "configuredBadge": "Configurado",
+      "notConfiguredBadge": "No configurado",
+      "testButton": "Probar Conexión",
+      "testAria": "Probar conectividad de {provider}",
+      "configureButton": "Configurar",
+      "configureAria": "Abrir configuración para {provider}",
+      "testingLabel": "Probando..."
+    },
+    "availability": {
+      "available": "Disponible",
+      "unavailable": "No disponible"
+    },
+    "health": {
+      "healthy": "Saludable",
+      "degraded": "Degradado",
+      "down": "Caído",
+      "unconfigured": "No configurado"
+    },
+    "alerts": {
+      "noProvidersTitle": "No se detectaron proveedores",
+      "noProvidersDescription": "Configura al menos un proveedor de IA en Configuración para habilitar chat y generación.",
+      "testSuccessTitle": "Conectividad OK",
+      "testErrorTitle": "Error de conectividad"
+    },
+    "tests": {
+      "localSuccess": "El proveedor de IA local es accesible.",
+      "localFailure": "El proveedor de IA local no es accesible.",
+      "missingCredential": "No hay credencial disponible para este proveedor.",
+      "connectionSuccess": "Conexión exitosa.",
+      "connectionFailure": "Conexión fallida."
+    },
+    "errors": {
+      "usageLoadFailed": "Error al cargar métricas de uso de IA.",
+      "modelsLoadFailed": "Error al cargar catálogo de modelos.",
+      "localConnectivityFailed": "Error al verificar conectividad del proveedor local.",
+      "providerTestFailed": "Error en la prueba del proveedor.",
+      "preferenceSaveFailed": "Error al guardar preferencia de IA."
+    },
+    "toasts": {
+      "loadFailed": "Error al cargar datos del panel de IA.",
+      "preferenceSaved": "Preferencia de IA guardada.",
+      "preferenceSaveFailed": "Error al guardar preferencia de IA."
+    }
+  },
+  "interviewHistory": {
+    "title": "Historial de Entrevistas",
+    "subtitle": "Revisa sesiones anteriores, compara puntuaciones en el tiempo y vuelve a abrir la retroalimentación completa de cada entrevista.",
+    "allSessionsTitle": "Todas las Sesiones",
+    "studioFilterAria": "Filtrar sesiones por estudio",
+    "allStudiosOption": "Todos los estudios",
+    "emptyState": "No se encontraron sesiones de entrevista.",
+    "emptyStateTitle": "No se encontraron sesiones de entrevista",
+    "emptyStateDescription": "Inicia una nueva entrevista desde un empleo extraído o una práctica por estudio para llenar el historial.",
+    "tableAriaLabel": "Sesiones de entrevista",
+    "timelineAriaLabel": "Vista de línea temporal de sesiones",
+    "viewButton": "Ver",
+    "viewSessionAria": "Ver sesión de entrevista {id}",
+    "loadingDetails": "Cargando detalles de sesión...",
+    "retryButtonLabel": "Reintentar",
+    "retryAria": "Reintentar la carga de los detalles de la sesión de entrevista",
+    "detailsTitle": "Detalles de Sesión",
+    "closeDetailsAria": "Cerrar panel de detalles",
+    "detailStudioLabel": "Estudio",
+    "detailRoleLabel": "Rol",
+    "detailScoreLabel": "Puntuación General",
+    "timelineScoreAria": "Puntuación de entrevista: {score} por ciento",
+    "detailScoreAria": "Puntuación de entrevista: {score} por ciento",
+    "questionsLabel": "Preguntas",
+    "questionAria": "Pregunta de entrevista {index}",
+    "questionHeader": "P{index}: {score}%",
+    "overallFeedbackLabel": "Feedback General",
+    "selectPrompt": "Selecciona una sesión para ver detalles",
+    "selectPromptTitle": "Elige una sesión",
+    "selectPromptDescription": "Abre cualquier sesión de la lista para revisar puntuaciones, respuestas y comentarios de IA.",
+    "fetchErrorFallback": "Error al cargar sesiones de entrevista",
+    "sessionNotFound": "Sesión no encontrada",
+    "detailLoadErrorFallback": "Error al cargar detalles de sesión",
+    "notAvailable": "N/D",
+    "viewModes": {
+      "table": "Tabla",
+      "timeline": "Línea temporal"
+    },
+    "columns": {
+      "date": "Fecha",
+      "studio": "Estudio",
+      "role": "Rol",
+      "score": "Puntuación",
+      "duration": "Duración",
+      "actions": "Acciones"
+    }
+  },
+  "interviewHub": {
+    "seoTitle": "Centro de Preparación de Entrevistas",
+    "seoDescription": "Practica con flujos de entrevista por empleo o estudio y revisa feedback con puntuación y mejoras recomendadas.",
+    "title": "Centro de Preparación de Entrevistas",
+    "subtitle": "Practica contra ofertas reales extraídas o pistas de entrevista centradas en estudios. Cada sesión devuelve feedback puntuado y puntos de mejora.",
+    "bootstrapRetry": "Reintentar",
+    "bootstrapRetryAria": "Reintentar carga de datos del hub de entrevistas",
+    "pathwaysRetry": "Reintentar",
+    "pathwaysRetryAria": "Reintentar carga de recomendaciones de rol",
+    "hero": {
+      "openJobAria": "Configurar entrevista basada en empleo",
+      "openJobButton": "Entrevista para Empleo Extraído",
+      "openStudioAria": "Configurar entrevista de estudio",
+      "openStudioButton": "Iniciar Práctica de Estudio",
+      "stepsAria": "Flujo de entrevista",
+      "steps": {
+        "chooseContext": "Elegir Contexto",
+        "configureSession": "Configurar Sesión",
+        "practiceAndScore": "Practicar + Puntuar"
+      }
+    },
+    "stats": {
+      "totalSessionsTitle": "Total de Sesiones",
+      "totalSessionsDesc": "Sesiones de práctica completadas",
+      "averageScoreTitle": "Puntuación Media",
+      "averageScoreDesc": "En sesiones completadas",
+      "improvementTitle": "Tendencia de Mejora",
+      "improvementDesc": "Cambio sesión a sesión"
+    },
+    "prep": {
+      "title": "Lista de Preparación para Entrevista",
+      "subtitle": "Mantén currículum, carta y portafolio listos para que cada entrevista refleje tu posicionamiento actual.",
+      "progressLabel": "{done}/{total} listos",
+      "progressAria": "Progreso de preparación para entrevista",
+      "readyBadge": "Listo",
+      "pendingBadge": "Pendiente",
+      "openAria": "Abrir espacio de trabajo {title}",
+      "items": {
+        "resume": {
+          "title": "Currículum",
+          "description": "Mantén al menos un currículum actual alineado con tus roles objetivo.",
+          "cta": "Abrir Currículum"
+        },
+        "coverLetter": {
+          "title": "Carta de Presentación",
+          "description": "Mantén borradores de carta listos para personalizar por rol y estudio.",
+          "cta": "Abrir Cartas"
+        },
+        "portfolio": {
+          "title": "Portafolio",
+          "description": "Muestra proyectos destacados para que tus ejemplos en entrevista sean concretos.",
+          "cta": "Abrir Portafolio"
+        }
+      }
+    },
+    "cards": {
+      "jobPracticeTitle": "Práctica por Empleo",
+      "recommendedBadge": "Recomendado",
+      "jobPracticeDescription": "Usa un rol extraído como objetivo para que las preguntas coincidan con una oferta real.",
+      "selectedJobTitle": "Empleo seleccionado",
+      "selectedJobValue": "{title} en {company}",
+      "changeJobAria": "Cambiar empleo extraído seleccionado",
+      "changeButton": "Cambiar",
+      "configureJobAria": "Abrir configuración de sesión de empleo",
+      "configureJobButton": "Configurar Sesión de Empleo",
+      "studioDrillTitle": "Práctica de Estudio",
+      "studioDrillDescription": "Ejecuta entrevistas simuladas más amplias adaptadas al perfil y estilo del estudio.",
+      "currentStudio": "Estudio actual: {studio}",
+      "configureStudioAria": "Abrir configuración de sesión de estudio",
+      "configureStudioButton": "Configurar Sesión de Estudio"
+    },
+    "recent": {
+      "title": "Sesiones Recientes",
+      "viewAllButton": "Ver Todas",
+      "emptyState": "Sin sesiones de entrevista aún. Inicia tu primera desde un empleo o estudio.",
+      "tableAria": "Sesiones de entrevista recientes",
+      "notAvailable": "N/D",
+      "viewSessionAria": "Ver sesión de entrevista {id}",
+      "viewButton": "Ver",
+      "columns": {
+        "context": "Contexto",
+        "role": "Rol",
+        "mode": "Modo",
+        "score": "Puntuación",
+        "date": "Fecha"
+      },
+      "pagination": {
+        "navigationAria": "Paginación de sesiones recientes",
+        "previousAria": "Página anterior de sesiones",
+        "nextAria": "Página siguiente de sesiones",
+        "pageAria": "Ir a la página de sesiones {page}",
+        "summary": "Mostrando {start}-{end} de {total} sesiones"
+      }
+    },
+    "config": {
+      "dialogAria": "Diálogo de configuración de sesión de entrevista",
+      "title": "Configurar Sesión de Entrevista",
+      "subtitle": "Elige un contexto, ajusta opciones y lanza tu práctica.",
+      "switchToJobAria": "Cambiar a modo empleo extraído",
+      "modeJobButton": "Empleo Extraído",
+      "switchToStudioAria": "Cambiar a modo estudio",
+      "modeStudioButton": "Estudio",
+      "searchJobsLegend": "Buscar empleos extraídos",
+      "searchJobsPlaceholder": "Buscar título, empresa o palabra clave",
+      "searchJobsAria": "Buscar título, empresa o palabra clave",
+      "jobsTableAria": "Empleos extraídos disponibles",
+      "jobsColumns": {
+        "job": "Empleo",
+        "company": "Empresa"
+      },
+      "noJobsState": "Ningún empleo coincide con tu búsqueda.",
+      "selectJobAria": "Seleccionar {title} en {company} para entrevista",
+      "selectedButton": "Seleccionado",
+      "selectButton": "Seleccionar",
+      "studioLegend": "Estudio",
+      "studioAria": "Estudio",
+      "selectStudioOption": "Seleccionar un estudio",
+      "noStudiosHint": "Sin estudios aún. Ejecuta extracción o crea un perfil de estudio primero.",
+      "roleLegend": "Rol",
+      "roleAria": "Rol",
+      "experienceLegend": "Nivel de experiencia",
+      "experienceAria": "Nivel de experiencia",
+      "questionCountLegend": "Número de preguntas",
+      "questionCountAria": "Número de preguntas",
+      "conversationStyleLegend": "Estilo de conversación",
+      "conversationStyleAria": "Estilo de conversación",
+      "conversationStyleNatural": "Conversación natural",
+      "conversationStyleStructured": "Rondas estructuradas",
+      "conversationStyleHint": "El modo natural genera una pregunta contextual cada vez. El modo estructurado prepara toda la entrevista desde el inicio.",
+      "enableVoiceAria": "Activar modo voz",
+      "enableVoiceLabel": "Activar modo voz",
+      "ttsVoiceLegend": "Voz TTS",
+      "ttsVoiceAria": "Voz TTS",
+      "ttsDefaultOption": "Por defecto",
+      "cancelAria": "Cancelar configuración de entrevista",
+      "cancelButton": "Cancelar",
+      "startAria": "Iniciar sesión de entrevista",
+      "startButton": "Iniciar Entrevista",
+      "closeDialogAria": "Cerrar diálogo de configuración",
+      "closeBackdropButton": "Cerrar",
+      "pagination": {
+        "navigationAria": "Paginación de selección de empleos",
+        "previousAria": "Página anterior de empleos",
+        "nextAria": "Página siguiente de empleos",
+        "pageAria": "Ir a la página de empleos {page}",
+        "summary": "Mostrando {start}-{end} de {total} empleos"
+      }
+    },
+    "mode": {
+      "job": "Empleo",
+      "studio": "Estudio"
+    },
+    "experience": {
+      "entry": "Principiante",
+      "mid": "Medio",
+      "lead": "Líder"
+    },
+    "questionCount": {
+      "quick": "3 (Rápida)",
+      "standard": "5 (Estándar)",
+      "deep": "8 (Profunda)"
+    },
+    "toasts": {
+      "started": "Sesión de entrevista iniciada"
+    },
+    "errors": {
+      "bootstrapLoadFailed": "Error al cargar los datos del hub de entrevistas",
+      "roleRecommendationsFailed": "Error al cargar recomendaciones de rol personalizadas",
+      "startFailed": "Error al iniciar sesión de entrevista",
+      "jobLoadFailed": "Error al cargar detalles del empleo seleccionado"
+    }
+  },
+  "interviewSession": {
+    "title": "Práctica de Entrevista",
+    "timeLabel": "Tiempo",
+    "timeAria": "Tiempo transcurrido de entrevista {minutes} minutos y {seconds} segundos",
+    "avatarLabelAi": "IA",
+    "progressLabel": "Pregunta {current} de {total}",
+    "progressAria": "Progreso de entrevista",
+    "jobTargetBadge": "Empleo Objetivo",
+    "interviewerLabel": "Entrevistador",
+    "feedbackScore": "Puntuación: {score}%",
+    "responseTitle": "Tu Respuesta",
+    "responsePlaceholder": "Escribe tu respuesta aquí...",
+    "responseAria": "Texto de respuesta de entrevista",
+    "minResponseHint": "La respuesta debe tener al menos {count} caracteres.",
+    "endAria": "Finalizar sesión de entrevista",
+    "endButton": "Finalizar Entrevista",
+    "submitAria": "Enviar respuesta de entrevista",
+    "submitNextButton": "Enviar y Siguiente",
+    "submitFinishButton": "Enviar y Finalizar",
+    "notFound": "Sesión no encontrada. Inicia una nueva entrevista.",
+    "voice": {
+      "listening": "Escuchando...",
+      "idle": "Entrada de voz",
+      "startTitle": "Iniciar entrada de voz",
+      "stopTitle": "Dejar de escuchar",
+      "startAria": "Iniciar entrada de voz",
+      "stopAria": "Detener entrada de voz",
+      "stopButton": "Detener"
+    },
+    "toasts": {
+      "responseRecorded": "Respuesta registrada",
+      "completed": "Entrevista completada"
+    },
+    "errors": {
+      "minResponseLength": "La respuesta debe tener al menos {count} caracteres",
+      "submitFailed": "Error al enviar respuesta",
+      "completeFailed": "Error al completar entrevista"
+    }
+  },
+  "settings": {
+    "seoTitle": "Configuración y Perfil",
+    "seoDescription": "Administra tu perfil, proveedores de IA, preferencias de notificación y valores predeterminados de automatización.",
+    "title": "Configuración y Perfil",
+    "subtitle": "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
+    "saveState": {
+      "idle": "Inactivo",
+      "saving": "Guardando",
+      "success": "Guardado"
+    },
+    "profile": {
+      "title": "Perfil de Usuario",
+      "nameLegend": "Nombre",
+      "nameAria": "Nombre",
+      "nameHint": "El nombre debe tener al menos 2 caracteres.",
+      "emailHint": "Introduce una dirección de email válida.",
+      "currentRoleLegend": "Rol Actual",
+      "currentRoleAria": "Rol actual",
+      "currentCompanyLegend": "Empresa Actual",
+      "currentCompanyAria": "Empresa actual",
+      "locationLegend": "Ubicación",
+      "locationAria": "Ubicación",
+      "yearsExperienceLegend": "Años de Experiencia",
+      "yearsExperienceAria": "Años de experiencia",
+      "githubAria": "URL del perfil de GitHub",
+      "linkedinAria": "URL del perfil de LinkedIn",
+      "summaryLegend": "Resumen",
+      "summaryAria": "Resumen del perfil",
+      "technicalSkillsLegend": "Habilidades Técnicas (separadas por comas)",
+      "technicalSkillsAria": "Habilidades técnicas",
+      "softSkillsLegend": "Habilidades Blandas (separadas por comas)",
+      "softSkillsPlaceholder": "Comunicación, Liderazgo, Colaboración",
+      "softSkillsAria": "Habilidades blandas",
+      "saveAria": "Guardar configuración del perfil",
+      "saveButton": "Guardar Perfil"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "themeLabel": "Tema",
+      "lightTheme": "Claro",
+      "darkTheme": "Oscuro",
+      "toggleThemeAria": "Alternar preferencia de tema",
+      "languageLegend": "Idioma",
+      "languageAria": "Idioma",
+      "notificationsLegend": "Notificaciones",
+      "notifications": {
+        "achievements": "Logros",
+        "achievementsAria": "Notificaciones de logros",
+        "dailyChallenges": "Desafíos diarios",
+        "dailyChallengesAria": "Notificaciones de desafíos diarios",
+        "levelUp": "Subir de nivel",
+        "levelUpAria": "Notificaciones de subida de nivel",
+        "jobAlerts": "Alertas de empleo",
+        "jobAlertsAria": "Notificaciones de alertas de empleo"
+      },
+      "saveAria": "Guardar preferencias",
+      "saveButton": "Guardar Preferencias"
+    },
+    "automation": {
+      "title": "Automatización y RPA",
+      "subtitle": "Configura valores por defecto de automatización del navegador para solicitudes.",
+      "headlessTitle": "Modo Sin Interfaz",
+      "headlessDescription": "Ejecutar automatización sin interfaz visible",
+      "headlessAria": "Modo sin interfaz",
+      "smartSelectorsTitle": "Selectores IA Inteligentes",
+      "smartSelectorsDescription": "Detectar campos de formulario dinámicamente",
+      "smartSelectorsAria": "Selectores inteligentes",
+      "autoScreenshotsTitle": "Guardar Capturas Automáticamente",
+      "autoScreenshotsDescription": "Capturar cada etapa de automatización",
+      "autoScreenshotsAria": "Guardar capturas automáticamente",
+      "timeoutLegend": "Tiempo de Espera (segundos)",
+      "timeoutAria": "Tiempo de espera por defecto en segundos",
+      "retentionLegend": "Retención de Capturas (días)",
+      "retentionAria": "Retención de capturas en días",
+      "concurrentRunsLegend": "Max Ejecuciones Concurrentes",
+      "concurrentRunsAria": "Máximo de ejecuciones simultáneas",
+      "defaultBrowserLegend": "Navegador por Defecto",
+      "defaultBrowserAria": "Navegador de automatización por defecto",
+      "saveAria": "Guardar configuración de automatización",
+      "saveButton": "Guardar Automatización"
+    },
+    "emailDelivery": {
+      "title": "Entrega de correo",
+      "subtitle": "Configura el transporte SMTP saliente que se usa cuando la automatización envía una respuesta generada.",
+      "configuredBadge": "Listo",
+      "incompleteBadge": "Necesita configuración",
+      "hostLegend": "Host SMTP",
+      "hostAria": "Host del servidor SMTP",
+      "portLegend": "Puerto",
+      "portAria": "Puerto del servidor SMTP",
+      "timeoutLegend": "Tiempo de conexión (segundos)",
+      "timeoutAria": "Tiempo de conexión SMTP en segundos",
+      "securityLegend": "Seguridad",
+      "securityAria": "Modo de seguridad del transporte SMTP",
+      "securityOptions": {
+        "tls": "TLS implícito",
+        "plain": "TCP simple"
+      },
+      "authLegend": "Autenticación",
+      "authAria": "Modo de autenticación SMTP",
+      "usernameLegend": "Usuario",
+      "usernameAria": "Usuario SMTP",
+      "fromNameLegend": "Nombre del remitente",
+      "fromNameAria": "Nombre visible del remitente",
+      "fromEmailLegend": "Correo del remitente",
+      "fromEmailAria": "Correo del remitente saliente",
+      "fromEmailHint": "Esta dirección se usa en la cabecera From del mensaje.",
+      "passwordLegend": "Contraseña",
+      "passwordPlaceholder": "Guardar o reemplazar la contraseña SMTP",
+      "passwordAria": "Contraseña SMTP",
+      "passwordHint": "Guarda una contraseña si este transporte requiere envío autenticado.",
+      "passwordStoredHint": "Ya hay una contraseña guardada. Guardar un nuevo valor la reemplazará, o puedes borrarla abajo.",
+      "clearPasswordAria": "Borrar contraseña guardada para entrega de correo",
+      "clearPasswordButton": "Borrar contraseña",
+      "savePasswordAria": "Guardar contraseña para entrega de correo",
+      "savePasswordButton": "Guardar contraseña",
+      "saveAria": "Guardar configuración de entrega de correo",
+      "saveButton": "Guardar entrega de correo"
+    },
+    "aiProviders": {
+      "title": "Proveedores de IA",
+      "subtitle": "Mantén proveedores locales como principales y cloud como respaldo controlado.",
+      "expandAria": "Expandir configuración de {provider}",
+      "configuredBadge": "Configurado",
+      "endpointLabel": "URL del Endpoint",
+      "credentialLabel": "Clave API",
+      "huggingFacePlaceholder": "Introduce token de Hugging Face",
+      "apiKeyPlaceholder": "Introduce clave API de {provider}",
+      "testAria": "Probar conexión del proveedor de IA",
+      "testButton": "Probar",
+      "localModelLegend": "Nombre del modelo local",
+      "localModelPlaceholder": "Detectado automáticamente del servidor",
+      "localModelAria": "Nombre del modelo local",
+      "connectedBadge": "Conectado",
+      "failedBadge": "Fallido",
+      "saveAria": "Guardar credenciales del proveedor de IA",
+      "saveButton": "Guardar Claves API",
+      "connectionSuccessful": "Conexión exitosa",
+      "connectionFailed": "Conexión fallida",
+      "preferredProviderLegend": "Proveedor de IA preferido",
+      "preferredProviderAria": "Seleccionar proveedor de IA preferido",
+      "preferredProviderSaveButton": "Guardar chat por defecto",
+      "preferredProviderHint": "Este control rápido define el proveedor predeterminado para chat y conversaciones.",
+      "preferredProviderSaved": "Proveedor preferido actualizado",
+      "routingTitle": "Enrutamiento por propósito",
+      "routingSubtitle": "Asigna un proveedor y un modelo opcional a cada capacidad de IA para que chat, entrevistas, exportaciones y automatizaciones no compartan una única configuración global.",
+      "saveRoutingAria": "Guardar enrutamiento de IA por propósito",
+      "saveRoutingButton": "Guardar enrutamiento",
+      "routingSaved": "Enrutamiento de IA guardado",
+      "purposeProviderLegend": "Proveedor",
+      "purposeProviderAria": "Seleccionar proveedor para {purpose}",
+      "purposeModelLegend": "Modelo específico",
+      "purposeModelAria": "Definir modelo específico para {purpose}",
+      "purposeModelPlaceholder": "Déjalo vacío para usar el modelo por defecto o la autodetección",
+      "purposeModelHint": "Usa un modelo concreto solo cuando este flujo lo necesite. Si lo dejas vacío, se mantiene el valor por defecto del proveedor.",
+      "purposes": {
+        "chat": {
+          "label": "Conversación",
+          "description": "Chat general, respuestas del asistente y conversaciones interactivas."
+        },
+        "interviewQuestions": {
+          "label": "Preguntas de entrevista",
+          "description": "Generación de preguntas, repreguntas y ritmo conversacional de la entrevista."
+        },
+        "interviewFeedback": {
+          "label": "Feedback de entrevista",
+          "description": "Puntuación de respuestas, feedback por rúbrica y resúmenes finales de entrevista."
+        },
+        "resume": {
+          "label": "Currículum",
+          "description": "Síntesis, mejora, puntuación y salidas estructuradas del CV."
+        },
+        "coverLetter": {
+          "label": "Carta de presentación",
+          "description": "Redacción, refinamiento y contenido listo para exportar de la carta."
+        },
+        "emailResponse": {
+          "label": "Respuesta por email",
+          "description": "Borradores de respuesta a recruiters y generación de emails automáticos."
+        },
+        "jobMatch": {
+          "label": "Ajuste al puesto",
+          "description": "Scoring de encaje, análisis del rol y resúmenes de recomendación."
+        },
+        "scrapeEnrichment": {
+          "label": "Enriquecimiento de scraping",
+          "description": "Enriquecimiento de perfiles de estudio y análisis de señales de contratación tras el scrape."
+        },
+        "automationFieldMapping": {
+          "label": "Mapeo de automatización",
+          "description": "Mapeo de campos, inferencia de selectores y automatización estructurada de formularios."
+        }
+      },
+      "ollamaTipTitle": "Consejo: Ollama va por fuera de esta app",
+      "ollamaTipDescription": "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",
+      "ollamaTipLinkAria": "Abrir sitio web de Ollama en una pestaña nueva"
+    },
+    "brand": {
+      "title": "Plano de control de marca",
+      "subtitle": "Identidad white-label, tipografía, tokens semánticos de tema y copy localizado desde una sola configuración persistida.",
+      "infoTitle": "Un solo contrato para cada superficie de marca",
+      "infoDescription": "Previsualiza identidad, tipografía, tokens de tema y copy localizado antes de publicar cambios en todo el producto.",
+      "previewEyebrow": "Vista previa en vivo",
+      "previewTitle": "Vista previa de la marca",
+      "previewSubtitle": "Valida logo, tono, contraste de tokens y overrides de copy antes de guardar la siguiente variante.",
+      "previewLogoAlt": "Vista previa del logo de {brand}",
+      "previewPrimaryAction": "Abrir espacio de trabajo",
+      "previewSecondaryAction": "Revisar copy",
+      "editorTabsAria": "Secciones del editor de marca",
+      "nameLegend": "Nombre del producto",
+      "nameAria": "Nombre del producto",
+      "assistantNameLegend": "Nombre del asistente",
+      "assistantNameAria": "Nombre del asistente",
+      "apiNameLegend": "Nombre de la API",
+      "apiNameAria": "Nombre de la API",
+      "taglineLegend": "Eslogan",
+      "taglineAria": "Eslogan",
+      "logoPathLegend": "Ruta o URL del logo",
+      "logoPathAria": "Ruta o URL del logo",
+      "faviconPathLegend": "Ruta o URL del favicon",
+      "faviconPathAria": "Ruta o URL del favicon",
+      "assetPathHint": "Usa una ruta de recurso pública o una URL absoluta que el cliente pueda cargar directamente.",
+      "defaultTitleLegend": "Título SEO por defecto",
+      "defaultTitleAria": "Título SEO por defecto",
+      "defaultDescriptionLegend": "Descripción SEO por defecto",
+      "defaultDescriptionAria": "Descripción SEO por defecto",
+      "fontStylesheetLegend": "URL de la hoja de estilos de fuentes",
+      "fontStylesheetAria": "URL de la hoja de estilos de fuentes",
+      "fontStylesheetHint": "Carga la hoja de estilos alojada de tus tipografías antes de aplicar las pilas de font-family de abajo.",
+      "displayFontLegend": "font-family de display",
+      "displayFontAria": "font-family de display",
+      "bodyFontLegend": "font-family del cuerpo",
+      "bodyFontAria": "font-family del cuerpo",
+      "monoFontLegend": "font-family mono",
+      "monoFontAria": "font-family mono",
+      "lightThemeLegend": "JSON del tema claro",
+      "lightThemeAria": "JSON del tema claro",
+      "darkThemeLegend": "JSON del tema oscuro",
+      "darkThemeAria": "JSON del tema oscuro",
+      "themeJsonHint": "Proporciona un objeto completo de tokens daisyUI. Las claves deben coincidir exactamente con el contrato de tema de marca.",
+      "contentOverridesLegend": "JSON de overrides de contenido",
+      "contentOverridesAria": "JSON de overrides de contenido",
+      "contentOverridesHint": "Usa claves de locale con puntos como `dashboard.pageTitle` para sobrescribir cualquier copy visible para usuarios.",
+      "saveAria": "Guardar configuración del plano de control de marca",
+      "saveButton": "Guardar marca",
+      "tabs": {
+        "identity": "Identidad",
+        "identityDescription": "Ajusta nombres, voz del asistente y recursos del logo para el paquete de marca activo.",
+        "typography": "Tipografía",
+        "typographyDescription": "Define la hoja de estilos alojada y las pilas display, body y mono usadas en toda la interfaz.",
+        "themes": "Tokens de tema",
+        "themesDescription": "Edita los objetos de tokens daisyUI claros y oscuros que definen color semántico, radio, borde y profundidad.",
+        "content": "Contenido",
+        "contentDescription": "Ajusta el copy SEO por defecto y los overrides de locale en tiempo de ejecución sin tocar el catálogo fuente."
+      },
+      "stats": {
+        "product": "Producto",
+        "productDescription": "Nombre principal de la aplicación visible para clientes.",
+        "assistant": "Asistente",
+        "assistantDescription": "Persona del asistente mostrada por defecto en las superficies de chat.",
+        "locales": "Idiomas",
+        "localesDescription": "Idiomas de interfaz compatibles expuestos en configuración.",
+        "overridesDescription": "Claves de copy personalizadas mezcladas en el catálogo activo."
+      },
+      "errors": {
+        "invalidLightTheme": "El JSON del tema claro no es válido.",
+        "invalidDarkTheme": "El JSON del tema oscuro no es válido.",
+        "invalidContentOverrides": "El JSON de overrides de contenido no es válido.",
+        "failedToSave": "No se pudo guardar la configuración de marca"
+      }
+    },
+    "toasts": {
+      "apiKeysSaved": "Claves API guardadas",
+      "brandSaved": "Configuración de marca guardada",
+      "emailDeliverySaved": "Configuración de entrega de correo guardada",
+      "emailDeliveryPasswordSaved": "Contraseña de entrega de correo guardada",
+      "emailDeliveryPasswordCleared": "Contraseña de entrega de correo eliminada",
+      "themeSaved": "Tema guardado",
+      "preferencesSaved": "Preferencias guardadas",
+      "profileSaved": "Perfil guardado",
+      "automationSaved": "Configuración de automatización guardada"
+    },
+    "errors": {
+      "failedToTestProvider": "Error al probar proveedor",
+      "failedToSaveApiKeys": "Error al guardar claves API",
+      "failedToSaveEmailDelivery": "Error al guardar la configuración de entrega de correo",
+      "failedToSaveEmailDeliveryPassword": "Error al guardar la contraseña de entrega de correo",
+      "failedToSaveTheme": "Error al guardar tema",
+      "failedToSavePreferences": "Error al guardar preferencias",
+      "nameTooShort": "El nombre debe tener al menos 2 caracteres",
+      "invalidEmail": "Introduce una dirección de email válida",
+      "invalidEmailDeliverySender": "Introduce un remitente válido para entrega de correo",
+      "failedToSaveProfile": "Error al guardar perfil",
+      "failedToSaveAutomation": "Error al guardar configuración de automatización"
+    }
+  },
+  "quickFab": {
+    "groupAria": "Acciones rápidas de {brand}",
+    "expandAria": "Abrir acciones rápidas",
+    "collapseAria": "Cerrar acciones rápidas",
+    "menuAria": "Atajos de acciones rápidas"
+  },
+  "floatingChat": {
+    "subtitle": "Copiloto de Carrera",
+    "contextBadge": "Contexto: {context}",
+    "contextAria": "Contexto actual del chat: {context}",
+    "focusedEntityBadge": "Enfoque: {entity}",
+    "focusedEntityAria": "Entidad enfocada en el chat: {entity}",
+    "domainChip": "Ámbito: {context}",
+    "sourceChip": "Superficie: {source}",
+    "routeBadge": "Ruta: {route}",
+    "contextChipsAria": "Chips de contexto específico del chat",
+    "contextDomain": {
+      "resume": "Currículum",
+      "jobSearch": "Empleos",
+      "interview": "Entrevista",
+      "portfolio": "Portafolio",
+      "skills": "Habilidades",
+      "automation": "Automatización"
+    },
+    "entityTypes": {
+      "job": "Empleo",
+      "resume": "Currículum",
+      "studio": "Estudio",
+      "interviewSession": "Entrevista",
+      "automationRun": "Automatización"
+    },
+    "sources": {
+      "chatPage": "Página completa"
+    },
+    "stateChips": {
+      "resumes": "{count} currículum | {count} currículums",
+      "jobs": "{count} empleo seguido | {count} empleos seguidos",
+      "studios": "{count} estudio | {count} estudios",
+      "sessions": "{count} sesión | {count} sesiones",
+      "projects": "{count} proyecto | {count} proyectos"
+    },
+    "expandAria": "Abrir página completa de chat",
+    "expandButton": "Expandir",
+    "clearAria": "Limpiar conversación del chat",
+    "clearButton": "Limpiar",
+    "closeAria": "Cerrar widget de chat",
+    "logAria": "Conversación del chat flotante",
+    "youLabel": "Tú",
+    "suggestionsAria": "Sugerencias de prompts contextuales del asistente",
+    "suggestionAria": "Usar prompt contextual: {prompt}",
+    "emptyTitle": "Inicia una revisión rápida",
+    "emptyDescription": "Pide próximos pasos, texto de seguimiento o una revisión enfocada desde la página en la que estás.",
+    "composerHint": "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    "prompts": {
+      "focusedEntity": "Dame coaching enfocado para {target}.",
+      "resume": "¿Cómo puedo mejorar este currículum para {target}?",
+      "jobSearch": "¿Cómo debo abordar este rol en {target}?",
+      "interview": "Genera preguntas de preparación para entrevista en {target}.",
+      "portfolio": "¿Cómo puedo adaptar mi portafolio para {target}?",
+      "skills": "¿Qué habilidades debería priorizar para {target}?",
+      "automation": "¿Cómo puedo optimizar este flujo de automatización para {target}?",
+      "general": "¿En qué debería enfocarme en mi búsqueda de empleo?",
+      "entity": {
+        "job": "Resume el encaje y los próximos pasos para {target}.",
+        "resume": "Identifica las mejoras más fuertes para {target}.",
+        "studio": "Oriéntame sobre cómo acercarme a {target}.",
+        "interviewSession": "Revisa las señales y puntos de coaching de {target}.",
+        "automationRun": "Explica qué pasó en {target} y qué corregir después."
+      }
+    },
+    "inputPlaceholder": "Pregunta sobre preparación de entrevistas, empleos, currículums...",
+    "inputAria": "Mensaje del chat flotante",
+    "sendAria": "Enviar mensaje del chat flotante",
+    "hideAria": "Ocultar asistente de chat flotante",
+    "showAria": "Mostrar asistente de chat flotante",
+    "unreadAria": "{count} mensajes del asistente sin leer",
+    "voiceSettings": {
+      "toggleButton": "Voz",
+      "toggleAria": "Alternar configuración de perfil de modelos de voz",
+      "saveSuccess": "Perfil de voz guardado",
+      "saveErrorFallback": "No se pudo guardar el perfil de voz"
+    }
+  },
+  "studioSelector": {
+    "toggleAria": "Abrir selector de estudios",
+    "selectPlaceholder": "Seleccionar un estudio",
+    "menuAria": "Menú de estudios",
+    "searchPlaceholder": "Buscar estudios",
+    "searchAria": "Buscar estudios",
+    "emptyState": "No se encontraron estudios",
+    "optionAria": "Seleccionar estudio {studio}",
+    "closeAria": "Cerrar selector de estudios",
+    "unknownType": "Tipo desconocido",
+    "unknownLocation": "Ubicación desconocida"
+  },
+  "aiChatPage": {
+    "title": "Chat con {brand}",
+    "seoTitle": "Chat IA de {brand}",
+    "seoDescription": "Habla con tu copiloto de carrera con IA para estrategia de CV, preparación de entrevistas y planificación de automatización.",
+    "subtitle": "Tu asistente de carrera con IA para la industria del juego",
+    "clearAria": "Limpiar conversación del chat",
+    "clearButton": "Limpiar",
+    "logAria": "Conversación del chat con IA",
+    "youLabel": "Tú",
+    "inputPlaceholder": "Pregunta a {assistant} sobre tu carrera en la industria del juego",
+    "inputAria": "Mensaje del chat",
+    "sendAria": "Enviar mensaje del chat",
+    "sendButton": "Enviar",
+    "emptyTitle": "Tu asistente está listo",
+    "emptyDescription": "Usa las sugerencias junto a la conversación o pide coaching, ayuda de redacción, investigación o guía de automatización.",
+    "composerHint": "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    "composerIdleStatus": "Listo cuando tú lo estés",
+    "composerBusyStatus": "Generando una respuesta...",
+    "contextPanelTitle": "Contexto actual",
+    "contextPanelDescription": "El asistente usa tu página activa, la entidad enfocada y las señales recientes del espacio de trabajo.",
+    "promptsTitle": "Prompts sugeridos",
+    "promptsDescription": "Carga uno de estos prompts en el editor con el contexto actual ya visible.",
+    "voiceSettings": {
+      "legend": "Perfiles de Modelo de Voz",
+      "sttProviderLabel": "Proveedor de voz a texto",
+      "sttProviderAria": "Selección de proveedor de voz a texto",
+      "sttModelLabel": "Modelo de voz a texto",
+      "sttModelAria": "Selección de modelo de voz a texto",
+      "ttsProviderLabel": "Proveedor de texto a voz",
+      "ttsProviderAria": "Selección de proveedor de texto a voz",
+      "ttsModelLabel": "Modelo de texto a voz",
+      "ttsModelAria": "Selección de modelo de texto a voz",
+      "hint": "Estos perfiles de proveedor/modelo se guardan para flujos de voz en chat y automatización.",
+      "saveButton": "Guardar Perfil de Voz",
+      "saveAria": "Guardar preferencias de proveedor y modelo de voz",
+      "saveSuccess": "Perfil de voz guardado",
+      "saveErrorFallback": "No se pudo guardar el perfil de voz",
+      "unsavedHint": "Tienes cambios sin guardar en el perfil de voz.",
+      "providers": {
+        "browser": "Navegador",
+        "custom": "Personalizado"
+      }
+    }
+  },
+  "aiChatCommon": {
+    "youLabel": "Tú",
+    "defaultGreeting": "¡Hola! Soy {brand}, tu asistente de carrera con IA para la industria del juego. ¿En qué puedo ayudarte hoy?",
+    "unableToProcessFallback": "Lo siento, no pude procesar esa solicitud.",
+    "requestErrorFallback": "Ocurrió un error al procesar la solicitud. Inténtalo de nuevo.",
+    "requestErrorToast": "Error en la solicitud del chat. Inténtalo de nuevo.",
+    "timeAt": "a las {time}",
+    "voice": {
+      "startTitle": "Iniciar entrada de voz",
+      "stopTitle": "Detener entrada de voz",
+      "startAria": "Iniciar entrada de voz",
+      "stopAria": "Detener entrada de voz",
+      "replayTitle": "Leer última respuesta del asistente",
+      "replayAria": "Leer última respuesta del asistente",
+      "voiceLegend": "Salida de voz",
+      "voiceAria": "Selección de salida de voz",
+      "systemVoiceOption": "Voz del sistema por defecto",
+      "autoSpeakLabel": "Leer respuestas automáticamente",
+      "autoSpeakAria": "Leer respuestas del asistente automáticamente",
+      "listeningStatus": "Escuchando...",
+      "speakingStatus": "Leyendo respuesta...",
+      "idleStatus": "Voz lista",
+      "unsupportedHint": "Los controles de voz no están disponibles en este navegador.",
+      "recognitionUnsupportedHint": "La entrada de voz no está disponible en este navegador.",
+      "synthesisUnsupportedHint": "La reproducción de voz no está disponible en este navegador.",
+      "errorLabel": "Error de voz: {error}",
+      "errors": {
+        "unsupportedRecognition": "La entrada de voz no es compatible con este navegador.",
+        "unsupportedSynthesis": "La reproducción de voz no es compatible con este navegador.",
+        "startFailed": "No se pudo iniciar la entrada de voz. Verifica los permisos del micrófono.",
+        "noSpeech": "No se detectó voz. Intenta hablar de nuevo.",
+        "aborted": "La entrada de voz se detuvo antes de completarse.",
+        "audioCapture": "No hay fuente de micrófono disponible.",
+        "network": "Un problema de red interrumpió el procesamiento de voz.",
+        "notAllowed": "Se denegó el permiso del micrófono.",
+        "serviceNotAllowed": "El acceso al servicio de voz está bloqueado en este entorno.",
+        "badGrammar": "Error en el análisis gramatical de voz.",
+        "languageNotSupported": "El idioma de voz seleccionado no es compatible.",
+        "canceled": "La reproducción de voz fue cancelada.",
+        "interrupted": "La reproducción de voz fue interrumpida.",
+        "audioBusy": "La salida de audio está ocupada.",
+        "audioHardware": "El hardware de audio no está disponible.",
+        "synthesisUnavailable": "La síntesis de voz no está disponible.",
+        "synthesisFailed": "La síntesis de voz no pudo generar audio.",
+        "languageUnavailable": "La síntesis no soporta el idioma seleccionado.",
+        "voiceUnavailable": "La voz seleccionada no está disponible en este dispositivo.",
+        "textTooLong": "El mensaje es demasiado largo para reproducción de voz.",
+        "invalidArgument": "La reproducción de voz recibió un argumento inválido.",
+        "unknown": "Ocurrió un error de voz desconocido."
+      }
+    }
+  }
+} as const;
+
+export default catalog;

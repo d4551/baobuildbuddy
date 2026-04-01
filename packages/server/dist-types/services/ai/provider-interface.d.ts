@@ -1,10 +1,11 @@
-import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared";
+import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 /**
  * Common interface for all AI providers
  */
 export interface AIProvider {
     name: AIProviderType;
     model: string;
+    readonly baseUrl?: string;
     /**
      * Generate a single response from the AI
      */

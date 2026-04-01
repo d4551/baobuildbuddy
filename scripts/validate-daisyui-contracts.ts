@@ -101,6 +101,38 @@ const BTN_SEMANTIC_MODIFIERS = [
   "btn-disabled",
 ] as const;
 
+const BRAND_PREVIEW_FILE_PATH = "packages/client/components/settings/brand/BrandPreviewCard.vue";
+const BRAND_PREVIEW_REQUIRED_THEME_VARIABLES = [
+  "--color-base-100",
+  "--color-base-200",
+  "--color-base-300",
+  "--color-base-content",
+  "--color-primary",
+  "--color-primary-content",
+  "--color-secondary",
+  "--color-secondary-content",
+  "--color-accent",
+  "--color-accent-content",
+  "--color-neutral",
+  "--color-neutral-content",
+  "--color-info",
+  "--color-info-content",
+  "--color-success",
+  "--color-success-content",
+  "--color-warning",
+  "--color-warning-content",
+  "--color-error",
+  "--color-error-content",
+  "--radius-selector",
+  "--radius-field",
+  "--radius-box",
+  "--size-selector",
+  "--size-field",
+  "--border",
+  "--depth",
+  "--noise",
+] as const;
+
 const extractClassTokens = (value: string): string[] =>
   value.split(WHITESPACE_PATTERN).filter((token) => token.length > 0);
 
@@ -312,6 +344,24 @@ const collectBtnModifierViolations = (filePath: string, fileContent: string): Vi
   return violations;
 };
 
+const collectBrandPreviewThemeViolations = (filePath: string, fileContent: string): Violation[] => {
+  if (filePath !== BRAND_PREVIEW_FILE_PATH) {
+    return [];
+  }
+
+  const previewSurfaceOffset = fileContent.indexOf("const createPreviewSurfaceStyle");
+  const previewSurfaceLine =
+    previewSurfaceOffset >= 0 ? getLineFromOffset(fileContent, previewSurfaceOffset) : 1;
+
+  return BRAND_PREVIEW_REQUIRED_THEME_VARIABLES.filter(
+    (variableName) => !fileContent.includes(variableName),
+  ).map((variableName) => ({
+    filePath,
+    line: previewSurfaceLine,
+    message: `Brand preview surfaces must scope \`${variableName}\` inside \`createPreviewSurfaceStyle\` so daisyUI semantic classes render the preview palette instead of the outer app theme.`,
+  }));
+};
+
 /**
  * Collect daisyUI contract violations for a single Vue file payload.
  *
@@ -330,6 +380,7 @@ export function collectDaisyUiContractViolationsForContent(
     ...collectTableMarkupViolations(filePath, fileContent),
     ...collectProgressMarkupViolations(filePath, fileContent),
     ...collectRadialProgressViolations(filePath, fileContent),
+    ...collectBrandPreviewThemeViolations(filePath, fileContent),
   ];
 }
 

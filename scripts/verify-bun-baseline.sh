@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-BASELINE="bun@1.3.10"
+BASELINE="bun@1.3.11"
 CURRENT="$(bun pm pkg get packageManager | tr -d '[:space:]')"
 
 if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then

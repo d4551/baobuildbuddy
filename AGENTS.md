@@ -10,7 +10,7 @@ BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry c
 | `@bao/client` | `packages/client`  | Nuxt 4 SSR frontend (port 3001)              |
 | `@bao/shared` | `packages/shared`  | Shared types, schemas, constants             |
 | `@bao/scraper`| `packages/scraper` | Bun + Playwright automation and scraper exes |
-| `@bao/desktop`| `packages/desktop` | Tauri desktop wrapper (optional)             |
+| `@bao/desktop`| `packages/desktop` | Tauri desktop shell (optional)               |
 
 **Stack truth:** Client data fetching uses **Vue / Nuxt** (`NuxtLink`, `useAsyncData`, composables), not htmx. The ORM is **Drizzle**, not Prisma. Themes are defined once in `packages/client/assets/css/main.css` via daisyUI **`corporate` (light, default) and `business` (prefers-dark)**; `useTheme` + `data-theme` on the shell keep persistence/settings in sync, and the navbar uses daisyUI **`swap swap-rotate`** with **`input.theme-controller[value="business"]`**. See `docs/feature-trace-matrix.md` for route-to-page mapping.
 
@@ -41,7 +41,7 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 1. **Client lint/typecheck self-bootstrap Nuxt + server types.** `packages/client` now prepares `.nuxt` and runs `packages/server` `build:types` automatically before client lint/typecheck, so clean clones and CI runners do not need a manual prep step.
 
-2. **Standalone client checks are deterministic.** `bun run --filter '@bao/client' lint` and `bun run --filter '@bao/client' typecheck` both bootstrap the generated server declarations and Nuxt types they depend on.
+2. **Standalone client checks are deterministic.** `bun run --cwd packages/client lint` and `bun run --cwd packages/client typecheck` both bootstrap the generated server declarations and Nuxt types they depend on.
 
 3. **`NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` must NOT be set as an env var.** Nuxt's env override replaces the parsed array with a raw string, breaking the i18n plugin. The `nuxt.config.ts` handles defaults.
 

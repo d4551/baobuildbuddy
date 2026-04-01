@@ -67,14 +67,14 @@ function toArray(val: string | string[]): string[] {
 }
 
 function buildPersonalInfo(form: Partial<ResumeFormData>): ResumePersonalInfo {
-  const personalInfo: ResumePersonalInfo = {};
-  if (form.name) personalInfo.name = form.name;
-  if (form.email) personalInfo.email = form.email;
-  if (form.phone) personalInfo.phone = form.phone;
-  if (form.location) personalInfo.location = form.location;
-  if (form.linkedIn) personalInfo.linkedIn = form.linkedIn;
-  if (form.portfolio) personalInfo.portfolio = form.portfolio;
-  return personalInfo;
+  return {
+    ...(form.name ? { name: form.name } : {}),
+    ...(form.email ? { email: form.email } : {}),
+    ...(form.phone ? { phone: form.phone } : {}),
+    ...(form.location ? { location: form.location } : {}),
+    ...(form.linkedIn ? { linkedIn: form.linkedIn } : {}),
+    ...(form.portfolio ? { portfolio: form.portfolio } : {}),
+  };
 }
 
 function mapFormExperienceToResumeExperience(
@@ -103,11 +103,7 @@ function mapFormEducationToResumeEducation(
 }
 
 function buildSkillsFromForm(skillsInput: string[] | undefined): ResumeSkills {
-  const skills: ResumeSkills = {};
-  if (skillsInput?.length) {
-    skills.technical = skillsInput;
-  }
-  return skills;
+  return skillsInput?.length ? { technical: skillsInput } : {};
 }
 
 function mapFormProjectsToResumeProjects(
@@ -122,18 +118,16 @@ function mapFormProjectsToResumeProjects(
 }
 
 function buildGamingExperience(gaming: ResumeFormData["gaming"] | undefined): GamingExperience {
-  const gamingExperience: GamingExperience = {};
-  if (!gaming) {
-    return gamingExperience;
-  }
+  if (!gaming) return {};
 
   const roles = toArray(gaming.roles);
   const genres = toArray(gaming.genres);
   const achievements = toArray(gaming.achievements);
-  if (roles.length) gamingExperience.gameEngines = roles.join(", ");
-  if (genres.length) gamingExperience.genres = genres.join(", ");
-  if (achievements.length) gamingExperience.shippedTitles = achievements.join("; ");
-  return gamingExperience;
+  return {
+    ...(roles.length ? { gameEngines: roles.join(", ") } : {}),
+    ...(genres.length ? { genres: genres.join(", ") } : {}),
+    ...(achievements.length ? { shippedTitles: achievements.join("; ") } : {}),
+  };
 }
 
 function buildResumeData(input: {
@@ -145,29 +139,17 @@ function buildResumeData(input: {
   projects: ResumeProject[];
   gamingExperience: GamingExperience;
 }): Partial<ResumeData> {
-  const resumeData: Partial<ResumeData> = {};
-  if (Object.keys(input.personalInfo).length > 0) {
-    resumeData.personalInfo = input.personalInfo;
-  }
-  if (input.form.summary) {
-    resumeData.summary = input.form.summary;
-  }
-  if (input.experience.length > 0) {
-    resumeData.experience = input.experience;
-  }
-  if (input.education.length > 0) {
-    resumeData.education = input.education;
-  }
-  if (Object.keys(input.skills).length > 0) {
-    resumeData.skills = input.skills;
-  }
-  if (input.projects.length > 0) {
-    resumeData.projects = input.projects;
-  }
-  if (Object.keys(input.gamingExperience).length > 0) {
-    resumeData.gamingExperience = input.gamingExperience;
-  }
-  return resumeData;
+  return {
+    ...(Object.keys(input.personalInfo).length > 0 ? { personalInfo: input.personalInfo } : {}),
+    ...(input.form.summary ? { summary: input.form.summary } : {}),
+    ...(input.experience.length > 0 ? { experience: input.experience } : {}),
+    ...(input.education.length > 0 ? { education: input.education } : {}),
+    ...(Object.keys(input.skills).length > 0 ? { skills: input.skills } : {}),
+    ...(input.projects.length > 0 ? { projects: input.projects } : {}),
+    ...(Object.keys(input.gamingExperience).length > 0
+      ? { gamingExperience: input.gamingExperience }
+      : {}),
+  };
 }
 
 function mapResumeExperienceToFormExperience(

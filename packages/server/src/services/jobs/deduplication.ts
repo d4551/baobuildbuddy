@@ -3,7 +3,7 @@
  * Uses content-based hashing to identify duplicate job postings
  */
 
-import { API_ERROR_CANNOT_MERGE_EMPTY_JOBS } from "@bao/shared";
+import { API_ERROR_CANNOT_MERGE_EMPTY_JOBS } from "@bao/shared/constants/api-errors";
 import type { RawJob } from "./providers/provider-interface";
 
 /**

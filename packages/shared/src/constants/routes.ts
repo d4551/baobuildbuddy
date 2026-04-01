@@ -17,6 +17,7 @@ export const APP_ROUTES = {
   skillsPathways: "/skills/pathways",
   studios: "/studios",
   aiChat: "/ai/chat",
+  aiDashboard: "/ai/dashboard",
   automation: "/automation",
   automationJobApply: "/automation/job-apply",
   automationScraper: "/automation/scraper",
@@ -27,6 +28,8 @@ export const APP_ROUTES = {
   settings: "/settings",
   setup: "/setup",
 } as const;
+
+export const ROUTE_JOBS = APP_ROUTES.jobs;
 
 /**
  * Canonical query-string keys for route-driven workflows.
@@ -39,6 +42,7 @@ export const APP_ROUTE_QUERY_KEYS = {
   studioId: "studio",
   mode: "mode",
   source: "source",
+  section: "section",
 } as const;
 
 /**
@@ -91,6 +95,33 @@ export const APP_ROUTE_BUILDERS = {
    */
   automationRunDetail(runId: string): string {
     return `${APP_ROUTES.automationRuns}/${encodeRouteParam(runId)}`;
+  },
+  /**
+   * Builds the settings route with a selected section query.
+   *
+   * @param sectionId Settings section identifier.
+   * @returns Canonical settings route with section query.
+   */
+  settingsSection(sectionId: string): string {
+    return `${APP_ROUTES.settings}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
+  },
+  /**
+   * Builds the automation scraper route with a selected workspace section query.
+   *
+   * @param sectionId Scraper workspace section identifier.
+   * @returns Canonical scraper route with section query.
+   */
+  automationScraperSection(sectionId: string): string {
+    return `${APP_ROUTES.automationScraper}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
+  },
+  /**
+   * Builds the automation hub route with a selected workspace section query.
+   *
+   * @param sectionId Automation hub section identifier.
+   * @returns Canonical automation hub route with section query.
+   */
+  automationHubSection(sectionId: string): string {
+    return `${APP_ROUTES.automation}?${APP_ROUTE_QUERY_KEYS.section}=${encodeRouteParam(sectionId)}`;
   },
   /**
    * Builds the resume editor route with selected resume id query.

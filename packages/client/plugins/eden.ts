@@ -1,21 +1,15 @@
 import type { App } from "@bao/server/app";
-import { AUTH_KEY_STORAGE_KEY } from "@bao/shared";
+import { AUTH_KEY_STORAGE_KEY } from "@bao/shared/constants/auth";
 import { treaty } from "@elysiajs/eden";
 import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";
-import { resolveApiBase } from "~/utils/endpoints";
+import { assertClientApi } from "~/types/client-api";
+import { resolveTreatyBase } from "~/utils/treaty-base";
 
 const AUTH_KEY = AUTH_KEY_STORAGE_KEY;
 
-type TreatyClient = ReturnType<typeof treaty<App>>;
-export type EdenApiNamespace = TreatyClient["api"];
-
 type StoredApiKey = string | null;
 type AuthKeyCookieRef = Ref<StoredApiKey> | null;
-
-function hasBrowserStorage(): boolean {
-  return import.meta.client && typeof window !== "undefined" && "localStorage" in window;
-}
 
 function getAuthKeyCookieRef() {
   return useCookie<StoredApiKey>(AUTH_KEY, {
@@ -25,38 +19,15 @@ function getAuthKeyCookieRef() {
   });
 }
 
-function getLocalStorageApiKey(): string | null {
-  if (!hasBrowserStorage()) return null;
-  return window.localStorage.getItem(AUTH_KEY);
-}
-
-function setLocalStorageApiKey(apiKey: string | null): void {
-  if (!hasBrowserStorage()) return;
-  if (apiKey) {
-    window.localStorage.setItem(AUTH_KEY, apiKey);
-    return;
-  }
-  window.localStorage.removeItem(AUTH_KEY);
-}
-
 function resolveAuthKeyCookieRef(): AuthKeyCookieRef {
   return tryUseNuxtApp() ? getAuthKeyCookieRef() : null;
 }
 
 function readStoredApiKey(cookieRef: AuthKeyCookieRef): string | null {
-  const localStorageApiKey = getLocalStorageApiKey();
-  if (localStorageApiKey) {
-    if (cookieRef && !cookieRef.value) {
-      cookieRef.value = localStorageApiKey;
-    }
-    return localStorageApiKey;
-  }
-
   return cookieRef?.value ?? null;
 }
 
 function writeStoredApiKey(cookieRef: AuthKeyCookieRef, apiKey: string | null): void {
-  setLocalStorageApiKey(apiKey);
   if (cookieRef) {
     cookieRef.value = apiKey;
   }
@@ -86,12 +57,12 @@ export default defineNuxtPlugin(() => {
   const cookieRef = getAuthKeyCookieRef();
 
   const configuredBase = (config.public.apiBase || "/").toString();
-  const apiBase = resolveApiBase(configuredBase, requestUrl);
+  const treatyBase = resolveTreatyBase(configuredBase, requestUrl);
 
   const readApiKey = () => readStoredApiKey(cookieRef);
   const writeApiKey = (key: string | null) => writeStoredApiKey(cookieRef, key);
 
-  const api = treaty<App>(apiBase, {
+  const api = treaty<App>(treatyBase, {
     fetch: {
       credentials: "include",
     },
@@ -105,6 +76,8 @@ export default defineNuxtPlugin(() => {
       }
     },
   });
+
+  assertClientApi(api.api);
 
   return {
     provide: {

@@ -1,5 +1,5 @@
-import type { ErrorEnvelope, JsonObject } from "@bao/shared";
-import { type RpaRunErrorCode } from "@bao/shared";
+import type { ErrorEnvelope, RpaRunErrorCode } from "@bao/shared/schemas/error-envelope.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 export type AutomationRouteErrorResult = {
     status: number;
     body: {

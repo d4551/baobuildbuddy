@@ -1,4 +1,4 @@
-import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared";
+import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getRunMock = vi.fn<(runId: string) => Promise<RpaRunExecutionEnvelope>>();

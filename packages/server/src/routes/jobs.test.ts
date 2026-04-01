@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { generateId } from "@bao/shared";
+import {
+  API_ENDPOINTS,
+  API_ENDPOINT_PREFIX,
+  buildJobDetailEndpoint,
+  buildJobSaveEndpoint,
+} from "@bao/shared/constants/endpoints";
+import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { requestJson } from "../test-utils";
@@ -16,40 +22,44 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 
-  app = new Elysia({ prefix: "/api" }).use(routesModule.jobsRoutes);
+  app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.jobsRoutes);
 });
 
 afterAll(() => {});
 
 function registerListAndLookupTests(): void {
-  test("GET /api/jobs returns jobs list", async () => {
+  test("GET jobs returns jobs list", async () => {
     const res = await requestJson<{ jobs: unknown[]; page: number; total: number }>(
       app,
       "GET",
-      "/api/jobs",
+      API_ENDPOINTS.jobs,
     );
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.jobs)).toBe(true);
     expect(res.body.page).toBe(1);
   });
 
-  test("GET /api/jobs/:id returns 404 for missing job", async () => {
-    const res = await requestJson<{ error: string }>(app, "GET", "/api/jobs/nonexistent-id");
+  test("GET job detail returns 404 for missing job", async () => {
+    const res = await requestJson<{ error: string }>(
+      app,
+      "GET",
+      buildJobDetailEndpoint("nonexistent-id"),
+    );
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Job not found");
   });
 }
 
 function registerSavedJobTests(): void {
-  test("POST /api/jobs/save requires existing job", async () => {
-    const res = await requestJson<{ error: string }>(app, "POST", "/api/jobs/save", {
+  test("POST job save requires existing job", async () => {
+    const res = await requestJson<{ error: string }>(app, "POST", API_ENDPOINTS.jobsSave, {
       jobId: "nonexistent",
     });
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Job not found");
   });
 
-  test("POST /api/jobs/save and GET /api/jobs/saved round-trip", async () => {
+  test("POST job save and GET saved jobs round-trip", async () => {
     const jobId = generateId();
     await db.insert(jobs).values({
       id: jobId,
@@ -59,13 +69,17 @@ function registerSavedJobTests(): void {
       postedDate: new Date().toISOString(),
     });
 
-    const saveRes = await requestJson<{ jobId: string }>(app, "POST", "/api/jobs/save", {
+    const saveRes = await requestJson<{ jobId: string }>(app, "POST", API_ENDPOINTS.jobsSave, {
       jobId,
     });
     expect(saveRes.status).toBe(201);
     expect(saveRes.body.jobId).toBe(jobId);
 
-    const savedRes = await requestJson<Array<{ jobId: string }>>(app, "GET", "/api/jobs/saved");
+    const savedRes = await requestJson<Array<{ jobId: string }>>(
+      app,
+      "GET",
+      API_ENDPOINTS.jobsSaved,
+    );
     expect(savedRes.status).toBe(200);
     expect(Array.isArray(savedRes.body)).toBe(true);
     const found = (savedRes.body as Array<{ jobId: string }>).some((s) => s.jobId === jobId);
@@ -74,23 +88,23 @@ function registerSavedJobTests(): void {
     const delRes = await requestJson<{ success: boolean }>(
       app,
       "DELETE",
-      `/api/jobs/save/${jobId}`,
+      buildJobSaveEndpoint(jobId),
     );
     expect(delRes.status).toBe(200);
   });
 }
 
 function registerApplicationTests(): void {
-  test("POST /api/jobs/apply requires existing job", async () => {
-    const res = await requestJson<{ error: string }>(app, "POST", "/api/jobs/apply", {
+  test("POST job apply requires existing job", async () => {
+    const res = await requestJson<{ error: string }>(app, "POST", API_ENDPOINTS.jobsApply, {
       jobId: "nonexistent",
     });
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Job not found");
   });
 
-  test("GET /api/jobs/applications returns list", async () => {
-    const res = await requestJson<unknown[]>(app, "GET", "/api/jobs/applications");
+  test("GET job applications returns list", async () => {
+    const res = await requestJson<unknown[]>(app, "GET", API_ENDPOINTS.jobsApplications);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });

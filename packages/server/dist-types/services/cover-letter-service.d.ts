@@ -1,4 +1,4 @@
-import type { CoverLetterData } from "@bao/shared";
+import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 export declare class CoverLetterService {
     private toCoverLetterData;
     /**

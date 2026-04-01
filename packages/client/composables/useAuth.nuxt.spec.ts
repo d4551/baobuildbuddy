@@ -44,7 +44,7 @@ beforeEach(() => {
 });
 
 describe("useAuth", () => {
-  it("checkAuthStatus returns authRequired: false when api returns error", async () => {
+  it("checkAuthStatus fails closed when api status is unavailable", async () => {
     mockApi.auth.status.get.mockResolvedValueOnce({
       data: null,
       error: { value: "err" },
@@ -52,9 +52,9 @@ describe("useAuth", () => {
 
     const { checkAuthStatus } = useAuth();
     const result = await checkAuthStatus();
-    expect(result.authRequired).toBe(false);
+    expect(result.authRequired).toBe(true);
     expect(result.configured).toBe(false);
-    expect(result.bootstrapRequired).toBe(false);
+    expect(result.bootstrapRequired).toBe(true);
     expect(result.setupTokenConfigured).toBe(false);
   });
 

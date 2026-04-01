@@ -1,7 +1,8 @@
-import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared";
-import { asNumber, asString, isRecord, STATE_KEYS } from "@bao/shared";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
+import { asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { assertApiResponse, withLoadingState } from "./async-flow";
+import { withLoadingState } from "./async-flow";
 
 type StatisticsState = {
   readonly dashboard: ReturnType<typeof useState<DashboardStats | null>>;
@@ -223,6 +224,20 @@ const toCareerProgress = (value: unknown): CareerProgress | null => {
   };
 };
 
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!(isRecord(response) && "data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
+};
+
 function createStatisticsState(): StatisticsState {
   return {
     dashboard: useState<DashboardStats | null>(STATE_KEYS.STATS_DASHBOARD, () => null),
@@ -239,22 +254,28 @@ function createStatisticsActions(
 ) {
   const fetchDashboard = async () =>
     withLoadingState(state.loading, async () => {
-      const { data, error } = await api.stats.dashboard.get();
-      assertApiResponse(error, t("apiErrors.statistics.fetchDashboardFailed"));
+      const data = await readApiData(
+        api.stats.dashboard.get(),
+        t("apiErrors.statistics.fetchDashboardFailed"),
+      );
       state.dashboard.value = toDashboardStats(data);
     });
 
   const fetchWeekly = async () =>
     withLoadingState(state.loading, async () => {
-      const { data, error } = await api.stats.weekly.get();
-      assertApiResponse(error, t("apiErrors.statistics.fetchWeeklyFailed"));
+      const data = await readApiData(
+        api.stats.weekly.get(),
+        t("apiErrors.statistics.fetchWeeklyFailed"),
+      );
       state.weekly.value = toWeeklyActivity(data);
     });
 
   const fetchCareerProgress = async () =>
     withLoadingState(state.loading, async () => {
-      const { data, error } = await api.stats.career.get();
-      assertApiResponse(error, t("apiErrors.statistics.fetchCareerFailed"));
+      const data = await readApiData(
+        api.stats.career.get(),
+        t("apiErrors.statistics.fetchCareerFailed"),
+      );
       state.career.value = toCareerProgress(data);
     });
 

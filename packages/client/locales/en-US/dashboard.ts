@@ -1,0 +1,92 @@
+const dashboard = {
+  dashboard: {
+    pageTitle: "Dashboard",
+    seoDescription:
+      "Track live opportunities, application assets, interview prep, and automation health in one operating dashboard.",
+    welcomeDescription: "Run your job search like a disciplined studio pipeline.",
+    welcomeHeading: {
+      named: "Welcome, {name}!",
+      fallback: "Welcome!",
+    },
+    emptyStateTitle: "Stand up your hiring workspace",
+    emptyStateDescription:
+      "Connect your profile, add your core assets, and start tracking live opportunities to unlock the full dashboard.",
+    onboardingChecklistTitle: "Complete the operating baseline",
+    setupCtaLabel: "Complete Setup",
+    metricsSummaryLabel: "{brand} operating snapshot",
+    pipelineTitle: "Hiring Pipeline",
+    pipelineDescription:
+      "Keep momentum across sourcing, tailoring, automation, interview prep, and compounding progress.",
+    pipelineAria: "Hiring workflow pipeline",
+    pipelineNextStepLabel: "Next step: {step}",
+    dailyChallengeTitle: "Daily Challenge",
+    dailyChallengeXpLabel: "+{xp} XP",
+    recentActivityTitle: "Recent Activity",
+    recentActivityEmptyLabel: "No recent activity",
+    quickActionsTitle: "Quick Actions",
+    levelLabel: "Level",
+    streakLabel: "day streak",
+    retryButtonLabel: "Retry",
+    retryAria: "Retry loading dashboard data",
+    loadErrorFallback: "Failed to load dashboard data",
+    activityFallback: "Activity",
+    heroPhrases: {
+      findDreamRole: "Source better-fit roles",
+      buildPortfolio: "Sharpen your proof of work",
+      prepareInterviews: "Rehearse the hard conversations",
+      levelUpSkills: "Close the gaps that matter",
+    },
+    onboarding: {
+      profile: "Profile",
+      aiProvider: "AI Provider",
+      resume: "Resume",
+      jobs: "Job Search",
+    },
+    pipeline: {
+      steps: {
+        search: "Search Jobs",
+        scrape: "Scrape Fresh Roles",
+        customize: "Customize Resume",
+        apply: "Automate Apply",
+        gamify: "Earn XP",
+      },
+      status: {
+        complete: "Complete",
+        inProgress: "In progress",
+        pending: "Pending",
+      },
+    },
+    stats: {
+      savedJobsTitle: "Saved Jobs",
+      savedJobsCta: "Open jobs workspace",
+      resumesTitle: "Resumes",
+      resumesCta: "Edit resume library",
+      interviewSessionsTitle: "Interview Sessions",
+      interviewSessionsCta: "Practice interview flow",
+      cardAria: "{title}: {value}. {cta}",
+      levelProgressAria: "Current level progress",
+      challengeProgressAria: "Daily challenge completion progress",
+    },
+    quickActions: {
+      actions: {
+        browseJobs: "Browse Jobs",
+        buildResume: "Build Resume",
+        practiceInterview: "Practice Interview",
+        aiChat: "AI Chat",
+      },
+    },
+    relativeTime: {
+      minutesAgo: "{count}m ago",
+      hoursAgo: "{count}h ago",
+      daysAgo: "{count}d ago",
+    },
+    errors: {
+      profileLoadFallback: "Failed to load user profile",
+      metricsLoadFallback: "Failed to load dashboard metrics",
+      gamificationLoadFallback: "Failed to load gamification progress",
+      challengesLoadFallback: "Failed to load daily challenges",
+    },
+  },
+} as const;
+
+export default dashboard;

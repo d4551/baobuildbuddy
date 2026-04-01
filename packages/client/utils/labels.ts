@@ -1,4 +1,4 @@
-import type { GameGenre, JobExperienceLevel, Platform } from "@bao/shared";
+import type { GameGenre, JobExperienceLevel, Platform } from "@bao/shared/types/jobs";
 
 type Translate = (key: string, params?: Record<string, unknown>) => string;
 

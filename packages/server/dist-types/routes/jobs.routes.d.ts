@@ -1,18 +1,5 @@
 import { Elysia } from "elysia";
-import { jobs } from "../db/schema/jobs";
-type JobRow = typeof jobs.$inferSelect;
-type JobRecommendation = JobRow & {
-    matchScore: number;
-    matchReason: string;
-    rank: number;
-};
-type JobRecommendationsResponse = {
-    recommendations: JobRecommendation[];
-    reason: string;
-    aiPowered: boolean;
-    provider?: string;
-};
-export declare const jobsRoutes: Elysia<"/jobs", {
+export declare const jobsRoutes: Elysia<string, {
     decorator: {};
     store: {};
     derive: {};
@@ -28,20 +15,20 @@ export declare const jobsRoutes: Elysia<"/jobs", {
     parser: {};
     response: {};
 }, {
-    jobs: {
+    [x: string]: {
         get: {
             body: unknown;
             params: {};
-            query: {
+            query: {} & {
+                genre?: string | undefined;
+                platform?: string | undefined;
+                studioType?: string | undefined;
                 location?: string | undefined;
                 remote?: string | undefined;
                 experienceLevel?: string | undefined;
                 limit?: string | undefined;
                 page?: string | undefined;
-                studioType?: string | undefined;
-                platform?: string | undefined;
                 q?: string | undefined;
-                genre?: string | undefined;
             };
             headers: unknown;
             response: {
@@ -50,27 +37,28 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         id: string;
                         source: string | null;
                         type: string | null;
-                        title: string;
-                        description: string | null;
-                        company: string;
-                        location: string;
-                        remote: boolean | null;
-                        url: string | null;
-                        contentHash: string | null;
-                        postedDate: string | null;
-                        technologies: string[] | null;
-                        requirements: string[] | null;
-                        experienceLevel: string | null;
-                        hybrid: boolean | null;
-                        gameGenres: string[] | null;
-                        platforms: string[] | null;
-                        tags: string[] | null;
                         createdAt: string;
                         updatedAt: string;
-                        salary: Record<string, unknown> | null;
+                        company: string;
                         studioType: string | null;
+                        title: string;
+                        location: string;
+                        remote: boolean | null;
+                        hybrid: boolean | null;
+                        salary: Record<string, unknown> | null;
+                        description: string | null;
+                        requirements: string[] | null;
+                        technologies: string[] | null;
+                        experienceLevel: string | null;
+                        postedDate: string | null;
+                        url: string | null;
+                        gameGenres: string[] | null;
+                        platforms: string[] | null;
+                        contentHash: string | null;
+                        tags: string[] | null;
                         companyLogo: string | null;
                         applicationUrl: string | null;
+                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                     }[];
                     page: number;
                     limit: number;
@@ -89,13 +77,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         ":id": {
             get: {
                 body: unknown;
                 params: {
                     id: string;
-                };
+                } & {};
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -122,6 +110,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                         tags: string[] | null;
                         companyLogo: string | null;
                         applicationUrl: string | null;
+                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                         createdAt: string;
                         updatedAt: string;
                     } | {
@@ -141,12 +130,12 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         save: {
             post: {
                 body: {
                     jobId: string;
-                };
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -182,14 +171,14 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         save: {
             ":jobId": {
                 delete: {
                     body: unknown;
                     params: {
                         jobId: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -212,7 +201,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         saved: {
             get: {
                 body: unknown;
@@ -247,6 +236,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                             tags: string[] | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
+                            enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | null;
@@ -256,12 +246,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         apply: {
             post: {
                 body: {
-                    notes?: string | undefined;
                     jobId: string;
+                } & {
+                    notes?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -310,17 +301,17 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         apply: {
             ":id": {
                 put: {
-                    body: {
+                    body: {} & {
                         status?: string | undefined;
                         notes?: string | undefined;
                     };
                     params: {
                         id: string;
-                    };
+                    } & {};
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -351,7 +342,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         applications: {
             get: {
                 body: unknown;
@@ -391,6 +382,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                             tags: string[] | null;
                             companyLogo: string | null;
                             applicationUrl: string | null;
+                            enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
                             createdAt: string;
                             updatedAt: string;
                         } | null;
@@ -400,7 +392,7 @@ export declare const jobsRoutes: Elysia<"/jobs", {
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         recommendations: {
             get: {
                 body: unknown;
@@ -408,13 +400,13 @@ export declare const jobsRoutes: Elysia<"/jobs", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: JobRecommendationsResponse;
+                    200: import("./jobs-route-recommendations").JobRecommendationsResponse;
                 };
             };
         };
     };
 } & {
-    jobs: {
+    [x: string]: {
         refresh: {
             post: {
                 body: unknown;
@@ -446,4 +438,3 @@ export declare const jobsRoutes: Elysia<"/jobs", {
     standaloneSchema: {};
     response: {};
 }>;
-export {};

@@ -4,24 +4,34 @@ import pluginVueA11y from "eslint-plugin-vuejs-accessibility";
 import tseslint from "typescript-eslint";
 import vueParser from "vue-eslint-parser";
 
+const typedFiles = ["**/*.{ts,tsx,vue}", "**/*.d.ts"];
+const javaScriptFiles = ["**/*.js", "**/*.mjs", "**/*.cjs"];
+const typedConfigs = tseslint.configs.recommendedTypeChecked.map((config) => ({
+  ...config,
+  files: typedFiles,
+}));
+
 export default [
   eslint.configs.recommended,
   ...pluginVue.configs["flat/recommended"],
   ...pluginVueA11y.configs["flat/recommended"],
-  ...tseslint.configs.recommendedTypeChecked,
+  ...typedConfigs,
   {
-    ignores: [
-      "node_modules/**",
-      ".nuxt/**",
-      "**/.nuxt/**",
-      ".output/**",
-      "dist/**",
-      ".data/**",
-      "eslint.config.js",
-    ],
+    ignores: ["node_modules/**", ".nuxt/**", "**/.nuxt/**", ".output/**", "dist/**"],
   },
   {
-    files: ["**/*.{ts,tsx,vue}"],
+    files: javaScriptFiles,
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+    },
+    rules: {
+      "no-console": "error",
+      "no-debugger": "error",
+    },
+  },
+  {
+    files: typedFiles,
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -44,17 +54,17 @@ export default [
     },
   },
   {
+    files: typedFiles,
     rules: {
       "no-undef": "off",
       "vue/max-attributes-per-line": "off",
       "vue/html-self-closing": "off",
       "vue/singleline-html-element-content-newline": "off",
-      "vue/multi-word-component-names": "off",
       "vue/attributes-order": "off",
       "vue/html-closing-bracket-spacing": "off",
       "vue/first-attribute-linebreak": "off",
       "vue/html-closing-bracket-newline": "off",
-      "vue/no-duplicate-attributes": "warn",
+      "vue/no-duplicate-attributes": "error",
       "vuejs-accessibility/click-events-have-key-events": "error",
       "vuejs-accessibility/interactive-supports-focus": "error",
       "vuejs-accessibility/form-control-has-label": "error",
@@ -72,7 +82,7 @@ export default [
       "vuejs-accessibility/aria-unsupported-elements": "error",
       "vuejs-accessibility/no-static-element-interactions": "error",
       "vuejs-accessibility/tabindex-no-positive": "error",
-      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/no-misused-promises": [
         "error",
         {
@@ -82,7 +92,7 @@ export default [
         },
       ],
       "@typescript-eslint/consistent-type-imports": [
-        "warn",
+        "error",
         {
           prefer: "type-imports",
           fixStyle: "inline-type-imports",
@@ -97,6 +107,12 @@ export default [
         },
       ],
       "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+  {
+    files: ["pages/**/*.vue", "layouts/**/*.vue", "app.vue", "error.vue"],
+    rules: {
+      "vue/multi-word-component-names": "off",
     },
   },
 ];

@@ -1,9 +1,5 @@
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
-import {
-  getLineFromOffset,
-  IGNORED_DIRECTORY_NAMES,
-  shouldIgnorePath,
-} from "./utils/validation-helpers";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type ViolationCategory = "route" | "api";
 
@@ -17,9 +13,6 @@ type Violation = {
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const allowedExtensions = new Set([".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs"]);
-const ignoredPathSegments = new Set([...IGNORED_DIRECTORY_NAMES, "locales"]);
-const routeAllowList = new Set<string>(["packages/client/nuxt.config.ts"]);
-const apiAllowList = new Set<string>(["packages/client/nuxt.config.ts"]);
 const appRouteLiterals = Object.values(APP_ROUTES).filter((route) => route !== "/");
 const hardcodedApiLiteralPattern = /(["'])\/api(?:\/[^"']+)?\1/gu;
 
@@ -33,9 +26,6 @@ const hasAllowedExtension = (pathValue: string): boolean => {
   return false;
 };
 
-const shouldIgnoreClientPath = (pathValue: string): boolean =>
-  shouldIgnorePath(pathValue, ignoredPathSegments);
-
 import { escapeRegExp } from "../packages/shared/src/utils/string";
 
 const collectClientFiles = async (): Promise<string[]> => {
@@ -43,7 +33,7 @@ const collectClientFiles = async (): Promise<string[]> => {
   const glob = new Bun.Glob(`${clientRoot}/**/*`);
   for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
     const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
-    if (!hasAllowedExtension(normalizedPath) || shouldIgnoreClientPath(normalizedPath)) {
+    if (!hasAllowedExtension(normalizedPath) || shouldIgnorePath(normalizedPath)) {
       continue;
     }
     files.push(normalizedPath);
@@ -52,9 +42,6 @@ const collectClientFiles = async (): Promise<string[]> => {
 };
 
 const collectRouteViolations = (filePath: string, content: string): Violation[] => {
-  if (routeAllowList.has(filePath)) {
-    return [];
-  }
   const violations: Violation[] = [];
   for (const routeLiteral of appRouteLiterals) {
     const routePattern = new RegExp(`(["'])${escapeRegExp(routeLiteral)}\\1`, "gu");
@@ -71,9 +58,6 @@ const collectRouteViolations = (filePath: string, content: string): Violation[] 
 };
 
 const collectApiViolations = (filePath: string, content: string): Violation[] => {
-  if (apiAllowList.has(filePath)) {
-    return [];
-  }
   const violations: Violation[] = [];
   hardcodedApiLiteralPattern.lastIndex = 0;
   for (const match of content.matchAll(hardcodedApiLiteralPattern)) {

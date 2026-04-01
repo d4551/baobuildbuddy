@@ -3,7 +3,7 @@ import {
   AI_CHAT_VOICE_RECOGNITION_ERROR_CODE_MAP,
   AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP,
   type AIChatVoiceErrorCode,
-} from "@bao/shared";
+} from "@bao/shared/constants/ai-voice";
 import type { Ref } from "vue";
 import {
   resolveSpeechLocale,

@@ -1,4 +1,4 @@
-import type { ResumeData } from "@bao/shared";
+import type { ResumeData } from "@bao/shared/types/resume";
 /**
  * Resume persistence service with validation and normalization from storage records.
  */

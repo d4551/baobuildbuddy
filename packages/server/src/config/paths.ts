@@ -1,7 +1,12 @@
 import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared";
+import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared/constants/paths";
+
+type AutomationScriptRunnerConfig = {
+  executablePath: string | null;
+  entrypointPath: string | null;
+};
 
 /**
  * Shared filesystem path utilities for server runtime and tooling configuration.
@@ -66,6 +71,16 @@ const resolveScraperDir = (): string => {
   }
 
   return candidates[0];
+};
+
+export const readAutomationScriptRunnerConfig = (): AutomationScriptRunnerConfig => {
+  const executablePath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
+  const entrypointPath = process.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH?.trim();
+
+  return {
+    executablePath: executablePath && executablePath.length > 0 ? executablePath : null,
+    entrypointPath: entrypointPath && entrypointPath.length > 0 ? entrypointPath : null,
+  };
 };
 
 /**

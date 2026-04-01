@@ -1,6 +1,6 @@
 import {
-  API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS,
   API_ERROR_CUSTOM_ANSWERS_KEYS,
+  API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS,
   API_ERROR_CUSTOM_ANSWERS_MAX_COUNT,
   API_ERROR_CUSTOM_ANSWERS_OBJECT,
   API_ERROR_CUSTOM_ANSWERS_VALUE_EXCEEDS,
@@ -11,14 +11,15 @@ import {
   API_ERROR_JOB_URL_HTTP_ONLY,
   API_ERROR_JOB_URL_NO_CREDENTIALS,
   API_ERROR_JOB_URL_REQUIRED,
+} from "@bao/shared/constants/api-errors";
+import {
   AUTOMATION_MAX_CUSTOM_ANSWER_COUNT,
   AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH,
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
   AUTOMATION_MAX_JOB_URL_LENGTH,
-  DECIMAL_RADIX,
-  DEFAULT_HOST,
-  LOOPBACK_HOST_IPV4,
-} from "@bao/shared";
+} from "@bao/shared/constants/automation-limits";
+import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared/constants/runtime";
 import { config } from "../../config/env";
 
 /** Re-export shared limits for consumers that import from this module. */

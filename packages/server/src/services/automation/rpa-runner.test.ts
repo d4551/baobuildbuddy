@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
-import { generateId } from "@bao/shared";
+import { generateId } from "@bao/shared/utils/validation";
 import { SCRAPER_DIR } from "../../config/paths";
-import { runRpaScript } from "./rpa-runner";
+import { runRpaScript } from "./rpa-runner-protocol";
 
 const TEST_SCRIPT_NAME = "rpa_runner_contract_test.ts";
 const TEST_SCRIPT_PATH = join(SCRAPER_DIR, TEST_SCRIPT_NAME);

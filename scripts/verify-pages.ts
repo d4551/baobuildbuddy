@@ -1,3 +1,4 @@
+import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { DEFAULT_I18N_LOCALE_COOKIE_KEY } from "../packages/shared/src/constants/client-config";
@@ -36,7 +37,9 @@ const DEFAULT_VERIFY_BASE_URL = `http://${VERIFY_HOST}:${VERIFY_PORT}`;
 const EXTERNAL_VERIFY_BASE_URL = process.env.VERIFY_BASE_URL?.replace(/\/$/u, "") ?? null;
 const VERIFY_BASE_URL = EXTERNAL_VERIFY_BASE_URL ?? DEFAULT_VERIFY_BASE_URL;
 const CLIENT_PACKAGE_ROOT = join(process.cwd(), "packages", "client");
+const CLIENT_OUTPUT_ROOT = join(CLIENT_PACKAGE_ROOT, ".output");
 const CLIENT_BUILD_OUTPUT_PATH = join(CLIENT_PACKAGE_ROOT, ".output", "server", "index.mjs");
+const CLIENT_BUILD_CHUNKS_PATH = join(CLIENT_PACKAGE_ROOT, ".output", "server", "chunks");
 const htmlHeadingPattern = /<h1\b[^>]*>([\s\S]*?)<\/h1>/iu;
 const htmlTitlePattern = /<title\b[^>]*>([\s\S]*?)<\/title>/iu;
 const htmlMainPattern = /<main\b[^>]*>/iu;
@@ -110,24 +113,50 @@ const readPreviewLogs = async (
   await consumeResult();
 };
 
-const ensureClientBuildExists = async (): Promise<boolean> => {
-  const buildFile = Bun.file(CLIENT_BUILD_OUTPUT_PATH);
-  if (await buildFile.exists()) {
-    return true;
-  }
+const pathExists = async (absolutePath: string): Promise<boolean> =>
+  readdir(absolutePath).then(
+    () => true,
+    () => false,
+  );
 
-  await writeOutput("Client build output missing; running `bun run --filter '@bao/client' build`.");
-  const buildProcess = Bun.spawn([process.execPath, "run", "--filter", "@bao/client", "build"], {
+const runCommand = async (command: readonly string[], outputMessage: string): Promise<boolean> => {
+  await writeOutput(outputMessage);
+  const processHandle = Bun.spawn(command, {
     cwd: process.cwd(),
     stdout: "inherit",
     stderr: "inherit",
   });
-  const buildExitCode = await buildProcess.exited;
-  return buildExitCode === 0;
+  const exitCode = await processHandle.exited;
+  return exitCode === 0;
+};
+
+const ensureClientBuildExists = async (): Promise<boolean> => {
+  const removeOutputSuccess = await runCommand(
+    ["rm", "-rf", CLIENT_OUTPUT_ROOT],
+    "Resetting client production output before verify:pages.",
+  );
+  if (!removeOutputSuccess) {
+    return false;
+  }
+
+  const buildSuccess = await runCommand(
+    [process.execPath, "run", "--cwd", "packages/client", "build"],
+    "Running `bun run --cwd packages/client build` for verify:pages.",
+  );
+  if (!buildSuccess) {
+    return false;
+  }
+
+  const buildFile = Bun.file(CLIENT_BUILD_OUTPUT_PATH);
+  const [buildFileExists, chunksPathExists] = await Promise.all([
+    buildFile.exists(),
+    pathExists(CLIENT_BUILD_CHUNKS_PATH),
+  ]);
+  return buildFileExists && chunksPathExists;
 };
 
 const spawnPreviewProcess = (): PreviewProcess =>
-  Bun.spawn(["node", ".output/server/index.mjs"], {
+  Bun.spawn(["bun", ".output/server/index.mjs"], {
     cwd: CLIENT_PACKAGE_ROOT,
     stdout: "pipe",
     stderr: "pipe",

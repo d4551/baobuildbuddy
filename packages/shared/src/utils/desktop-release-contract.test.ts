@@ -139,7 +139,7 @@ describe("desktop release contract optional variants", () => {
     ).toEqual([
       "BaoBuildBuddy_0.1.0_x64-setup.exe",
       "BaoBuildBuddy_0.1.0_x64-portable.zip",
-      "BaoBuildBuddy_0.1.0_x64-en-US.msi",
+      "BaoBuildBuddy_0.1.0_x64_en-US.msi",
     ]);
   });
 });

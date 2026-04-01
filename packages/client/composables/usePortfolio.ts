@@ -1,8 +1,19 @@
-import type { PortfolioData, PortfolioMetadata, PortfolioProject } from "@bao/shared";
-import { STATE_KEYS } from "@bao/shared";
+import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type {
+  PortfolioData,
+  PortfolioMetadata,
+  PortfolioProject,
+} from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
-import { toPortfolioData } from "./api-normalizers";
+import { toPortfolioData } from "./api-normalizer-portfolio";
+import {
+  downloadApiFile,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "./api-request";
 import { assertApiResponse, withLoadingState } from "./async-flow";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdatePortfolioPayload = NonNullable<Parameters<ApiClient["portfolio"]["put"]>[0]>;
@@ -16,7 +27,22 @@ interface PortfolioContext {
   loading: ReturnType<typeof useState<boolean>>;
   portfolio: ReturnType<typeof useState<PortfolioData | null>>;
   projects: ReturnType<typeof useState<PortfolioProject[]>>;
+  runtime: ClientApiRequestRuntime;
 }
+
+const readApiData = async (
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> => {
+  const response = await request;
+  if (!(isRecord(response) && "data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
+};
 
 function hydratePortfolio(context: PortfolioContext, next: PortfolioData | null): void {
   context.portfolio.value = next;
@@ -25,8 +51,10 @@ function hydratePortfolio(context: PortfolioContext, next: PortfolioData | null)
 
 async function fetchPortfolio(context: PortfolioContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.portfolio.get();
-    assertApiResponse(error, context.t("apiErrors.portfolio.fetchFailed"));
+    const data = await readApiData(
+      context.api.portfolio.get(),
+      context.t("apiErrors.portfolio.fetchFailed"),
+    );
     hydratePortfolio(context, toPortfolioData(data));
   });
 }
@@ -37,8 +65,10 @@ async function updatePortfolio(
 ): Promise<PortfolioData | null> {
   return withLoadingState(context.loading, async () => {
     const payload: UpdatePortfolioPayload = { metadata: updates };
-    const { data, error } = await context.api.portfolio.put(payload);
-    assertApiResponse(error, context.t("apiErrors.portfolio.updateFailed"));
+    const data = await readApiData(
+      context.api.portfolio.put(payload),
+      context.t("apiErrors.portfolio.updateFailed"),
+    );
     const normalized = toPortfolioData(data);
     hydratePortfolio(context, normalized);
     return normalized;
@@ -48,12 +78,13 @@ async function updatePortfolio(
 async function addProject(
   context: PortfolioContext,
   projectData: CreateProjectPayload,
-): Promise<unknown> {
+): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.portfolio.projects.post(projectData);
-    assertApiResponse(error, context.t("apiErrors.portfolio.addProjectFailed"));
+    await readApiData(
+      context.api.portfolio.projects.post(projectData),
+      context.t("apiErrors.portfolio.addProjectFailed"),
+    );
     await fetchPortfolio(context);
-    return data;
   });
 }
 
@@ -61,12 +92,13 @@ async function updateProject(
   context: PortfolioContext,
   id: string,
   updates: UpdateProjectPayload,
-): Promise<unknown> {
+): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.portfolio.projects({ id }).put(updates);
-    assertApiResponse(error, context.t("apiErrors.portfolio.updateProjectFailed"));
+    await readApiData(
+      context.api.portfolio.projects({ id }).put(updates),
+      context.t("apiErrors.portfolio.updateProjectFailed"),
+    );
     await fetchPortfolio(context);
-    return data;
   });
 }
 
@@ -78,25 +110,28 @@ async function deleteProject(context: PortfolioContext, id: string): Promise<voi
   });
 }
 
-async function reorderProjects(
-  context: PortfolioContext,
-  orderedIds: string[],
-): Promise<PortfolioData | null> {
+async function reorderProjects(context: PortfolioContext, orderedIds: string[]): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const { data, error } = await context.api.portfolio.projects.reorder.post({ orderedIds });
-    assertApiResponse(error, context.t("apiErrors.portfolio.reorderFailed"));
+    const data = await readApiData(
+      context.api.portfolio.projects.reorder.post({ orderedIds }),
+      context.t("apiErrors.portfolio.reorderFailed"),
+    );
     const normalized = toPortfolioData(data);
     hydratePortfolio(context, normalized);
-    return normalized;
   });
 }
 
-async function exportPortfolio(context: PortfolioContext, format?: string): Promise<unknown> {
+async function exportPortfolio(context: PortfolioContext, format?: string): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const payload = format ? { format } : {};
-    const { data, error } = await context.api.portfolio.export.post(payload);
-    assertApiResponse(error, context.t("apiErrors.portfolio.exportFailed"));
-    return data;
+    await downloadApiFile(
+      context.runtime,
+      `${API_ENDPOINTS.portfolio}/export`,
+      {
+        method: "POST",
+        body: format ? { format } : {},
+      },
+      `portfolio.${format === "docx" ? "docx" : "pdf"}`,
+    );
   });
 }
 
@@ -110,6 +145,7 @@ export function usePortfolio() {
     portfolio: useState<PortfolioData | null>(STATE_KEYS.PORTFOLIO_DATA, () => null),
     projects: useState<PortfolioProject[]>(STATE_KEYS.PORTFOLIO_PROJECTS, () => []),
     loading: useState(STATE_KEYS.PORTFOLIO_LOADING, () => false),
+    runtime: useClientApiRequestRuntime(),
   };
 
   return {

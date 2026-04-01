@@ -1,23 +1,86 @@
 import {
-  type AIResponse,
-  API_ERROR_AI_STREAMING_FAILED,
-  type GenerateOptions,
   LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
-  LOCAL_AI_SERVERS,
-  settle,
-  toErrorMessage,
-} from "@bao/shared";
+} from "@bao/shared/constants/ai-provider";
+import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
+import type {
+  AIProviderDiagnostic,
+  AIProviderType,
+  AIResponse,
+  GenerateOptions,
+} from "@bao/shared/types/ai";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";
+import {
+  detectFirstLocalProviderModel,
+  detectLocalProviderServers,
+  inspectLocalProviderEndpoint,
+} from "./local-provider-diagnostics";
 import { BaseAIProvider } from "./provider-interface";
+
+const buildLocalProviderMessages = (
+  prompt: string,
+  systemPrompt?: string,
+): OpenAI.Chat.ChatCompletionMessageParam[] => {
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+  if (systemPrompt) {
+    messages.push({
+      role: "system",
+      content: systemPrompt,
+    });
+  }
+  messages.push({
+    role: "user",
+    content: prompt,
+  });
+  return messages;
+};
+
+const isJsonRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const readNonEmptyString = (value: unknown): string | null =>
+  typeof value === "string" && value.trim().length > 0 ? value : null;
+
+const readMessageReasoning = (completion: OpenAI.Chat.ChatCompletion): string => {
+  const serializedMessage = JSON.stringify(completion.choices[0]?.message ?? null);
+  const parsedMessage = safeParseJson(serializedMessage);
+  if (!isJsonRecord(parsedMessage)) {
+    return "";
+  }
+
+  return readNonEmptyString(parsedMessage.reasoning) ?? "";
+};
+
+const readCompletionContent = (
+  completion: OpenAI.Chat.ChatCompletion,
+  options?: GenerateOptions,
+): string => {
+  const content = completion.choices[0]?.message?.content;
+  if (typeof content === "string" && content.trim().length > 0) {
+    return content;
+  }
+
+  if (
+    options?.purpose === "coverLetter" ||
+    options?.purpose === "scrapeEnrichment" ||
+    options?.purpose === "emailResponse"
+  ) {
+    return readMessageReasoning(completion);
+  }
+
+  return "";
+};
 
 /**
  * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
  * Uses the OpenAI SDK pointed at a local endpoint
  */
 export class LocalProvider extends BaseAIProvider {
-  name = "local" as const;
+  name: AIProviderType = "local";
   model: string;
   private client: OpenAI;
 
@@ -34,48 +97,61 @@ export class LocalProvider extends BaseAIProvider {
     });
   }
 
-  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
-    const startTime = Date.now();
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-    // Add system message if provided
-    if (options?.systemPrompt) {
-      messages.push({
-        role: "system",
-        content: options.systemPrompt,
-      });
+  private async resolveRequestedModel(requestedModel?: string): Promise<string | null> {
+    if (typeof requestedModel === "string" && requestedModel.trim().length > 0) {
+      return requestedModel.trim();
     }
 
-    messages.push({
-      role: "user",
-      content: prompt,
-    });
+    const resolved = await this.resolveModelIfNeeded();
+    return resolved ? this.model : null;
+  }
 
-    const responseResult = await settle(
-      this.client.chat.completions.create({
-        model: this.model,
-        messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
-        top_p: options?.topP ?? 1,
-      }),
-    );
+  private async createCompletion(
+    prompt: string,
+    model: string,
+    options?: GenerateOptions,
+  ): Promise<OpenAI.Chat.ChatCompletion> {
+    const messages = buildLocalProviderMessages(prompt, options?.systemPrompt);
+    return this.client.chat.completions.create({
+      model,
+      messages,
+      max_tokens: options?.maxTokens ?? 2048,
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 1,
+      stream: false,
+    });
+  }
+
+  async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
+    const startTime = Date.now();
+    const model = await this.resolveRequestedModel(options?.model);
+    if (!model) {
+      return {
+        id: this.generateId(),
+        provider: this.name,
+        model: "",
+        content: "",
+        error: "No local model available",
+        timing: this.createTimingMetrics(startTime),
+      };
+    }
+    const responseResult = await settle(this.createCompletion(prompt, model, options));
     if (responseResult.status === "rejected") {
       return {
         id: this.generateId(),
         provider: this.name,
-        model: this.model,
+        model,
         content: "",
         error: toErrorMessage(responseResult.reason),
         timing: this.createTimingMetrics(startTime),
       };
     }
     const response = responseResult.value;
-    const text = response.choices[0]?.message?.content || "";
+    const text = readCompletionContent(response, options);
     return {
       id: this.generateId(),
       provider: this.name,
-      model: this.model,
+      model,
       content: text,
       usage: response.usage
         ? {
@@ -88,24 +164,15 @@ export class LocalProvider extends BaseAIProvider {
   }
 
   async *stream(prompt: string, options?: GenerateOptions): AsyncGenerator<string> {
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-
-    // Add system message if provided
-    if (options?.systemPrompt) {
-      messages.push({
-        role: "system",
-        content: options.systemPrompt,
-      });
+    const model = await this.resolveRequestedModel(options?.model);
+    if (!model) {
+      throw new Error("No local model available");
     }
-
-    messages.push({
-      role: "user",
-      content: prompt,
-    });
+    const messages = buildLocalProviderMessages(prompt, options?.systemPrompt);
 
     const streamResult = await settle(
       this.client.chat.completions.create({
-        model: this.model,
+        model,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: options?.temperature ?? 0.7,
@@ -171,46 +238,33 @@ export class LocalProvider extends BaseAIProvider {
    * Returns null if the server is unreachable or has no models.
    */
   static async detectFirstModel(baseUrl: string): Promise<string | null> {
-    const provider = new LocalProvider(baseUrl, LOCAL_AI_AUTO_DETECT_MODEL);
-    const listResult = await settle(provider.client.models.list());
-    if (listResult.status === "rejected") {
-      return null;
-    }
-    const models: Array<{ id: string }> = [];
-    for await (const model of listResult.value) {
-      models.push(model);
-    }
-    return models.length > 0 ? models[0].id : null;
+    return await detectFirstLocalProviderModel(baseUrl);
+  }
+
+  /**
+   * Inspect a local OpenAI-compatible endpoint and return structured diagnostics.
+   */
+  static async inspectEndpoint(
+    baseUrl: string,
+    selectedModel?: string,
+  ): Promise<AIProviderDiagnostic> {
+    return await inspectLocalProviderEndpoint(baseUrl, selectedModel);
   }
 
   /**
    * Static method to detect local AI servers
    */
   static async detectLocalServers(): Promise<
-    Array<{ id?: string; baseUrl: string; name: string; available: boolean }>
+    Array<{
+      id?: string;
+      baseUrl: string;
+      name: string;
+      available: boolean;
+      availableModels?: readonly string[];
+      diagnosticCode?: AIProviderDiagnostic["code"];
+      message?: string;
+    }>
   > {
-    const servers = LOCAL_AI_SERVERS.map((server) => ({
-      id: server.id,
-      baseUrl: server.baseUrl,
-      name: server.name,
-    }));
-
-    const results = await Promise.all(
-      servers.map(async (server) => {
-        const result = await settle(
-          Promise.resolve().then(async () => {
-            const provider = new LocalProvider(server.baseUrl);
-            const available = await provider.isAvailable();
-            return { ...server, available };
-          }),
-        );
-        if (result.status === "rejected") {
-          return { ...server, available: false };
-        }
-        return result.value;
-      }),
-    );
-
-    return results;
+    return await detectLocalProviderServers();
   }
 }

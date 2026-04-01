@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "codex/**"
+      - "copilot/**"
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get Bun version from package.json
+        id: bun-version
+        shell: bash
+        run: echo "version=$(bash scripts/read-bun-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ steps.bun-version.outputs.version }}
+
+      - name: Install workspace dependencies
+        run: bun ci
+
+      - name: Install Playwright Chromium
+        run: bun run automation:browsers:install
+
+      - name: Run lint
+        run: bun run lint
+
+      - name: Run tests
+        run: bun run test
+
+      - name: Build production bundles
+        run: bun run build:verify
+
+      - name: Verify SSR routes
+        run: bun run verify:pages

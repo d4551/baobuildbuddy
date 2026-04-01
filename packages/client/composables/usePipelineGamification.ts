@@ -3,8 +3,8 @@ import {
   PIPELINE_GAMIFICATION_XP,
   type PipelineGamificationAction,
   type PipelineGamificationReason,
-  STATE_KEYS,
-} from "@bao/shared";
+} from "@bao/shared/constants/gamification";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 
 type AwardedReasonState = Partial<Record<PipelineGamificationReason, true>>;
 
