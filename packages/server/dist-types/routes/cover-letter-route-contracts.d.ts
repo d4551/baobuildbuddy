@@ -20,14 +20,26 @@ export declare const coverLetterMutationBodySchema: Type.TObject<{
     readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
-}, "company" | "position", never>;
+}, "company" | "position", Type.InferOptionalKeys<{
+    readonly company: Type.TString;
+    readonly position: Type.TString;
+    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
+}>>;
 export declare const coverLetterUpdateBodySchema: Type.TObject<{
     readonly company: Type.TOptional<Type.TString>;
     readonly position: Type.TOptional<Type.TString>;
     readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
-}, never, never>;
+}, never, Type.InferOptionalKeys<{
+    readonly company: Type.TOptional<Type.TString>;
+    readonly position: Type.TOptional<Type.TString>;
+    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
+}>>;
 export declare const generateCoverLetterBodySchema: Type.TObject<{
     readonly company: Type.TString;
     readonly position: Type.TString;
@@ -35,7 +47,14 @@ export declare const generateCoverLetterBodySchema: Type.TObject<{
     readonly resumeId: Type.TOptional<Type.TString>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
     readonly save: Type.TOptional<Type.TBoolean>;
-}, "company" | "position", never>;
+}, "company" | "position", Type.InferOptionalKeys<{
+    readonly company: Type.TString;
+    readonly position: Type.TString;
+    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly resumeId: Type.TOptional<Type.TString>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
+    readonly save: Type.TOptional<Type.TBoolean>;
+}>>;
 export declare const coverLetterExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
-}, never, never>;
+}, never, "format">;

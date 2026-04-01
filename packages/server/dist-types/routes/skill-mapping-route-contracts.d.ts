@@ -25,7 +25,10 @@ export type SkillMappingRouteSetState = {
 export declare const skillMappingsQuerySchema: Type.TObject<{
     readonly category: Type.TOptional<Type.TString>;
     readonly search: Type.TOptional<Type.TString>;
-}, never, never>;
+}, never, Type.InferOptionalKeys<{
+    readonly category: Type.TOptional<Type.TString>;
+    readonly search: Type.TOptional<Type.TString>;
+}>>;
 export declare const skillMappingIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
@@ -38,7 +41,16 @@ export declare const skillMappingCreateBodySchema: Type.TObject<{
     readonly category: Type.TOptional<Type.TString>;
     readonly demandLevel: Type.TOptional<Type.TString>;
     readonly aiGenerated: Type.TOptional<Type.TBoolean>;
-}, "gameExpression" | "transferableSkill", never>;
+}, "gameExpression" | "transferableSkill", Type.InferOptionalKeys<{
+    readonly gameExpression: Type.TString;
+    readonly transferableSkill: Type.TString;
+    readonly industryApplications: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly evidence: Type.TOptional<Type.TArray<Type.TRecord<Type.TString, Type.TUnknown>>>;
+    readonly confidence: Type.TOptional<Type.TNumber>;
+    readonly category: Type.TOptional<Type.TString>;
+    readonly demandLevel: Type.TOptional<Type.TString>;
+    readonly aiGenerated: Type.TOptional<Type.TBoolean>;
+}>>;
 export declare const skillMappingUpdateBodySchema: Type.TObject<{
     readonly gameExpression: Type.TOptional<Type.TString>;
     readonly transferableSkill: Type.TOptional<Type.TString>;
@@ -48,12 +60,25 @@ export declare const skillMappingUpdateBodySchema: Type.TObject<{
     readonly category: Type.TOptional<Type.TString>;
     readonly demandLevel: Type.TOptional<Type.TString>;
     readonly aiGenerated: Type.TOptional<Type.TBoolean>;
-}, never, never>;
+}, never, Type.InferOptionalKeys<{
+    readonly gameExpression: Type.TOptional<Type.TString>;
+    readonly transferableSkill: Type.TOptional<Type.TString>;
+    readonly industryApplications: Type.TOptional<Type.TArray<Type.TString>>;
+    readonly evidence: Type.TOptional<Type.TArray<Type.TRecord<Type.TString, Type.TUnknown>>>;
+    readonly confidence: Type.TOptional<Type.TNumber>;
+    readonly category: Type.TOptional<Type.TString>;
+    readonly demandLevel: Type.TOptional<Type.TString>;
+    readonly aiGenerated: Type.TOptional<Type.TBoolean>;
+}>>;
 export declare const skillAnalysisBodySchema: Type.TObject<{
     readonly gameExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly resume: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly autoCreateMappings: Type.TOptional<Type.TBoolean>;
-}, never, never>;
+}, never, Type.InferOptionalKeys<{
+    readonly gameExperience: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly resume: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
+    readonly autoCreateMappings: Type.TOptional<Type.TBoolean>;
+}>>;
 export declare const skillReadinessQuerySchema: Type.TObject<{
     readonly jobId: Type.TOptional<Type.TString>;
-}, never, never>;
+}, never, "jobId">;

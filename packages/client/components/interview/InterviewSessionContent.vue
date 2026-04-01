@@ -10,6 +10,7 @@ import type {
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type InterviewCompletionState =
   | "idle"
@@ -56,45 +57,31 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-semibold">{{ sessionProgressLabel }}</h2>
-        <p class="text-base-content/70">
-          {{ targetJob?.company || activeSession.studioName }} -
-          {{ targetJob?.title || activeSession.role }}
-        </p>
-      </div>
-      <div class="stats bg-base-200">
-        <div class="stat py-3 px-6">
-          <div class="stat-title text-xs">{{ t("interviewSession.timeLabel") }}</div>
-          <div class="stat-value text-2xl">
-            <time
-              class="font-mono text-2xl tabular-nums"
-              :datetime="elapsedTimeDuration"
-              :aria-label="elapsedTimeAriaLabel"
-              aria-live="polite"
-            >
-              {{ elapsedTimeText }}
-            </time>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="space-y-6">
+    <InterviewSessionOverviewCard
+      :active-session="activeSession"
+      :can-use-voice="canUseVoice"
+      :elapsed-time-aria-label="elapsedTimeAriaLabel"
+      :elapsed-time-duration="elapsedTimeDuration"
+      :elapsed-time-text="elapsedTimeText"
+      :progress="progress"
+      :session-progress-label="sessionProgressLabel"
+      :target-job="targetJob"
+    />
 
     <div
       v-if="completionState === 'completed'"
-      class="alert alert-success mt-4"
+      class="alert alert-success"
       role="status"
       aria-live="polite"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button
         type="button"
-        class="btn btn-sm btn-success"
+        class="btn btn-success btn-sm"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
         @click="$emit('history')"
       >
@@ -102,10 +89,12 @@ const { t } = useI18n();
       </button>
     </div>
 
-    <div class="card bg-base-200 mt-4">
-      <div class="card-body">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium">{{ sessionProgressLabel }}</span>
+    <div class="card card-border bg-base-100">
+      <div class="card-body gap-3">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm font-medium text-base-content/70">
+            {{ sessionProgressLabel }}
+          </span>
           <span class="text-sm text-base-content/60">{{ Math.round(progress) }}%</span>
         </div>
         <progress
@@ -120,38 +109,45 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div v-if="targetJob" class="card bg-base-200 mt-4">
-      <div class="card-body">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 class="card-title text-lg">{{ targetJob.title }}</h2>
-            <p class="text-sm text-base-content/70">{{ targetJob.company }} · {{ targetJob.location }}</p>
-          </div>
-          <span class="badge badge-primary badge-outline">{{ t("interviewSession.jobTargetBadge") }}</span>
-        </div>
+    <SectionGrid grid-token="twoColumnWide" extra-class="items-start">
+      <div class="space-y-6">
+        <InterviewSessionPromptCard :current-question="currentQuestion" />
+        <InterviewSessionFeedbackCard
+          :current-question="currentQuestion"
+          :get-alert-class="getAlertClass"
+        />
       </div>
-    </div>
 
-    <div
-      v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
-      class="card bg-base-200 mt-4"
-    >
-      <div class="card-body">
-        <div v-if="canUseVoice" class="mb-3 flex items-center justify-between gap-2">
-          <span class="text-sm opacity-80">
-            {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
-          </span>
-          <button
-            type="button"
-            class="btn btn-sm btn-primary"
-            :class="{ 'btn-error': stt.isListening.value }"
-            :disabled="completionState !== 'ready' || !canUseVoice"
-            :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
-            :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"
-            @click="stt.isListening.value ? stt.stopListening() : stt.startListening()"
-          >
-            {{ stt.isListening.value ? t("interviewSession.voice.stopButton") : t("interviewSession.voice.startButton") }}
-          </button>
+      <div
+        v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
+        class="space-y-4"
+      >
+        <div
+          v-if="canUseVoice"
+          class="card card-border bg-base-100"
+          :aria-label="t('interviewSession.voice.idle')"
+        >
+          <div class="card-body flex-row items-center justify-between gap-4">
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-base-content/70">
+                {{ t("interviewSession.voiceTitle") }}
+              </p>
+              <p class="text-sm text-base-content/60">
+                {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              :class="{ 'btn-error': stt.isListening.value }"
+              :disabled="completionState !== 'ready' || !canUseVoice"
+              :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
+              :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"
+              @click="stt.isListening.value ? stt.stopListening() : stt.startListening()"
+            >
+              {{ stt.isListening.value ? t("interviewSession.voice.stopButton") : t("interviewSession.voice.startButton") }}
+            </button>
+          </div>
         </div>
 
         <InterviewChat
@@ -174,10 +170,10 @@ const { t } = useI18n();
           @respond="emit('submit', $event)"
         />
 
-        <div class="mt-3 flex justify-end">
+        <div class="flex justify-end">
           <button
             type="button"
-            class="btn btn-error btn-outline"
+            class="btn btn-outline btn-error"
             :disabled="!canComplete || completionState !== 'ready'"
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"
@@ -187,23 +183,6 @@ const { t } = useI18n();
           </button>
         </div>
       </div>
-    </div>
-
-    <div v-if="currentQuestion?.feedback" class="card bg-base-200 mt-4">
-      <div class="card-body">
-        <h3 class="card-title text-lg">{{ t("interviewSession.feedbackTitle") }}</h3>
-        <div
-          v-if="currentQuestion.score !== undefined"
-          class="alert"
-          :class="getAlertClass(currentQuestion.score)"
-          aria-live="polite"
-        >
-          <div>
-            <p class="font-semibold">{{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}</p>
-            <p class="text-sm">{{ currentQuestion.feedback }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </SectionGrid>
   </div>
 </template>

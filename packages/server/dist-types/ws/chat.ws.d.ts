@@ -18,7 +18,7 @@ export declare const chatWebSocket: Elysia<"", {
     [x: string]: {
         subscribe: {
             body: {
-                content?: string | undefined;
+                content: string;
                 sessionId?: string | undefined;
             };
             params: {};

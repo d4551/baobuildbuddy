@@ -1,10 +1,15 @@
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
+import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { AIService } from "./ai/ai-service";
 import type { ScrapeEnrichmentAccumulator, ScrapeEnrichmentAttempt } from "./scraper-service-contracts";
 export declare const createScrapeEnrichmentAccumulator: () => ScrapeEnrichmentAccumulator;
 export declare const toScrapeEnrichmentSummary: (accumulator: ScrapeEnrichmentAccumulator) => ScrapeEnrichmentRunSummary;
 export declare const pushScrapeEnrichmentWarning: (accumulator: ScrapeEnrichmentAccumulator, warning: string) => void;
 export declare const createScrapeEnrichmentService: () => Promise<AIService | null>;
+export declare const parseScrapeEnrichmentContent: (content: string) => ReturnType<typeof normalizeScrapePersonaEnrichment>;
+export declare const buildFallbackJobEnrichment: (jobRow: ScrapedJob) => ScrapePersonaEnrichment;
+export declare const buildFallbackStudioEnrichment: (studioRow: ScrapedStudio) => ScrapePersonaEnrichment;
 export declare const enrichStudioRow: (studioRow: ScrapedStudio, aiService: AIService | null) => Promise<ScrapeEnrichmentAttempt>;
 export declare const enrichJobRow: (jobRow: ScrapedJob, aiService: AIService | null) => Promise<ScrapeEnrichmentAttempt>;

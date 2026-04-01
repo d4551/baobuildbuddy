@@ -1,6 +1,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { chromium } from "playwright";
 import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -35,14 +35,6 @@ type BrowserInstance = {
   close(): Promise<void>;
 };
 
-type ChromiumLauncher = {
-  launch(options: { readonly headless: boolean }): Promise<BrowserInstance>;
-};
-
-type PlaywrightModule = {
-  readonly chromium: ChromiumLauncher;
-};
-
 type PageProofRouteSpec = {
   readonly slug: string;
   readonly route: string;
@@ -57,6 +49,14 @@ type PageProofReportItem = {
   readonly h1: string | null;
   readonly alerts: readonly string[];
   readonly flaggedKeywords: readonly string[];
+};
+
+type CapturePageProofReportInput = {
+  readonly browser: BrowserInstance;
+  readonly clientBase: string;
+  readonly outputDirectory: string;
+  readonly remainingSpecs: readonly PageProofRouteSpec[];
+  readonly captured?: readonly PageProofReportItem[];
 };
 
 type ResolvedPageIdentifiers = {
@@ -76,16 +76,18 @@ const DEFAULT_VIEWPORT = {
 } as const satisfies ViewportSize;
 const DEFAULT_WAIT_AFTER_NAVIGATION_MS = 3_000;
 const DEFAULT_NAVIGATION_TIMEOUT_MS = 60_000;
+const DEFAULT_SETTLE_POLL_INTERVAL_MS = 500;
+const DEFAULT_SETTLE_TIMEOUT_MS = 12_000;
 const FLAGGED_KEYWORDS = ["failed", "error", "could not", "unable", "not found"] as const;
-const PLAYWRIGHT_ENTRYPOINT = resolve(
-  process.cwd(),
-  "packages",
-  "scraper",
-  "node_modules",
-  "playwright",
-  "index.mjs",
-);
-
+const TRAILING_SLASH_PATTERN = /\/$/u;
+const COLLECTION_RESPONSE_KEYS = [
+  "items",
+  "data",
+  "jobs",
+  "resumes",
+  "studios",
+  "coverLetters",
+] as const;
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -93,12 +95,6 @@ const isString = (value: unknown): value is string => typeof value === "string";
 
 const isPageProofRouteSpec = (value: unknown): value is PageProofRouteSpec =>
   isRecord(value) && isString(value.slug) && isString(value.route);
-
-const isChromiumLauncher = (value: unknown): value is ChromiumLauncher =>
-  isRecord(value) && typeof value.launch === "function";
-
-const isPlaywrightModule = (value: unknown): value is PlaywrightModule =>
-  isRecord(value) && isChromiumLauncher(value.chromium);
 
 const normalizeText = (value: string): string => value.replace(/\s+/gu, " ").trim();
 
@@ -120,23 +116,15 @@ const resolveOutputDirectory = (): string => {
 
 const resolveClientBase = (): string =>
   (resolveFlagValue("--client-base") ?? process.env.PAGE_PROOF_CLIENT_BASE ?? DEFAULT_CLIENT_BASE).replace(
-    /\/$/u,
+    TRAILING_SLASH_PATTERN,
     "",
   );
 
 const resolveApiBase = (): string =>
   (resolveFlagValue("--api-base") ?? process.env.PAGE_PROOF_API_BASE ?? DEFAULT_API_BASE).replace(
-    /\/$/u,
+    TRAILING_SLASH_PATTERN,
     "",
   );
-
-const loadPlaywrightModule = async (): Promise<PlaywrightModule> => {
-  const imported = await import(pathToFileURL(PLAYWRIGHT_ENTRYPOINT).href);
-  if (!isPlaywrightModule(imported)) {
-    throw new Error(`Playwright entrypoint did not expose a Chromium launcher: ${PLAYWRIGHT_ENTRYPOINT}`);
-  }
-  return imported;
-};
 
 const fetchJson = async (url: string): Promise<unknown> => {
   const response = await fetch(url);
@@ -146,22 +134,24 @@ const fetchJson = async (url: string): Promise<unknown> => {
   return response.json();
 };
 
-const readArrayCandidate = (value: unknown): readonly unknown[] =>
-  Array.isArray(value)
-    ? value
-    : isRecord(value) && Array.isArray(value.items)
-      ? value.items
-      : isRecord(value) && Array.isArray(value.data)
-        ? value.data
-        : isRecord(value) && Array.isArray(value.jobs)
-          ? value.jobs
-          : isRecord(value) && Array.isArray(value.resumes)
-            ? value.resumes
-            : isRecord(value) && Array.isArray(value.studios)
-              ? value.studios
-              : isRecord(value) && Array.isArray(value.coverLetters)
-                ? value.coverLetters
-                : [];
+const readCollectionRecordArray = (value: JsonRecord): readonly unknown[] => {
+  for (const key of COLLECTION_RESPONSE_KEYS) {
+    const candidate = value[key];
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+};
+
+const readArrayCandidate = (value: unknown): readonly unknown[] => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return isRecord(value) ? readCollectionRecordArray(value) : [];
+};
 
 const readEntityId = (value: unknown): string | null =>
   isRecord(value) && isString(value.id) && value.id.length > 0 ? value.id : null;
@@ -242,7 +232,7 @@ const buildRouteSpecs = (ids: ResolvedPageIdentifiers): readonly PageProofRouteS
     { slug: "studios-detail", route: `${APP_ROUTES.studios}/${ids.studioId}` },
     { slug: "studios-analytics", route: `${APP_ROUTES.studios}/analytics` },
     { slug: "ai-chat", route: APP_ROUTES.aiChat },
-    { slug: "ai-dashboard", route: "/ai/dashboard" },
+    { slug: "ai-dashboard", route: APP_ROUTES.aiDashboard },
     { slug: "automation-index", route: APP_ROUTES.automation },
     { slug: "automation-job-apply", route: APP_ROUTES.automationJobApply },
     { slug: "automation-scraper", route: APP_ROUTES.automationScraper },
@@ -278,6 +268,42 @@ const capturePageSignals = async (page: PageInstance): Promise<PageSignalSnapsho
     };
   });
 
+const pageStillLoading = async (page: PageInstance): Promise<boolean> =>
+  page.evaluate(() => {
+    const skeletonCount = document.querySelectorAll(".skeleton").length;
+    const loadingIndicatorCount = document.querySelectorAll(".loading").length;
+    const mainText = document.querySelector("main")?.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+
+    if (skeletonCount > 0) {
+      return true;
+    }
+
+    if (loadingIndicatorCount === 0) {
+      return false;
+    }
+
+    return mainText.length === 0;
+  });
+
+const waitForSettledIteration = async (page: PageInstance, waitedMs: number): Promise<void> => {
+  if (waitedMs >= DEFAULT_SETTLE_TIMEOUT_MS) {
+    return;
+  }
+
+  const stillLoading = await pageStillLoading(page);
+  if (!stillLoading) {
+    return;
+  }
+
+  await page.waitForTimeout(DEFAULT_SETTLE_POLL_INTERVAL_MS);
+  return waitForSettledIteration(page, waitedMs + DEFAULT_SETTLE_POLL_INTERVAL_MS);
+};
+
+const waitForPageToSettle = async (page: PageInstance): Promise<void> => {
+  await page.waitForTimeout(DEFAULT_WAIT_AFTER_NAVIGATION_MS);
+  return waitForSettledIteration(page, 0);
+};
+
 const capturePageProof = async (
   browser: BrowserInstance,
   clientBase: string,
@@ -290,7 +316,7 @@ const capturePageProof = async (
     waitUntil: "domcontentloaded",
     timeout: DEFAULT_NAVIGATION_TIMEOUT_MS,
   });
-  await page.waitForTimeout(DEFAULT_WAIT_AFTER_NAVIGATION_MS);
+  await waitForPageToSettle(page);
 
   const title = normalizeText(await page.title());
   const snapshot = await capturePageSignals(page);
@@ -336,6 +362,25 @@ const buildMarkdownReport = (report: readonly PageProofReportItem[]): string => 
   return `${lines.join("\n")}\n`;
 };
 
+const capturePageProofReport = async (
+  input: CapturePageProofReportInput,
+): Promise<readonly PageProofReportItem[]> => {
+  const { browser, clientBase, outputDirectory, remainingSpecs, captured = [] } = input;
+  const [nextSpec, ...nextSpecs] = remainingSpecs;
+  if (!nextSpec) {
+    return captured;
+  }
+
+  const nextItem = await capturePageProof(browser, clientBase, outputDirectory, nextSpec);
+  return capturePageProofReport({
+    browser,
+    clientBase,
+    outputDirectory,
+    remainingSpecs: nextSpecs,
+    captured: [...captured, nextItem],
+  });
+};
+
 const main = async (): Promise<void> => {
   const apiBase = resolveApiBase();
   const clientBase = resolveClientBase();
@@ -346,11 +391,13 @@ const main = async (): Promise<void> => {
 
   const ids = await resolvePageIdentifiers(apiBase);
   const routeSpecs = buildRouteSpecs(ids);
-  const playwright = await loadPlaywrightModule();
-  const browser = await playwright.chromium.launch({ headless: true });
-  const report = await Promise.all(
-    routeSpecs.map((spec) => capturePageProof(browser, clientBase, outputDirectory, spec)),
-  );
+  const browser = await chromium.launch({ headless: true });
+  const report = await capturePageProofReport({
+    browser,
+    clientBase,
+    outputDirectory,
+    remainingSpecs: routeSpecs,
+  });
   await browser.close();
 
   const jsonPath = join(outputDirectory, "report.json");

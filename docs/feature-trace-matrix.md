@@ -2,7 +2,7 @@
 
 Canonical stack definitions (Drizzle, Nuxt, Eden—not Prisma/htmx): [`STACK-CONTRACT.md`](./STACK-CONTRACT.md).
 
-This matrix is the current traceability artifact for the last full audit pass.
+This matrix is the current route-to-service/UI/test traceability reference for the repository.
 
 ## Layouts and shared UI
 

@@ -152,69 +152,85 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full gap-3">
-    <!-- Chat History -->
-    <div
-      ref="chatHistoryRef"
-      class="flex-1 overflow-y-auto space-y-4 p-4 bg-base-200 rounded-t-lg"
-      role="log"
-      :aria-label="t(props.responseAriaKey)"
-      aria-live="polite"
-    >
-      <AIChatBubble
-        v-for="(messageRow, index) in renderedMessages"
-        :key="messageRow.key"
-        :assistant-label="t('interviewChatComponent.interviewerLabel')"
-        :is-latest-assistant-message="index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'"
-        :is-streaming="false"
-        :locale="currentLocale"
-        :message="messageRow.message"
-        :user-label="t('interviewChatComponent.userLabel')"
-      />
-    </div>
-
-    <!-- Response Input -->
-    <div v-if="currentQuestion" class="p-4 bg-base-100 rounded-b-lg border-t border-base-300">
-      <form class="gap-2" @submit.prevent="submitResponse">
-        <div class="label">
-          <label :for="responseTextareaId" class="font-medium">
-            {{ t(props.responseLabelKey) }}
-          </label>
-          <span class="font-medium">
-            {{ currentQuestionProgressLabel }}
-          </span>
+  <section class="card card-border bg-base-100 h-full" aria-labelledby="interview-chat-workspace-title">
+    <div class="card-body gap-0 p-0">
+      <div class="border-b border-base-300 px-6 py-5">
+        <div class="space-y-1">
+          <h2 id="interview-chat-workspace-title" class="text-lg font-semibold">
+            {{ t("interviewSession.responseWorkspaceTitle") }}
+          </h2>
+          <p class="text-sm text-base-content/60">
+            {{ t("interviewSession.responseWorkspaceDescription") }}
+          </p>
         </div>
-        <textarea
-          :id="responseTextareaId"
-          v-model="currentResponse"
-          class="textarea h-24"
-          :placeholder="t(props.responsePlaceholderKey)"
-          :aria-label="t(props.responseAriaKey)"
-          :aria-describedby="responseHintId"
-          :minlength="props.minResponseLength"
-          :disabled="props.disabled"
-          :aria-disabled="props.disabled ? 'true' : 'false'"
-          :aria-invalid="props.disabled || canSubmit ? undefined : 'true'"
-          @keyup.ctrl.enter.prevent="submitResponse"
-          @keyup.meta.enter.prevent="submitResponse"
-        ></textarea>
-        <span :id="responseHintId" class="label text-sm">
-          {{ responseHintText }}
-        </span>
-        <button
-          type="submit"
-          class="btn btn-primary btn-sm self-end"
-          :aria-label="t(props.submitButtonAriaLabelKey)"
-          :disabled="!canSubmit"
-        >
-          <span v-if="props.isSubmitting" class="loading loading-spinner loading-sm"></span>
-          {{ t(props.submitButtonLabelKey) }}
-        </button>
-      </form>
-    </div>
+      </div>
 
-    <div v-else class="p-4 text-center text-base-content/70">
-      <p>{{ completeMessage }}</p>
+      <div
+        ref="chatHistoryRef"
+        class="min-h-80 flex-1 space-y-4 overflow-y-auto bg-base-200/60 px-6 py-5"
+        role="log"
+        :aria-label="t(props.responseAriaKey)"
+        aria-live="polite"
+      >
+        <AIChatBubble
+          v-for="(messageRow, index) in renderedMessages"
+          :key="messageRow.key"
+          :assistant-label="t('interviewChatComponent.interviewerLabel')"
+          :is-latest-assistant-message="index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'"
+          :is-streaming="false"
+          :locale="currentLocale"
+          :message="messageRow.message"
+          :user-label="t('interviewChatComponent.userLabel')"
+        />
+      </div>
+
+      <div v-if="currentQuestion" class="border-t border-base-300 px-6 py-5">
+        <form class="space-y-4" @submit.prevent="submitResponse">
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">
+              {{ t(props.responseLabelKey) }}
+            </legend>
+            <textarea
+              :id="responseTextareaId"
+              v-model="currentResponse"
+              class="textarea min-h-40 w-full"
+              :placeholder="t(props.responsePlaceholderKey)"
+              :aria-label="t(props.responseAriaKey)"
+              :aria-describedby="responseHintId"
+              :minlength="props.minResponseLength"
+              :disabled="props.disabled"
+              :aria-disabled="props.disabled ? 'true' : 'false'"
+              :aria-invalid="props.disabled || canSubmit ? undefined : 'true'"
+              @keyup.ctrl.enter.prevent="submitResponse"
+              @keyup.meta.enter.prevent="submitResponse"
+            ></textarea>
+            <p :id="responseHintId" class="validator-hint text-sm text-base-content/60">
+              {{ responseHintText }}
+            </p>
+          </fieldset>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-base-content/60">
+              {{ currentQuestionProgressLabel }}
+            </p>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :aria-label="t(props.submitButtonAriaLabelKey)"
+              :disabled="!canSubmit"
+            >
+              <span v-if="props.isSubmitting" class="loading loading-spinner loading-sm"></span>
+              {{ t(props.submitButtonLabelKey) }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div v-else class="px-6 py-8">
+        <div class="alert alert-success">
+          <span>{{ completeMessage }}</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 </template>

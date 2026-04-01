@@ -31,12 +31,12 @@ export declare const automationScreenshotRoutes: Elysia<string, {
                     headers: unknown;
                     response: {
                         200: unknown;
-                        400: {} & {
-                            error?: string | undefined;
-                        };
-                        404: {} & {
-                            error?: string | undefined;
-                        };
+                        400: {
+                            error: string;
+                        } & {};
+                        404: {
+                            error: string;
+                        } & {};
                         422: {
                             type: "validation";
                             on: string;

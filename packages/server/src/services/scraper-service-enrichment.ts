@@ -23,6 +23,7 @@ import { SCRAPE_ENRICHMENT_WARNING_LIMIT } from "./scraper-service-contracts";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/iu;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/u;
+const SENTENCE_END_PATTERN = /[.!?]$/u;
 
 export const createScrapeEnrichmentAccumulator = (): ScrapeEnrichmentAccumulator => ({
   enabled: true,
@@ -88,7 +89,7 @@ const toSentence = (value: string | undefined, fallback: string): string => {
   if (!normalized) {
     return fallback;
   }
-  return /[.!?]$/u.test(normalized) ? normalized : `${normalized}.`;
+  return SENTENCE_END_PATTERN.test(normalized) ? normalized : `${normalized}.`;
 };
 
 const compactList = (items: readonly (string | undefined)[]): string[] => {

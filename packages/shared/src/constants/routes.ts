@@ -17,6 +17,7 @@ export const APP_ROUTES = {
   skillsPathways: "/skills/pathways",
   studios: "/studios",
   aiChat: "/ai/chat",
+  aiDashboard: "/ai/dashboard",
   automation: "/automation",
   automationJobApply: "/automation/job-apply",
   automationScraper: "/automation/scraper",

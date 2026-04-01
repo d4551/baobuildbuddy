@@ -21,8 +21,8 @@ import {
 
 async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
   const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
 
@@ -64,11 +64,11 @@ function renderCoverLetterSender(
   context.page.drawText(userProfile.name, {
     x: context.margin,
     y: context.yPosition,
-    size: 22,
+    size: 24,
     font: context.boldFont,
     color: COVER_LETTER_PDF_COLORS.primary,
   });
-  context.yPosition -= 22;
+  context.yPosition -= 24;
 
   const contactLine = collectDefinedStringValues([
     userProfile.email,

@@ -9,14 +9,23 @@ function renderPortfolioProjectHeading(
   project: PortfolioProject,
   index: number,
 ): void {
+  context.page.drawText(`CASE STUDY ${index + 1}`, {
+    x: context.margin,
+    y: context.yPosition,
+    size: 9,
+    font: context.boldFont,
+    color: PORTFOLIO_PDF_COLORS.accent,
+  });
+  context.yPosition -= 13;
+
   context.page.drawText(`${index + 1}. ${project.title}`, {
     x: context.margin,
     y: context.yPosition,
-    size: 16,
+    size: 18,
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 20;
+  context.yPosition -= 22;
 
   if (!project.featured) {
     return;
@@ -42,7 +51,7 @@ function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: stri
     y: context.yPosition,
     size: 10,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.text,
+    color: PORTFOLIO_PDF_COLORS.muted,
   });
   context.yPosition -= 15;
 }

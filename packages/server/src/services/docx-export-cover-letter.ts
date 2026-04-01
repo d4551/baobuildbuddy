@@ -6,11 +6,11 @@ import {
 } from "@bao/shared/utils/export-contract";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import {
+  COVER_LETTER_DOCX_ACCENT_COLOR,
   COVER_LETTER_DOCX_FONT_FAMILY,
   COVER_LETTER_DOCX_LINE_COLOR,
   COVER_LETTER_DOCX_MUTED_COLOR,
   COVER_LETTER_DOCX_PRIMARY_COLOR,
-  COVER_LETTER_DOCX_SUBTLE_COLOR,
   COVER_LETTER_DOCX_TEXT_COLOR,
   type CoverLetterPayload,
   type CoverLetterUserProfile,
@@ -92,7 +92,7 @@ function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragr
           text: `Re: ${coverLetter.position}`,
           italics: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_SUBTLE_COLOR,
+          color: COVER_LETTER_DOCX_ACCENT_COLOR,
           font: COVER_LETTER_DOCX_FONT_FAMILY,
         }),
       ],

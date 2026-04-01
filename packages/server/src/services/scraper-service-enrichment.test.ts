@@ -5,7 +5,7 @@ import {
   parseScrapeEnrichmentContent,
 } from "./scraper-service-enrichment";
 
-describe("parseScrapeEnrichmentContent", () => {
+const registerFencedJsonTest = (): void => {
   test("parses fenced JSON responses", () => {
     const enrichment = parseScrapeEnrichmentContent(`\`\`\`json
 {
@@ -23,7 +23,9 @@ describe("parseScrapeEnrichmentContent", () => {
       candidatePitchAngles: ["pitch 1"],
     });
   });
+};
 
+const registerEmbeddedJsonTest = (): void => {
   test("parses embedded JSON surrounded by commentary", () => {
     const enrichment = parseScrapeEnrichmentContent(
       `Here is the enrichment payload:
@@ -43,7 +45,9 @@ Use it directly.`,
       candidatePitchAngles: ["pitch 1", "pitch 2"],
     });
   });
+};
 
+const registerFallbackJobTest = (): void => {
   test("builds grounded job fallback enrichment when JSON parsing fails", () => {
     const enrichment = buildFallbackJobEnrichment({
       title: "AI Gameplay Engineer",
@@ -61,7 +65,9 @@ Use it directly.`,
       "Show why Studio Hash is a strong match.",
     );
   });
+};
 
+const registerFallbackStudioTest = (): void => {
   test("builds grounded studio fallback enrichment when JSON parsing fails", () => {
     const enrichment = buildFallbackStudioEnrichment({
       name: "Studio Hash",
@@ -82,4 +88,11 @@ Use it directly.`,
       "Experience with technologies such as Bun, TypeScript.",
     );
   });
+};
+
+describe("parseScrapeEnrichmentContent", () => {
+  registerFencedJsonTest();
+  registerEmbeddedJsonTest();
+  registerFallbackJobTest();
+  registerFallbackStudioTest();
 });

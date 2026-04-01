@@ -32,10 +32,10 @@ export declare const gamificationRoutes: Elysia<string, {
     [x: string]: {
         "award-xp": {
             post: {
-                body: {} & {
-                    reason?: string | undefined;
-                    amount?: number | undefined;
-                };
+                body: {
+                    reason: string;
+                    amount: number;
+                } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -110,9 +110,9 @@ export declare const gamificationRoutes: Elysia<string, {
                 complete: {
                     post: {
                         body: unknown;
-                        params: {} & {
-                            id?: string | undefined;
-                        };
+                        params: {
+                            id: string;
+                        } & {};
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -128,6 +128,15 @@ export declare const gamificationRoutes: Elysia<string, {
                                 completed: boolean;
                                 totalXP: number;
                                 level: number;
+                            };
+                            422: {
+                                type: "validation";
+                                on: string;
+                                summary?: string;
+                                message?: string;
+                                found?: unknown;
+                                property?: string;
+                                expected?: string;
                             };
                         };
                     };

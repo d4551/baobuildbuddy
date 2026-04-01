@@ -51,6 +51,15 @@ BAO_DISABLE_AUTH=true bun run dev -- --server-port 3400 --client-port 3401
 
 Keep that terminal open for the rest of the run.
 
+If a dev-only Nuxt route hangs or a screenshot pass needs a stable SSR surface, run the proof pass against a built production client instead of the dev server:
+
+```bash
+BAO_DISABLE_AUTH=true CLIENT_PORT=3411 PORT=3400 bun run --cwd packages/server dev
+PORT=3411 HOST=127.0.0.1 NUXT_PUBLIC_API_BASE=http://127.0.0.1:3400 bun packages/client/.output/server/index.mjs
+```
+
+Use `3400/3411` consistently for the rest of the proof when you choose this path.
+
 ## Step 3: Run the quality gates
 
 ```bash
@@ -93,7 +102,7 @@ Alternate ports:
 
 ```bash
 PAGE_PROOF_API_BASE=http://127.0.0.1:3400 \
-PAGE_PROOF_CLIENT_BASE=http://localhost:3401 \
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3411 \
 bun run proof:pages -- --output-dir /tmp/bao-page-proof-$(date +%F)
 ```
 
@@ -106,8 +115,22 @@ Outputs:
 Review rule:
 
 - inspect every row in `report.md`
-- inspect every screenshot whose row includes alerts or flagged keywords
+- reject the run if `report.json` contains any `flaggedKeywords`
+- inspect every screenshot whose row includes alerts and confirm the alert is expected product content rather than a load/runtime failure
 - do not treat screenshots as proof if they show the setup gate instead of the intended page
+- ask the same five questions for every screenshot:
+  1. does the route render the intended page, not a fallback or setup gate?
+  2. is the layout using the shared shell, page scaffold, and grid tokens rather than an ad-hoc width or spacing pattern?
+  3. are there any overlaps, clipped badges, floating actions on top of content, or broken card heights?
+  4. do async states look intentional: loading, empty, error, or success rather than a half-rendered surface?
+  5. does the page still look like the same product family as the rest of the app?
+- if any screenshot fails those questions, fix the page and rerun the proof set before treating the run as complete
+
+Fast zero-flag check:
+
+```bash
+node -e "const data=require('/tmp/bao-page-proof-'\"$(date +%F)\"'/report.json'); const flagged=data.filter((page)=>page.flaggedKeywords.length||page.alerts.some((alert)=>/failed|error/i.test(alert))); console.log(JSON.stringify(flagged, null, 2)); process.exit(flagged.length === 0 ? 0 : 1)"
+```
 
 ## Step 6: Verify export generation and styling
 
@@ -130,7 +153,54 @@ Recommended artifact capture pattern:
 mkdir -p /tmp/bao-export-proof
 ```
 
-Store the downloaded files there and render PDF page one to PNG for visual review.
+Reference API calls:
+
+```bash
+# Resume
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"pdf"}' \
+  http://127.0.0.1:3400/api/resumes/<resume-id>/export -o /tmp/bao-export-proof/resume.pdf
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"docx"}' \
+  http://127.0.0.1:3400/api/resumes/<resume-id>/export -o /tmp/bao-export-proof/resume.docx
+
+# Cover letter
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"pdf"}' \
+  http://127.0.0.1:3400/api/cover-letters/<cover-letter-id>/export -o /tmp/bao-export-proof/cover-letter.pdf
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"docx"}' \
+  http://127.0.0.1:3400/api/cover-letters/<cover-letter-id>/export -o /tmp/bao-export-proof/cover-letter.docx
+
+# Portfolio
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"pdf"}' \
+  http://127.0.0.1:3400/api/portfolio/export -o /tmp/bao-export-proof/portfolio.pdf
+curl -sS -X POST -H 'content-type: application/json' -d '{"format":"docx"}' \
+  http://127.0.0.1:3400/api/portfolio/export -o /tmp/bao-export-proof/portfolio.docx
+```
+
+Render the artifacts with the platform-native tools that match the actual document engines:
+
+```bash
+mkdir -p /tmp/bao-export-proof/previews /tmp/bao-export-proof/quicklook
+
+# PDF first-page previews
+pdftoppm -png -f 1 -singlefile /tmp/bao-export-proof/resume.pdf /tmp/bao-export-proof/previews/resume-pdf
+pdftoppm -png -f 1 -singlefile /tmp/bao-export-proof/cover-letter.pdf /tmp/bao-export-proof/previews/cover-letter-pdf
+pdftoppm -png -f 1 -singlefile /tmp/bao-export-proof/portfolio.pdf /tmp/bao-export-proof/previews/portfolio-pdf
+
+# Actual macOS Word renderer previews (preferred over HTML conversion)
+qlmanage -t -s 1000 -o /tmp/bao-export-proof/quicklook \
+  /tmp/bao-export-proof/resume.docx \
+  /tmp/bao-export-proof/cover-letter.docx \
+  /tmp/bao-export-proof/portfolio.docx
+```
+
+Review rule:
+
+- use the PDF PNGs to inspect spacing, hierarchy, and page density
+- use the Quick Look DOCX thumbnails to inspect the real Word-rendered layout
+- do not use HTML conversion as the final DOCX proof if Quick Look is available
+- the three export families should be visibly distinct:
+  - resume: compact and scan-first
+  - cover letter: formal one-page correspondence
+  - portfolio: showcase / case-study presentation
 
 ## Step 7: Verify automation and packaged runtime behavior
 
@@ -181,6 +251,14 @@ bun run verify:desktop-releases -- --release-root /tmp/bao-desktop-proof --targe
 
 Swap `macos` for the host target you actually generated.
 
+For the currently staged repo-local artifact set:
+
+```bash
+bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
+```
+
+That command validates the staged Tauri 2 artifacts, signatures, payload manifests, provenance, and checksums for the targets already present under `packages/desktop/releases/`.
+
 Important:
 
 - macOS can only generate macOS artifacts
@@ -204,6 +282,7 @@ Keep these together for each proof pass:
 - per-page screenshots
 - exported PDF and DOCX files
 - PDF first-page screenshots
+- Quick Look DOCX thumbnails
 - desktop artifact verification output
 
 ## Step 10: Fail conditions

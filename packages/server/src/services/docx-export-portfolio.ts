@@ -97,7 +97,7 @@ function buildPortfolioProjectsHeading(): Paragraph {
     heading: HeadingLevel.HEADING_1,
     children: [
       new TextRun({
-        text: "Selected Projects",
+        text: "Selected Case Studies",
         bold: true,
         size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
         color: PORTFOLIO_DOCX_PRIMARY_COLOR,
@@ -189,6 +189,18 @@ function buildPortfolioProjectParagraphs(project: PortfolioProject, index: numbe
     new Paragraph({
       children: [
         new TextRun({
+          text: `CASE STUDY ${index + 1}`,
+          bold: true,
+          size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+          color: PORTFOLIO_DOCX_ACCENT_COLOR,
+          font: PORTFOLIO_DOCX_FONT_FAMILY,
+        }),
+      ],
+      spacing: { before: 200, after: 20 },
+    }),
+    new Paragraph({
+      children: [
+        new TextRun({
           text: `${String(index + 1)}. ${project.title}`,
           bold: true,
           size: (DOCX_PORTFOLIO_FONT_HEADING_PT - 1) * 2,
@@ -245,6 +257,18 @@ function buildPortfolioDocumentSection(
     children: [
       buildPortfolioTitleParagraph(metadata.title),
       ...buildPortfolioAuthorParagraph(metadata.author),
+      new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({
+            text: "CASE STUDIES FOR GAME INDUSTRY HIRING",
+            bold: true,
+            size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
+            color: PORTFOLIO_DOCX_ACCENT_COLOR,
+            font: PORTFOLIO_DOCX_FONT_FAMILY,
+          }),
+        ],
+      }),
       ...buildPortfolioDescriptionParagraph(metadata),
       ...buildPortfolioContactParagraph(metadata),
       createDivider(PORTFOLIO_DOCX_LINE_COLOR),

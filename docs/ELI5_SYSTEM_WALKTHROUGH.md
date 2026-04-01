@@ -51,7 +51,7 @@ flowchart TD
   end
 
   subgraph ServerLayer["Server (Elysia)"]
-    Routes["17 route modules"]
+    Routes["17 public route modules"]
     Services["Services"]
     WSHandlers["WebSocket handlers"]
   end

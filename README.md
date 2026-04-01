@@ -240,7 +240,7 @@ flowchart LR
   end
 
   subgraph Server["@bao/server"]
-    API["17 route modules"]
+    API["17 public route modules"]
     WSHandlers["ws/chat · interview · automation"]
     Svcs["Services layer"]
   end
@@ -294,7 +294,7 @@ flowchart TD
   EdenClient -->|"type import"| ServerTypes
   ApiPrefix --> App["packages/server/src/app"]
   App --> Middleware["cors · swagger · rate-limit · logger · errorHandler · authGuard"]
-  App --> Routes["17 route modules from route-modules"]
+  App --> Routes["17 public route modules from route-modules.ts"]
   App --> WebSockets["ws: chat · interview · automation"]
   App --> Shared
   App --> ServerTypes
@@ -1181,6 +1181,12 @@ bun run release:refresh:all-os
 This assembles previously built artifacts into `packages/desktop/releases/`, regenerates checksums, and verifies provenance. The GitHub Actions desktop workflow now gates every native packaging job behind `bun ci`, `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`, then runs `bun run verify:desktop-runtime` and `bun run verify:desktop-releases -- --release` on each native host before artifact upload. MSI, AppImage, and Linux `.sig` outputs are **on by default** (unset env uses defaults); set workflow-dispatch inputs, repository variables, or `DESKTOP_RELEASE_*=false` to turn them off. Extra macOS architectures still use `DESKTOP_RELEASE_MACOS_ARCHITECTURES`.
 
 `--release` on macOS **always** runs `xcrun stapler validate` on the staged DMG (notarization ticket). For a **non-stapled** tree (typical local ad-hoc sign), run `bun run verify:desktop-releases` **without** `--release` so payload and checksum checks still run; use `--release` only when the DMG is stapled like a shipping build.
+
+For the step-by-step proof flow, including production-preview screenshots, PDF first-page rendering with `pdftoppm`, and Quick Look verification for DOCX exports, follow [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md). For the current staged desktop artifact set in this repository, the direct verifier command is:
+
+```bash
+bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
+```
 
 **Output locations:**
 - Raw build output: `packages/desktop/src-tauri/target/release/bundle`

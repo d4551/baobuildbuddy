@@ -7,39 +7,39 @@ export declare const aiRoutingBodySchema: Type.TObject<{
     readonly chat: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly interviewQuestions: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly interviewFeedback: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly resume: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly coverLetter: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly emailResponse: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly jobMatch: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly scrapeEnrichment: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
     readonly automationFieldMapping: Type.TObject<{
         readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
         readonly model: Type.TOptional<Type.TString>;
-    }, "provider", never>;
+    }, "provider", "model">;
 }, "chat" | "interviewQuestions" | "interviewFeedback" | "resume" | "coverLetter" | "emailResponse" | "jobMatch" | "scrapeEnrichment" | "automationFieldMapping", never>;
 export declare const brandSettingsPatchBodySchema: Type.TPartial<Type.TObject<{
     readonly name: Type.TString;
@@ -52,7 +52,7 @@ export declare const brandSettingsPatchBodySchema: Type.TPartial<Type.TObject<{
         readonly displayFontFamily: Type.TString;
         readonly bodyFontFamily: Type.TString;
         readonly monoFontFamily: Type.TString;
-    }, never, never>>;
+    }, "fontStylesheetUrl" | "displayFontFamily" | "bodyFontFamily" | "monoFontFamily", never>>;
     readonly lightTheme: Type.TPartial<Type.TObject<{
         readonly base100: Type.TString;
         readonly base200: Type.TString;
@@ -82,7 +82,7 @@ export declare const brandSettingsPatchBodySchema: Type.TPartial<Type.TObject<{
         readonly border: Type.TString;
         readonly depth: Type.TString;
         readonly noise: Type.TString;
-    }, never, never>>;
+    }, "error" | "success" | "base100" | "base200" | "base300" | "baseContent" | "primary" | "primaryContent" | "secondary" | "secondaryContent" | "accent" | "accentContent" | "neutral" | "neutralContent" | "info" | "infoContent" | "successContent" | "warning" | "warningContent" | "errorContent" | "radiusSelector" | "radiusField" | "radiusBox" | "sizeSelector" | "sizeField" | "border" | "depth" | "noise", never>>;
     readonly darkTheme: Type.TPartial<Type.TObject<{
         readonly base100: Type.TString;
         readonly base200: Type.TString;
@@ -112,14 +112,14 @@ export declare const brandSettingsPatchBodySchema: Type.TPartial<Type.TObject<{
         readonly border: Type.TString;
         readonly depth: Type.TString;
         readonly noise: Type.TString;
-    }, never, never>>;
+    }, "error" | "success" | "base100" | "base200" | "base300" | "baseContent" | "primary" | "primaryContent" | "secondary" | "secondaryContent" | "accent" | "accentContent" | "neutral" | "neutralContent" | "info" | "infoContent" | "successContent" | "warning" | "warningContent" | "errorContent" | "radiusSelector" | "radiusField" | "radiusBox" | "sizeSelector" | "sizeField" | "border" | "depth" | "noise", never>>;
     readonly content: Type.TPartial<Type.TObject<{
         readonly tagline: Type.TString;
         readonly defaultTitle: Type.TString;
         readonly defaultDescription: Type.TString;
         readonly contentOverrides: Type.TRecord<Type.TString, Type.TString>;
-    }, never, never>>;
-}, never, never>>;
+    }, "tagline" | "defaultTitle" | "defaultDescription" | "contentOverrides", never>>;
+}, "name" | "assistantName" | "apiName" | "logoPath" | "faviconPath" | "typography" | "lightTheme" | "darkTheme" | "content", never>>;
 export declare const languageBodySchema: Type.TUnion<(Type.TLiteral<"en-US"> | Type.TLiteral<"es-ES"> | Type.TLiteral<"fr-FR"> | Type.TLiteral<"ja-JP">)[]>;
 export declare const browserBodySchema: Type.TUnion<(Type.TLiteral<"chrome"> | Type.TLiteral<"chromium"> | Type.TLiteral<"edge">)[]>;
 export declare const emailTransportSecurityBodySchema: Type.TUnion<(Type.TLiteral<"tls"> | Type.TLiteral<"starttls"> | Type.TLiteral<"plain">)[]>;

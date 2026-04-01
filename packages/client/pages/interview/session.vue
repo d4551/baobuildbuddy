@@ -11,10 +11,12 @@ useSeoMeta({
 </script>
 
 <template>
-  <div>
-    <header class="mb-4">
-      <h1 class="text-3xl font-bold">{{ t("interviewSession.title") }}</h1>
-    </header>
+  <div class="space-y-6">
+    <PageHeaderBlock
+      title-id="interview-session-page-title"
+      :title="t('interviewSession.title')"
+      :description="t('interviewSession.subtitle')"
+    />
 
     <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="8" />
 
