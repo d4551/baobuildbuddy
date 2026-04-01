@@ -2,11 +2,15 @@ import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors"
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
-import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
-import { StandardSchemaV1 } from "baobox";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { gamificationService } from "../services/gamification-service";
+import {
+  awardXpBody,
+  challengeIdParams,
+  type AwardXpBody,
+  type ChallengeIdParams,
+  type RouteSetState,
+} from "./gamification-route-contracts";
 
 export const gamificationRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase),
@@ -17,7 +21,7 @@ export const gamificationRoutes = new Elysia({
   })
   .post(
     "/award-xp",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
       if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return { error: "amount and reason are required." };
@@ -38,12 +42,7 @@ export const gamificationRoutes = new Elysia({
       };
     },
     {
-      body: StandardSchemaV1(
-        Type.Object({
-          amount: Type.Number({ minimum: 0, maximum: 10000 }),
-          reason: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-        }),
-      ),
+      body: awardXpBody,
     },
   )
   .get("/achievements", async () => {
@@ -63,7 +62,7 @@ export const gamificationRoutes = new Elysia({
   })
   .post(
     "/challenges/:id/complete",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
       if (!params.id) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
@@ -87,11 +86,7 @@ export const gamificationRoutes = new Elysia({
       };
     },
     {
-      params: StandardSchemaV1(
-        Type.Object({
-          id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-        }),
-      ),
+      params: challengeIdParams,
     },
   )
   .get("/weekly", async () => {

@@ -20,6 +20,11 @@ import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import {
+  automationScreenshotParams,
+  type AutomationScreenshotParams,
+  type RouteSetState,
+} from "./automation-screenshot-route-contracts";
+import {
   type BinaryPayload,
   CACHE_CONTROL_PRIVATE_NO_STORE,
   createBinaryResponse,
@@ -110,7 +115,7 @@ export const automationScreenshotRoutes = new Elysia({
   tags: ["Automation"],
 }).get(
   "/:runId/:index",
-  async ({ params, set }) => {
+  async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: API_ERROR_INVALID_SCREENSHOT_INDEX };
@@ -150,15 +155,7 @@ export const automationScreenshotRoutes = new Elysia({
     return createScreenshotResponse(contents, extension);
   },
   {
-    params: StandardSchemaV1(
-      Type.Object(
-        {
-          runId: Type.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
-          index: Type.String({ minLength: 1, pattern: "^(0|[1-9][0-9]*)$" }),
-        },
-        { required: ["runId", "index"] },
-      ),
-    ),
+    params: automationScreenshotParams,
     response: {
       200: StandardSchemaV1(Type.Unknown()),
       400: StandardSchemaV1(

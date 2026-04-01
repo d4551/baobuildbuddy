@@ -1,4 +1,4 @@
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export type GenerateCoverLetterBody = {
     company: string;
     position: string;
@@ -14,6 +14,7 @@ export declare const coverLetterTemplateBodySchema: Type.TUnion<Type.TLiteral<"p
 export declare const coverLetterIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
+export type CoverLetterIdParams = StaticParse<typeof coverLetterIdParamsSchema>;
 export declare const coverLetterMutationBodySchema: Type.TObject<{
     readonly company: Type.TString;
     readonly position: Type.TString;
@@ -27,6 +28,7 @@ export declare const coverLetterMutationBodySchema: Type.TObject<{
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
 }>>;
+export type CoverLetterMutationBody = StaticParse<typeof coverLetterMutationBodySchema>;
 export declare const coverLetterUpdateBodySchema: Type.TObject<{
     readonly company: Type.TOptional<Type.TString>;
     readonly position: Type.TOptional<Type.TString>;
@@ -40,6 +42,7 @@ export declare const coverLetterUpdateBodySchema: Type.TObject<{
     readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
 }>>;
+export type CoverLetterUpdateBody = StaticParse<typeof coverLetterUpdateBodySchema>;
 export declare const generateCoverLetterBodySchema: Type.TObject<{
     readonly company: Type.TString;
     readonly position: Type.TString;
@@ -55,6 +58,8 @@ export declare const generateCoverLetterBodySchema: Type.TObject<{
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"professional" | "creative" | "gaming" | "executive" | "technical">[]>>;
     readonly save: Type.TOptional<Type.TBoolean>;
 }>>;
+export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterBodySchema>;
 export declare const coverLetterExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
 }, never, "format">;
+export type CoverLetterExportBody = StaticParse<typeof coverLetterExportBodySchema>;

@@ -16,7 +16,7 @@ import {
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
 import type { ResumeData } from "@bao/shared/types/resume";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 export type ResumeRouteSetState = {
   status?: number | string;
@@ -164,6 +164,7 @@ export const resumeIdParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type ResumeIdParams = StaticParse<typeof resumeIdParamsSchema>;
 
 export const resumeQuestionGenerateBodySchema = Type.Object(
   {
@@ -173,6 +174,7 @@ export const resumeQuestionGenerateBodySchema = Type.Object(
   },
   { required: ["targetRole"] },
 );
+export type ResumeQuestionGenerateRouteBody = StaticParse<typeof resumeQuestionGenerateBodySchema>;
 
 export const resumeQuestionSynthesizeBodySchema = Type.Object(
   {
@@ -190,15 +192,19 @@ export const resumeQuestionSynthesizeBodySchema = Type.Object(
   },
   { required: ["questionsAndAnswers"] },
 );
+export type ResumeQuestionSynthesizeRouteBody =
+  StaticParse<typeof resumeQuestionSynthesizeBodySchema>;
 
 export const resumeExportBodySchema = Type.Object({
   format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
   template: Type.Optional(resumeTemplateBodySchema),
 });
+export type ResumeExportRouteBody = StaticParse<typeof resumeExportBodySchema>;
 
 export const resumeEnhanceBodySchema = Type.Object({
   section: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
 });
+export type ResumeEnhanceRouteBody = StaticParse<typeof resumeEnhanceBodySchema>;
 
 export const resumeScoreBodySchema = Type.Object(
   {

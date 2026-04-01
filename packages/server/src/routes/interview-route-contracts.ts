@@ -11,7 +11,7 @@ import {
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
 import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;
@@ -23,6 +23,9 @@ export type SubmitResponseBody = {
   questionId?: string;
   questionIndex?: number;
   response: string;
+};
+export type RouteSetState = {
+  status?: number | string;
 };
 
 const interviewModeSchema = Type.Union([Type.Literal("studio"), Type.Literal("job")]);
@@ -102,6 +105,7 @@ export const createSessionBodySchema = Type.Object({
   studioId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   config: Type.Optional(sessionConfigSchema),
 });
+export type CreateSessionBody = StaticParse<typeof createSessionBodySchema>;
 
 export const interviewSessionParamsSchema = Type.Object(
   {
@@ -109,6 +113,7 @@ export const interviewSessionParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type InterviewSessionParams = StaticParse<typeof interviewSessionParamsSchema>;
 
 export const submitResponseBodySchema = Type.Object(
   {
@@ -118,3 +123,4 @@ export const submitResponseBodySchema = Type.Object(
   },
   { required: ["response"] },
 );
+export type SubmitResponseRouteBody = StaticParse<typeof submitResponseBodySchema>;

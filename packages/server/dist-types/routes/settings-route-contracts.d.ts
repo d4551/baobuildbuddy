@@ -1,4 +1,4 @@
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export declare const preferredProviderBodySchema: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
 export declare const resolveKnownProvider: (value?: string | null) => import("@bao/shared/types/ai").AIProviderType;
 export declare const settingsUpdateBodySchema: Type.TObject<{
@@ -596,6 +596,7 @@ export declare const settingsUpdateBodySchema: Type.TObject<{
         readonly connectionTimeoutSeconds: Type.TOptional<Type.TNumber>;
     }>>>;
 }>>;
+export type SettingsUpdateBody = StaticParse<typeof settingsUpdateBodySchema>;
 export declare const apiKeysUpdateBodySchema: Type.TObject<{
     readonly geminiApiKey: Type.TOptional<Type.TString>;
     readonly openaiApiKey: Type.TOptional<Type.TString>;
@@ -613,11 +614,13 @@ export declare const apiKeysUpdateBodySchema: Type.TObject<{
     readonly localModelName: Type.TOptional<Type.TString>;
     readonly emailTransportPassword: Type.TOptional<Type.TString>;
 }>>;
+export type ApiKeysUpdateBody = StaticParse<typeof apiKeysUpdateBodySchema>;
 export declare const providerTestBodySchema: Type.TObject<{
     readonly provider: Type.TUnion<Type.TLiteral<"openai" | "huggingface" | "local" | "gemini" | "claude">[]>;
     readonly key: Type.TString;
     readonly model: Type.TOptional<Type.TString>;
 }, "provider" | "key", "model">;
+export type ProviderTestBody = StaticParse<typeof providerTestBodySchema>;
 export declare const jobTaxonomyUpdateBodySchema: Type.TRequired<Type.TObject<{
     readonly keywords: Type.TArray<Type.TRequired<Type.TObject<{
         readonly id: Type.TString;
@@ -635,6 +638,7 @@ export declare const jobTaxonomyUpdateBodySchema: Type.TRequired<Type.TObject<{
         readonly enabled: Type.TBoolean;
     }, "id" | "sortOrder" | "enabled" | "studioType" | "keyword", never>>>;
 }, "keywords" | "studioRules", never>>;
+export type JobTaxonomyUpdateBody = StaticParse<typeof jobTaxonomyUpdateBodySchema>;
 export declare const importSettingsBodySchema: Type.TObject<{
     readonly version: Type.TLiteral<"1.0">;
     readonly exportedAt: Type.TString;
@@ -651,3 +655,4 @@ export declare const importSettingsBodySchema: Type.TObject<{
     readonly savedJobs: Type.TArray<Type.TRecursive<Type.TSchema>>;
     readonly skillMappings: Type.TArray<Type.TRecursive<Type.TSchema>>;
 }, "portfolio" | "gamification" | "applications" | "resumes" | "settings" | "chatHistory" | "coverLetters" | "interviewSessions" | "portfolioProjects" | "savedJobs" | "skillMappings" | "profile" | "version" | "exportedAt", never>;
+export type ImportSettingsBody = StaticParse<typeof importSettingsBodySchema>;

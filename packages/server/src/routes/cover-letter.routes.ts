@@ -3,6 +3,12 @@ import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/cons
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import {
+  type CoverLetterExportBody,
+  type CoverLetterIdParams,
+  type CoverLetterMutationBody,
+  type CoverLetterUpdateBody,
+  type GenerateCoverLetterRouteBody,
+  type RouteSetState,
   coverLetterExportBodySchema,
   coverLetterIdParamsSchema,
   coverLetterMutationBodySchema,
@@ -28,7 +34,7 @@ export const coverLetterRoutes = new Elysia({
   .get("/", async () => listCoverLetters())
   .post(
     "/",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
       const result = await createCoverLetter(body);
       set.status = result.statusCode;
       return result.coverLetter;
@@ -37,29 +43,51 @@ export const coverLetterRoutes = new Elysia({
   )
   .get(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
       const coverLetter = await getCoverLetterById(params.id, set);
       return coverLetter ?? { error: API_ERROR_COVER_LETTER_NOT_FOUND };
     },
     { params: StandardSchemaV1(coverLetterIdParamsSchema) },
   )
-  .put("/:id", async ({ params, body, set }) => updateCoverLetter(params.id, body, set), {
-    params: StandardSchemaV1(coverLetterIdParamsSchema),
-    body: StandardSchemaV1(coverLetterUpdateBodySchema),
-  })
-  .delete("/:id", async ({ params, set }) => deleteCoverLetter(params.id, set), {
+  .put(
+    "/:id",
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: CoverLetterIdParams;
+      body: CoverLetterUpdateBody;
+      set: RouteSetState;
+    }) => updateCoverLetter(params.id, body, set),
+    {
+      params: StandardSchemaV1(coverLetterIdParamsSchema),
+      body: StandardSchemaV1(coverLetterUpdateBodySchema),
+    },
+  )
+  .delete("/:id", async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
+    deleteCoverLetter(params.id, set), {
     params: StandardSchemaV1(coverLetterIdParamsSchema),
   })
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
-    async ({ body, set }) => handleGenerateCoverLetter(body, set),
+    async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
+      handleGenerateCoverLetter(body, set),
     {
       body: StandardSchemaV1(generateCoverLetterBodySchema),
     },
   )
   .post(
     "/:id/export",
-    async ({ params, body, set }) => exportCoverLetterAttachment(params.id, body.format, set),
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: CoverLetterIdParams;
+      body: CoverLetterExportBody;
+      set: RouteSetState;
+    }) => exportCoverLetterAttachment(params.id, body.format, set),
     {
       params: StandardSchemaV1(coverLetterIdParamsSchema),
       body: StandardSchemaV1(coverLetterExportBodySchema),

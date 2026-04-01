@@ -7,7 +7,7 @@ import {
   SCHEMA_MAX_LENGTH_MESSAGE,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
 
 export type AnalyzeResumeBody = {
@@ -68,6 +68,7 @@ export const chatRouteBodySchema = Type.Object(
   },
   { required: ["message"] },
 );
+export type ChatRouteBody = StaticParse<typeof chatRouteBodySchema>;
 
 export const analyzeResumeRouteBodySchema = Type.Object(
   {
@@ -76,6 +77,7 @@ export const analyzeResumeRouteBodySchema = Type.Object(
   },
   { required: ["resumeId"] },
 );
+export type AnalyzeResumeRouteBody = StaticParse<typeof analyzeResumeRouteBodySchema>;
 
 export const generateCoverLetterRouteBodySchema = Type.Object(
   {
@@ -86,6 +88,7 @@ export const generateCoverLetterRouteBodySchema = Type.Object(
   },
   { required: ["resumeId", "company", "position"] },
 );
+export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterRouteBodySchema>;
 
 export const matchJobsRouteBodySchema = Type.Object({
   resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
@@ -96,6 +99,7 @@ export const matchJobsRouteBodySchema = Type.Object({
   ),
   preferences: Type.Optional(aiPreferenceSchema),
 });
+export type MatchJobsRouteBody = StaticParse<typeof matchJobsRouteBodySchema>;
 
 export const automationActionRouteBodySchema = Type.Object(
   {
@@ -107,5 +111,6 @@ export const automationActionRouteBodySchema = Type.Object(
   },
   { required: ["action", "jobUrl", "resumeId"] },
 );
+export type AutomationActionRouteBody = StaticParse<typeof automationActionRouteBodySchema>;
 
 export const usageTailLimit = AI_CHAT_CONTEXT_TAIL_LIMIT;

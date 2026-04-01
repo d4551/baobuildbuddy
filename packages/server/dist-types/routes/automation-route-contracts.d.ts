@@ -1,7 +1,7 @@
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 declare const AUTOMATION_STATUS_PENDING: "pending", AUTOMATION_STATUS_SUCCESS: "success", AUTOMATION_STATUS_ERROR: "error";
 export type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
 export type JobApplyRequestBody = {
@@ -23,6 +23,9 @@ export type ScheduleEmailResponseRequestBody = EmailResponseRequest & {
 export type ScheduleScrapeRequestBody = {
     target: AutomationScrapeTarget;
     runAt: string;
+};
+export type RouteSetState = {
+    status?: number | string;
 };
 export declare const RUN_ID_PATTERN: RegExp;
 export declare const AUTOMATION_TYPE_SCHEMA: Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>;
@@ -168,6 +171,7 @@ export declare const jobApplyBodySchema: Type.TObject<{
     readonly jobId: Type.TOptional<Type.TString>;
     readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
 }>>;
+export type JobApplyBody = StaticParse<typeof jobApplyBodySchema>;
 export declare const scheduledJobApplyBodySchema: Type.TObject<{
     readonly jobUrl: Type.TString;
     readonly resumeId: Type.TString;
@@ -183,6 +187,7 @@ export declare const scheduledJobApplyBodySchema: Type.TObject<{
     readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
     readonly runAt: Type.TString;
 }>>;
+export type ScheduledJobApplyBody = StaticParse<typeof scheduledJobApplyBodySchema>;
 export declare const emailResponseBodySchema: Type.TObject<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
@@ -198,6 +203,7 @@ export declare const emailResponseBodySchema: Type.TObject<{
     readonly recipientEmail: Type.TOptional<Type.TString>;
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
 }>>;
+export type EmailResponseBody = StaticParse<typeof emailResponseBodySchema>;
 export declare const scheduledEmailResponseBodySchema: Type.TObject<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
@@ -215,13 +221,16 @@ export declare const scheduledEmailResponseBodySchema: Type.TObject<{
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
     readonly runAt: Type.TString;
 }>>;
+export type ScheduledEmailResponseBody = StaticParse<typeof scheduledEmailResponseBodySchema>;
 export declare const scrapeBodySchema: Type.TObject<{
     readonly target: Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>;
 }, "target", never>;
+export type ScrapeBody = StaticParse<typeof scrapeBodySchema>;
 export declare const scheduledScrapeBodySchema: Type.TObject<{
     readonly target: Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>;
     readonly runAt: Type.TString;
 }, "target" | "runAt", never>;
+export type ScheduledScrapeBody = StaticParse<typeof scheduledScrapeBodySchema>;
 export declare const automationRunQuerySchema: Type.TObject<{
     readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>>;
     readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>>;
@@ -229,7 +238,9 @@ export declare const automationRunQuerySchema: Type.TObject<{
     readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>>;
     readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>>;
 }>>;
+export type AutomationRunQuery = StaticParse<typeof automationRunQuerySchema>;
 export declare const automationRunIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
+export type AutomationRunIdParams = StaticParse<typeof automationRunIdParamsSchema>;
 export { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, AUTOMATION_STATUS_ERROR, AUTOMATION_STATUS_PENDING, AUTOMATION_STATUS_SUCCESS, };

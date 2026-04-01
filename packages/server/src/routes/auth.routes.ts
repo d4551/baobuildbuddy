@@ -16,9 +16,7 @@ import {
 } from "@bao/shared/constants/auth";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
-import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "../config/env";
@@ -29,11 +27,13 @@ import {
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
 import { resolveRateLimitClientKey } from "../utils/rate-limit";
+import {
+  authBootstrapBody,
+  type AuthBootstrapBody,
+  type RouteSetState,
+} from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /=+$/u;
-const authBootstrapBodySchema = Type.Object({
-  setupToken: Type.Optional(Type.String({ minLength: 1 })),
-});
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes))
@@ -102,7 +102,15 @@ export const authRoutes = new Elysia({
       )
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
-        async ({ body, request, status }) => {
+        async ({
+          body,
+          request,
+          set,
+        }: {
+          body: AuthBootstrapBody;
+          request: Request;
+          set: RouteSetState;
+        }) => {
           if (config.disableAuth) {
             return { configured: false, message: API_MESSAGE_AUTH_DISABLED };
           }
@@ -119,21 +127,24 @@ export const authRoutes = new Elysia({
 
           const expectedSetupToken = config.authSetupToken;
           if (!expectedSetupToken) {
-            return status(HTTP_STATUS_FORBIDDEN, {
+            set.status = HTTP_STATUS_FORBIDDEN;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
-            });
+            };
           }
 
           const providedSetupToken = resolveSetupToken(request, body);
           if (!providedSetupToken) {
-            return status(HTTP_STATUS_BAD_REQUEST, {
+            set.status = HTTP_STATUS_BAD_REQUEST;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
-            });
+            };
           }
           if (providedSetupToken !== expectedSetupToken) {
-            return status(HTTP_STATUS_FORBIDDEN, {
+            set.status = HTTP_STATUS_FORBIDDEN;
+            return {
               error: API_ERROR_AUTH_SETUP_TOKEN_INVALID,
-            });
+            };
           }
 
           const apiKey = generateApiKey();
@@ -149,7 +160,7 @@ export const authRoutes = new Elysia({
           };
         },
         {
-          body: StandardSchemaV1(authBootstrapBodySchema),
+          body: authBootstrapBody,
         },
       ),
   );

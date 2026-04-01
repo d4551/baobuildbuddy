@@ -21,7 +21,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
@@ -61,6 +61,9 @@ export type ScheduleEmailResponseRequestBody = EmailResponseRequest & {
 export type ScheduleScrapeRequestBody = {
   target: AutomationScrapeTarget;
   runAt: string;
+};
+export type RouteSetState = {
+  status?: number | string;
 };
 
 export const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
@@ -189,6 +192,7 @@ export const jobApplyBodySchema = Type.Object(
   },
   { required: ["jobUrl", "resumeId"] },
 );
+export type JobApplyBody = StaticParse<typeof jobApplyBodySchema>;
 
 export const scheduledJobApplyBodySchema = Type.Object(
   {
@@ -201,6 +205,7 @@ export const scheduledJobApplyBodySchema = Type.Object(
   },
   { required: ["jobUrl", "resumeId", "runAt"] },
 );
+export type ScheduledJobApplyBody = StaticParse<typeof scheduledJobApplyBodySchema>;
 
 export const emailResponseBodySchema = Type.Object(
   {
@@ -215,6 +220,7 @@ export const emailResponseBodySchema = Type.Object(
   },
   { required: ["subject", "message"] },
 );
+export type EmailResponseBody = StaticParse<typeof emailResponseBodySchema>;
 
 export const scheduledEmailResponseBodySchema = Type.Object(
   {
@@ -230,6 +236,7 @@ export const scheduledEmailResponseBodySchema = Type.Object(
   },
   { required: ["subject", "message", "runAt"] },
 );
+export type ScheduledEmailResponseBody = StaticParse<typeof scheduledEmailResponseBodySchema>;
 
 export const scrapeBodySchema = Type.Object(
   {
@@ -237,6 +244,7 @@ export const scrapeBodySchema = Type.Object(
   },
   { required: ["target"] },
 );
+export type ScrapeBody = StaticParse<typeof scrapeBodySchema>;
 
 export const scheduledScrapeBodySchema = Type.Object(
   {
@@ -245,11 +253,13 @@ export const scheduledScrapeBodySchema = Type.Object(
   },
   { required: ["target", "runAt"] },
 );
+export type ScheduledScrapeBody = StaticParse<typeof scheduledScrapeBodySchema>;
 
 export const automationRunQuerySchema = Type.Object({
   type: Type.Optional(AUTOMATION_TYPE_SCHEMA),
   status: Type.Optional(AUTOMATION_STATUS_SCHEMA),
 });
+export type AutomationRunQuery = StaticParse<typeof automationRunQuerySchema>;
 
 export const automationRunIdParamsSchema = Type.Object(
   {
@@ -257,6 +267,7 @@ export const automationRunIdParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type AutomationRunIdParams = StaticParse<typeof automationRunIdParamsSchema>;
 
 export {
   AUTOMATION_RUN_STATUSES,

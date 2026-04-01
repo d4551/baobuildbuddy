@@ -22,10 +22,15 @@ import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
+  type ApiKeysUpdateBody,
   apiKeysUpdateBodySchema,
   importSettingsBodySchema,
+  type ImportSettingsBody,
   jobTaxonomyUpdateBodySchema,
+  type JobTaxonomyUpdateBody,
   providerTestBodySchema,
+  type ProviderTestBody,
+  type SettingsUpdateBody,
   settingsUpdateBodySchema,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
@@ -68,7 +73,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/",
-        async ({ body, set }) => {
+        async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
             set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -97,7 +102,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/job-taxonomy",
-        async ({ body }) => {
+        async ({ body }: { body: JobTaxonomyUpdateBody }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
           return { success: true, jobTaxonomy };
         },
@@ -107,7 +112,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/api-keys",
-        async ({ body }) => {
+        async ({ body }: { body: ApiKeysUpdateBody }) => {
           await readOrCreateSettingsRow();
           await db
             .update(settings)
@@ -120,16 +125,17 @@ export const settingsRoutes = new Elysia({
           body: StandardSchemaV1(apiKeysUpdateBodySchema),
         },
       )
-      .post("/test-api-key", async ({ body }) => testProviderConnection(body), {
-        body: StandardSchemaV1(providerTestBodySchema),
-      })
+      .post("/test-api-key", async ({ body }: { body: ProviderTestBody }) =>
+        testProviderConnection(body), {
+          body: StandardSchemaV1(providerTestBodySchema),
+        })
       .get("/export", async () => {
         const { dataService } = await import("../services/data-service");
         return dataService.exportAll();
       })
       .post(
         "/import",
-        async ({ body }) => {
+        async ({ body }: { body: ImportSettingsBody }) => {
           const { dataService } = await import("../services/data-service");
           return dataService.importAll({
             version: body.version,

@@ -6,7 +6,7 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_TINY,
 } from "@bao/shared/constants/schema-limits";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 export type JobListQuery = {
   q?: string;
@@ -38,6 +38,7 @@ export const jobIdParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type JobIdParams = StaticParse<typeof jobIdParamsSchema>;
 
 export const saveJobBodySchema = Type.Object(
   {
@@ -45,6 +46,7 @@ export const saveJobBodySchema = Type.Object(
   },
   { required: ["jobId"] },
 );
+export type SaveJobBody = StaticParse<typeof saveJobBodySchema>;
 
 export const savedJobParamsSchema = Type.Object(
   {
@@ -52,6 +54,7 @@ export const savedJobParamsSchema = Type.Object(
   },
   { required: ["jobId"] },
 );
+export type SavedJobParams = StaticParse<typeof savedJobParamsSchema>;
 
 export const applyJobBodySchema = Type.Object(
   {
@@ -60,6 +63,7 @@ export const applyJobBodySchema = Type.Object(
   },
   { required: ["jobId"] },
 );
+export type ApplyJobBody = StaticParse<typeof applyJobBodySchema>;
 
 export const updateApplicationParamsSchema = Type.Object(
   {
@@ -67,10 +71,12 @@ export const updateApplicationParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type UpdateApplicationParams = StaticParse<typeof updateApplicationParamsSchema>;
 
 export const updateApplicationBodySchema = Type.Object({
   status: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
   notes: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
 });
+export type UpdateApplicationBody = StaticParse<typeof updateApplicationBodySchema>;
 
 export { HTTP_STATUS_CREATED };

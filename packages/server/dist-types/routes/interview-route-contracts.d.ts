@@ -1,5 +1,5 @@
 import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
     voiceSettings?: Partial<VoiceSettings>;
 };
@@ -8,6 +8,9 @@ export type SubmitResponseBody = {
     questionId?: string;
     questionIndex?: number;
     response: string;
+};
+export type RouteSetState = {
+    status?: number | string;
 };
 export declare const sessionConfigSchema: Type.TObject<{
     readonly roleType: Type.TOptional<Type.TString>;
@@ -395,9 +398,11 @@ export declare const createSessionBodySchema: Type.TObject<{
         }>>>;
     }>>>;
 }>>;
+export type CreateSessionBody = StaticParse<typeof createSessionBodySchema>;
 export declare const interviewSessionParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
+export type InterviewSessionParams = StaticParse<typeof interviewSessionParamsSchema>;
 export declare const submitResponseBodySchema: Type.TObject<{
     readonly questionId: Type.TOptional<Type.TString>;
     readonly questionIndex: Type.TOptional<Type.TInteger>;
@@ -407,3 +412,4 @@ export declare const submitResponseBodySchema: Type.TObject<{
     readonly questionIndex: Type.TOptional<Type.TInteger>;
     readonly response: Type.TString;
 }>>;
+export type SubmitResponseRouteBody = StaticParse<typeof submitResponseBodySchema>;

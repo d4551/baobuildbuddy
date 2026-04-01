@@ -4,7 +4,7 @@ import {
   SCHEMA_MAX_LENGTH_MICRO,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 
 export type GenerateCoverLetterBody = {
   company: string;
@@ -29,6 +29,7 @@ export const coverLetterIdParamsSchema = Type.Object(
   },
   { required: ["id"] },
 );
+export type CoverLetterIdParams = StaticParse<typeof coverLetterIdParamsSchema>;
 
 export const coverLetterMutationBodySchema = Type.Object(
   {
@@ -40,6 +41,7 @@ export const coverLetterMutationBodySchema = Type.Object(
   },
   { required: ["company", "position"] },
 );
+export type CoverLetterMutationBody = StaticParse<typeof coverLetterMutationBodySchema>;
 
 export const coverLetterUpdateBodySchema = Type.Object({
   company: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
@@ -48,6 +50,7 @@ export const coverLetterUpdateBodySchema = Type.Object({
   content: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   template: Type.Optional(coverLetterTemplateBodySchema),
 });
+export type CoverLetterUpdateBody = StaticParse<typeof coverLetterUpdateBodySchema>;
 
 export const generateCoverLetterBodySchema = Type.Object(
   {
@@ -60,7 +63,9 @@ export const generateCoverLetterBodySchema = Type.Object(
   },
   { required: ["company", "position"] },
 );
+export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterBodySchema>;
 
 export const coverLetterExportBodySchema = Type.Object({
   format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });
+export type CoverLetterExportBody = StaticParse<typeof coverLetterExportBodySchema>;

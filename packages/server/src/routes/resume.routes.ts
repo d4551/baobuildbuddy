@@ -19,12 +19,20 @@ import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
 import {
+  type ResumeEnhanceRouteBody,
+  type ResumeExportRouteBody,
+  type ResumeIdParams,
   resumeEnhanceBodySchema,
   resumeExportBodySchema,
   resumeIdParamsSchema,
+  type ResumeMutationBody,
   resumeMutationBodySchema,
+  type ResumeQuestionGenerateRouteBody,
   resumeQuestionGenerateBodySchema,
+  type ResumeQuestionSynthesizeRouteBody,
   resumeQuestionSynthesizeBodySchema,
+  type ResumeRouteSetState,
+  type ResumeScoreBody,
   resumeScoreBodySchema,
 } from "./resume-route-contracts";
 import {
@@ -41,7 +49,7 @@ export const resumeRoutes = new Elysia({
 })
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
-    async ({ body, set }) => {
+    async ({ body, set }: { body: ResumeQuestionGenerateRouteBody; set: ResumeRouteSetState }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
           targetRole: body.targetRole,
@@ -64,7 +72,13 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
-    async ({ body, set }) => {
+    async ({
+      body,
+      set,
+    }: {
+      body: ResumeQuestionSynthesizeRouteBody;
+      set: ResumeRouteSetState;
+    }) => {
       const synthesizeResult = await settle(
         cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
       );
@@ -106,7 +120,7 @@ export const resumeRoutes = new Elysia({
   })
   .post(
     "/",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: ResumeMutationBody; set: ResumeRouteSetState }) => {
       const created = await resumeService.createResume(buildResumeCreatePayload(body));
       set.status = HTTP_STATUS_CREATED;
       gamificationService.trackActionFireAndForget(
@@ -122,7 +136,7 @@ export const resumeRoutes = new Elysia({
   )
   .get(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -138,7 +152,15 @@ export const resumeRoutes = new Elysia({
   )
   .put(
     "/:id",
-    async ({ params, body, set }) => {
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: ResumeIdParams;
+      body: ResumeMutationBody;
+      set: ResumeRouteSetState;
+    }) => {
       const updated = await resumeService.updateResume(params.id, buildResumeUpdatePayload(body));
       if (!updated) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -153,7 +175,7 @@ export const resumeRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -166,13 +188,33 @@ export const resumeRoutes = new Elysia({
       params: StandardSchemaV1(resumeIdParamsSchema),
     },
   )
-  .post("/:id/export", async ({ params, body, set }) => exportResumeAsset(params.id, body, set), {
-    params: StandardSchemaV1(resumeIdParamsSchema),
-    body: StandardSchemaV1(resumeExportBodySchema),
-  })
+  .post(
+    "/:id/export",
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: ResumeIdParams;
+      body: ResumeExportRouteBody;
+      set: ResumeRouteSetState;
+    }) => exportResumeAsset(params.id, body, set),
+    {
+      params: StandardSchemaV1(resumeIdParamsSchema),
+      body: StandardSchemaV1(resumeExportBodySchema),
+    },
+  )
   .post(
     "/:id/ai-enhance",
-    async ({ params, body, set }) => enhanceResumeWithAi(params.id, body, set),
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: ResumeIdParams;
+      body: ResumeEnhanceRouteBody;
+      set: ResumeRouteSetState;
+    }) => enhanceResumeWithAi(params.id, body, set),
     {
       params: StandardSchemaV1(resumeIdParamsSchema),
       body: StandardSchemaV1(resumeEnhanceBodySchema),
@@ -180,7 +222,15 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/ai-score",
-    async ({ params, body, set }) => handleResumeAiScore(params.id, body, set),
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: ResumeIdParams;
+      body: ResumeScoreBody;
+      set: ResumeRouteSetState;
+    }) => handleResumeAiScore(params.id, body, set),
     {
       params: StandardSchemaV1(resumeIdParamsSchema),
       body: StandardSchemaV1(resumeScoreBodySchema),

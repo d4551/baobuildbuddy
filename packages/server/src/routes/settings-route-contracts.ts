@@ -7,7 +7,7 @@ import {
   SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
   SCHEMA_MAX_LENGTH_SETTINGS_URL,
 } from "@bao/shared/constants/schema-limits";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 import { DATA_EXPORT_VERSION } from "../services/data-service-contracts";
 import {
   aiRoutingBodySchema,
@@ -78,6 +78,7 @@ export const settingsUpdateBodySchema = Type.Object({
     }),
   ),
 });
+export type SettingsUpdateBody = StaticParse<typeof settingsUpdateBodySchema>;
 
 export const apiKeysUpdateBodySchema = Type.Object({
   geminiApiKey: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
@@ -88,6 +89,7 @@ export const apiKeysUpdateBodySchema = Type.Object({
   localModelName: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
   emailTransportPassword: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_API_KEY })),
 });
+export type ApiKeysUpdateBody = StaticParse<typeof apiKeysUpdateBodySchema>;
 
 export const providerTestBodySchema = Type.Object(
   {
@@ -97,8 +99,10 @@ export const providerTestBodySchema = Type.Object(
   },
   { required: ["provider", "key"] },
 );
+export type ProviderTestBody = StaticParse<typeof providerTestBodySchema>;
 
 export const jobTaxonomyUpdateBodySchema = jobTaxonomySettingsBodySchema;
+export type JobTaxonomyUpdateBody = StaticParse<typeof jobTaxonomyUpdateBodySchema>;
 
 export const importSettingsBodySchema = Type.Object(
   {
@@ -136,3 +140,4 @@ export const importSettingsBodySchema = Type.Object(
     ],
   },
 );
+export type ImportSettingsBody = StaticParse<typeof importSettingsBodySchema>;

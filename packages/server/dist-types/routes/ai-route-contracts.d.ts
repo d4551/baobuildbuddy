@@ -1,4 +1,4 @@
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export type AnalyzeResumeBody = {
     resumeId: string;
     jobId?: string;
@@ -155,16 +155,19 @@ export declare const chatRouteBodySchema: Type.TObject<{
         }, "hasResumes" | "resumeCount" | "hasJobs" | "jobCount" | "hasStudios" | "studioCount" | "hasInterviewSessions" | "interviewSessionCount" | "hasPortfolioProjects" | "portfolioProjectCount", never>;
     }>>>;
 }>>;
+export type ChatRouteBody = StaticParse<typeof chatRouteBodySchema>;
 export declare const analyzeResumeRouteBodySchema: Type.TObject<{
     readonly resumeId: Type.TString;
     readonly jobId: Type.TOptional<Type.TString>;
 }, "resumeId", "jobId">;
+export type AnalyzeResumeRouteBody = StaticParse<typeof analyzeResumeRouteBodySchema>;
 export declare const generateCoverLetterRouteBodySchema: Type.TObject<{
     readonly resumeId: Type.TString;
     readonly jobId: Type.TOptional<Type.TString>;
     readonly company: Type.TString;
     readonly position: Type.TString;
 }, "resumeId" | "company" | "position", "jobId">;
+export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterRouteBodySchema>;
 export declare const matchJobsRouteBodySchema: Type.TObject<{
     readonly resumeId: Type.TOptional<Type.TString>;
     readonly skills: Type.TOptional<Type.TArray<Type.TString>>;
@@ -174,6 +177,7 @@ export declare const matchJobsRouteBodySchema: Type.TObject<{
     readonly skills: Type.TOptional<Type.TArray<Type.TString>>;
     readonly preferences: Type.TOptional<Type.TRecord<Type.TString, Type.TUnion<(Type.TString | Type.TBoolean | Type.TNumber)[]>>>;
 }>>;
+export type MatchJobsRouteBody = StaticParse<typeof matchJobsRouteBodySchema>;
 export declare const automationActionRouteBodySchema: Type.TObject<{
     readonly action: Type.TString;
     readonly jobUrl: Type.TString;
@@ -187,4 +191,5 @@ export declare const automationActionRouteBodySchema: Type.TObject<{
     readonly coverLetterId: Type.TOptional<Type.TString>;
     readonly jobId: Type.TOptional<Type.TString>;
 }>>;
+export type AutomationActionRouteBody = StaticParse<typeof automationActionRouteBodySchema>;
 export declare const usageTailLimit = 10;

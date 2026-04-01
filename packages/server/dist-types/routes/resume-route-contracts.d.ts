@@ -1,5 +1,5 @@
 import type { ResumeData } from "@bao/shared/types/resume";
-import Type from "baobox";
+import Type, { type StaticParse } from "baobox";
 export type ResumeRouteSetState = {
     status?: number | string;
 };
@@ -272,6 +272,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
 export declare const resumeIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
 }, "id", never>;
+export type ResumeIdParams = StaticParse<typeof resumeIdParamsSchema>;
 export declare const resumeQuestionGenerateBodySchema: Type.TObject<{
     readonly targetRole: Type.TString;
     readonly studioName: Type.TOptional<Type.TString>;
@@ -281,6 +282,7 @@ export declare const resumeQuestionGenerateBodySchema: Type.TObject<{
     readonly studioName: Type.TOptional<Type.TString>;
     readonly experienceLevel: Type.TOptional<Type.TString>;
 }>>;
+export type ResumeQuestionGenerateRouteBody = StaticParse<typeof resumeQuestionGenerateBodySchema>;
 export declare const resumeQuestionSynthesizeBodySchema: Type.TObject<{
     readonly questionsAndAnswers: Type.TArray<Type.TObject<{
         readonly id: Type.TString;
@@ -289,6 +291,7 @@ export declare const resumeQuestionSynthesizeBodySchema: Type.TObject<{
         readonly category: Type.TString;
     }, "id" | "category" | "question" | "answer", never>>;
 }, "questionsAndAnswers", never>;
+export type ResumeQuestionSynthesizeRouteBody = StaticParse<typeof resumeQuestionSynthesizeBodySchema>;
 export declare const resumeExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
@@ -296,9 +299,11 @@ export declare const resumeExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
     readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
 }>>;
+export type ResumeExportRouteBody = StaticParse<typeof resumeExportBodySchema>;
 export declare const resumeEnhanceBodySchema: Type.TObject<{
     readonly section: Type.TOptional<Type.TString>;
 }, never, "section">;
+export type ResumeEnhanceRouteBody = StaticParse<typeof resumeEnhanceBodySchema>;
 export declare const resumeScoreBodySchema: Type.TObject<{
     readonly jobId: Type.TString;
 }, "jobId", never>;

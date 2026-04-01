@@ -11,12 +11,19 @@ import { Elysia } from "elysia";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
 import {
+  type ApplyJobBody,
   applyJobBodySchema,
+  type JobIdParams,
   jobIdParamsSchema,
   jobsListQuerySchema,
+  type JobListQuery,
+  type SaveJobBody,
   saveJobBodySchema,
+  type SavedJobParams,
   savedJobParamsSchema,
+  type UpdateApplicationBody,
   updateApplicationBodySchema,
+  type UpdateApplicationParams,
   updateApplicationParamsSchema,
 } from "./jobs-route-contracts";
 import {
@@ -37,12 +44,12 @@ export const jobsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.jobsBase),
   tags: ["Jobs"],
 })
-  .get("/", async ({ query }) => listJobs(query), {
+  .get("/", async ({ query }: { query: JobListQuery }) => listJobs(query), {
     query: StandardSchemaV1(jobsListQuerySchema),
   })
   .get(
     "/:id",
-    async ({ params, set }) => {
+    async ({ params, set }: { params: JobIdParams; set: { status?: number | string } }) => {
       const job = await getJobById(params.id);
       if (!job) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -56,7 +63,7 @@ export const jobsRoutes = new Elysia({
   )
   .post(
     "/save",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: SaveJobBody; set: { status?: number | string } }) => {
       const result = await saveJob(body.jobId);
       if (result.status !== null) {
         set.status = result.status;
@@ -67,13 +74,14 @@ export const jobsRoutes = new Elysia({
       body: StandardSchemaV1(saveJobBodySchema),
     },
   )
-  .delete("/save/:jobId", async ({ params }) => deleteSavedJob(params.jobId), {
+  .delete("/save/:jobId", async ({ params }: { params: SavedJobParams }) =>
+    deleteSavedJob(params.jobId), {
     params: StandardSchemaV1(savedJobParamsSchema),
   })
   .get("/saved", async () => listSavedJobs())
   .post(
     "/apply",
-    async ({ body, set }) => {
+    async ({ body, set }: { body: ApplyJobBody; set: { status?: number | string } }) => {
       const result = await createApplication(body.jobId, body.notes ?? "");
       if (result.status !== null) {
         set.status = result.status;
@@ -86,7 +94,15 @@ export const jobsRoutes = new Elysia({
   )
   .put(
     "/apply/:id",
-    async ({ params, body, set }) => {
+    async ({
+      params,
+      body,
+      set,
+    }: {
+      params: UpdateApplicationParams;
+      body: UpdateApplicationBody;
+      set: { status?: number | string };
+    }) => {
       const result = await updateApplication(params.id, body.status, body.notes);
       if (result.status !== null) {
         set.status = result.status;

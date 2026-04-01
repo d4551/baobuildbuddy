@@ -1,13 +1,14 @@
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
-import { StandardSchemaV1 } from "baobox";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
-
-const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
-type SearchType = (typeof searchTypes)[number];
-const searchTypeSchema = Type.Union(searchTypes.map((searchType) => Type.Literal(searchType)));
+import {
+  searchAutocompleteQuery,
+  type SearchAutocompleteQuery,
+  searchQuery,
+  type SearchQuery,
+  searchTypes,
+  type SearchType,
+} from "./search-route-contracts";
 
 const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | undefined => {
   if (!value) {
@@ -28,7 +29,7 @@ export const searchRoutes = new Elysia({
 })
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
-    ({ query }) => {
+    ({ query }: { query: SearchQuery }) => {
       const q = query.q || "";
       if (q.length < 2) {
         return {
@@ -42,30 +43,16 @@ export const searchRoutes = new Elysia({
       return searchService.searchAll(q, types);
     },
     {
-      query: StandardSchemaV1(
-        Type.Object({
-          q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-          types: Type.Optional(
-            Type.Union([
-              Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-              Type.Array(searchTypeSchema),
-            ]),
-          ),
-        }),
-      ),
+      query: searchQuery,
     },
   )
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
-    async ({ query }) => {
+    async ({ query }: { query: SearchAutocompleteQuery }) => {
       const prefix = query.prefix || "";
       return await searchService.autocomplete(prefix);
     },
     {
-      query: StandardSchemaV1(
-        Type.Object({
-          prefix: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-        }),
-      ),
+      query: searchAutocompleteQuery,
     },
   );

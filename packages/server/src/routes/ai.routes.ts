@@ -14,6 +14,12 @@ import {
 } from "./ai-route-actions";
 import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
+  type AnalyzeResumeRouteBody,
+  type AutomationActionRouteBody,
+  type ChatRouteBody,
+  type GenerateCoverLetterRouteBody,
+  type MatchJobsRouteBody,
+  type RouteSetState,
   analyzeResumeRouteBodySchema,
   automationActionRouteBodySchema,
   chatRouteBodySchema,
@@ -32,20 +38,28 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       generator: (request) => resolveRateLimitClientKey(request),
     }),
   )
-  .post("/chat", async ({ body, set }) => handleChatRoute(body, set), {
+  .post("/chat", async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
+    handleChatRoute(body, set), {
     body: StandardSchemaV1(chatRouteBodySchema),
   })
-  .post("/analyze-resume", async ({ body, set }) => handleAnalyzeResumeRoute(body, set), {
-    body: StandardSchemaV1(analyzeResumeRouteBodySchema),
-  })
+  .post(
+    "/analyze-resume",
+    async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
+      handleAnalyzeResumeRoute(body, set),
+    {
+      body: StandardSchemaV1(analyzeResumeRouteBodySchema),
+    },
+  )
   .post(
     "/generate-cover-letter",
-    async ({ body, set }) => handleGenerateCoverLetterRoute(body, set),
+    async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
+      handleGenerateCoverLetterRoute(body, set),
     {
       body: StandardSchemaV1(generateCoverLetterRouteBodySchema),
     },
   )
-  .post("/match-jobs", async ({ body, set }) => handleMatchJobsRoute(body, set), {
+  .post("/match-jobs", async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
+    handleMatchJobsRoute(body, set), {
     body: StandardSchemaV1(matchJobsRouteBodySchema),
   })
   .get("/models", async () => buildProviderModelsResponse())
@@ -64,6 +78,11 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       })),
     };
   })
-  .post("/automation-action", async ({ body, set }) => handleAutomationActionRoute(body, set), {
-    body: StandardSchemaV1(automationActionRouteBodySchema),
-  });
+  .post(
+    "/automation-action",
+    async ({ body, set }: { body: AutomationActionRouteBody; set: RouteSetState }) =>
+      handleAutomationActionRoute(body, set),
+    {
+      body: StandardSchemaV1(automationActionRouteBodySchema),
+    },
+  );

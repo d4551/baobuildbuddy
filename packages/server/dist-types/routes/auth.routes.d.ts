@@ -71,19 +71,18 @@ export declare const authRoutes: Elysia<string, {
                     200: {
                         configured: boolean;
                         message: string;
+                        error?: undefined;
+                        apiKey?: undefined;
+                    } | {
+                        error: string;
+                        configured?: undefined;
+                        message?: undefined;
                         apiKey?: undefined;
                     } | {
                         configured: boolean;
                         apiKey: string;
                         message: string;
-                    };
-                    400: {
-                        readonly error: "Setup token is required";
-                    };
-                    403: {
-                        readonly error: "Setup token bootstrap is unavailable";
-                    } | {
-                        readonly error: "Setup token is invalid";
+                        error?: undefined;
                     };
                     422: {
                         type: "validation";
