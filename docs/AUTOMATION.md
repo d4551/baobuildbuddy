@@ -17,8 +17,8 @@ flowchart LR
   ScraperRoutes --> ScraperService["scraper-service.ts"]
   Service --> RunnerProtocol["automation/rpa-runner-protocol.ts"]
   Service --> RunnerProcess["automation/rpa-runner-process.ts"]
-  ScraperService --> Runner
-  Runner --> Scripts["packages/scraper/src/scripts/*.ts"]
+  ScraperService --> RunnerProcess
+  RunnerProcess --> Scripts["packages/scraper/src/scripts/*.ts"]
   Scripts --> Runtime["Playwright runtime + ATS adapters + provider extractors"]
   Runtime --> Shared["@bao/shared automation contracts"]
   Service --> Scheduler["pending automation_runs + in-memory timers"]
