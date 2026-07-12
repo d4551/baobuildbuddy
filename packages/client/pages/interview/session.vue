@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -11,7 +15,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="space-y-6">
+  <PageScaffold labelled-by="interview-session-page-title">
     <PageHeaderBlock
       title-id="interview-session-page-title"
       :title="t('interviewSession.title')"
@@ -20,17 +24,14 @@ useSeoMeta({
 
     <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="8" />
 
-    <div v-else-if="page.completionState.value === 'error'" role="alert" class="alert alert-error">
-      <span>{{ page.sessionLoadError.value }}</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-outline"
-        :aria-label="t('interviewSession.notFound')"
-        @click="page.retryLoadSession"
-      >
-        {{ t("dashboard.retryButtonLabel") }}
-      </button>
-    </div>
+    <BootstrapErrorAlert
+      v-else-if="page.completionState.value === 'error'"
+      :title="t('interviewSession.loadErrorTitle')"
+      :message="page.sessionLoadError.value"
+      :retry-label="t('interviewSession.retryButtonLabel')"
+      :retry-aria-label="t('interviewSession.retryAriaLabel')"
+      @retry="page.retryLoadSession"
+    />
 
     <InterviewSessionContent
       v-else-if="page.activeSession.value"
@@ -62,16 +63,10 @@ useSeoMeta({
       @history="page.goToHistory"
     />
 
-    <div v-else class="alert alert-error">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      <span>{{ t("interviewSession.notFound") }}</span>
-    </div>
-  </div>
+    <EmptyState
+      v-else
+      :title-key="'interviewSession.notFound'"
+      :description-key="'interviewSession.notFound'"
+    />
+  </PageScaffold>
 </template>

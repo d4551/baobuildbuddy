@@ -3,8 +3,8 @@ import { AUTOMATION_RUN_HISTORY_LIMIT } from "@bao/shared/constants/automation-l
 import { rpaRunErrorCodeSchema } from "@bao/shared/schemas/error-envelope.schema";
 import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
 import {
-  rpaRunExecutionEnvelopeSchema,
   type RpaRunExecutionEnvelope,
+  rpaRunExecutionEnvelopeSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";

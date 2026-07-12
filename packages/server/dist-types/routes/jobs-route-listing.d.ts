@@ -1,31 +1,31 @@
 import type { JobListQuery } from "./jobs-route-contracts";
 export declare const listJobs: (query: JobListQuery) => Promise<{
     jobs: {
-        id: string;
-        source: string | null;
-        type: string | null;
-        createdAt: string;
-        updatedAt: string;
-        company: string;
-        studioType: string | null;
-        title: string;
-        location: string;
-        remote: boolean | null;
-        hybrid: boolean | null;
-        salary: Record<string, unknown> | null;
-        description: string | null;
-        requirements: string[] | null;
-        technologies: string[] | null;
-        experienceLevel: string | null;
-        postedDate: string | null;
-        url: string | null;
-        gameGenres: string[] | null;
-        platforms: string[] | null;
-        contentHash: string | null;
-        tags: string[] | null;
-        companyLogo: string | null;
         applicationUrl: string | null;
+        company: string;
+        companyLogo: string | null;
+        contentHash: string | null;
+        createdAt: string;
+        description: string | null;
         enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
+        experienceLevel: string | null;
+        gameGenres: string[] | null;
+        hybrid: boolean | null;
+        id: string;
+        location: string;
+        platforms: string[] | null;
+        postedDate: string | null;
+        remote: boolean | null;
+        requirements: string[] | null;
+        salary: Record<string, unknown> | null;
+        source: string | null;
+        studioType: string | null;
+        tags: string[] | null;
+        technologies: string[] | null;
+        title: string;
+        type: string | null;
+        updatedAt: string;
+        url: string | null;
     }[];
     page: number;
     limit: number;
@@ -61,20 +61,20 @@ export declare const getJobById: (id: string) => Promise<{
 export declare const saveJob: (jobId: string) => Promise<{
     status: number;
     body: {
-        error: string;
         message?: undefined;
+        error: string;
         saved?: undefined;
     };
 } | {
     status: null;
     body: {
+        error?: undefined;
         message: string;
         saved: {
             id: string;
             jobId: string;
             savedAt: string;
         };
-        error?: undefined;
     };
 } | {
     status: number;
@@ -123,13 +123,14 @@ export declare const listSavedJobs: () => Promise<{
 export declare const createApplication: (jobId: string, notes: string) => Promise<{
     status: number;
     body: {
-        error: string;
         message?: undefined;
+        error: string;
         application?: undefined;
     };
 } | {
     status: null;
     body: {
+        error?: undefined;
         message: string;
         application: {
             id: string;
@@ -141,7 +142,6 @@ export declare const createApplication: (jobId: string, notes: string) => Promis
             createdAt: string;
             updatedAt: string;
         };
-        error?: undefined;
     };
 } | {
     status: number;

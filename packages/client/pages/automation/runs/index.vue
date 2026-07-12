@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
@@ -7,9 +11,9 @@ import {
 } from "@bao/shared/constants/automation";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import { useSeoMeta } from "#imports";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useSeoMeta } from "#imports";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
@@ -26,7 +30,7 @@ const RUN_STATUS_ORDER: Record<AutomationRunStatus, number> = {
   [RUN_STATUS_SUCCESS]: 3,
 };
 
-const EMPTY_VALUE = "—";
+const notAvailableValue = computed(() => t("automation.runs.list.notAvailable"));
 const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
   timeStyle: "short",
@@ -44,14 +48,12 @@ useSeoMeta({
 
 const activeSubscriptions = new Map<string, () => void>();
 const liveRunById = ref<Record<string, RpaRunExecutionEnvelope>>({});
-
 const typeOptions = computed(() =>
   AUTOMATION_RUN_TYPES.map((runType) => ({
     value: runType,
     label: t(`automation.runs.typeOptions.${runType}`),
   })),
 );
-
 const statusOptions = computed(() =>
   AUTOMATION_RUN_STATUSES.map((runStatus) => ({
     value: runStatus,
@@ -236,7 +238,7 @@ const formatRunProgress = (run: RpaRunExecutionEnvelope): string => {
   if (typeof run.progress === "number" && Number.isFinite(run.progress)) {
     return `${Math.max(0, Math.min(100, Math.round(run.progress)))}%`;
   }
-  return EMPTY_VALUE;
+  return notAvailableValue.value;
 };
 
 const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> => ({

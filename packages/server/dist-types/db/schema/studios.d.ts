@@ -306,5 +306,5 @@ export declare const studios: import("drizzle-orm/sqlite-core").SQLiteTableWithC
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

@@ -2,9 +2,9 @@ import { API_ERROR_UNSUPPORTED_AUTOMATION_ACTION } from "@bao/shared/constants/a
 import { HTTP_STATUS_BAD_REQUEST } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
+import type { RouteSetState } from "../types/route-state";
 import { mapAutomationRouteError } from "../utils/automation-route-error";
 import { createServerLogger } from "../utils/logger";
-import type { RouteSetState } from "./ai-route-contracts";
 
 const aiRoutesLogger = createServerLogger("ai-routes");
 

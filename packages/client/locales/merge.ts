@@ -24,5 +24,9 @@ function mergeValue(target: unknown, source: unknown): unknown {
 export function mergeLocaleCatalog<T extends Record<string, unknown>>(
   ...catalogs: readonly DeepPartial<T>[]
 ): T {
-  return catalogs.reduce((accumulator, catalog) => mergeValue(accumulator, catalog) as T, {} as T);
+  let result = {} as T;
+  for (const catalog of catalogs) {
+    result = mergeValue(result, catalog) as T;
+  }
+  return result;
 }

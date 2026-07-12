@@ -18,8 +18,8 @@ export declare const canCreateLocalProvider: (config: AIProviderConfig) => boole
 export declare const isConfiguredProviderConfig: (config: AIProviderConfig) => boolean;
 export declare const createProvider: (config: AIProviderConfig) => AIProvider | null;
 export declare const createDeterministicServiceState: () => {
-    fallbackOrder: AIProviderType[];
-    preferredProvider: "openai" | "huggingface" | "local" | "gemini" | "claude";
-    providers: Map<"openai" | "huggingface" | "local" | "gemini" | "claude", AIProvider>;
+    fallbackOrder: ["claude" | "gemini" | "huggingface" | "local" | "openai"];
+    preferredProvider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+    providers: Map<"claude" | "gemini" | "huggingface" | "local" | "openai", AIProvider>;
     routing: AIRouting;
 };

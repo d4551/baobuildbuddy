@@ -208,5 +208,5 @@ export declare const skillMappings: import("drizzle-orm/sqlite-core").SQLiteTabl
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

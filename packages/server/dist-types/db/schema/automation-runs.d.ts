@@ -372,5 +372,5 @@ export declare const automationRuns: import("drizzle-orm/sqlite-core").SQLiteTab
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

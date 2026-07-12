@@ -475,7 +475,7 @@ export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColu
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export declare const savedJobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "saved_jobs";
@@ -539,7 +539,7 @@ export declare const savedJobs: import("drizzle-orm/sqlite-core").SQLiteTableWit
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export declare const applications: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "applications";
@@ -698,5 +698,5 @@ export declare const applications: import("drizzle-orm/sqlite-core").SQLiteTable
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

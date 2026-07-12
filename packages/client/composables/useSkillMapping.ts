@@ -81,7 +81,6 @@ function toCareerSalary(value: unknown): CareerPathway["averageSalary"] {
       currency: asString(value.currency),
     };
   }
-  return;
 }
 
 function toCareerStage(entry: unknown): CareerPathway["stages"][number] | null {

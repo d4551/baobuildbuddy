@@ -20,52 +20,52 @@ export declare const jobsRoutes: Elysia<string, {
             body: unknown;
             params: {};
             query: {} & {
-                genre?: string | undefined;
-                platform?: string | undefined;
-                studioType?: string | undefined;
-                location?: string | undefined;
-                remote?: string | undefined;
                 experienceLevel?: string | undefined;
+                genre?: string | undefined;
                 limit?: string | undefined;
+                location?: string | undefined;
                 page?: string | undefined;
+                platform?: string | undefined;
                 q?: string | undefined;
+                remote?: string | undefined;
+                studioType?: string | undefined;
             };
             headers: unknown;
             response: {
                 200: {
                     jobs: {
-                        id: string;
-                        source: string | null;
-                        type: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                        company: string;
-                        studioType: string | null;
-                        title: string;
-                        location: string;
-                        remote: boolean | null;
-                        hybrid: boolean | null;
-                        salary: Record<string, unknown> | null;
-                        description: string | null;
-                        requirements: string[] | null;
-                        technologies: string[] | null;
-                        experienceLevel: string | null;
-                        postedDate: string | null;
-                        url: string | null;
-                        gameGenres: string[] | null;
-                        platforms: string[] | null;
-                        contentHash: string | null;
-                        tags: string[] | null;
-                        companyLogo: string | null;
                         applicationUrl: string | null;
+                        company: string;
+                        companyLogo: string | null;
+                        contentHash: string | null;
+                        createdAt: string;
+                        description: string | null;
                         enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
+                        experienceLevel: string | null;
+                        gameGenres: string[] | null;
+                        hybrid: boolean | null;
+                        id: string;
+                        location: string;
+                        platforms: string[] | null;
+                        postedDate: string | null;
+                        remote: boolean | null;
+                        requirements: string[] | null;
+                        salary: Record<string, unknown> | null;
+                        source: string | null;
+                        studioType: string | null;
+                        tags: string[] | null;
+                        technologies: string[] | null;
+                        title: string;
+                        type: string | null;
+                        updatedAt: string;
+                        url: string | null;
                     }[];
                     page: number;
                     limit: number;
                     total: number;
                 };
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;
@@ -117,7 +117,7 @@ export declare const jobsRoutes: Elysia<string, {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -141,24 +141,24 @@ export declare const jobsRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
-                        id: string;
-                        jobId: string;
-                        savedAt: string;
-                    } | {
-                        error: string;
                         message?: undefined;
+                        error: string;
                         saved?: undefined;
                     } | {
+                        error?: undefined;
                         message: string;
                         saved: {
                             id: string;
                             jobId: string;
                             savedAt: string;
                         };
-                        error?: undefined;
+                    } | {
+                        id: string;
+                        jobId: string;
+                        savedAt: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -187,7 +187,7 @@ export declare const jobsRoutes: Elysia<string, {
                             deleted: void;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;
@@ -259,21 +259,11 @@ export declare const jobsRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
-                        id: string;
-                        jobId: string;
-                        status: string;
-                        appliedDate: string;
-                        notes: string;
-                        timeline: {
-                            status: string;
-                            date: string;
-                            notes: string;
-                        }[];
-                    } | {
-                        error: string;
                         message?: undefined;
+                        error: string;
                         application?: undefined;
                     } | {
+                        error?: undefined;
                         message: string;
                         application: {
                             id: string;
@@ -285,10 +275,20 @@ export declare const jobsRoutes: Elysia<string, {
                             createdAt: string;
                             updatedAt: string;
                         };
-                        error?: undefined;
+                    } | {
+                        id: string;
+                        jobId: string;
+                        status: string;
+                        appliedDate: string;
+                        notes: string;
+                        timeline: {
+                            status: string;
+                            date: string;
+                            notes: string;
+                        }[];
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -306,8 +306,8 @@ export declare const jobsRoutes: Elysia<string, {
             ":id": {
                 put: {
                     body: {} & {
-                        status?: string | undefined;
                         notes?: string | undefined;
+                        status?: string | undefined;
                     };
                     params: {
                         id: string;
@@ -328,7 +328,7 @@ export declare const jobsRoutes: Elysia<string, {
                             error: string;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;

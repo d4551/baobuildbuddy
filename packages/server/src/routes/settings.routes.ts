@@ -20,23 +20,23 @@ import {
 } from "../config/rate-limit";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
+import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   type ApiKeysUpdateBody,
   apiKeysUpdateBodySchema,
-  importSettingsBodySchema,
   type ImportSettingsBody,
-  jobTaxonomyUpdateBodySchema,
+  importSettingsBodySchema,
   type JobTaxonomyUpdateBody,
-  providerTestBodySchema,
+  jobTaxonomyUpdateBodySchema,
   type ProviderTestBody,
+  providerTestBodySchema,
   type SettingsUpdateBody,
   settingsUpdateBodySchema,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
-import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
-import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
+import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
 
 export const settingsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.settings),
@@ -125,10 +125,13 @@ export const settingsRoutes = new Elysia({
           body: StandardSchemaV1(apiKeysUpdateBodySchema),
         },
       )
-      .post("/test-api-key", async ({ body }: { body: ProviderTestBody }) =>
-        testProviderConnection(body), {
+      .post(
+        "/test-api-key",
+        async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
+        {
           body: StandardSchemaV1(providerTestBodySchema),
-        })
+        },
+      )
       .get("/export", async () => {
         const { dataService } = await import("../services/data-service");
         return dataService.exportAll();

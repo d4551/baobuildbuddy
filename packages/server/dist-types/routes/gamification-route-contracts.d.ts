@@ -1,12 +1,8 @@
-import { StandardSchemaV1 } from "baobox";
-import Type, { type StaticParse } from "baobox";
-export type RouteSetState = {
-    status?: number | string;
-};
+import Type, { StandardSchemaV1, type StaticParse } from "baobox";
 export declare const awardXpBodySchema: Type.TObject<{
     readonly amount: Type.TNumber;
     readonly reason: Type.TString;
-}, "reason" | "amount", never>;
+}, "amount" | "reason", never>;
 export type AwardXpBody = StaticParse<typeof awardXpBodySchema>;
 export declare const challengeIdParamsSchema: Type.TObject<{
     readonly id: Type.TString;
@@ -15,9 +11,9 @@ export type ChallengeIdParams = StaticParse<typeof challengeIdParamsSchema>;
 export declare const awardXpBody: Type.TObject<{
     readonly amount: Type.TNumber;
     readonly reason: Type.TString;
-}, "reason" | "amount", never> & StandardSchemaV1<unknown, {
-    reason: string;
+}, "amount" | "reason", never> & StandardSchemaV1<unknown, {
     amount: number;
+    reason: string;
 } & {}>;
 export declare const challengeIdParams: Type.TObject<{
     readonly id: Type.TString;

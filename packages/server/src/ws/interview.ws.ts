@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
+import { authenticateApiKey } from "../middleware/auth";
 import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
 import {
   interviewWebSocketBodySchema,
@@ -13,6 +14,15 @@ import {
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: StandardSchemaV1(interviewWebSocketBodySchema),
+  async beforeHandle({ request }) {
+    const failure = await authenticateApiKey(request);
+    if (failure) {
+      return new Response(JSON.stringify({ error: failure.error }), {
+        status: failure.status,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  },
   async open(ws) {
     const settingsRows = await db
       .select()

@@ -15,8 +15,8 @@ import type { InterviewResponse, InterviewSession } from "@bao/shared/types/inte
 import { asString } from "@bao/shared/utils/type-guards";
 import { gamificationService } from "../services/gamification-service";
 import { interviewService } from "../services/interview-service";
-import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 import { parseResponsePayload, sessionConfigFromUi } from "./interview-route-config";
+import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 import { sessionWithDerivedFields } from "./interview-route-presentation";
 
 const buildDefaultResponse = (questionId: string, answer: string): InterviewResponse => ({

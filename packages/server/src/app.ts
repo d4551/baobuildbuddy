@@ -1,7 +1,7 @@
 import { APP_BRAND } from "@bao/shared/constants/branding";
 import {
-  API_ENDPOINTS,
   API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
   OPENAPI_VERSION,
   toApiScopedPath,
 } from "@bao/shared/constants/endpoints";
@@ -13,30 +13,29 @@ import Type, { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { config } from "./config/env";
+import { isProductionRuntime } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
 import { authGuard } from "./middleware/auth";
 import { errorHandler } from "./middleware/error-handler";
 import { logger } from "./middleware/logger";
-import {
-  aiRoutes,
-  authRoutes,
-  automationRoutes,
-  automationScreenshotRoutes,
-  coverLetterRoutes,
-  gamificationRoutes,
-  interviewRoutes,
-  jobsRoutes,
-  portfolioRoutes,
-  resumeRoutes,
-  scraperRoutes,
-  searchRoutes,
-  settingsRoutes,
-  skillMappingRoutes,
-  statsRoutes,
-  studioRoutes,
-  userRoutes,
-} from "./routes/route-modules";
+import { aiRoutes } from "./routes/ai.routes";
+import { authRoutes } from "./routes/auth.routes";
+import { automationRoutes } from "./routes/automation.routes";
+import { automationScreenshotRoutes } from "./routes/automation-screenshots.routes";
+import { coverLetterRoutes } from "./routes/cover-letter.routes";
+import { gamificationRoutes } from "./routes/gamification.routes";
+import { interviewRoutes } from "./routes/interview.routes";
+import { jobsRoutes } from "./routes/jobs.routes";
+import { portfolioRoutes } from "./routes/portfolio.routes";
+import { resumeRoutes } from "./routes/resume.routes";
+import { scraperRoutes } from "./routes/scraper.routes";
+import { searchRoutes } from "./routes/search.routes";
+import { settingsRoutes } from "./routes/settings.routes";
+import { skillMappingRoutes } from "./routes/skill-mapping.routes";
+import { statsRoutes } from "./routes/stats.routes";
+import { studioRoutes } from "./routes/studio.routes";
+import { userRoutes } from "./routes/user.routes";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
@@ -130,6 +129,17 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
   .use(rateLimit({ duration: RATE_LIMIT_GLOBAL_DURATION_MS, max: RATE_LIMIT_GLOBAL_MAX_REQUESTS }))
   .use(logger)
   .use(errorHandler)
+  .onAfterHandle(({ set }) => {
+    set.headers["x-content-type-options"] = "nosniff";
+    set.headers["x-frame-options"] = "DENY";
+    set.headers["referrer-policy"] = "strict-origin-when-cross-origin";
+    set.headers["permissions-policy"] =
+      "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
+
+    if (isProductionRuntime()) {
+      set.headers["strict-transport-security"] = "max-age=63072000; includeSubDomains; preload";
+    }
+  })
   .get(
     toApiScopedPath(API_ENDPOINTS.health),
     async () => {

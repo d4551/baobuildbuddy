@@ -1,9 +1,9 @@
 import { normalizeAIRouting } from "@bao/shared/constants/ai-provider";
 import {
+  type AppDataTheme,
   mergeBrandSettings,
   normalizeAppDataTheme,
   resolveBrandSettings,
-  type AppDataTheme,
 } from "@bao/shared/constants/branding";
 import {
   automationSettingsSchema,

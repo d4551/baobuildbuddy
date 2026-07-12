@@ -367,6 +367,6 @@ export declare const settings: import("drizzle-orm/sqlite-core").SQLiteTableWith
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export { DEFAULT_SETTINGS_ID };

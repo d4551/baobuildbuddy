@@ -6,8 +6,8 @@ import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 import {
-  userProfileUpdateBodySchema,
   type UserProfileUpdateRouteBody,
+  userProfileUpdateBodySchema,
 } from "./user-route-contracts";
 
 export const userRoutes = new Elysia({

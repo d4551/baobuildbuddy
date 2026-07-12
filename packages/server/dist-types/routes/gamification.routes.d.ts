@@ -33,32 +33,32 @@ export declare const gamificationRoutes: Elysia<string, {
         "award-xp": {
             post: {
                 body: {
-                    reason: string;
                     amount: number;
+                    reason: string;
                 } & {};
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
                     200: {
+                        message?: undefined;
                         error: string;
                         xp?: undefined;
                         level?: undefined;
                         leveledUp?: undefined;
                         levelUp?: undefined;
                         reason?: undefined;
-                        message?: undefined;
                     } | {
+                        error?: undefined;
                         xp: number;
                         level: number;
                         leveledUp: boolean;
                         levelUp: import("@bao/shared/types/gamification").LevelUpResult | null;
                         reason: string;
                         message: string;
-                        error?: undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -117,11 +117,11 @@ export declare const gamificationRoutes: Elysia<string, {
                         headers: unknown;
                         response: {
                             200: {
+                                level?: undefined;
                                 message: string;
                                 completed: boolean;
                                 challengeId?: undefined;
                                 totalXP?: undefined;
-                                level?: undefined;
                             } | {
                                 message: string;
                                 challengeId: string;
@@ -130,7 +130,7 @@ export declare const gamificationRoutes: Elysia<string, {
                                 level: number;
                             };
                             422: {
-                                type: "validation";
+                                type: 'validation';
                                 on: string;
                                 summary?: string;
                                 message?: string;

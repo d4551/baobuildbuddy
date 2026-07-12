@@ -12,24 +12,23 @@ import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints"
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
+import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import Type from "baobox";
 import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
-import {
-  automationScreenshotParams,
-  type AutomationScreenshotParams,
-  type RouteSetState,
-} from "./automation-screenshot-route-contracts";
+import type { RouteSetState } from "../types/route-state";
 import {
   type BinaryPayload,
   CACHE_CONTROL_PRIVATE_NO_STORE,
   createBinaryResponse,
   MIME_TYPE_OCTET_STREAM,
 } from "../utils/http-response";
+import {
+  type AutomationScreenshotParams,
+  automationScreenshotParams,
+} from "./automation-screenshot-route-contracts";
 
 const RUN_ID_SAFE_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 const FILE_NAME_SAFE_PATTERN = /^[a-zA-Z0-9._-]+$/;

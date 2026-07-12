@@ -26,7 +26,7 @@ export declare const chatWebSocket: Elysia<"", {
             headers: {};
             response: {
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;

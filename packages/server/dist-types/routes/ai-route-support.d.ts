@@ -23,10 +23,10 @@ export declare function getAISettingsRow(): Promise<{
 export declare function getAIService(settingsRow?: Awaited<ReturnType<typeof getAISettingsRow>>): Promise<AIService>;
 export declare function buildProviderModelsResponse(): Promise<import("../services/ai/control-plane").AIControlPlaneState | {
     providers: {
-        id: "openai" | "huggingface" | "local" | "gemini" | "claude";
+        id: "claude" | "gemini" | "huggingface" | "local" | "openai";
         nameKey: string;
         descriptionKey: string;
-        iconId: "openai" | "huggingface" | "local" | "gemini" | "claude";
+        iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
         models: string[];
         available: boolean;
         health: "unconfigured";

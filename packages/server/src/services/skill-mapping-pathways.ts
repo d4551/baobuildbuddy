@@ -354,7 +354,10 @@ const buildPathway = (category: SkillCategory, mappings: SkillMapping[]): Career
   };
 };
 
-export const buildCareerPathways = (mappings: SkillMapping[]): CareerPathway[] =>
-  Object.entries(groupMappingsByCategory(mappings))
-    .map(([category, skills]) => buildPathway(category as SkillCategory, skills))
+export const buildCareerPathways = (mappings: SkillMapping[]): CareerPathway[] => {
+  const grouped = groupMappingsByCategory(mappings);
+  const categories = Object.keys(grouped) as SkillCategory[];
+  return categories
+    .map((category) => buildPathway(category, grouped[category]))
     .sort((left, right) => right.matchScore - left.matchScore);
+};

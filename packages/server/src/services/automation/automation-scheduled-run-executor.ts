@@ -51,7 +51,7 @@ export class AutomationScheduledRunExecutor {
 
   async execute(runId: string): Promise<void> {
     const row = await this.options.readRunRow(runId);
-    if (!row || row.status !== "pending") {
+    if (row?.status !== "pending") {
       return;
     }
 

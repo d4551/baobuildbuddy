@@ -1,15 +1,15 @@
 import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors";
-import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
 import { Elysia } from "elysia";
 import { gamificationService } from "../services/gamification-service";
+import type { RouteSetState } from "../types/route-state";
 import {
-  awardXpBody,
-  challengeIdParams,
   type AwardXpBody,
+  awardXpBody,
   type ChallengeIdParams,
-  type RouteSetState,
+  challengeIdParams,
 } from "./gamification-route-contracts";
 
 export const gamificationRoutes = new Elysia({

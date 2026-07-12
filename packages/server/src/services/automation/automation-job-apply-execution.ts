@@ -131,7 +131,6 @@ const finalizeJobApplySuccess = async (
     gamificationService.awardXP(ROUTE_GAMIFICATION_XP.automationCompleted, "automation_success"),
   );
   if (awardXpResult.status === "rejected") {
-    return;
   }
 };
 

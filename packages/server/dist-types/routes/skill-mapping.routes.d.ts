@@ -31,8 +31,8 @@ export declare const skillMappingRoutes: Elysia<string, {
                 body: unknown;
                 params: {};
                 query: {} & {
-                    search?: string | undefined;
                     category?: string | undefined;
+                    search?: string | undefined;
                 };
                 headers: unknown;
                 response: {
@@ -50,7 +50,7 @@ export declare const skillMappingRoutes: Elysia<string, {
                         updatedAt: string;
                     }[];
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -70,12 +70,12 @@ export declare const skillMappingRoutes: Elysia<string, {
                     gameExpression: string;
                     transferableSkill: string;
                 } & {
+                    aiGenerated?: boolean | undefined;
                     category?: string | undefined;
-                    industryApplications?: string[] | undefined;
-                    evidence?: Record<string, unknown>[] | undefined;
                     confidence?: number | undefined;
                     demandLevel?: string | undefined;
-                    aiGenerated?: boolean | undefined;
+                    evidence?: Record<string, unknown>[] | undefined;
+                    industryApplications?: string[] | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -83,7 +83,7 @@ export declare const skillMappingRoutes: Elysia<string, {
                 response: {
                     200: import("@bao/shared/types/skill-mapping").SkillMapping;
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -101,14 +101,14 @@ export declare const skillMappingRoutes: Elysia<string, {
             ":id": {
                 put: {
                     body: {} & {
+                        aiGenerated?: boolean | undefined;
                         category?: string | undefined;
-                        gameExpression?: string | undefined;
-                        transferableSkill?: string | undefined;
-                        industryApplications?: string[] | undefined;
-                        evidence?: Record<string, unknown>[] | undefined;
                         confidence?: number | undefined;
                         demandLevel?: string | undefined;
-                        aiGenerated?: boolean | undefined;
+                        evidence?: Record<string, unknown>[] | undefined;
+                        gameExpression?: string | undefined;
+                        industryApplications?: string[] | undefined;
+                        transferableSkill?: string | undefined;
                     };
                     params: {
                         id: string;
@@ -120,7 +120,7 @@ export declare const skillMappingRoutes: Elysia<string, {
                             error: string;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;
@@ -146,13 +146,13 @@ export declare const skillMappingRoutes: Elysia<string, {
                     headers: unknown;
                     response: {
                         [x: number]: {
+                            message?: undefined;
                             error: string;
                             id: string;
-                            message?: undefined;
                         } | {
+                            error?: undefined;
                             message: string;
                             id: string;
-                            error?: undefined;
                         };
                     };
                 };
@@ -185,7 +185,6 @@ export declare const skillMappingRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
-                        jobId: string;
                         overallScore: number;
                         categories: {
                             technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
@@ -196,9 +195,10 @@ export declare const skillMappingRoutes: Elysia<string, {
                         improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
                         nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
                         targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
+                        jobId: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -215,9 +215,9 @@ export declare const skillMappingRoutes: Elysia<string, {
         "ai-analyze": {
             post: {
                 body: {} & {
-                    resume?: Record<string, unknown> | undefined;
-                    gameExperience?: Record<string, unknown> | undefined;
                     autoCreateMappings?: boolean | undefined;
+                    gameExperience?: Record<string, unknown> | undefined;
+                    resume?: Record<string, unknown> | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -231,7 +231,7 @@ export declare const skillMappingRoutes: Elysia<string, {
                         provider?: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

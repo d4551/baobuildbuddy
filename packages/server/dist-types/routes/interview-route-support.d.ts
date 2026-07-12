@@ -22,8 +22,8 @@ export declare const submitInterviewResponse: (id: string, body: SubmitResponseB
 } | {
     status: null;
     body: {
-        message: string;
         error?: undefined;
+        message: string;
     };
 }>;
 export declare const completeInterviewSession: (id: string) => Promise<{
@@ -34,7 +34,7 @@ export declare const completeInterviewSession: (id: string) => Promise<{
 } | {
     status: null;
     body: {
-        message: string;
         error?: undefined;
+        message: string;
     };
 }>;

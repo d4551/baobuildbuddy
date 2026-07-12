@@ -87,7 +87,7 @@ function createInterviewTimerControls(input: {
   timer: Ref<number | null>;
 }) {
   function stopTimer() {
-    if (input.timer.value) {
+    if (import.meta.client && input.timer.value) {
       window.clearInterval(input.timer.value);
       input.timer.value = null;
     }
@@ -109,6 +109,9 @@ function createInterviewTimerControls(input: {
     }
 
     input.timeElapsed.value = estimateElapsedTime(DEFAULT_TIMER_VALUE, session.startTime);
+    if (!import.meta.client) {
+      return;
+    }
     input.timer.value = window.setInterval(() => {
       const current = input.activeSession.value;
       if (!current) {

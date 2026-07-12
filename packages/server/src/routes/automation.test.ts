@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
-import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { and, eq, inArray } from "drizzle-orm";

@@ -54,8 +54,8 @@ export class ClaudeProvider extends BaseAIProvider {
     }
     const response = responseResult.value;
     const text = response.content
-      .filter((block) => block.type === "text")
-      .map((block) => (block as { type: "text"; text: string }).text)
+      .filter((block): block is Anthropic.TextBlock => block.type === "text")
+      .map((block) => block.text)
       .join("");
 
     return {

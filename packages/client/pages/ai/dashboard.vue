@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAIDashboardPage } from "~/composables/useAIDashboardPage";

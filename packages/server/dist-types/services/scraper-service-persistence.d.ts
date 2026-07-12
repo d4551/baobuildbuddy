@@ -4,7 +4,7 @@ import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 import type { ScrapeEnrichmentAccumulator, ScrapeEnrichmentAttempt } from "./scraper-service-contracts";
 export declare const runWithErrorCollection: (operation: () => Promise<void>, errors: string[]) => Promise<void>;
 export declare const resolvePortalSourceUrl: (portalId: GamingPortalId) => Promise<string | null>;
-export declare const resolvePortalScriptId: (portalId: GamingPortalId) => "scraper-hitmarker" | "scraper-grackle" | "scraper-workwithindies" | "scraper-remotegamejobs" | "scraper-gamesjobsdirect" | "scraper-pocketgamer";
+export declare const resolvePortalScriptId: (portalId: GamingPortalId) => "scraper-gamesjobsdirect" | "scraper-grackle" | "scraper-hitmarker" | "scraper-pocketgamer" | "scraper-remotegamejobs" | "scraper-workwithindies";
 export declare const upsertStudioRow: (studioRow: ScrapedStudio, now: string, enrichment?: ScrapePersonaEnrichment) => Promise<void>;
 export declare const upsertScrapedJob: (job: JobSearchResult["jobs"][number], now: string, enrichment?: ScrapePersonaEnrichment) => Promise<void>;
 type PersistScrapedEntityOptions = {

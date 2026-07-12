@@ -1,5 +1,6 @@
+import type { RouteSetState } from "../types/route-state";
 import { type ChatContextPayload } from "./ai-route-chat-context";
-import type { AnalyzeResumeBody, GenerateCoverLetterBody, RouteSetState } from "./ai-route-contracts";
+import type { AnalyzeResumeBody, GenerateCoverLetterBody } from "./ai-route-contracts";
 export declare const handleChatRoute: (body: {
     message: string;
     sessionId?: string;
@@ -8,10 +9,10 @@ export declare const handleChatRoute: (body: {
     message: string;
     sessionId: string | null | undefined;
     timestamp: string;
-    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+    provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
     model: string;
     followUps: string[];
-    contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
+    contextDomain: "automation" | "general" | "interview" | "job_search" | "portfolio" | "resume" | "skills";
 } | {
     error: string;
 }>;
@@ -24,26 +25,26 @@ export declare const handleAnalyzeResumeRoute: (body: AnalyzeResumeBody, set: Ro
     provider?: undefined;
     model?: undefined;
 } | {
+    error?: undefined;
     message: string;
     resumeId: string;
     jobId: string | null;
     analysis: import("./ai-route-contracts").ResumeAnalysisResult;
-    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+    provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
     model: string;
-    error?: undefined;
 }>;
 export declare const handleGenerateCoverLetterRoute: (body: GenerateCoverLetterBody, set: RouteSetState) => Promise<{
-    error: string;
     message?: undefined;
-    content?: undefined;
     provider?: undefined;
     model?: undefined;
+    error: string;
+    content?: undefined;
 } | {
+    error?: undefined;
     message: string;
     content: import("./ai-route-contracts").CoverLetterSections;
-    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+    provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
     model: string;
-    error?: undefined;
 }>;
 export declare const handleMatchJobsRoute: (body: {
     resumeId?: string;

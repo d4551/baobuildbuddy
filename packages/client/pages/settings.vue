@@ -1,11 +1,15 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSeoMeta } from "#imports";
-import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import {
-  SETTINGS_DEFAULT_SECTION_ID,
   isSettingsSectionId,
+  SETTINGS_DEFAULT_SECTION_ID,
   type SettingsSectionId,
 } from "~/components/settings/settings-sections";
 import { useSettingsPage } from "~/composables/useSettingsPage";

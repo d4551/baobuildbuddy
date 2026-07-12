@@ -2,19 +2,23 @@ import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-erro
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
+import type { RouteSetState } from "../types/route-state";
 import {
   type CoverLetterExportBody,
   type CoverLetterIdParams,
   type CoverLetterMutationBody,
   type CoverLetterUpdateBody,
-  type GenerateCoverLetterRouteBody,
-  type RouteSetState,
   coverLetterExportBodySchema,
   coverLetterIdParamsSchema,
   coverLetterMutationBodySchema,
   coverLetterUpdateBodySchema,
+  type GenerateCoverLetterRouteBody,
   generateCoverLetterBodySchema,
 } from "./cover-letter-route-contracts";
+import {
+  exportCoverLetterAttachment,
+  handleGenerateCoverLetter,
+} from "./cover-letter-route-generation";
 import {
   createCoverLetter,
   deleteCoverLetter,
@@ -22,10 +26,6 @@ import {
   listCoverLetters,
   updateCoverLetter,
 } from "./cover-letter-route-support";
-import {
-  exportCoverLetterAttachment,
-  handleGenerateCoverLetter,
-} from "./cover-letter-route-generation";
 
 export const coverLetterRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.coverLettersBase),
@@ -65,10 +65,14 @@ export const coverLetterRoutes = new Elysia({
       body: StandardSchemaV1(coverLetterUpdateBodySchema),
     },
   )
-  .delete("/:id", async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
-    deleteCoverLetter(params.id, set), {
-    params: StandardSchemaV1(coverLetterIdParamsSchema),
-  })
+  .delete(
+    "/:id",
+    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
+      deleteCoverLetter(params.id, set),
+    {
+      params: StandardSchemaV1(coverLetterIdParamsSchema),
+    },
+  )
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
     async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>

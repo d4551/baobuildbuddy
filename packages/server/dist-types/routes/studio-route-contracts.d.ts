@@ -1,7 +1,4 @@
 import Type, { type StaticParse } from "baobox";
-export type RouteSetState = {
-    status?: number | string;
-};
 export declare const studioListQuerySchema: Type.TObject<{
     readonly q: Type.TOptional<Type.TString>;
     readonly type: Type.TOptional<Type.TString>;

@@ -27,7 +27,7 @@ export declare const jobTaxonomyKeywords: import("drizzle-orm/sqlite-core").SQLi
             tableName: "job_taxonomy_keywords";
             dataType: "string";
             columnType: "SQLiteText";
-            data: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+            data: "genre" | "hybrid-location" | "platform" | "remote-location" | "requirement" | "role" | "technology";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -40,7 +40,7 @@ export declare const jobTaxonomyKeywords: import("drizzle-orm/sqlite-core").SQLi
             generated: undefined;
         }, {}, {
             length: number | undefined;
-            $type: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+            $type: "genre" | "hybrid-location" | "platform" | "remote-location" | "requirement" | "role" | "technology";
         }>;
         label: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "label";
@@ -153,7 +153,7 @@ export declare const jobTaxonomyKeywords: import("drizzle-orm/sqlite-core").SQLi
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export declare const studioClassificationRules: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "studio_classification_rules";
@@ -290,5 +290,5 @@ export declare const studioClassificationRules: import("drizzle-orm/sqlite-core"
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

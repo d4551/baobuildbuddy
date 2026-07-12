@@ -185,11 +185,12 @@ export const AI_ROUTING_DEFAULT_TARGET: AIRoutingTarget = {
 /**
  * Default purpose-aware AI routing table.
  */
-export const DEFAULT_AI_ROUTING: AIRouting = Object.freeze(
+const buildDefaultRouting = (): AIRouting =>
   Object.fromEntries(
     AI_ROUTING_PURPOSE_IDS.map((purpose) => [purpose, { ...AI_ROUTING_DEFAULT_TARGET }]),
-  ) as AIRouting,
-);
+  ) as AIRouting;
+
+export const DEFAULT_AI_ROUTING: AIRouting = Object.freeze(buildDefaultRouting());
 
 /**
  * Normalizes a partial routing payload into the full canonical routing table.
@@ -199,20 +200,19 @@ export function normalizeAIRouting(
   fallbackProvider: AIProviderType = AI_PROVIDER_DEFAULT,
   fallbackModel?: string | null,
 ): AIRouting {
-  return Object.fromEntries(
-    AI_ROUTING_PURPOSE_IDS.map((purpose) => {
-      const configuredTarget = routing?.[purpose];
-      const configuredProvider = configuredTarget?.provider;
-      const provider = AI_PROVIDER_ID_LIST.includes(configuredProvider ?? fallbackProvider)
-        ? (configuredProvider ?? fallbackProvider)
-        : fallbackProvider;
-      const model =
-        typeof configuredTarget?.model === "string" && configuredTarget.model.trim().length > 0
-          ? configuredTarget.model.trim()
-          : typeof fallbackModel === "string" && fallbackModel.trim().length > 0
-            ? fallbackModel.trim()
-            : undefined;
-      return [purpose, model ? { provider, model } : { provider }];
-    }),
-  ) as AIRouting;
+  const entries = AI_ROUTING_PURPOSE_IDS.map((purpose) => {
+    const configuredTarget = routing?.[purpose];
+    const configuredProvider = configuredTarget?.provider;
+    const provider = AI_PROVIDER_ID_LIST.includes(configuredProvider ?? fallbackProvider)
+      ? (configuredProvider ?? fallbackProvider)
+      : fallbackProvider;
+    const model =
+      typeof configuredTarget?.model === "string" && configuredTarget.model.trim().length > 0
+        ? configuredTarget.model.trim()
+        : typeof fallbackModel === "string" && fallbackModel.trim().length > 0
+          ? fallbackModel.trim()
+          : undefined;
+    return [purpose, model ? { provider, model } : { provider }] as const;
+  });
+  return Object.fromEntries(entries) as AIRouting;
 }

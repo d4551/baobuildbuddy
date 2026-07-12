@@ -9,9 +9,9 @@ import {
 } from "bun:test";
 import { API_ENDPOINTS, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import {
-  rpaRunEventSchema,
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
+  rpaRunEventSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
 import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
 import {

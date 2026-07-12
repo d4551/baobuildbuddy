@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -55,16 +55,6 @@
       "includes": ["**/*.vue"],
       "linter": {
         "enabled": false
-      }
-    },
-    {
-      "includes": ["**/packages/client/assets/css/main.css"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noUnknownProperty": "off"
-          }
-        }
       }
     },
     {

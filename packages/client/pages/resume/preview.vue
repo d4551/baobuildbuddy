@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+definePageMeta({
+  middleware: ["auth"],
+});
+
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { useAsyncData, useRoute, useRouter, useSeoMeta } from "#imports";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useAsyncData, useRoute, useRouter, useSeoMeta } from "#imports";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 

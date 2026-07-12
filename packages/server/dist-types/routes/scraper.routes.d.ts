@@ -47,7 +47,7 @@ export declare const scraperRoutes: Elysia<string, {
                         details: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

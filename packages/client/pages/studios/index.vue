@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { useI18n } from "vue-i18n";
 
 const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";

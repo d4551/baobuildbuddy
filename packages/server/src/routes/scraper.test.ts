@@ -4,8 +4,8 @@ import {
   API_ERROR_SCRAPE_STUDIOS_FAILED,
 } from "@bao/shared/constants/api-errors";
 import {
-  API_ENDPOINTS,
   API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
   buildScraperJobsEndpoint,
 } from "@bao/shared/constants/endpoints";
 import { scraperService } from "../services/scraper-service";

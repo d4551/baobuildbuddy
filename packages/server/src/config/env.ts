@@ -140,6 +140,15 @@ const resolveAuthConfig = () => {
   };
 };
 
+export const isAuthDisabled = (): boolean => {
+  const disableAuthEnv = Bun.env.BAO_DISABLE_AUTH;
+  const disabled = disableAuthEnv === "true" || disableAuthEnv === "1";
+  if (disabled && isProductionRuntime()) {
+    throw new Error("BAO_DISABLE_AUTH cannot be set to true in production");
+  }
+  return disabled;
+};
+
 const resolveEnableAutomationVerification = (): boolean =>
   parseBooleanFlag(Bun.env.BAO_ENABLE_AUTOMATION_VERIFY, process.env.BAO_ENABLE_AUTOMATION_VERIFY);
 

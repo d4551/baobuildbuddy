@@ -192,8 +192,9 @@ export const resumeQuestionSynthesizeBodySchema = Type.Object(
   },
   { required: ["questionsAndAnswers"] },
 );
-export type ResumeQuestionSynthesizeRouteBody =
-  StaticParse<typeof resumeQuestionSynthesizeBodySchema>;
+export type ResumeQuestionSynthesizeRouteBody = StaticParse<
+  typeof resumeQuestionSynthesizeBodySchema
+>;
 
 export const resumeExportBodySchema = Type.Object({
   format: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),

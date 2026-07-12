@@ -36,8 +36,6 @@ function readValidationFields(error: unknown): unknown[] | undefined {
     const computed = details();
     return isUnknownArray(computed) ? computed : undefined;
   }
-
-  return;
 }
 
 /**

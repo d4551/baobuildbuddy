@@ -1,24 +1,28 @@
-import type { GenerateCoverLetterBody, RouteSetState } from "./cover-letter-route-contracts";
+import type { RouteSetState } from "../types/route-state";
+import type { GenerateCoverLetterBody } from "./cover-letter-route-contracts";
 import { type GeneratedCoverLetterContent } from "./cover-letter-route-generation-support";
 export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, set: RouteSetState) => Promise<{
+    message?: undefined;
     error: string;
     details?: undefined;
-    message?: undefined;
     content?: undefined;
     coverLetter?: undefined;
 } | {
+    message?: undefined;
     error: string;
     details: string;
-    message?: undefined;
     content?: undefined;
     coverLetter?: undefined;
 } | {
-    message: string;
-    content: GeneratedCoverLetterContent;
     error?: undefined;
     details?: undefined;
+    message: string;
+    content: GeneratedCoverLetterContent;
     coverLetter?: undefined;
 } | {
+    error?: undefined;
+    details?: undefined;
+    content?: undefined;
     message: string;
     coverLetter: {
         id: string;
@@ -26,11 +30,8 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
         position: string;
         jobInfo: Record<string, unknown>;
         content: GeneratedCoverLetterContent;
-        template: "professional" | "creative" | "gaming" | "executive" | "technical";
+        template: "creative" | "executive" | "gaming" | "professional" | "technical";
     };
-    error?: undefined;
-    details?: undefined;
-    content?: undefined;
 }>;
 export declare const exportCoverLetterAttachment: (id: string, format: string | undefined, set: RouteSetState) => Promise<Response | {
     error: string;

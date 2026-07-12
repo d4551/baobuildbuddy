@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
-import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };

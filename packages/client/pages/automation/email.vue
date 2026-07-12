@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+definePageMeta({
+  middleware: ["auth"],
+});
+
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { getErrorMessage } from "~/utils/errors";
+
 const {
   t,
   form,

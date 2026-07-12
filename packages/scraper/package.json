@@ -16,7 +16,7 @@
     "./scripts/*": "./src/scripts/*.ts"
   },
   "scripts": {
-    "typecheck": "bun run tsc --noEmit",
+    "typecheck": "bun --bun ../../node_modules/@typescript/native/bin/tsc --noEmit",
     "test": "bun test",
     "install:browsers": "playwright install chromium"
   },
@@ -26,8 +26,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/bun": "1.3.11",
+    "@types/bun": "1.3.14",
     "happy-dom": "^20.8.4",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }

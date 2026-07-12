@@ -16,6 +16,7 @@ import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import type { AIService } from "../services/ai/ai-service";
 import { contextManager } from "../services/ai/context-manager";
+import { authenticateApiKey } from "../middleware/auth";
 import { chatWebSocketBodySchema, type ChatWebSocketBody } from "./chat-ws-contracts";
 
 type AIServiceInstance = AIService;
@@ -207,6 +208,15 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
 
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
   body: StandardSchemaV1(chatWebSocketBodySchema),
+  async beforeHandle({ request }) {
+    const failure = await authenticateApiKey(request);
+    if (failure) {
+      return new Response(JSON.stringify({ error: failure.error }), {
+        status: failure.status,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  },
   async open(ws) {
     const brand = resolveRuntimeBrand(await getSettingsRow());
     sendSocketPayload(ws, {

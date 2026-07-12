@@ -15,7 +15,9 @@ function getAuthKeyCookieRef() {
   return useCookie<StoredApiKey>(AUTH_KEY, {
     default: () => null,
     path: "/",
-    sameSite: "lax",
+    sameSite: "strict",
+    httpOnly: true,
+    secure: true,
   });
 }
 

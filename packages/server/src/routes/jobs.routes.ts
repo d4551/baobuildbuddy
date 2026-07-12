@@ -1,6 +1,6 @@
 import { API_ERROR_JOB_NOT_FOUND, API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
-import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_JOB_REFRESH_COMPLETE } from "@bao/shared/constants/api-messages";
+import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
@@ -14,16 +14,16 @@ import {
   type ApplyJobBody,
   applyJobBodySchema,
   type JobIdParams,
+  type JobListQuery,
   jobIdParamsSchema,
   jobsListQuerySchema,
-  type JobListQuery,
-  type SaveJobBody,
-  saveJobBodySchema,
   type SavedJobParams,
+  type SaveJobBody,
   savedJobParamsSchema,
+  saveJobBodySchema,
   type UpdateApplicationBody,
-  updateApplicationBodySchema,
   type UpdateApplicationParams,
+  updateApplicationBodySchema,
   updateApplicationParamsSchema,
 } from "./jobs-route-contracts";
 import {
@@ -74,10 +74,13 @@ export const jobsRoutes = new Elysia({
       body: StandardSchemaV1(saveJobBodySchema),
     },
   )
-  .delete("/save/:jobId", async ({ params }: { params: SavedJobParams }) =>
-    deleteSavedJob(params.jobId), {
-    params: StandardSchemaV1(savedJobParamsSchema),
-  })
+  .delete(
+    "/save/:jobId",
+    async ({ params }: { params: SavedJobParams }) => deleteSavedJob(params.jobId),
+    {
+      params: StandardSchemaV1(savedJobParamsSchema),
+    },
+  )
   .get("/saved", async () => listSavedJobs())
   .post(
     "/apply",

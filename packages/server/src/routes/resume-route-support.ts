@@ -19,10 +19,10 @@ import {
 } from "@bao/shared/constants/http";
 import { DEFAULT_SCORE_NEUTRAL } from "@bao/shared/constants/jobs";
 import {
+  isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_DEFAULT_THEME,
   RESUME_TEMPLATE_DEFAULT,
-  isResumeTemplate,
 } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { safeParseJson } from "@bao/shared/utils/json";

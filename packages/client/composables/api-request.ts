@@ -88,6 +88,9 @@ function resolveDownloadFilename(
 }
 
 function triggerFileDownload(blob: Blob, filename: string): void {
+  if (!import.meta.client) {
+    return;
+  }
   const objectUrl = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = objectUrl;

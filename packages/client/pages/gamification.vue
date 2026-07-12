@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { getXPProgress } from "@bao/shared/constants/xp-levels";
 import type {

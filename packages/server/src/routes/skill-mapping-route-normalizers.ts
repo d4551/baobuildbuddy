@@ -1,9 +1,9 @@
 import {
-  SKILLS_DEFAULT_CONFIDENCE,
   SKILL_CATEGORY_IDS,
   SKILL_DEMAND_LEVEL_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
+  SKILLS_DEFAULT_CONFIDENCE,
   type SkillCategory,
   type SkillEvidence,
   type SkillMapping,
@@ -103,7 +103,7 @@ export const mapSuggestedMappingToCreateInput = (suggestedMapping: Record<string
     gameExpression,
     transferableSkill,
     industryApplications: normalizeStringArray(suggestedMapping.industryApplications),
-    evidence: [] as SkillEvidence[],
+    evidence: [] satisfies SkillEvidence[],
     confidence:
       typeof suggestedMapping.confidence === "number" &&
       Number.isFinite(suggestedMapping.confidence)

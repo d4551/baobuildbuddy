@@ -67,7 +67,7 @@ interface SpeakVoiceInput {
 function resolveLatestAssistantMessage(messages: readonly ChatMessage[]): string {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
-    if (!message || message.role !== "assistant") {
+    if (message?.role !== "assistant") {
       continue;
     }
 
@@ -219,7 +219,7 @@ function registerVoiceWatchers(input: VoiceWatchInput): void {
         return;
       }
       const newestMessage = input.messages.value.at(-1);
-      if (!newestMessage || newestMessage.role !== "assistant") {
+      if (newestMessage?.role !== "assistant") {
         return;
       }
       const trimmedContent = newestMessage.content.trim();

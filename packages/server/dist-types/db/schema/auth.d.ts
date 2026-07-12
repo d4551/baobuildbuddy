@@ -41,5 +41,5 @@ export declare const auth: import("drizzle-orm/sqlite-core").SQLiteTableWithColu
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

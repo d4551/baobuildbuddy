@@ -23,7 +23,7 @@ function setByPath(target: MessageNode, path: string, value: string): void {
     if (typeof next !== "object" || next === null || Array.isArray(next)) {
       cursor[segment] = {};
     }
-    cursor = cursor[segment] as MessageNode;
+    cursor = next as Record<string, unknown>;
   }
 
   const leafKey = segments[segments.length - 1];
@@ -43,9 +43,9 @@ export function buildBrandedLocaleMessages(
   locale: AvailableLocale,
   overrides: Record<string, string>,
 ): MessageNode {
-  const baseMessages = cloneMessageNode(I18N_MESSAGE_CATALOG[locale]);
+  const baseMessages: MessageNode = cloneMessageNode(I18N_MESSAGE_CATALOG[locale]);
   for (const [messageKey, messageValue] of Object.entries(overrides)) {
-    setByPath(baseMessages as MessageNode, messageKey, messageValue);
+    setByPath(baseMessages, messageKey, messageValue);
   }
-  return baseMessages as MessageNode;
+  return baseMessages;
 }

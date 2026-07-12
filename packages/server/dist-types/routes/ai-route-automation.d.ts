@@ -1,4 +1,4 @@
-import type { RouteSetState } from "./ai-route-contracts";
+import type { RouteSetState } from "../types/route-state";
 export declare const handleAutomationActionRoute: (body: {
     action: string;
     jobUrl: string;
@@ -11,8 +11,8 @@ export declare const handleAutomationActionRoute: (body: {
     status?: undefined;
     message?: undefined;
 } | {
+    error?: undefined;
     runId: string;
     status: string;
     message: string;
-    error?: undefined;
 }>;

@@ -1,4 +1,4 @@
-import { rpaProgressEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
+import { type RpaRunEvent, rpaProgressEventSchema } from "@bao/shared/schemas/rpa-events.schema";
 import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
@@ -36,11 +36,12 @@ export class AutomationProgressEvents {
         params,
         error: parsed.error.flatten(),
       });
-      return {
+      const fallbackEvent: RpaRunEvent = {
         ...event,
         action: "validation_error",
-        status: "error" as const,
-      } as RpaRunEvent;
+        status: "error",
+      };
+      return fallbackEvent;
     }
     return parsed.data;
   }

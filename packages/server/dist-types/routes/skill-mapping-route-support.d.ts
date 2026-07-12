@@ -1,4 +1,4 @@
-import type { SkillMappingMutationBody, SkillMappingRouteSetState, SkillMappingUpdateBody, SkillMappingsQuery } from "./skill-mapping-route-contracts";
+import type { SkillMappingMutationBody, SkillMappingRouteSetState, SkillMappingsQuery, SkillMappingUpdateBody } from "./skill-mapping-route-contracts";
 export declare const listSkillMappings: (query: SkillMappingsQuery) => Promise<{
     id: string;
     gameExpression: string;
@@ -20,32 +20,31 @@ export declare const updateSkillMappingFromBody: (id: string, body: SkillMapping
     error: string;
 }>;
 export declare const deleteSkillMappingById: (id: string, set: SkillMappingRouteSetState) => Promise<{
+    statusCode?: undefined;
     kind: "not-found";
     payload: {
-        error: string;
-        id?: undefined;
         message?: undefined;
+        id?: undefined;
+        error: string;
     };
-    statusCode?: undefined;
 } | {
     kind: "gone";
     payload: {
+        message?: undefined;
         error: string;
         id: string;
-        message?: undefined;
     };
     statusCode: number;
 } | {
     kind: "deleted";
     payload: {
+        error?: undefined;
         message: string;
         id: string;
-        error?: undefined;
     };
     statusCode: number;
 }>;
 export declare const getSkillReadiness: (jobId?: string) => Promise<import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
-    jobId: string;
     overallScore: number;
     categories: {
         technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
@@ -56,4 +55,5 @@ export declare const getSkillReadiness: (jobId?: string) => Promise<import("@bao
     improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
     nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
     targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
+    jobId: string;
 }>;

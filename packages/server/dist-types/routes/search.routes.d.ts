@@ -21,14 +21,14 @@ export declare const searchRoutes: Elysia<string, {
                 body: unknown;
                 params: {};
                 query: {} & {
-                    types?: string | ("skills" | "studios" | "jobs" | "resumes")[] | undefined;
                     q?: string | undefined;
+                    types?: string | ("jobs" | "resumes" | "skills" | "studios")[] | undefined;
                 };
                 headers: unknown;
                 response: {
                     200: import("../services/search-service").UnifiedSearchResult;
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -56,7 +56,7 @@ export declare const searchRoutes: Elysia<string, {
                         type: string;
                     }[];
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

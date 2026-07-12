@@ -343,5 +343,5 @@ export declare const userProfile: import("drizzle-orm/sqlite-core").SQLiteTableW
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

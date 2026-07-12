@@ -38,7 +38,7 @@ export declare const portfolioRoutes: Elysia<string, {
             response: {
                 200: import("@bao/shared/types/portfolio").PortfolioData;
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;
@@ -54,19 +54,19 @@ export declare const portfolioRoutes: Elysia<string, {
         projects: {
             post: {
                 body: {
-                    title: string;
                     description: string;
+                    title: string;
                 } & {
-                    role?: string | undefined;
-                    sortOrder?: number | undefined;
-                    technologies?: string[] | undefined;
-                    platforms?: string[] | undefined;
-                    tags?: string[] | undefined;
+                    engines?: string[] | undefined;
+                    featured?: boolean | undefined;
+                    githubUrl?: string | undefined;
                     image?: string | undefined;
                     liveUrl?: string | undefined;
-                    githubUrl?: string | undefined;
-                    featured?: boolean | undefined;
-                    engines?: string[] | undefined;
+                    platforms?: string[] | undefined;
+                    role?: string | undefined;
+                    sortOrder?: number | undefined;
+                    tags?: string[] | undefined;
+                    technologies?: string[] | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -76,7 +76,7 @@ export declare const portfolioRoutes: Elysia<string, {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -104,7 +104,7 @@ export declare const portfolioRoutes: Elysia<string, {
                             error: string;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;
@@ -123,18 +123,18 @@ export declare const portfolioRoutes: Elysia<string, {
             ":id": {
                 put: {
                     body: {} & {
-                        role?: string | undefined;
-                        sortOrder?: number | undefined;
-                        title?: string | undefined;
                         description?: string | undefined;
-                        technologies?: string[] | undefined;
-                        platforms?: string[] | undefined;
-                        tags?: string[] | undefined;
+                        engines?: string[] | undefined;
+                        featured?: boolean | undefined;
+                        githubUrl?: string | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
-                        githubUrl?: string | undefined;
-                        featured?: boolean | undefined;
-                        engines?: string[] | undefined;
+                        platforms?: string[] | undefined;
+                        role?: string | undefined;
+                        sortOrder?: number | undefined;
+                        tags?: string[] | undefined;
+                        technologies?: string[] | undefined;
+                        title?: string | undefined;
                     };
                     params: {
                         id: string;
@@ -146,7 +146,7 @@ export declare const portfolioRoutes: Elysia<string, {
                             error: string;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;
@@ -172,16 +172,16 @@ export declare const portfolioRoutes: Elysia<string, {
                     headers: unknown;
                     response: {
                         200: {
-                            error: string;
                             success?: undefined;
                             id?: undefined;
+                            error: string;
                         } | {
+                            error?: undefined;
                             success: boolean;
                             id: string;
-                            error?: undefined;
                         };
                         422: {
-                            type: "validation";
+                            type: 'validation';
                             on: string;
                             summary?: string;
                             message?: string;
@@ -213,7 +213,7 @@ export declare const portfolioRoutes: Elysia<string, {
                         details: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

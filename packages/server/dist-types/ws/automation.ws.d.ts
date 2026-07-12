@@ -26,15 +26,15 @@ export declare const automationWebSocket: Elysia<"", {
     [x: string]: {
         subscribe: {
             body: {
-                type: "subscribe" | "unsubscribe";
                 runId?: string | undefined;
+                type: "subscribe" | "unsubscribe";
             };
             params: {};
             query: {};
             headers: {};
             response: {
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;

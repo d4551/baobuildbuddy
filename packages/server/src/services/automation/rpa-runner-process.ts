@@ -1,4 +1,4 @@
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, resolve, sep } from "node:path";
 import {
   automationScriptEntryById,
   automationScriptIdSchema,
@@ -126,10 +126,23 @@ const createProcessSignal = (
   return AbortSignal.any([externalSignal, timeoutSignal]);
 };
 
+const isPathWithinScraperDir = (resolvedPath: string): boolean => {
+  const normalizedScraperDir = resolve(SCRAPER_DIR);
+  const normalizedPath = resolve(resolvedPath);
+  return (
+    normalizedPath === normalizedScraperDir ||
+    normalizedPath.startsWith(`${normalizedScraperDir}${sep}`)
+  );
+};
+
 const resolveAutomationScriptPath = (options: RunAutomationScriptOptions): string => {
   const scriptPath = options.scriptPath?.trim();
   if (scriptPath && scriptPath.length > 0) {
-    return isAbsolute(scriptPath) ? scriptPath : resolve(SCRAPER_DIR, scriptPath);
+    const resolvedPath = isAbsolute(scriptPath) ? scriptPath : resolve(SCRAPER_DIR, scriptPath);
+    if (!isPathWithinScraperDir(resolvedPath)) {
+      return resolve(SCRAPER_DIR, "__missing-script__.ts");
+    }
+    return resolvedPath;
   }
 
   const parsedScriptId = automationScriptIdSchema.safeParse(options.scriptId);

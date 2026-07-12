@@ -1,15 +1,15 @@
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { StandardSchemaV1 } from "baobox";
-import { status } from "elysia";
-import { Elysia } from "elysia";
+import { Elysia, status } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
+import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 import {
   type SkillAnalysisRouteBody,
   type SkillMappingCreateRouteBody,
   type SkillMappingIdParams,
-  type SkillMappingsRouteQuery,
   type SkillMappingRouteSetState,
+  type SkillMappingsRouteQuery,
   type SkillMappingUpdateRouteBody,
   type SkillReadinessRouteQuery,
   skillAnalysisBodySchema,
@@ -26,19 +26,28 @@ import {
   listSkillMappings,
   updateSkillMappingFromBody,
 } from "./skill-mapping-route-support";
-import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
   tags: ["Skill Mapping"],
 })
   .use(skillAnalysisRateLimit)
-  .get("/mappings", async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query), {
-    query: StandardSchemaV1(skillMappingsQuerySchema),
-  })
+  .get(
+    "/mappings",
+    async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
+    {
+      query: StandardSchemaV1(skillMappingsQuerySchema),
+    },
+  )
   .post(
     "/mappings",
-    async ({ body, set }: { body: SkillMappingCreateRouteBody; set: SkillMappingRouteSetState }) => {
+    async ({
+      body,
+      set,
+    }: {
+      body: SkillMappingCreateRouteBody;
+      set: SkillMappingRouteSetState;
+    }) => {
       const result = await createSkillMappingFromBody(body);
       set.status = result.statusCode;
       return result.mapping;
@@ -73,10 +82,13 @@ export const skillMappingRoutes = new Elysia({
     { params: StandardSchemaV1(skillMappingIdParamsSchema) },
   )
   .get("/pathways", async () => skillMappingService.getPathways())
-  .get("/readiness", async ({ query }: { query: SkillReadinessRouteQuery }) =>
-    getSkillReadiness(query.jobId), {
-    query: StandardSchemaV1(skillReadinessQuerySchema),
-  })
+  .get(
+    "/readiness",
+    async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
+    {
+      query: StandardSchemaV1(skillReadinessQuerySchema),
+    },
+  )
   .post(
     "/ai-analyze",
     async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };

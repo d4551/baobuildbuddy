@@ -79,7 +79,7 @@ export declare const portfolios: import("drizzle-orm/sqlite-core").SQLiteTableWi
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;
 export declare const portfolioProjects: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "portfolio_projects";
@@ -386,5 +386,5 @@ export declare const portfolioProjects: import("drizzle-orm/sqlite-core").SQLite
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

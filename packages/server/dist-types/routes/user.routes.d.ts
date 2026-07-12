@@ -59,21 +59,21 @@ export declare const userRoutes: Elysia<string, {
         [x: string]: {
             put: {
                 body: {} & {
-                    name?: string | undefined;
-                    email?: string | undefined;
-                    location?: string | undefined;
-                    summary?: string | undefined;
-                    gamingExperience?: Record<string, unknown> | undefined;
-                    website?: string | undefined;
-                    phone?: string | undefined;
-                    linkedin?: string | undefined;
-                    github?: string | undefined;
-                    currentRole?: string | undefined;
-                    currentCompany?: string | undefined;
-                    yearsExperience?: number | undefined;
-                    technicalSkills?: string[] | undefined;
-                    softSkills?: string[] | undefined;
                     careerGoals?: Record<string, unknown> | undefined;
+                    currentCompany?: string | undefined;
+                    currentRole?: string | undefined;
+                    email?: string | undefined;
+                    gamingExperience?: Record<string, unknown> | undefined;
+                    github?: string | undefined;
+                    linkedin?: string | undefined;
+                    location?: string | undefined;
+                    name?: string | undefined;
+                    phone?: string | undefined;
+                    softSkills?: string[] | undefined;
+                    summary?: string | undefined;
+                    technicalSkills?: string[] | undefined;
+                    website?: string | undefined;
+                    yearsExperience?: number | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -100,7 +100,7 @@ export declare const userRoutes: Elysia<string, {
                         updatedAt: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

@@ -179,8 +179,6 @@ function resolveSessionContextEntity(input: EntityContextInput): AIChatContextEn
   if (input.path.startsWith(`${AI_CHAT_ENTITY_ROUTE_PATHS.automationRuns}/`) && routeId) {
     return toEntity("automation_run", routeId);
   }
-
-  return;
 }
 
 function resolveEntityContext(input: EntityContextInput): AIChatContextEntity | undefined {
@@ -199,8 +197,6 @@ function resolveEntityContext(input: EntityContextInput): AIChatContextEntity | 
       return entity;
     }
   }
-
-  return;
 }
 
 export function createContextBuilder(input: ContextBuilderInput) {

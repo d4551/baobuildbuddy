@@ -35,8 +35,9 @@ function syncUserMenuState(): void {
 }
 
 function onThemeControllerChange(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  setTheme(input.checked ? THEME_NAMES.dark : THEME_NAMES.light);
+  const { target } = event;
+  if (!(target instanceof HTMLInputElement)) return;
+  setTheme(target.checked ? THEME_NAMES.dark : THEME_NAMES.light);
 }
 </script>
 

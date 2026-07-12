@@ -24,9 +24,6 @@ export type SubmitResponseBody = {
   questionIndex?: number;
   response: string;
 };
-export type RouteSetState = {
-  status?: number | string;
-};
 
 const interviewModeSchema = Type.Union([Type.Literal("studio"), Type.Literal("job")]);
 const interviewConversationStyleSchema = Type.Union([

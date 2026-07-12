@@ -7,8 +7,8 @@ export declare const listAutomationRuns: (query: {
     status?: (typeof AUTOMATION_RUN_STATUSES)[number];
 }) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -18,7 +18,7 @@ export declare const listAutomationRuns: (query: {
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -31,10 +31,10 @@ export declare const listAutomationRuns: (query: {
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;

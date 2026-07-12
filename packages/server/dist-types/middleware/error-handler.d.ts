@@ -35,9 +35,9 @@ export declare const errorHandler: Elysia<"", {
             code: "VALIDATION";
             fields: unknown[] | undefined;
         } | {
-            error: string;
-            code: number | "UNKNOWN" | "PARSE" | "INTERNAL_SERVER_ERROR" | "INVALID_COOKIE_SIGNATURE" | "INVALID_FILE_TYPE";
             fields?: undefined;
+            error: string;
+            code: number | "INTERNAL_SERVER_ERROR" | "INVALID_COOKIE_SIGNATURE" | "INVALID_FILE_TYPE" | "PARSE" | "UNKNOWN";
         };
     };
 }>;

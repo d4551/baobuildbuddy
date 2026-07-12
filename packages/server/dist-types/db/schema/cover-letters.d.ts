@@ -155,5 +155,5 @@ export declare const coverLetters: import("drizzle-orm/sqlite-core").SQLiteTable
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

@@ -30,10 +30,10 @@ export declare const studioRoutes: Elysia<string, {
             body: unknown;
             params: {};
             query: {} & {
-                type?: string | undefined;
-                size?: string | undefined;
-                remoteWork?: string | undefined;
                 q?: string | undefined;
+                remoteWork?: string | undefined;
+                size?: string | undefined;
+                type?: string | undefined;
             };
             headers: unknown;
             response: {
@@ -56,7 +56,7 @@ export declare const studioRoutes: Elysia<string, {
                     updatedAt: string;
                 }[];
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;
@@ -99,7 +99,7 @@ export declare const studioRoutes: Elysia<string, {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -117,20 +117,20 @@ export declare const studioRoutes: Elysia<string, {
             body: {
                 name: string;
             } & {
-                type?: string | undefined;
-                location?: string | undefined;
-                description?: string | undefined;
-                technologies?: string[] | undefined;
-                platforms?: string[] | undefined;
-                website?: string | undefined;
-                size?: string | undefined;
-                culture?: Record<string, unknown> | undefined;
-                remoteWork?: boolean | undefined;
-                genres?: string[] | undefined;
-                founded?: string | undefined;
                 benefits?: string[] | undefined;
-                socialMedia?: Record<string, string> | undefined;
+                culture?: Record<string, unknown> | undefined;
+                description?: string | undefined;
+                founded?: string | undefined;
+                genres?: string[] | undefined;
+                location?: string | undefined;
                 notableGames?: string[] | undefined;
+                platforms?: string[] | undefined;
+                remoteWork?: boolean | undefined;
+                size?: string | undefined;
+                socialMedia?: Record<string, string> | undefined;
+                technologies?: string[] | undefined;
+                type?: string | undefined;
+                website?: string | undefined;
             };
             params: {};
             query: unknown;
@@ -155,7 +155,7 @@ export declare const studioRoutes: Elysia<string, {
                     notableGames: string[];
                 };
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;
@@ -171,21 +171,21 @@ export declare const studioRoutes: Elysia<string, {
         ":id": {
             put: {
                 body: {} & {
-                    name?: string | undefined;
-                    type?: string | undefined;
-                    location?: string | undefined;
-                    description?: string | undefined;
-                    technologies?: string[] | undefined;
-                    platforms?: string[] | undefined;
-                    website?: string | undefined;
-                    size?: string | undefined;
-                    culture?: Record<string, unknown> | undefined;
-                    remoteWork?: boolean | undefined;
-                    genres?: string[] | undefined;
-                    founded?: string | undefined;
                     benefits?: string[] | undefined;
-                    socialMedia?: Record<string, string> | undefined;
+                    culture?: Record<string, unknown> | undefined;
+                    description?: string | undefined;
+                    founded?: string | undefined;
+                    genres?: string[] | undefined;
+                    location?: string | undefined;
+                    name?: string | undefined;
                     notableGames?: string[] | undefined;
+                    platforms?: string[] | undefined;
+                    remoteWork?: boolean | undefined;
+                    size?: string | undefined;
+                    socialMedia?: Record<string, string> | undefined;
+                    technologies?: string[] | undefined;
+                    type?: string | undefined;
+                    website?: string | undefined;
                 };
                 params: {
                     id: string;
@@ -214,7 +214,7 @@ export declare const studioRoutes: Elysia<string, {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -238,16 +238,16 @@ export declare const studioRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
                         message?: undefined;
                         id?: undefined;
+                        error: string;
                     } | {
+                        error?: undefined;
                         message: string;
                         id: string;
-                        error?: undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

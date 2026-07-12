@@ -2,6 +2,7 @@ import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { rpaRunEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
+import { authenticateApiKey } from "../middleware/auth";
 import {
   automationWebSocketBodySchema,
   type AutomationWebSocketMessage,
@@ -82,6 +83,16 @@ export function broadcastAutomationEvent(event: RpaRunEvent): void {
  */
 export const automationWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.automation), {
   body: StandardSchemaV1(automationWebSocketBodySchema),
+
+  async beforeHandle({ request }) {
+    const failure = await authenticateApiKey(request);
+    if (failure) {
+      return new Response(JSON.stringify({ error: failure.error }), {
+        status: failure.status,
+        headers: { "content-type": "application/json" },
+      });
+    }
+  },
 
   message(ws, payload: AutomationWebSocketMessage) {
     if (!payload.runId) {

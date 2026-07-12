@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useAutomationRunDetailPage } from "~/composables/useAutomationRunDetailPage";
 

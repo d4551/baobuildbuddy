@@ -1,9 +1,9 @@
+import { timingSafeEqual } from "node:crypto";
 import {
   API_ERROR_AUTH_SETUP_TOKEN_INVALID,
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
   API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
 } from "@bao/shared/constants/api-errors";
-import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
   API_MESSAGE_AUTH_DISABLED,
@@ -14,6 +14,7 @@ import {
   AUTH_KEY_RANDOM_BYTES,
   AUTH_SETUP_TOKEN_HEADER,
 } from "@bao/shared/constants/auth";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
@@ -26,14 +27,11 @@ import {
 } from "../config/rate-limit";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
+import type { RouteSetState } from "../types/route-state";
 import { resolveRateLimitClientKey } from "../utils/rate-limit";
-import {
-  authBootstrapBody,
-  type AuthBootstrapBody,
-  type RouteSetState,
-} from "./auth-route-contracts";
+import { type AuthBootstrapBody, authBootstrapBody } from "./auth-route-contracts";
 
-const BASE64URL_PADDING_PATTERN = /=+$/u;
+const BASE64URL_PADDING_PATTERN = /[=]+$/u;
 
 const encodeBase64Url = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes))
@@ -140,7 +138,12 @@ export const authRoutes = new Elysia({
               error: API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
             };
           }
-          if (providedSetupToken !== expectedSetupToken) {
+          if (
+            !timingSafeEqual(
+              Buffer.from(providedSetupToken, "utf8"),
+              Buffer.from(expectedSetupToken, "utf8"),
+            )
+          ) {
             set.status = HTTP_STATUS_FORBIDDEN;
             return {
               error: API_ERROR_AUTH_SETUP_TOKEN_INVALID,

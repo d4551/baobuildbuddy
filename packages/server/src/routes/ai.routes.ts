@@ -5,6 +5,7 @@ import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
+import type { RouteSetState } from "../types/route-state";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   handleAnalyzeResumeRoute,
@@ -16,14 +17,13 @@ import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
   type AnalyzeResumeRouteBody,
   type AutomationActionRouteBody,
-  type ChatRouteBody,
-  type GenerateCoverLetterRouteBody,
-  type MatchJobsRouteBody,
-  type RouteSetState,
   analyzeResumeRouteBodySchema,
   automationActionRouteBodySchema,
+  type ChatRouteBody,
   chatRouteBodySchema,
+  type GenerateCoverLetterRouteBody,
   generateCoverLetterRouteBodySchema,
+  type MatchJobsRouteBody,
   matchJobsRouteBodySchema,
   usageTailLimit,
 } from "./ai-route-contracts";
@@ -38,10 +38,14 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       generator: (request) => resolveRateLimitClientKey(request),
     }),
   )
-  .post("/chat", async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
-    handleChatRoute(body, set), {
-    body: StandardSchemaV1(chatRouteBodySchema),
-  })
+  .post(
+    "/chat",
+    async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
+      handleChatRoute(body, set),
+    {
+      body: StandardSchemaV1(chatRouteBodySchema),
+    },
+  )
   .post(
     "/analyze-resume",
     async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
@@ -58,10 +62,14 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: StandardSchemaV1(generateCoverLetterRouteBodySchema),
     },
   )
-  .post("/match-jobs", async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
-    handleMatchJobsRoute(body, set), {
-    body: StandardSchemaV1(matchJobsRouteBodySchema),
-  })
+  .post(
+    "/match-jobs",
+    async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
+      handleMatchJobsRoute(body, set),
+    {
+      body: StandardSchemaV1(matchJobsRouteBodySchema),
+    },
+  )
   .get("/models", async () => buildProviderModelsResponse())
   .get("/usage", async () => {
     const chatMessages = await db.select().from(chatHistory);

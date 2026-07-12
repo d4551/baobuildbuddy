@@ -1,8 +1,8 @@
 import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
-  isCoverLetterTemplate,
   type CoverLetterTemplate,
+  isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
 import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
@@ -11,7 +11,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";
 import { gamificationService } from "../services/gamification-service";
-import type { RouteSetState } from "./cover-letter-route-contracts";
+import type { RouteSetState } from "../types/route-state";
 
 export const normalizeTemplate = (value: string | undefined): CoverLetterTemplate =>
   isCoverLetterTemplate(value) ? value : COVER_LETTER_DEFAULT_TEMPLATE;

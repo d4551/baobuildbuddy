@@ -2,16 +2,16 @@ import { AI_PROVIDER_TEST_STRATEGY_BY_ID } from "@bao/shared/constants/ai-provid
 import { API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
 import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
 import type { AIProviderType } from "@bao/shared/types/ai";
-import { toErrorMessage } from "@bao/shared/utils/error-helpers";
-import { settle } from "@bao/shared/utils/promise";
 import {
   normalizeAutomationSettings,
   normalizeLocalModelEndpoint,
 } from "@bao/shared/types/settings-normalization";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { buildAIControlPlaneState } from "../services/ai/control-plane";
-import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { LocalProvider } from "../services/ai/local-provider";
+import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 
 const KEY_MASK_VISIBLE_CHARS = 4;
 type SettingsRow = typeof settingsTable.$inferSelect;

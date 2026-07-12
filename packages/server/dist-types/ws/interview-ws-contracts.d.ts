@@ -33,7 +33,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly volume: Type.TOptional<Type.TNumber>;
             readonly language: Type.TOptional<Type.TString>;
         }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"studio"> | Type.TLiteral<"job">)[]>>;
+        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
         readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
         readonly targetJob: Type.TOptional<Type.TObject<{
             readonly id: Type.TString;
@@ -46,7 +46,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly source: Type.TOptional<Type.TString>;
             readonly postedDate: Type.TOptional<Type.TString>;
             readonly url: Type.TOptional<Type.TString>;
-        }, "id" | "company" | "title" | "location", Type.InferOptionalKeys<{
+        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
             readonly id: Type.TString;
             readonly title: Type.TString;
             readonly company: Type.TString;
@@ -96,7 +96,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly volume: Type.TOptional<Type.TNumber>;
             readonly language: Type.TOptional<Type.TString>;
         }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"studio"> | Type.TLiteral<"job">)[]>>;
+        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
         readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
         readonly targetJob: Type.TOptional<Type.TObject<{
             readonly id: Type.TString;
@@ -109,7 +109,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly source: Type.TOptional<Type.TString>;
             readonly postedDate: Type.TOptional<Type.TString>;
             readonly url: Type.TOptional<Type.TString>;
-        }, "id" | "company" | "title" | "location", Type.InferOptionalKeys<{
+        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
             readonly id: Type.TString;
             readonly title: Type.TString;
             readonly company: Type.TString;
@@ -165,7 +165,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly volume: Type.TOptional<Type.TNumber>;
             readonly language: Type.TOptional<Type.TString>;
         }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"studio"> | Type.TLiteral<"job">)[]>>;
+        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
         readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
         readonly targetJob: Type.TOptional<Type.TObject<{
             readonly id: Type.TString;
@@ -178,7 +178,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly source: Type.TOptional<Type.TString>;
             readonly postedDate: Type.TOptional<Type.TString>;
             readonly url: Type.TOptional<Type.TString>;
-        }, "id" | "company" | "title" | "location", Type.InferOptionalKeys<{
+        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
             readonly id: Type.TString;
             readonly title: Type.TString;
             readonly company: Type.TString;
@@ -228,7 +228,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly volume: Type.TOptional<Type.TNumber>;
             readonly language: Type.TOptional<Type.TString>;
         }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"studio"> | Type.TLiteral<"job">)[]>>;
+        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
         readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
         readonly targetJob: Type.TOptional<Type.TObject<{
             readonly id: Type.TString;
@@ -241,7 +241,7 @@ export declare const interviewWebSocketBodySchema: Type.TObject<{
             readonly source: Type.TOptional<Type.TString>;
             readonly postedDate: Type.TOptional<Type.TString>;
             readonly url: Type.TOptional<Type.TString>;
-        }, "id" | "company" | "title" | "location", Type.InferOptionalKeys<{
+        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
             readonly id: Type.TString;
             readonly title: Type.TString;
             readonly company: Type.TString;

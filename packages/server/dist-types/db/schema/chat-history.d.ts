@@ -117,5 +117,5 @@ export declare const chatHistory: import("drizzle-orm/sqlite-core").SQLiteTableW
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

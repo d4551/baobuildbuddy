@@ -19,7 +19,6 @@ const asNonNegativeInt = (value: number | undefined): number | undefined => {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
   }
-  return;
 };
 
 const asStringArrayTrimmed = (value: unknown): string[] =>
@@ -126,7 +125,6 @@ const parseConversationStyle = (
 ): InterviewConversationStyle | undefined => {
   if (value === "structured") return "structured";
   if (value === "natural") return "natural";
-  return;
 };
 
 export const sessionConfigFromUi = (config: CreateSessionConfigInput): CreateSessionConfigInput => {

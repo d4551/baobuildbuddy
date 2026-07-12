@@ -26,8 +26,8 @@ export type ResumeExportBody = {
 export type ResumeEnhanceBody = {
     section?: string;
 };
-export declare const resumeTemplateBodySchema: Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>;
-export declare const resumeThemeBodySchema: Type.TUnion<(Type.TLiteral<"light"> | Type.TLiteral<"dark">)[]>;
+export declare const resumeTemplateBodySchema: Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
+export declare const resumeThemeBodySchema: Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>;
 export declare const resumePersonalInfoBodySchema: Type.TObject<{
     readonly name: Type.TOptional<Type.TString>;
     readonly email: Type.TOptional<Type.TString>;
@@ -56,7 +56,7 @@ export declare const resumeExperienceBodySchema: Type.TObject<{
     readonly description: Type.TOptional<Type.TString>;
     readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
     readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-}, "company" | "title" | "startDate", Type.InferOptionalKeys<{
+}, "company" | "startDate" | "title", Type.InferOptionalKeys<{
     readonly title: Type.TString;
     readonly company: Type.TString;
     readonly startDate: Type.TString;
@@ -72,7 +72,7 @@ export declare const resumeEducationBodySchema: Type.TObject<{
     readonly school: Type.TString;
     readonly year: Type.TString;
     readonly gpa: Type.TOptional<Type.TString>;
-}, "degree" | "year" | "field" | "school", "gpa">;
+}, "degree" | "field" | "school" | "year", "gpa">;
 export declare const resumeSkillsBodySchema: Type.TObject<{
     readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
     readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
@@ -87,7 +87,7 @@ export declare const resumeProjectBodySchema: Type.TObject<{
     readonly description: Type.TString;
     readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
     readonly link: Type.TOptional<Type.TString>;
-}, "title" | "description", Type.InferOptionalKeys<{
+}, "description" | "title", Type.InferOptionalKeys<{
     readonly title: Type.TString;
     readonly description: Type.TString;
     readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
@@ -135,7 +135,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly description: Type.TOptional<Type.TString>;
         readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }, "company" | "title" | "startDate", Type.InferOptionalKeys<{
+    }, "company" | "startDate" | "title", Type.InferOptionalKeys<{
         readonly title: Type.TString;
         readonly company: Type.TString;
         readonly startDate: Type.TString;
@@ -151,7 +151,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly school: Type.TString;
         readonly year: Type.TString;
         readonly gpa: Type.TOptional<Type.TString>;
-    }, "degree" | "year" | "field" | "school", "gpa">>>;
+    }, "degree" | "field" | "school" | "year", "gpa">>>;
     readonly skills: Type.TOptional<Type.TObject<{
         readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
         readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
@@ -166,7 +166,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly description: Type.TString;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
         readonly link: Type.TOptional<Type.TString>;
-    }, "title" | "description", Type.InferOptionalKeys<{
+    }, "description" | "title", Type.InferOptionalKeys<{
         readonly title: Type.TString;
         readonly description: Type.TString;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
@@ -183,8 +183,8 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly genres: Type.TOptional<Type.TString>;
         readonly shippedTitles: Type.TOptional<Type.TString>;
     }>>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
-    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"light"> | Type.TLiteral<"dark">)[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
+    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>>;
     readonly isDefault: Type.TOptional<Type.TBoolean>;
 }, never, Type.InferOptionalKeys<{
     readonly name: Type.TOptional<Type.TString>;
@@ -217,7 +217,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly description: Type.TOptional<Type.TString>;
         readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }, "company" | "title" | "startDate", Type.InferOptionalKeys<{
+    }, "company" | "startDate" | "title", Type.InferOptionalKeys<{
         readonly title: Type.TString;
         readonly company: Type.TString;
         readonly startDate: Type.TString;
@@ -233,7 +233,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly school: Type.TString;
         readonly year: Type.TString;
         readonly gpa: Type.TOptional<Type.TString>;
-    }, "degree" | "year" | "field" | "school", "gpa">>>;
+    }, "degree" | "field" | "school" | "year", "gpa">>>;
     readonly skills: Type.TOptional<Type.TObject<{
         readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
         readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
@@ -248,7 +248,7 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly description: Type.TString;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
         readonly link: Type.TOptional<Type.TString>;
-    }, "title" | "description", Type.InferOptionalKeys<{
+    }, "description" | "title", Type.InferOptionalKeys<{
         readonly title: Type.TString;
         readonly description: Type.TString;
         readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
@@ -265,8 +265,8 @@ export declare const resumeMutationBodySchema: Type.TObject<{
         readonly genres: Type.TOptional<Type.TString>;
         readonly shippedTitles: Type.TOptional<Type.TString>;
     }>>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
-    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"light"> | Type.TLiteral<"dark">)[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
+    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>>;
     readonly isDefault: Type.TOptional<Type.TBoolean>;
 }>>;
 export declare const resumeIdParamsSchema: Type.TObject<{
@@ -289,15 +289,15 @@ export declare const resumeQuestionSynthesizeBodySchema: Type.TObject<{
         readonly question: Type.TString;
         readonly answer: Type.TString;
         readonly category: Type.TString;
-    }, "id" | "category" | "question" | "answer", never>>;
+    }, "answer" | "category" | "id" | "question", never>>;
 }, "questionsAndAnswers", never>;
 export type ResumeQuestionSynthesizeRouteBody = StaticParse<typeof resumeQuestionSynthesizeBodySchema>;
 export declare const resumeExportBodySchema: Type.TObject<{
     readonly format: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
 }, never, Type.InferOptionalKeys<{
     readonly format: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "gaming" | "executive" | "technical" | "modern" | "classic" | "minimal" | "google-xyz">[]>>;
+    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
 }>>;
 export type ResumeExportRouteBody = StaticParse<typeof resumeExportBodySchema>;
 export declare const resumeEnhanceBodySchema: Type.TObject<{

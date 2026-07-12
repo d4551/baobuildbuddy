@@ -27,10 +27,6 @@ export type MatchJobsBody = {
   skills?: string[];
 };
 
-export type RouteSetState = {
-  status?: number | string;
-};
-
 export type MatchJobsResponse = {
   message: string;
   matches: Array<{

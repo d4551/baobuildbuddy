@@ -20,8 +20,8 @@ import {
   resolveKnownProvider as resolveKnownProviderValue,
 } from "./settings-route-schema-ai-brand";
 import {
-  jobTaxonomySettingsBodySchema,
   jobProviderSettingsBodySchema,
+  jobTaxonomySettingsBodySchema,
   jsonValueBodySchema,
   nullableJsonValueBodySchema,
   speechSettingsBodySchema,

@@ -3,15 +3,15 @@ import type { ResumeEnhanceBody, ResumeExportBody, ResumeMutationBody, ResumeRou
 export declare const buildResumeCreatePayload: (body: ResumeMutationBody) => Omit<ResumeData, "id">;
 export declare const buildResumeUpdatePayload: (body: ResumeMutationBody) => Partial<ResumeData>;
 export declare const exportResumeAsset: (resumeId: string, body: ResumeExportBody, set: ResumeRouteSetState) => Promise<Response | {
-    error: string;
     details?: undefined;
+    error: string;
 } | {
     error: string;
     details: string;
 }>;
 export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhanceBody, set: ResumeRouteSetState) => Promise<{
-    error: string;
     details?: undefined;
+    error: string;
     resume?: undefined;
     suggestions?: undefined;
     section?: undefined;
@@ -22,33 +22,35 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
     suggestions?: undefined;
     section?: undefined;
 } | {
+    error?: undefined;
+    details?: undefined;
     resume: ResumeData;
     suggestions: import("@bao/shared/utils/json").JsonArray;
     section: string;
-    error?: undefined;
-    details?: undefined;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{
-    error: string;
-    details?: undefined;
     resumeId?: undefined;
     jobId?: undefined;
+    analysis?: undefined;
+    details?: undefined;
+    error: string;
     score?: undefined;
     strengths?: undefined;
     improvements?: undefined;
     keywords?: undefined;
-    analysis?: undefined;
 } | {
+    resumeId?: undefined;
+    jobId?: undefined;
+    analysis?: undefined;
     error: string;
     details: string;
-    resumeId?: undefined;
-    jobId?: undefined;
     score?: undefined;
     strengths?: undefined;
     improvements?: undefined;
     keywords?: undefined;
-    analysis?: undefined;
 } | {
+    error?: undefined;
+    details?: undefined;
     resumeId: string;
     jobId: string;
     score: number;
@@ -56,6 +58,4 @@ export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBo
     improvements: string[];
     keywords: string[];
     analysis: Record<string, unknown>;
-    error?: undefined;
-    details?: undefined;
 }>;

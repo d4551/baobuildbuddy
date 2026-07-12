@@ -9,10 +9,10 @@ export declare const mapSuggestedMappingToCreateInput: (suggestedMapping: Record
     gameExpression: string;
     transferableSkill: string;
     industryApplications: string[];
-    evidence: SkillEvidence[];
+    evidence: never[];
     confidence: number;
-    category: "creative" | "technical" | "leadership" | "community" | "analytical" | "communication" | "project_management";
-    demandLevel: "medium" | "low" | "high";
+    category: "analytical" | "communication" | "community" | "creative" | "leadership" | "project_management" | "technical";
+    demandLevel: "high" | "low" | "medium";
     verified: boolean;
     aiGenerated: boolean;
 } | null;

@@ -1,4 +1,3 @@
-import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_MEDIUM,
@@ -10,11 +9,8 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
+import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import Type, { type StaticParse } from "baobox";
-
-export type RouteSetState = {
-  status?: number | string;
-};
 
 export type PortfolioMetadataRecord = PortfolioMetadata;
 
@@ -67,8 +63,9 @@ export const portfolioProjectReorderBodySchema = Type.Object(
   },
   { required: ["orderedIds"] },
 );
-export type PortfolioProjectReorderRouteBody =
-  StaticParse<typeof portfolioProjectReorderBodySchema>;
+export type PortfolioProjectReorderRouteBody = StaticParse<
+  typeof portfolioProjectReorderBodySchema
+>;
 
 export const portfolioProjectIdParamsSchema = Type.Object(
   {

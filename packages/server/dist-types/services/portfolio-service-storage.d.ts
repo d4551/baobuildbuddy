@@ -1,4 +1,5 @@
 import type { CreatePortfolioProjectPayload, PortfolioRecord, UpdatePortfolioProjectPayload } from "./portfolio-service-contracts";
+import { metadataToRecord } from "./portfolio-service-normalizers";
 export declare const getOrCreateDefaultPortfolioRecord: () => Promise<PortfolioRecord>;
 export declare const getPortfolioRecord: (portfolioId?: string) => Promise<PortfolioRecord | null>;
 export declare const updatePortfolioMetadata: (portfolioId: string, metadata: Record<string, unknown>, now: string) => Promise<void>;
@@ -10,4 +11,4 @@ export declare const deleteProjectById: (id: string) => Promise<boolean>;
 export declare const reorderPortfolioProjects: (portfolioId: string, orderedIds: string[]) => Promise<{
     valid: boolean;
 }>;
-export declare const serializePortfolioMetadata: (metadata?: import("@bao/shared/types/portfolio").PortfolioMetadata) => Record<string, unknown>;
+export declare const serializePortfolioMetadata: typeof metadataToRecord;

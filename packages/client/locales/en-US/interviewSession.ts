@@ -58,6 +58,9 @@ const interviewSession = {
     submitNextButton: "Submit & Next",
     submitFinishButton: "Submit & Finish",
     notFound: "Session not found. Please start a new interview.",
+    retryButtonLabel: "Retry",
+    retryAriaLabel: "Retry loading interview session",
+    loadErrorTitle: "Session could not be loaded",
     voice: {
       listening: "Listening...",
       idle: "Voice input",

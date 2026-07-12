@@ -1,5 +1,5 @@
 import { type CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
-import type { RouteSetState } from "./cover-letter-route-contracts";
+import type { RouteSetState } from "../types/route-state";
 export declare const normalizeTemplate: (value: string | undefined) => CoverLetterTemplate;
 export declare const listCoverLetters: () => Promise<{
     id: string;
@@ -24,7 +24,7 @@ export declare const createCoverLetter: (body: {
         position: string;
         jobInfo: Record<string, unknown>;
         content: Record<string, unknown>;
-        template: "professional" | "creative" | "gaming" | "executive" | "technical";
+        template: "creative" | "executive" | "gaming" | "professional" | "technical";
     };
     statusCode: number;
 }>;
@@ -61,7 +61,7 @@ export declare const deleteCoverLetter: (id: string, set: RouteSetState) => Prom
     success?: undefined;
     id?: undefined;
 } | {
+    error?: undefined;
     success: boolean;
     id: string;
-    error?: undefined;
 }>;

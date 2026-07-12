@@ -1,15 +1,15 @@
 import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
-import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
 import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
+import type { RouteSetState } from "../types/route-state";
 import {
-  type RouteSetState,
   type StudioIdParams,
   type StudioListRouteQuery,
   type StudioMutationRouteBody,

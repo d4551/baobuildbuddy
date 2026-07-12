@@ -7,9 +7,10 @@ import {
   HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
-import { StandardSchemaV1 } from "baobox";
-import Type from "baobox";
+import Type, { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
+import type { RouteSetState } from "../types/route-state";
+import { toRouteError } from "../utils/automation-route-error";
 import { automationRateLimit } from "../utils/rate-limit";
 import {
   handleAutomationCapabilitiesRoute,
@@ -23,30 +24,28 @@ import {
   handleVerifyAutomationContext,
 } from "./automation-route-actions";
 import {
+  AUTOMATION_STATUS_SUCCESS,
   type AutomationRunIdParams,
   type AutomationRunQuery,
+  automationRunEnvelopeBodySchema,
+  automationRunIdParamsSchema,
+  automationRunQuerySchema,
+  capabilityAuditReportBodySchema,
   type EmailResponseBody,
+  emailResponseBodySchema,
   type JobApplyBody,
-  type RouteSetState,
+  jobApplyBodySchema,
+  routeErrorBodySchema,
   type ScheduledEmailResponseBody,
   type ScheduledJobApplyBody,
   type ScheduledScrapeBody,
   type ScrapeBody,
-  automationRunEnvelopeBodySchema,
-  automationRunIdParamsSchema,
-  automationRunQuerySchema,
-  AUTOMATION_STATUS_SUCCESS,
-  capabilityAuditReportBodySchema,
-  emailResponseBodySchema,
-  jobApplyBodySchema,
-  routeErrorBodySchema,
   scheduledEmailResponseBodySchema,
   scheduledJobApplyBodySchema,
   scheduledScrapeBodySchema,
   scrapeBodySchema,
 } from "./automation-route-contracts";
 import { listAutomationRuns } from "./automation-route-support";
-import { toRouteError } from "../utils/automation-route-error";
 
 const hasText = (value: string | undefined): value is string =>
   typeof value === "string" && value.trim().length > 0;

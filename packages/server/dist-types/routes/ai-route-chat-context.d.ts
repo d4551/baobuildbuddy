@@ -8,7 +8,7 @@ export declare const chatContextSchema: Type.TObject<{
         readonly name: Type.TOptional<Type.TString>;
         readonly params: Type.TRecord<Type.TString, Type.TString>;
         readonly query: Type.TRecord<Type.TString, Type.TString>;
-    }, "path" | "params" | "query", "name">;
+    }, "params" | "path" | "query", "name">;
     readonly entity: Type.TOptional<Type.TObject<{
         readonly type: Type.TString;
         readonly id: Type.TString;
@@ -25,8 +25,8 @@ export declare const chatContextSchema: Type.TObject<{
         readonly interviewSessionCount: Type.TNumber;
         readonly hasPortfolioProjects: Type.TBoolean;
         readonly portfolioProjectCount: Type.TNumber;
-    }, "hasResumes" | "resumeCount" | "hasJobs" | "jobCount" | "hasStudios" | "studioCount" | "hasInterviewSessions" | "interviewSessionCount" | "hasPortfolioProjects" | "portfolioProjectCount", never>;
-}, "source" | "route" | "state", Type.InferOptionalKeys<{
+    }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
+}, "route" | "source" | "state", Type.InferOptionalKeys<{
     readonly source: Type.TString;
     readonly domain: Type.TOptional<Type.TString>;
     readonly route: Type.TObject<{
@@ -34,7 +34,7 @@ export declare const chatContextSchema: Type.TObject<{
         readonly name: Type.TOptional<Type.TString>;
         readonly params: Type.TRecord<Type.TString, Type.TString>;
         readonly query: Type.TRecord<Type.TString, Type.TString>;
-    }, "path" | "params" | "query", "name">;
+    }, "params" | "path" | "query", "name">;
     readonly entity: Type.TOptional<Type.TObject<{
         readonly type: Type.TString;
         readonly id: Type.TString;
@@ -51,9 +51,9 @@ export declare const chatContextSchema: Type.TObject<{
         readonly interviewSessionCount: Type.TNumber;
         readonly hasPortfolioProjects: Type.TBoolean;
         readonly portfolioProjectCount: Type.TNumber;
-    }, "hasResumes" | "resumeCount" | "hasJobs" | "jobCount" | "hasStudios" | "studioCount" | "hasInterviewSessions" | "interviewSessionCount" | "hasPortfolioProjects" | "portfolioProjectCount", never>;
+    }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
 }>>;
-export declare const aiPreferenceSchema: Type.TRecord<Type.TString, Type.TUnion<(Type.TString | Type.TBoolean | Type.TNumber)[]>>;
+export declare const aiPreferenceSchema: Type.TRecord<Type.TString, Type.TUnion<(Type.TBoolean | Type.TNumber | Type.TString)[]>>;
 export type ChatContextPayload = StaticParse<typeof chatContextSchema>;
 export declare function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null;
 export declare function serializeClientChatContext(context: AIChatContext): string;

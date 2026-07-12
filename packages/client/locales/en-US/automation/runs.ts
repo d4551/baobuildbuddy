@@ -40,6 +40,9 @@ const automationruns = {
         success: "Success",
         error: "Error",
       },
+      list: {
+        notAvailable: "N/A",
+      },
     },
   },
 } as const;

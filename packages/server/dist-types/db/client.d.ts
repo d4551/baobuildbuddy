@@ -158,7 +158,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     auth: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "auth";
@@ -203,7 +203,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     automationRuns: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "automation_runs";
@@ -576,7 +576,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     chatHistory: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "chat_history";
@@ -697,7 +697,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     coverLetters: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "cover_letters";
@@ -856,7 +856,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     gamification: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "gamification";
@@ -1064,7 +1064,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     interviewSessions: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "interview_sessions";
@@ -1276,7 +1276,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     jobTaxonomyKeywords: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "job_taxonomy_keywords";
@@ -1306,7 +1306,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "job_taxonomy_keywords";
                 dataType: "string";
                 columnType: "SQLiteText";
-                data: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                data: "genre" | "hybrid-location" | "platform" | "remote-location" | "requirement" | "role" | "technology";
                 driverParam: string;
                 notNull: true;
                 hasDefault: false;
@@ -1319,7 +1319,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 generated: undefined;
             }, {}, {
                 length: number | undefined;
-                $type: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                $type: "genre" | "hybrid-location" | "platform" | "remote-location" | "requirement" | "role" | "technology";
             }>;
             label: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "label";
@@ -1432,7 +1432,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "jobs";
@@ -1910,7 +1910,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     portfolioProjects: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "portfolio_projects";
@@ -2217,7 +2217,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     portfolios: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "portfolios";
@@ -2300,7 +2300,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     resumes: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "resumes";
@@ -2571,7 +2571,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     savedJobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "saved_jobs";
@@ -2635,7 +2635,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     settings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "settings";
@@ -3003,7 +3003,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     skillMappings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "skill_mappings";
@@ -3215,7 +3215,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     studioClassificationRules: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "studio_classification_rules";
@@ -3352,7 +3352,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     studios: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "studios";
@@ -3661,7 +3661,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
     userProfile: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "user_profile";
@@ -4008,7 +4008,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 length: number | undefined;
             }>;
         };
-        dialect: "sqlite";
+        dialect: 'sqlite';
     }>;
 }> & {
     $client: Database;

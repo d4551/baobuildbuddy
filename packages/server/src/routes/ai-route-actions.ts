@@ -29,16 +29,12 @@ import { chatHistory } from "../db/schema/chat-history";
 import { resumes } from "../db/schema/resumes";
 import { contextManager } from "../services/ai/context-manager";
 import { buildSystemPrompt } from "../services/ai/prompts-system";
+import type { RouteSetState } from "../types/route-state";
 import {
+  type ChatContextPayload,
   composeChatSystemPrompt,
   normalizeClientChatContext,
-  type ChatContextPayload,
 } from "./ai-route-chat-context";
-import type {
-  AnalyzeResumeBody,
-  GenerateCoverLetterBody,
-  RouteSetState,
-} from "./ai-route-contracts";
 import {
   buildAnalyzeResumePrompt,
   buildCoverLetterPrompt,
@@ -48,6 +44,7 @@ import {
   resolveCoverLetterJobDescription,
   serializeResume,
 } from "./ai-route-content";
+import type { AnalyzeResumeBody, GenerateCoverLetterBody } from "./ai-route-contracts";
 import { runJobMatchingFlow } from "./ai-route-job-matching";
 import { getAIService, getAISettingsRow } from "./ai-route-support";
 

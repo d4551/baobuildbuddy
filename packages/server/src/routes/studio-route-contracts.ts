@@ -11,10 +11,6 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import Type, { type StaticParse } from "baobox";
 
-export type RouteSetState = {
-  status?: number | string;
-};
-
 export const studioListQuerySchema = Type.Object({
   q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
   type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),

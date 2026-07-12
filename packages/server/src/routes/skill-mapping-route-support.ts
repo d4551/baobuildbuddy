@@ -18,8 +18,8 @@ import { skillMappingService } from "../services/skill-mapping-service";
 import type {
   SkillMappingMutationBody,
   SkillMappingRouteSetState,
-  SkillMappingUpdateBody,
   SkillMappingsQuery,
+  SkillMappingUpdateBody,
 } from "./skill-mapping-route-contracts";
 import {
   clampConfidence,

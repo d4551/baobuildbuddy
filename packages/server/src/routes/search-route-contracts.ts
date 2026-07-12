@@ -1,6 +1,5 @@
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
-import { StandardSchemaV1 } from "baobox";
-import Type, { type StaticParse } from "baobox";
+import Type, { StandardSchemaV1, type StaticParse } from "baobox";
 
 export const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
 export type SearchType = (typeof searchTypes)[number];

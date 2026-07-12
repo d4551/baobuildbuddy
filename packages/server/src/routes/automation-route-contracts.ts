@@ -1,9 +1,9 @@
 import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
-  RPA_CAPABILITY_ISSUE_CODES,
   AUTOMATION_SCRAPE_TARGETS,
   type AutomationScrapeTarget,
+  RPA_CAPABILITY_ISSUE_CODES,
 } from "@bao/shared/constants/automation";
 import {
   HTTP_STATUS_BAD_REQUEST,
@@ -61,9 +61,6 @@ export type ScheduleEmailResponseRequestBody = EmailResponseRequest & {
 export type ScheduleScrapeRequestBody = {
   target: AutomationScrapeTarget;
   runAt: string;
-};
-export type RouteSetState = {
-  status?: number | string;
 };
 
 export const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);

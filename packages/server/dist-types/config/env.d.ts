@@ -2,26 +2,27 @@ export declare const isProductionRuntime: () => boolean;
 export declare const isTestRuntime: boolean;
 export declare const isBunExecutablePath: (execPath?: string) => boolean;
 export declare const shouldUsePrettyLogTransport: (nodeEnv?: string | undefined, execPath?: string, testMode?: string | undefined) => boolean;
+export declare const isAuthDisabled: () => boolean;
 /**
  * Resolves the current server runtime configuration from environment variables.
  */
 export declare function readConfig(): {
+    disableAuth: boolean;
+    authSetupToken: string | null;
+    automationScriptTimeoutMs: number;
+    automationStdioBufferLimit: number;
     smartFieldMapperRetries: number;
     smartFieldMapperRetryDelayMs: number;
     smartFieldMapperFetchTimeoutMs: number;
     smartFieldMapperMaxFormHtmlChars: number;
     smartFieldMapperUserAgent: string;
-    automationScriptTimeoutMs: number;
-    automationStdioBufferLimit: number;
-    enableAutomationVerification: boolean;
-    allowAutomationPrivateHosts: boolean;
-    disableAuth: boolean;
-    authSetupToken: string | null;
     port: number;
     host: string;
     dbPath: string;
     logLevel: string;
     corsOrigins: string[];
+    enableAutomationVerification: boolean;
+    allowAutomationPrivateHosts: boolean;
 };
 /**
  * Stable server runtime configuration for the current process.

@@ -31,27 +31,26 @@ export declare const aiRoutes: Elysia<string, {
                 body: {
                     message: string;
                 } & {
-                    sessionId?: string | undefined;
                     context?: ({
-                        source: string;
                         route: {
-                            path: string;
                             params: Record<string, string>;
+                            path: string;
                             query: Record<string, string>;
                         } & {
                             name?: string | undefined;
                         };
+                        source: string;
                         state: {
-                            hasResumes: boolean;
-                            resumeCount: number;
-                            hasJobs: boolean;
-                            jobCount: number;
-                            hasStudios: boolean;
-                            studioCount: number;
                             hasInterviewSessions: boolean;
-                            interviewSessionCount: number;
+                            hasJobs: boolean;
                             hasPortfolioProjects: boolean;
+                            hasResumes: boolean;
+                            hasStudios: boolean;
+                            interviewSessionCount: number;
+                            jobCount: number;
                             portfolioProjectCount: number;
+                            resumeCount: number;
+                            studioCount: number;
                         } & {};
                     } & {
                         domain?: string | undefined;
@@ -62,6 +61,7 @@ export declare const aiRoutes: Elysia<string, {
                             label?: string | undefined;
                         }) | undefined;
                     }) | undefined;
+                    sessionId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -71,15 +71,15 @@ export declare const aiRoutes: Elysia<string, {
                         message: string;
                         sessionId: string | null | undefined;
                         timestamp: string;
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
                         followUps: string[];
-                        contextDomain: "resume" | "job_search" | "interview" | "portfolio" | "skills" | "automation" | "general";
+                        contextDomain: "automation" | "general" | "interview" | "job_search" | "portfolio" | "resume" | "skills";
                     } | {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -105,24 +105,24 @@ export declare const aiRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
+                        model?: undefined;
                         error: string;
                         message?: undefined;
                         resumeId?: undefined;
                         jobId?: undefined;
                         analysis?: undefined;
                         provider?: undefined;
-                        model?: undefined;
                     } | {
+                        error?: undefined;
                         message: string;
                         resumeId: string;
                         jobId: string | null;
                         analysis: import("./ai-route-contracts").ResumeAnalysisResult;
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
-                        error?: undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -139,9 +139,9 @@ export declare const aiRoutes: Elysia<string, {
         "generate-cover-letter": {
             post: {
                 body: {
-                    resumeId: string;
                     company: string;
                     position: string;
+                    resumeId: string;
                 } & {
                     jobId?: string | undefined;
                 };
@@ -150,20 +150,20 @@ export declare const aiRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
-                        error: string;
-                        message?: undefined;
-                        content?: undefined;
-                        provider?: undefined;
                         model?: undefined;
+                        message?: undefined;
+                        provider?: undefined;
+                        error: string;
+                        content?: undefined;
                     } | {
+                        error?: undefined;
                         message: string;
                         content: import("./ai-route-contracts").CoverLetterSections;
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
-                        error?: undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -180,9 +180,9 @@ export declare const aiRoutes: Elysia<string, {
         "match-jobs": {
             post: {
                 body: {} & {
-                    skills?: string[] | undefined;
-                    resumeId?: string | undefined;
                     preferences?: Record<string, string | number | boolean> | undefined;
+                    resumeId?: string | undefined;
+                    skills?: string[] | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -192,7 +192,7 @@ export declare const aiRoutes: Elysia<string, {
                         error: string;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -215,10 +215,10 @@ export declare const aiRoutes: Elysia<string, {
                 response: {
                     200: import("../services/ai/control-plane").AIControlPlaneState | {
                         providers: {
-                            id: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                            id: "claude" | "gemini" | "huggingface" | "local" | "openai";
                             nameKey: string;
                             descriptionKey: string;
-                            iconId: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                            iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
                             models: string[];
                             available: boolean;
                             health: "unconfigured";
@@ -258,30 +258,30 @@ export declare const aiRoutes: Elysia<string, {
         "automation-action": {
             post: {
                 body: {
-                    resumeId: string;
                     action: string;
                     jobUrl: string;
+                    resumeId: string;
                 } & {
-                    jobId?: string | undefined;
                     coverLetterId?: string | undefined;
+                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
                     200: {
+                        message?: undefined;
                         error: string;
                         runId?: undefined;
                         status?: undefined;
-                        message?: undefined;
                     } | {
+                        error?: undefined;
                         runId: string;
                         status: string;
                         message: string;
-                        error?: undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

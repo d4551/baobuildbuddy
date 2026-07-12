@@ -1,8 +1,5 @@
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import Type, { type StaticParse } from "baobox";
-export type RouteSetState = {
-    status?: number | string;
-};
 export type PortfolioMetadataRecord = PortfolioMetadata;
 export declare const portfolioUpdateBodySchema: Type.TObject<{
     readonly metadata: Type.TRecord<Type.TString, Type.TUnknown>;
@@ -21,7 +18,7 @@ export declare const portfolioProjectCreateBodySchema: Type.TObject<{
     readonly platforms: Type.TOptional<Type.TArray<Type.TString>>;
     readonly engines: Type.TOptional<Type.TArray<Type.TString>>;
     readonly sortOrder: Type.TOptional<Type.TNumber>;
-}, "title" | "description", Type.InferOptionalKeys<{
+}, "description" | "title", Type.InferOptionalKeys<{
     readonly title: Type.TString;
     readonly description: Type.TString;
     readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;

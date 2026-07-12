@@ -103,7 +103,6 @@ const resolveFallbackSelectedModel = (
   if (aiRouting.chat.provider === providerId) {
     return aiRouting.chat.model ?? row.preferredModel ?? undefined;
   }
-  return;
 };
 
 const resolveFallbackModels = (

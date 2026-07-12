@@ -34,7 +34,7 @@ export declare const settingsRoutes: Elysia<string, {
                     automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
                     localModelEndpoint: string | null;
                     aiRouting: import("@bao/shared/types/ai").AIRouting;
-                    providerDiagnostics: Partial<Record<"openai" | "huggingface" | "local" | "gemini" | "claude", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
+                    providerDiagnostics: Partial<Record<"claude" | "gemini" | "huggingface" | "local" | "openai", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
                     preferredProvider: string | null;
                     preferredModel: string | null;
                     theme: import("@bao/shared/constants/branding").AppDataTheme;
@@ -50,13 +50,13 @@ export declare const settingsRoutes: Elysia<string, {
                     hasEmailTransportPassword: boolean;
                     hasLocalKey: boolean;
                     jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
-                    id: string;
                     createdAt: string;
-                    updatedAt: string;
-                    localModelName: string | null;
-                    language: string | null;
-                    notifications: Record<string, boolean> | null;
                     emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
+                    id: string;
+                    language: string | null;
+                    localModelName: string | null;
+                    notifications: Record<string, boolean> | null;
+                    updatedAt: string;
                 } | {
                     error: string;
                 };
@@ -67,57 +67,126 @@ export declare const settingsRoutes: Elysia<string, {
     [x: string]: {
         put: {
             body: {} & {
-                theme?: "corporate" | "business" | "bao-dark" | "bao-light" | undefined;
                 aiRouting?: ({
+                    automationFieldMapping: {
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                    } & {
+                        model?: string | undefined;
+                    };
                     chat: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
-                    } & {
-                        model?: string | undefined;
-                    };
-                    interviewQuestions: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
-                    } & {
-                        model?: string | undefined;
-                    };
-                    interviewFeedback: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
-                    } & {
-                        model?: string | undefined;
-                    };
-                    resume: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                     } & {
                         model?: string | undefined;
                     };
                     coverLetter: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                     } & {
                         model?: string | undefined;
                     };
                     emailResponse: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    interviewFeedback: {
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    interviewQuestions: {
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                     } & {
                         model?: string | undefined;
                     };
                     jobMatch: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                    } & {
+                        model?: string | undefined;
+                    };
+                    resume: {
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                     } & {
                         model?: string | undefined;
                     };
                     scrapeEnrichment: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
-                    } & {
-                        model?: string | undefined;
-                    };
-                    automationFieldMapping: {
-                        provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                     } & {
                         model?: string | undefined;
                     };
                 } & {}) | undefined;
-                preferredProvider?: "openai" | "huggingface" | "local" | "gemini" | "claude" | undefined;
-                preferredModel?: string | undefined;
-                language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
+                automationSettings?: ({} & {
+                    autoSaveScreenshots?: boolean | undefined;
+                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
+                    defaultTimeout?: number | undefined;
+                    enableSmartSelectors?: boolean | undefined;
+                    headless?: boolean | undefined;
+                    jobProviders?: {
+                        readonly providerTimeoutMs: number;
+                        readonly companyBoardResultLimit: number;
+                        readonly gamingBoardResultLimit: number;
+                        readonly unknownLocationLabel: string;
+                        readonly unknownCompanyLabel: string;
+                        readonly hitmarkerEnabled: boolean;
+                        readonly hitmarkerApiBaseUrl: string;
+                        readonly hitmarkerDefaultQuery: string;
+                        readonly hitmarkerDefaultLocation: string;
+                        readonly greenhouseApiBaseUrl: string;
+                        readonly greenhouseMaxPages: number;
+                        readonly greenhouseBoards: {
+                            readonly board: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly leverApiBaseUrl: string;
+                        readonly leverMaxPages: number;
+                        readonly leverCompanies: {
+                            readonly slug: string;
+                            readonly company: string;
+                            readonly enabled: boolean;
+                        }[];
+                        readonly companyBoardApiTemplates: {
+                            readonly greenhouse: string;
+                            readonly lever: string;
+                            readonly recruitee: string;
+                            readonly workable: string;
+                            readonly ashby: string;
+                            readonly smartrecruiters: string;
+                            readonly teamtailor: string;
+                            readonly workday: string;
+                        };
+                        readonly companyBoards: {
+                            readonly name: string;
+                            readonly token: string;
+                            readonly type: "ashby" | "greenhouse" | "lever" | "recruitee" | "smartrecruiters" | "teamtailor" | "workable" | "workday";
+                            readonly enabled: boolean;
+                            readonly priority: number;
+                        }[];
+                        readonly gamingPortals: {
+                            readonly id: "gamesjobsdirect" | "grackle" | "hitmarker" | "pocketgamer" | "remotegamejobs" | "workwithindies";
+                            readonly name: string;
+                            readonly source: string;
+                            readonly fallbackUrl: string;
+                            readonly enabled: boolean;
+                        }[];
+                    } | undefined;
+                    maxConcurrentRuns?: number | undefined;
+                    screenshotRetention?: number | undefined;
+                    speech?: {
+                        readonly locale: string;
+                        readonly stt: {
+                            provider: "browser" | "custom" | "huggingface" | "local" | "openai";
+                            model: string;
+                            endpoint: string;
+                        };
+                        readonly tts: {
+                            provider: "browser" | "custom" | "huggingface" | "local" | "openai";
+                            model: string;
+                            endpoint: string;
+                            voice: string;
+                            format: "mp3" | "wav";
+                        };
+                    } | undefined;
+                }) | undefined;
                 brandSettings?: {
                     readonly name?: string | undefined;
                     readonly assistantName?: string | undefined;
@@ -197,95 +266,26 @@ export declare const settingsRoutes: Elysia<string, {
                         readonly contentOverrides?: Record<string, string> | undefined;
                     } | undefined;
                 } | undefined;
+                emailTransportSettings?: ({} & {
+                    authMethod?: "login" | "plain" | undefined;
+                    connectionTimeoutSeconds?: number | undefined;
+                    fromEmail?: string | undefined;
+                    fromName?: string | undefined;
+                    host?: string | undefined;
+                    port?: number | undefined;
+                    security?: "plain" | "starttls" | "tls" | undefined;
+                    username?: string | undefined;
+                }) | undefined;
+                language?: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | undefined;
                 notifications?: ({} & {
                     achievements?: boolean | undefined;
                     dailyChallenges?: boolean | undefined;
-                    levelUp?: boolean | undefined;
                     jobAlerts?: boolean | undefined;
+                    levelUp?: boolean | undefined;
                 }) | undefined;
-                automationSettings?: ({} & {
-                    headless?: boolean | undefined;
-                    defaultTimeout?: number | undefined;
-                    screenshotRetention?: number | undefined;
-                    maxConcurrentRuns?: number | undefined;
-                    defaultBrowser?: "chrome" | "chromium" | "edge" | undefined;
-                    enableSmartSelectors?: boolean | undefined;
-                    autoSaveScreenshots?: boolean | undefined;
-                    speech?: {
-                        readonly locale: string;
-                        readonly stt: {
-                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
-                            model: string;
-                            endpoint: string;
-                        };
-                        readonly tts: {
-                            voice: string;
-                            format: "mp3" | "wav";
-                            provider: "browser" | "openai" | "huggingface" | "local" | "custom";
-                            model: string;
-                            endpoint: string;
-                        };
-                    } | undefined;
-                    jobProviders?: {
-                        readonly providerTimeoutMs: number;
-                        readonly companyBoardResultLimit: number;
-                        readonly gamingBoardResultLimit: number;
-                        readonly unknownLocationLabel: string;
-                        readonly unknownCompanyLabel: string;
-                        readonly hitmarkerEnabled: boolean;
-                        readonly hitmarkerApiBaseUrl: string;
-                        readonly hitmarkerDefaultQuery: string;
-                        readonly hitmarkerDefaultLocation: string;
-                        readonly greenhouseApiBaseUrl: string;
-                        readonly greenhouseMaxPages: number;
-                        readonly greenhouseBoards: {
-                            readonly board: string;
-                            readonly company: string;
-                            readonly enabled: boolean;
-                        }[];
-                        readonly leverApiBaseUrl: string;
-                        readonly leverMaxPages: number;
-                        readonly leverCompanies: {
-                            readonly slug: string;
-                            readonly company: string;
-                            readonly enabled: boolean;
-                        }[];
-                        readonly companyBoardApiTemplates: {
-                            readonly greenhouse: string;
-                            readonly lever: string;
-                            readonly recruitee: string;
-                            readonly workable: string;
-                            readonly ashby: string;
-                            readonly smartrecruiters: string;
-                            readonly teamtailor: string;
-                            readonly workday: string;
-                        };
-                        readonly companyBoards: {
-                            readonly name: string;
-                            readonly token: string;
-                            readonly type: "greenhouse" | "lever" | "recruitee" | "workable" | "ashby" | "smartrecruiters" | "teamtailor" | "workday";
-                            readonly enabled: boolean;
-                            readonly priority: number;
-                        }[];
-                        readonly gamingPortals: {
-                            readonly id: "hitmarker" | "grackle" | "workwithindies" | "remotegamejobs" | "gamesjobsdirect" | "pocketgamer";
-                            readonly name: string;
-                            readonly source: string;
-                            readonly fallbackUrl: string;
-                            readonly enabled: boolean;
-                        }[];
-                    } | undefined;
-                }) | undefined;
-                emailTransportSettings?: ({} & {
-                    authMethod?: "plain" | "login" | undefined;
-                    port?: number | undefined;
-                    fromEmail?: string | undefined;
-                    host?: string | undefined;
-                    security?: "tls" | "starttls" | "plain" | undefined;
-                    username?: string | undefined;
-                    fromName?: string | undefined;
-                    connectionTimeoutSeconds?: number | undefined;
-                }) | undefined;
+                preferredModel?: string | undefined;
+                preferredProvider?: "claude" | "gemini" | "huggingface" | "local" | "openai" | undefined;
+                theme?: "bao-dark" | "bao-light" | "business" | "corporate" | undefined;
             };
             params: {};
             query: unknown;
@@ -295,11 +295,11 @@ export declare const settingsRoutes: Elysia<string, {
                     success: boolean;
                     error: string;
                 } | {
-                    success: boolean;
                     error?: undefined;
+                    success: boolean;
                 };
                 422: {
-                    type: "validation";
+                    type: 'validation';
                     on: string;
                     summary?: string;
                     message?: string;
@@ -315,7 +315,7 @@ export declare const settingsRoutes: Elysia<string, {
                 body: {
                     readonly keywords: {
                         readonly id: string;
-                        readonly category: "remote-location" | "hybrid-location" | "requirement" | "technology" | "genre" | "platform" | "role";
+                        readonly category: "genre" | "hybrid-location" | "platform" | "remote-location" | "requirement" | "role" | "technology";
                         readonly label: string;
                         readonly synonyms: string[];
                         readonly sortOrder: number;
@@ -338,7 +338,7 @@ export declare const settingsRoutes: Elysia<string, {
                         jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -353,13 +353,13 @@ export declare const settingsRoutes: Elysia<string, {
         "api-keys": {
             put: {
                 body: {} & {
-                    geminiApiKey?: string | undefined;
-                    openaiApiKey?: string | undefined;
                     claudeApiKey?: string | undefined;
+                    emailTransportPassword?: string | undefined;
+                    geminiApiKey?: string | undefined;
                     huggingfaceToken?: string | undefined;
                     localModelEndpoint?: string | undefined;
                     localModelName?: string | undefined;
-                    emailTransportPassword?: string | undefined;
+                    openaiApiKey?: string | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -369,7 +369,7 @@ export declare const settingsRoutes: Elysia<string, {
                         success: boolean;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -384,8 +384,8 @@ export declare const settingsRoutes: Elysia<string, {
         "test-api-key": {
             post: {
                 body: {
-                    provider: "openai" | "huggingface" | "local" | "gemini" | "claude";
                     key: string;
+                    provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                 } & {
                     model?: string | undefined;
                 };
@@ -394,32 +394,32 @@ export declare const settingsRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
+                        error?: undefined;
                         valid: boolean;
                         provider: "local";
-                        diagnosticCode: "healthy" | "unconfigured" | "unreachable" | "empty-model-list" | "invalid-model" | "timeout" | "error";
+                        diagnosticCode: "empty-model-list" | "error" | "healthy" | "invalid-model" | "timeout" | "unconfigured" | "unreachable";
                         message: string | undefined;
                         availableModels: readonly string[] | undefined;
                         selectedModel: string | undefined;
-                        error?: undefined;
                     } | {
-                        valid: boolean;
-                        provider: "openai" | "huggingface" | "gemini" | "claude";
-                        error: string;
-                        diagnosticCode?: undefined;
                         message?: undefined;
                         availableModels?: undefined;
                         selectedModel?: undefined;
-                    } | {
                         valid: boolean;
-                        provider: "openai" | "huggingface" | "gemini" | "claude";
-                        diagnosticCode: "healthy" | "error";
-                        message: string | undefined;
+                        provider: "claude" | "gemini" | "huggingface" | "openai";
+                        error: string;
+                        diagnosticCode?: undefined;
+                    } | {
+                        error?: undefined;
                         availableModels?: undefined;
                         selectedModel?: undefined;
-                        error?: undefined;
+                        valid: boolean;
+                        provider: "claude" | "gemini" | "huggingface" | "openai";
+                        diagnosticCode: "error" | "healthy";
+                        message: string | undefined;
                     };
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;
@@ -446,20 +446,20 @@ export declare const settingsRoutes: Elysia<string, {
         import: {
             post: {
                 body: {
-                    portfolio: unknown;
-                    gamification: unknown;
                     applications: unknown[];
-                    resumes: unknown[];
-                    settings: unknown;
                     chatHistory: unknown[];
                     coverLetters: unknown[];
-                    interviewSessions: unknown[];
-                    portfolioProjects: unknown[];
-                    savedJobs: unknown[];
-                    skillMappings: unknown[];
-                    profile: unknown;
-                    version: "1.0";
                     exportedAt: string;
+                    gamification: unknown;
+                    interviewSessions: unknown[];
+                    portfolio: unknown;
+                    portfolioProjects: unknown[];
+                    profile: unknown;
+                    resumes: unknown[];
+                    savedJobs: unknown[];
+                    settings: unknown;
+                    skillMappings: unknown[];
+                    version: "1.0";
                 } & {};
                 params: {};
                 query: unknown;
@@ -467,7 +467,7 @@ export declare const settingsRoutes: Elysia<string, {
                 response: {
                     200: import("../services/data-service-contracts").ImportResult;
                     422: {
-                        type: "validation";
+                        type: 'validation';
                         on: string;
                         summary?: string;
                         message?: string;

@@ -20,7 +20,46 @@ export declare const TABLE_DEFINITIONS: readonly ["CREATE TABLE IF NOT EXISTS us
       email_transport_password TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
-    )`, "CREATE TABLE IF NOT EXISTS auth (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      api_key TEXT\n    )", "CREATE TABLE IF NOT EXISTS jobs (\n      id TEXT PRIMARY KEY,\n      title TEXT NOT NULL,\n      company TEXT NOT NULL,\n      location TEXT NOT NULL,\n      remote INTEGER DEFAULT 0,\n      hybrid INTEGER DEFAULT 0,\n      salary TEXT,\n      description TEXT,\n      requirements TEXT,\n      technologies TEXT,\n      experience_level TEXT,\n      type TEXT DEFAULT 'full-time',\n      posted_date TEXT,\n      url TEXT,\n      source TEXT,\n      studio_type TEXT,\n      game_genres TEXT,\n      platforms TEXT,\n      content_hash TEXT,\n      tags TEXT,\n      company_logo TEXT,\n      application_url TEXT,\n      enrichment TEXT,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS saved_jobs (\n      id TEXT PRIMARY KEY,\n      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,\n      saved_at TEXT NOT NULL\n    )", "CREATE TABLE IF NOT EXISTS applications (\n      id TEXT PRIMARY KEY,\n      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,\n      status TEXT DEFAULT 'applied',\n      applied_date TEXT NOT NULL,\n      notes TEXT DEFAULT '',\n      timeline TEXT DEFAULT '[]',\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", `CREATE TABLE IF NOT EXISTS resumes (
+    )`, "CREATE TABLE IF NOT EXISTS auth (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      api_key TEXT\n    )", `CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      company TEXT NOT NULL,
+      location TEXT NOT NULL,
+      remote INTEGER DEFAULT 0,
+      hybrid INTEGER DEFAULT 0,
+      salary TEXT,
+      description TEXT,
+      requirements TEXT,
+      technologies TEXT,
+      experience_level TEXT,
+      type TEXT DEFAULT 'full-time',
+      posted_date TEXT,
+      url TEXT,
+      source TEXT,
+      studio_type TEXT,
+      game_genres TEXT,
+      platforms TEXT,
+      content_hash TEXT,
+      tags TEXT,
+      company_logo TEXT,
+      application_url TEXT,
+      enrichment TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS saved_jobs (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      saved_at TEXT NOT NULL
+    )`, `CREATE TABLE IF NOT EXISTS applications (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      status TEXT DEFAULT 'applied',
+      applied_date TEXT NOT NULL,
+      notes TEXT DEFAULT '',
+      timeline TEXT DEFAULT '[]',
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS resumes (
       id TEXT PRIMARY KEY,
       name TEXT DEFAULT '${string}',
       personal_info TEXT,
@@ -44,6 +83,114 @@ export declare const TABLE_DEFINITIONS: readonly ["CREATE TABLE IF NOT EXISTS us
       template TEXT DEFAULT '${string}',
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
-    )`, "CREATE TABLE IF NOT EXISTS portfolios (\n      id TEXT PRIMARY KEY,\n      metadata TEXT,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS portfolio_projects (\n      id TEXT PRIMARY KEY,\n      portfolio_id TEXT NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,\n      title TEXT NOT NULL,\n      description TEXT NOT NULL,\n      technologies TEXT DEFAULT '[]',\n      image TEXT,\n      live_url TEXT,\n      github_url TEXT,\n      tags TEXT DEFAULT '[]',\n      featured INTEGER DEFAULT 0,\n      role TEXT,\n      platforms TEXT,\n      engines TEXT,\n      sort_order INTEGER DEFAULT 0,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS interview_sessions (\n      id TEXT PRIMARY KEY,\n      studio_id TEXT NOT NULL,\n      config TEXT,\n      questions TEXT DEFAULT '[]',\n      responses TEXT DEFAULT '[]',\n      final_analysis TEXT,\n      status TEXT DEFAULT 'preparing',\n      start_time INTEGER,\n      end_time INTEGER,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS studios (\n      id TEXT PRIMARY KEY,\n      name TEXT NOT NULL,\n      logo TEXT,\n      website TEXT,\n      location TEXT,\n      size TEXT,\n      type TEXT,\n      description TEXT,\n      games TEXT DEFAULT '[]',\n      technologies TEXT DEFAULT '[]',\n      culture TEXT,\n      interview_style TEXT,\n      remote_work INTEGER,\n      enrichment TEXT,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS gamification (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      xp INTEGER DEFAULT 0,\n      level INTEGER DEFAULT 1,\n      achievements TEXT DEFAULT '[]',\n      daily_challenges TEXT DEFAULT '{}',\n      longest_streak INTEGER DEFAULT 0,\n      current_streak INTEGER DEFAULT 0,\n      last_active_date TEXT,\n      stats TEXT DEFAULT '{}',\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS skill_mappings (\n      id TEXT PRIMARY KEY,\n      game_expression TEXT NOT NULL,\n      transferable_skill TEXT NOT NULL,\n      industry_applications TEXT DEFAULT '[]',\n      evidence TEXT DEFAULT '[]',\n      confidence INTEGER DEFAULT 50,\n      category TEXT,\n      demand_level TEXT DEFAULT 'medium',\n      ai_generated INTEGER DEFAULT 0,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS chat_history (\n      id TEXT PRIMARY KEY,\n      role TEXT NOT NULL,\n      content TEXT NOT NULL,\n      timestamp TEXT NOT NULL,\n      session_id TEXT,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS automation_runs (\n      id TEXT PRIMARY KEY,\n      type TEXT NOT NULL,\n      status TEXT NOT NULL DEFAULT 'pending',\n      job_id TEXT,\n      user_id TEXT,\n      input TEXT,\n      output TEXT,\n      screenshots TEXT,\n      error TEXT,\n      progress INTEGER DEFAULT 0,\n      current_step INTEGER,\n      total_steps INTEGER,\n      exit_code INTEGER,\n      timed_out INTEGER NOT NULL DEFAULT 0,\n      aborted INTEGER NOT NULL DEFAULT 0,\n      execution_ms INTEGER,\n      started_at TEXT,\n      completed_at TEXT,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS job_taxonomy_keywords (\n      id TEXT PRIMARY KEY,\n      category TEXT NOT NULL,\n      label TEXT NOT NULL,\n      synonyms TEXT NOT NULL DEFAULT '[]',\n      sort_order INTEGER NOT NULL DEFAULT 0,\n      enabled INTEGER NOT NULL DEFAULT 1,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", "CREATE TABLE IF NOT EXISTS studio_classification_rules (\n      id TEXT PRIMARY KEY,\n      studio_type TEXT NOT NULL,\n      keyword TEXT NOT NULL,\n      sort_order INTEGER NOT NULL DEFAULT 0,\n      enabled INTEGER NOT NULL DEFAULT 1,\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )"];
+    )`, `CREATE TABLE IF NOT EXISTS portfolios (
+      id TEXT PRIMARY KEY,
+      metadata TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS portfolio_projects (
+      id TEXT PRIMARY KEY,
+      portfolio_id TEXT NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      technologies TEXT DEFAULT '[]',
+      image TEXT,
+      live_url TEXT,
+      github_url TEXT,
+      tags TEXT DEFAULT '[]',
+      featured INTEGER DEFAULT 0,
+      role TEXT,
+      platforms TEXT,
+      engines TEXT,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS interview_sessions (
+      id TEXT PRIMARY KEY,
+      studio_id TEXT NOT NULL,
+      config TEXT,
+      questions TEXT DEFAULT '[]',
+      responses TEXT DEFAULT '[]',
+      final_analysis TEXT,
+      status TEXT DEFAULT 'preparing',
+      start_time INTEGER,
+      end_time INTEGER,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS studios (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      logo TEXT,
+      website TEXT,
+      location TEXT,
+      size TEXT,
+      type TEXT,
+      description TEXT,
+      games TEXT DEFAULT '[]',
+      technologies TEXT DEFAULT '[]',
+      culture TEXT,
+      interview_style TEXT,
+      remote_work INTEGER,
+      enrichment TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, "CREATE TABLE IF NOT EXISTS gamification (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      xp INTEGER DEFAULT 0,\n      level INTEGER DEFAULT 1,\n      achievements TEXT DEFAULT '[]',\n      daily_challenges TEXT DEFAULT '{}',\n      longest_streak INTEGER DEFAULT 0,\n      current_streak INTEGER DEFAULT 0,\n      last_active_date TEXT,\n      stats TEXT DEFAULT '{}',\n      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),\n      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n    )", `CREATE TABLE IF NOT EXISTS skill_mappings (
+      id TEXT PRIMARY KEY,
+      game_expression TEXT NOT NULL,
+      transferable_skill TEXT NOT NULL,
+      industry_applications TEXT DEFAULT '[]',
+      evidence TEXT DEFAULT '[]',
+      confidence INTEGER DEFAULT 50,
+      category TEXT,
+      demand_level TEXT DEFAULT 'medium',
+      ai_generated INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS chat_history (
+      id TEXT PRIMARY KEY,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      timestamp TEXT NOT NULL,
+      session_id TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS automation_runs (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      job_id TEXT,
+      user_id TEXT,
+      input TEXT,
+      output TEXT,
+      screenshots TEXT,
+      error TEXT,
+      progress INTEGER DEFAULT 0,
+      current_step INTEGER,
+      total_steps INTEGER,
+      exit_code INTEGER,
+      timed_out INTEGER NOT NULL DEFAULT 0,
+      aborted INTEGER NOT NULL DEFAULT 0,
+      execution_ms INTEGER,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS job_taxonomy_keywords (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      label TEXT NOT NULL,
+      synonyms TEXT NOT NULL DEFAULT '[]',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS studio_classification_rules (
+      id TEXT PRIMARY KEY,
+      studio_type TEXT NOT NULL,
+      keyword TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`];
 export declare const INDEXES: readonly ["CREATE INDEX IF NOT EXISTS jobs_source_idx ON jobs(source)", "CREATE INDEX IF NOT EXISTS jobs_posted_date_idx ON jobs(posted_date)", "CREATE UNIQUE INDEX IF NOT EXISTS jobs_content_hash_idx ON jobs(content_hash)", "CREATE INDEX IF NOT EXISTS saved_jobs_job_id_idx ON saved_jobs(job_id)", "CREATE INDEX IF NOT EXISTS applications_job_id_idx ON applications(job_id)", "CREATE INDEX IF NOT EXISTS portfolio_projects_portfolio_id_idx ON portfolio_projects(portfolio_id)", "CREATE INDEX IF NOT EXISTS interview_sessions_studio_id_idx ON interview_sessions(studio_id)", "CREATE INDEX IF NOT EXISTS chat_history_session_id_idx ON chat_history(session_id)", "CREATE INDEX IF NOT EXISTS chat_history_timestamp_idx ON chat_history(timestamp)", "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_category_idx ON job_taxonomy_keywords(category, sort_order)", "CREATE INDEX IF NOT EXISTS job_taxonomy_keywords_enabled_idx ON job_taxonomy_keywords(enabled)", "CREATE INDEX IF NOT EXISTS studio_classification_rules_type_idx ON studio_classification_rules(studio_type, sort_order)", "CREATE INDEX IF NOT EXISTS studio_classification_rules_enabled_idx ON studio_classification_rules(enabled)"];
 export { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID };

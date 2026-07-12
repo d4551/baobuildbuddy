@@ -111,7 +111,7 @@ export class CvQuestionnaireService {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       throw new Error(API_ERROR_PARSE_RESUME_SYNTHESIS);
     }
-    return parsed as Partial<ResumeData>;
+    return parsed satisfies Partial<ResumeData>;
   }
 }
 

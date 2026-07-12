@@ -204,5 +204,5 @@ export declare const gamification: import("drizzle-orm/sqlite-core").SQLiteTable
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

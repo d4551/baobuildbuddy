@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-BASELINE="bun@1.3.11"
+BASELINE="bun@1.3.14"
 CURRENT="$(bun pm pkg get packageManager | tr -d '[:space:]')"
 
 if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then
@@ -22,7 +22,7 @@ read_stale_bun_refs_with_rg() {
     -g '!**/.git/**' \
     -g '!**/.bun/**' \
     -g '!scripts/verify-bun-baseline.sh' \
-    -e 'bun@1\\.3\\.9|\"1\\.3\\.9\"' .)"
+    -e 'bun@1\\.3\\.11|\"1\\.3\\.11\"' .)"
   status=$?
   set -e
 
@@ -49,7 +49,7 @@ read_stale_bun_refs_with_grep() {
       \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
       -o -type f \
       ! -path './scripts/verify-bun-baseline.sh' \
-      -exec grep -InE 'bun@1\\.3\\.9|\"1\\.3\\.9\"' {} +
+      -exec grep -InE 'bun@1\\.3\\.11|\"1\\.3\\.11\"' {} +
   )"
   status=$?
   set -e
@@ -73,7 +73,7 @@ else
   STALE_LINES="$(read_stale_bun_refs_with_grep)"
 fi
 if [[ -n "$STALE_LINES" ]]; then
-  echo "❌ Found stale Bun 1.3.9 references:"
+  echo "❌ Found stale Bun 1.3.11 references:"
   echo "$STALE_LINES"
   exit 1
 fi

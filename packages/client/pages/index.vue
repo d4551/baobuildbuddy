@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 

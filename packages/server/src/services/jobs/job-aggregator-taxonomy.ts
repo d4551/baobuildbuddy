@@ -111,8 +111,6 @@ export const detectExperienceLevel = (title: string): JobExperienceLevel | undef
   if (titleLower.includes("mid") || titleLower.includes("intermediate")) return "mid";
   if (titleLower.includes("junior") || titleLower.includes("jr")) return "junior";
   if (titleLower.includes("entry") || titleLower.includes("intern")) return "entry";
-
-  return;
 };
 
 export const detectJobType = (title: string): JobType => {

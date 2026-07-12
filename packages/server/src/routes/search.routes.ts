@@ -2,12 +2,12 @@ import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/cons
 import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
 import {
-  searchAutocompleteQuery,
   type SearchAutocompleteQuery,
-  searchQuery,
   type SearchQuery,
-  searchTypes,
   type SearchType,
+  searchAutocompleteQuery,
+  searchQuery,
+  searchTypes,
 } from "./search-route-contracts";
 
 const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | undefined => {

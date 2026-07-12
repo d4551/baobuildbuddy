@@ -950,7 +950,7 @@ const extractZipArchive = async (absolutePath: string, destinationRoot: string):
     Promise.resolve(null),
   );
 
-  if (!commandResult || commandResult.exitCode !== 0) {
+  if (commandResult?.exitCode !== 0) {
     throw new Error(`Unable to extract zip archive ${absolutePath}.`);
   }
 };

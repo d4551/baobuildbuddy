@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -128,7 +132,7 @@ function studioDetailLocation(location: string | undefined): string {
             v-if="studio?.website"
             :href="studio.website"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             class="btn btn-outline"
             :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
           >
@@ -141,7 +145,7 @@ function studioDetailLocation(location: string | undefined): string {
             <div class="card-body">
               <div class="flex items-start gap-4">
                 <div class="avatar placeholder">
-                  <div class="w-20 rounded-full bg-neutral text-neutral-content">
+                  <div class="bg-base-300 text-base-content w-20 rounded-full">
                     <span class="text-3xl">{{ studioInitial }}</span>
                   </div>
                 </div>

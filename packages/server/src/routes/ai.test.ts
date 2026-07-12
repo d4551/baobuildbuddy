@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
 import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
-import { API_ENDPOINTS, API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";

@@ -15,10 +15,6 @@ export type GenerateCoverLetterBody = {
   save?: boolean;
 };
 
-export type RouteSetState = {
-  status?: number | string;
-};
-
 export const coverLetterTemplateBodySchema = Type.Union(
   COVER_LETTER_TEMPLATE_OPTIONS.map((template) => Type.Literal(template)),
 );

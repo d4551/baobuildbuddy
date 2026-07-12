@@ -1,10 +1,5 @@
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
-import { StandardSchemaV1 } from "baobox";
-import Type, { type StaticParse } from "baobox";
-
-export type RouteSetState = {
-  status?: number | string;
-};
+import Type, { StandardSchemaV1, type StaticParse } from "baobox";
 
 export const automationScreenshotParamsSchema = Type.Object(
   {

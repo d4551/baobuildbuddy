@@ -10,8 +10,8 @@ export declare const handleVerifyAutomationContext: (set: RouteSetState) => Prom
 }>;
 export declare const handleJobApplyRoute: (payload: JobApplyRequestBody, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -21,7 +21,7 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody, set: Ro
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -34,10 +34,10 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody, set: Ro
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;
@@ -55,8 +55,8 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody, set: Ro
 }>;
 export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyRequestBody, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -66,7 +66,7 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -79,10 +79,10 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;
@@ -113,8 +113,8 @@ export declare const handleEmailResponseRoute: (payload: EmailResponseRequest, s
 }>;
 export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailResponseRequestBody, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -124,7 +124,7 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -137,10 +137,10 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;
@@ -158,8 +158,8 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
 }>;
 export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -169,7 +169,7 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: Rou
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -182,10 +182,10 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: Rou
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;
@@ -203,8 +203,8 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody, set: Rou
 }>;
 export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequestBody, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -214,7 +214,7 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -227,10 +227,10 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;
@@ -251,8 +251,8 @@ export declare const handleAutomationCapabilitiesRoute: (set: RouteSetState) => 
 }>;
 export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSetState) => Promise<{
     id: string;
-    type: "scrape" | "job_apply" | "email";
-    status: "error" | "success" | "pending" | "running";
+    type: "email" | "job_apply" | "scrape";
+    status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
@@ -262,7 +262,7 @@ export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSet
         screenshots: string[];
         artifacts: {
             id: string;
-            kind: "screenshot" | "trace" | "document" | "log";
+            kind: "document" | "log" | "screenshot" | "trace";
             path: string;
             label?: string | undefined;
             mimeType?: string | undefined;
@@ -275,10 +275,10 @@ export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSet
     } | null;
     screenshots: string[] | null;
     error: string | {
-        code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+        code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        source: string;
         details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        source: string;
     } | null;
     progress: number | null;
     currentStep: number | null;

@@ -16,8 +16,8 @@ import { resumes } from "../db/schema/resumes";
 import { userProfile } from "../db/schema/user";
 import { jobMatchPrompt } from "../services/ai/prompts-career";
 import { createServerLogger } from "../utils/logger";
-import type { MatchJobsResponse } from "./ai-route-contracts";
 import { extractResumeSkills } from "./ai-route-content";
+import type { MatchJobsResponse } from "./ai-route-contracts";
 import { getAIService } from "./ai-route-support";
 
 const aiRoutesJobMatchingLogger = createServerLogger("ai-route-job-matching");

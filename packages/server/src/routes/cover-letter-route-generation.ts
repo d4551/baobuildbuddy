@@ -30,13 +30,14 @@ import { AIService } from "../services/ai/ai-service";
 import { coverLetterPrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
+import type { RouteSetState } from "../types/route-state";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
-import type { GenerateCoverLetterBody, RouteSetState } from "./cover-letter-route-contracts";
+import type { GenerateCoverLetterBody } from "./cover-letter-route-contracts";
 import {
   ensureCompleteCoverLetterContent,
+  type GeneratedCoverLetterContent,
   resolveResumeContext,
   toGeneratedCoverLetterContent,
-  type GeneratedCoverLetterContent,
 } from "./cover-letter-route-generation-support";
 import { getCoverLetterById, normalizeTemplate } from "./cover-letter-route-support";
 

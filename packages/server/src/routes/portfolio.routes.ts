@@ -20,6 +20,7 @@ import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
+import type { RouteSetState } from "../types/route-state";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 import {
   type PortfolioExportRouteBody,
@@ -28,7 +29,6 @@ import {
   type PortfolioProjectReorderRouteBody,
   type PortfolioProjectUpdateRouteBody,
   type PortfolioUpdateRouteBody,
-  type RouteSetState,
   portfolioExportBodySchema,
   portfolioProjectCreateBodySchema,
   portfolioProjectIdParamsSchema,

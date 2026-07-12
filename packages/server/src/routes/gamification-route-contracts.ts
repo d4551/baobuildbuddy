@@ -1,13 +1,5 @@
-import {
-  SCHEMA_MAX_LENGTH_ID,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "@bao/shared/constants/schema-limits";
-import { StandardSchemaV1 } from "baobox";
-import Type, { type StaticParse } from "baobox";
-
-export type RouteSetState = {
-  status?: number | string;
-};
+import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import Type, { StandardSchemaV1, type StaticParse } from "baobox";
 
 export const awardXpBodySchema = Type.Object({
   amount: Type.Number({ minimum: 0, maximum: 10000 }),

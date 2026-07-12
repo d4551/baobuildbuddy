@@ -31,7 +31,7 @@ export declare const createFailedRunUpdate: (errorMessage: string, execution?: {
             message: string;
         }[];
         errorEnvelope: {
-            code: "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "AUTOMATION_CANCELLED" | "SCRIPT_PROTOCOL_ERROR" | "SCRIPT_OUTPUT_INVALID" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "NETWORK_ERROR" | "UNKNOWN_ERROR";
+            code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
             details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
         } | null;

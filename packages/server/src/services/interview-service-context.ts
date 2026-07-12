@@ -6,7 +6,7 @@ import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enric
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";
-import { portfolios, portfolioProjects } from "../db/schema/portfolios";
+import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
@@ -206,7 +206,8 @@ async function resolvePreferredPortfolio(candidateContext?: InterviewCandidateCo
   const portfolioRow = portfolioRows[0];
 
   if (!portfolioRow) {
-    return { projectRows: [] as Array<typeof portfolioProjects.$inferSelect> };
+    const emptyProjectRows: Array<typeof portfolioProjects.$inferSelect> = [];
+    return { projectRows: emptyProjectRows };
   }
 
   const projectRows = await db

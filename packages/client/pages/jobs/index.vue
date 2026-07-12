@@ -1,7 +1,12 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: ["auth"],
+});
+
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
+
 const { t } = useI18n();
 
 useSeoMeta({

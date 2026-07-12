@@ -24,41 +24,38 @@ export type ScheduleScrapeRequestBody = {
     target: AutomationScrapeTarget;
     runAt: string;
 };
-export type RouteSetState = {
-    status?: number | string;
-};
 export declare const RUN_ID_PATTERN: RegExp;
-export declare const AUTOMATION_TYPE_SCHEMA: Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>;
-export declare const AUTOMATION_STATUS_SCHEMA: Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>;
-export declare const EMAIL_RESPONSE_TONE_SCHEMA: Type.TUnion<(Type.TLiteral<"professional"> | Type.TLiteral<"friendly"> | Type.TLiteral<"concise">)[]>;
-export declare const SCRAPE_TARGET_SCHEMA: Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>;
+export declare const AUTOMATION_TYPE_SCHEMA: Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
+export declare const AUTOMATION_STATUS_SCHEMA: Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>;
+export declare const EMAIL_RESPONSE_TONE_SCHEMA: Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>;
+export declare const SCRAPE_TARGET_SCHEMA: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
 export declare const automationRunEnvelopeBodySchema: Type.TObject<{
     readonly id: Type.TString;
-    readonly type: Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>;
-    readonly status: Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>;
-    readonly jobId: Type.TUnion<(Type.TString | Type.TNull)[]>;
-    readonly userId: Type.TUnion<(Type.TString | Type.TNull)[]>;
+    readonly type: Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
+    readonly status: Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>;
+    readonly jobId: Type.TUnion<(Type.TNull | Type.TString)[]>;
+    readonly userId: Type.TUnion<(Type.TNull | Type.TString)[]>;
     readonly input: Type.TUnion<(Type.TNull | Type.TRecord<Type.TString, Type.TUnknown>)[]>;
     readonly output: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TNull | Type.TRecord<Type.TString, Type.TUnknown>)[]>)[]>;
-    readonly screenshots: Type.TUnion<(Type.TNull | Type.TArray<Type.TString>)[]>;
-    readonly error: Type.TUnion<(Type.TString | Type.TNull | Type.TObject<{
+    readonly screenshots: Type.TUnion<(Type.TArray<Type.TString> | Type.TNull)[]>;
+    readonly error: Type.TUnion<(Type.TNull | Type.TObject<{
         readonly code: Type.TString;
         readonly message: Type.TString;
         readonly source: Type.TString;
         readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    }, "code" | "source" | "message", "details">)[]>;
-    readonly progress: Type.TUnion<(Type.TNumber | Type.TNull)[]>;
-    readonly currentStep: Type.TUnion<(Type.TNumber | Type.TNull)[]>;
-    readonly totalSteps: Type.TUnion<(Type.TNumber | Type.TNull)[]>;
-    readonly startedAt: Type.TUnion<(Type.TString | Type.TNull)[]>;
-    readonly completedAt: Type.TUnion<(Type.TString | Type.TNull)[]>;
+    }, "code" | "message" | "source", "details"> | Type.TString)[]>;
+    readonly progress: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
+    readonly currentStep: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
+    readonly totalSteps: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
+    readonly startedAt: Type.TUnion<(Type.TNull | Type.TString)[]>;
+    readonly completedAt: Type.TUnion<(Type.TNull | Type.TString)[]>;
     readonly createdAt: Type.TString;
     readonly updatedAt: Type.TString;
-    readonly exitCode: Type.TUnion<(Type.TNumber | Type.TNull)[]>;
+    readonly exitCode: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
     readonly timedOut: Type.TBoolean;
     readonly aborted: Type.TBoolean;
-    readonly executionMs: Type.TUnion<(Type.TNumber | Type.TNull)[]>;
-}, "error" | "id" | "aborted" | "type" | "output" | "input" | "progress" | "screenshots" | "status" | "jobId" | "userId" | "currentStep" | "totalSteps" | "exitCode" | "timedOut" | "executionMs" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", never>;
+    readonly executionMs: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
+}, "aborted" | "completedAt" | "createdAt" | "currentStep" | "error" | "executionMs" | "exitCode" | "id" | "input" | "jobId" | "output" | "progress" | "screenshots" | "startedAt" | "status" | "timedOut" | "totalSteps" | "type" | "updatedAt" | "userId", never>;
 export declare const routeErrorBodySchema: Type.TObject<{
     readonly error: Type.TObject<{
         readonly code: Type.TString;
@@ -68,9 +65,9 @@ export declare const routeErrorBodySchema: Type.TObject<{
 }, "error", never>;
 export declare const capabilityAuditEntryBodySchema: Type.TObject<{
     readonly id: Type.TString;
-    readonly category: Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply">)[]>;
+    readonly category: Type.TUnion<(Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
     readonly name: Type.TString;
-    readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>)[]>;
+    readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>)[]>;
     readonly implemented: Type.TBoolean;
     readonly configured: Type.TBoolean;
     readonly enabled: Type.TBoolean;
@@ -79,15 +76,15 @@ export declare const capabilityAuditEntryBodySchema: Type.TObject<{
     readonly runHistoryAvailable: Type.TBoolean;
     readonly liveUpdatesAvailable: Type.TBoolean;
     readonly issues: Type.TArray<Type.TObject<{
-        readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+        readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
         readonly portalId: Type.TOptional<Type.TString>;
         readonly portalName: Type.TOptional<Type.TString>;
     }, "code", Type.InferOptionalKeys<{
-        readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+        readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
         readonly portalId: Type.TOptional<Type.TString>;
         readonly portalName: Type.TOptional<Type.TString>;
     }>>>;
-}, "name" | "id" | "category" | "enabled" | "target" | "issues" | "configured" | "implemented" | "manualRunAvailable" | "scheduledRunAvailable" | "runHistoryAvailable" | "liveUpdatesAvailable", never>;
+}, "category" | "configured" | "enabled" | "id" | "implemented" | "issues" | "liveUpdatesAvailable" | "manualRunAvailable" | "name" | "runHistoryAvailable" | "scheduledRunAvailable" | "target", never>;
 export declare const capabilityAuditReportBodySchema: Type.TObject<{
     readonly generatedAt: Type.TString;
     readonly summary: Type.TObject<{
@@ -97,12 +94,12 @@ export declare const capabilityAuditReportBodySchema: Type.TObject<{
         readonly scheduledRunAvailable: Type.TNumber;
         readonly runHistoryAvailable: Type.TNumber;
         readonly liveUpdatesAvailable: Type.TNumber;
-    }, "configured" | "manualRunAvailable" | "scheduledRunAvailable" | "runHistoryAvailable" | "liveUpdatesAvailable" | "total", never>;
+    }, "configured" | "liveUpdatesAvailable" | "manualRunAvailable" | "runHistoryAvailable" | "scheduledRunAvailable" | "total", never>;
     readonly capabilities: Type.TArray<Type.TObject<{
         readonly id: Type.TString;
-        readonly category: Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply">)[]>;
+        readonly category: Type.TUnion<(Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
         readonly name: Type.TString;
-        readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>)[]>;
+        readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>)[]>;
         readonly implemented: Type.TBoolean;
         readonly configured: Type.TBoolean;
         readonly enabled: Type.TBoolean;
@@ -111,16 +108,16 @@ export declare const capabilityAuditReportBodySchema: Type.TObject<{
         readonly runHistoryAvailable: Type.TBoolean;
         readonly liveUpdatesAvailable: Type.TBoolean;
         readonly issues: Type.TArray<Type.TObject<{
-            readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+            readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
             readonly portalId: Type.TOptional<Type.TString>;
             readonly portalName: Type.TOptional<Type.TString>;
         }, "code", Type.InferOptionalKeys<{
-            readonly code: Type.TUnion<Type.TLiteral<"provider_settings_unavailable" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing">[]>;
+            readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
             readonly portalId: Type.TOptional<Type.TString>;
             readonly portalName: Type.TOptional<Type.TString>;
         }>>>;
-    }, "name" | "id" | "category" | "enabled" | "target" | "issues" | "configured" | "implemented" | "manualRunAvailable" | "scheduledRunAvailable" | "runHistoryAvailable" | "liveUpdatesAvailable", never>>;
-}, "summary" | "capabilities" | "generatedAt", never>;
+    }, "category" | "configured" | "enabled" | "id" | "implemented" | "issues" | "liveUpdatesAvailable" | "manualRunAvailable" | "name" | "runHistoryAvailable" | "scheduledRunAvailable" | "target", never>>;
+}, "capabilities" | "generatedAt" | "summary", never>;
 export declare const automationRouteErrorResponses: {
     400: Type.TObject<{
         readonly error: Type.TObject<{
@@ -164,7 +161,7 @@ export declare const jobApplyBodySchema: Type.TObject<{
     readonly coverLetterId: Type.TOptional<Type.TString>;
     readonly jobId: Type.TOptional<Type.TString>;
     readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
-}, "resumeId" | "jobUrl", Type.InferOptionalKeys<{
+}, "jobUrl" | "resumeId", Type.InferOptionalKeys<{
     readonly jobUrl: Type.TString;
     readonly resumeId: Type.TString;
     readonly coverLetterId: Type.TOptional<Type.TString>;
@@ -179,7 +176,7 @@ export declare const scheduledJobApplyBodySchema: Type.TObject<{
     readonly jobId: Type.TOptional<Type.TString>;
     readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
     readonly runAt: Type.TString;
-}, "resumeId" | "jobUrl" | "runAt", Type.InferOptionalKeys<{
+}, "jobUrl" | "resumeId" | "runAt", Type.InferOptionalKeys<{
     readonly jobUrl: Type.TString;
     readonly resumeId: Type.TString;
     readonly coverLetterId: Type.TOptional<Type.TString>;
@@ -192,14 +189,14 @@ export declare const emailResponseBodySchema: Type.TObject<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
     readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"professional"> | Type.TLiteral<"friendly"> | Type.TLiteral<"concise">)[]>>;
+    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
     readonly recipientEmail: Type.TOptional<Type.TString>;
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
 }, "message" | "subject", Type.InferOptionalKeys<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
     readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"professional"> | Type.TLiteral<"friendly"> | Type.TLiteral<"concise">)[]>>;
+    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
     readonly recipientEmail: Type.TOptional<Type.TString>;
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
 }>>;
@@ -208,35 +205,35 @@ export declare const scheduledEmailResponseBodySchema: Type.TObject<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
     readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"professional"> | Type.TLiteral<"friendly"> | Type.TLiteral<"concise">)[]>>;
+    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
     readonly recipientEmail: Type.TOptional<Type.TString>;
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
     readonly runAt: Type.TString;
-}, "message" | "subject" | "runAt", Type.InferOptionalKeys<{
+}, "message" | "runAt" | "subject", Type.InferOptionalKeys<{
     readonly subject: Type.TString;
     readonly message: Type.TString;
     readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"professional"> | Type.TLiteral<"friendly"> | Type.TLiteral<"concise">)[]>>;
+    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
     readonly recipientEmail: Type.TOptional<Type.TString>;
     readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
     readonly runAt: Type.TString;
 }>>;
 export type ScheduledEmailResponseBody = StaticParse<typeof scheduledEmailResponseBodySchema>;
 export declare const scrapeBodySchema: Type.TObject<{
-    readonly target: Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>;
+    readonly target: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
 }, "target", never>;
 export type ScrapeBody = StaticParse<typeof scrapeBodySchema>;
 export declare const scheduledScrapeBodySchema: Type.TObject<{
-    readonly target: Type.TUnion<(Type.TLiteral<"studios"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_pocketgamer">)[]>;
+    readonly target: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
     readonly runAt: Type.TString;
-}, "target" | "runAt", never>;
+}, "runAt" | "target", never>;
 export type ScheduledScrapeBody = StaticParse<typeof scheduledScrapeBodySchema>;
 export declare const automationRunQuerySchema: Type.TObject<{
-    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>>;
-    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>>;
+    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>>;
+    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>>;
 }, never, Type.InferOptionalKeys<{
-    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"scrape"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"email">)[]>>;
-    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success"> | Type.TLiteral<"error">)[]>>;
+    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>>;
+    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>>;
 }>>;
 export type AutomationRunQuery = StaticParse<typeof automationRunQuerySchema>;
 export declare const automationRunIdParamsSchema: Type.TObject<{

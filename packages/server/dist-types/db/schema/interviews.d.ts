@@ -208,5 +208,5 @@ export declare const interviewSessions: import("drizzle-orm/sqlite-core").SQLite
             length: number | undefined;
         }>;
     };
-    dialect: "sqlite";
+    dialect: 'sqlite';
 }>;

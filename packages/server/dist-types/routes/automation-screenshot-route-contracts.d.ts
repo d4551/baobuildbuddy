@@ -1,8 +1,4 @@
-import { StandardSchemaV1 } from "baobox";
-import Type, { type StaticParse } from "baobox";
-export type RouteSetState = {
-    status?: number | string;
-};
+import Type, { StandardSchemaV1, type StaticParse } from "baobox";
 export declare const automationScreenshotParamsSchema: Type.TObject<{
     readonly runId: Type.TString;
     readonly index: Type.TString;

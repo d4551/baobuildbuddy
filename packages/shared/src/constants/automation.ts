@@ -360,5 +360,6 @@ export function automationScrapeTargetToAction(target: AutomationScrapeTarget): 
 export function buildRpaCapabilityIdFromScrapeTarget(
   target: AutomationScrapeTarget,
 ): RpaCapabilityId {
-  return target === "studios" ? "scrape_studios" : (`scrape_${target}` as RpaCapabilityId);
+  const capabilityId = target === "studios" ? "scrape_studios" : `scrape_${target}`;
+  return capabilityId as RpaCapabilityId;
 }

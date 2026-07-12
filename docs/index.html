@@ -244,7 +244,7 @@
             <li><a href="#how-it-helps">How It Helps</a></li>
           </ul>
         </details>
-        <a href="#" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
+        <a href="/" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
           <svg viewBox="0 0 64 64" class="w-8 h-8" aria-hidden="true" role="presentation">
             <circle cx="32" cy="32" r="30" fill="#2d3570" />
             <path d="M15 36c0-8.8 7.7-15.8 17-15.8S49 27.2 49 36c0 8.2-7.8 13.8-17 13.8S15 44.2 15 36Z" fill="#ffefcc" stroke="#e0a84f" stroke-linejoin="round" stroke-width="2.2" />
@@ -257,13 +257,13 @@
           <span class="hidden sm:inline">BaoBuildBuddy</span>
         </a>
       </div>
-      <div class="navbar-center hidden lg:flex" aria-label="Main Navigation">
+      <nav class="navbar-center hidden lg:flex" aria-label="Main Navigation">
         <ul class="menu menu-horizontal px-1 gap-2 font-medium">
           <li><a href="#downloads" data-nav-target="downloads" aria-label="Go to Downloads section" class="h-10 flex items-center">Downloads</a></li>
           <li><a href="#ollama" data-nav-target="ollama" aria-label="Go to Ollama setup section" class="h-10 flex items-center">Set Up Ollama</a></li>
           <li><a href="#how-it-helps" data-nav-target="how-it-helps" aria-label="Go to how BaoBuildBuddy helps section" class="h-10 flex items-center">How It Helps</a></li>
         </ul>
-      </div>
+      </nav>
       <div class="navbar-end gap-3">
         <!-- GitHub Link -->
         <a href="https://github.com/d4551/baobuildbuddy" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="View BaoBuildBuddy on GitHub">
@@ -292,11 +292,11 @@
         <div class="hero-orb hero-orb-accent"></div>
         <div class="section-shell grid items-center gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,24rem)]">
           <div class="text-center lg:text-left">
-          <div class="flex flex-wrap items-center justify-center gap-2 mb-6 lg:justify-start" aria-label="Features">
+          <fieldset class="flex flex-wrap items-center justify-center gap-2 mb-6 lg:justify-start" aria-label="Features">
             <span class="badge badge-soft badge-primary font-medium">Find jobs</span>
             <span class="badge badge-soft badge-neutral font-medium">Apply faster</span>
             <span class="badge badge-soft badge-info font-medium">Free Open Source</span>
-          </div>
+          </fieldset>
           
           <h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
             Use AI to move faster in videogame job hunting
@@ -364,7 +364,7 @@
               <p class="text-sm text-base-content/70 mt-2">Most Windows people can start with the setup file.</p>
             </div>
             <div class="release-grid grid gap-6" id="assets-windows" aria-live="polite">
-              <div class="col-span-full flex justify-center py-12" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+              <div class="col-span-full flex justify-center py-12" role="status" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
             </div>
             <div class="mt-8 text-center">
                <p class="text-base-content/70 text-sm font-medium">Choose the setup file for the normal install, or the portable ZIP if you want a self-contained folder.</p>
@@ -670,7 +670,7 @@
 
     <!-- Mobile Dock Navigation -->
     <nav class="dock sm:hidden border-t border-base-300 bg-base-100/95 backdrop-blur z-50 fixed bottom-0 w-full" aria-label="Mobile Navigation">
-      <a href="#" class="dock-item dock-active" data-dock-target="top" aria-label="Go to Home">
+      <a href="/" class="dock-item dock-active" data-dock-target="top" aria-label="Go to Home">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span class="dock-label">Home</span>
       </a>

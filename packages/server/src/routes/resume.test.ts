@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
-  API_ENDPOINTS,
   API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
   buildResumeExportEndpoint,
 } from "@bao/shared/constants/endpoints";
 import { generateId } from "@bao/shared/utils/validation";

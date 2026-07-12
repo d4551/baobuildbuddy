@@ -53,8 +53,13 @@ function setActiveActionRef(
   index: number,
   element: Element | ComponentPublicInstance | null,
 ): void {
-  const el = element && "$el" in element ? (element.$el as Element | null) : element;
-  actionItemRefs.value[index] = el instanceof HTMLAnchorElement ? el : null;
+  if (element === null) {
+    actionItemRefs.value[index] = null;
+    return;
+  }
+  const refEl: Element | null =
+    element instanceof Element ? element : element.$el instanceof Element ? element.$el : null;
+  actionItemRefs.value[index] = refEl instanceof HTMLAnchorElement ? refEl : null;
 }
 
 function getActionIndex(currentIndex: number, direction: number): number {
