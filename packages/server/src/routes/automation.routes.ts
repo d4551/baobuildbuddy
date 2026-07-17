@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_AUTOMATION_RUN_ID_REQUIRED,
   API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED,
@@ -52,7 +52,7 @@ import {
 } from "./automation-route-contracts";
 import { listAutomationRuns } from "./automation-route-support";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 const hasText = (value: string | undefined): value is string =>
   typeof value === "string" && value.trim().length > 0;

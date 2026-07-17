@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_GENERATE_QUESTIONS,
   API_ERROR_RESUME_NOT_FOUND,
@@ -59,7 +59,7 @@ import {
   handleResumeAiScore,
 } from "./resume-route-support";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 const toResumeEntityResponse = (resume: ResumeData) => ({
   id: resume.id ?? "",

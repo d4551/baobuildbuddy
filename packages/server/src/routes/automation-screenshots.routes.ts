@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import { join } from "node:path";
 import {
   API_ERROR_INVALID_RUN_ID,
@@ -33,7 +33,7 @@ import {
   automationScreenshotResponses,
 } from "./automation-screenshot-route-contracts";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 const RUN_ID_SAFE_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 const FILE_NAME_SAFE_PATTERN = /^[a-zA-Z0-9._-]+$/;

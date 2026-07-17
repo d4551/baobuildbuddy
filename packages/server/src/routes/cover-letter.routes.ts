@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_UNKNOWN,
@@ -39,7 +39,7 @@ import {
   updateCoverLetter,
 } from "./cover-letter-route-support";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 type CoverLetterEntitySource = {
   id: string;
@@ -150,7 +150,7 @@ export const coverLetterRoutes = new Elysia({
     },
     async ({ params, status }: { params: CoverLetterIdParams; status: RouteStatus }) => {
       const state: RouteSetState = {};
-      const result = await deleteCoverLetter(params.id, state);
+      await deleteCoverLetter(params.id, state);
       if (state.status === HTTP_STATUS_NOT_FOUND) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_COVER_LETTER_NOT_FOUND });
       }

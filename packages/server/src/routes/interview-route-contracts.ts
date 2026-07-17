@@ -19,7 +19,6 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { InterviewConfig, InterviewSession, VoiceSettings } from "@bao/shared/types/interview";
 import { t } from "elysia";
-import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;

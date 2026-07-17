@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_EXPORT_PORTFOLIO,
   API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
@@ -46,7 +46,7 @@ import {
   portfolioUpdateBodySchema,
 } from "./portfolio-route-contracts";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 const toPortfolioProjectResponse = (project: PortfolioProject) => ({
   id: project.id,

@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
   API_ERROR_SKILL_MAPPING_NOT_FOUND,
@@ -40,7 +40,7 @@ import {
   updateSkillMappingFromBody,
 } from "./skill-mapping-route-support";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),

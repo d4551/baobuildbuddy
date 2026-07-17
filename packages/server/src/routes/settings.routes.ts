@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_INIT_SETTINGS_ROW,
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
@@ -45,7 +45,7 @@ import { buildSettingsResponse, testProviderConnection } from "./settings-route-
 import { readOrCreateSettingsRow } from "./settings-route-support";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
 
-type RouteStatus = typeof import("elysia").status;
+type RouteStatus = typeof status;
 
 export const settingsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.settings),

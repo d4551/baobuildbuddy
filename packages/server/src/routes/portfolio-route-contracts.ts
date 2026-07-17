@@ -18,7 +18,6 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { t } from "elysia";
-import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type PortfolioMetadataRecord = PortfolioMetadata;
 
