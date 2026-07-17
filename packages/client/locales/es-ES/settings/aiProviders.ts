@@ -3,6 +3,10 @@ const catalog = {
     aiProviders: {
       title: "Proveedores de IA",
       subtitle: "Mantén proveedores locales como principales y cloud como respaldo controlado.",
+      openaiCompatTitle: "API compatible con OpenAI",
+      openaiCompatDescription:
+        "Apunta los SDK de OpenAI a esta URL base con tu clave API de Bao como Bearer (models + chat/completions).",
+      openaiCompatAria: "URL base de la API compatible con OpenAI",
       expandAria: "Expandir configuración de {provider}",
       configuredBadge: "Configurado",
       endpointLabel: "URL del Endpoint",

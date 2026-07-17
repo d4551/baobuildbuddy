@@ -17,7 +17,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
+  <div class="card-glass">
     <div class="card-body gap-4">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
       <p class="text-sm text-base-content/70">{{ t("aiDashboard.preference.description") }}</p>

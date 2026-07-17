@@ -16,6 +16,7 @@ const catalog = {
     dismissNotification: "通知を閉じる",
     localeSwitcher: "言語を変更",
     localeOptionAria: "{locale} に言語を変更",
+    aiConfigIncompleteAria: "設定で AI プロバイダーの構成が必要です",
   },
 } as const;
 

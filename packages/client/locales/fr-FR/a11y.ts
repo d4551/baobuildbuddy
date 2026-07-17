@@ -15,6 +15,7 @@ const catalog = {
     dismissNotification: "Fermer la notification",
     localeSwitcher: "Changer de langue",
     localeOptionAria: "Changer la langue en {locale}",
+    aiConfigIncompleteAria: "Les fournisseurs d’IA doivent être configurés dans Paramètres",
   },
 } as const;
 

@@ -47,6 +47,10 @@ const catalog = {
       title: "AIプロバイダー",
       subtitle:
         "ローカルプロバイダーを優先し、クラウドプロバイダーをフォールバックとして使用します。",
+      openaiCompatTitle: "OpenAI 互換 API",
+      openaiCompatDescription:
+        "OpenAI SDK の baseURL にこの URL を指定し、Bao API キーを Bearer として使います（models + chat/completions）。",
+      openaiCompatAria: "OpenAI 互換 API のベース URL",
       configuredBadge: "設定済み",
       endpointLabel: "エンドポイントURL",
       credentialLabel: "APIキー",

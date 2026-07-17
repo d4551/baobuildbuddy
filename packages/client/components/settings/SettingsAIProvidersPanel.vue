@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
+import { OPENAI_COMPAT_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -48,6 +49,13 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const runtimeConfig = useRuntimeConfig();
+
+const openaiCompatBaseUrl = computed(() => {
+  const rawBase = String(runtimeConfig.public.apiBase ?? "http://localhost:3000");
+  const apiBase = rawBase.endsWith("/") ? rawBase.slice(0, -1) : rawBase;
+  return `${apiBase}${OPENAI_COMPAT_ENDPOINT_PREFIX}`;
+});
 
 const configuredProviderCount = computed(
   () => props.providerInputs.filter((provider) => props.providerConfiguredById[provider.id]).length,
@@ -113,6 +121,20 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
           </span>
         </template>
       </SettingsPanelHeader>
+
+      <div
+        role="note"
+        class="alert alert-info alert-soft"
+        :aria-label="t('settings.aiProviders.openaiCompatAria')"
+      >
+        <div class="min-w-0 space-y-1">
+          <p class="font-semibold">{{ t("settings.aiProviders.openaiCompatTitle") }}</p>
+          <p class="text-sm opacity-80">{{ t("settings.aiProviders.openaiCompatDescription") }}</p>
+          <code class="block break-all rounded-box bg-base-100/70 px-3 py-2 text-sm">
+            {{ openaiCompatBaseUrl }}
+          </code>
+        </div>
+      </div>
 
       <div class="stats stats-vertical w-full bg-base-200 shadow-sm lg:stats-horizontal">
         <div class="stat px-4 py-3">

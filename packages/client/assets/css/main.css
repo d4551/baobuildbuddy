@@ -103,3 +103,17 @@ samp {
 [data-theme="business"] {
   --color-error: oklch(46% 0.14 29.674);
 }
+
+/* Fluid glass surfaces — consume via layout tokens (SURFACE_GLASS_CARD_CLASS). */
+.card-glass {
+  border-color: color-mix(in oklab, var(--color-base-300) 60%, transparent);
+  background-color: color-mix(in oklab, var(--color-base-100) 82%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card-glass-interactive:hover {
+    transform: translateY(-0.125rem);
+    box-shadow: 0 10px 24px color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  }
+}

@@ -7,6 +7,10 @@ const catalog = {
     emptyStateTitle: "Aucune offre ne correspond à vos filtres",
     emptyStateDescription:
       "Ajustez votre recherche ou vos filtres pour élargir la vue actuelle de découverte d'offres.",
+    configureProvidersButton: "Configurer les sources d'offres",
+    configureProvidersAria: "Ouvrir Paramètres pour configurer les sources d'offres",
+    refreshButton: "Actualiser les offres",
+    refreshAria: "Actualiser le flux d'offres",
     pagination: {
       navigationAria: "Pagination des offres",
       previousAria: "Page précédente des offres",

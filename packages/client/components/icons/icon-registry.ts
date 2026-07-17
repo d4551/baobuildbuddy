@@ -1,3 +1,5 @@
+import { resolveComponent, type Component } from "vue";
+
 export const APP_ICON_COMPONENTS = {
   IconBolt: "IconBolt",
   IconCheckCircle: "IconCheckCircle",
@@ -13,8 +15,9 @@ export const APP_ICON_COMPONENTS = {
 
 export type AppIconName = keyof typeof APP_ICON_COMPONENTS;
 
-export function resolveAppIconComponent(
-  iconName: AppIconName,
-): (typeof APP_ICON_COMPONENTS)[AppIconName] {
-  return APP_ICON_COMPONENTS[iconName];
+/**
+ * Resolves a registered app icon name to a Vue component (Nuxt auto-import).
+ */
+export function resolveAppIconComponent(iconName: AppIconName): Component | string {
+  return resolveComponent(APP_ICON_COMPONENTS[iconName]);
 }

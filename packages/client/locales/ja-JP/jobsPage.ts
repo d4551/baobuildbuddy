@@ -7,6 +7,10 @@ const catalog = {
     emptyStateTitle: "フィルターに一致する求人がありません",
     emptyStateDescription:
       "現在の求人ビューを広げるために、検索条件またはフィルターを調整してください。",
+    configureProvidersButton: "求人プロバイダーを設定",
+    configureProvidersAria: "設定を開いて求人プロバイダーを構成",
+    refreshButton: "求人を更新",
+    refreshAria: "求人フィードを更新",
     pagination: {
       navigationAria: "求人ページネーション",
       previousAria: "前の求人ページ",

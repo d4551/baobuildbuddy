@@ -27,7 +27,7 @@ defineProps<{
     <div
       v-for="provider in providers"
       :key="provider.id"
-      class="card card-border bg-base-100 shadow-sm"
+      class="card-glass card-glass-interactive"
     >
       <div class="card-body gap-4">
         <div class="flex items-center justify-between gap-3">
