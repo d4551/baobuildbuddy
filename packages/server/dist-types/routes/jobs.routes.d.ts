@@ -184,7 +184,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                     response: {
                         200: {
                             success: boolean;
-                            deleted: unknown;
+                            deletedCount: number;
                         };
                     };
                     error: never;

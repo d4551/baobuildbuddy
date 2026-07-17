@@ -239,7 +239,7 @@ export declare const saveJobResponses: {
 export declare const deleteSavedJobResponses: {
     readonly 200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
-        deleted: import("typebox").TUnknown;
+        deletedCount: import("typebox").TNumber;
     }>;
 };
 export declare const savedJobsListResponses: {

@@ -47,11 +47,11 @@ const activeDescription = computed<string>(() => {
 
 <template>
   <div class="space-y-6">
-    <section class="card card-border card-glass" :aria-label="t(ariaLabelKey)">
-      <div class="card-body gap-4 p-4 lg:p-5">
+    <section class="card card-border card-glass min-w-0 max-w-full overflow-x-clip" :aria-label="t(ariaLabelKey)">
+      <div class="card-body min-w-0 max-w-full gap-4 overflow-x-clip p-4 lg:p-5">
         <div
           v-if="activeSectionEntry"
-          class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+          class="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
         >
           <div class="flex min-w-0 items-start gap-3">
             <span
@@ -82,7 +82,10 @@ const activeDescription = computed<string>(() => {
             </div>
           </div>
 
-          <nav class="w-full overflow-x-auto xl:max-w-4xl" :aria-label="t(ariaLabelKey)">
+          <nav
+            class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain xl:max-w-4xl"
+            :aria-label="t(ariaLabelKey)"
+          >
             <div class="tabs tabs-box w-max min-w-full gap-2 bg-base-200/70 p-2 xl:min-w-0">
               <NuxtLink
                 v-for="section in sections"

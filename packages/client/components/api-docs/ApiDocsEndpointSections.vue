@@ -37,18 +37,18 @@ const { t } = useI18n();
           :ref="registerEndpointSectionRef(endpoint.id)"
           class="space-y-4 rounded-lg border border-base-200 bg-base-100 p-4 scroll-mt-24"
         >
-          <header class="flex flex-wrap items-start justify-between gap-3">
-            <div class="space-y-2">
-              <p class="flex items-center gap-2">
+          <header class="flex min-w-0 flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0 flex-1 space-y-2">
+              <p class="flex min-w-0 flex-wrap items-center gap-2">
                 <span :class="methodBadgeClass(endpoint.method)">
                   {{ methodLabel(endpoint.method) }}
                 </span>
-                <span class="font-mono text-sm">{{ endpoint.path }}</span>
+                <span class="min-w-0 break-all font-mono text-sm">{{ endpoint.path }}</span>
               </p>
-              <h3 class="text-lg font-semibold">
+              <h3 class="text-lg font-semibold break-words">
                 {{ endpoint.operation.summary || endpoint.operation.operationId || endpoint.path }}
               </h3>
-              <p class="text-sm text-base-content/80">
+              <p class="text-sm text-base-content/80 break-words">
                 {{ endpoint.operation.description || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>

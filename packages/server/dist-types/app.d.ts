@@ -914,7 +914,7 @@ export declare const app: Elysia<"/api", "local", {
                         response: {
                             200: {
                                 success: boolean;
-                                deleted: unknown;
+                                deletedCount: number;
                             };
                         };
                         error: never;

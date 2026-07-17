@@ -41,6 +41,12 @@ const collectSourceCandidates = (pathValue: string): string[] => {
   return [...candidates];
 };
 
+const LOCALE_ENTRY_FILE_PATTERN = /^packages\/client\/locales\/[^/]+\.ts$/u;
+const LOCALE_CATALOG_FILE_PATTERN = /^packages\/client\/locales\/[^/]+\/catalog\.ts$/u;
+
+const isLocaleCatalogEntrypoint = (filePath: string): boolean =>
+  LOCALE_ENTRY_FILE_PATTERN.test(filePath) || LOCALE_CATALOG_FILE_PATTERN.test(filePath);
+
 const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
   filePath === "packages/client/app.vue" ||
@@ -51,7 +57,7 @@ const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.startsWith("packages/client/plugins/") ||
   filePath.startsWith("packages/client/layouts/") ||
   filePath.startsWith("packages/client/middleware/") ||
-  filePath.startsWith("packages/client/locales/");
+  isLocaleCatalogEntrypoint(filePath);
 
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {
   if (importPath.startsWith("@bao/shared/")) {

@@ -33,13 +33,13 @@ export const TOAST_CONTAINER_DOM_ID = "toast-container";
  * Includes bottom padding for shell chrome (dock / FAB) on small viewports.
  */
 export const SHELL_MAIN_INNER_CLASS =
-  "mx-auto w-full max-w-7xl space-y-6 px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8";
+  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8";
 
 /** Root app drawer contract. */
 export const SHELL_DRAWER_CLASS = "min-h-screen lg:drawer-open";
 
 /** Drawer content container containing navbar, main, and toast host. */
-export const SHELL_DRAWER_CONTENT_CLASS = "flex min-h-screen flex-col";
+export const SHELL_DRAWER_CONTENT_CLASS = "flex min-h-screen min-w-0 flex-col overflow-x-clip";
 
 /** Drawer side container. */
 export const SHELL_DRAWER_SIDE_CLASS = "z-20 is-drawer-close:overflow-visible";
@@ -105,16 +105,17 @@ export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-base-content/7
 /**
  * Shared hero surface for page-level headers that need elevated context.
  */
-export const PAGE_HERO_SECTION_CLASS = "hero rounded-box border border-base-300 bg-base-200";
+export const PAGE_HERO_SECTION_CLASS =
+  "hero min-w-0 overflow-x-clip rounded-box border border-base-300 bg-base-200";
 
 /** Aside width contract inside page hero headers. */
-export const PAGE_HERO_ASIDE_CLASS = "w-full lg:max-w-2xl";
+export const PAGE_HERO_ASIDE_CLASS = "w-full min-w-0 max-w-full lg:max-w-2xl";
 
 /**
  * Base hero content layout for page-level header surfaces.
  */
 export const PAGE_HERO_CONTENT_BASE_CLASS =
-  "hero-content w-full flex-col items-start lg:flex-row lg:items-center lg:justify-between";
+  "hero-content w-full min-w-0 max-w-full flex-col items-start lg:flex-row lg:items-center lg:justify-between";
 
 /**
  * Compact hero spacing used when the header does not carry a large aside surface.

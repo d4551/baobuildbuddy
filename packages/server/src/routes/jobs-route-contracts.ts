@@ -173,7 +173,7 @@ export const saveJobResponses = {
 export const deleteSavedJobResponses = {
   [HTTP_STATUS_OK]: t.Object({
     success: t.Boolean(),
-    deleted: t.Unknown(),
+    deletedCount: t.Number(),
   }),
 } as const;
 

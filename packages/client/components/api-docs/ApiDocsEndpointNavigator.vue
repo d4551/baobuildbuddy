@@ -44,7 +44,7 @@ const { t } = useI18n();
                   <span :class="methodBadgeClass(endpoint.method)" class="mr-2">
                     {{ methodLabel(endpoint.method) }}
                   </span>
-                  <span class="font-mono text-xs">{{ endpoint.path }}</span>
+                  <span class="min-w-0 break-all font-mono text-xs">{{ endpoint.path }}</span>
                 </button>
               </li>
             </ul>

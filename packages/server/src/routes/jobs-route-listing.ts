@@ -168,8 +168,11 @@ export const saveJob = async (jobId: string): Promise<SaveJobResult> => {
 };
 
 export const deleteSavedJob = async (jobId: string) => {
-  const result = await db.delete(savedJobs).where(eq(savedJobs.jobId, jobId));
-  return { success: true, deleted: result };
+  const deletedRows = await db
+    .delete(savedJobs)
+    .where(eq(savedJobs.jobId, jobId))
+    .returning({ id: savedJobs.id });
+  return { success: true, deletedCount: deletedRows.length };
 };
 
 export const listSavedJobs = async () =>
