@@ -1,11 +1,19 @@
 import type { Static } from "typebox";
 import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_GONE,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
+import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type SkillMappingsQuery = {
   category?: string;
@@ -99,3 +107,152 @@ export const skillReadinessQuerySchema = t.Object({
   jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
 export type SkillReadinessRouteQuery = Static<typeof skillReadinessQuerySchema>;
+
+const nullableStringSchema = t.Union([t.String(), t.Null()]);
+const nullableNumberSchema = t.Union([t.Number(), t.Null()]);
+const nullableBooleanSchema = t.Union([t.Boolean(), t.Null()]);
+const nullableStringArraySchema = t.Union([t.Array(t.String()), t.Null()]);
+const nullableUnknownArraySchema = t.Union([t.Array(t.Unknown()), t.Null()]);
+
+export const skillMappingRowResponseSchema = t.Object({
+  id: t.String(),
+  gameExpression: t.String(),
+  transferableSkill: t.String(),
+  industryApplications: nullableStringArraySchema,
+  evidence: nullableUnknownArraySchema,
+  confidence: nullableNumberSchema,
+  category: nullableStringSchema,
+  demandLevel: nullableStringSchema,
+  aiGenerated: nullableBooleanSchema,
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export const skillEvidenceResponseSchema = t.Object({
+  id: t.String(),
+  type: t.String(),
+  title: t.String(),
+  description: t.String(),
+  url: t.Optional(t.String()),
+  verificationStatus: t.String(),
+});
+
+export const skillMappingResponseSchema = t.Object({
+  id: t.String(),
+  gameExpression: t.String(),
+  transferableSkill: t.String(),
+  industryApplications: t.Array(t.String()),
+  evidenceSuggestions: t.Optional(t.Array(t.String())),
+  evidence: t.Array(skillEvidenceResponseSchema),
+  confidence: t.Number(),
+  category: t.String(),
+  demandLevel: t.String(),
+  verified: t.Boolean(),
+  aiGenerated: t.Optional(t.Boolean()),
+});
+
+const pathwayStageResponseSchema = t.Object({
+  title: t.String(),
+  duration: t.String(),
+  description: t.String(),
+  completed: t.Optional(t.Boolean()),
+  current: t.Optional(t.Boolean()),
+  requirements: t.Optional(t.Array(t.String())),
+  outcomes: t.Optional(t.Array(t.String())),
+});
+
+export const careerPathwayResponseSchema = t.Object({
+  id: t.String(),
+  title: t.String(),
+  description: t.String(),
+  detailedDescription: t.Optional(t.String()),
+  matchScore: t.Number(),
+  stages: t.Array(pathwayStageResponseSchema),
+  requiredSkills: t.Array(t.String()),
+  estimatedTimeToEntry: t.String(),
+  icon: t.Optional(t.String()),
+  averageSalary: t.Optional(
+    t.Object({
+      min: t.Number(),
+      max: t.Number(),
+      currency: t.Optional(t.String()),
+    }),
+  ),
+  jobMarketTrend: t.String(),
+});
+
+const categoryAssessmentResponseSchema = t.Object({
+  score: t.Number(),
+  feedbackId: t.String(),
+  strengths: t.Optional(t.Array(t.String())),
+  improvements: t.Optional(t.Array(t.String())),
+});
+
+const roleReadinessResponseSchema = t.Object({
+  roleId: t.String(),
+  roleTitle: t.String(),
+  readinessScore: t.Number(),
+  missingSkills: t.Array(t.String()),
+  matchingSkills: t.Array(t.String()),
+  timeToReady: t.Optional(t.String()),
+  recommendedActions: t.Array(t.String()),
+});
+
+export const skillReadinessResponseSchema = t.Object({
+  overallScore: t.Number(),
+  categories: t.Object({
+    technical: categoryAssessmentResponseSchema,
+    softSkills: categoryAssessmentResponseSchema,
+    industryKnowledge: categoryAssessmentResponseSchema,
+    portfolio: categoryAssessmentResponseSchema,
+  }),
+  improvementSuggestions: t.Array(t.String()),
+  nextSteps: t.Array(t.String()),
+  targetRoleReadiness: t.Optional(t.Array(roleReadinessResponseSchema)),
+  jobId: t.Optional(t.String()),
+});
+
+export const skillAnalysisResponseSchema = t.Object({
+  message: t.String(),
+  detectedSkills: t.Array(t.String()),
+  suggestedMappings: t.Array(t.Record(t.String(), t.Unknown())),
+  recommendations: t.Array(t.String()),
+  provider: t.Optional(t.String()),
+});
+
+export const skillMappingDeleteResponseSchema = t.Object({
+  message: t.String(),
+  id: t.String(),
+});
+
+export const skillMappingsListResponses = {
+  [HTTP_STATUS_OK]: t.Array(skillMappingRowResponseSchema),
+};
+
+export const skillMappingCreateResponses = {
+  [HTTP_STATUS_CREATED]: skillMappingResponseSchema,
+};
+
+export const skillMappingUpdateResponses = {
+  [HTTP_STATUS_OK]: skillMappingResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+};
+
+export const skillMappingDeleteResponses = {
+  [HTTP_STATUS_OK]: skillMappingDeleteResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_GONE]: simpleErrorResponseSchema,
+};
+
+export const skillPathwaysResponses = {
+  [HTTP_STATUS_OK]: t.Array(careerPathwayResponseSchema),
+};
+
+export const skillReadinessResponses = {
+  [HTTP_STATUS_OK]: skillReadinessResponseSchema,
+};
+
+export const skillAnalysisResponses = {
+  [HTTP_STATUS_OK]: skillAnalysisResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: skillAnalysisResponseSchema,
+};

@@ -1,4 +1,4 @@
-import { t, Elysia, status } from "elysia";
+import { Elysia, status } from "elysia";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
@@ -12,9 +12,16 @@ import {
   type SkillMappingUpdateRouteBody,
   type SkillReadinessRouteQuery,
   skillAnalysisBodySchema,
+  skillAnalysisResponses,
   skillMappingCreateBodySchema,
+  skillMappingCreateResponses,
+  skillMappingDeleteResponses,
   skillMappingIdParamsSchema,
+  skillMappingUpdateResponses,
   skillMappingsQuerySchema,
+  skillMappingsListResponses,
+  skillPathwaysResponses,
+  skillReadinessResponses,
   skillMappingUpdateBodySchema,
   skillReadinessQuerySchema,
 } from "./skill-mapping-route-contracts";
@@ -32,12 +39,21 @@ export const skillMappingRoutes = new Elysia({
   .use(skillAnalysisRateLimit)
   .get(
     "/mappings",
-    { detail: { tags: ["Skill Mapping"] }, query: skillMappingsQuerySchema,
-    }, async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
+    {
+      detail: { tags: ["Skill Mapping"] },
+      query: skillMappingsQuerySchema,
+      response: skillMappingsListResponses,
+    },
+    async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
   )
   .post(
     "/mappings",
-    { detail: { tags: ["Skill Mapping"] }, body: skillMappingCreateBodySchema }, async ({
+    {
+      detail: { tags: ["Skill Mapping"] },
+      body: skillMappingCreateBodySchema,
+      response: skillMappingCreateResponses,
+    },
+    async ({
       body,
       set,
     }: {
@@ -51,9 +67,13 @@ export const skillMappingRoutes = new Elysia({
   )
   .put(
     "/mappings/:id",
-    { detail: { tags: ["Skill Mapping"] }, params: skillMappingIdParamsSchema,
+    {
+      detail: { tags: ["Skill Mapping"] },
+      params: skillMappingIdParamsSchema,
       body: skillMappingUpdateBodySchema,
-    }, async ({
+      response: skillMappingUpdateResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -65,7 +85,12 @@ export const skillMappingRoutes = new Elysia({
   )
   .delete(
     "/mappings/:id",
-    { detail: { tags: ["Skill Mapping"] }, params: skillMappingIdParamsSchema }, async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
+    {
+      detail: { tags: ["Skill Mapping"] },
+      params: skillMappingIdParamsSchema,
+      response: skillMappingDeleteResponses,
+    },
+    async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
       const result = await deleteSkillMappingById(params.id, set);
       if (result.kind === "gone" || result.kind === "deleted") {
         return status(result.statusCode, result.payload);
@@ -73,15 +98,30 @@ export const skillMappingRoutes = new Elysia({
       return result.payload;
     },
   )
-  .get("/pathways",{ detail: { tags: ["Skill Mapping"] } }, async () => skillMappingService.getPathways())
+  .get(
+    "/pathways",
+    {
+      detail: { tags: ["Skill Mapping"] },
+      response: skillPathwaysResponses,
+    },
+    async () => skillMappingService.getPathways(),
+  )
   .get(
     "/readiness",
-    { detail: { tags: ["Skill Mapping"] }, query: skillReadinessQuerySchema,
-    }, async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
+    {
+      detail: { tags: ["Skill Mapping"] },
+      query: skillReadinessQuerySchema,
+      response: skillReadinessResponses,
+    },
+    async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
   )
   .post(
     "/ai-analyze",
-    { detail: { tags: ["Skill Mapping"] }, body: skillAnalysisBodySchema,
-    }, async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
+    {
+      detail: { tags: ["Skill Mapping"] },
+      body: skillAnalysisBodySchema,
+      response: skillAnalysisResponses,
+    },
+    async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
       analyzeSkillMappingsSafely(body, set),
   );
