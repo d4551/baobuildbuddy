@@ -114,8 +114,25 @@ export const createJobsDerivedState = (input: {
     }),
   );
 
+  const hasActiveFilters = computed(() => {
+    const filters = input.localFilters;
+    return (
+      input.searchQuery.value.trim().length > 0 ||
+      filters.location.trim().length > 0 ||
+      filters.remote ||
+      filters.experienceLevel !== JOB_FILTER_ALL_VALUE ||
+      filters.studioType !== JOB_FILTER_ALL_VALUE ||
+      filters.platform !== JOB_FILTER_ALL_VALUE ||
+      filters.genre !== JOB_FILTER_ALL_VALUE
+    );
+  });
+
+  const isCatalogEmpty = computed(() => input.jobs.value.length === 0);
+
   return {
     filteredJobs,
+    hasActiveFilters,
+    isCatalogEmpty,
     jobsPaginationSummary,
     pageNumbers: pagination.pageNumbers,
     pageSize,

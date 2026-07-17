@@ -7,6 +7,9 @@ const catalog = {
     emptyStateTitle: "フィルターに一致する求人がありません",
     emptyStateDescription:
       "現在の求人ビューを広げるために、検索条件またはフィルターを調整してください。",
+    emptyCatalogTitle: "まだ求人が読み込まれていません",
+    emptyCatalogDescription:
+      "求人フィードを更新するか、設定で求人プロバイダーを構成して発見を開始してください。",
     configureProvidersButton: "求人プロバイダーを設定",
     configureProvidersAria: "設定を開いて求人プロバイダーを構成",
     refreshButton: "求人を更新",

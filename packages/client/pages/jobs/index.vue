@@ -103,12 +103,24 @@ const page = useJobsIndexPage();
 
         <EmptyState
           v-else-if="page.paginatedJobs.value.length === 0"
-          title-key="jobsPage.emptyStateTitle"
-          description-key="jobsPage.emptyStateDescription"
-          cta-label-key="jobsPage.refreshButton"
-          @cta="page.handleRefresh()"
+          :title-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.emptyCatalogTitle'
+              : 'jobsPage.emptyStateTitle'
+          "
+          :description-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.emptyCatalogDescription'
+              : 'jobsPage.emptyStateDescription'
+          "
+          :cta-label-key="
+            page.isCatalogEmpty.value ? 'jobsPage.refreshButton' : 'jobsPage.clearFiltersButton'
+          "
+          @cta="
+            page.isCatalogEmpty.value ? page.handleRefresh() : page.clearFilters()
+          "
         >
-          <template #actions>
+          <template v-if="page.isCatalogEmpty.value" #actions>
             <NuxtLink
               :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
               class="btn btn-outline btn-sm"

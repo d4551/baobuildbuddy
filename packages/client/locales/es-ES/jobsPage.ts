@@ -7,6 +7,9 @@ const catalog = {
     emptyStateTitle: "No hay empleos que coincidan con tus filtros",
     emptyStateDescription:
       "Ajusta la búsqueda o los filtros para ampliar la vista actual de descubrimiento de empleos.",
+    emptyCatalogTitle: "Aún no hay empleos cargados",
+    emptyCatalogDescription:
+      "Actualiza el feed de empleos o configura proveedores en Ajustes para empezar el descubrimiento.",
     configureProvidersButton: "Configurar proveedores de empleo",
     configureProvidersAria: "Abrir Ajustes para configurar proveedores de empleo",
     refreshButton: "Actualizar Empleos",
