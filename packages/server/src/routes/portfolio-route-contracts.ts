@@ -1,5 +1,11 @@
 import type { Static } from "typebox";
 import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
+import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_MEDIUM,
   SCHEMA_MAX_ITEMS_SMALL,
@@ -12,6 +18,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type PortfolioMetadataRecord = PortfolioMetadata;
 
@@ -112,3 +119,66 @@ export const portfolioExportBodySchema = t.Object({
   format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });
 export type PortfolioExportRouteBody = Static<typeof portfolioExportBodySchema>;
+
+export const portfolioProjectResponseSchema = t.Object({
+  id: t.Optional(t.String()),
+  portfolioId: t.Optional(t.String()),
+  title: t.String(),
+  description: t.String(),
+  technologies: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  image: t.Optional(t.Union([t.String(), t.Null()])),
+  liveUrl: t.Optional(t.Union([t.String(), t.Null()])),
+  githubUrl: t.Optional(t.Union([t.String(), t.Null()])),
+  tags: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  featured: t.Optional(t.Union([t.Boolean(), t.Null()])),
+  role: t.Optional(t.Union([t.String(), t.Null()])),
+  platforms: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  engines: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  sortOrder: t.Optional(t.Union([t.Number(), t.Null()])),
+  createdAt: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
+});
+
+export const portfolioResponseSchema = t.Object({
+  id: t.Optional(t.String()),
+  metadata: t.Optional(t.Record(t.String(), t.Unknown())),
+  projects: t.Array(portfolioProjectResponseSchema),
+  createdAt: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
+});
+
+export const portfolioProjectDeleteResponseSchema = t.Object({
+  success: t.Boolean(),
+  id: t.String(),
+});
+
+export const portfolioResponses = {
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
+};
+
+export const portfolioMutationResponses = {
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
+};
+
+export const portfolioProjectMutationResponses = {
+  [HTTP_STATUS_OK]: portfolioProjectResponseSchema,
+  [HTTP_STATUS_CREATED]: portfolioProjectResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+};
+
+export const portfolioProjectReorderResponses = {
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+};
+
+export const portfolioProjectDeleteResponses = {
+  [HTTP_STATUS_OK]: portfolioProjectDeleteResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+};
+
+export const portfolioExportResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+};

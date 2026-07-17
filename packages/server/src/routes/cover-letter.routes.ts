@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import type { RouteSetState } from "../types/route-state";
@@ -7,11 +7,16 @@ import {
   type CoverLetterIdParams,
   type CoverLetterMutationBody,
   type CoverLetterUpdateBody,
+  coverLetterDeleteResponses,
+  coverLetterEntityResponses,
   coverLetterExportBodySchema,
+  coverLetterExportResponses,
   coverLetterIdParamsSchema,
   coverLetterMutationBodySchema,
   coverLetterUpdateBodySchema,
+  coverLettersListResponses,
   type GenerateCoverLetterRouteBody,
+  generateCoverLetterResponses,
   generateCoverLetterBodySchema,
 } from "./cover-letter-route-contracts";
 import {
@@ -29,10 +34,22 @@ import {
 export const coverLetterRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.coverLettersBase),
 })
-  .get("/",{ detail: { tags: ["Cover Letters"] } }, async () => listCoverLetters())
+  .get(
+    "/",
+    {
+      detail: { tags: ["Cover Letters"] },
+      response: coverLettersListResponses,
+    },
+    async () => listCoverLetters(),
+  )
   .post(
     "/",
-    { detail: { tags: ["Cover Letters"] }, body: coverLetterMutationBodySchema }, async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Cover Letters"] },
+      body: coverLetterMutationBodySchema,
+      response: coverLetterEntityResponses,
+    },
+    async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
       const result = await createCoverLetter(body);
       set.status = result.statusCode;
       return result.coverLetter;
@@ -40,16 +57,25 @@ export const coverLetterRoutes = new Elysia({
   )
   .get(
     "/:id",
-    { detail: { tags: ["Cover Letters"] }, params: coverLetterIdParamsSchema }, async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Cover Letters"] },
+      params: coverLetterIdParamsSchema,
+      response: coverLetterEntityResponses,
+    },
+    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
       const coverLetter = await getCoverLetterById(params.id, set);
       return coverLetter ?? { error: API_ERROR_COVER_LETTER_NOT_FOUND };
     },
   )
   .put(
     "/:id",
-    { detail: { tags: ["Cover Letters"] }, params: coverLetterIdParamsSchema,
+    {
+      detail: { tags: ["Cover Letters"] },
+      params: coverLetterIdParamsSchema,
       body: coverLetterUpdateBodySchema,
-    }, async ({
+      response: coverLetterEntityResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -61,21 +87,33 @@ export const coverLetterRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    { detail: { tags: ["Cover Letters"] }, params: coverLetterIdParamsSchema,
-    }, async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
+    {
+      detail: { tags: ["Cover Letters"] },
+      params: coverLetterIdParamsSchema,
+      response: coverLetterDeleteResponses,
+    },
+    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
       deleteCoverLetter(params.id, set),
   )
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
-    { detail: { tags: ["Cover Letters"] }, body: generateCoverLetterBodySchema,
-    }, async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["Cover Letters"] },
+      body: generateCoverLetterBodySchema,
+      response: generateCoverLetterResponses,
+    },
+    async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
       handleGenerateCoverLetter(body, set),
   )
   .post(
     "/:id/export",
-    { detail: { tags: ["Cover Letters"] }, params: coverLetterIdParamsSchema,
+    {
+      detail: { tags: ["Cover Letters"] },
+      params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,
-    }, async ({
+      response: coverLetterExportResponses,
+    },
+    async ({
       params,
       body,
       set,

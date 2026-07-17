@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import {
   API_ERROR_EXPORT_PORTFOLIO,
   API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
@@ -28,31 +28,52 @@ import {
   type PortfolioProjectReorderRouteBody,
   type PortfolioProjectUpdateRouteBody,
   type PortfolioUpdateRouteBody,
+  portfolioExportResponses,
   portfolioExportBodySchema,
   portfolioProjectCreateBodySchema,
+  portfolioProjectDeleteResponses,
   portfolioProjectIdParamsSchema,
+  portfolioProjectMutationResponses,
   portfolioProjectReorderBodySchema,
+  portfolioProjectReorderResponses,
   portfolioProjectUpdateBodySchema,
+  portfolioMutationResponses,
+  portfolioResponses,
   portfolioUpdateBodySchema,
 } from "./portfolio-route-contracts";
 
 export const portfolioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase),
 })
-  .get("/",{ detail: { tags: ["Portfolio"] } }, async () => {
-    return await portfolioService.getPortfolioPayload();
-  })
+  .get(
+    "/",
+    {
+      detail: { tags: ["Portfolio"] },
+      response: portfolioResponses,
+    },
+    async () => {
+      return await portfolioService.getPortfolioPayload();
+    },
+  )
   .put(
     "/",
-    { detail: { tags: ["Portfolio"] }, body: portfolioUpdateBodySchema,
-    }, async ({ body }: { body: PortfolioUpdateRouteBody }) => {
+    {
+      detail: { tags: ["Portfolio"] },
+      body: portfolioUpdateBodySchema,
+      response: portfolioMutationResponses,
+    },
+    async ({ body }: { body: PortfolioUpdateRouteBody }) => {
       return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
   )
   .post(
     "/projects",
-    { detail: { tags: ["Portfolio"] }, body: portfolioProjectCreateBodySchema,
-    }, async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Portfolio"] },
+      body: portfolioProjectCreateBodySchema,
+      response: portfolioProjectMutationResponses,
+    },
+    async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -83,8 +104,12 @@ export const portfolioRoutes = new Elysia({
   )
   .post(
     "/projects/reorder",
-    { detail: { tags: ["Portfolio"] }, body: portfolioProjectReorderBodySchema,
-    }, async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Portfolio"] },
+      body: portfolioProjectReorderBodySchema,
+      response: portfolioProjectReorderResponses,
+    },
+    async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -96,9 +121,13 @@ export const portfolioRoutes = new Elysia({
   )
   .put(
     "/projects/:id",
-    { detail: { tags: ["Portfolio"] }, params: portfolioProjectIdParamsSchema,
+    {
+      detail: { tags: ["Portfolio"] },
+      params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
-    }, async ({
+      response: portfolioProjectMutationResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -132,8 +161,12 @@ export const portfolioRoutes = new Elysia({
   )
   .delete(
     "/projects/:id",
-    { detail: { tags: ["Portfolio"] }, params: portfolioProjectIdParamsSchema,
-    }, async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Portfolio"] },
+      params: portfolioProjectIdParamsSchema,
+      response: portfolioProjectDeleteResponses,
+    },
+    async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -145,8 +178,12 @@ export const portfolioRoutes = new Elysia({
   )
   .post(
     "/export",
-    { detail: { tags: ["Portfolio"] }, body: portfolioExportBodySchema,
-    }, async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Portfolio"] },
+      body: portfolioExportBodySchema,
+      response: portfolioExportResponses,
+    },
+    async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
         set.status = HTTP_STATUS_NOT_FOUND;
