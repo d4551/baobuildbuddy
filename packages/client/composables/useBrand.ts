@@ -1,7 +1,8 @@
 import { resolveBrandSettings, THEME_NAMES } from "@bao/shared/constants/branding";
-import type { BrandSettings, BrandThemePalette } from "@bao/shared/types/settings-contracts";
+import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { AppSettings, BrandSettings, BrandThemePalette } from "@bao/shared/types/settings-contracts";
 import { computed, readonly } from "vue";
-import { useSettings } from "./useSettings";
+import { useNuxtState } from "./nuxtRuntime";
 import { useTheme } from "./useTheme";
 
 function toFontCssVars(brand: BrandSettings): Record<string, string> {
@@ -52,10 +53,13 @@ function toDaisySemanticColorVars(palette: BrandThemePalette): Record<string, st
  * Resolves persisted brand settings and derived CSS variables.
  * Document CSS application is owned exclusively by `plugins/brand-css.client.ts`.
  *
+ * Reads the shared settings state key directly so it is safe outside Vue component
+ * setup (Nuxt plugins) without pulling `useI18n` via `useSettings`.
+ *
  * @returns White-label brand settings and CSS var map (read-only).
  */
 export function useBrand() {
-  const { settings } = useSettings();
+  const settings = useNuxtState<AppSettings | null>(STATE_KEYS.APP_SETTINGS, () => null);
   const { theme } = useTheme();
 
   const resolvedBrand = computed(() => resolveBrandSettings(settings.value?.brandSettings));

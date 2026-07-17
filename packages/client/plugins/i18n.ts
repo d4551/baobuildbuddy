@@ -135,54 +135,57 @@ const resolveInitialLocale = ({
 /**
  * Installs `vue-i18n` using SSR-safe locale resolution and shared runtime config.
  */
-export default defineNuxtPlugin((nuxtApp) => {
-  const runtimeConfig = useRuntimeConfig();
-  const i18nConfig = runtimeConfig.public.i18n;
-  const supportedLocales = parseSupportedLocales(i18nConfig.supportedLocales);
-  const defaultLocale =
-    resolveFromCandidates([i18nConfig.defaultLocale], supportedLocales) ?? DEFAULT_LOCALE;
-  const fallbackLocale =
-    resolveFromCandidates([i18nConfig.fallbackLocale], supportedLocales) ?? defaultLocale;
-  const localeCookie = useCookie<AvailableLocale>(i18nConfig.localeCookieKey, {
-    sameSite: "lax",
-    path: "/",
-    default: () => defaultLocale,
-  });
-  const acceptLanguageHeader = import.meta.server
-    ? useRequestHeaders(["accept-language"])["accept-language"]
-    : undefined;
-  const browserLocale = import.meta.client ? navigator.language : undefined;
-  const initialLocale = resolveInitialLocale({
-    cookieLocale: localeCookie.value,
-    acceptLanguageHeader,
-    browserLocale,
-    supportedLocales,
-    defaultLocale,
-  });
+export default defineNuxtPlugin({
+  name: "i18n",
+  setup(nuxtApp) {
+    const runtimeConfig = useRuntimeConfig();
+    const i18nConfig = runtimeConfig.public.i18n;
+    const supportedLocales = parseSupportedLocales(i18nConfig.supportedLocales);
+    const defaultLocale =
+      resolveFromCandidates([i18nConfig.defaultLocale], supportedLocales) ?? DEFAULT_LOCALE;
+    const fallbackLocale =
+      resolveFromCandidates([i18nConfig.fallbackLocale], supportedLocales) ?? defaultLocale;
+    const localeCookie = useCookie<AvailableLocale>(i18nConfig.localeCookieKey, {
+      sameSite: "lax",
+      path: "/",
+      default: () => defaultLocale,
+    });
+    const acceptLanguageHeader = import.meta.server
+      ? useRequestHeaders(["accept-language"])["accept-language"]
+      : undefined;
+    const browserLocale = import.meta.client ? navigator.language : undefined;
+    const initialLocale = resolveInitialLocale({
+      cookieLocale: localeCookie.value,
+      acceptLanguageHeader,
+      browserLocale,
+      supportedLocales,
+      defaultLocale,
+    });
 
-  const i18n = createI18n({
-    legacy: false,
-    globalInjection: true,
-    locale: initialLocale,
-    fallbackLocale,
-    messages: I18N_MESSAGE_CATALOG,
-    missingWarn: false,
-    fallbackWarn: false,
-  });
+    const i18n = createI18n({
+      legacy: false,
+      globalInjection: true,
+      locale: initialLocale,
+      fallbackLocale,
+      messages: I18N_MESSAGE_CATALOG,
+      missingWarn: false,
+      fallbackWarn: false,
+    });
 
-  nuxtApp.vueApp.use(i18n);
+    nuxtApp.vueApp.use(i18n);
 
-  useHead(() => ({
-    htmlAttrs: {
-      lang: i18n.global.locale.value,
-    },
-  }));
+    useHead(() => ({
+      htmlAttrs: {
+        lang: i18n.global.locale.value,
+      },
+    }));
 
-  watch(
-    () => i18n.global.locale.value,
-    (nextLocale) => {
-      localeCookie.value = nextLocale;
-    },
-    { immediate: true },
-  );
+    watch(
+      () => i18n.global.locale.value,
+      (nextLocale) => {
+        localeCookie.value = nextLocale;
+      },
+      { immediate: true },
+    );
+  },
 });
