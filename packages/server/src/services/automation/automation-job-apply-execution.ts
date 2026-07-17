@@ -13,6 +13,7 @@ import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { gamificationService } from "../gamification-service";
+import { createServerLogger } from "../../utils/logger";
 import {
   markRunCompleted,
   markRunFailed,
@@ -25,6 +26,8 @@ import type {
 } from "./automation-service-contracts";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 import { runRpaScript } from "./rpa-runner-protocol";
+
+const logger = createServerLogger("automation-job-apply-execution");
 
 export const createExecutionTracking = (): JobApplyExecutionTracking => ({
   exitCode: null,
@@ -131,6 +134,7 @@ const finalizeJobApplySuccess = async (
     gamificationService.awardXP(ROUTE_GAMIFICATION_XP.automationCompleted, "automation_success"),
   );
   if (awardXpResult.status === "rejected") {
+    logger.warn({ err: String(awardXpResult.reason) }, "XP award failed after job apply automation");
   }
 };
 
