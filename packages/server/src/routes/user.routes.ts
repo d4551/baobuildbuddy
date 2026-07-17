@@ -104,6 +104,6 @@ export const userRoutes = new Elysia({
         .select()
         .from(userProfile)
         .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
-      return status(HTTP_STATUS_OK, updated[0]);
+      return status(HTTP_STATUS_OK, toUserProfileResponse(updated[0]));
     },
   );

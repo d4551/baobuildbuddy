@@ -38,7 +38,6 @@ import {
   automationRunEnvelopeBodySchema,
   automationRunIdParamsSchema,
   automationRunQuerySchema,
-  capabilityAuditReportBodySchema,
   type EmailResponseBody,
   emailResponseBodySchema,
   type JobApplyBody,

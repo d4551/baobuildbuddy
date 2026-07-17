@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { createInterviewHistoryRadialProgressStyle } from "./interview-history-radial-progress";
 
 defineProps<{
   detailError: string;
@@ -20,8 +20,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const buildDetailScoreStyle = (score: number | undefined): Record<string, string> =>
-  createInterviewHistoryRadialProgressStyle(score ?? 0, "detail");
 </script>
 
 <template>
@@ -68,18 +66,14 @@ const buildDetailScoreStyle = (score: number | undefined): Record<string, string
           <div>
             <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailScoreLabel") }}</p>
             <div class="flex items-center gap-2">
-              <div
-                class="radial-progress"
-                :class="getScoreColorClass(selectedSession.score ?? 0)"
-                :style="buildDetailScoreStyle(selectedSession.score)"
-                role="progressbar"
+              <UiRadialMeter
+                :value="selectedSession.score ?? 0"
+                size-class="h-16 w-16"
+                fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
-                :aria-valuenow="selectedSession.score ?? 0"
-                aria-valuemin="0"
-                aria-valuemax="100"
               >
                 <span class="text-sm font-bold">{{ formatScore(selectedSession.score) }}</span>
-              </div>
+              </UiRadialMeter>
             </div>
           </div>
 

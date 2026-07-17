@@ -13,7 +13,6 @@ import {
   type ReadinessNextStepItem,
 } from "~/composables/skills-pathways-page-contracts";
 import {
-  SKILLS_READINESS_DIAL_SIZE_REM,
   SKILLS_READINESS_THRESHOLD_HIGH,
   SKILLS_READINESS_THRESHOLD_MEDIUM,
 } from "~/constants/skills";
@@ -33,11 +32,6 @@ const getReadinessBadgeColor = (percentage: number): string => {
   if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return "badge-warning";
   return "badge-error";
 };
-
-const getReadinessDialStyle = (score: number): Record<string, string> => ({
-  "--value": String(score),
-  "--size": `${SKILLS_READINESS_DIAL_SIZE_REM}rem`,
-});
 
 const sortPathways = (pathways: readonly CareerPathway[]): readonly CareerPathway[] =>
   [...pathways].sort((left, right) => right.matchScore - left.matchScore);
@@ -93,7 +87,6 @@ export const createSkillsPathwaysPresentation = ({ t }: SkillsPathwaysPresentati
     getPathwayIcon: copy.getPathwayIcon,
     getReadinessBadgeColor,
     getReadinessColor,
-    getReadinessDialStyle,
     getReadinessImprovementLabel: copy.getReadinessImprovementLabel,
     getReadinessNextStepLabel: copy.getReadinessNextStepLabel,
     sortPathways,

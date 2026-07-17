@@ -95,7 +95,6 @@ useSeoMeta({
         :get-readiness-improvement-label="page.getReadinessImprovementLabel"
         :get-readiness-next-step-label="page.getReadinessNextStepLabel"
         :get-readiness-color="page.getReadinessColor"
-        :get-readiness-dial-style="page.getReadinessDialStyle"
       />
 
       <SkillsPathwaysGrid

@@ -2,9 +2,9 @@
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 
 type BrandPreviewTheme = "light" | "dark";
-type BrandPreviewPalette = BrandSettings["lightTheme"];
 
 const props = defineProps<{
   brandDraft: BrandSettings;
@@ -12,6 +12,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+useBrandPreviewStyles(() => props.brandDraft);
 
 const brandPreviewInitial = computed(() => props.brandDraft.name.charAt(0).toUpperCase());
 const previewFontStylesheetUrl = computed(() =>
@@ -28,58 +29,20 @@ const brandPreviewThemes = computed<
   ReadonlyArray<{
     id: BrandPreviewTheme;
     label: string;
-    palette: BrandPreviewPalette;
+    surfaceClass: string;
   }>
 >(() => [
   {
     id: "light",
     label: props.themeNames.light,
-    palette: props.brandDraft.lightTheme,
+    surfaceClass: "brand-preview-surface-light",
   },
   {
     id: "dark",
     label: props.themeNames.dark,
-    palette: props.brandDraft.darkTheme,
+    surfaceClass: "brand-preview-surface-dark",
   },
 ]);
-
-const createPreviewSurfaceStyle = (palette: BrandPreviewPalette) => ({
-  "--color-base-100": palette.base100,
-  "--color-base-200": palette.base200,
-  "--color-base-300": palette.base300,
-  "--color-base-content": palette.baseContent,
-  "--color-primary": palette.primary,
-  "--color-primary-content": palette.primaryContent,
-  "--color-secondary": palette.secondary,
-  "--color-secondary-content": palette.secondaryContent,
-  "--color-accent": palette.accent,
-  "--color-accent-content": palette.accentContent,
-  "--color-neutral": palette.neutral,
-  "--color-neutral-content": palette.neutralContent,
-  "--color-info": palette.info,
-  "--color-info-content": palette.infoContent,
-  "--color-success": palette.success,
-  "--color-success-content": palette.successContent,
-  "--color-warning": palette.warning,
-  "--color-warning-content": palette.warningContent,
-  "--color-error": palette.error,
-  "--color-error-content": palette.errorContent,
-  "--radius-selector": palette.radiusSelector,
-  "--radius-field": palette.radiusField,
-  "--radius-box": palette.radiusBox,
-  "--size-selector": palette.sizeSelector,
-  "--size-field": palette.sizeField,
-  "--border": palette.border,
-  "--depth": palette.depth,
-  "--noise": palette.noise,
-  "--brand-font-display": props.brandDraft.typography.displayFontFamily,
-  "--brand-font-body": props.brandDraft.typography.bodyFontFamily,
-  "--brand-font-mono": props.brandDraft.typography.monoFontFamily,
-  backgroundColor: palette.base100,
-  borderColor: `color-mix(in srgb, ${palette.secondary} 24%, ${palette.base100})`,
-  color: palette.baseContent,
-  fontFamily: "var(--brand-font-body)",
-});
 </script>
 
 <template>
@@ -105,7 +68,7 @@ const createPreviewSurfaceStyle = (palette: BrandPreviewPalette) => ({
           v-for="themeSurface in brandPreviewThemes"
           :key="themeSurface.id"
           class="rounded-box border p-5 shadow-sm"
-          :style="createPreviewSurfaceStyle(themeSurface.palette)"
+          :class="themeSurface.surfaceClass"
           :aria-label="t('settings.brand.previewTitle')"
         >
           <div class="flex items-center justify-between gap-3">

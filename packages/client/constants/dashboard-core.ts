@@ -8,19 +8,6 @@ import type { DashboardOnboardingStep, DashboardStatCard } from "./dashboard-con
  */
 export const DASHBOARD_GAMIFICATION_PROGRESS_MIN = 0;
 export const DASHBOARD_GAMIFICATION_PROGRESS_MAX = 100;
-export const DASHBOARD_GAMIFICATION_LEVEL_DIAL_SIZE_REM = 5.5;
-export const DASHBOARD_GAMIFICATION_LEVEL_DIAL_THICKNESS_REM = 0.4;
-
-/**
- * Builds a radial dial style object for dashboard-level XP ring rendering.
- */
-export function getDashboardGamificationDialStyle(percentage: number): Record<string, string> {
-  return {
-    "--value": String(percentage),
-    "--size": `${DASHBOARD_GAMIFICATION_LEVEL_DIAL_SIZE_REM}rem`,
-    "--thickness": `${DASHBOARD_GAMIFICATION_LEVEL_DIAL_THICKNESS_REM}rem`,
-  };
-}
 
 /**
  * useAsyncData key for SSR dashboard bootstrap.

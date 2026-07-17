@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
+import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import { DASHBOARD_A11Y_KEYS } from "~/constants/dashboard-copy";
 import {
   DASHBOARD_GAMIFICATION_PROGRESS_MAX,
   DASHBOARD_GAMIFICATION_PROGRESS_MIN,
-  getDashboardGamificationDialStyle,
 } from "~/constants/dashboard-core";
 import {
   GAMIFICATION_CURRENT_STREAK_ICON,
@@ -54,17 +54,15 @@ const { t } = useI18n();
         </div>
 
         <div class="flex items-center gap-6">
-          <div
-            class="radial-progress text-primary"
-            :style="getDashboardGamificationDialStyle(levelProgress)"
-            role="progressbar"
-            :aria-valuenow="levelProgress"
-            :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
-            :aria-valuemax="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
+          <UiRadialMeter
+            :value="levelProgress"
+            :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
+            size-class="h-20 w-20"
+            fill-class="stroke-primary"
             :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
           >
             <span class="text-sm font-bold">{{ levelProgress }}%</span>
-          </div>
+          </UiRadialMeter>
 
           <div v-if="gamification.currentStreak" class="text-center">
             <div class="text-3xl" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
