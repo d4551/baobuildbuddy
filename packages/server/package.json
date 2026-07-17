@@ -42,7 +42,7 @@
     "@huggingface/inference": "^4.13.15",
     "docx": "^9.6.1",
     "drizzle-orm": "^0.45.2",
-    "elysia": "2.0.0-exp.44",
+    "elysia": "2.0.0-exp.45",
     "openai": "^6.32.0",
     "pdf-lib": "^1.17.1",
     "pino": "^10.3.1",
