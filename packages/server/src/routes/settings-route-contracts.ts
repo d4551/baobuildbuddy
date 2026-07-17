@@ -1,5 +1,7 @@
 import type { Static } from "typebox";
 import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
   HTTP_STATUS_OK,
   HTTP_STATUS_TOO_MANY_REQUESTS,
 } from "@bao/shared/constants/http";
@@ -264,36 +266,40 @@ export const settingsImportResponseSchema = t.Object({
 });
 
 export const settingsReadResponses = {
-  [HTTP_STATUS_OK]: settingsResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const settingsUpdateResponses = {
-  [HTTP_STATUS_OK]: settingsMutationResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const jobTaxonomyUpdateResponses = {
-  [HTTP_STATUS_OK]: jobTaxonomyUpdateResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const apiKeysUpdateResponses = {
-  [HTTP_STATUS_OK]: settingsMutationResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const providerTestResponses = {
-  [HTTP_STATUS_OK]: providerTestResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const settingsExportResponses = {
-  [HTTP_STATUS_OK]: settingsExportResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const settingsImportResponses = {
-  [HTTP_STATUS_OK]: settingsImportResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;

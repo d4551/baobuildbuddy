@@ -15,7 +15,11 @@ import {
 } from "../services/automation/automation-errors";
 
 export type AutomationRouteErrorResult = {
-  status: number;
+  status:
+    | typeof HTTP_STATUS_CONFLICT
+    | typeof HTTP_STATUS_INTERNAL_SERVER_ERROR
+    | typeof HTTP_STATUS_NOT_FOUND
+    | typeof HTTP_STATUS_UNPROCESSABLE_ENTITY;
   body: { error: ErrorEnvelope };
 };
 

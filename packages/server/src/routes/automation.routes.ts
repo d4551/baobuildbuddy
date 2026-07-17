@@ -11,10 +11,9 @@ import {
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
-import type { RouteSetState } from "../types/route-state";
 import { toRouteError } from "../utils/automation-route-error";
 import { automationRateLimit } from "../utils/rate-limit";
 import {
@@ -31,8 +30,13 @@ import {
 import {
   type AutomationRunIdParams,
   type AutomationRunQuery,
+  automationCapabilitiesResponses,
+  automationEmailResponseResponses,
   automationRunIdParamsSchema,
   automationRunQuerySchema,
+  automationRunResponses,
+  automationRunsListResponses,
+  automationVerifyContextResponses,
   type EmailResponseBody,
   emailResponseBodySchema,
   type JobApplyBody,
@@ -47,6 +51,8 @@ import {
   scrapeBodySchema,
 } from "./automation-route-contracts";
 import { listAutomationRuns } from "./automation-route-support";
+
+type RouteStatus = typeof import("elysia").status;
 
 const hasText = (value: string | undefined): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -70,9 +76,8 @@ export const automationRoutes = new Elysia({
 })
   .use(automationRateLimit)
   .error((context) => {
-    const { error, set } = context;
-    const code =
-      "code" in context && typeof context.code === "string" ? context.code : undefined;
+    const { error, status } = context;
+    const code = "code" in context && typeof context.code === "string" ? context.code : undefined;
     const isValidation =
       code === "VALIDATION" ||
       (typeof error === "object" &&
@@ -83,151 +88,211 @@ export const automationRoutes = new Elysia({
       return;
     }
 
-    set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
-    return toRouteError("OUTPUT_VALIDATION_ERROR", readValidationErrorMessage(error));
+    return status(
+      HTTP_STATUS_UNPROCESSABLE_ENTITY,
+      toRouteError("OUTPUT_VALIDATION_ERROR", readValidationErrorMessage(error)),
+    );
   })
-  .get("/verify/context", { detail: { tags: ["Automation"] }, }, async ({ set }) => handleVerifyAutomationContext(set))
+  .get(
+    "/verify/context",
+    {
+      detail: { tags: ["Automation"] },
+      response: automationVerifyContextResponses,
+    },
+    async ({ status }: { status: RouteStatus }) => {
+      const result = await handleVerifyAutomationContext();
+      return status(result.status, result.body);
+    },
+  )
   .post(
     "/job-apply",
-    { detail: { tags: ["Automation"] }, body: jobApplyBodySchema,
-      }, async ({ body, set }: { body: JobApplyBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: jobApplyBodySchema,
+      response: automationRunResponses,
+    },
+    async ({ body, status }: { body: JobApplyBody; status: RouteStatus }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId))) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_JOB_APPLY_FIELDS_REQUIRED);
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_JOB_APPLY_FIELDS_REQUIRED),
+        );
       }
 
-      return handleJobApplyRoute(
-        {
-          jobUrl: body.jobUrl,
-          resumeId: body.resumeId,
-          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
-          ...(body.jobId ? { jobId: body.jobId } : {}),
-          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
-        },
-        set,
-      );
+      const result = await handleJobApplyRoute({
+        jobUrl: body.jobUrl,
+        resumeId: body.resumeId,
+        ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+        ...(body.jobId ? { jobId: body.jobId } : {}),
+        ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+      });
+      return status(result.status, result.body);
     },
   )
   .post(
     "/job-apply/schedule",
-    { detail: { tags: ["Automation"] }, body: scheduledJobApplyBodySchema,
-      }, async ({ body, set }: { body: ScheduledJobApplyBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: scheduledJobApplyBodySchema,
+      response: automationRunResponses,
+    },
+    async ({ body, status }: { body: ScheduledJobApplyBody; status: RouteStatus }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId) && hasText(body.runAt))) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError(
-          "OUTPUT_VALIDATION_ERROR",
-          API_ERROR_SCHEDULED_JOB_APPLY_FIELDS_REQUIRED,
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCHEDULED_JOB_APPLY_FIELDS_REQUIRED),
         );
       }
 
-      return handleScheduledJobApplyRoute(
-        {
-          jobUrl: body.jobUrl,
-          resumeId: body.resumeId,
-          runAt: body.runAt,
-          ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
-          ...(body.jobId ? { jobId: body.jobId } : {}),
-          ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
-        },
-        set,
-      );
+      const result = await handleScheduledJobApplyRoute({
+        jobUrl: body.jobUrl,
+        resumeId: body.resumeId,
+        runAt: body.runAt,
+        ...(body.coverLetterId ? { coverLetterId: body.coverLetterId } : {}),
+        ...(body.jobId ? { jobId: body.jobId } : {}),
+        ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
+      });
+      return status(result.status, result.body);
     },
   )
   .post(
     "/email-response",
-    { detail: { tags: ["Automation"] }, body: emailResponseBodySchema,
-      }, async ({ body, set }: { body: EmailResponseBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: emailResponseBodySchema,
+      response: automationEmailResponseResponses,
+    },
+    async ({ body, status }: { body: EmailResponseBody; status: RouteStatus }) => {
       if (!(hasText(body.subject) && hasText(body.message))) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED);
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED),
+        );
       }
 
-      return handleEmailResponseRoute(
-        {
-          subject: body.subject,
-          message: body.message,
-          ...(body.sender ? { sender: body.sender } : {}),
-          ...(body.tone ? { tone: body.tone } : {}),
-          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
-          ...(body.deliverAfterGeneration !== undefined
-            ? { deliverAfterGeneration: body.deliverAfterGeneration }
-            : {}),
-        },
-        set,
-      );
+      const result = await handleEmailResponseRoute({
+        subject: body.subject,
+        message: body.message,
+        ...(body.sender ? { sender: body.sender } : {}),
+        ...(body.tone ? { tone: body.tone } : {}),
+        ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+        ...(body.deliverAfterGeneration !== undefined
+          ? { deliverAfterGeneration: body.deliverAfterGeneration }
+          : {}),
+      });
+      return status(result.status, result.body);
     },
   )
   .post(
     "/email-response/schedule",
-    { detail: { tags: ["Automation"] }, body: scheduledEmailResponseBodySchema,
-      }, async ({ body, set }: { body: ScheduledEmailResponseBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: scheduledEmailResponseBodySchema,
+      response: automationRunResponses,
+    },
+    async ({ body, status }: { body: ScheduledEmailResponseBody; status: RouteStatus }) => {
       if (!(hasText(body.subject) && hasText(body.message) && hasText(body.runAt))) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError(
-          "OUTPUT_VALIDATION_ERROR",
-          API_ERROR_SCHEDULED_EMAIL_RESPONSE_FIELDS_REQUIRED,
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError(
+            "OUTPUT_VALIDATION_ERROR",
+            API_ERROR_SCHEDULED_EMAIL_RESPONSE_FIELDS_REQUIRED,
+          ),
         );
       }
 
-      return handleScheduledEmailResponseRoute(
-        {
-          subject: body.subject,
-          message: body.message,
-          runAt: body.runAt,
-          ...(body.sender ? { sender: body.sender } : {}),
-          ...(body.tone ? { tone: body.tone } : {}),
-          ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
-          ...(body.deliverAfterGeneration !== undefined
-            ? { deliverAfterGeneration: body.deliverAfterGeneration }
-            : {}),
-        },
-        set,
-      );
+      const result = await handleScheduledEmailResponseRoute({
+        subject: body.subject,
+        message: body.message,
+        runAt: body.runAt,
+        ...(body.sender ? { sender: body.sender } : {}),
+        ...(body.tone ? { tone: body.tone } : {}),
+        ...(body.recipientEmail ? { recipientEmail: body.recipientEmail } : {}),
+        ...(body.deliverAfterGeneration !== undefined
+          ? { deliverAfterGeneration: body.deliverAfterGeneration }
+          : {}),
+      });
+      return status(result.status, result.body);
     },
   )
   .post(
     "/scrape",
-    { detail: { tags: ["Automation"] }, body: scrapeBodySchema,
-      }, async ({ body, set }: { body: ScrapeBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: scrapeBodySchema,
+      response: automationRunResponses,
+    },
+    async ({ body, status }: { body: ScrapeBody; status: RouteStatus }) => {
       if (!body.target) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCRAPE_TARGET_REQUIRED);
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCRAPE_TARGET_REQUIRED),
+        );
       }
 
-      return handleScrapeRoute({ target: body.target }, set);
+      const result = await handleScrapeRoute({ target: body.target });
+      return status(result.status, result.body);
     },
   )
   .post(
     "/scrape/schedule",
-    { detail: { tags: ["Automation"] }, body: scheduledScrapeBodySchema,
-      }, async ({ body, set }: { body: ScheduledScrapeBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      body: scheduledScrapeBodySchema,
+      response: automationRunResponses,
+    },
+    async ({ body, status }: { body: ScheduledScrapeBody; status: RouteStatus }) => {
       if (!(body.target && hasText(body.runAt))) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCHEDULED_SCRAPE_FIELDS_REQUIRED);
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCHEDULED_SCRAPE_FIELDS_REQUIRED),
+        );
       }
 
-      return handleScheduledScrapeRoute({ target: body.target, runAt: body.runAt }, set);
+      const result = await handleScheduledScrapeRoute({
+        target: body.target,
+        runAt: body.runAt,
+      });
+      return status(result.status, result.body);
     },
   )
-  .get("/capabilities", { detail: { tags: ["Automation"] } }, async ({ set }) => {
-    const result = await handleAutomationCapabilitiesRoute();
-    if (!result.ok) {
-      set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-      return result.body;
-    }
-    return result.body;
-  })
-  .get("/runs", { detail: { tags: ["Automation"] }, query: automationRunQuerySchema,
-  }, async ({ query }: { query: AutomationRunQuery }) => listAutomationRuns(query))
+  .get(
+    "/capabilities",
+    {
+      detail: { tags: ["Automation"] },
+      response: automationCapabilitiesResponses,
+    },
+    async ({ status }: { status: RouteStatus }) => {
+      const result = await handleAutomationCapabilitiesRoute();
+      return status(result.status, result.body);
+    },
+  )
+  .get(
+    "/runs",
+    {
+      detail: { tags: ["Automation"] },
+      query: automationRunQuerySchema,
+      response: automationRunsListResponses,
+    },
+    async ({ query, status }: { query: AutomationRunQuery; status: RouteStatus }) =>
+      status(HTTP_STATUS_OK, await listAutomationRuns(query)),
+  )
   .get(
     "/runs/:id",
-    { detail: { tags: ["Automation"] }, params: automationRunIdParamsSchema,
-      }, async ({ params, set }: { params: AutomationRunIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Automation"] },
+      params: automationRunIdParamsSchema,
+      response: automationRunResponses,
+    },
+    async ({ params, status }: { params: AutomationRunIdParams; status: RouteStatus }) => {
       if (!hasText(params.id)) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_AUTOMATION_RUN_ID_REQUIRED);
+        return status(
+          HTTP_STATUS_BAD_REQUEST,
+          toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_AUTOMATION_RUN_ID_REQUIRED),
+        );
       }
 
-      return handleAutomationRunByIdRoute(params.id, set);
+      const result = await handleAutomationRunByIdRoute(params.id);
+      return status(result.status, result.body);
     },
   );

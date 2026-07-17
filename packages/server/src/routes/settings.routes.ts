@@ -7,6 +7,7 @@ import {
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
@@ -31,11 +32,20 @@ import {
   type ProviderTestBody,
   providerTestBodySchema,
   type SettingsUpdateBody,
+  apiKeysUpdateResponses,
   settingsUpdateBodySchema,
+  jobTaxonomyUpdateResponses,
+  providerTestResponses,
+  settingsExportResponses,
+  settingsImportResponses,
+  settingsReadResponses,
+  settingsUpdateResponses,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
+
+type RouteStatus = typeof import("elysia").status;
 
 export const settingsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.settings),
@@ -54,15 +64,15 @@ export const settingsRoutes = new Elysia({
         "/",
         {
           detail: { tags: ["Settings"] },
-          },
-        async ({ set }: { set: { status?: number | string } }) => {
+          response: settingsReadResponses,
+        },
+        async ({ status }: { status: RouteStatus }) => {
           const row = await readOrCreateSettingsRow();
           if (!row) {
-            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-            return { error: API_ERROR_LOAD_SETTINGS };
+            return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: API_ERROR_LOAD_SETTINGS });
           }
 
-          return buildSettingsResponse(row);
+          return status(HTTP_STATUS_OK, await buildSettingsResponse(row));
         },
       ),
   )
@@ -81,21 +91,21 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: settingsUpdateBodySchema,
-          },
-        async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
+          response: settingsUpdateResponses,
+        },
+        async ({ body, status }: { body: SettingsUpdateBody; status: RouteStatus }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
-            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-            return { success: false, error: API_ERROR_INIT_SETTINGS_ROW };
+            return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+              error: API_ERROR_INIT_SETTINGS_ROW,
+            });
           }
 
           const update = buildSettingsUpdate(existingRow, body);
           if (!update) {
-            set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
-            return {
-              success: false,
+            return status(HTTP_STATUS_UNPROCESSABLE_ENTITY, {
               error: API_ERROR_INVALID_AUTOMATION_PAYLOAD,
-            };
+            });
           }
 
           await db
@@ -103,7 +113,7 @@ export const settingsRoutes = new Elysia({
             .set({ ...update, updatedAt: new Date().toISOString() })
             .where(eq(settings.id, DEFAULT_SETTINGS_ID));
 
-          return { success: true };
+          return status(HTTP_STATUS_OK, { success: true });
         },
       )
       .put(
@@ -111,10 +121,11 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: jobTaxonomyUpdateBodySchema,
-          },
-        async ({ body }: { body: JobTaxonomyUpdateBody }) => {
+          response: jobTaxonomyUpdateResponses,
+        },
+        async ({ body, status }: { body: JobTaxonomyUpdateBody; status: RouteStatus }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
-          return { success: true, jobTaxonomy };
+          return status(HTTP_STATUS_OK, { success: true, jobTaxonomy });
         },
       )
       .put(
@@ -122,15 +133,16 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: apiKeysUpdateBodySchema,
-          },
-        async ({ body }: { body: ApiKeysUpdateBody }) => {
+          response: apiKeysUpdateResponses,
+        },
+        async ({ body, status }: { body: ApiKeysUpdateBody; status: RouteStatus }) => {
           await readOrCreateSettingsRow();
           await db
             .update(settings)
             .set(buildApiKeysUpdate(body))
             .where(eq(settings.id, DEFAULT_SETTINGS_ID));
 
-          return { success: true };
+          return status(HTTP_STATUS_OK, { success: true });
         },
       )
       .post(
@@ -138,17 +150,20 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: providerTestBodySchema,
-          },
-        async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
+          response: providerTestResponses,
+        },
+        async ({ body, status }: { body: ProviderTestBody; status: RouteStatus }) =>
+          status(HTTP_STATUS_OK, await testProviderConnection(body)),
       )
       .get(
         "/export",
         {
           detail: { tags: ["Settings"] },
-          },
-        async () => {
+          response: settingsExportResponses,
+        },
+        async ({ status }: { status: RouteStatus }) => {
           const { dataService } = await import("../services/data-service");
-          return dataService.exportAll();
+          return status(HTTP_STATUS_OK, await dataService.exportAll());
         },
       )
       .post(
@@ -156,25 +171,29 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: importSettingsBodySchema,
-          },
-        async ({ body }: { body: ImportSettingsBody }) => {
+          response: settingsImportResponses,
+        },
+        async ({ body, status }: { body: ImportSettingsBody; status: RouteStatus }) => {
           const { dataService } = await import("../services/data-service");
-          return dataService.importAll({
-            version: body.version,
-            exportedAt: body.exportedAt,
-            profile: body.profile,
-            settings: body.settings,
-            resumes: body.resumes,
-            coverLetters: body.coverLetters,
-            portfolio: body.portfolio,
-            portfolioProjects: body.portfolioProjects,
-            interviewSessions: body.interviewSessions,
-            gamification: body.gamification,
-            skillMappings: body.skillMappings,
-            savedJobs: body.savedJobs,
-            applications: body.applications,
-            chatHistory: body.chatHistory,
-          });
+          return status(
+            HTTP_STATUS_OK,
+            await dataService.importAll({
+              version: body.version,
+              exportedAt: body.exportedAt,
+              profile: body.profile,
+              settings: body.settings,
+              resumes: body.resumes,
+              coverLetters: body.coverLetters,
+              portfolio: body.portfolio,
+              portfolioProjects: body.portfolioProjects,
+              interviewSessions: body.interviewSessions,
+              gamification: body.gamification,
+              skillMappings: body.skillMappings,
+              savedJobs: body.savedJobs,
+              applications: body.applications,
+              chatHistory: body.chatHistory,
+            }),
+          );
         },
       ),
   );

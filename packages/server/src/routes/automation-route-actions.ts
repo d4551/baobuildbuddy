@@ -30,43 +30,42 @@ import {
   runJobApplyInBackground,
 } from "./automation-route-support";
 
-interface RouteSetState {
-  status?: number | string;
-}
+const routeResult = <const Status extends number, Body>(status: Status, body: Body) => ({
+  status,
+  body,
+});
 
-export const handleVerifyAutomationContext = async (set: RouteSetState) => {
+export const handleVerifyAutomationContext = async () => {
   if (!config.enableAutomationVerification) {
-    set.status = HTTP_STATUS_NOT_FOUND;
-    return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_NOT_FOUND,
+      toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return ensureAutomationVerifyContext();
+  return routeResult(HTTP_STATUS_OK, await ensureAutomationVerifyContext());
 };
 
-export const handleJobApplyRoute = async (payload: JobApplyRequestBody, set: RouteSetState) => {
+export const handleJobApplyRoute = async (payload: JobApplyRequestBody) => {
   const createRunResult = await settle(applicationAutomationService.createJobApplyRun(payload));
   if (createRunResult.status === "rejected") {
     const mapped = mapAutomationRouteError(createRunResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
   runJobApplyInBackground(createRunResult.value, payload);
   const run = await readAutomationRunById(createRunResult.value);
   if (!run) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };
 
-export const handleScheduledJobApplyRoute = async (
-  payload: ScheduleJobApplyRequestBody,
-  set: RouteSetState,
-) => {
+export const handleScheduledJobApplyRoute = async (payload: ScheduleJobApplyRequestBody) => {
   const scheduleResult = await settle(
     applicationAutomationService.createScheduledJobApplyRun(
       {
@@ -81,38 +80,32 @@ export const handleScheduledJobApplyRoute = async (
   );
   if (scheduleResult.status === "rejected") {
     const mapped = mapAutomationRouteError(scheduleResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
   const run = await readAutomationRunById(scheduleResult.value.runId);
   if (!run) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };
 
-export const handleEmailResponseRoute = async (
-  payload: EmailResponseRequest,
-  set: RouteSetState,
-) => {
+export const handleEmailResponseRoute = async (payload: EmailResponseRequest) => {
   const emailResponseResult = await settle(applicationAutomationService.runEmailResponse(payload));
   if (emailResponseResult.status === "rejected") {
     const mapped = mapAutomationRouteError(emailResponseResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
-  set.status = HTTP_STATUS_OK;
-  return emailResponseResult.value;
+  return routeResult(HTTP_STATUS_OK, emailResponseResult.value);
 };
 
 export const handleScheduledEmailResponseRoute = async (
   payload: ScheduleEmailResponseRequestBody,
-  set: RouteSetState,
 ) => {
   const scheduleResult = await settle(
     applicationAutomationService.createScheduledEmailResponseRun(
@@ -131,88 +124,85 @@ export const handleScheduledEmailResponseRoute = async (
   );
   if (scheduleResult.status === "rejected") {
     const mapped = mapAutomationRouteError(scheduleResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
   const run = await readAutomationRunById(scheduleResult.value.runId);
   if (!run) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };
 
-export const handleScrapeRoute = async (payload: RunScrapeRequestBody, set: RouteSetState) => {
+export const handleScrapeRoute = async (payload: RunScrapeRequestBody) => {
   const runResult = await settle(applicationAutomationService.runScrape(payload.target));
   if (runResult.status === "rejected") {
     const mapped = mapAutomationRouteError(runResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
   const run = await readAutomationRunById(runResult.value);
   if (!run) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_AUTOMATION_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };
 
-export const handleScheduledScrapeRoute = async (
-  payload: ScheduleScrapeRequestBody,
-  set: RouteSetState,
-) => {
+export const handleScheduledScrapeRoute = async (payload: ScheduleScrapeRequestBody) => {
   const scheduleResult = await settle(
     applicationAutomationService.createScheduledScrapeRun(payload.target, payload.runAt),
   );
   if (scheduleResult.status === "rejected") {
     const mapped = mapAutomationRouteError(scheduleResult.reason);
-    set.status = mapped.status;
-    return mapped.body;
+    return routeResult(mapped.status, mapped.body);
   }
 
   const run = await readAutomationRunById(scheduleResult.value.runId);
   if (!run) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", API_ERROR_SCHEDULED_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };
 
 export const handleAutomationCapabilitiesRoute = async () => {
   const auditResult = await settle(applicationAutomationService.getRpaCapabilityAudit());
   if (auditResult.status === "rejected") {
-    return {
-      ok: false as const,
-      body: toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit."),
-    };
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit."),
+    );
   }
 
-  return {
-    ok: true as const,
-    body: auditResult.value,
-  };
+  return routeResult(HTTP_STATUS_OK, auditResult.value);
 };
 
-export const handleAutomationRunByIdRoute = async (runId: string, set: RouteSetState) => {
+export const handleAutomationRunByIdRoute = async (runId: string) => {
   if (runId.length < RUN_ID_MIN_LENGTH || !RUN_ID_PATTERN.test(runId)) {
-    set.status = HTTP_STATUS_BAD_REQUEST;
-    return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_INVALID_RUN_ID);
+    return routeResult(
+      HTTP_STATUS_BAD_REQUEST,
+      toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_INVALID_RUN_ID),
+    );
   }
 
   const run = await readAutomationRunById(runId);
   if (!run) {
-    set.status = HTTP_STATUS_NOT_FOUND;
-    return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND);
+    return routeResult(
+      HTTP_STATUS_NOT_FOUND,
+      toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND),
+    );
   }
 
-  set.status = HTTP_STATUS_OK;
-  return run;
+  return routeResult(HTTP_STATUS_OK, run);
 };

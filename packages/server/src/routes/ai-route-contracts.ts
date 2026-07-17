@@ -1,8 +1,13 @@
 import type { Static } from "typebox";
 import { AI_CHAT_CONTEXT_TAIL_LIMIT } from "@bao/shared/constants/ai-chat";
 import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CONFLICT,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
   HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import {
   SCHEMA_MAX_ITEMS_XXLARGE,
@@ -14,8 +19,8 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
-import { aiRoutingBodySchema, preferredProviderBodySchema } from "./settings-route-schema-ai-brand";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
+import { aiRoutingBodySchema, preferredProviderBodySchema } from "./settings-route-schema-ai-brand";
 
 export const chatRouteBodySchema = t.Object(
   {
@@ -198,37 +203,48 @@ export const automationActionResponseSchema = t.Object({
 });
 
 export const chatRouteResponses = {
-  [HTTP_STATUS_OK]: chatRouteResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const analyzeResumeResponses = {
-  [HTTP_STATUS_OK]: analyzeResumeResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const generateCoverLetterResponses = {
-  [HTTP_STATUS_OK]: generateCoverLetterResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const matchJobsResponses = {
-  [HTTP_STATUS_OK]: matchJobsResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const aiModelsResponses = {
-  [HTTP_STATUS_OK]: aiModelsResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const aiUsageResponses = {
-  [HTTP_STATUS_OK]: aiUsageResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const automationActionResponses = {
-  [HTTP_STATUS_OK]: automationActionResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_CONFLICT]: simpleErrorResponseSchema,
+  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 

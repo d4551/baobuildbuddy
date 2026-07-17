@@ -1,12 +1,16 @@
 import { API_ERROR_UNSUPPORTED_AUTOMATION_ACTION } from "@bao/shared/constants/api-errors";
-import { HTTP_STATUS_BAD_REQUEST } from "@bao/shared/constants/http";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
-import type { RouteSetState } from "../types/route-state";
 import { mapAutomationRouteError } from "../utils/automation-route-error";
 import { createServerLogger } from "../utils/logger";
 
 const aiRoutesLogger = createServerLogger("ai-routes");
+
+const routeResult = <const Status extends number, Body>(status: Status, body: Body) => ({
+  status,
+  body,
+});
 
 const startJobApplyRun = (
   runId: string,
@@ -22,21 +26,19 @@ const startJobApplyRun = (
   });
 };
 
-export const handleAutomationActionRoute = async (
-  body: {
-    action: string;
-    jobUrl: string;
-    resumeId: string;
-    coverLetterId?: string;
-    jobId?: string;
-  },
-  set: RouteSetState,
-) => {
+export const handleAutomationActionRoute = async (body: {
+  action: string;
+  jobUrl: string;
+  resumeId: string;
+  coverLetterId?: string;
+  jobId?: string;
+}) => {
   const { action, jobUrl, resumeId, coverLetterId, jobId } = body;
 
   if (action !== "job_apply") {
-    set.status = HTTP_STATUS_BAD_REQUEST;
-    return { error: API_ERROR_UNSUPPORTED_AUTOMATION_ACTION.replace("__ACTION__", action) };
+    return routeResult(HTTP_STATUS_BAD_REQUEST, {
+      error: API_ERROR_UNSUPPORTED_AUTOMATION_ACTION.replace("__ACTION__", action),
+    });
   }
 
   const runResult = await settle(
@@ -47,10 +49,9 @@ export const handleAutomationActionRoute = async (
   );
   if (runResult.status === "rejected") {
     const mapped = mapAutomationRouteError(runResult.reason);
-    set.status = mapped.status;
-    return {
+    return routeResult(mapped.status, {
       error: mapped.body.error.message,
-    };
+    });
   }
 
   const runId = runResult.value;
@@ -61,10 +62,10 @@ export const handleAutomationActionRoute = async (
     jobId,
   });
 
-  return {
+  return routeResult(HTTP_STATUS_OK, {
     runId,
     status: "running",
     message:
       "Job application automation started. Use GET /api/automation/runs/:id to check status.",
-  };
+  });
 };

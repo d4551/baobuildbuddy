@@ -7,6 +7,15 @@ import {
   RPA_CAPABILITY_ISSUE_CODES,
 } from "@bao/shared/constants/automation";
 import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CONFLICT,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
+} from "@bao/shared/constants/http";
+import {
   RUN_ID_MIN_LENGTH,
   RUN_ID_SAFE_PATTERN_SOURCE,
   SCHEMA_MAX_LENGTH_EMAIL,
@@ -16,8 +25,9 @@ import {
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { t } from "elysia";
+import { routeErrorBodySchema, simpleErrorResponseSchema } from "./route-error-envelope";
 
-export { routeErrorBodySchema } from "./route-error-envelope";
+export { routeErrorBodySchema };
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
@@ -87,10 +97,7 @@ export const SCRAPE_TARGET_SCHEMA = t.Union([
   t.Literal(SCRAPE_TARGET_POCKETGAMER),
 ]);
 
-const nullableJsonRecordBodySchema = t.Union([
-  t.Record(t.String(), t.Unknown()),
-  t.Null(),
-]);
+const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
 const nullableRunErrorSchema = t.Union([
   t.String({ minLength: 1 }),
   t.Object({
@@ -159,9 +166,57 @@ export const capabilityAuditReportBodySchema = t.Object({
   capabilities: t.Array(capabilityAuditEntryBodySchema),
 });
 
-export const automationRouteErrorResponses = {
+export const automationVerifyContextResponseSchema = t.Object({
+  resumeId: t.String({ minLength: 1 }),
+});
 
-};
+export const automationEmailResponseBodySchema = t.Object({
+  runId: t.String({ minLength: 1 }),
+  status: t.Literal("success"),
+  reply: t.String({ minLength: 1 }),
+  provider: t.String({ minLength: 1 }),
+  model: t.String({ minLength: 1 }),
+  delivered: t.Boolean(),
+  recipientEmail: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+  deliveredAt: t.Optional(t.String({ minLength: 1 })),
+  messageId: t.Optional(t.String({ minLength: 1 })),
+});
+
+export const automationRouteErrorResponses = {
+  [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+  [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+} as const;
+
+export const automationVerifyContextResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const automationRunResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  ...automationRouteErrorResponses,
+} as const;
+
+export const automationEmailResponseResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  ...automationRouteErrorResponses,
+} as const;
+
+export const automationCapabilitiesResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const automationRunsListResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
 
 export const jobApplyBodySchema = t.Object(
   {
@@ -194,9 +249,7 @@ export const emailResponseBodySchema = t.Object(
     message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
     sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
     tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-    recipientEmail: t.Optional(
-      t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL }),
-    ),
+    recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
     deliverAfterGeneration: t.Optional(t.Boolean()),
   },
   { required: ["subject", "message"] },
@@ -209,9 +262,7 @@ export const scheduledEmailResponseBodySchema = t.Object(
     message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
     sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
     tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-    recipientEmail: t.Optional(
-      t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL }),
-    ),
+    recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
     deliverAfterGeneration: t.Optional(t.Boolean()),
     runAt: t.String({ minLength: 1 }),
   },

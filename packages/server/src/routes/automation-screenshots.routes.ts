@@ -10,14 +10,17 @@ import {
 } from "@bao/shared/constants/api-errors";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
-import type { RouteSetState } from "../types/route-state";
 import {
   type BinaryPayload,
   CACHE_CONTROL_PRIVATE_NO_STORE,
@@ -27,7 +30,10 @@ import {
 import {
   type AutomationScreenshotParams,
   automationScreenshotParams,
+  automationScreenshotResponses,
 } from "./automation-screenshot-route-contracts";
+
+type RouteStatus = typeof import("elysia").status;
 
 const RUN_ID_SAFE_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 const FILE_NAME_SAFE_PATTERN = /^[a-zA-Z0-9._-]+$/;
@@ -112,44 +118,42 @@ export const automationScreenshotRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.automationScreenshotsBase),
 }).get(
   "/:runId/:index",
-  { detail: { tags: ["Automation"] }, params: automationScreenshotParams,
-    }, async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
+  {
+    detail: { tags: ["Automation"] },
+    params: automationScreenshotParams,
+    response: automationScreenshotResponses,
+  },
+  async ({ params, status }: { params: AutomationScreenshotParams; status: RouteStatus }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
-      set.status = HTTP_STATUS_BAD_REQUEST;
-      return { error: API_ERROR_INVALID_SCREENSHOT_INDEX };
+      return status(HTTP_STATUS_BAD_REQUEST, { error: API_ERROR_INVALID_SCREENSHOT_INDEX });
     }
 
     if (isInvalidRunId(params.runId)) {
-      set.status = HTTP_STATUS_BAD_REQUEST;
-      return { error: API_ERROR_INVALID_RUN_ID };
+      return status(HTTP_STATUS_BAD_REQUEST, { error: API_ERROR_INVALID_RUN_ID });
     }
 
     const run = await readRunScreenshots(params.runId);
     if (!run) {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: API_ERROR_SCREENSHOT_NOT_FOUND };
+      return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_SCREENSHOT_NOT_FOUND });
     }
 
     const idx = resolveScreenshotIndex(params.index, run.screenshots.length);
     if (idx === null) {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE };
+      return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_SCREENSHOT_INDEX_OUT_OF_RANGE });
     }
 
     const fileName = run.screenshots[idx];
     if (!isSafeScreenshotFileName(fileName)) {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: API_ERROR_INVALID_SCREENSHOT_METADATA };
+      return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_INVALID_SCREENSHOT_METADATA });
     }
 
     const filePath = join(AUTOMATION_SCREENSHOT_DIR, run.id, fileName);
     const contents = await readScreenshotPayload(filePath);
     if (!contents) {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: API_ERROR_SCREENSHOT_FILE_MISSING };
+      return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_SCREENSHOT_FILE_MISSING });
     }
 
     const extension = `.${getScreenshotExtension(fileName)}`;
-    return createScreenshotResponse(contents, extension);
+    return status(HTTP_STATUS_OK, createScreenshotResponse(contents, extension));
   },
 );
