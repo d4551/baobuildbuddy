@@ -1,6 +1,7 @@
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
 } from "@bao/shared/constants/ai-generation";
+import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
 import {
   API_ERROR_OPENAI_COMPAT_GENERATION_FAILED,
   API_ERROR_OPENAI_COMPAT_MODEL_NOT_FOUND,
@@ -82,6 +83,19 @@ export const listOpenAICompatModels = async (): Promise<OpenAICompatModelRecord[
       created,
       owned_by: status.provider,
     });
+  }
+
+  // When no live providers are available, expose catalog hints so SDK clients can discover IDs.
+  if (models.length === 0) {
+    for (const provider of AI_PROVIDER_CATALOG) {
+      const hint = provider.modelHints[0] ?? "default";
+      models.push({
+        id: buildOpenAICompatModelId(provider.id, hint),
+        object: "model",
+        created,
+        owned_by: provider.id,
+      });
+    }
   }
 
   return models;
