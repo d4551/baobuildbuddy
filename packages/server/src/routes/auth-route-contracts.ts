@@ -1,6 +1,11 @@
 import type { Static } from "typebox";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const authBootstrapBodySchema = t.Object({
   setupToken: t.Optional(t.String({ minLength: 1 })),
@@ -37,4 +42,6 @@ export const authConfiguredResponses = {
 
 export const authInitResponses = {
   [HTTP_STATUS_OK]: authInitSuccessResponseSchema,
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+  [HTTP_STATUS_FORBIDDEN]: simpleErrorResponseSchema,
 } as const;

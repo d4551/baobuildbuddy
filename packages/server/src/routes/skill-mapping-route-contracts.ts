@@ -2,6 +2,8 @@ import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_GONE,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import {
@@ -233,11 +235,13 @@ export const skillMappingCreateResponses = {
 
 export const skillMappingUpdateResponses = {
   [HTTP_STATUS_OK]: skillMappingResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const skillMappingDeleteResponses = {
-  [HTTP_STATUS_OK]: skillMappingDeleteResponseSchema,
-  [HTTP_STATUS_GONE]: simpleErrorResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_GONE]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const skillPathwaysResponses = {
@@ -250,4 +254,5 @@ export const skillReadinessResponses = {
 
 export const skillAnalysisResponses = {
   [HTTP_STATUS_OK]: skillAnalysisResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: skillAnalysisResponseSchema,
 };

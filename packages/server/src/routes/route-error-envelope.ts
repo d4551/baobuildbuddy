@@ -26,7 +26,9 @@ export const simpleErrorBodySchema = t.Object(
   {
     error: t.String(),
     code: t.Optional(t.String()),
+    details: t.Optional(t.String()),
     fields: t.Optional(t.Array(t.String())),
+    id: t.Optional(t.String()),
   },
   { required: ["error"] },
 );

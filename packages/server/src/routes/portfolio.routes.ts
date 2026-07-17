@@ -12,29 +12,66 @@ import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
-import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
+import type {
+  PortfolioData,
+  PortfolioMetadata,
+  PortfolioProject,
+} from "@bao/shared/types/portfolio";
 import { settle } from "@bao/shared/utils/promise";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
-import type { RouteSetState } from "../types/route-state";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
 import {
   type PortfolioExportRouteBody,
-  type PortfolioProjectCreateRouteBody,
-  type PortfolioProjectIdParams,
-  type PortfolioProjectReorderRouteBody,
-  type PortfolioProjectUpdateRouteBody,
-  type PortfolioUpdateRouteBody,
   portfolioExportBodySchema,
+  portfolioExportResponses,
+  portfolioMutationResponses,
+  type PortfolioProjectCreateRouteBody,
+  portfolioProjectDeleteResponses,
   portfolioProjectCreateBodySchema,
+  type PortfolioProjectIdParams,
   portfolioProjectIdParamsSchema,
+  portfolioProjectMutationResponses,
+  type PortfolioProjectReorderRouteBody,
   portfolioProjectReorderBodySchema,
+  portfolioProjectReorderResponses,
+  type PortfolioProjectUpdateRouteBody,
   portfolioProjectUpdateBodySchema,
+  portfolioResponses,
+  type PortfolioUpdateRouteBody,
   portfolioUpdateBodySchema,
 } from "./portfolio-route-contracts";
+
+type RouteStatus = typeof import("elysia").status;
+
+const toPortfolioProjectResponse = (project: PortfolioProject) => ({
+  id: project.id,
+  portfolioId: project.portfolioId,
+  title: project.title,
+  description: project.description,
+  technologies: project.technologies,
+  image: project.image,
+  liveUrl: project.liveUrl,
+  githubUrl: project.githubUrl,
+  tags: project.tags,
+  featured: project.featured,
+  role: project.role,
+  platforms: project.platforms,
+  engines: project.engines,
+  sortOrder: project.sortOrder,
+});
+
+const toPortfolioResponse = (portfolio: PortfolioData) => ({
+  id: portfolio.id,
+  metadata: portfolio.metadata ? { ...portfolio.metadata } : undefined,
+  projects: portfolio.projects.map(toPortfolioProjectResponse),
+  createdAt: portfolio.createdAt,
+  updatedAt: portfolio.updatedAt,
+});
 
 export const portfolioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase),
@@ -43,9 +80,13 @@ export const portfolioRoutes = new Elysia({
     "/",
     {
       detail: { tags: ["Portfolio"] },
-      },
-    async () => {
-      return await portfolioService.getPortfolioPayload();
+      response: portfolioResponses,
+    },
+    async ({ status }: { status: RouteStatus }) => {
+      return status(
+        HTTP_STATUS_OK,
+        toPortfolioResponse(await portfolioService.getPortfolioPayload()),
+      );
     },
   )
   .put(
@@ -53,9 +94,13 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioUpdateBodySchema,
-      },
-    async ({ body }: { body: PortfolioUpdateRouteBody }) => {
-      return await portfolioService.updatePortfolio({ metadata: body.metadata });
+      response: portfolioMutationResponses,
+    },
+    async ({ body, status }: { body: PortfolioUpdateRouteBody; status: RouteStatus }) => {
+      return status(
+        HTTP_STATUS_OK,
+        toPortfolioResponse(await portfolioService.updatePortfolio({ metadata: body.metadata })),
+      );
     },
   )
   .post(
@@ -63,12 +108,14 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioProjectCreateBodySchema,
-      },
-    async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
+      response: portfolioProjectMutationResponses,
+    },
+    async ({ body, status }: { body: PortfolioProjectCreateRouteBody; status: RouteStatus }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return { error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE };
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+          error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
+        });
       }
       const newProject = await portfolioService.addProject(portfolio.id, {
         title: body.title,
@@ -84,13 +131,12 @@ export const portfolioRoutes = new Elysia({
         engines: body.engines || [],
         sortOrder: body.sortOrder || 0,
       });
-      set.status = HTTP_STATUS_CREATED;
       gamificationService.trackActionFireAndForget(
         "portfolioItems",
         ROUTE_GAMIFICATION_XP.portfolioItems,
         "portfolio_project_added",
       );
-      return newProject;
+      return status(HTTP_STATUS_CREATED, toPortfolioProjectResponse(newProject));
     },
   )
   .post(
@@ -98,15 +144,20 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioProjectReorderBodySchema,
-      },
-    async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
+      response: portfolioProjectReorderResponses,
+    },
+    async ({ body, status }: { body: PortfolioProjectReorderRouteBody; status: RouteStatus }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return { error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE };
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+          error: API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
+        });
       }
       await portfolioService.reorderProjects(portfolio.id, body.orderedIds);
-      return await portfolioService.getPortfolioPayload();
+      return status(
+        HTTP_STATUS_OK,
+        toPortfolioResponse(await portfolioService.getPortfolioPayload()),
+      );
     },
   )
   .put(
@@ -115,15 +166,16 @@ export const portfolioRoutes = new Elysia({
       detail: { tags: ["Portfolio"] },
       params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
-      },
+      response: portfolioProjectMutationResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: PortfolioProjectIdParams;
       body: PortfolioProjectUpdateRouteBody;
-      set: RouteSetState;
+      status: RouteStatus;
     }) => {
       const updated = await portfolioService.updateProject(params.id, {
         title: body.title,
@@ -141,11 +193,10 @@ export const portfolioRoutes = new Elysia({
       });
 
       if (!updated) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_PROJECT_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_PROJECT_NOT_FOUND });
       }
 
-      return updated;
+      return status(HTTP_STATUS_OK, toPortfolioProjectResponse(updated));
     },
   )
   .delete(
@@ -153,15 +204,15 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       params: portfolioProjectIdParamsSchema,
-      },
-    async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
+      response: portfolioProjectDeleteResponses,
+    },
+    async ({ params, status }: { params: PortfolioProjectIdParams; status: RouteStatus }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_PROJECT_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_PROJECT_NOT_FOUND });
       }
 
-      return { success: true, id: params.id };
+      return status(HTTP_STATUS_OK, { success: true, id: params.id });
     },
   )
   .post(
@@ -169,12 +220,12 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioExportBodySchema,
-      },
-    async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
+      response: portfolioExportResponses,
+    },
+    async ({ body, status }: { body: PortfolioExportRouteBody; status: RouteStatus }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_PORTFOLIO_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_PORTFOLIO_NOT_FOUND });
       }
 
       const metadata: PortfolioMetadata = portfolio.metadata ?? {};
@@ -184,31 +235,35 @@ export const portfolioRoutes = new Elysia({
           docxExportService.exportPortfolioDocx(metadata, portfolio.projects),
         );
         if (docxResult.status === "rejected") {
-          set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-          return {
+          return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
             error: API_ERROR_EXPORT_PORTFOLIO,
             details:
               docxResult.reason instanceof Error ? docxResult.reason.message : API_ERROR_UNKNOWN,
-          };
+          });
         }
-        return createDocxAttachmentResponse(docxResult.value, `portfolio-${portfolio.id}.docx`);
+        return status(
+          HTTP_STATUS_OK,
+          createDocxAttachmentResponse(docxResult.value, `portfolio-${portfolio.id}.docx`),
+        );
       }
 
       const exportResult = await settle(
         exportService.exportPortfolioPDF(metadata, portfolio.projects),
       );
       if (exportResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_EXPORT_PORTFOLIO,
           details:
             exportResult.reason instanceof Error ? exportResult.reason.message : API_ERROR_UNKNOWN,
-        };
+        });
       }
 
-      return createPdfAttachmentResponse(
-        Buffer.from(exportResult.value),
-        `portfolio-${portfolio.id}.pdf`,
+      return status(
+        HTTP_STATUS_OK,
+        createPdfAttachmentResponse(
+          Buffer.from(exportResult.value),
+          `portfolio-${portfolio.id}.pdf`,
+        ),
       );
     },
   );

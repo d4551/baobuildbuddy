@@ -1,14 +1,24 @@
 import { Elysia } from "elysia";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
-import { interviewService } from "../services/interview-service";
-import type { RouteSetState } from "../types/route-state";
 import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
+import { interviewService } from "../services/interview-service";
+import {
+  completeInterviewSessionResponses,
   type CreateSessionBody,
   createSessionBodySchema,
+  createInterviewSessionResponses,
+  interviewSessionResponses,
   type InterviewSessionParams,
+  interviewSessionsListResponses,
   interviewSessionParamsSchema,
+  interviewStatsResponses,
   type SubmitResponseRouteBody,
+  submitInterviewResponseResponses,
   submitResponseBodySchema,
 } from "./interview-route-contracts";
 import { sessionWithDerivedFields } from "./interview-route-presentation";
@@ -20,6 +30,8 @@ import {
   submitInterviewResponse,
 } from "./interview-route-support";
 
+type RouteStatus = (code: number, body: unknown) => unknown;
+
 export const interviewRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.interviewBase),
 })
@@ -28,21 +40,22 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       body: createSessionBodySchema,
-      },
-    async ({ body, set }: { body: CreateSessionBody; set: RouteSetState }) => {
+      response: createInterviewSessionResponses,
+    },
+    async ({ body, status }: { body: CreateSessionBody; status: RouteStatus }) => {
       const result = await createInterviewSession(body.studioId, body.config);
-      set.status = HTTP_STATUS_CREATED;
-      return result.body;
+      return status(HTTP_STATUS_CREATED, result.body);
     },
   )
   .get(
     "/sessions",
     {
       detail: { tags: ["Interview"] },
-      },
-    async () => {
+      response: interviewSessionsListResponses,
+    },
+    async ({ status }: { status: RouteStatus }) => {
       const sessions = await interviewService.getSessions();
-      return Promise.all(sessions.map(sessionWithDerivedFields));
+      return status(HTTP_STATUS_OK, await Promise.all(sessions.map(sessionWithDerivedFields)));
     },
   )
   .get(
@@ -50,13 +63,14 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
-      },
-    async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
+      response: interviewSessionResponses,
+    },
+    async ({ params, status }: { params: InterviewSessionParams; status: RouteStatus }) => {
       const result = await getInterviewSession(params.id);
-      if (result.status !== null) {
-        set.status = result.status;
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
       }
-      return result.body;
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -65,21 +79,25 @@ export const interviewRoutes = new Elysia({
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
       body: submitResponseBodySchema,
-      },
+      response: submitInterviewResponseResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: InterviewSessionParams;
       body: SubmitResponseRouteBody;
-      set: RouteSetState;
+      status: RouteStatus;
     }) => {
       const result = await submitInterviewResponse(params.id, body);
-      if (result.status !== null) {
-        set.status = result.status;
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
       }
-      return result.body;
+      if (result.status === HTTP_STATUS_BAD_REQUEST) {
+        return status(HTTP_STATUS_BAD_REQUEST, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -87,19 +105,21 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
-      },
-    async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
+      response: completeInterviewSessionResponses,
+    },
+    async ({ params, status }: { params: InterviewSessionParams; status: RouteStatus }) => {
       const result = await completeInterviewSession(params.id);
-      if (result.status !== null) {
-        set.status = result.status;
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
       }
-      return result.body;
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .get(
     toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats),
     {
       detail: { tags: ["Interview"] },
-      },
-    async () => getInterviewStats(),
+      response: interviewStatsResponses,
+    },
+    async ({ status }) => status(HTTP_STATUS_OK, await getInterviewStats()),
   );

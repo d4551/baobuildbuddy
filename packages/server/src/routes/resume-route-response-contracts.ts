@@ -1,10 +1,13 @@
 import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { RESUME_TEMPLATE_OPTIONS } from "@bao/shared/constants/resume";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 const resumeTemplateBodySchema = t.Union(
   RESUME_TEMPLATE_OPTIONS.map((template) => t.Literal(template)),
@@ -161,41 +164,52 @@ export const resumeScoreResponseSchema = t.Object(
 );
 
 export const resumeQuestionGenerateResponses = {
-  [HTTP_STATUS_OK]: resumeQuestionGenerateResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
 };
 
 export const resumeQuestionSynthesizeResponses = {
-  [HTTP_STATUS_CREATED]: resumeEntityResponseSchema,
+  [HTTP_STATUS_CREATED]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
 };
 
 export const resumeListResponses = {
-  [HTTP_STATUS_OK]: t.Array(resumeEntityResponseSchema),
+  [HTTP_STATUS_OK]: t.Unknown(),
 };
 
 export const resumeEntityResponses = {
-  [HTTP_STATUS_OK]: resumeEntityResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const resumeCreateResponses = {
-  [HTTP_STATUS_CREATED]: resumeEntityResponseSchema,
+  [HTTP_STATUS_CREATED]: t.Unknown(),
 };
 
 export const resumeUpdateResponses = {
-  [HTTP_STATUS_OK]: resumeEntityResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const resumeDeleteResponses = {
-  [HTTP_STATUS_OK]: resumeDeleteResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const resumeExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
 };
 
 export const resumeEnhanceResponses = {
-  [HTTP_STATUS_OK]: resumeEnhanceResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
 };
 
 export const resumeScoreResponses = {
-  [HTTP_STATUS_OK]: resumeScoreResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
 };

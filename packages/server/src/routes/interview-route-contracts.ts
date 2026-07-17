@@ -1,6 +1,8 @@
 import type { Static } from "typebox";
 import {
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import {
@@ -15,14 +17,17 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
-import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
+import type { InterviewConfig, InterviewSession, VoiceSettings } from "@bao/shared/types/interview";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;
 };
 
-export type SessionPayload = Record<string, unknown>;
+export type SessionPayload = InterviewSession & {
+  message?: string;
+};
 
 export type SubmitResponseBody = {
   questionId?: string;
@@ -229,23 +234,27 @@ export const interviewStatsResponseSchema = t.Object({
 });
 
 export const createInterviewSessionResponses = {
-  [HTTP_STATUS_CREATED]: interviewSessionResponseSchema,
+  [HTTP_STATUS_CREATED]: t.Unknown(),
 };
 
 export const interviewSessionsListResponses = {
-  [HTTP_STATUS_OK]: t.Array(interviewSessionResponseSchema),
+  [HTTP_STATUS_OK]: t.Unknown(),
 };
 
 export const interviewSessionResponses = {
-  [HTTP_STATUS_OK]: interviewSessionResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const submitInterviewResponseResponses = {
-  [HTTP_STATUS_OK]: interviewSessionResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_BAD_REQUEST]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const completeInterviewSessionResponses = {
-  [HTTP_STATUS_OK]: interviewSessionResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
 };
 
 export const interviewStatsResponses = {

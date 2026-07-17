@@ -8,13 +8,13 @@ import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/cons
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
-import type { RouteSetState } from "../types/route-state";
 import {
-  type ScraperPortalParams,
+  scraperOperationResponses,
   scraperPortalParamsSchema,
 } from "./scraper-route-contracts";
 
@@ -27,20 +27,20 @@ export const scraperRoutes = new Elysia({
     toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios),
     {
       detail: { tags: ["Scraper"] },
-      },
-    async ({ set }) => {
+      response: scraperOperationResponses,
+    },
+    async ({ status }) => {
       const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
       if (scrapeStudiosResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_SCRAPE_STUDIOS_FAILED,
           details:
             scrapeStudiosResult.reason instanceof Error
               ? scrapeStudiosResult.reason.message
               : API_ERROR_UNKNOWN,
-        };
+        });
       }
-      return scrapeStudiosResult.value;
+      return status(HTTP_STATUS_OK, scrapeStudiosResult.value);
     },
   )
   .post(
@@ -48,28 +48,27 @@ export const scraperRoutes = new Elysia({
     {
       detail: { tags: ["Scraper"] },
       params: scraperPortalParamsSchema,
-      },
-    async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
+      response: scraperOperationResponses,
+    },
+    async ({ params, status }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {
-        set.status = HTTP_STATUS_BAD_REQUEST;
-        return {
+        return status(HTTP_STATUS_BAD_REQUEST, {
           error: API_ERROR_SCRAPE_JOBS_FAILED,
           details: `Unsupported scraper portal: ${params.portalId}`,
-        };
+        });
       }
 
       const scrapeJobsResult = await settle(scraperService.scrapeJobsForPortal(portalId));
       if (scrapeJobsResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_SCRAPE_JOBS_FAILED,
           details:
             scrapeJobsResult.reason instanceof Error
               ? scrapeJobsResult.reason.message
               : API_ERROR_UNKNOWN,
-        };
+        });
       }
-      return scrapeJobsResult.value;
+      return status(HTTP_STATUS_OK, scrapeJobsResult.value);
     },
   );

@@ -1,6 +1,8 @@
 import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import {
@@ -11,6 +13,7 @@ import {
   SCHEMA_MAX_LENGTH_TINY,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type JobListQuery = {
   q?: string;
@@ -90,7 +93,7 @@ export const jobEntityResponseSchema = t.Object({
   location: t.String(),
   remote: t.Optional(t.Union([t.Boolean(), t.Null()])),
   hybrid: t.Optional(t.Union([t.Boolean(), t.Null()])),
-  salary: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
+  salary: t.Optional(t.Union([t.Unknown(), t.Null()])),
   description: t.Optional(t.Union([t.String(), t.Null()])),
   requirements: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
   technologies: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
@@ -106,7 +109,7 @@ export const jobEntityResponseSchema = t.Object({
   tags: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
   companyLogo: t.Optional(t.Union([t.String(), t.Null()])),
   applicationUrl: t.Optional(t.Union([t.String(), t.Null()])),
-  enrichment: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
+  enrichment: t.Optional(t.Union([t.Unknown(), t.Null()])),
   createdAt: t.Optional(t.String()),
   updatedAt: t.Optional(t.String()),
   matchScore: t.Optional(t.Number()),
@@ -130,10 +133,12 @@ export const savedJobResponseSchema = t.Object({
 export const applicationResponseSchema = t.Object({
   id: t.String(),
   jobId: t.String(),
-  status: t.String(),
+  status: t.Union([t.String(), t.Null()]),
   appliedDate: t.Optional(t.Union([t.String(), t.Null()])),
   notes: t.Optional(t.Union([t.String(), t.Null()])),
-  timeline: t.Optional(t.Union([t.Array(t.Record(t.String(), t.Unknown())), t.Null()])),
+  timeline: t.Optional(t.Union([t.Array(t.Unknown()), t.Null()])),
+  createdAt: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
 });
 
 export const jobsRefreshResponseSchema = t.Object({
@@ -150,6 +155,7 @@ export const jobsListResponses = {
 
 export const jobEntityResponses = {
   [HTTP_STATUS_OK]: jobEntityResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const saveJobResponses = {
@@ -159,9 +165,9 @@ export const saveJobResponses = {
     id: t.Optional(t.String()),
     jobId: t.Optional(t.String()),
     savedAt: t.Optional(t.String()),
-    error: t.Optional(t.String()),
   }),
   [HTTP_STATUS_CREATED]: savedJobResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const deleteSavedJobResponses = {
@@ -191,14 +197,15 @@ export const applyJobResponses = {
     status: t.Optional(t.String()),
     appliedDate: t.Optional(t.String()),
     notes: t.Optional(t.String()),
-    timeline: t.Optional(t.Array(t.Record(t.String(), t.Unknown()))),
-    error: t.Optional(t.String()),
+    timeline: t.Optional(t.Array(t.Unknown())),
   }),
   [HTTP_STATUS_CREATED]: applicationResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const updateApplicationResponses = {
   [HTTP_STATUS_OK]: applicationResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const applicationsListResponses = {
@@ -216,6 +223,7 @@ export const recommendationsResponses = {
 
 export const jobsRefreshResponses = {
   [HTTP_STATUS_OK]: jobsRefreshResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 } as const;
 
 export { HTTP_STATUS_CREATED };

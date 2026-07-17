@@ -1,25 +1,26 @@
 import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
 import { desc, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
-import type { RouteSetState } from "../types/route-state";
 import {
-  type StudioIdParams,
-  type StudioListRouteQuery,
-  type StudioMutationRouteBody,
-  type StudioUpdateRouteBody,
+  studioAnalyticsResponses,
   studioIdParamsSchema,
+  studioDeleteResponses,
+  studioEntityResponses,
   studioListQuerySchema,
+  studioListResponses,
   studioMutationBodySchema,
   studioUpdateBodySchema,
 } from "./studio-route-contracts";
-
-type StudioInsert = typeof studios.$inferInsert;
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -37,8 +38,9 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       query: studioListQuerySchema,
-      },
-    async ({ query }: { query: StudioListRouteQuery }) => {
+      response: studioListResponses,
+    },
+    async ({ query, status }) => {
       const { q = "", type, size, remoteWork } = query;
 
       let results = await db.select().from(studios).orderBy(desc(studios.createdAt));
@@ -66,15 +68,16 @@ export const studioRoutes = new Elysia({
         results = results.filter((studio) => studio.remoteWork === false);
       }
 
-      return results;
+      return status(HTTP_STATUS_OK, results);
     },
   )
   .get(
     "/analytics",
     {
       detail: { tags: ["Studios"] },
-      },
-    async (): Promise<StudioAnalytics> => {
+      response: studioAnalyticsResponses,
+    },
+    async ({ status }) => {
       const allStudios = await db.select().from(studios);
 
       const analytics: StudioAnalytics = {
@@ -111,7 +114,7 @@ export const studioRoutes = new Elysia({
         .sort((left, right) => right.count - left.count)
         .slice(0, 10);
 
-      return analytics;
+      return status(HTTP_STATUS_OK, analytics);
     },
   )
   .get(
@@ -119,14 +122,14 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
-      },
-    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
+      response: studioEntityResponses,
+    },
+    async ({ params, status }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_STUDIO_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_STUDIO_NOT_FOUND });
       }
-      return rows[0];
+      return status(HTTP_STATUS_OK, rows[0]);
     },
   )
   .post(
@@ -134,9 +137,10 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       body: studioMutationBodySchema,
-      },
-    async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
-      const newStudio: StudioInsert = {
+      response: studioEntityResponses,
+    },
+    async ({ body, status }) => {
+      const newStudio = {
         id: generateId(),
         name: body.name,
         description: body.description ?? null,
@@ -153,8 +157,7 @@ export const studioRoutes = new Elysia({
       };
 
       await db.insert(studios).values(newStudio);
-      set.status = HTTP_STATUS_CREATED;
-      return newStudio;
+      return status(HTTP_STATUS_CREATED, newStudio);
     },
   )
   .put(
@@ -163,23 +166,15 @@ export const studioRoutes = new Elysia({
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
-      },
-    async ({
-      params,
-      body,
-      set,
-    }: {
-      params: StudioIdParams;
-      body: StudioUpdateRouteBody;
-      set: RouteSetState;
-    }) => {
+      response: studioEntityResponses,
+    },
+    async ({ params, body, status }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_STUDIO_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_STUDIO_NOT_FOUND });
       }
 
-      const updates: Partial<StudioInsert> = { updatedAt: new Date().toISOString() };
+      const updates: Partial<typeof studios.$inferInsert> = { updatedAt: new Date().toISOString() };
       if (body.name !== undefined) updates.name = body.name;
       if (body.description !== undefined) updates.description = body.description;
       if (body.website !== undefined) updates.website = body.website;
@@ -195,7 +190,7 @@ export const studioRoutes = new Elysia({
 
       await db.update(studios).set(updates).where(eq(studios.id, params.id));
       const updated = await db.select().from(studios).where(eq(studios.id, params.id));
-      return updated[0];
+      return status(HTTP_STATUS_OK, updated[0]);
     },
   )
   .delete(
@@ -203,15 +198,15 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
-      },
-    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
+      response: studioDeleteResponses,
+    },
+    async ({ params, status }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_STUDIO_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_STUDIO_NOT_FOUND });
       }
 
       await db.delete(studios).where(eq(studios.id, params.id));
-      return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
+      return status(HTTP_STATUS_OK, { message: API_MESSAGE_STUDIO_DELETED, id: params.id });
     },
   );
