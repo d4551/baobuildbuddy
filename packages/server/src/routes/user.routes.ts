@@ -33,6 +33,29 @@ const userProfileResponseSchema = t.Object({
   updatedAt: t.String(),
 });
 
+type UserProfileRow = typeof userProfile.$inferSelect;
+
+const toUserProfileResponse = (row: UserProfileRow) => ({
+  id: row.id,
+  name: row.name,
+  email: row.email,
+  phone: row.phone,
+  location: row.location,
+  website: row.website,
+  linkedin: row.linkedin,
+  github: row.github,
+  summary: row.summary,
+  currentRole: row.currentRole,
+  currentCompany: row.currentCompany,
+  yearsExperience: row.yearsExperience,
+  technicalSkills: row.technicalSkills ?? [],
+  softSkills: row.softSkills ?? [],
+  gamingExperience: row.gamingExperience ?? {},
+  careerGoals: row.careerGoals ?? {},
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
+});
+
 export const userRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.userBase),
 })
@@ -51,7 +74,7 @@ export const userRoutes = new Elysia({
       if (rows.length === 0) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_USER_PROFILE_NOT_FOUND });
       }
-      return status(HTTP_STATUS_OK, rows[0]);
+      return status(HTTP_STATUS_OK, toUserProfileResponse(rows[0]));
     },
   )
   .put(

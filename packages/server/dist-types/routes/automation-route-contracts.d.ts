@@ -1,7 +1,8 @@
+import type { Static } from "typebox";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import Type, { type StaticParse } from "baobox";
+export { routeErrorBodySchema } from "./route-error-envelope";
 declare const AUTOMATION_STATUS_PENDING: "pending", AUTOMATION_STATUS_SUCCESS: "success", AUTOMATION_STATUS_ERROR: "error";
 export type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
 export type JobApplyRequestBody = {
@@ -25,219 +26,173 @@ export type ScheduleScrapeRequestBody = {
     runAt: string;
 };
 export declare const RUN_ID_PATTERN: RegExp;
-export declare const AUTOMATION_TYPE_SCHEMA: Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
-export declare const AUTOMATION_STATUS_SCHEMA: Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>;
-export declare const EMAIL_RESPONSE_TONE_SCHEMA: Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>;
-export declare const SCRAPE_TARGET_SCHEMA: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
-export declare const automationRunEnvelopeBodySchema: Type.TObject<{
-    readonly id: Type.TString;
-    readonly type: Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
-    readonly status: Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>;
-    readonly jobId: Type.TUnion<(Type.TNull | Type.TString)[]>;
-    readonly userId: Type.TUnion<(Type.TNull | Type.TString)[]>;
-    readonly input: Type.TUnion<(Type.TNull | Type.TRecord<Type.TString, Type.TUnknown>)[]>;
-    readonly output: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TNull | Type.TRecord<Type.TString, Type.TUnknown>)[]>)[]>;
-    readonly screenshots: Type.TUnion<(Type.TArray<Type.TString> | Type.TNull)[]>;
-    readonly error: Type.TUnion<(Type.TNull | Type.TObject<{
-        readonly code: Type.TString;
-        readonly message: Type.TString;
-        readonly source: Type.TString;
-        readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    }, "code" | "message" | "source", "details"> | Type.TString)[]>;
-    readonly progress: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
-    readonly currentStep: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
-    readonly totalSteps: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
-    readonly startedAt: Type.TUnion<(Type.TNull | Type.TString)[]>;
-    readonly completedAt: Type.TUnion<(Type.TNull | Type.TString)[]>;
-    readonly createdAt: Type.TString;
-    readonly updatedAt: Type.TString;
-    readonly exitCode: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
-    readonly timedOut: Type.TBoolean;
-    readonly aborted: Type.TBoolean;
-    readonly executionMs: Type.TUnion<(Type.TNull | Type.TNumber)[]>;
-}, "aborted" | "completedAt" | "createdAt" | "currentStep" | "error" | "executionMs" | "exitCode" | "id" | "input" | "jobId" | "output" | "progress" | "screenshots" | "startedAt" | "status" | "timedOut" | "totalSteps" | "type" | "updatedAt" | "userId", never>;
-export declare const routeErrorBodySchema: Type.TObject<{
-    readonly error: Type.TObject<{
-        readonly code: Type.TString;
-        readonly message: Type.TString;
-        readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    }, "code" | "message", "details">;
-}, "error", never>;
-export declare const capabilityAuditEntryBodySchema: Type.TObject<{
-    readonly id: Type.TString;
-    readonly category: Type.TUnion<(Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
-    readonly name: Type.TString;
-    readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>)[]>;
-    readonly implemented: Type.TBoolean;
-    readonly configured: Type.TBoolean;
-    readonly enabled: Type.TBoolean;
-    readonly manualRunAvailable: Type.TBoolean;
-    readonly scheduledRunAvailable: Type.TBoolean;
-    readonly runHistoryAvailable: Type.TBoolean;
-    readonly liveUpdatesAvailable: Type.TBoolean;
-    readonly issues: Type.TArray<Type.TObject<{
-        readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
-        readonly portalId: Type.TOptional<Type.TString>;
-        readonly portalName: Type.TOptional<Type.TString>;
-    }, "code", Type.InferOptionalKeys<{
-        readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
-        readonly portalId: Type.TOptional<Type.TString>;
-        readonly portalName: Type.TOptional<Type.TString>;
-    }>>>;
-}, "category" | "configured" | "enabled" | "id" | "implemented" | "issues" | "liveUpdatesAvailable" | "manualRunAvailable" | "name" | "runHistoryAvailable" | "scheduledRunAvailable" | "target", never>;
-export declare const capabilityAuditReportBodySchema: Type.TObject<{
-    readonly generatedAt: Type.TString;
-    readonly summary: Type.TObject<{
-        readonly total: Type.TNumber;
-        readonly configured: Type.TNumber;
-        readonly manualRunAvailable: Type.TNumber;
-        readonly scheduledRunAvailable: Type.TNumber;
-        readonly runHistoryAvailable: Type.TNumber;
-        readonly liveUpdatesAvailable: Type.TNumber;
-    }, "configured" | "liveUpdatesAvailable" | "manualRunAvailable" | "runHistoryAvailable" | "scheduledRunAvailable" | "total", never>;
-    readonly capabilities: Type.TArray<Type.TObject<{
-        readonly id: Type.TString;
-        readonly category: Type.TUnion<(Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>;
-        readonly name: Type.TString;
-        readonly target: Type.TUnion<(Type.TNull | Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>)[]>;
-        readonly implemented: Type.TBoolean;
-        readonly configured: Type.TBoolean;
-        readonly enabled: Type.TBoolean;
-        readonly manualRunAvailable: Type.TBoolean;
-        readonly scheduledRunAvailable: Type.TBoolean;
-        readonly runHistoryAvailable: Type.TBoolean;
-        readonly liveUpdatesAvailable: Type.TBoolean;
-        readonly issues: Type.TArray<Type.TObject<{
-            readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
-            readonly portalId: Type.TOptional<Type.TString>;
-            readonly portalName: Type.TOptional<Type.TString>;
-        }, "code", Type.InferOptionalKeys<{
-            readonly code: Type.TUnion<Type.TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
-            readonly portalId: Type.TOptional<Type.TString>;
-            readonly portalName: Type.TOptional<Type.TString>;
-        }>>>;
-    }, "category" | "configured" | "enabled" | "id" | "implemented" | "issues" | "liveUpdatesAvailable" | "manualRunAvailable" | "name" | "runHistoryAvailable" | "scheduledRunAvailable" | "target", never>>;
-}, "capabilities" | "generatedAt" | "summary", never>;
+export declare const AUTOMATION_TYPE_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
+export declare const AUTOMATION_STATUS_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>;
+export declare const EMAIL_RESPONSE_TONE_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"professional">, import("typebox").TLiteral<"friendly">, import("typebox").TLiteral<"concise">]>;
+export declare const SCRAPE_TARGET_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>;
+export declare const automationRunEnvelopeBodySchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    type: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
+    status: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>;
+    jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    userId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    input: import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>;
+    output: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>, import("typebox").TNull]>;
+    screenshots: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
+    error: import("typebox").TUnion<[import("typebox").TString, import("typebox").TObject<{
+        code: import("typebox").TString;
+        message: import("typebox").TString;
+        source: import("typebox").TString;
+        details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    }>, import("typebox").TNull]>;
+    progress: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    currentStep: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    totalSteps: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    startedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    completedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    createdAt: import("typebox").TString;
+    updatedAt: import("typebox").TString;
+    exitCode: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    timedOut: import("typebox").TBoolean;
+    aborted: import("typebox").TBoolean;
+    executionMs: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+}>;
+export declare const capabilityAuditEntryBodySchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    category: import("typebox").TUnion<[import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"scrape">]>;
+    name: import("typebox").TString;
+    target: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>, import("typebox").TNull]>;
+    implemented: import("typebox").TBoolean;
+    configured: import("typebox").TBoolean;
+    enabled: import("typebox").TBoolean;
+    manualRunAvailable: import("typebox").TBoolean;
+    scheduledRunAvailable: import("typebox").TBoolean;
+    runHistoryAvailable: import("typebox").TBoolean;
+    liveUpdatesAvailable: import("typebox").TBoolean;
+    issues: import("typebox").TArray<import("typebox").TObject<{
+        code: import("typebox").TUnion<import("typebox").TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
+        portalId: import("typebox").TOptional<import("typebox").TString>;
+        portalName: import("typebox").TOptional<import("typebox").TString>;
+    }>>;
+}>;
+export declare const capabilityAuditReportBodySchema: import("typebox").TObject<{
+    generatedAt: import("typebox").TString;
+    summary: import("typebox").TObject<{
+        total: import("typebox").TNumber;
+        configured: import("typebox").TNumber;
+        manualRunAvailable: import("typebox").TNumber;
+        scheduledRunAvailable: import("typebox").TNumber;
+        runHistoryAvailable: import("typebox").TNumber;
+        liveUpdatesAvailable: import("typebox").TNumber;
+    }>;
+    capabilities: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        category: import("typebox").TUnion<[import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"scrape">]>;
+        name: import("typebox").TString;
+        target: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>, import("typebox").TNull]>;
+        implemented: import("typebox").TBoolean;
+        configured: import("typebox").TBoolean;
+        enabled: import("typebox").TBoolean;
+        manualRunAvailable: import("typebox").TBoolean;
+        scheduledRunAvailable: import("typebox").TBoolean;
+        runHistoryAvailable: import("typebox").TBoolean;
+        liveUpdatesAvailable: import("typebox").TBoolean;
+        issues: import("typebox").TArray<import("typebox").TObject<{
+            code: import("typebox").TUnion<import("typebox").TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
+            portalId: import("typebox").TOptional<import("typebox").TString>;
+            portalName: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+    }>>;
+}>;
 export declare const automationRouteErrorResponses: {
-    400: Type.TObject<{
-        readonly error: Type.TObject<{
-            readonly code: Type.TString;
-            readonly message: Type.TString;
-            readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-        }, "code" | "message", "details">;
-    }, "error", never>;
-    404: Type.TObject<{
-        readonly error: Type.TObject<{
-            readonly code: Type.TString;
-            readonly message: Type.TString;
-            readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-        }, "code" | "message", "details">;
-    }, "error", never>;
-    409: Type.TObject<{
-        readonly error: Type.TObject<{
-            readonly code: Type.TString;
-            readonly message: Type.TString;
-            readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-        }, "code" | "message", "details">;
-    }, "error", never>;
-    422: Type.TObject<{
-        readonly error: Type.TObject<{
-            readonly code: Type.TString;
-            readonly message: Type.TString;
-            readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-        }, "code" | "message", "details">;
-    }, "error", never>;
-    500: Type.TObject<{
-        readonly error: Type.TObject<{
-            readonly code: Type.TString;
-            readonly message: Type.TString;
-            readonly details: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-        }, "code" | "message", "details">;
-    }, "error", never>;
+    400: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    404: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    409: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    422: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    500: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
 };
-export declare const jobApplyBodySchema: Type.TObject<{
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-    readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
-}, "jobUrl" | "resumeId", Type.InferOptionalKeys<{
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-    readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
-}>>;
-export type JobApplyBody = StaticParse<typeof jobApplyBodySchema>;
-export declare const scheduledJobApplyBodySchema: Type.TObject<{
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-    readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
-    readonly runAt: Type.TString;
-}, "jobUrl" | "resumeId" | "runAt", Type.InferOptionalKeys<{
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-    readonly customAnswers: Type.TOptional<Type.TRecord<Type.TString, Type.TString>>;
-    readonly runAt: Type.TString;
-}>>;
-export type ScheduledJobApplyBody = StaticParse<typeof scheduledJobApplyBodySchema>;
-export declare const emailResponseBodySchema: Type.TObject<{
-    readonly subject: Type.TString;
-    readonly message: Type.TString;
-    readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
-    readonly recipientEmail: Type.TOptional<Type.TString>;
-    readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
-}, "message" | "subject", Type.InferOptionalKeys<{
-    readonly subject: Type.TString;
-    readonly message: Type.TString;
-    readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
-    readonly recipientEmail: Type.TOptional<Type.TString>;
-    readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
-}>>;
-export type EmailResponseBody = StaticParse<typeof emailResponseBodySchema>;
-export declare const scheduledEmailResponseBodySchema: Type.TObject<{
-    readonly subject: Type.TString;
-    readonly message: Type.TString;
-    readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
-    readonly recipientEmail: Type.TOptional<Type.TString>;
-    readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
-    readonly runAt: Type.TString;
-}, "message" | "runAt" | "subject", Type.InferOptionalKeys<{
-    readonly subject: Type.TString;
-    readonly message: Type.TString;
-    readonly sender: Type.TOptional<Type.TString>;
-    readonly tone: Type.TOptional<Type.TUnion<(Type.TLiteral<"concise"> | Type.TLiteral<"friendly"> | Type.TLiteral<"professional">)[]>>;
-    readonly recipientEmail: Type.TOptional<Type.TString>;
-    readonly deliverAfterGeneration: Type.TOptional<Type.TBoolean>;
-    readonly runAt: Type.TString;
-}>>;
-export type ScheduledEmailResponseBody = StaticParse<typeof scheduledEmailResponseBodySchema>;
-export declare const scrapeBodySchema: Type.TObject<{
-    readonly target: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
-}, "target", never>;
-export type ScrapeBody = StaticParse<typeof scrapeBodySchema>;
-export declare const scheduledScrapeBodySchema: Type.TObject<{
-    readonly target: Type.TUnion<(Type.TLiteral<"jobs_gamesjobsdirect"> | Type.TLiteral<"jobs_grackle"> | Type.TLiteral<"jobs_hitmarker"> | Type.TLiteral<"jobs_pocketgamer"> | Type.TLiteral<"jobs_remotegamejobs"> | Type.TLiteral<"jobs_workwithindies"> | Type.TLiteral<"studios">)[]>;
-    readonly runAt: Type.TString;
-}, "runAt" | "target", never>;
-export type ScheduledScrapeBody = StaticParse<typeof scheduledScrapeBodySchema>;
-export declare const automationRunQuerySchema: Type.TObject<{
-    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>>;
-    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>>;
-}, never, Type.InferOptionalKeys<{
-    readonly type: Type.TOptional<Type.TUnion<(Type.TLiteral<"email"> | Type.TLiteral<"job_apply"> | Type.TLiteral<"scrape">)[]>>;
-    readonly status: Type.TOptional<Type.TUnion<(Type.TLiteral<"error"> | Type.TLiteral<"pending"> | Type.TLiteral<"running"> | Type.TLiteral<"success">)[]>>;
-}>>;
-export type AutomationRunQuery = StaticParse<typeof automationRunQuerySchema>;
-export declare const automationRunIdParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type AutomationRunIdParams = StaticParse<typeof automationRunIdParamsSchema>;
+export declare const jobApplyBodySchema: import("typebox").TObject<{
+    jobUrl: import("typebox").TString;
+    resumeId: import("typebox").TString;
+    coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+    customAnswers: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TString>>;
+}>;
+export type JobApplyBody = Static<typeof jobApplyBodySchema>;
+export declare const scheduledJobApplyBodySchema: import("typebox").TObject<{
+    jobUrl: import("typebox").TString;
+    resumeId: import("typebox").TString;
+    coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+    customAnswers: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TString>>;
+    runAt: import("typebox").TString;
+}>;
+export type ScheduledJobApplyBody = Static<typeof scheduledJobApplyBodySchema>;
+export declare const emailResponseBodySchema: import("typebox").TObject<{
+    subject: import("typebox").TString;
+    message: import("typebox").TString;
+    sender: import("typebox").TOptional<import("typebox").TString>;
+    tone: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"professional">, import("typebox").TLiteral<"friendly">, import("typebox").TLiteral<"concise">]>>;
+    recipientEmail: import("typebox").TOptional<import("typebox").TString>;
+    deliverAfterGeneration: import("typebox").TOptional<import("typebox").TBoolean>;
+}>;
+export type EmailResponseBody = Static<typeof emailResponseBodySchema>;
+export declare const scheduledEmailResponseBodySchema: import("typebox").TObject<{
+    subject: import("typebox").TString;
+    message: import("typebox").TString;
+    sender: import("typebox").TOptional<import("typebox").TString>;
+    tone: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"professional">, import("typebox").TLiteral<"friendly">, import("typebox").TLiteral<"concise">]>>;
+    recipientEmail: import("typebox").TOptional<import("typebox").TString>;
+    deliverAfterGeneration: import("typebox").TOptional<import("typebox").TBoolean>;
+    runAt: import("typebox").TString;
+}>;
+export type ScheduledEmailResponseBody = Static<typeof scheduledEmailResponseBodySchema>;
+export declare const scrapeBodySchema: import("typebox").TObject<{
+    target: import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>;
+}>;
+export type ScrapeBody = Static<typeof scrapeBodySchema>;
+export declare const scheduledScrapeBodySchema: import("typebox").TObject<{
+    target: import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>;
+    runAt: import("typebox").TString;
+}>;
+export type ScheduledScrapeBody = Static<typeof scheduledScrapeBodySchema>;
+export declare const automationRunQuerySchema: import("typebox").TObject<{
+    type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>>;
+    status: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>>;
+}>;
+export type AutomationRunQuery = Static<typeof automationRunQuerySchema>;
+export declare const automationRunIdParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type AutomationRunIdParams = Static<typeof automationRunIdParamsSchema>;
 export { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, AUTOMATION_STATUS_ERROR, AUTOMATION_STATUS_PENDING, AUTOMATION_STATUS_SUCCESS, };

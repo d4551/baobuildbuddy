@@ -1,20 +1,7 @@
-import { Elysia } from "elysia";
-export declare const statsRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const statsRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         [x: string]: {
             get: {
@@ -25,6 +12,7 @@ export declare const statsRoutes: Elysia<string, {
                 response: {
                     200: import("@bao/shared/types/search").DashboardStats;
                 };
+                error: never;
             };
         };
     };
@@ -39,33 +27,8 @@ export declare const statsRoutes: Elysia<string, {
                 response: {
                     200: import("@bao/shared/types/search").WeeklyActivity;
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        [x: string]: {
-            get: {
-                body: unknown;
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: import("@bao/shared/types/search").CareerProgress;
-                };
-            };
-        };
-    };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<import("@bao/shared/types/search").CareerProgress>>;

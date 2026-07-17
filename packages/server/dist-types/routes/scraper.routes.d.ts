@@ -1,20 +1,9 @@
-import { Elysia } from "elysia";
-export declare const scraperRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+import type { RouteSetState } from "../types/route-state";
+import { type ScraperPortalParams } from "./scraper-route-contracts";
+export declare const scraperRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         [x: string]: {
             post: {
@@ -28,47 +17,21 @@ export declare const scraperRoutes: Elysia<string, {
                         details: string;
                     };
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        [x: string]: {
-            post: {
-                body: unknown;
-                params: {
-                    portalId: string;
-                } & {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: import("@bao/shared/types/jobs").ScraperOperationResult | {
-                        error: string;
-                        details: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    params: import("typebox").TObject<{
+        portalId: import("typebox").TString;
+    }>;
+}, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, set }: {
+    params: ScraperPortalParams;
+    set: RouteSetState;
+}) => Promise<import("@bao/shared/types/jobs").ScraperOperationResult | {
+    error: string;
+    details: string;
+}>>;

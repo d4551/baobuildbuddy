@@ -1,20 +1,9 @@
-import { Elysia } from "elysia";
-export declare const portfolioRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+import type { RouteSetState } from "../types/route-state";
+import { type PortfolioExportRouteBody } from "./portfolio-route-contracts";
+export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         get: {
             body: unknown;
@@ -24,6 +13,7 @@ export declare const portfolioRoutes: Elysia<string, {
             response: {
                 200: import("@bao/shared/types/portfolio").PortfolioData;
             };
+            error: never;
         };
     };
 } & {
@@ -31,7 +21,7 @@ export declare const portfolioRoutes: Elysia<string, {
         put: {
             body: {
                 metadata: Record<string, unknown>;
-            } & {};
+            };
             params: {};
             query: unknown;
             headers: unknown;
@@ -39,14 +29,16 @@ export declare const portfolioRoutes: Elysia<string, {
                 200: import("@bao/shared/types/portfolio").PortfolioData;
                 422: {
                     type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
                     on: string;
-                    summary?: string;
-                    message?: string;
                     found?: unknown;
                     property?: string;
                     expected?: string;
                 };
             };
+            error: never;
         };
     };
 } & {
@@ -54,19 +46,18 @@ export declare const portfolioRoutes: Elysia<string, {
         projects: {
             post: {
                 body: {
-                    description: string;
                     title: string;
-                } & {
-                    engines?: string[] | undefined;
-                    featured?: boolean | undefined;
-                    githubUrl?: string | undefined;
+                    description: string;
+                    technologies?: string[] | undefined;
                     image?: string | undefined;
                     liveUrl?: string | undefined;
-                    platforms?: string[] | undefined;
-                    role?: string | undefined;
-                    sortOrder?: number | undefined;
+                    githubUrl?: string | undefined;
                     tags?: string[] | undefined;
-                    technologies?: string[] | undefined;
+                    featured?: boolean | undefined;
+                    role?: string | undefined;
+                    platforms?: string[] | undefined;
+                    engines?: string[] | undefined;
+                    sortOrder?: number | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -77,14 +68,16 @@ export declare const portfolioRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -95,7 +88,7 @@ export declare const portfolioRoutes: Elysia<string, {
                 post: {
                     body: {
                         orderedIds: string[];
-                    } & {};
+                    };
                     params: {};
                     query: unknown;
                     headers: unknown;
@@ -105,14 +98,16 @@ export declare const portfolioRoutes: Elysia<string, {
                         };
                         422: {
                             type: 'validation';
+                            title: 'Validation Error';
+                            status: 422;
+                            detail?: string;
                             on: string;
-                            summary?: string;
-                            message?: string;
                             found?: unknown;
                             property?: string;
                             expected?: string;
                         };
                     };
+                    error: never;
                 };
             };
         };
@@ -122,23 +117,23 @@ export declare const portfolioRoutes: Elysia<string, {
         projects: {
             ":id": {
                 put: {
-                    body: {} & {
+                    body: {
+                        title?: string | undefined;
                         description?: string | undefined;
-                        engines?: string[] | undefined;
-                        featured?: boolean | undefined;
-                        githubUrl?: string | undefined;
+                        technologies?: string[] | undefined;
                         image?: string | undefined;
                         liveUrl?: string | undefined;
-                        platforms?: string[] | undefined;
-                        role?: string | undefined;
-                        sortOrder?: number | undefined;
+                        githubUrl?: string | undefined;
                         tags?: string[] | undefined;
-                        technologies?: string[] | undefined;
-                        title?: string | undefined;
+                        featured?: boolean | undefined;
+                        role?: string | undefined;
+                        platforms?: string[] | undefined;
+                        engines?: string[] | undefined;
+                        sortOrder?: number | undefined;
                     };
                     params: {
                         id: string;
-                    } & {};
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -147,14 +142,16 @@ export declare const portfolioRoutes: Elysia<string, {
                         };
                         422: {
                             type: 'validation';
+                            title: 'Validation Error';
+                            status: 422;
+                            detail?: string;
                             on: string;
-                            summary?: string;
-                            message?: string;
                             found?: unknown;
                             property?: string;
                             expected?: string;
                         };
                     };
+                    error: never;
                 };
             };
         };
@@ -167,7 +164,7 @@ export declare const portfolioRoutes: Elysia<string, {
                     body: unknown;
                     params: {
                         id: string;
-                    } & {};
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
@@ -180,61 +177,26 @@ export declare const portfolioRoutes: Elysia<string, {
                             success: boolean;
                             id: string;
                         };
-                        422: {
-                            type: 'validation';
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
                     };
+                    error: never;
                 };
             };
         };
     };
-} & {
-    [x: string]: {
-        export: {
-            post: {
-                body: {} & {
-                    format?: string | undefined;
-                };
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: Response | {
-                        error: string;
-                        details?: undefined;
-                    } | {
-                        error: string;
-                        details: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/export", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    body: import("typebox").TObject<{
+        format: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+}, {}, `${string}/export`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
+    body: PortfolioExportRouteBody;
+    set: RouteSetState;
+}) => Promise<Response | {
+    error: string;
+    details?: undefined;
+} | {
+    error: string;
+    details: string;
+}>>;

@@ -1,267 +1,49 @@
-import Type, { type StaticParse } from "baobox";
-export declare const interviewWebSocketBodySchema: Type.TObject<{
-    readonly type: Type.TString;
-    readonly sessionId: Type.TOptional<Type.TString>;
-    readonly content: Type.TOptional<Type.TString>;
-    readonly studioId: Type.TOptional<Type.TString>;
-    readonly config: Type.TOptional<Type.TObject<{
-        readonly roleType: Type.TOptional<Type.TString>;
-        readonly roleCategory: Type.TOptional<Type.TString>;
-        readonly experienceLevel: Type.TOptional<Type.TString>;
-        readonly focusAreas: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly duration: Type.TOptional<Type.TInteger>;
-        readonly questionCount: Type.TOptional<Type.TInteger>;
-        readonly includeTechnical: Type.TOptional<Type.TBoolean>;
-        readonly includeBehavioral: Type.TOptional<Type.TBoolean>;
-        readonly includeStudioSpecific: Type.TOptional<Type.TBoolean>;
-        readonly enableVoiceMode: Type.TOptional<Type.TBoolean>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly voiceSettings: Type.TOptional<Type.TObject<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
-        readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
-        readonly targetJob: Type.TOptional<Type.TObject<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly candidateContext: Type.TOptional<Type.TObject<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }>>>;
-    }, never, Type.InferOptionalKeys<{
-        readonly roleType: Type.TOptional<Type.TString>;
-        readonly roleCategory: Type.TOptional<Type.TString>;
-        readonly experienceLevel: Type.TOptional<Type.TString>;
-        readonly focusAreas: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly duration: Type.TOptional<Type.TInteger>;
-        readonly questionCount: Type.TOptional<Type.TInteger>;
-        readonly includeTechnical: Type.TOptional<Type.TBoolean>;
-        readonly includeBehavioral: Type.TOptional<Type.TBoolean>;
-        readonly includeStudioSpecific: Type.TOptional<Type.TBoolean>;
-        readonly enableVoiceMode: Type.TOptional<Type.TBoolean>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly voiceSettings: Type.TOptional<Type.TObject<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
-        readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
-        readonly targetJob: Type.TOptional<Type.TObject<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly candidateContext: Type.TOptional<Type.TObject<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }>>>;
-    }>>>;
-}, "type", Type.InferOptionalKeys<{
-    readonly type: Type.TString;
-    readonly sessionId: Type.TOptional<Type.TString>;
-    readonly content: Type.TOptional<Type.TString>;
-    readonly studioId: Type.TOptional<Type.TString>;
-    readonly config: Type.TOptional<Type.TObject<{
-        readonly roleType: Type.TOptional<Type.TString>;
-        readonly roleCategory: Type.TOptional<Type.TString>;
-        readonly experienceLevel: Type.TOptional<Type.TString>;
-        readonly focusAreas: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly duration: Type.TOptional<Type.TInteger>;
-        readonly questionCount: Type.TOptional<Type.TInteger>;
-        readonly includeTechnical: Type.TOptional<Type.TBoolean>;
-        readonly includeBehavioral: Type.TOptional<Type.TBoolean>;
-        readonly includeStudioSpecific: Type.TOptional<Type.TBoolean>;
-        readonly enableVoiceMode: Type.TOptional<Type.TBoolean>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly voiceSettings: Type.TOptional<Type.TObject<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
-        readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
-        readonly targetJob: Type.TOptional<Type.TObject<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly candidateContext: Type.TOptional<Type.TObject<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }>>>;
-    }, never, Type.InferOptionalKeys<{
-        readonly roleType: Type.TOptional<Type.TString>;
-        readonly roleCategory: Type.TOptional<Type.TString>;
-        readonly experienceLevel: Type.TOptional<Type.TString>;
-        readonly focusAreas: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly duration: Type.TOptional<Type.TInteger>;
-        readonly questionCount: Type.TOptional<Type.TInteger>;
-        readonly includeTechnical: Type.TOptional<Type.TBoolean>;
-        readonly includeBehavioral: Type.TOptional<Type.TBoolean>;
-        readonly includeStudioSpecific: Type.TOptional<Type.TBoolean>;
-        readonly enableVoiceMode: Type.TOptional<Type.TBoolean>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly voiceSettings: Type.TOptional<Type.TObject<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly microphoneId: Type.TOptional<Type.TString>;
-            readonly speakerId: Type.TOptional<Type.TString>;
-            readonly voiceId: Type.TOptional<Type.TString>;
-            readonly rate: Type.TOptional<Type.TNumber>;
-            readonly pitch: Type.TOptional<Type.TNumber>;
-            readonly volume: Type.TOptional<Type.TNumber>;
-            readonly language: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly interviewMode: Type.TOptional<Type.TUnion<(Type.TLiteral<"job"> | Type.TLiteral<"studio">)[]>>;
-        readonly conversationStyle: Type.TOptional<Type.TUnion<(Type.TLiteral<"natural"> | Type.TLiteral<"structured">)[]>>;
-        readonly targetJob: Type.TOptional<Type.TObject<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }, "company" | "id" | "location" | "title", Type.InferOptionalKeys<{
-            readonly id: Type.TString;
-            readonly title: Type.TString;
-            readonly company: Type.TString;
-            readonly location: Type.TString;
-            readonly description: Type.TOptional<Type.TString>;
-            readonly requirements: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-            readonly source: Type.TOptional<Type.TString>;
-            readonly postedDate: Type.TOptional<Type.TString>;
-            readonly url: Type.TOptional<Type.TString>;
-        }>>>;
-        readonly candidateContext: Type.TOptional<Type.TObject<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }, never, Type.InferOptionalKeys<{
-            readonly resumeId: Type.TOptional<Type.TString>;
-            readonly coverLetterId: Type.TOptional<Type.TString>;
-            readonly portfolioId: Type.TOptional<Type.TString>;
-        }>>>;
-    }>>>;
-}>>;
-export type InterviewWebSocketBody = StaticParse<typeof interviewWebSocketBodySchema>;
+import type { Static } from "typebox";
+export declare const interviewWebSocketBodySchema: import("typebox").TObject<{
+    type: import("typebox").TString;
+    sessionId: import("typebox").TOptional<import("typebox").TString>;
+    content: import("typebox").TOptional<import("typebox").TString>;
+    studioId: import("typebox").TOptional<import("typebox").TString>;
+    config: import("typebox").TOptional<import("typebox").TObject<{
+        roleType: import("typebox").TOptional<import("typebox").TString>;
+        roleCategory: import("typebox").TOptional<import("typebox").TString>;
+        experienceLevel: import("typebox").TOptional<import("typebox").TString>;
+        focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        duration: import("typebox").TOptional<import("typebox").TInteger>;
+        questionCount: import("typebox").TOptional<import("typebox").TInteger>;
+        includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
+        includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
+        includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
+        enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
+        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
+            microphoneId: import("typebox").TOptional<import("typebox").TString>;
+            speakerId: import("typebox").TOptional<import("typebox").TString>;
+            voiceId: import("typebox").TOptional<import("typebox").TString>;
+            rate: import("typebox").TOptional<import("typebox").TNumber>;
+            pitch: import("typebox").TOptional<import("typebox").TNumber>;
+            volume: import("typebox").TOptional<import("typebox").TNumber>;
+            language: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+        interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
+        conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
+        targetJob: import("typebox").TOptional<import("typebox").TObject<{
+            id: import("typebox").TString;
+            title: import("typebox").TString;
+            company: import("typebox").TString;
+            location: import("typebox").TString;
+            description: import("typebox").TOptional<import("typebox").TString>;
+            requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            source: import("typebox").TOptional<import("typebox").TString>;
+            postedDate: import("typebox").TOptional<import("typebox").TString>;
+            url: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+        candidateContext: import("typebox").TOptional<import("typebox").TObject<{
+            resumeId: import("typebox").TOptional<import("typebox").TString>;
+            coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+            portfolioId: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+    }>>;
+}>;
+export type InterviewWebSocketBody = Static<typeof interviewWebSocketBodySchema>;

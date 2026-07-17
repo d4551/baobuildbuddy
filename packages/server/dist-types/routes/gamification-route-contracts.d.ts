@@ -1,22 +1,17 @@
-import Type, { StandardSchemaV1, type StaticParse } from "baobox";
-export declare const awardXpBodySchema: Type.TObject<{
-    readonly amount: Type.TNumber;
-    readonly reason: Type.TString;
-}, "amount" | "reason", never>;
-export type AwardXpBody = StaticParse<typeof awardXpBodySchema>;
-export declare const challengeIdParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type ChallengeIdParams = StaticParse<typeof challengeIdParamsSchema>;
-export declare const awardXpBody: Type.TObject<{
-    readonly amount: Type.TNumber;
-    readonly reason: Type.TString;
-}, "amount" | "reason", never> & StandardSchemaV1<unknown, {
-    amount: number;
-    reason: string;
-} & {}>;
-export declare const challengeIdParams: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never> & StandardSchemaV1<unknown, {
-    id: string;
-} & {}>;
+import type { Static } from "typebox";
+export declare const awardXpBodySchema: import("typebox").TObject<{
+    amount: import("typebox").TNumber;
+    reason: import("typebox").TString;
+}>;
+export type AwardXpBody = Static<typeof awardXpBodySchema>;
+export declare const challengeIdParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type ChallengeIdParams = Static<typeof challengeIdParamsSchema>;
+export declare const awardXpBody: import("typebox").TObject<{
+    amount: import("typebox").TNumber;
+    reason: import("typebox").TString;
+}>;
+export declare const challengeIdParams: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;

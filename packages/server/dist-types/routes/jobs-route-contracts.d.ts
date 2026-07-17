@@ -1,5 +1,5 @@
+import type { Static } from "typebox";
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
-import Type, { type StaticParse } from "baobox";
 export type JobListQuery = {
     q?: string;
     location?: string;
@@ -11,54 +11,41 @@ export type JobListQuery = {
     page?: string;
     limit?: string;
 };
-export declare const jobsListQuerySchema: Type.TObject<{
-    readonly q: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly remote: Type.TOptional<Type.TString>;
-    readonly experienceLevel: Type.TOptional<Type.TString>;
-    readonly studioType: Type.TOptional<Type.TString>;
-    readonly platform: Type.TOptional<Type.TString>;
-    readonly genre: Type.TOptional<Type.TString>;
-    readonly page: Type.TOptional<Type.TString>;
-    readonly limit: Type.TOptional<Type.TString>;
-}, never, Type.InferOptionalKeys<{
-    readonly q: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly remote: Type.TOptional<Type.TString>;
-    readonly experienceLevel: Type.TOptional<Type.TString>;
-    readonly studioType: Type.TOptional<Type.TString>;
-    readonly platform: Type.TOptional<Type.TString>;
-    readonly genre: Type.TOptional<Type.TString>;
-    readonly page: Type.TOptional<Type.TString>;
-    readonly limit: Type.TOptional<Type.TString>;
-}>>;
-export declare const jobIdParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type JobIdParams = StaticParse<typeof jobIdParamsSchema>;
-export declare const saveJobBodySchema: Type.TObject<{
-    readonly jobId: Type.TString;
-}, "jobId", never>;
-export type SaveJobBody = StaticParse<typeof saveJobBodySchema>;
-export declare const savedJobParamsSchema: Type.TObject<{
-    readonly jobId: Type.TString;
-}, "jobId", never>;
-export type SavedJobParams = StaticParse<typeof savedJobParamsSchema>;
-export declare const applyJobBodySchema: Type.TObject<{
-    readonly jobId: Type.TString;
-    readonly notes: Type.TOptional<Type.TString>;
-}, "jobId", "notes">;
-export type ApplyJobBody = StaticParse<typeof applyJobBodySchema>;
-export declare const updateApplicationParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type UpdateApplicationParams = StaticParse<typeof updateApplicationParamsSchema>;
-export declare const updateApplicationBodySchema: Type.TObject<{
-    readonly status: Type.TOptional<Type.TString>;
-    readonly notes: Type.TOptional<Type.TString>;
-}, never, Type.InferOptionalKeys<{
-    readonly status: Type.TOptional<Type.TString>;
-    readonly notes: Type.TOptional<Type.TString>;
-}>>;
-export type UpdateApplicationBody = StaticParse<typeof updateApplicationBodySchema>;
+export declare const jobsListQuerySchema: import("typebox").TObject<{
+    q: import("typebox").TOptional<import("typebox").TString>;
+    location: import("typebox").TOptional<import("typebox").TString>;
+    remote: import("typebox").TOptional<import("typebox").TString>;
+    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
+    studioType: import("typebox").TOptional<import("typebox").TString>;
+    platform: import("typebox").TOptional<import("typebox").TString>;
+    genre: import("typebox").TOptional<import("typebox").TString>;
+    page: import("typebox").TOptional<import("typebox").TString>;
+    limit: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const jobIdParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type JobIdParams = Static<typeof jobIdParamsSchema>;
+export declare const saveJobBodySchema: import("typebox").TObject<{
+    jobId: import("typebox").TString;
+}>;
+export type SaveJobBody = Static<typeof saveJobBodySchema>;
+export declare const savedJobParamsSchema: import("typebox").TObject<{
+    jobId: import("typebox").TString;
+}>;
+export type SavedJobParams = Static<typeof savedJobParamsSchema>;
+export declare const applyJobBodySchema: import("typebox").TObject<{
+    jobId: import("typebox").TString;
+    notes: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type ApplyJobBody = Static<typeof applyJobBodySchema>;
+export declare const updateApplicationParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type UpdateApplicationParams = Static<typeof updateApplicationParamsSchema>;
+export declare const updateApplicationBodySchema: import("typebox").TObject<{
+    status: import("typebox").TOptional<import("typebox").TString>;
+    notes: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type UpdateApplicationBody = Static<typeof updateApplicationBodySchema>;
 export { HTTP_STATUS_CREATED };

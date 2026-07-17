@@ -1,28 +1,12 @@
 import { Elysia } from "elysia";
-export declare const authRoutes: Elysia<string, {
+export declare const authRoutes: Elysia<string, "local", {
     decorator: {};
     store: {};
     derive: {};
-    resolve: {};
 }, {
     typebox: {};
-    error: {};
-} & {
-    error: {};
-    typebox: import("@sinclair/typebox").TModule<{}, {}>;
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-} & {
-    schema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         [x: string]: {
             get: {
@@ -38,6 +22,7 @@ export declare const authRoutes: Elysia<string, {
                         setupTokenConfigured: boolean;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -54,6 +39,7 @@ export declare const authRoutes: Elysia<string, {
                         configured: boolean;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -61,7 +47,7 @@ export declare const authRoutes: Elysia<string, {
     [x: string]: {
         [x: string]: {
             post: {
-                body: {} & {
+                body: {
                     setupToken?: string | undefined;
                 };
                 params: {};
@@ -86,37 +72,23 @@ export declare const authRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
-}, {
+}, import("elysia/types").DefaultEphemeral, {
     derive: {};
-    resolve: {};
     schema: {};
-    standaloneSchema: {};
+    schemas: {};
     response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
+    error: [];
 }>;

@@ -1,4 +1,3 @@
-import { Elysia } from "elysia";
 export interface StudioAnalytics {
     totalStudios: number;
     byType: Record<string, number>;
@@ -9,31 +8,19 @@ export interface StudioAnalytics {
         count: number;
     }>;
 }
-export declare const studioRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const studioRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         get: {
             body: unknown;
             params: {};
-            query: {} & {
+            query: {
                 q?: string | undefined;
-                remoteWork?: string | undefined;
-                size?: string | undefined;
                 type?: string | undefined;
+                size?: string | undefined;
+                remoteWork?: string | undefined;
             };
             headers: unknown;
             response: {
@@ -57,14 +44,16 @@ export declare const studioRoutes: Elysia<string, {
                 }[];
                 422: {
                     type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
                     on: string;
-                    summary?: string;
-                    message?: string;
                     found?: unknown;
                     property?: string;
                     expected?: string;
                 };
             };
+            error: never;
         };
     };
 } & {
@@ -74,7 +63,7 @@ export declare const studioRoutes: Elysia<string, {
                 body: unknown;
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -98,16 +87,8 @@ export declare const studioRoutes: Elysia<string, {
                     } | {
                         error: string;
                     };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
                 };
+                error: never;
             };
         };
     };
@@ -116,21 +97,20 @@ export declare const studioRoutes: Elysia<string, {
         post: {
             body: {
                 name: string;
-            } & {
-                benefits?: string[] | undefined;
-                culture?: Record<string, unknown> | undefined;
                 description?: string | undefined;
-                founded?: string | undefined;
-                genres?: string[] | undefined;
-                location?: string | undefined;
-                notableGames?: string[] | undefined;
-                platforms?: string[] | undefined;
-                remoteWork?: boolean | undefined;
-                size?: string | undefined;
-                socialMedia?: Record<string, string> | undefined;
-                technologies?: string[] | undefined;
-                type?: string | undefined;
                 website?: string | undefined;
+                location?: string | undefined;
+                type?: string | undefined;
+                size?: string | undefined;
+                founded?: string | undefined;
+                remoteWork?: boolean | undefined;
+                technologies?: string[] | undefined;
+                genres?: string[] | undefined;
+                platforms?: string[] | undefined;
+                culture?: Record<string, unknown> | undefined;
+                benefits?: string[] | undefined;
+                socialMedia?: Record<string, string> | undefined;
+                notableGames?: string[] | undefined;
             };
             params: {};
             query: unknown;
@@ -156,40 +136,42 @@ export declare const studioRoutes: Elysia<string, {
                 };
                 422: {
                     type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
                     on: string;
-                    summary?: string;
-                    message?: string;
                     found?: unknown;
                     property?: string;
                     expected?: string;
                 };
             };
+            error: never;
         };
     };
 } & {
     [x: string]: {
         ":id": {
             put: {
-                body: {} & {
-                    benefits?: string[] | undefined;
-                    culture?: Record<string, unknown> | undefined;
-                    description?: string | undefined;
-                    founded?: string | undefined;
-                    genres?: string[] | undefined;
-                    location?: string | undefined;
+                body: {
                     name?: string | undefined;
-                    notableGames?: string[] | undefined;
-                    platforms?: string[] | undefined;
-                    remoteWork?: boolean | undefined;
-                    size?: string | undefined;
-                    socialMedia?: Record<string, string> | undefined;
-                    technologies?: string[] | undefined;
-                    type?: string | undefined;
+                    description?: string | undefined;
                     website?: string | undefined;
+                    location?: string | undefined;
+                    type?: string | undefined;
+                    size?: string | undefined;
+                    founded?: string | undefined;
+                    remoteWork?: boolean | undefined;
+                    technologies?: string[] | undefined;
+                    genres?: string[] | undefined;
+                    platforms?: string[] | undefined;
+                    culture?: Record<string, unknown> | undefined;
+                    benefits?: string[] | undefined;
+                    socialMedia?: Record<string, string> | undefined;
+                    notableGames?: string[] | undefined;
                 };
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -215,14 +197,16 @@ export declare const studioRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -233,7 +217,7 @@ export declare const studioRoutes: Elysia<string, {
                 body: unknown;
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -246,43 +230,9 @@ export declare const studioRoutes: Elysia<string, {
                         message: string;
                         id: string;
                     };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        analytics: {
-            get: {
-                body: unknown;
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: StudioAnalytics;
-                };
-            };
-        };
-    };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/analytics", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/analytics`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<StudioAnalytics>>;

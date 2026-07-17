@@ -1,5 +1,5 @@
+import type { Static } from "typebox";
 import type { ResumeData } from "@bao/shared/types/resume";
-import Type, { type StaticParse } from "baobox";
 export type ResumeRouteSetState = {
     status?: number | string;
 };
@@ -26,284 +26,131 @@ export type ResumeExportBody = {
 export type ResumeEnhanceBody = {
     section?: string;
 };
-export declare const resumeTemplateBodySchema: Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-export declare const resumeThemeBodySchema: Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>;
-export declare const resumePersonalInfoBodySchema: Type.TObject<{
-    readonly name: Type.TOptional<Type.TString>;
-    readonly email: Type.TOptional<Type.TString>;
-    readonly phone: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly website: Type.TOptional<Type.TString>;
-    readonly linkedIn: Type.TOptional<Type.TString>;
-    readonly github: Type.TOptional<Type.TString>;
-    readonly portfolio: Type.TOptional<Type.TString>;
-}, never, Type.InferOptionalKeys<{
-    readonly name: Type.TOptional<Type.TString>;
-    readonly email: Type.TOptional<Type.TString>;
-    readonly phone: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly website: Type.TOptional<Type.TString>;
-    readonly linkedIn: Type.TOptional<Type.TString>;
-    readonly github: Type.TOptional<Type.TString>;
-    readonly portfolio: Type.TOptional<Type.TString>;
-}>>;
-export declare const resumeExperienceBodySchema: Type.TObject<{
-    readonly title: Type.TString;
-    readonly company: Type.TString;
-    readonly startDate: Type.TString;
-    readonly endDate: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly description: Type.TOptional<Type.TString>;
-    readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-}, "company" | "startDate" | "title", Type.InferOptionalKeys<{
-    readonly title: Type.TString;
-    readonly company: Type.TString;
-    readonly startDate: Type.TString;
-    readonly endDate: Type.TOptional<Type.TString>;
-    readonly location: Type.TOptional<Type.TString>;
-    readonly description: Type.TOptional<Type.TString>;
-    readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-}>>;
-export declare const resumeEducationBodySchema: Type.TObject<{
-    readonly degree: Type.TString;
-    readonly field: Type.TString;
-    readonly school: Type.TString;
-    readonly year: Type.TString;
-    readonly gpa: Type.TOptional<Type.TString>;
-}, "degree" | "field" | "school" | "year", "gpa">;
-export declare const resumeSkillsBodySchema: Type.TObject<{
-    readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
-}, never, Type.InferOptionalKeys<{
-    readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
-}>>;
-export declare const resumeProjectBodySchema: Type.TObject<{
-    readonly title: Type.TString;
-    readonly description: Type.TString;
-    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly link: Type.TOptional<Type.TString>;
-}, "description" | "title", Type.InferOptionalKeys<{
-    readonly title: Type.TString;
-    readonly description: Type.TString;
-    readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly link: Type.TOptional<Type.TString>;
-}>>;
-export declare const resumeGamingExperienceBodySchema: Type.TObject<{
-    readonly gameEngines: Type.TOptional<Type.TString>;
-    readonly platforms: Type.TOptional<Type.TString>;
-    readonly genres: Type.TOptional<Type.TString>;
-    readonly shippedTitles: Type.TOptional<Type.TString>;
-}, never, Type.InferOptionalKeys<{
-    readonly gameEngines: Type.TOptional<Type.TString>;
-    readonly platforms: Type.TOptional<Type.TString>;
-    readonly genres: Type.TOptional<Type.TString>;
-    readonly shippedTitles: Type.TOptional<Type.TString>;
-}>>;
-export declare const resumeMutationBodySchema: Type.TObject<{
-    readonly name: Type.TOptional<Type.TString>;
-    readonly personalInfo: Type.TOptional<Type.TObject<{
-        readonly name: Type.TOptional<Type.TString>;
-        readonly email: Type.TOptional<Type.TString>;
-        readonly phone: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly website: Type.TOptional<Type.TString>;
-        readonly linkedIn: Type.TOptional<Type.TString>;
-        readonly github: Type.TOptional<Type.TString>;
-        readonly portfolio: Type.TOptional<Type.TString>;
-    }, never, Type.InferOptionalKeys<{
-        readonly name: Type.TOptional<Type.TString>;
-        readonly email: Type.TOptional<Type.TString>;
-        readonly phone: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly website: Type.TOptional<Type.TString>;
-        readonly linkedIn: Type.TOptional<Type.TString>;
-        readonly github: Type.TOptional<Type.TString>;
-        readonly portfolio: Type.TOptional<Type.TString>;
+export declare const resumeTemplateBodySchema: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
+export declare const resumeThemeBodySchema: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
+export declare const resumePersonalInfoBodySchema: import("typebox").TObject<{
+    name: import("typebox").TOptional<import("typebox").TString>;
+    email: import("typebox").TOptional<import("typebox").TString>;
+    phone: import("typebox").TOptional<import("typebox").TString>;
+    location: import("typebox").TOptional<import("typebox").TString>;
+    website: import("typebox").TOptional<import("typebox").TString>;
+    linkedIn: import("typebox").TOptional<import("typebox").TString>;
+    github: import("typebox").TOptional<import("typebox").TString>;
+    portfolio: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const resumeExperienceBodySchema: import("typebox").TObject<{
+    title: import("typebox").TString;
+    company: import("typebox").TString;
+    startDate: import("typebox").TString;
+    endDate: import("typebox").TOptional<import("typebox").TString>;
+    location: import("typebox").TOptional<import("typebox").TString>;
+    description: import("typebox").TOptional<import("typebox").TString>;
+    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+}>;
+export declare const resumeEducationBodySchema: import("typebox").TObject<{
+    degree: import("typebox").TString;
+    field: import("typebox").TString;
+    school: import("typebox").TString;
+    year: import("typebox").TString;
+    gpa: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const resumeSkillsBodySchema: import("typebox").TObject<{
+    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+}>;
+export declare const resumeProjectBodySchema: import("typebox").TObject<{
+    title: import("typebox").TString;
+    description: import("typebox").TString;
+    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    link: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const resumeGamingExperienceBodySchema: import("typebox").TObject<{
+    gameEngines: import("typebox").TOptional<import("typebox").TString>;
+    platforms: import("typebox").TOptional<import("typebox").TString>;
+    genres: import("typebox").TOptional<import("typebox").TString>;
+    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const resumeMutationBodySchema: import("typebox").TObject<{
+    name: import("typebox").TOptional<import("typebox").TString>;
+    personalInfo: import("typebox").TOptional<import("typebox").TObject<{
+        name: import("typebox").TOptional<import("typebox").TString>;
+        email: import("typebox").TOptional<import("typebox").TString>;
+        phone: import("typebox").TOptional<import("typebox").TString>;
+        location: import("typebox").TOptional<import("typebox").TString>;
+        website: import("typebox").TOptional<import("typebox").TString>;
+        linkedIn: import("typebox").TOptional<import("typebox").TString>;
+        github: import("typebox").TOptional<import("typebox").TString>;
+        portfolio: import("typebox").TOptional<import("typebox").TString>;
+    }>>;
+    summary: import("typebox").TOptional<import("typebox").TString>;
+    experience: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+        title: import("typebox").TString;
+        company: import("typebox").TString;
+        startDate: import("typebox").TString;
+        endDate: import("typebox").TOptional<import("typebox").TString>;
+        location: import("typebox").TOptional<import("typebox").TString>;
+        description: import("typebox").TOptional<import("typebox").TString>;
+        achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>>>;
-    readonly summary: Type.TOptional<Type.TString>;
-    readonly experience: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly title: Type.TString;
-        readonly company: Type.TString;
-        readonly startDate: Type.TString;
-        readonly endDate: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly description: Type.TOptional<Type.TString>;
-        readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }, "company" | "startDate" | "title", Type.InferOptionalKeys<{
-        readonly title: Type.TString;
-        readonly company: Type.TString;
-        readonly startDate: Type.TString;
-        readonly endDate: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly description: Type.TOptional<Type.TString>;
-        readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }>>>>;
-    readonly education: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly degree: Type.TString;
-        readonly field: Type.TString;
-        readonly school: Type.TString;
-        readonly year: Type.TString;
-        readonly gpa: Type.TOptional<Type.TString>;
-    }, "degree" | "field" | "school" | "year", "gpa">>>;
-    readonly skills: Type.TOptional<Type.TObject<{
-        readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
-    }, never, Type.InferOptionalKeys<{
-        readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
+    education: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+        degree: import("typebox").TString;
+        field: import("typebox").TString;
+        school: import("typebox").TString;
+        year: import("typebox").TString;
+        gpa: import("typebox").TOptional<import("typebox").TString>;
     }>>>;
-    readonly projects: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly title: Type.TString;
-        readonly description: Type.TString;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly link: Type.TOptional<Type.TString>;
-    }, "description" | "title", Type.InferOptionalKeys<{
-        readonly title: Type.TString;
-        readonly description: Type.TString;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly link: Type.TOptional<Type.TString>;
-    }>>>>;
-    readonly gamingExperience: Type.TOptional<Type.TObject<{
-        readonly gameEngines: Type.TOptional<Type.TString>;
-        readonly platforms: Type.TOptional<Type.TString>;
-        readonly genres: Type.TOptional<Type.TString>;
-        readonly shippedTitles: Type.TOptional<Type.TString>;
-    }, never, Type.InferOptionalKeys<{
-        readonly gameEngines: Type.TOptional<Type.TString>;
-        readonly platforms: Type.TOptional<Type.TString>;
-        readonly genres: Type.TOptional<Type.TString>;
-        readonly shippedTitles: Type.TOptional<Type.TString>;
+    skills: import("typebox").TOptional<import("typebox").TObject<{
+        technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    }>>;
+    projects: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+        title: import("typebox").TString;
+        description: import("typebox").TString;
+        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        link: import("typebox").TOptional<import("typebox").TString>;
     }>>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
-    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>>;
-    readonly isDefault: Type.TOptional<Type.TBoolean>;
-}, never, Type.InferOptionalKeys<{
-    readonly name: Type.TOptional<Type.TString>;
-    readonly personalInfo: Type.TOptional<Type.TObject<{
-        readonly name: Type.TOptional<Type.TString>;
-        readonly email: Type.TOptional<Type.TString>;
-        readonly phone: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly website: Type.TOptional<Type.TString>;
-        readonly linkedIn: Type.TOptional<Type.TString>;
-        readonly github: Type.TOptional<Type.TString>;
-        readonly portfolio: Type.TOptional<Type.TString>;
-    }, never, Type.InferOptionalKeys<{
-        readonly name: Type.TOptional<Type.TString>;
-        readonly email: Type.TOptional<Type.TString>;
-        readonly phone: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly website: Type.TOptional<Type.TString>;
-        readonly linkedIn: Type.TOptional<Type.TString>;
-        readonly github: Type.TOptional<Type.TString>;
-        readonly portfolio: Type.TOptional<Type.TString>;
-    }>>>;
-    readonly summary: Type.TOptional<Type.TString>;
-    readonly experience: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly title: Type.TString;
-        readonly company: Type.TString;
-        readonly startDate: Type.TString;
-        readonly endDate: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly description: Type.TOptional<Type.TString>;
-        readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }, "company" | "startDate" | "title", Type.InferOptionalKeys<{
-        readonly title: Type.TString;
-        readonly company: Type.TString;
-        readonly startDate: Type.TString;
-        readonly endDate: Type.TOptional<Type.TString>;
-        readonly location: Type.TOptional<Type.TString>;
-        readonly description: Type.TOptional<Type.TString>;
-        readonly achievements: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-    }>>>>;
-    readonly education: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly degree: Type.TString;
-        readonly field: Type.TString;
-        readonly school: Type.TString;
-        readonly year: Type.TString;
-        readonly gpa: Type.TOptional<Type.TString>;
-    }, "degree" | "field" | "school" | "year", "gpa">>>;
-    readonly skills: Type.TOptional<Type.TObject<{
-        readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
-    }, never, Type.InferOptionalKeys<{
-        readonly technical: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly soft: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly gaming: Type.TOptional<Type.TArray<Type.TString>>;
-    }>>>;
-    readonly projects: Type.TOptional<Type.TArray<Type.TObject<{
-        readonly title: Type.TString;
-        readonly description: Type.TString;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly link: Type.TOptional<Type.TString>;
-    }, "description" | "title", Type.InferOptionalKeys<{
-        readonly title: Type.TString;
-        readonly description: Type.TString;
-        readonly technologies: Type.TOptional<Type.TArray<Type.TString>>;
-        readonly link: Type.TOptional<Type.TString>;
-    }>>>>;
-    readonly gamingExperience: Type.TOptional<Type.TObject<{
-        readonly gameEngines: Type.TOptional<Type.TString>;
-        readonly platforms: Type.TOptional<Type.TString>;
-        readonly genres: Type.TOptional<Type.TString>;
-        readonly shippedTitles: Type.TOptional<Type.TString>;
-    }, never, Type.InferOptionalKeys<{
-        readonly gameEngines: Type.TOptional<Type.TString>;
-        readonly platforms: Type.TOptional<Type.TString>;
-        readonly genres: Type.TOptional<Type.TString>;
-        readonly shippedTitles: Type.TOptional<Type.TString>;
-    }>>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
-    readonly theme: Type.TOptional<Type.TUnion<(Type.TLiteral<"dark"> | Type.TLiteral<"light">)[]>>;
-    readonly isDefault: Type.TOptional<Type.TBoolean>;
-}>>;
-export declare const resumeIdParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type ResumeIdParams = StaticParse<typeof resumeIdParamsSchema>;
-export declare const resumeQuestionGenerateBodySchema: Type.TObject<{
-    readonly targetRole: Type.TString;
-    readonly studioName: Type.TOptional<Type.TString>;
-    readonly experienceLevel: Type.TOptional<Type.TString>;
-}, "targetRole", Type.InferOptionalKeys<{
-    readonly targetRole: Type.TString;
-    readonly studioName: Type.TOptional<Type.TString>;
-    readonly experienceLevel: Type.TOptional<Type.TString>;
-}>>;
-export type ResumeQuestionGenerateRouteBody = StaticParse<typeof resumeQuestionGenerateBodySchema>;
-export declare const resumeQuestionSynthesizeBodySchema: Type.TObject<{
-    readonly questionsAndAnswers: Type.TArray<Type.TObject<{
-        readonly id: Type.TString;
-        readonly question: Type.TString;
-        readonly answer: Type.TString;
-        readonly category: Type.TString;
-    }, "answer" | "category" | "id" | "question", never>>;
-}, "questionsAndAnswers", never>;
-export type ResumeQuestionSynthesizeRouteBody = StaticParse<typeof resumeQuestionSynthesizeBodySchema>;
-export declare const resumeExportBodySchema: Type.TObject<{
-    readonly format: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
-}, never, Type.InferOptionalKeys<{
-    readonly format: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
-}>>;
-export type ResumeExportRouteBody = StaticParse<typeof resumeExportBodySchema>;
-export declare const resumeEnhanceBodySchema: Type.TObject<{
-    readonly section: Type.TOptional<Type.TString>;
-}, never, "section">;
-export type ResumeEnhanceRouteBody = StaticParse<typeof resumeEnhanceBodySchema>;
-export declare const resumeScoreBodySchema: Type.TObject<{
-    readonly jobId: Type.TString;
-}, "jobId", never>;
+    gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
+        gameEngines: import("typebox").TOptional<import("typebox").TString>;
+        platforms: import("typebox").TOptional<import("typebox").TString>;
+        genres: import("typebox").TOptional<import("typebox").TString>;
+        shippedTitles: import("typebox").TOptional<import("typebox").TString>;
+    }>>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
+    theme: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>>;
+    isDefault: import("typebox").TOptional<import("typebox").TBoolean>;
+}>;
+export declare const resumeIdParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type ResumeIdParams = Static<typeof resumeIdParamsSchema>;
+export declare const resumeQuestionGenerateBodySchema: import("typebox").TObject<{
+    targetRole: import("typebox").TString;
+    studioName: import("typebox").TOptional<import("typebox").TString>;
+    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type ResumeQuestionGenerateRouteBody = Static<typeof resumeQuestionGenerateBodySchema>;
+export declare const resumeQuestionSynthesizeBodySchema: import("typebox").TObject<{
+    questionsAndAnswers: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        question: import("typebox").TString;
+        answer: import("typebox").TString;
+        category: import("typebox").TString;
+    }>>;
+}>;
+export type ResumeQuestionSynthesizeRouteBody = Static<typeof resumeQuestionSynthesizeBodySchema>;
+export declare const resumeExportBodySchema: import("typebox").TObject<{
+    format: import("typebox").TOptional<import("typebox").TString>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>>;
+}>;
+export type ResumeExportRouteBody = Static<typeof resumeExportBodySchema>;
+export declare const resumeEnhanceBodySchema: import("typebox").TObject<{
+    section: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type ResumeEnhanceRouteBody = Static<typeof resumeEnhanceBodySchema>;
+export declare const resumeScoreBodySchema: import("typebox").TObject<{
+    jobId: import("typebox").TString;
+}>;

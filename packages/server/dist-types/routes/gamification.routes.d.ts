@@ -1,20 +1,7 @@
-import { Elysia } from "elysia";
-export declare const gamificationRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const gamificationRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         progress: {
             get: {
@@ -25,6 +12,7 @@ export declare const gamificationRoutes: Elysia<string, {
                 response: {
                     200: import("@bao/shared/types/gamification").UserGamificationData;
                 };
+                error: never;
             };
         };
     };
@@ -35,7 +23,7 @@ export declare const gamificationRoutes: Elysia<string, {
                 body: {
                     amount: number;
                     reason: string;
-                } & {};
+                };
                 params: {};
                 query: unknown;
                 headers: unknown;
@@ -59,14 +47,16 @@ export declare const gamificationRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -81,6 +71,7 @@ export declare const gamificationRoutes: Elysia<string, {
                 response: {
                     200: import("@bao/shared/types/gamification").Achievement[];
                 };
+                error: never;
             };
         };
     };
@@ -100,6 +91,7 @@ export declare const gamificationRoutes: Elysia<string, {
                         totalCount: number;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -112,7 +104,7 @@ export declare const gamificationRoutes: Elysia<string, {
                         body: unknown;
                         params: {
                             id: string;
-                        } & {};
+                        };
                         query: unknown;
                         headers: unknown;
                         response: {
@@ -129,16 +121,8 @@ export declare const gamificationRoutes: Elysia<string, {
                                 totalXP: number;
                                 level: number;
                             };
-                            422: {
-                                type: 'validation';
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
                         };
+                        error: never;
                     };
                 };
             };
@@ -155,40 +139,15 @@ export declare const gamificationRoutes: Elysia<string, {
                 response: {
                     200: import("../services/gamification-definitions").WeeklyProgressResult;
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        monthly: {
-            get: {
-                body: unknown;
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        totalXP: number;
-                        levelsGained: number;
-                        achievementsUnlocked: number;
-                        challengesCompleted: number;
-                        actionsCount: number;
-                        streakDays: number;
-                    };
-                };
-            };
-        };
-    };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/monthly", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/monthly`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<{
+    totalXP: number;
+    levelsGained: number;
+    achievementsUnlocked: number;
+    challengesCompleted: number;
+    actionsCount: number;
+    streakDays: number;
+}>>;

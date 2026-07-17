@@ -1,4 +1,4 @@
-import Type, { type StaticParse } from "baobox";
+import type { Static } from "typebox";
 export type AnalyzeResumeBody = {
     resumeId: string;
     jobId?: string;
@@ -39,154 +39,62 @@ export type ResumeAnalysisResult = {
     improvements: string[];
     keywords: string[];
 };
-export declare const chatRouteBodySchema: Type.TObject<{
-    readonly message: Type.TString;
-    readonly sessionId: Type.TOptional<Type.TString>;
-    readonly context: Type.TOptional<Type.TObject<{
-        readonly source: Type.TString;
-        readonly domain: Type.TOptional<Type.TString>;
-        readonly route: Type.TObject<{
-            readonly path: Type.TString;
-            readonly name: Type.TOptional<Type.TString>;
-            readonly params: Type.TRecord<Type.TString, Type.TString>;
-            readonly query: Type.TRecord<Type.TString, Type.TString>;
-        }, "params" | "path" | "query", "name">;
-        readonly entity: Type.TOptional<Type.TObject<{
-            readonly type: Type.TString;
-            readonly id: Type.TString;
-            readonly label: Type.TOptional<Type.TString>;
-        }, "id" | "type", "label">>;
-        readonly state: Type.TObject<{
-            readonly hasResumes: Type.TBoolean;
-            readonly resumeCount: Type.TNumber;
-            readonly hasJobs: Type.TBoolean;
-            readonly jobCount: Type.TNumber;
-            readonly hasStudios: Type.TBoolean;
-            readonly studioCount: Type.TNumber;
-            readonly hasInterviewSessions: Type.TBoolean;
-            readonly interviewSessionCount: Type.TNumber;
-            readonly hasPortfolioProjects: Type.TBoolean;
-            readonly portfolioProjectCount: Type.TNumber;
-        }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-    }, "route" | "source" | "state", Type.InferOptionalKeys<{
-        readonly source: Type.TString;
-        readonly domain: Type.TOptional<Type.TString>;
-        readonly route: Type.TObject<{
-            readonly path: Type.TString;
-            readonly name: Type.TOptional<Type.TString>;
-            readonly params: Type.TRecord<Type.TString, Type.TString>;
-            readonly query: Type.TRecord<Type.TString, Type.TString>;
-        }, "params" | "path" | "query", "name">;
-        readonly entity: Type.TOptional<Type.TObject<{
-            readonly type: Type.TString;
-            readonly id: Type.TString;
-            readonly label: Type.TOptional<Type.TString>;
-        }, "id" | "type", "label">>;
-        readonly state: Type.TObject<{
-            readonly hasResumes: Type.TBoolean;
-            readonly resumeCount: Type.TNumber;
-            readonly hasJobs: Type.TBoolean;
-            readonly jobCount: Type.TNumber;
-            readonly hasStudios: Type.TBoolean;
-            readonly studioCount: Type.TNumber;
-            readonly hasInterviewSessions: Type.TBoolean;
-            readonly interviewSessionCount: Type.TNumber;
-            readonly hasPortfolioProjects: Type.TBoolean;
-            readonly portfolioProjectCount: Type.TNumber;
-        }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-    }>>>;
-}, "message", Type.InferOptionalKeys<{
-    readonly message: Type.TString;
-    readonly sessionId: Type.TOptional<Type.TString>;
-    readonly context: Type.TOptional<Type.TObject<{
-        readonly source: Type.TString;
-        readonly domain: Type.TOptional<Type.TString>;
-        readonly route: Type.TObject<{
-            readonly path: Type.TString;
-            readonly name: Type.TOptional<Type.TString>;
-            readonly params: Type.TRecord<Type.TString, Type.TString>;
-            readonly query: Type.TRecord<Type.TString, Type.TString>;
-        }, "params" | "path" | "query", "name">;
-        readonly entity: Type.TOptional<Type.TObject<{
-            readonly type: Type.TString;
-            readonly id: Type.TString;
-            readonly label: Type.TOptional<Type.TString>;
-        }, "id" | "type", "label">>;
-        readonly state: Type.TObject<{
-            readonly hasResumes: Type.TBoolean;
-            readonly resumeCount: Type.TNumber;
-            readonly hasJobs: Type.TBoolean;
-            readonly jobCount: Type.TNumber;
-            readonly hasStudios: Type.TBoolean;
-            readonly studioCount: Type.TNumber;
-            readonly hasInterviewSessions: Type.TBoolean;
-            readonly interviewSessionCount: Type.TNumber;
-            readonly hasPortfolioProjects: Type.TBoolean;
-            readonly portfolioProjectCount: Type.TNumber;
-        }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-    }, "route" | "source" | "state", Type.InferOptionalKeys<{
-        readonly source: Type.TString;
-        readonly domain: Type.TOptional<Type.TString>;
-        readonly route: Type.TObject<{
-            readonly path: Type.TString;
-            readonly name: Type.TOptional<Type.TString>;
-            readonly params: Type.TRecord<Type.TString, Type.TString>;
-            readonly query: Type.TRecord<Type.TString, Type.TString>;
-        }, "params" | "path" | "query", "name">;
-        readonly entity: Type.TOptional<Type.TObject<{
-            readonly type: Type.TString;
-            readonly id: Type.TString;
-            readonly label: Type.TOptional<Type.TString>;
-        }, "id" | "type", "label">>;
-        readonly state: Type.TObject<{
-            readonly hasResumes: Type.TBoolean;
-            readonly resumeCount: Type.TNumber;
-            readonly hasJobs: Type.TBoolean;
-            readonly jobCount: Type.TNumber;
-            readonly hasStudios: Type.TBoolean;
-            readonly studioCount: Type.TNumber;
-            readonly hasInterviewSessions: Type.TBoolean;
-            readonly interviewSessionCount: Type.TNumber;
-            readonly hasPortfolioProjects: Type.TBoolean;
-            readonly portfolioProjectCount: Type.TNumber;
-        }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-    }>>>;
-}>>;
-export type ChatRouteBody = StaticParse<typeof chatRouteBodySchema>;
-export declare const analyzeResumeRouteBodySchema: Type.TObject<{
-    readonly resumeId: Type.TString;
-    readonly jobId: Type.TOptional<Type.TString>;
-}, "resumeId", "jobId">;
-export type AnalyzeResumeRouteBody = StaticParse<typeof analyzeResumeRouteBodySchema>;
-export declare const generateCoverLetterRouteBodySchema: Type.TObject<{
-    readonly resumeId: Type.TString;
-    readonly jobId: Type.TOptional<Type.TString>;
-    readonly company: Type.TString;
-    readonly position: Type.TString;
-}, "company" | "position" | "resumeId", "jobId">;
-export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterRouteBodySchema>;
-export declare const matchJobsRouteBodySchema: Type.TObject<{
-    readonly resumeId: Type.TOptional<Type.TString>;
-    readonly skills: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly preferences: Type.TOptional<Type.TRecord<Type.TString, Type.TUnion<(Type.TBoolean | Type.TNumber | Type.TString)[]>>>;
-}, never, Type.InferOptionalKeys<{
-    readonly resumeId: Type.TOptional<Type.TString>;
-    readonly skills: Type.TOptional<Type.TArray<Type.TString>>;
-    readonly preferences: Type.TOptional<Type.TRecord<Type.TString, Type.TUnion<(Type.TBoolean | Type.TNumber | Type.TString)[]>>>;
-}>>;
-export type MatchJobsRouteBody = StaticParse<typeof matchJobsRouteBodySchema>;
-export declare const automationActionRouteBodySchema: Type.TObject<{
-    readonly action: Type.TString;
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-}, "action" | "jobUrl" | "resumeId", Type.InferOptionalKeys<{
-    readonly action: Type.TString;
-    readonly jobUrl: Type.TString;
-    readonly resumeId: Type.TString;
-    readonly coverLetterId: Type.TOptional<Type.TString>;
-    readonly jobId: Type.TOptional<Type.TString>;
-}>>;
-export type AutomationActionRouteBody = StaticParse<typeof automationActionRouteBodySchema>;
+export declare const chatRouteBodySchema: import("typebox").TObject<{
+    message: import("typebox").TString;
+    sessionId: import("typebox").TOptional<import("typebox").TString>;
+    context: import("typebox").TOptional<import("typebox").TObject<{
+        source: import("typebox").TString;
+        domain: import("typebox").TOptional<import("typebox").TString>;
+        route: import("typebox").TObject<{
+            path: import("typebox").TString;
+            name: import("typebox").TOptional<import("typebox").TString>;
+            params: import("typebox").TRecord<"^.*$", import("typebox").TString>;
+            query: import("typebox").TRecord<"^.*$", import("typebox").TString>;
+        }>;
+        entity: import("typebox").TOptional<import("typebox").TObject<{
+            type: import("typebox").TString;
+            id: import("typebox").TString;
+            label: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+        state: import("typebox").TObject<{
+            hasResumes: import("typebox").TBoolean;
+            resumeCount: import("typebox").TNumber;
+            hasJobs: import("typebox").TBoolean;
+            jobCount: import("typebox").TNumber;
+            hasStudios: import("typebox").TBoolean;
+            studioCount: import("typebox").TNumber;
+            hasInterviewSessions: import("typebox").TBoolean;
+            interviewSessionCount: import("typebox").TNumber;
+            hasPortfolioProjects: import("typebox").TBoolean;
+            portfolioProjectCount: import("typebox").TNumber;
+        }>;
+    }>>;
+}>;
+export type ChatRouteBody = Static<typeof chatRouteBodySchema>;
+export declare const analyzeResumeRouteBodySchema: import("typebox").TObject<{
+    resumeId: import("typebox").TString;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type AnalyzeResumeRouteBody = Static<typeof analyzeResumeRouteBodySchema>;
+export declare const generateCoverLetterRouteBodySchema: import("typebox").TObject<{
+    resumeId: import("typebox").TString;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+    company: import("typebox").TString;
+    position: import("typebox").TString;
+}>;
+export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterRouteBodySchema>;
+export declare const matchJobsRouteBodySchema: import("typebox").TObject<{
+    resumeId: import("typebox").TOptional<import("typebox").TString>;
+    skills: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    preferences: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean]>>>;
+}>;
+export type MatchJobsRouteBody = Static<typeof matchJobsRouteBodySchema>;
+export declare const automationActionRouteBodySchema: import("typebox").TObject<{
+    action: import("typebox").TString;
+    jobUrl: import("typebox").TString;
+    resumeId: import("typebox").TString;
+    coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type AutomationActionRouteBody = Static<typeof automationActionRouteBodySchema>;
 export declare const usageTailLimit = 10;

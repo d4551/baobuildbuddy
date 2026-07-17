@@ -1,66 +1,31 @@
-import { Elysia } from "elysia";
+import type { RouteSetState } from "../types/route-state";
+import { type AutomationScreenshotParams } from "./automation-screenshot-route-contracts";
 /**
  * Serves automation run screenshots from managed run directories.
  */
-export declare const automationScreenshotRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const automationScreenshotRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
-    [x: string]: {
-        ":runId": {
-            ":index": {
-                get: {
-                    body: unknown;
-                    params: {
-                        index: string;
-                        runId: string;
-                    } & {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: unknown;
-                        400: {
-                            error: string;
-                        } & {};
-                        404: {
-                            error: string;
-                        } & {};
-                        422: {
-                            type: 'validation';
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
-                    };
-                };
-            };
-        };
+    error: [];
+}, import("elysia/types").DefaultMetadata, {}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/:runId/:index", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    params: import("typebox").TObject<{
+        runId: import("typebox").TString;
+        index: import("typebox").TString;
+    }>;
+    response: {
+        200: import("typebox").TUnknown;
+        400: import("typebox").TObject<{
+            error: import("typebox").TString;
+        }>;
+        404: import("typebox").TObject<{
+            error: import("typebox").TString;
+        }>;
+    };
+}, {}, `${string}/:runId/:index`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, set }: {
+    params: AutomationScreenshotParams;
+    set: RouteSetState;
+}) => Promise<Response | {
+    error: string;
+}>>;

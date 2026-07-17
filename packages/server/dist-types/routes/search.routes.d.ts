@@ -1,83 +1,45 @@
-import { Elysia } from "elysia";
-export declare const searchRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+import { type SearchAutocompleteQuery } from "./search-route-contracts";
+export declare const searchRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         [x: string]: {
             get: {
                 body: unknown;
                 params: {};
-                query: {} & {
+                query: {
                     q?: string | undefined;
-                    types?: string | ("jobs" | "resumes" | "skills" | "studios")[] | undefined;
+                    types?: string | undefined;
                 };
                 headers: unknown;
                 response: {
                     200: import("../services/search-service").UnifiedSearchResult;
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        [x: string]: {
-            get: {
-                body: unknown;
-                params: {};
-                query: {} & {
-                    prefix?: string | undefined;
-                };
-                headers: unknown;
-                response: {
-                    200: {
-                        text: string;
-                        type: string;
-                    }[];
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    query: import("typebox").TObject<{
+        prefix: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+}, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ query }: {
+    query: SearchAutocompleteQuery;
+}) => Promise<{
+    text: string;
+    type: string;
+}[]>>;

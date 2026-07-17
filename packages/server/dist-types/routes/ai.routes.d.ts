@@ -1,28 +1,13 @@
-import { Elysia } from "elysia";
-export declare const aiRoutes: Elysia<string, {
+import type { RouteSetState } from "../types/route-state";
+import { type AutomationActionRouteBody } from "./ai-route-contracts";
+export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", {
     decorator: {};
     store: {};
     derive: {};
-    resolve: {};
 }, {
     typebox: {};
-    error: {};
-} & {
-    error: {};
-    typebox: import("@sinclair/typebox").TModule<{}, {}>;
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-} & {
-    schema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {};
 } & {
     [x: string]: {
@@ -30,38 +15,34 @@ export declare const aiRoutes: Elysia<string, {
             post: {
                 body: {
                     message: string;
-                } & {
-                    context?: ({
-                        route: {
-                            params: Record<string, string>;
-                            path: string;
-                            query: Record<string, string>;
-                        } & {
-                            name?: string | undefined;
-                        };
-                        source: string;
-                        state: {
-                            hasInterviewSessions: boolean;
-                            hasJobs: boolean;
-                            hasPortfolioProjects: boolean;
-                            hasResumes: boolean;
-                            hasStudios: boolean;
-                            interviewSessionCount: number;
-                            jobCount: number;
-                            portfolioProjectCount: number;
-                            resumeCount: number;
-                            studioCount: number;
-                        } & {};
-                    } & {
-                        domain?: string | undefined;
-                        entity?: ({
-                            id: string;
-                            type: string;
-                        } & {
-                            label?: string | undefined;
-                        }) | undefined;
-                    }) | undefined;
                     sessionId?: string | undefined;
+                    context?: {
+                        source: string;
+                        domain?: string | undefined;
+                        route: {
+                            path: string;
+                            name?: string | undefined;
+                            params: Record<string, string>;
+                            query: Record<string, string>;
+                        };
+                        entity?: {
+                            type: string;
+                            id: string;
+                            label?: string | undefined;
+                        } | undefined;
+                        state: {
+                            hasResumes: boolean;
+                            resumeCount: number;
+                            hasJobs: boolean;
+                            jobCount: number;
+                            hasStudios: boolean;
+                            studioCount: number;
+                            hasInterviewSessions: boolean;
+                            interviewSessionCount: number;
+                            hasPortfolioProjects: boolean;
+                            portfolioProjectCount: number;
+                        };
+                    } | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -80,14 +61,16 @@ export declare const aiRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -97,7 +80,6 @@ export declare const aiRoutes: Elysia<string, {
             post: {
                 body: {
                     resumeId: string;
-                } & {
                     jobId?: string | undefined;
                 };
                 params: {};
@@ -105,13 +87,13 @@ export declare const aiRoutes: Elysia<string, {
                 headers: unknown;
                 response: {
                     200: {
-                        model?: undefined;
                         error: string;
                         message?: undefined;
                         resumeId?: undefined;
                         jobId?: undefined;
                         analysis?: undefined;
                         provider?: undefined;
+                        model?: undefined;
                     } | {
                         error?: undefined;
                         message: string;
@@ -123,14 +105,16 @@ export declare const aiRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -139,20 +123,19 @@ export declare const aiRoutes: Elysia<string, {
         "generate-cover-letter": {
             post: {
                 body: {
+                    resumeId: string;
+                    jobId?: string | undefined;
                     company: string;
                     position: string;
-                    resumeId: string;
-                } & {
-                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
                     200: {
-                        model?: undefined;
                         message?: undefined;
                         provider?: undefined;
+                        model?: undefined;
                         error: string;
                         content?: undefined;
                     } | {
@@ -164,14 +147,16 @@ export declare const aiRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -179,10 +164,10 @@ export declare const aiRoutes: Elysia<string, {
     [x: string]: {
         "match-jobs": {
             post: {
-                body: {} & {
-                    preferences?: Record<string, string | number | boolean> | undefined;
+                body: {
                     resumeId?: string | undefined;
                     skills?: string[] | undefined;
+                    preferences?: Record<string, string | number | boolean> | undefined;
                 };
                 params: {};
                 query: unknown;
@@ -193,14 +178,16 @@ export declare const aiRoutes: Elysia<string, {
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -226,6 +213,7 @@ export declare const aiRoutes: Elysia<string, {
                         error: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -250,67 +238,38 @@ export declare const aiRoutes: Elysia<string, {
                         }[];
                     };
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        "automation-action": {
-            post: {
-                body: {
-                    action: string;
-                    jobUrl: string;
-                    resumeId: string;
-                } & {
-                    coverLetterId?: string | undefined;
-                    jobId?: string | undefined;
-                };
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        message?: undefined;
-                        error: string;
-                        runId?: undefined;
-                        status?: undefined;
-                    } | {
-                        error?: undefined;
-                        runId: string;
-                        status: string;
-                        message: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, {
+    derive: {};
+    schema: {};
+    schemas: {};
+    response: {};
+    error: [];
+}, "post", "/automation-action", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}>;
+    body: import("typebox").TObject<{
+        action: import("typebox").TString;
+        jobUrl: import("typebox").TString;
+        resumeId: import("typebox").TString;
+        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+        jobId: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+}, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
+    body: AutomationActionRouteBody;
+    set: RouteSetState;
+}) => Promise<{
+    message?: undefined;
+    error: string;
+    runId?: undefined;
+    status?: undefined;
+} | {
+    error?: undefined;
+    runId: string;
+    status: string;
+    message: string;
+}>>;

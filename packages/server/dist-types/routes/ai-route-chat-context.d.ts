@@ -1,60 +1,34 @@
+import type { Static } from "typebox";
 import { type AIChatContext } from "@bao/shared/types/ai";
-import Type, { type StaticParse } from "baobox";
-export declare const chatContextSchema: Type.TObject<{
-    readonly source: Type.TString;
-    readonly domain: Type.TOptional<Type.TString>;
-    readonly route: Type.TObject<{
-        readonly path: Type.TString;
-        readonly name: Type.TOptional<Type.TString>;
-        readonly params: Type.TRecord<Type.TString, Type.TString>;
-        readonly query: Type.TRecord<Type.TString, Type.TString>;
-    }, "params" | "path" | "query", "name">;
-    readonly entity: Type.TOptional<Type.TObject<{
-        readonly type: Type.TString;
-        readonly id: Type.TString;
-        readonly label: Type.TOptional<Type.TString>;
-    }, "id" | "type", "label">>;
-    readonly state: Type.TObject<{
-        readonly hasResumes: Type.TBoolean;
-        readonly resumeCount: Type.TNumber;
-        readonly hasJobs: Type.TBoolean;
-        readonly jobCount: Type.TNumber;
-        readonly hasStudios: Type.TBoolean;
-        readonly studioCount: Type.TNumber;
-        readonly hasInterviewSessions: Type.TBoolean;
-        readonly interviewSessionCount: Type.TNumber;
-        readonly hasPortfolioProjects: Type.TBoolean;
-        readonly portfolioProjectCount: Type.TNumber;
-    }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-}, "route" | "source" | "state", Type.InferOptionalKeys<{
-    readonly source: Type.TString;
-    readonly domain: Type.TOptional<Type.TString>;
-    readonly route: Type.TObject<{
-        readonly path: Type.TString;
-        readonly name: Type.TOptional<Type.TString>;
-        readonly params: Type.TRecord<Type.TString, Type.TString>;
-        readonly query: Type.TRecord<Type.TString, Type.TString>;
-    }, "params" | "path" | "query", "name">;
-    readonly entity: Type.TOptional<Type.TObject<{
-        readonly type: Type.TString;
-        readonly id: Type.TString;
-        readonly label: Type.TOptional<Type.TString>;
-    }, "id" | "type", "label">>;
-    readonly state: Type.TObject<{
-        readonly hasResumes: Type.TBoolean;
-        readonly resumeCount: Type.TNumber;
-        readonly hasJobs: Type.TBoolean;
-        readonly jobCount: Type.TNumber;
-        readonly hasStudios: Type.TBoolean;
-        readonly studioCount: Type.TNumber;
-        readonly hasInterviewSessions: Type.TBoolean;
-        readonly interviewSessionCount: Type.TNumber;
-        readonly hasPortfolioProjects: Type.TBoolean;
-        readonly portfolioProjectCount: Type.TNumber;
-    }, "hasInterviewSessions" | "hasJobs" | "hasPortfolioProjects" | "hasResumes" | "hasStudios" | "interviewSessionCount" | "jobCount" | "portfolioProjectCount" | "resumeCount" | "studioCount", never>;
-}>>;
-export declare const aiPreferenceSchema: Type.TRecord<Type.TString, Type.TUnion<(Type.TBoolean | Type.TNumber | Type.TString)[]>>;
-export type ChatContextPayload = StaticParse<typeof chatContextSchema>;
+export declare const chatContextSchema: import("typebox").TObject<{
+    source: import("typebox").TString;
+    domain: import("typebox").TOptional<import("typebox").TString>;
+    route: import("typebox").TObject<{
+        path: import("typebox").TString;
+        name: import("typebox").TOptional<import("typebox").TString>;
+        params: import("typebox").TRecord<"^.*$", import("typebox").TString>;
+        query: import("typebox").TRecord<"^.*$", import("typebox").TString>;
+    }>;
+    entity: import("typebox").TOptional<import("typebox").TObject<{
+        type: import("typebox").TString;
+        id: import("typebox").TString;
+        label: import("typebox").TOptional<import("typebox").TString>;
+    }>>;
+    state: import("typebox").TObject<{
+        hasResumes: import("typebox").TBoolean;
+        resumeCount: import("typebox").TNumber;
+        hasJobs: import("typebox").TBoolean;
+        jobCount: import("typebox").TNumber;
+        hasStudios: import("typebox").TBoolean;
+        studioCount: import("typebox").TNumber;
+        hasInterviewSessions: import("typebox").TBoolean;
+        interviewSessionCount: import("typebox").TNumber;
+        hasPortfolioProjects: import("typebox").TBoolean;
+        portfolioProjectCount: import("typebox").TNumber;
+    }>;
+}>;
+export declare const aiPreferenceSchema: import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean]>>;
+export type ChatContextPayload = Static<typeof chatContextSchema>;
 export declare function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null;
 export declare function serializeClientChatContext(context: AIChatContext): string;
 export declare function composeChatSystemPrompt(basePrompt: string, contextualPrompt: string, clientContext: AIChatContext | null): string;

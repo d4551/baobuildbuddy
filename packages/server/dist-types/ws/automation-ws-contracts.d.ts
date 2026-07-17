@@ -1,6 +1,6 @@
-import Type, { type StaticParse } from "baobox";
-export declare const automationWebSocketBodySchema: Type.TObject<{
-    readonly type: Type.TUnion<(Type.TLiteral<"subscribe"> | Type.TLiteral<"unsubscribe">)[]>;
-    readonly runId: Type.TOptional<Type.TString>;
-}, "type", "runId">;
-export type AutomationWebSocketMessage = StaticParse<typeof automationWebSocketBodySchema>;
+import type { Static } from "typebox";
+export declare const automationWebSocketBodySchema: import("typebox").TObject<{
+    type: import("typebox").TUnion<[import("typebox").TLiteral<"subscribe">, import("typebox").TLiteral<"unsubscribe">]>;
+    runId: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type AutomationWebSocketMessage = Static<typeof automationWebSocketBodySchema>;
