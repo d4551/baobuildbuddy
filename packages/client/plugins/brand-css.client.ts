@@ -10,12 +10,15 @@ export default defineNuxtPlugin(() => {
   watchEffect((onCleanup) => {
     const nextVars = brandCssVars.value;
     const root = document.documentElement;
-    const appliedKeys = Object.keys(nextVars) as Array<keyof typeof nextVars>;
-    for (const key of appliedKeys) {
-      root.style.setProperty(key, nextVars[key]);
+    const appliedEntries = Object.entries(nextVars).map(([key, value]) => [
+      key,
+      typeof value === "string" ? value : String(value),
+    ] as const);
+    for (const [key, value] of appliedEntries) {
+      root.style.setProperty(key, value);
     }
     onCleanup(() => {
-      for (const key of appliedKeys) {
+      for (const [key] of appliedEntries) {
         root.style.removeProperty(key);
       }
     });
