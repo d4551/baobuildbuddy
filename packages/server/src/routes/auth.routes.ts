@@ -28,7 +28,13 @@ import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
 import type { RouteSetState } from "../types/route-state";
 import { rateLimit, resolveRateLimitClientKey } from "../utils/rate-limit";
-import { type AuthBootstrapBody, authBootstrapBody } from "./auth-route-contracts";
+import {
+  type AuthBootstrapBody,
+  authBootstrapBody,
+  authConfiguredResponses,
+  authInitResponses,
+  authStatusResponses,
+} from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /[=]+$/u;
 
@@ -60,7 +66,13 @@ function generateApiKey(): string {
 export const authRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.authBase),
 })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),{ detail: { tags: ["Auth"] } }, async () => {
+  .get(
+    toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),
+    {
+      detail: { tags: ["Auth"] },
+      response: authStatusResponses,
+    },
+    async () => {
     if (config.disableAuth) {
       return {
         configured: false,
@@ -77,15 +89,23 @@ export const authRoutes = new Elysia({
       bootstrapRequired: !hasKey,
       setupTokenConfigured: config.authSetupToken !== null,
     };
-  })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),{ detail: { tags: ["Auth"] } }, async () => {
+  },
+  )
+  .get(
+    toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
+    {
+      detail: { tags: ["Auth"] },
+      response: authConfiguredResponses,
+    },
+    async () => {
     if (config.disableAuth) {
       return { configured: false };
     }
     const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
     const hasKey = Boolean(rows[0]?.apiKey);
     return { configured: hasKey };
-  })
+  },
+  )
   .use(
     new Elysia()
       .use(
@@ -98,7 +118,10 @@ export const authRoutes = new Elysia({
       )
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
-        { detail: { tags: ["Auth"] }, body: authBootstrapBody,
+        {
+          detail: { tags: ["Auth"] },
+          body: authBootstrapBody,
+          response: authInitResponses,
         }, async ({
           body,
           request,
