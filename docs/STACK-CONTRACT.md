@@ -7,7 +7,7 @@ This document overrides generic “full-stack audit” prompts that assume **Pri
 | Layer | Technology | Notes |
 |-------|------------|--------|
 | Runtime / PM | **Bun** | `bun run *` for dev, test, lint, build |
-| API | **Elysia** on Bun | Port **3000** |
+| API | **Elysia 2** (`>=2.0.0-exp.42`) on Bun | Port **3000**; route hooks precede handlers; OpenAPI via `@elysiajs/openapi` |
 | API client types | **Eden Treaty** | Generated from server |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
 | UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
