@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import {
   API_ERROR_GENERATE_QUESTIONS,
   API_ERROR_RESUME_NOT_FOUND,
@@ -26,13 +26,23 @@ import {
   type ResumeQuestionSynthesizeRouteBody,
   type ResumeRouteSetState,
   type ResumeScoreBody,
+  resumeCreateResponses,
+  resumeDeleteResponses,
   resumeEnhanceBodySchema,
+  resumeEnhanceResponses,
+  resumeEntityResponses,
+  resumeExportResponses,
   resumeExportBodySchema,
   resumeIdParamsSchema,
+  resumeListResponses,
   resumeMutationBodySchema,
   resumeQuestionGenerateBodySchema,
+  resumeQuestionGenerateResponses,
   resumeQuestionSynthesizeBodySchema,
+  resumeQuestionSynthesizeResponses,
   resumeScoreBodySchema,
+  resumeScoreResponses,
+  resumeUpdateResponses,
 } from "./resume-route-contracts";
 import {
   buildResumeCreatePayload,
@@ -47,8 +57,12 @@ export const resumeRoutes = new Elysia({
 })
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
-    { detail: { tags: ["Resumes"] }, body: resumeQuestionGenerateBodySchema,
-    }, async ({ body, set }: { body: ResumeQuestionGenerateRouteBody; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeQuestionGenerateBodySchema,
+      response: resumeQuestionGenerateResponses,
+    },
+    async ({ body, set }: { body: ResumeQuestionGenerateRouteBody; set: ResumeRouteSetState }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
           targetRole: body.targetRole,
@@ -68,8 +82,12 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
-    { detail: { tags: ["Resumes"] }, body: resumeQuestionSynthesizeBodySchema,
-    }, async ({
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeQuestionSynthesizeBodySchema,
+      response: resumeQuestionSynthesizeResponses,
+    },
+    async ({
       body,
       set,
     }: {
@@ -109,13 +127,24 @@ export const resumeRoutes = new Elysia({
       return createResult.value;
     },
   )
-  .get("/",{ detail: { tags: ["Resumes"] } }, async () => {
-    return resumeService.getResumes();
-  })
+  .get(
+    "/",
+    {
+      detail: { tags: ["Resumes"] },
+      response: resumeListResponses,
+    },
+    async () => {
+      return resumeService.getResumes();
+    },
+  )
   .post(
     "/",
-    { detail: { tags: ["Resumes"] }, body: resumeMutationBodySchema,
-    }, async ({ body, set }: { body: ResumeMutationBody; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeMutationBodySchema,
+      response: resumeCreateResponses,
+    },
+    async ({ body, set }: { body: ResumeMutationBody; set: ResumeRouteSetState }) => {
       const created = await resumeService.createResume(buildResumeCreatePayload(body));
       set.status = HTTP_STATUS_CREATED;
       gamificationService.trackActionFireAndForget(
@@ -128,8 +157,12 @@ export const resumeRoutes = new Elysia({
   )
   .get(
     "/:id",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
-    }, async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      response: resumeEntityResponses,
+    },
+    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -142,9 +175,13 @@ export const resumeRoutes = new Elysia({
   )
   .put(
     "/:id",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
       body: resumeMutationBodySchema,
-    }, async ({
+      response: resumeUpdateResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -163,8 +200,12 @@ export const resumeRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
-    }, async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      response: resumeDeleteResponses,
+    },
+    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -176,9 +217,13 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/export",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
       body: resumeExportBodySchema,
-    }, async ({
+      response: resumeExportResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -190,9 +235,13 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/ai-enhance",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
       body: resumeEnhanceBodySchema,
-    }, async ({
+      response: resumeEnhanceResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -204,9 +253,13 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/ai-score",
-    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
       body: resumeScoreBodySchema,
-    }, async ({
+      response: resumeScoreResponses,
+    },
+    async ({
       params,
       body,
       set,
