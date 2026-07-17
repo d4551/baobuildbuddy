@@ -1,10 +1,12 @@
 import type { Static } from "typebox";
 import {
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const awardXpBodySchema = t.Object({
   amount: t.Number({ minimum: 0, maximum: 10000 }),
@@ -146,29 +148,31 @@ export const monthlyStatsResponseSchema = t.Object({
 
 export const gamificationProgressResponses = {
   [HTTP_STATUS_OK]: gamificationProgressResponseSchema,
-} as const;
+};
 
 export const awardXpResponses = {
   [HTTP_STATUS_OK]: awardXpResponseSchema,
-} as const;
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+};
 
 export const achievementsResponses = {
   [HTTP_STATUS_OK]: t.Array(achievementResponseSchema),
-} as const;
+};
 
 export const challengesListResponses = {
   [HTTP_STATUS_OK]: challengesListResponseSchema,
-} as const;
+};
 
 export const challengeCompleteResponses = {
   [HTTP_STATUS_OK]: challengeCompleteResponseSchema,
   [HTTP_STATUS_CREATED]: challengeCompleteResponseSchema,
-} as const;
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+};
 
 export const weeklyProgressResponses = {
   [HTTP_STATUS_OK]: weeklyProgressResponseSchema,
-} as const;
+};
 
 export const monthlyStatsResponses = {
   [HTTP_STATUS_OK]: monthlyStatsResponseSchema,
-} as const;
+};

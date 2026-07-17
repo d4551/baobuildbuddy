@@ -1,3 +1,4 @@
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { t } from "elysia";
 
 export const automationStatsSchema = t.Object({
@@ -64,3 +65,15 @@ export const statsCareerResponseSchema = t.Object({
   applicationSuccessRate: t.Number(),
   interviewTrend: t.Array(t.Number()),
 });
+
+export const statsDashboardResponses = {
+  [HTTP_STATUS_OK]: statsDashboardResponseSchema,
+};
+
+export const statsWeeklyResponses = {
+  [HTTP_STATUS_OK]: statsWeeklyResponseSchema,
+};
+
+export const statsCareerResponses = {
+  [HTTP_STATUS_OK]: statsCareerResponseSchema,
+};

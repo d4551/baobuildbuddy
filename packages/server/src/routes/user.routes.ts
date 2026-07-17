@@ -6,9 +6,15 @@ import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
-import { userProfileUpdateBodySchema } from "./user-route-contracts";
+import { simpleRouteErrorResponses } from "./route-error-envelope";
+import { userProfileResponseSchema, userProfileUpdateBodySchema } from "./user-route-contracts";
 
 type UserProfileRow = typeof userProfile.$inferSelect;
+
+const userProfileResponses = {
+  [HTTP_STATUS_OK]: userProfileResponseSchema,
+  ...simpleRouteErrorResponses,
+};
 
 const toUserProfileResponse = (row: UserProfileRow) => ({
   id: row.id,
@@ -36,7 +42,10 @@ export const userRoutes = new Elysia({
 })
   .get(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
-    { detail: { tags: ["User"] }, },
+    {
+      detail: { tags: ["User"] },
+      response: userProfileResponses,
+    },
     async ({ status }) => {
       const rows = await db
         .select()
@@ -53,7 +62,8 @@ export const userRoutes = new Elysia({
     {
       detail: { tags: ["User"] },
       body: userProfileUpdateBodySchema,
-      },
+      response: userProfileResponses,
+    },
     async ({ body, status }) => {
       const existing = await db
         .select()

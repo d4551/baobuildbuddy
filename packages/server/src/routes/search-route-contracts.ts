@@ -3,7 +3,12 @@ import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
 
-export const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
+export const searchTypes: readonly ["jobs", "studios", "skills", "resumes"] = [
+  "jobs",
+  "studios",
+  "skills",
+  "resumes",
+];
 export type SearchType = (typeof searchTypes)[number];
 
 export const searchQuerySchema = t.Object({
@@ -57,8 +62,8 @@ export const searchAutocompleteResponseSchema = t.Array(
 
 export const searchAllResponses = {
   [HTTP_STATUS_OK]: searchAllResponseSchema,
-} as const;
+};
 
 export const searchAutocompleteResponses = {
   [HTTP_STATUS_OK]: searchAutocompleteResponseSchema,
-} as const;
+};
