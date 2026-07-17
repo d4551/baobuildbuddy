@@ -1,4 +1,3 @@
-export { resolveRateLimitClientKey } from "./request";
 type CreateRateLimitOptions = {
     durationMs: number;
     max: number;
@@ -58,3 +57,4 @@ export declare function rateLimit(options: {
         code: string;
     };
 }>;
+export {};

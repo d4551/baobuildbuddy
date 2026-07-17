@@ -8,8 +8,6 @@ import {
 } from "../config/rate-limit";
 import { resolveRateLimitClientKey } from "./request";
 
-export { resolveRateLimitClientKey } from "./request";
-
 type RateLimitBucket = {
   count: number;
   resetAt: number;

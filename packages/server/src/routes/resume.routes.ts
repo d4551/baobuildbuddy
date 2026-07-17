@@ -34,23 +34,25 @@ import {
   type ResumeRouteSetState,
   type ResumeScoreRouteBody,
   resumeEnhanceBodySchema,
-  resumeEnhanceResponses,
   resumeExportBodySchema,
-  resumeExportResponses,
   resumeIdParamsSchema,
   resumeMutationBodySchema,
+  resumeQuestionGenerateBodySchema,
+  resumeQuestionSynthesizeBodySchema,
+  resumeScoreBodySchema,
+} from "./resume-route-contracts";
+import {
   resumeCreateResponses,
   resumeDeleteResponses,
+  resumeEnhanceResponses,
   resumeEntityResponses,
+  resumeExportResponses,
   resumeListResponses,
-  resumeQuestionGenerateBodySchema,
   resumeQuestionGenerateResponses,
-  resumeQuestionSynthesizeBodySchema,
   resumeQuestionSynthesizeResponses,
-  resumeScoreBodySchema,
   resumeScoreResponses,
   resumeUpdateResponses,
-} from "./resume-route-contracts";
+} from "./resume-route-response-contracts";
 import {
   buildResumeCreatePayload,
   buildResumeUpdatePayload,

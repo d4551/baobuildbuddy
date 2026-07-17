@@ -30,7 +30,8 @@ import {
 } from "../config/rate-limit";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
-import { rateLimit, resolveRateLimitClientKey } from "../utils/rate-limit";
+import { rateLimit } from "../utils/rate-limit";
+import { resolveRateLimitClientKey } from "../utils/request";
 import {
   authBootstrapBody,
   authConfiguredResponses,

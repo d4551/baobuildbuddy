@@ -108,9 +108,7 @@ if (import.meta.main) {
     await writeOutput("skipLibCheck waiver validation passed.");
   } else {
     await writeError("skipLibCheck waiver validation failed:");
-    for (const violation of violations) {
-      await writeError(`- ${violation.message}`);
-    }
+    await Promise.all(violations.map((violation) => writeError(`- ${violation.message}`)));
     process.exit(1);
   }
 }

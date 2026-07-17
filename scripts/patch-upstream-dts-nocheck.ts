@@ -25,13 +25,15 @@ const PACKAGE_GLOBS = [
 ] as const;
 
 const NOCHECK = "// @ts-nocheck\n";
+const TRAILING_SLASH_PATTERN = /\/$/;
+const LEADING_SLASH_PATTERN = /^\//;
 
 const expandGlobDir = (pattern: string): string[] => {
   if (!pattern.includes("*")) {
     return [join(ROOT, pattern)];
   }
   const [prefix, suffix] = pattern.split("*");
-  const parent = join(ROOT, prefix.replace(/\/$/, ""));
+  const parent = join(ROOT, prefix.replace(TRAILING_SLASH_PATTERN, ""));
   if (!existsSync(parent)) {
     return [];
   }
@@ -40,7 +42,7 @@ const expandGlobDir = (pattern: string): string[] => {
       const full = join(parent, entry);
       return existsSync(full) && statSync(full).isDirectory();
     })
-    .map((entry) => join(parent, entry, suffix.replace(/^\//, "")));
+    .map((entry) => join(parent, entry, suffix.replace(LEADING_SLASH_PATTERN, "")));
 };
 
 const collectDtsFiles = (dir: string, out: string[]): void => {

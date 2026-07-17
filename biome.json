@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -29,9 +29,15 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "complexity": "warn",
-      "performance": "warn",
+      "preset": "recommended",
+      "complexity": {
+        "noVoid": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error",
+        "noAwaitInLoops": "error",
+        "useTopLevelRegex": "error"
+      },
       "security": "error",
       "suspicious": {
         "noConsole": "error",
