@@ -8,6 +8,7 @@ This document overrides generic “full-stack audit” prompts that assume **Pri
 |-------|------------|--------|
 | Runtime / PM | **Bun** | `bun run *` for dev, test, lint, build |
 | API | **Elysia 2** (`>=2.0.0-exp.42`) on Bun | Port **3000**; route hooks precede handlers; OpenAPI via `@elysiajs/openapi` |
+| TypeScript | **7** (`@typescript/native`) + **6.0.3** API peer | Typecheck uses TS7 native; ESLint/typescript-eslint stays on TS 6.0.3 until TS 7.1 programmatic API lands |
 | API client types | **Eden Treaty** | Generated from server |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
 | UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
