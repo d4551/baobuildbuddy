@@ -42,8 +42,8 @@ defineProps<{
             </div>
           </div>
           <span
-            class="badge"
-            :class="isProviderConfigured(provider.id) ? 'badge-success' : 'badge-ghost'"
+            class="badge badge-sm shrink-0"
+            :class="isProviderConfigured(provider.id) ? 'badge-success' : 'badge-soft'"
           >
             {{
               isProviderConfigured(provider.id)
@@ -54,10 +54,13 @@ defineProps<{
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <span class="badge" :class="provider.available ? 'badge-success' : 'badge-neutral'">
+          <span
+            class="badge badge-sm"
+            :class="provider.available ? 'badge-success badge-soft' : 'badge-neutral badge-soft'"
+          >
             {{ providerAvailabilityLabel(provider.available) }}
           </span>
-          <span class="badge badge-outline" :class="providerHealthBadgeClass(provider.health)">
+          <span class="badge badge-sm badge-outline" :class="providerHealthBadgeClass(provider.health)">
             {{ providerHealthLabel(provider.health) }}
           </span>
         </div>
