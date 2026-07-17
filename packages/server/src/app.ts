@@ -26,6 +26,7 @@ import { interviewRoutes } from "./routes/interview.routes";
 import { jobsRoutes } from "./routes/jobs.routes";
 import { portfolioRoutes } from "./routes/portfolio.routes";
 import { resumeRoutes } from "./routes/resume.routes";
+import { ROUTE_RESPONSE_REGISTRY } from "./routes/route-response-registry";
 import { scraperRoutes } from "./routes/scraper.routes";
 import { searchRoutes } from "./routes/search.routes";
 import { settingsRoutes } from "./routes/settings.routes";
@@ -39,6 +40,9 @@ import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 
 setupTypebox();
+
+// Keep stripped Elysia response schemas reachable until OpenAPI wiring can consume them again.
+void ROUTE_RESPONSE_REGISTRY;
 
 const OPENAPI_TAGS = [
   { name: "Health", description: "Service health and readiness endpoints." },

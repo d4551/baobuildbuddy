@@ -15,7 +15,6 @@ import { scraperService } from "../services/scraper-service";
 import type { RouteSetState } from "../types/route-state";
 import {
   type ScraperPortalParams,
-  scraperOperationResponses,
   scraperPortalParamsSchema,
 } from "./scraper-route-contracts";
 

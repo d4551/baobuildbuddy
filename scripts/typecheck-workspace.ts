@@ -6,6 +6,7 @@
  */
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 const packages = ["shared", "scraper", "server", "client"] as const;
 const tscBin = join(process.cwd(), "node_modules", "@typescript", "native", "bin", "tsc");
@@ -30,11 +31,11 @@ for (const pkg of packages) {
   const sourceErrors = lines.filter((line) => !line.includes("node_modules"));
   const upstreamErrors = lines.filter((line) => line.includes("node_modules"));
 
-  console.log(
+  await writeOutput(
     `[typecheck:${pkg}] sourceErrors=${sourceErrors.length} upstreamDeclarationErrors=${upstreamErrors.length}`,
   );
   for (const line of sourceErrors) {
-    console.error(line);
+    await writeError(line);
   }
   if (sourceErrors.length > 0) {
     failed = true;
@@ -45,4 +46,4 @@ if (failed) {
   process.exit(1);
 }
 
-console.log("Workspace source typecheck passed (TypeScript 7 native).");
+await writeOutput("Workspace source typecheck passed (TypeScript 7 native).");

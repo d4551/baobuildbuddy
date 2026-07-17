@@ -1,7 +1,6 @@
 import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import {
@@ -14,7 +13,6 @@ import {
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
-import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const studioListQuerySchema = t.Object({
   q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),

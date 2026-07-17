@@ -4,16 +4,10 @@ import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
 import { interviewService } from "../services/interview-service";
 import type { RouteSetState } from "../types/route-state";
 import {
-  completeInterviewSessionResponses,
   type CreateSessionBody,
   createSessionBodySchema,
-  createInterviewSessionResponses,
-  interviewSessionResponses,
   type InterviewSessionParams,
   interviewSessionParamsSchema,
-  interviewSessionsListResponses,
-  interviewStatsResponses,
-  submitInterviewResponseResponses,
   type SubmitResponseRouteBody,
   submitResponseBodySchema,
 } from "./interview-route-contracts";

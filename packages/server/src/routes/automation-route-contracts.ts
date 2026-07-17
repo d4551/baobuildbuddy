@@ -7,13 +7,6 @@ import {
   RPA_CAPABILITY_ISSUE_CODES,
 } from "@bao/shared/constants/automation";
 import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_CONFLICT,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
-} from "@bao/shared/constants/http";
-import {
   RUN_ID_MIN_LENGTH,
   RUN_ID_SAFE_PATTERN_SOURCE,
   SCHEMA_MAX_LENGTH_EMAIL,
@@ -23,7 +16,6 @@ import {
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { t } from "elysia";
-import { routeErrorBodySchema } from "./route-error-envelope";
 
 export { routeErrorBodySchema } from "./route-error-envelope";
 

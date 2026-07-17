@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import {
   API_ERROR_AUTOMATION_RUN_ID_REQUIRED,
   API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED,
@@ -11,10 +11,7 @@ import {
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import type { RouteSetState } from "../types/route-state";
@@ -32,18 +29,14 @@ import {
   handleVerifyAutomationContext,
 } from "./automation-route-actions";
 import {
-  AUTOMATION_STATUS_SUCCESS,
   type AutomationRunIdParams,
   type AutomationRunQuery,
-  automationRunEnvelopeBodySchema,
   automationRunIdParamsSchema,
   automationRunQuerySchema,
-  capabilityAuditReportBodySchema,
   type EmailResponseBody,
   emailResponseBodySchema,
   type JobApplyBody,
   jobApplyBodySchema,
-  routeErrorBodySchema,
   type ScheduledEmailResponseBody,
   type ScheduledJobApplyBody,
   type ScheduledScrapeBody,

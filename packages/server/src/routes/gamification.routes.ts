@@ -10,16 +10,9 @@ import { gamificationService } from "../services/gamification-service";
 import type { RouteSetState } from "../types/route-state";
 import {
   type AwardXpBody,
-  achievementsResponses,
   awardXpBody,
-  awardXpResponses,
   type ChallengeIdParams,
-  challengeCompleteResponses,
   challengeIdParams,
-  challengesListResponses,
-  gamificationProgressResponses,
-  monthlyStatsResponses,
-  weeklyProgressResponses,
 } from "./gamification-route-contracts";
 
 export const gamificationRoutes = new Elysia({

@@ -1,12 +1,6 @@
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { Elysia } from "elysia";
 import { statisticsService } from "../services/statistics-service";
-import {
-  statsCareerResponseSchema,
-  statsDashboardResponseSchema,
-  statsWeeklyResponseSchema,
-} from "./stats-route-contracts";
 
 export const statsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.statsBase),

@@ -1,9 +1,7 @@
 import type { Static } from "typebox";
 import {
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_OK,
   HTTP_STATUS_TOO_MANY_REQUESTS,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import { MAX_PORT, MIN_PORT } from "@bao/shared/constants/ports";
 import {

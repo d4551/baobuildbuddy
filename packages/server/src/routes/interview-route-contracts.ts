@@ -1,8 +1,6 @@
 import type { Static } from "typebox";
 import {
-  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import {
@@ -19,7 +17,6 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
 import { t } from "elysia";
-import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;

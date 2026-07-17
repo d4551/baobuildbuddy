@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import { join } from "node:path";
 import {
   API_ERROR_INVALID_RUN_ID,

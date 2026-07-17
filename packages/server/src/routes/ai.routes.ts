@@ -15,21 +15,14 @@ import {
 import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
   type AnalyzeResumeRouteBody,
-  analyzeResumeResponses,
   type AutomationActionRouteBody,
-  automationActionResponses,
   analyzeResumeRouteBodySchema,
   automationActionRouteBodySchema,
-  aiModelsResponses,
-  aiUsageResponses,
   type ChatRouteBody,
-  chatRouteResponses,
   chatRouteBodySchema,
   type GenerateCoverLetterRouteBody,
-  generateCoverLetterResponses,
   generateCoverLetterRouteBodySchema,
   type MatchJobsRouteBody,
-  matchJobsResponses,
   matchJobsRouteBodySchema,
   usageTailLimit,
 } from "./ai-route-contracts";

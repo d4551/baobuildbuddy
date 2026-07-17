@@ -5,9 +5,7 @@ import {
   type SearchAutocompleteQuery,
   type SearchQuery,
   type SearchType,
-  searchAllResponses,
   searchAutocompleteQuery,
-  searchAutocompleteResponses,
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";

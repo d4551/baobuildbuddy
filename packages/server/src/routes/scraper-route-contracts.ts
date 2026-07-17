@@ -1,10 +1,6 @@
 import type { Static } from "typebox";
 import { AI_PROVIDER_IDS } from "@bao/shared/types/ai";
-import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_OK,
-} from "@bao/shared/constants/http";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { t } from "elysia";
 
 export const scraperPortalParamsSchema = t.Object(

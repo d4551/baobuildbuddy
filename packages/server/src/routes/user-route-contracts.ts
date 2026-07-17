@@ -38,3 +38,24 @@ export const userProfileUpdateBodySchema = t.Object({
 });
 
 export type UserProfileUpdateRouteBody = Static<typeof userProfileUpdateBodySchema>;
+
+export const userProfileResponseSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  email: t.Union([t.String(), t.Null()]),
+  phone: t.Union([t.String(), t.Null()]),
+  location: t.Union([t.String(), t.Null()]),
+  website: t.Union([t.String(), t.Null()]),
+  linkedin: t.Union([t.String(), t.Null()]),
+  github: t.Union([t.String(), t.Null()]),
+  summary: t.Union([t.String(), t.Null()]),
+  currentRole: t.Union([t.String(), t.Null()]),
+  currentCompany: t.Union([t.String(), t.Null()]),
+  yearsExperience: t.Union([t.Number(), t.Null()]),
+  technicalSkills: t.Array(t.String()),
+  softSkills: t.Array(t.String()),
+  gamingExperience: t.Record(t.String(), t.Unknown()),
+  careerGoals: t.Record(t.String(), t.Unknown()),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});

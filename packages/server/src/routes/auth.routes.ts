@@ -31,9 +31,6 @@ import { rateLimit, resolveRateLimitClientKey } from "../utils/rate-limit";
 import {
   type AuthBootstrapBody,
   authBootstrapBody,
-  authConfiguredResponses,
-  authInitResponses,
-  authStatusResponses,
 } from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /[=]+$/u;

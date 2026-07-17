@@ -7,16 +7,11 @@ import {
   type CoverLetterIdParams,
   type CoverLetterMutationBody,
   type CoverLetterUpdateBody,
-  coverLetterDeleteResponses,
-  coverLetterEntityResponses,
   coverLetterExportBodySchema,
-  coverLetterExportResponses,
   coverLetterIdParamsSchema,
   coverLetterMutationBodySchema,
   coverLetterUpdateBodySchema,
-  coverLettersListResponses,
   type GenerateCoverLetterRouteBody,
-  generateCoverLetterResponses,
   generateCoverLetterBodySchema,
 } from "./cover-letter-route-contracts";
 import {
