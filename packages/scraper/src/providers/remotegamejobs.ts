@@ -7,7 +7,7 @@ const REMOTE_GAME_JOBS_RESULT_LIMIT = 50;
 const EMPLOYMENT_TYPE_TOKENS = ["full-time", "part-time", "contract", "freelance", "internship"];
 const REMOTE_GAME_JOBS_BOX_SELECTOR = ".job-box";
 const REMOTE_GAME_JOBS_PRIMARY_LINK_SELECTOR = "a.has-text-black";
-const REMOTE_GAME_JOBS_FALLBACK_LINK_SELECTOR = "a[href*='/jobs/']";
+const REMOTE_GAME_JOBS_SECONDARY_LINK_SELECTOR = "a[href*='/jobs/']";
 
 type RemoteGameJobsCandidate = {
   title: string;
@@ -19,14 +19,14 @@ type RemoteGameJobsEvaluateArgs = {
   employmentTypeTokens: readonly string[];
   boxSelector: string;
   primaryLinkSelector: string;
-  fallbackLinkSelector: string;
+  secondaryLinkSelector: string;
 };
 
 const extractRemoteGameJobsCandidates = ({
   employmentTypeTokens,
   boxSelector,
   primaryLinkSelector,
-  fallbackLinkSelector,
+  secondaryLinkSelector,
 }: RemoteGameJobsEvaluateArgs): RemoteGameJobsCandidate[] => {
   const findCompanyLine = (lines: string[], title: string): string =>
     lines.find((line) => {
@@ -45,7 +45,7 @@ const extractRemoteGameJobsCandidates = ({
   return boxes.slice(0, 50).flatMap((box) => {
     const link =
       box.querySelector<HTMLAnchorElement>(primaryLinkSelector) ??
-      box.querySelector<HTMLAnchorElement>(fallbackLinkSelector);
+      box.querySelector<HTMLAnchorElement>(secondaryLinkSelector);
     if (!link) {
       return [];
     }
@@ -85,7 +85,7 @@ export const extractRemoteGameJobs = async (
     employmentTypeTokens: EMPLOYMENT_TYPE_TOKENS,
     boxSelector: REMOTE_GAME_JOBS_BOX_SELECTOR,
     primaryLinkSelector: REMOTE_GAME_JOBS_PRIMARY_LINK_SELECTOR,
-    fallbackLinkSelector: REMOTE_GAME_JOBS_FALLBACK_LINK_SELECTOR,
+    secondaryLinkSelector: REMOTE_GAME_JOBS_SECONDARY_LINK_SELECTOR,
   });
 
   return rows.slice(0, REMOTE_GAME_JOBS_RESULT_LIMIT).map((row) => {

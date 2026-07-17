@@ -1,13 +1,13 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 
-const parsePositiveInt = (rawValue: string | undefined, fallbackValue: number): number => {
+const parsePositiveInt = (rawValue: string | undefined, defaultValue: number): number => {
   if (!rawValue) {
-    return fallbackValue;
+    return defaultValue;
   }
 
   const parsedValue = Number.parseInt(rawValue, DECIMAL_RADIX);
-  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : fallbackValue;
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : defaultValue;
 };
 
 /**

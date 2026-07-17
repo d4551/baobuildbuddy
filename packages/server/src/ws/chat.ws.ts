@@ -184,20 +184,18 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
   const contextResult = await settle(
     contextManager.buildContext(sessionId, data.content, undefined, runtimeBrand),
   );
-  const responseText =
-    contextResult.status === "fulfilled"
-      ? await streamAssistantResponse({
-          socket,
-          aiService,
-          input: data.content,
-          context: contextResult.value,
-          sessionId,
-        })
-      : generateFallbackResponse(data.content, runtimeBrand);
-
   if (contextResult.status === "rejected") {
-    sendSocketPayload(socket, { type: "response", content: responseText, sessionId });
+    sendChatError(socket, sessionId);
+    return;
   }
+
+  const responseText = await streamAssistantResponse({
+    socket,
+    aiService,
+    input: data.content,
+    context: contextResult.value,
+    sessionId,
+  });
 
   const persistResult = await settle(saveChatMessage("assistant", responseText, sessionId));
   if (persistResult.status === "rejected") {
@@ -242,29 +240,3 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
     // Connection closed
   },
 });
-
-function generateFallbackResponse(input: string, brand: RuntimeBrand): string {
-  const lower = input.toLowerCase();
-  if (lower.includes("resume")) {
-    return "I can help tighten your resume. Head to the Resume workspace to build or refine it, and once an AI provider is configured I can give targeted feedback.";
-  }
-  if (lower.includes("job") || lower.includes("work") || lower.includes("career")) {
-    return "Open Jobs to review live game-industry roles. Once an AI provider is configured, I can help prioritize fit, positioning, and next steps.";
-  }
-  if (lower.includes("interview")) {
-    return "Interview Prep lets you rehearse studio-specific interviews and review feedback. Configure an AI provider to unlock guided practice.";
-  }
-  if (
-    lower.includes("automate") ||
-    lower.includes("automation") ||
-    lower.includes("rpa") ||
-    lower.includes("auto-apply") ||
-    lower.includes("auto apply")
-  ) {
-    return "Automation can handle repetitive application work. Open the Automation workspace to configure a run, or connect an AI provider so I can guide the setup here in chat.";
-  }
-  if (lower.includes("hello") || lower.includes("hi") || lower.includes("hey")) {
-    return `Hello. I’m ${brand.assistantName}, your hiring copilot for game-industry roles. I can help with resumes, opportunity research, interview prep, and workflow execution. What are we moving forward today?`;
-  }
-  return `I’m ${brand.assistantName}. Configure an AI provider in Settings to unlock guided help across resumes, role targeting, interview prep, and automation workflows.`;
-}
