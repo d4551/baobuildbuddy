@@ -34,8 +34,8 @@ for (const pkg of packages) {
   await writeOutput(
     `[typecheck:${pkg}] sourceErrors=${sourceErrors.length} upstreamDeclarationErrors=${upstreamErrors.length}`,
   );
-  for (const line of sourceErrors) {
-    await writeError(line);
+  if (sourceErrors.length > 0) {
+    await Promise.all(sourceErrors.map((line) => writeError(line)));
   }
   if (sourceErrors.length > 0) {
     failed = true;

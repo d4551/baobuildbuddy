@@ -156,11 +156,6 @@ export declare const awardXpResponses: {
         reason: import("typebox").TString;
         message: import("typebox").TString;
     }>;
-    readonly 400: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const achievementsResponses: {
     readonly 200: import("typebox").TArray<import("typebox").TObject<{
@@ -208,13 +203,6 @@ export declare const challengeCompleteResponses: {
         level: import("typebox").TOptional<import("typebox").TNumber>;
     }>;
     readonly 201: import("typebox").TObject<{
-        message: import("typebox").TString;
-        challengeId: import("typebox").TOptional<import("typebox").TString>;
-        completed: import("typebox").TBoolean;
-        totalXP: import("typebox").TOptional<import("typebox").TNumber>;
-        level: import("typebox").TOptional<import("typebox").TNumber>;
-    }>;
-    readonly 400: import("typebox").TObject<{
         message: import("typebox").TString;
         challengeId: import("typebox").TOptional<import("typebox").TString>;
         completed: import("typebox").TBoolean;

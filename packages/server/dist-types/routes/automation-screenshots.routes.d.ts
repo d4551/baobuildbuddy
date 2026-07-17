@@ -14,15 +14,6 @@ export declare const automationScreenshotRoutes: import("elysia/types").AddRoute
         runId: import("typebox").TString;
         index: import("typebox").TString;
     }>;
-    response: {
-        200: import("typebox").TUnknown;
-        400: import("typebox").TObject<{
-            error: import("typebox").TString;
-        }>;
-        404: import("typebox").TObject<{
-            error: import("typebox").TString;
-        }>;
-    };
 }, {}, `${string}/:runId/:index`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, set }: {
     params: AutomationScreenshotParams;
     set: RouteSetState;

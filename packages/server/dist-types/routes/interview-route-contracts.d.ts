@@ -517,11 +517,6 @@ export declare const interviewSessionResponses: {
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
         message: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const submitInterviewResponseResponses: {
     200: import("typebox").TObject<{
@@ -623,16 +618,6 @@ export declare const submitInterviewResponseResponses: {
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
         message: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    400: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const completeInterviewSessionResponses: {
     200: import("typebox").TObject<{
@@ -733,11 +718,6 @@ export declare const completeInterviewSessionResponses: {
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
         message: import("typebox").TOptional<import("typebox").TString>;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const interviewStatsResponses: {

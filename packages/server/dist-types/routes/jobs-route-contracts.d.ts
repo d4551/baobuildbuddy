@@ -201,11 +201,6 @@ export declare const jobEntityResponses: {
         matchReason: import("typebox").TOptional<import("typebox").TString>;
         rank: import("typebox").TOptional<import("typebox").TNumber>;
     }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const saveJobResponses: {
     readonly 200: import("typebox").TObject<{
@@ -224,11 +219,6 @@ export declare const saveJobResponses: {
         id: import("typebox").TString;
         jobId: import("typebox").TString;
         savedAt: import("typebox").TString;
-    }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const deleteSavedJobResponses: {
@@ -301,11 +291,6 @@ export declare const applyJobResponses: {
         notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
     }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const updateApplicationResponses: {
     readonly 200: import("typebox").TObject<{
@@ -315,11 +300,6 @@ export declare const updateApplicationResponses: {
         appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
-    }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const applicationsListResponses: {
@@ -371,13 +351,6 @@ export declare const recommendationsResponses: {
 };
 export declare const jobsRefreshResponses: {
     readonly 200: import("typebox").TObject<{
-        message: import("typebox").TString;
-        status: import("typebox").TString;
-        totalJobs: import("typebox").TNumber;
-        newJobs: import("typebox").TNumber;
-        updatedJobs: import("typebox").TNumber;
-    }>;
-    readonly 500: import("typebox").TObject<{
         message: import("typebox").TString;
         status: import("typebox").TString;
         totalJobs: import("typebox").TNumber;

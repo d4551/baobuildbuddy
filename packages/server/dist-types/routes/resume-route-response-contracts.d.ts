@@ -186,11 +186,6 @@ export declare const resumeQuestionGenerateResponses: {
             category: import("typebox").TString;
         }>>;
     }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeQuestionSynthesizeResponses: {
     201: import("typebox").TObject<{
@@ -244,11 +239,6 @@ export declare const resumeQuestionSynthesizeResponses: {
         template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
         theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
         isDefault: import("typebox").TBoolean;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const resumeListResponses: {
@@ -358,11 +348,6 @@ export declare const resumeEntityResponses: {
         theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
         isDefault: import("typebox").TBoolean;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeCreateResponses: {
     201: import("typebox").TObject<{
@@ -471,35 +456,15 @@ export declare const resumeUpdateResponses: {
         theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
         isDefault: import("typebox").TBoolean;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeDeleteResponses: {
     200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
         id: import("typebox").TString;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeExportResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeEnhanceResponses: {
     200: import("typebox").TObject<{
@@ -558,16 +523,6 @@ export declare const resumeEnhanceResponses: {
         suggestions: import("typebox").TArray<import("typebox").TUnknown>;
         section: import("typebox").TString;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const resumeScoreResponses: {
     200: import("typebox").TObject<{
@@ -578,15 +533,5 @@ export declare const resumeScoreResponses: {
         improvements: import("typebox").TArray<import("typebox").TString>;
         keywords: import("typebox").TArray<import("typebox").TString>;
         analysis: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };

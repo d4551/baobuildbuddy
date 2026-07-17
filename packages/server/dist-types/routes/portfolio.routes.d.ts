@@ -11,30 +11,7 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
             query: unknown;
             headers: unknown;
             response: {
-                200: {
-                    id?: string | undefined;
-                    metadata?: Record<string, unknown> | undefined;
-                    projects: {
-                        id?: string | undefined;
-                        portfolioId?: string | undefined;
-                        title: string;
-                        description: string;
-                        technologies?: string[] | null | undefined;
-                        image?: string | null | undefined;
-                        liveUrl?: string | null | undefined;
-                        githubUrl?: string | null | undefined;
-                        tags?: string[] | null | undefined;
-                        featured?: boolean | null | undefined;
-                        role?: string | null | undefined;
-                        platforms?: string[] | null | undefined;
-                        engines?: string[] | null | undefined;
-                        sortOrder?: number | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
-                    }[];
-                    createdAt?: string | undefined;
-                    updatedAt?: string | undefined;
-                };
+                200: import("@bao/shared/types/portfolio").PortfolioData;
             };
             error: never;
         };
@@ -49,30 +26,7 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
             query: unknown;
             headers: unknown;
             response: {
-                200: {
-                    id?: string | undefined;
-                    metadata?: Record<string, unknown> | undefined;
-                    projects: {
-                        id?: string | undefined;
-                        portfolioId?: string | undefined;
-                        title: string;
-                        description: string;
-                        technologies?: string[] | null | undefined;
-                        image?: string | null | undefined;
-                        liveUrl?: string | null | undefined;
-                        githubUrl?: string | null | undefined;
-                        tags?: string[] | null | undefined;
-                        featured?: boolean | null | undefined;
-                        role?: string | null | undefined;
-                        platforms?: string[] | null | undefined;
-                        engines?: string[] | null | undefined;
-                        sortOrder?: number | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
-                    }[];
-                    createdAt?: string | undefined;
-                    updatedAt?: string | undefined;
-                };
+                200: import("@bao/shared/types/portfolio").PortfolioData;
                 422: {
                     type: 'validation';
                     title: 'Validation Error';
@@ -109,46 +63,8 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        id?: string | undefined;
-                        portfolioId?: string | undefined;
-                        title: string;
-                        description: string;
-                        technologies?: string[] | null | undefined;
-                        image?: string | null | undefined;
-                        liveUrl?: string | null | undefined;
-                        githubUrl?: string | null | undefined;
-                        tags?: string[] | null | undefined;
-                        featured?: boolean | null | undefined;
-                        role?: string | null | undefined;
-                        platforms?: string[] | null | undefined;
-                        engines?: string[] | null | undefined;
-                        sortOrder?: number | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
-                    };
-                    201: {
-                        id?: string | undefined;
-                        portfolioId?: string | undefined;
-                        title: string;
-                        description: string;
-                        technologies?: string[] | null | undefined;
-                        image?: string | null | undefined;
-                        liveUrl?: string | null | undefined;
-                        githubUrl?: string | null | undefined;
-                        tags?: string[] | null | undefined;
-                        featured?: boolean | null | undefined;
-                        role?: string | null | undefined;
-                        platforms?: string[] | null | undefined;
-                        engines?: string[] | null | undefined;
-                        sortOrder?: number | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
-                    };
-                    404: {
+                    200: import("@bao/shared/types/portfolio").PortfolioProject | {
                         error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -159,11 +75,6 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                         found?: unknown;
                         property?: string;
                         expected?: string;
-                    };
-                    500: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -182,29 +93,8 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            id?: string | undefined;
-                            metadata?: Record<string, unknown> | undefined;
-                            projects: {
-                                id?: string | undefined;
-                                portfolioId?: string | undefined;
-                                title: string;
-                                description: string;
-                                technologies?: string[] | null | undefined;
-                                image?: string | null | undefined;
-                                liveUrl?: string | null | undefined;
-                                githubUrl?: string | null | undefined;
-                                tags?: string[] | null | undefined;
-                                featured?: boolean | null | undefined;
-                                role?: string | null | undefined;
-                                platforms?: string[] | null | undefined;
-                                engines?: string[] | null | undefined;
-                                sortOrder?: number | null | undefined;
-                                createdAt?: string | undefined;
-                                updatedAt?: string | undefined;
-                            }[];
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                        200: import("@bao/shared/types/portfolio").PortfolioData | {
+                            error: string;
                         };
                         422: {
                             type: 'validation';
@@ -215,11 +105,6 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                             found?: unknown;
                             property?: string;
                             expected?: string;
-                        };
-                        500: {
-                            error: string;
-                            code?: string | undefined;
-                            fields?: string[] | undefined;
                         };
                     };
                     error: never;
@@ -252,46 +137,8 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            id?: string | undefined;
-                            portfolioId?: string | undefined;
-                            title: string;
-                            description: string;
-                            technologies?: string[] | null | undefined;
-                            image?: string | null | undefined;
-                            liveUrl?: string | null | undefined;
-                            githubUrl?: string | null | undefined;
-                            tags?: string[] | null | undefined;
-                            featured?: boolean | null | undefined;
-                            role?: string | null | undefined;
-                            platforms?: string[] | null | undefined;
-                            engines?: string[] | null | undefined;
-                            sortOrder?: number | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
-                        };
-                        201: {
-                            id?: string | undefined;
-                            portfolioId?: string | undefined;
-                            title: string;
-                            description: string;
-                            technologies?: string[] | null | undefined;
-                            image?: string | null | undefined;
-                            liveUrl?: string | null | undefined;
-                            githubUrl?: string | null | undefined;
-                            tags?: string[] | null | undefined;
-                            featured?: boolean | null | undefined;
-                            role?: string | null | undefined;
-                            platforms?: string[] | null | undefined;
-                            engines?: string[] | null | undefined;
-                            sortOrder?: number | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
-                        };
-                        404: {
+                        200: import("@bao/shared/types/portfolio").PortfolioProject | {
                             error: string;
-                            code?: string | undefined;
-                            fields?: string[] | undefined;
                         };
                         422: {
                             type: 'validation';
@@ -302,11 +149,6 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                             found?: unknown;
                             property?: string;
                             expected?: string;
-                        };
-                        500: {
-                            error: string;
-                            code?: string | undefined;
-                            fields?: string[] | undefined;
                         };
                     };
                     error: never;
@@ -327,13 +169,13 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     headers: unknown;
                     response: {
                         200: {
+                            success?: undefined;
+                            id?: undefined;
+                            error: string;
+                        } | {
+                            error?: undefined;
                             success: boolean;
                             id: string;
-                        };
-                        404: {
-                            error: string;
-                            code?: string | undefined;
-                            fields?: string[] | undefined;
                         };
                     };
                     error: never;
@@ -348,19 +190,6 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
     body: import("typebox").TObject<{
         format: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    response: {
-        200: import("typebox").TUnknown;
-        404: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        500: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-    };
 }, {}, `${string}/export`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
     body: PortfolioExportRouteBody;
     set: RouteSetState;

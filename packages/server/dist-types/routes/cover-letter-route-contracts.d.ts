@@ -114,21 +114,11 @@ export declare const coverLetterEntityResponses: {
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const coverLetterDeleteResponses: {
     200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
         id: import("typebox").TString;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const generateCoverLetterResponses: {
@@ -153,11 +143,6 @@ export declare const generateCoverLetterResponses: {
             updatedAt: import("typebox").TOptional<import("typebox").TString>;
         }>;
     }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
     503: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -166,14 +151,4 @@ export declare const generateCoverLetterResponses: {
 };
 export declare const coverLetterExportResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };

@@ -239,21 +239,11 @@ export declare const skillMappingUpdateResponses: {
         verified: import("typebox").TBoolean;
         aiGenerated: import("typebox").TOptional<import("typebox").TBoolean>;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const skillMappingDeleteResponses: {
     200: import("typebox").TObject<{
         message: import("typebox").TString;
         id: import("typebox").TString;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
     410: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -333,13 +323,6 @@ export declare const skillReadinessResponses: {
 };
 export declare const skillAnalysisResponses: {
     200: import("typebox").TObject<{
-        message: import("typebox").TString;
-        detectedSkills: import("typebox").TArray<import("typebox").TString>;
-        suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        recommendations: import("typebox").TArray<import("typebox").TString>;
-        provider: import("typebox").TOptional<import("typebox").TString>;
-    }>;
-    500: import("typebox").TObject<{
         message: import("typebox").TString;
         detectedSkills: import("typebox").TArray<import("typebox").TString>;
         suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;

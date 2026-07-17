@@ -10,11 +10,14 @@ const mockApi = {
   },
 };
 
-function getNuxtState<T>(key: string, initializer?: () => T) {
-  if (!nuxtStateStore.has(key)) {
-    nuxtStateStore.set(key, ref(initializer ? initializer() : undefined) as Ref<unknown>);
+function getNuxtState<T>(key: string, initializer?: () => T): Ref<T> {
+  const existing = nuxtStateStore.get(key);
+  if (existing) {
+    return existing as Ref<T>;
   }
-  return nuxtStateStore.get(key) as Ref<T>;
+  const created: Ref<unknown> = ref(initializer ? initializer() : undefined);
+  nuxtStateStore.set(key, created);
+  return created as Ref<T>;
 }
 
 function resetNuxtState() {

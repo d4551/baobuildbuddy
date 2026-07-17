@@ -4,7 +4,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    "skipLibCheck": false,
+    // Upstream Elysia 2.0.0-exp.44 + drizzle-orm .d.ts fail under TypeScript 7 lib checking.
+    // First-party source is gated by `bun run typecheck` (scripts/typecheck-workspace.ts).
+    "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

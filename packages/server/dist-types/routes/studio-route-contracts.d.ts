@@ -129,21 +129,11 @@ export declare const studioEntityResponses: {
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const studioDeleteResponses: {
     readonly 200: import("typebox").TObject<{
         message: import("typebox").TString;
         id: import("typebox").TString;
-    }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
 };
 export declare const studioAnalyticsResponses: {

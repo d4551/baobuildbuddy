@@ -39,12 +39,4 @@ export declare const scraperOperationResponses: {
             model: import("typebox").TOptional<import("typebox").TString>;
         }>;
     }>;
-    readonly 400: import("typebox").TObject<{
-        error: import("typebox").TString;
-        details: import("typebox").TOptional<import("typebox").TString>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        details: import("typebox").TOptional<import("typebox").TString>;
-    }>;
 };

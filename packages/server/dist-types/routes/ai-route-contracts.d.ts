@@ -213,11 +213,6 @@ export declare const chatRouteResponses: {
         followUps: import("typebox").TArray<import("typebox").TString>;
         contextDomain: import("typebox").TString;
     }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -238,16 +233,6 @@ export declare const analyzeResumeResponses: {
         provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
         model: import("typebox").TString;
     }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -264,16 +249,6 @@ export declare const generateCoverLetterResponses: {
         }>;
         provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
         model: import("typebox").TString;
-    }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -296,11 +271,6 @@ export declare const matchJobsResponses: {
             highlightSkills: import("typebox").TArray<import("typebox").TString>;
         }>>;
         recommendations: import("typebox").TArray<import("typebox").TString>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -404,31 +374,6 @@ export declare const automationActionResponses: {
         runId: import("typebox").TString;
         status: import("typebox").TString;
         message: import("typebox").TString;
-    }>;
-    readonly 400: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 409: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 422: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;

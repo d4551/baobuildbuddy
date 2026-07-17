@@ -827,11 +827,6 @@ export declare const settingsReadResponses: {
             }>>;
         }>;
     }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -841,16 +836,6 @@ export declare const settingsReadResponses: {
 export declare const settingsUpdateResponses: {
     readonly 200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
-    }>;
-    readonly 422: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
     }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;

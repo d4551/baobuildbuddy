@@ -55,19 +55,20 @@ export declare const authRoutes: Elysia<string, "local", {
                 headers: unknown;
                 response: {
                     200: {
+                        error?: undefined;
                         configured: boolean;
-                        apiKey?: string | undefined;
-                        message?: string | undefined;
-                    };
-                    400: {
+                        message: string;
+                        apiKey?: undefined;
+                    } | {
+                        message?: undefined;
                         error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
-                    403: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
+                        configured?: undefined;
+                        apiKey?: undefined;
+                    } | {
+                        error?: undefined;
+                        configured: boolean;
+                        apiKey: string;
+                        message: string;
                     };
                     422: {
                         type: 'validation';

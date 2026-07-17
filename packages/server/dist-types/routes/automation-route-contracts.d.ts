@@ -104,43 +104,7 @@ export declare const capabilityAuditReportBodySchema: import("typebox").TObject<
         }>>;
     }>>;
 }>;
-export declare const automationRouteErrorResponses: {
-    400: import("typebox").TObject<{
-        error: import("typebox").TObject<{
-            code: import("typebox").TString;
-            message: import("typebox").TString;
-            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        }>;
-    }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TObject<{
-            code: import("typebox").TString;
-            message: import("typebox").TString;
-            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        }>;
-    }>;
-    409: import("typebox").TObject<{
-        error: import("typebox").TObject<{
-            code: import("typebox").TString;
-            message: import("typebox").TString;
-            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        }>;
-    }>;
-    422: import("typebox").TObject<{
-        error: import("typebox").TObject<{
-            code: import("typebox").TString;
-            message: import("typebox").TString;
-            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        }>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TObject<{
-            code: import("typebox").TString;
-            message: import("typebox").TString;
-            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        }>;
-    }>;
-};
+export declare const automationRouteErrorResponses: {};
 export declare const jobApplyBodySchema: import("typebox").TObject<{
     jobUrl: import("typebox").TString;
     resumeId: import("typebox").TString;

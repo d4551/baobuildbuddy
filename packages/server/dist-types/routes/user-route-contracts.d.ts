@@ -17,3 +17,23 @@ export declare const userProfileUpdateBodySchema: import("typebox").TObject<{
     careerGoals: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
 }>;
 export type UserProfileUpdateRouteBody = Static<typeof userProfileUpdateBodySchema>;
+export declare const userProfileResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    name: import("typebox").TString;
+    email: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    phone: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    location: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    website: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    linkedin: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    github: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    summary: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    currentRole: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    currentCompany: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    yearsExperience: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    technicalSkills: import("typebox").TArray<import("typebox").TString>;
+    softSkills: import("typebox").TArray<import("typebox").TString>;
+    gamingExperience: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+    careerGoals: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+    createdAt: import("typebox").TString;
+    updatedAt: import("typebox").TString;
+}>;

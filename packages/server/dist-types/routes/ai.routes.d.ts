@@ -50,12 +50,14 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 response: {
                     200: {
                         message: string;
-                        sessionId: string;
+                        sessionId: string | null | undefined;
                         timestamp: string;
                         provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
                         followUps: string[];
-                        contextDomain: string;
+                        contextDomain: "automation" | "general" | "interview" | "job_search" | "portfolio" | "resume" | "skills";
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: 'validation';
@@ -66,16 +68,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
-                    };
-                    429: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
-                    500: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -95,6 +87,15 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 headers: unknown;
                 response: {
                     200: {
+                        error: string;
+                        message?: undefined;
+                        resumeId?: undefined;
+                        jobId?: undefined;
+                        analysis?: undefined;
+                        provider?: undefined;
+                        model?: undefined;
+                    } | {
+                        error?: undefined;
                         message: string;
                         resumeId: string;
                         jobId: string | null;
@@ -107,11 +108,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
                     };
-                    404: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -121,16 +117,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
-                    };
-                    429: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
-                    500: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -152,6 +138,13 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 headers: unknown;
                 response: {
                     200: {
+                        message?: undefined;
+                        provider?: undefined;
+                        model?: undefined;
+                        error: string;
+                        content?: undefined;
+                    } | {
+                        error?: undefined;
                         message: string;
                         content: {
                             introduction: string;
@@ -160,11 +153,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         };
                         provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
                         model: string;
-                    };
-                    404: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -175,16 +163,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
-                    };
-                    429: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
-                    500: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -218,6 +196,8 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                             highlightSkills: string[];
                         }[];
                         recommendations: string[];
+                    } | {
+                        error: string;
                     };
                     422: {
                         type: 'validation';
@@ -228,16 +208,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
-                    };
-                    429: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
-                    500: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -253,58 +223,7 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        aiRouting?: {
-                            chat: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            interviewQuestions: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            interviewFeedback: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            resume: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            coverLetter: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            emailResponse: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            jobMatch: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            scrapeEnrichment: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                            automationFieldMapping: {
-                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                                model?: string | undefined;
-                            };
-                        } | undefined;
-                        configuredProviders?: ("claude" | "gemini" | "huggingface" | "local" | "openai")[] | undefined;
-                        error?: string | undefined;
-                        preferredModel?: string | null | undefined;
-                        preferredProvider?: "claude" | "gemini" | "huggingface" | "local" | "openai" | undefined;
-                        providerDiagnostics?: Record<string, {
-                            provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                            code: string;
-                            checkedAt: string;
-                            endpoint?: string | undefined;
-                            selectedModel?: string | undefined;
-                            availableModels?: string[] | undefined;
-                            message?: string | undefined;
-                        }> | undefined;
+                    200: import("../services/ai/control-plane").AIControlPlaneState | {
                         providers: {
                             id: "claude" | "gemini" | "huggingface" | "local" | "openai";
                             nameKey: string;
@@ -312,17 +231,9 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                             iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
                             models: string[];
                             available: boolean;
-                            health: "degraded" | "down" | "healthy" | "unconfigured";
-                            selectedModel?: string | undefined;
-                            diagnosticCode?: string | undefined;
-                            availableModels?: string[] | undefined;
-                            error?: string | undefined;
+                            health: "unconfigured";
                         }[];
-                    };
-                    429: {
                         error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -349,11 +260,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                             sessionId: string | null;
                         }[];
                     };
-                    429: {
-                        error: string;
-                        code?: string | undefined;
-                        fields?: string[] | undefined;
-                    };
                 };
                 error: never;
             };
@@ -376,43 +282,6 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
         coverLetterId: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    response: {
-        readonly 200: import("typebox").TObject<{
-            runId: import("typebox").TString;
-            status: import("typebox").TString;
-            message: import("typebox").TString;
-        }>;
-        readonly 400: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        readonly 404: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        readonly 409: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        readonly 422: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        readonly 500: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-        readonly 429: import("typebox").TObject<{
-            error: import("typebox").TString;
-            code: import("typebox").TOptional<import("typebox").TString>;
-            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        }>;
-    };
 }, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
     body: AutomationActionRouteBody;
     set: RouteSetState;

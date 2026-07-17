@@ -182,16 +182,6 @@ export declare const portfolioProjectMutationResponses: {
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const portfolioProjectReorderResponses: {
     200: import("typebox").TObject<{
@@ -218,33 +208,13 @@ export declare const portfolioProjectReorderResponses: {
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const portfolioProjectDeleteResponses: {
     200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
         id: import("typebox").TString;
     }>;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
 export declare const portfolioExportResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    500: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };

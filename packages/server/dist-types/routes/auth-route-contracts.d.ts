@@ -39,14 +39,4 @@ export declare const authInitResponses: {
         apiKey: import("typebox").TOptional<import("typebox").TString>;
         message: import("typebox").TOptional<import("typebox").TString>;
     }>;
-    readonly 400: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
-    readonly 403: import("typebox").TObject<{
-        error: import("typebox").TString;
-        code: import("typebox").TOptional<import("typebox").TString>;
-        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    }>;
 };
