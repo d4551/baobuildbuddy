@@ -6,7 +6,7 @@
  * exact upstream packages and `bun run typecheck` is wired to the source-only
  * gate (`scripts/typecheck-workspace.ts`).
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -91,16 +91,7 @@ export const collectSkipLibCheckWaiverViolations = (input?: {
     });
   }
 
-  const workspaceExists =
-    input?.typecheckWorkspaceExists ??
-    (() => {
-      try {
-        readFileSync(TYPECHECK_WORKSPACE_PATH, "utf8");
-        return true;
-      } catch {
-        return false;
-      }
-    })();
+  const workspaceExists = input?.typecheckWorkspaceExists ?? existsSync(TYPECHECK_WORKSPACE_PATH);
   if (!workspaceExists) {
     violations.push({
       message:

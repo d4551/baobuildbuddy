@@ -4,7 +4,7 @@
  *
  * Idempotent. Invoked from the root `postinstall` script after `bun install`.
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -32,37 +32,28 @@ const expandGlobDir = (pattern: string): string[] => {
   }
   const [prefix, suffix] = pattern.split("*");
   const parent = join(ROOT, prefix.replace(/\/$/, ""));
-  try {
-    return readdirSync(parent)
-      .filter((entry) => {
-        try {
-          return statSync(join(parent, entry)).isDirectory();
-        } catch {
-          return false;
-        }
-      })
-      .map((entry) => join(parent, entry, suffix.replace(/^\//, "")));
-  } catch {
+  if (!existsSync(parent)) {
     return [];
   }
+  return readdirSync(parent)
+    .filter((entry) => {
+      const full = join(parent, entry);
+      return existsSync(full) && statSync(full).isDirectory();
+    })
+    .map((entry) => join(parent, entry, suffix.replace(/^\//, "")));
 };
 
 const collectDtsFiles = (dir: string, out: string[]): void => {
-  let entries: string[];
-  try {
-    entries = readdirSync(dir);
-  } catch {
+  if (!existsSync(dir)) {
     return;
   }
+  const entries = readdirSync(dir);
   for (const entry of entries) {
     const full = join(dir, entry);
-    let isDir = false;
-    try {
-      isDir = statSync(full).isDirectory();
-    } catch {
+    if (!existsSync(full)) {
       continue;
     }
-    if (isDir) {
+    if (statSync(full).isDirectory()) {
       collectDtsFiles(full, out);
       continue;
     }
@@ -95,10 +86,13 @@ const main = async (): Promise<void> => {
 };
 
 if (import.meta.main) {
-  await main().catch(async (error: unknown) => {
-    await writeError(
-      `Upstream .d.ts nocheck patch failed: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    process.exit(1);
-  });
+  await main().then(
+    () => undefined,
+    async (error: unknown) => {
+      await writeError(
+        `Upstream .d.ts nocheck patch failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      process.exit(1);
+    },
+  );
 }

@@ -9,7 +9,7 @@ const validPackage = JSON.stringify({
   scripts: { typecheck: "bun run scripts/typecheck-workspace.ts" },
 });
 
-describe("collectSkipLibCheckWaiverViolations", () => {
+describe("skipLibCheck waiver gate", () => {
   test("passes when skipLibCheck is false", () => {
     const violations = collectSkipLibCheckWaiverViolations({
       tsconfigText: JSON.stringify({ compilerOptions: { skipLibCheck: false } }),
