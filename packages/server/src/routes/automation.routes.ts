@@ -38,6 +38,7 @@ import {
   automationRunEnvelopeBodySchema,
   automationRunIdParamsSchema,
   automationRunQuerySchema,
+  capabilityAuditReportBodySchema,
   type EmailResponseBody,
   emailResponseBodySchema,
   type JobApplyBody,
@@ -279,8 +280,22 @@ export const automationRoutes = new Elysia({
       return handleScheduledScrapeRoute({ target: body.target, runAt: body.runAt }, set);
     },
   )
-  .get("/capabilities", { detail: { tags: ["Automation"] } }, async ({ set }) =>
-    handleAutomationCapabilitiesRoute(set),
+  .get(
+    "/capabilities",
+    {
+      detail: { tags: ["Automation"] },
+      response: {
+        [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
+        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+      },
+    },
+    async ({ status }) => {
+      const result = await handleAutomationCapabilitiesRoute();
+      if (!result.ok) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
+    },
   )
   .get("/runs", { detail: { tags: ["Automation"] }, response: t.Array(automationRunEnvelopeBodySchema),
     query: automationRunQuerySchema,

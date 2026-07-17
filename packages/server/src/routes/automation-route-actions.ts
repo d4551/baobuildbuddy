@@ -186,15 +186,19 @@ export const handleScheduledScrapeRoute = async (
   return run;
 };
 
-export const handleAutomationCapabilitiesRoute = async (set: RouteSetState) => {
+export const handleAutomationCapabilitiesRoute = async () => {
   const auditResult = await settle(applicationAutomationService.getRpaCapabilityAudit());
   if (auditResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit.");
+    return {
+      ok: false as const,
+      body: toRouteError("SCRIPT_OUTPUT_INVALID", "Failed to load RPA capability audit."),
+    };
   }
 
-  set.status = HTTP_STATUS_OK;
-  return auditResult.value;
+  return {
+    ok: true as const,
+    body: auditResult.value,
+  };
 };
 
 export const handleAutomationRunByIdRoute = async (runId: string, set: RouteSetState) => {
