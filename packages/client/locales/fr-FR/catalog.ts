@@ -867,9 +867,7 @@ const catalog = {
       "successRateTitle": "Taux de réussite",
       "successRateDesc": "Réponses de l'assistant par rapport aux invites utilisateur",
       "averageResponseTitle": "Temps de réponse moyen",
-      "averageResponseValue": "{seconds}s",
       "averageResponseDesc": "Latence mesurée sur les requêtes de chat",
-      "sessionsTitle": "Sessions",
       "sessionsDesc": "Fournisseur actif : {provider}"
     },
     "preference": {
