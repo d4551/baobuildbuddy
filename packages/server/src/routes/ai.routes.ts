@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { db } from "../db/client";
@@ -15,14 +15,21 @@ import {
 import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
   type AnalyzeResumeRouteBody,
+  analyzeResumeResponses,
   type AutomationActionRouteBody,
+  automationActionResponses,
   analyzeResumeRouteBodySchema,
   automationActionRouteBodySchema,
+  aiModelsResponses,
+  aiUsageResponses,
   type ChatRouteBody,
+  chatRouteResponses,
   chatRouteBodySchema,
   type GenerateCoverLetterRouteBody,
+  generateCoverLetterResponses,
   generateCoverLetterRouteBodySchema,
   type MatchJobsRouteBody,
+  matchJobsResponses,
   matchJobsRouteBodySchema,
   usageTailLimit,
 } from "./ai-route-contracts";
@@ -39,47 +46,81 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   )
   .post(
     "/chat",
-    { detail: { tags: ["AI"] }, body: chatRouteBodySchema,
-    }, async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["AI"] },
+      body: chatRouteBodySchema,
+      response: chatRouteResponses,
+    },
+    async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
       handleChatRoute(body, set),
   )
   .post(
     "/analyze-resume",
-    { detail: { tags: ["AI"] }, body: analyzeResumeRouteBodySchema,
-    }, async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["AI"] },
+      body: analyzeResumeRouteBodySchema,
+      response: analyzeResumeResponses,
+    },
+    async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
       handleAnalyzeResumeRoute(body, set),
   )
   .post(
     "/generate-cover-letter",
-    { detail: { tags: ["AI"] }, body: generateCoverLetterRouteBodySchema,
-    }, async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["AI"] },
+      body: generateCoverLetterRouteBodySchema,
+      response: generateCoverLetterResponses,
+    },
+    async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
       handleGenerateCoverLetterRoute(body, set),
   )
   .post(
     "/match-jobs",
-    { detail: { tags: ["AI"] }, body: matchJobsRouteBodySchema,
-    }, async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["AI"] },
+      body: matchJobsRouteBodySchema,
+      response: matchJobsResponses,
+    },
+    async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
       handleMatchJobsRoute(body, set),
   )
-  .get("/models",{ detail: { tags: ["AI"] } }, async () => buildProviderModelsResponse())
-  .get("/usage",{ detail: { tags: ["AI"] } }, async () => {
-    const chatMessages = await db.select().from(chatHistory);
+  .get(
+    "/models",
+    {
+      detail: { tags: ["AI"] },
+      response: aiModelsResponses,
+    },
+    async () => buildProviderModelsResponse(),
+  )
+  .get(
+    "/usage",
+    {
+      detail: { tags: ["AI"] },
+      response: aiUsageResponses,
+    },
+    async () => {
+      const chatMessages = await db.select().from(chatHistory);
 
-    return {
-      totalMessages: chatMessages.length,
-      userMessages: chatMessages.filter((message) => message.role === "user").length,
-      assistantMessages: chatMessages.filter((message) => message.role === "assistant").length,
-      sessions: [...new Set(chatMessages.map((message) => message.sessionId))].length,
-      recentActivity: chatMessages.slice(-usageTailLimit).map((message) => ({
-        timestamp: message.timestamp,
-        role: message.role,
-        sessionId: message.sessionId,
-      })),
-    };
-  })
+      return {
+        totalMessages: chatMessages.length,
+        userMessages: chatMessages.filter((message) => message.role === "user").length,
+        assistantMessages: chatMessages.filter((message) => message.role === "assistant").length,
+        sessions: [...new Set(chatMessages.map((message) => message.sessionId))].length,
+        recentActivity: chatMessages.slice(-usageTailLimit).map((message) => ({
+          timestamp: message.timestamp,
+          role: message.role,
+          sessionId: message.sessionId,
+        })),
+      };
+    },
+  )
   .post(
     "/automation-action",
-    { detail: { tags: ["AI"] }, body: automationActionRouteBodySchema,
-    }, async ({ body, set }: { body: AutomationActionRouteBody; set: RouteSetState }) =>
+    {
+      detail: { tags: ["AI"] },
+      body: automationActionRouteBodySchema,
+      response: automationActionResponses,
+    },
+    async ({ body, set }: { body: AutomationActionRouteBody; set: RouteSetState }) =>
       handleAutomationActionRoute(body, set),
   );

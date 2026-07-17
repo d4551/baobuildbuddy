@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import {
   API_ERROR_INIT_SETTINGS_ROW,
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
@@ -24,14 +24,21 @@ import { resolveRateLimitClientKey } from "../utils/request";
 import {
   type ApiKeysUpdateBody,
   apiKeysUpdateBodySchema,
+  apiKeysUpdateResponses,
   type ImportSettingsBody,
   importSettingsBodySchema,
+  jobTaxonomyUpdateResponses,
   type JobTaxonomyUpdateBody,
   jobTaxonomyUpdateBodySchema,
+  providerTestResponses,
   type ProviderTestBody,
   providerTestBodySchema,
+  settingsExportResponses,
+  settingsImportResponses,
+  settingsReadResponses,
   type SettingsUpdateBody,
   settingsUpdateBodySchema,
+  settingsUpdateResponses,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
@@ -50,14 +57,22 @@ export const settingsRoutes = new Elysia({
           generator: (request) => resolveRateLimitClientKey(request),
         }),
       )
-      .get("/",{ detail: { tags: ["Settings"] } }, async () => {
-        const row = await readOrCreateSettingsRow();
-        if (!row) {
-          return { error: API_ERROR_LOAD_SETTINGS };
-        }
+      .get(
+        "/",
+        {
+          detail: { tags: ["Settings"] },
+          response: settingsReadResponses,
+        },
+        async ({ set }: { set: { status?: number | string } }) => {
+          const row = await readOrCreateSettingsRow();
+          if (!row) {
+            set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+            return { error: API_ERROR_LOAD_SETTINGS };
+          }
 
-        return buildSettingsResponse(row);
-      }),
+          return buildSettingsResponse(row);
+        },
+      ),
   )
   .use(
     new Elysia()
@@ -71,8 +86,12 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/",
-        { detail: { tags: ["Settings"] }, body: settingsUpdateBodySchema,
-        }, async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
+        {
+          detail: { tags: ["Settings"] },
+          body: settingsUpdateBodySchema,
+          response: settingsUpdateResponses,
+        },
+        async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
             set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -98,16 +117,24 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/job-taxonomy",
-        { detail: { tags: ["Settings"] }, body: jobTaxonomyUpdateBodySchema,
-        }, async ({ body }: { body: JobTaxonomyUpdateBody }) => {
+        {
+          detail: { tags: ["Settings"] },
+          body: jobTaxonomyUpdateBodySchema,
+          response: jobTaxonomyUpdateResponses,
+        },
+        async ({ body }: { body: JobTaxonomyUpdateBody }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
           return { success: true, jobTaxonomy };
         },
       )
       .put(
         "/api-keys",
-        { detail: { tags: ["Settings"] }, body: apiKeysUpdateBodySchema,
-        }, async ({ body }: { body: ApiKeysUpdateBody }) => {
+        {
+          detail: { tags: ["Settings"] },
+          body: apiKeysUpdateBodySchema,
+          response: apiKeysUpdateResponses,
+        },
+        async ({ body }: { body: ApiKeysUpdateBody }) => {
           await readOrCreateSettingsRow();
           await db
             .update(settings)
@@ -119,17 +146,32 @@ export const settingsRoutes = new Elysia({
       )
       .post(
         "/test-api-key",
-        { detail: { tags: ["Settings"] }, body: providerTestBodySchema,
-        }, async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
+        {
+          detail: { tags: ["Settings"] },
+          body: providerTestBodySchema,
+          response: providerTestResponses,
+        },
+        async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
       )
-      .get("/export",{ detail: { tags: ["Settings"] } }, async () => {
-        const { dataService } = await import("../services/data-service");
-        return dataService.exportAll();
-      })
+      .get(
+        "/export",
+        {
+          detail: { tags: ["Settings"] },
+          response: settingsExportResponses,
+        },
+        async () => {
+          const { dataService } = await import("../services/data-service");
+          return dataService.exportAll();
+        },
+      )
       .post(
         "/import",
-        { detail: { tags: ["Settings"] }, body: importSettingsBodySchema,
-        }, async ({ body }: { body: ImportSettingsBody }) => {
+        {
+          detail: { tags: ["Settings"] },
+          body: importSettingsBodySchema,
+          response: settingsImportResponses,
+        },
+        async ({ body }: { body: ImportSettingsBody }) => {
           const { dataService } = await import("../services/data-service");
           return dataService.importAll({
             version: body.version,

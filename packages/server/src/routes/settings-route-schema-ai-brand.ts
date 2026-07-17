@@ -39,7 +39,7 @@ export const preferredProviderBodySchema = t.Union([
   t.Literal(PROVIDER_LOCAL),
 ]);
 
-const aiRoutingTargetBodySchema = t.Object(
+export const aiRoutingTargetBodySchema = t.Object(
   {
     provider: preferredProviderBodySchema,
     model: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MODEL })),
@@ -74,7 +74,7 @@ export const aiRoutingBodySchema = t.Object(
   },
 );
 
-const brandThemePaletteBodySchema = t.Object({
+export const brandThemePaletteBodySchema = t.Object({
   base100: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   base200: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   base300: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
@@ -107,7 +107,7 @@ const brandThemePaletteBodySchema = t.Object({
 
 const brandThemePalettePatchBodySchema = t.Partial(brandThemePaletteBodySchema);
 
-const brandTypographyBodySchema = t.Object({
+export const brandTypographyBodySchema = t.Object({
   fontStylesheetUrl: t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG }),
   displayFontFamily: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
   bodyFontFamily: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
@@ -116,7 +116,7 @@ const brandTypographyBodySchema = t.Object({
 
 const brandTypographyPatchBodySchema = t.Partial(brandTypographyBodySchema);
 
-const brandContentBodySchema = t.Object({
+export const brandContentBodySchema = t.Object({
   tagline: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   defaultTitle: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   defaultDescription: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
@@ -127,6 +127,20 @@ const brandContentBodySchema = t.Object({
 });
 
 const brandContentPatchBodySchema = t.Partial(brandContentBodySchema);
+
+export const brandSettingsBodySchema = t.Required(
+  t.Object({
+    name: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    assistantName: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    apiName: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    logoPath: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    faviconPath: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    typography: brandTypographyBodySchema,
+    lightTheme: brandThemePaletteBodySchema,
+    darkTheme: brandThemePaletteBodySchema,
+    content: brandContentBodySchema,
+  }),
+);
 
 export const brandSettingsPatchBodySchema = t.Partial(
   t.Object({
