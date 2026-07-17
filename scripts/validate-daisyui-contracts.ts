@@ -102,6 +102,7 @@ const BTN_SEMANTIC_MODIFIERS = [
 ] as const;
 
 const BRAND_PREVIEW_FILE_PATH = "packages/client/components/settings/brand/BrandPreviewCard.vue";
+const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
 const BRAND_PREVIEW_REQUIRED_THEME_VARIABLES = [
   "--color-base-100",
   "--color-base-200",
@@ -345,21 +346,35 @@ const collectBtnModifierViolations = (filePath: string, fileContent: string): Vi
 };
 
 const collectBrandPreviewThemeViolations = (filePath: string, fileContent: string): Violation[] => {
-  if (filePath !== BRAND_PREVIEW_FILE_PATH) {
+  if (filePath !== BRAND_PREVIEW_STYLES_FILE_PATH) {
     return [];
   }
 
-  const previewSurfaceOffset = fileContent.indexOf("const createPreviewSurfaceStyle");
+  const previewSurfaceOffset = fileContent.indexOf("function paletteRules");
   const previewSurfaceLine =
     previewSurfaceOffset >= 0 ? getLineFromOffset(fileContent, previewSurfaceOffset) : 1;
 
-  return BRAND_PREVIEW_REQUIRED_THEME_VARIABLES.filter(
+  const missingOwner =
+    fileContent.includes("function paletteRules") && fileContent.includes("useBrandPreviewStyles")
+      ? []
+      : [
+          {
+            filePath,
+            line: previewSurfaceLine,
+            message:
+              "Brand preview CSS variable owner must export `paletteRules` via `useBrandPreviewStyles` (no Vue `:style` bindings).",
+          },
+        ];
+
+  const missingVariables = BRAND_PREVIEW_REQUIRED_THEME_VARIABLES.filter(
     (variableName) => !fileContent.includes(variableName),
   ).map((variableName) => ({
     filePath,
     line: previewSurfaceLine,
-    message: `Brand preview surfaces must scope \`${variableName}\` inside \`createPreviewSurfaceStyle\` so daisyUI semantic classes render the preview palette instead of the outer app theme.`,
+    message: `Brand preview surfaces must scope \`${variableName}\` inside \`paletteRules\` / \`useBrandPreviewStyles\` so daisyUI semantic classes render the preview palette instead of the outer app theme.`,
   }));
+
+  return [...missingOwner, ...missingVariables];
 };
 
 /**
@@ -386,8 +401,12 @@ export function collectDaisyUiContractViolationsForContent(
 
 const collectScopeViolations = async (): Promise<Violation[]> => {
   const files = await collectVueFiles();
+  const brandPreviewStylesPath = BRAND_PREVIEW_STYLES_FILE_PATH;
+  const scopedFiles = files.includes(brandPreviewStylesPath)
+    ? files
+    : [...files, brandPreviewStylesPath];
   const fileViolationGroups = await Promise.all(
-    files.map(async (filePath) => {
+    scopedFiles.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
       return collectDaisyUiContractViolationsForContent(filePath, fileContent);
     }),
