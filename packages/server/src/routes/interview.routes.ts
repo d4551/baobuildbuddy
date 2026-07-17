@@ -1,7 +1,6 @@
+import { t, Elysia } from "elysia";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { interviewService } from "../services/interview-service";
 import type { RouteSetState } from "../types/route-state";
 import {
@@ -23,26 +22,23 @@ import {
 
 export const interviewRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.interviewBase),
-  tags: ["Interview"],
 })
   .post(
     "/sessions",
-    {
-      body: StandardSchemaV1(createSessionBodySchema),
+    { detail: { tags: ["Interview"] }, body: createSessionBodySchema,
     }, async ({ body, set }: { body: CreateSessionBody; set: RouteSetState }) => {
       const result = await createInterviewSession(body.studioId, body.config);
       set.status = HTTP_STATUS_CREATED;
       return result.body;
     },
   )
-  .get("/sessions", async () => {
+  .get("/sessions",{ detail: { tags: ["Interview"] } }, async () => {
     const sessions = await interviewService.getSessions();
     return Promise.all(sessions.map(sessionWithDerivedFields));
   })
   .get(
     "/sessions/:id",
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
+    { detail: { tags: ["Interview"] }, params: interviewSessionParamsSchema,
     }, async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await getInterviewSession(params.id);
       if (result.status !== null) {
@@ -53,9 +49,8 @@ export const interviewRoutes = new Elysia({
   )
   .post(
     "/sessions/:id/response",
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
-      body: StandardSchemaV1(submitResponseBodySchema),
+    { detail: { tags: ["Interview"] }, params: interviewSessionParamsSchema,
+      body: submitResponseBodySchema,
     }, async ({
       params,
       body,
@@ -74,8 +69,7 @@ export const interviewRoutes = new Elysia({
   )
   .post(
     "/sessions/:id/complete",
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
+    { detail: { tags: ["Interview"] }, params: interviewSessionParamsSchema,
     }, async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await completeInterviewSession(params.id);
       if (result.status !== null) {
@@ -84,6 +78,8 @@ export const interviewRoutes = new Elysia({
       return result.body;
     },
   )
-  .get(toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats), async () =>
-    getInterviewStats(),
+  .get(
+    toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats),
+    { detail: { tags: ["Interview"] } },
+    async () => getInterviewStats(),
   );

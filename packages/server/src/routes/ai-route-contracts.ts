@@ -1,3 +1,4 @@
+import type { Static } from "typebox";
 import { AI_CHAT_CONTEXT_TAIL_LIMIT } from "@bao/shared/constants/ai-chat";
 import {
   SCHEMA_MAX_ITEMS_XXLARGE,
@@ -7,7 +8,7 @@ import {
   SCHEMA_MAX_LENGTH_MESSAGE,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
 
 export type AnalyzeResumeBody = {
@@ -56,57 +57,57 @@ export type ResumeAnalysisResult = {
   keywords: string[];
 };
 
-export const chatRouteBodySchema = Type.Object(
+export const chatRouteBodySchema = t.Object(
   {
-    message: Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
-    sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    context: Type.Optional(chatContextSchema),
+    message: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    context: t.Optional(chatContextSchema),
   },
   { required: ["message"] },
 );
-export type ChatRouteBody = StaticParse<typeof chatRouteBodySchema>;
+export type ChatRouteBody = Static<typeof chatRouteBodySchema>;
 
-export const analyzeResumeRouteBodySchema = Type.Object(
+export const analyzeResumeRouteBodySchema = t.Object(
   {
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   },
   { required: ["resumeId"] },
 );
-export type AnalyzeResumeRouteBody = StaticParse<typeof analyzeResumeRouteBodySchema>;
+export type AnalyzeResumeRouteBody = Static<typeof analyzeResumeRouteBodySchema>;
 
-export const generateCoverLetterRouteBodySchema = Type.Object(
+export const generateCoverLetterRouteBodySchema = t.Object(
   {
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    position: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   },
   { required: ["resumeId", "company", "position"] },
 );
-export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterRouteBodySchema>;
+export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterRouteBodySchema>;
 
-export const matchJobsRouteBodySchema = Type.Object({
-  resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  skills: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+export const matchJobsRouteBodySchema = t.Object({
+  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  skills: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
     }),
   ),
-  preferences: Type.Optional(aiPreferenceSchema),
+  preferences: t.Optional(aiPreferenceSchema),
 });
-export type MatchJobsRouteBody = StaticParse<typeof matchJobsRouteBodySchema>;
+export type MatchJobsRouteBody = Static<typeof matchJobsRouteBodySchema>;
 
-export const automationActionRouteBodySchema = Type.Object(
+export const automationActionRouteBodySchema = t.Object(
   {
-    action: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-    jobUrl: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    coverLetterId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    action: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+    jobUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   },
   { required: ["action", "jobUrl", "resumeId"] },
 );
-export type AutomationActionRouteBody = StaticParse<typeof automationActionRouteBodySchema>;
+export type AutomationActionRouteBody = Static<typeof automationActionRouteBodySchema>;
 
 export const usageTailLimit = AI_CHAT_CONTEXT_TAIL_LIMIT;

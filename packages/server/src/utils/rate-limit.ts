@@ -25,7 +25,7 @@ type CreateRateLimitOptions = {
 /**
  * Builds an in-memory Elysia 2 rate-limit plugin keyed by client IP headers.
  */
-export function createRateLimitPlugin(options: CreateRateLimitOptions): Elysia {
+export function createRateLimitPlugin(options: CreateRateLimitOptions) {
   const buckets = new Map<string, RateLimitBucket>();
   const resolveKey = options.generator ?? resolveRateLimitClientKey;
 
@@ -85,7 +85,7 @@ export function rateLimit(options: {
   max: number;
   generator?: (request: Request) => string;
   scoping?: string;
-}): Elysia {
+}) {
   return createRateLimitPlugin({
     name: `rate-limit-${options.max}-${options.duration}`,
     durationMs: options.duration,

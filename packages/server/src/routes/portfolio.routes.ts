@@ -1,3 +1,4 @@
+import { t, Elysia } from "elysia";
 import {
   API_ERROR_EXPORT_PORTFOLIO,
   API_ERROR_PORTFOLIO_ID_NOT_AVAILABLE,
@@ -14,8 +15,6 @@ import {
 } from "@bao/shared/constants/http";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
@@ -39,23 +38,20 @@ import {
 
 export const portfolioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase),
-  tags: ["Portfolio"],
 })
-  .get("/", async () => {
+  .get("/",{ detail: { tags: ["Portfolio"] } }, async () => {
     return await portfolioService.getPortfolioPayload();
   })
   .put(
     "/",
-    {
-      body: StandardSchemaV1(portfolioUpdateBodySchema),
+    { detail: { tags: ["Portfolio"] }, body: portfolioUpdateBodySchema,
     }, async ({ body }: { body: PortfolioUpdateRouteBody }) => {
       return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
   )
   .post(
     "/projects",
-    {
-      body: StandardSchemaV1(portfolioProjectCreateBodySchema),
+    { detail: { tags: ["Portfolio"] }, body: portfolioProjectCreateBodySchema,
     }, async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
@@ -87,8 +83,7 @@ export const portfolioRoutes = new Elysia({
   )
   .post(
     "/projects/reorder",
-    {
-      body: StandardSchemaV1(portfolioProjectReorderBodySchema),
+    { detail: { tags: ["Portfolio"] }, body: portfolioProjectReorderBodySchema,
     }, async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
@@ -101,9 +96,8 @@ export const portfolioRoutes = new Elysia({
   )
   .put(
     "/projects/:id",
-    {
-      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
-      body: StandardSchemaV1(portfolioProjectUpdateBodySchema),
+    { detail: { tags: ["Portfolio"] }, params: portfolioProjectIdParamsSchema,
+      body: portfolioProjectUpdateBodySchema,
     }, async ({
       params,
       body,
@@ -138,8 +132,7 @@ export const portfolioRoutes = new Elysia({
   )
   .delete(
     "/projects/:id",
-    {
-      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
+    { detail: { tags: ["Portfolio"] }, params: portfolioProjectIdParamsSchema,
     }, async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
@@ -152,8 +145,7 @@ export const portfolioRoutes = new Elysia({
   )
   .post(
     "/export",
-    {
-      body: StandardSchemaV1(portfolioExportBodySchema),
+    { detail: { tags: ["Portfolio"] }, body: portfolioExportBodySchema,
     }, async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {

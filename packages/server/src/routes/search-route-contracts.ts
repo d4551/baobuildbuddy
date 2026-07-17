@@ -1,25 +1,22 @@
+import type { Static } from "typebox";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
-import Type, { StandardSchemaV1, type StaticParse } from "baobox";
+import { t } from "elysia";
 
 export const searchTypes = ["jobs", "studios", "skills", "resumes"] as const;
 export type SearchType = (typeof searchTypes)[number];
 
-const searchTypeSchema = Type.Union(searchTypes.map((searchType) => Type.Literal(searchType)));
-
-export const searchQuerySchema = Type.Object({
-  q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  types: Type.Optional(
-    Type.Union([Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), Type.Array(searchTypeSchema)]),
-  ),
+export const searchQuerySchema = t.Object({
+  q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  types: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
 
-export type SearchQuery = StaticParse<typeof searchQuerySchema>;
+export type SearchQuery = Static<typeof searchQuerySchema>;
 
-export const searchAutocompleteQuerySchema = Type.Object({
-  prefix: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+export const searchAutocompleteQuerySchema = t.Object({
+  prefix: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
 
-export type SearchAutocompleteQuery = StaticParse<typeof searchAutocompleteQuerySchema>;
+export type SearchAutocompleteQuery = Static<typeof searchAutocompleteQuerySchema>;
 
-export const searchQuery = StandardSchemaV1(searchQuerySchema);
-export const searchAutocompleteQuery = StandardSchemaV1(searchAutocompleteQuerySchema);
+export const searchQuery = searchQuerySchema;
+export const searchAutocompleteQuery = searchAutocompleteQuerySchema;

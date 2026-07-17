@@ -1,3 +1,4 @@
+import type { Static } from "typebox";
 import { inferAIChatDomainFromRoutePath } from "@bao/shared/constants/ai-chat";
 import {
   SCHEMA_MAX_LENGTH_DEVICE,
@@ -13,43 +14,43 @@ import {
   AI_CHAT_CONTEXT_SOURCE_IDS,
   type AIChatContext,
 } from "@bao/shared/types/ai";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 
-export const chatContextSchema = Type.Object(
+export const chatContextSchema = t.Object(
   {
-    source: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE }),
-    domain: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE })),
-    route: Type.Object(
+    source: t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE }),
+    domain: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SOURCE })),
+    route: t.Object(
       {
-        path: Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL }),
-        name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-        params: Type.Record(Type.String(), Type.String()),
-        query: Type.Record(Type.String(), Type.String()),
+        path: t.String({ maxLength: SCHEMA_MAX_LENGTH_URL }),
+        name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+        params: t.Record(t.String(), t.String()),
+        query: t.Record(t.String(), t.String()),
       },
       { required: ["path", "params", "query"] },
     ),
-    entity: Type.Optional(
-      Type.Object(
+    entity: t.Optional(
+      t.Object(
         {
-          type: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ENTITY_TYPE }),
-          id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-          label: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+          type: t.String({ maxLength: SCHEMA_MAX_LENGTH_ENTITY_TYPE }),
+          id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+          label: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
         },
         { required: ["type", "id"] },
       ),
     ),
-    state: Type.Object(
+    state: t.Object(
       {
-        hasResumes: Type.Boolean(),
-        resumeCount: Type.Number(),
-        hasJobs: Type.Boolean(),
-        jobCount: Type.Number(),
-        hasStudios: Type.Boolean(),
-        studioCount: Type.Number(),
-        hasInterviewSessions: Type.Boolean(),
-        interviewSessionCount: Type.Number(),
-        hasPortfolioProjects: Type.Boolean(),
-        portfolioProjectCount: Type.Number(),
+        hasResumes: t.Boolean(),
+        resumeCount: t.Number(),
+        hasJobs: t.Boolean(),
+        jobCount: t.Number(),
+        hasStudios: t.Boolean(),
+        studioCount: t.Number(),
+        hasInterviewSessions: t.Boolean(),
+        interviewSessionCount: t.Number(),
+        hasPortfolioProjects: t.Boolean(),
+        portfolioProjectCount: t.Number(),
       },
       {
         required: [
@@ -70,12 +71,12 @@ export const chatContextSchema = Type.Object(
   { required: ["source", "route", "state"] },
 );
 
-export const aiPreferenceSchema = Type.Record(
-  Type.String(),
-  Type.Union([Type.String(), Type.Number(), Type.Boolean()]),
+export const aiPreferenceSchema = t.Record(
+  t.String(),
+  t.Union([t.String(), t.Number(), t.Boolean()]),
 );
 
-export type ChatContextPayload = StaticParse<typeof chatContextSchema>;
+export type ChatContextPayload = Static<typeof chatContextSchema>;
 
 const isValidChatContextSource = (value: string): value is AIChatContext["source"] =>
   AI_CHAT_CONTEXT_SOURCE_IDS.some((entry) => entry === value);

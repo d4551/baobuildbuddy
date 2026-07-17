@@ -1,9 +1,10 @@
-import Type, { StandardSchemaV1, type StaticParse } from "baobox";
+import type { Static } from "typebox";
+import { t } from "elysia";
 
-export const authBootstrapBodySchema = Type.Object({
-  setupToken: Type.Optional(Type.String({ minLength: 1 })),
+export const authBootstrapBodySchema = t.Object({
+  setupToken: t.Optional(t.String({ minLength: 1 })),
 });
 
-export type AuthBootstrapBody = StaticParse<typeof authBootstrapBodySchema>;
+export type AuthBootstrapBody = Static<typeof authBootstrapBodySchema>;
 
-export const authBootstrapBody = StandardSchemaV1(authBootstrapBodySchema);
+export const authBootstrapBody = authBootstrapBodySchema;

@@ -1,3 +1,4 @@
+import { t, Elysia } from "elysia";
 import {
   API_ERROR_SCRAPE_JOBS_FAILED,
   API_ERROR_SCRAPE_STUDIOS_FAILED,
@@ -10,8 +11,6 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
 import type { RouteSetState } from "../types/route-state";
 import { type ScraperPortalParams, scraperPortalParamsSchema } from "./scraper-route-contracts";
@@ -20,9 +19,8 @@ const SCRAPER_BASE_PATH = API_ENDPOINTS.scraperBase;
 
 export const scraperRoutes = new Elysia({
   prefix: toApiScopedPath(SCRAPER_BASE_PATH),
-  tags: ["Scraper"],
 })
-  .post(toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios), async ({ set }) => {
+  .post(toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios),{ detail: { tags: ["Scraper"] } }, async ({ set }) => {
     const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
     if (scrapeStudiosResult.status === "rejected") {
       set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -38,8 +36,7 @@ export const scraperRoutes = new Elysia({
   })
   .post(
     toApiChildPath(SCRAPER_BASE_PATH, `${API_ENDPOINTS.scraperJobsBase}/:portalId`),
-    {
-      params: StandardSchemaV1(scraperPortalParamsSchema),
+    { detail: { tags: ["Scraper"] }, params: scraperPortalParamsSchema,
     }, async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {

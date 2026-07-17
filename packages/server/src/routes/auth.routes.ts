@@ -59,9 +59,8 @@ function generateApiKey(): string {
 
 export const authRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.authBase),
-  tags: ["Auth"],
 })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus), async () => {
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),{ detail: { tags: ["Auth"] } }, async () => {
     if (config.disableAuth) {
       return {
         configured: false,
@@ -79,7 +78,7 @@ export const authRoutes = new Elysia({
       setupTokenConfigured: config.authSetupToken !== null,
     };
   })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured), async () => {
+  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),{ detail: { tags: ["Auth"] } }, async () => {
     if (config.disableAuth) {
       return { configured: false };
     }
@@ -99,8 +98,7 @@ export const authRoutes = new Elysia({
       )
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
-        {
-          body: authBootstrapBody,
+        { detail: { tags: ["Auth"] }, body: authBootstrapBody,
         }, async ({
           body,
           request,

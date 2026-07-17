@@ -1,6 +1,5 @@
+import { t, Elysia, status } from "elysia";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia, status } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
@@ -29,18 +28,16 @@ import {
 
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
-  tags: ["Skill Mapping"],
 })
   .use(skillAnalysisRateLimit)
   .get(
     "/mappings",
-    {
-      query: StandardSchemaV1(skillMappingsQuerySchema),
+    { detail: { tags: ["Skill Mapping"] }, query: skillMappingsQuerySchema,
     }, async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
   )
   .post(
     "/mappings",
-    { body: StandardSchemaV1(skillMappingCreateBodySchema) }, async ({
+    { detail: { tags: ["Skill Mapping"] }, body: skillMappingCreateBodySchema }, async ({
       body,
       set,
     }: {
@@ -54,9 +51,8 @@ export const skillMappingRoutes = new Elysia({
   )
   .put(
     "/mappings/:id",
-    {
-      params: StandardSchemaV1(skillMappingIdParamsSchema),
-      body: StandardSchemaV1(skillMappingUpdateBodySchema),
+    { detail: { tags: ["Skill Mapping"] }, params: skillMappingIdParamsSchema,
+      body: skillMappingUpdateBodySchema,
     }, async ({
       params,
       body,
@@ -69,7 +65,7 @@ export const skillMappingRoutes = new Elysia({
   )
   .delete(
     "/mappings/:id",
-    { params: StandardSchemaV1(skillMappingIdParamsSchema) }, async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
+    { detail: { tags: ["Skill Mapping"] }, params: skillMappingIdParamsSchema }, async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
       const result = await deleteSkillMappingById(params.id, set);
       if (result.kind === "gone" || result.kind === "deleted") {
         return status(result.statusCode, result.payload);
@@ -77,17 +73,15 @@ export const skillMappingRoutes = new Elysia({
       return result.payload;
     },
   )
-  .get("/pathways", async () => skillMappingService.getPathways())
+  .get("/pathways",{ detail: { tags: ["Skill Mapping"] } }, async () => skillMappingService.getPathways())
   .get(
     "/readiness",
-    {
-      query: StandardSchemaV1(skillReadinessQuerySchema),
+    { detail: { tags: ["Skill Mapping"] }, query: skillReadinessQuerySchema,
     }, async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
   )
   .post(
     "/ai-analyze",
-    {
-      body: StandardSchemaV1(skillAnalysisBodySchema),
+    { detail: { tags: ["Skill Mapping"] }, body: skillAnalysisBodySchema,
     }, async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
       analyzeSkillMappingsSafely(body, set),
   );

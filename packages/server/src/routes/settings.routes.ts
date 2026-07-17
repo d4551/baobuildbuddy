@@ -1,3 +1,4 @@
+import { t, Elysia } from "elysia";
 import {
   API_ERROR_INIT_SETTINGS_ROW,
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
@@ -9,9 +10,7 @@ import {
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
-import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import {
   RATE_LIMIT_SETTINGS_DURATION_MS,
   RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS,
@@ -40,7 +39,6 @@ import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update
 
 export const settingsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.settings),
-  tags: ["Settings"],
 })
   .use(
     new Elysia()
@@ -52,7 +50,7 @@ export const settingsRoutes = new Elysia({
           generator: (request) => resolveRateLimitClientKey(request),
         }),
       )
-      .get("/", async () => {
+      .get("/",{ detail: { tags: ["Settings"] } }, async () => {
         const row = await readOrCreateSettingsRow();
         if (!row) {
           return { error: API_ERROR_LOAD_SETTINGS };
@@ -73,8 +71,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/",
-        {
-          body: StandardSchemaV1(settingsUpdateBodySchema),
+        { detail: { tags: ["Settings"] }, body: settingsUpdateBodySchema,
         }, async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
@@ -101,8 +98,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/job-taxonomy",
-        {
-          body: StandardSchemaV1(jobTaxonomyUpdateBodySchema),
+        { detail: { tags: ["Settings"] }, body: jobTaxonomyUpdateBodySchema,
         }, async ({ body }: { body: JobTaxonomyUpdateBody }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
           return { success: true, jobTaxonomy };
@@ -110,8 +106,7 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/api-keys",
-        {
-          body: StandardSchemaV1(apiKeysUpdateBodySchema),
+        { detail: { tags: ["Settings"] }, body: apiKeysUpdateBodySchema,
         }, async ({ body }: { body: ApiKeysUpdateBody }) => {
           await readOrCreateSettingsRow();
           await db
@@ -124,18 +119,16 @@ export const settingsRoutes = new Elysia({
       )
       .post(
         "/test-api-key",
-        {
-          body: StandardSchemaV1(providerTestBodySchema),
+        { detail: { tags: ["Settings"] }, body: providerTestBodySchema,
         }, async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
       )
-      .get("/export", async () => {
+      .get("/export",{ detail: { tags: ["Settings"] } }, async () => {
         const { dataService } = await import("../services/data-service");
         return dataService.exportAll();
       })
       .post(
         "/import",
-        {
-          body: StandardSchemaV1(importSettingsBodySchema),
+        { detail: { tags: ["Settings"] }, body: importSettingsBodySchema,
         }, async ({ body }: { body: ImportSettingsBody }) => {
           const { dataService } = await import("../services/data-service");
           return dataService.importAll({

@@ -1,10 +1,11 @@
+import type { Static } from "typebox";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 
 export type SkillMappingsQuery = {
   category?: string;
@@ -34,67 +35,67 @@ export type SkillMappingRouteSetState = {
   status?: number | string;
 };
 
-export const skillMappingsQuerySchema = Type.Object({
-  category: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  search: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+export const skillMappingsQuerySchema = t.Object({
+  category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  search: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
 });
-export type SkillMappingsRouteQuery = StaticParse<typeof skillMappingsQuerySchema>;
+export type SkillMappingsRouteQuery = Static<typeof skillMappingsQuerySchema>;
 
-export const skillMappingIdParamsSchema = Type.Object(
+export const skillMappingIdParamsSchema = t.Object(
   {
-    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
   },
   { required: ["id"] },
 );
-export type SkillMappingIdParams = StaticParse<typeof skillMappingIdParamsSchema>;
+export type SkillMappingIdParams = Static<typeof skillMappingIdParamsSchema>;
 
-export const skillMappingCreateBodySchema = Type.Object(
+export const skillMappingCreateBodySchema = t.Object(
   {
-    gameExpression: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    transferableSkill: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    industryApplications: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+    gameExpression: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    transferableSkill: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    industryApplications: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
         maxItems: SCHEMA_MAX_ITEMS_LARGE,
       }),
     ),
-    evidence: Type.Optional(
-      Type.Array(Type.Record(Type.String(), Type.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+    evidence: t.Optional(
+      t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
     ),
-    confidence: Type.Optional(Type.Number({ minimum: 0, maximum: 100 })),
-    category: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    demandLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-    aiGenerated: Type.Optional(Type.Boolean()),
+    confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
+    category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+    aiGenerated: t.Optional(t.Boolean()),
   },
   { required: ["gameExpression", "transferableSkill"] },
 );
-export type SkillMappingCreateRouteBody = StaticParse<typeof skillMappingCreateBodySchema>;
+export type SkillMappingCreateRouteBody = Static<typeof skillMappingCreateBodySchema>;
 
-export const skillMappingUpdateBodySchema = Type.Object({
-  gameExpression: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  transferableSkill: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  industryApplications: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+export const skillMappingUpdateBodySchema = t.Object({
+  gameExpression: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  transferableSkill: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  industryApplications: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
       maxItems: SCHEMA_MAX_ITEMS_LARGE,
     }),
   ),
-  evidence: Type.Optional(
-    Type.Array(Type.Record(Type.String(), Type.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
+  evidence: t.Optional(
+    t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
   ),
-  confidence: Type.Optional(Type.Number({ minimum: 0, maximum: 100 })),
-  category: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  demandLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  aiGenerated: Type.Optional(Type.Boolean()),
+  confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
+  category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  aiGenerated: t.Optional(t.Boolean()),
 });
-export type SkillMappingUpdateRouteBody = StaticParse<typeof skillMappingUpdateBodySchema>;
+export type SkillMappingUpdateRouteBody = Static<typeof skillMappingUpdateBodySchema>;
 
-export const skillAnalysisBodySchema = Type.Object({
-  gameExperience: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  resume: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  autoCreateMappings: Type.Optional(Type.Boolean()),
+export const skillAnalysisBodySchema = t.Object({
+  gameExperience: t.Optional(t.Record(t.String(), t.Unknown())),
+  resume: t.Optional(t.Record(t.String(), t.Unknown())),
+  autoCreateMappings: t.Optional(t.Boolean()),
 });
-export type SkillAnalysisRouteBody = StaticParse<typeof skillAnalysisBodySchema>;
+export type SkillAnalysisRouteBody = Static<typeof skillAnalysisBodySchema>;
 
-export const skillReadinessQuerySchema = Type.Object({
-  jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+export const skillReadinessQuerySchema = t.Object({
+  jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
-export type SkillReadinessRouteQuery = StaticParse<typeof skillReadinessQuerySchema>;
+export type SkillReadinessRouteQuery = Static<typeof skillReadinessQuerySchema>;

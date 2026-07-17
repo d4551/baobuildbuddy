@@ -17,15 +17,13 @@ import {
 
 export const gamificationRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase),
-  tags: ["Gamification"],
 })
-  .get("/progress", async () => {
+  .get("/progress",{ detail: { tags: ["Gamification"] } }, async () => {
     return gamificationService.getProgress();
   })
   .post(
     "/award-xp",
-    {
-      body: awardXpBody,
+    { detail: { tags: ["Gamification"] }, body: awardXpBody,
     }, async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
       if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -47,10 +45,10 @@ export const gamificationRoutes = new Elysia({
       };
     },
   )
-  .get("/achievements", async () => {
+  .get("/achievements",{ detail: { tags: ["Gamification"] } }, async () => {
     return gamificationService.getAchievements();
   })
-  .get("/challenges", async () => {
+  .get("/challenges",{ detail: { tags: ["Gamification"] } }, async () => {
     const challenges = await gamificationService.getDailyChallenges();
     const today = new Date().toISOString().split("T")[0];
     const completedCount = challenges.filter((c) => c.completed).length;
@@ -64,8 +62,7 @@ export const gamificationRoutes = new Elysia({
   })
   .post(
     "/challenges/:id/complete",
-    {
-      params: challengeIdParams,
+    { detail: { tags: ["Gamification"] }, params: challengeIdParams,
     }, async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
       if (!params.id) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -90,9 +87,9 @@ export const gamificationRoutes = new Elysia({
       };
     },
   )
-  .get("/weekly", async () => {
+  .get("/weekly",{ detail: { tags: ["Gamification"] } }, async () => {
     return gamificationService.getWeeklyProgress();
   })
-  .get("/monthly", async () => {
+  .get("/monthly",{ detail: { tags: ["Gamification"] } }, async () => {
     return gamificationService.getMonthlyStats();
   });

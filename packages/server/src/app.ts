@@ -1,3 +1,4 @@
+import { t, Elysia, setupTypebox } from "elysia";
 import { APP_BRAND } from "@bao/shared/constants/branding";
 import {
   API_ENDPOINT_PREFIX,
@@ -8,8 +9,6 @@ import {
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
-import Type, { StandardSchemaV1 } from "baobox";
-import { Elysia, setupTypebox } from "elysia";
 import { isProductionRuntime } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
@@ -78,27 +77,23 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
     }),
   )
   .model({
-    HealthResponse: StandardSchemaV1(
-      Type.Object(
+    HealthResponse: t.Object(
         {
-          status: Type.String(),
-          timestamp: Type.String(),
-          database: Type.String(),
-          uptime: Type.Number(),
+          status: t.String(),
+          timestamp: t.String(),
+          database: t.String(),
+          uptime: t.Number(),
         },
         { required: ["status", "timestamp", "database", "uptime"] },
       ),
-    ),
-    ErrorResponse: StandardSchemaV1(
-      Type.Object(
+    ErrorResponse: t.Object(
         {
-          error: Type.String(),
-          code: Type.Optional(Type.String()),
-          fields: Type.Optional(Type.Array(Type.String())),
+          error: t.String(),
+          code: t.Optional(t.String()),
+          fields: t.Optional(t.Array(t.String())),
         },
         { required: ["error"] },
       ),
-    ),
   })
   .use(
     rateLimit({

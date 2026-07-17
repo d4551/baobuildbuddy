@@ -10,13 +10,13 @@ import {
   searchTypes,
 } from "./search-route-contracts";
 
-const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | undefined => {
+const parseSearchTypes = (value: string | undefined): SearchType[] | undefined => {
   if (!value) {
     return;
   }
 
-  const rawTypes = typeof value === "string" ? value.split(",") : value;
-  const parsedTypes = rawTypes
+  const parsedTypes = value
+    .split(",")
     .map((type) => type.trim())
     .filter((type): type is SearchType => (searchTypes as readonly string[]).includes(type));
 
@@ -25,12 +25,10 @@ const parseSearchTypes = (value: string | string[] | undefined): SearchType[] | 
 
 export const searchRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.searchBase),
-  tags: ["Search"],
 })
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
-    {
-      query: searchQuery,
+    { detail: { tags: ["Search"] }, query: searchQuery,
     }, ({ query }: { query: SearchQuery }) => {
       const q = query.q || "";
       if (q.length < 2) {
@@ -47,8 +45,7 @@ export const searchRoutes = new Elysia({
   )
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
-    {
-      query: searchAutocompleteQuery,
+    { detail: { tags: ["Search"] }, query: searchAutocompleteQuery,
     }, async ({ query }: { query: SearchAutocompleteQuery }) => {
       const prefix = query.prefix || "";
       return await searchService.autocomplete(prefix);

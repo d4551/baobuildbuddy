@@ -1,3 +1,4 @@
+import { t, Elysia } from "elysia";
 import {
   API_ERROR_GENERATE_QUESTIONS,
   API_ERROR_RESUME_NOT_FOUND,
@@ -13,8 +14,6 @@ import {
 } from "@bao/shared/constants/http";
 import { RESUME_DEFAULT_NAME_QUESTIONNAIRE } from "@bao/shared/constants/resume";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
@@ -45,12 +44,10 @@ import {
 
 export const resumeRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.resumes),
-  tags: ["Resumes"],
 })
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
-    {
-      body: StandardSchemaV1(resumeQuestionGenerateBodySchema),
+    { detail: { tags: ["Resumes"] }, body: resumeQuestionGenerateBodySchema,
     }, async ({ body, set }: { body: ResumeQuestionGenerateRouteBody; set: ResumeRouteSetState }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
@@ -71,8 +68,7 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
-    {
-      body: StandardSchemaV1(resumeQuestionSynthesizeBodySchema),
+    { detail: { tags: ["Resumes"] }, body: resumeQuestionSynthesizeBodySchema,
     }, async ({
       body,
       set,
@@ -113,13 +109,12 @@ export const resumeRoutes = new Elysia({
       return createResult.value;
     },
   )
-  .get("/", async () => {
+  .get("/",{ detail: { tags: ["Resumes"] } }, async () => {
     return resumeService.getResumes();
   })
   .post(
     "/",
-    {
-      body: StandardSchemaV1(resumeMutationBodySchema),
+    { detail: { tags: ["Resumes"] }, body: resumeMutationBodySchema,
     }, async ({ body, set }: { body: ResumeMutationBody; set: ResumeRouteSetState }) => {
       const created = await resumeService.createResume(buildResumeCreatePayload(body));
       set.status = HTTP_STATUS_CREATED;
@@ -133,8 +128,7 @@ export const resumeRoutes = new Elysia({
   )
   .get(
     "/:id",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
     }, async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
@@ -148,9 +142,8 @@ export const resumeRoutes = new Elysia({
   )
   .put(
     "/:id",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeMutationBodySchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+      body: resumeMutationBodySchema,
     }, async ({
       params,
       body,
@@ -170,8 +163,7 @@ export const resumeRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
     }, async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
@@ -184,9 +176,8 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/export",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeExportBodySchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+      body: resumeExportBodySchema,
     }, async ({
       params,
       body,
@@ -199,9 +190,8 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/ai-enhance",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeEnhanceBodySchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+      body: resumeEnhanceBodySchema,
     }, async ({
       params,
       body,
@@ -214,9 +204,8 @@ export const resumeRoutes = new Elysia({
   )
   .post(
     "/:id/ai-score",
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeScoreBodySchema),
+    { detail: { tags: ["Resumes"] }, params: resumeIdParamsSchema,
+      body: resumeScoreBodySchema,
     }, async ({
       params,
       body,

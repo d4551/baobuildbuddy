@@ -1,3 +1,4 @@
+import type { Static } from "typebox";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_MEDIUM,
@@ -9,101 +10,101 @@ import {
   SCHEMA_MAX_LENGTH_TINY,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 
-export const studioListQuerySchema = Type.Object({
-  q: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  remoteWork: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+export const studioListQuerySchema = t.Object({
+  q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  remoteWork: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
 });
-export type StudioListRouteQuery = StaticParse<typeof studioListQuerySchema>;
+export type StudioListRouteQuery = Static<typeof studioListQuerySchema>;
 
-export const studioIdParamsSchema = Type.Object(
+export const studioIdParamsSchema = t.Object(
   {
-    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
   },
   { required: ["id"] },
 );
-export type StudioIdParams = StaticParse<typeof studioIdParamsSchema>;
+export type StudioIdParams = Static<typeof studioIdParamsSchema>;
 
-export const studioMutationBodySchema = Type.Object(
+export const studioMutationBodySchema = t.Object(
   {
-    name: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-    website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-    location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-    type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-    size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-    founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-    remoteWork: Type.Optional(Type.Boolean()),
-    technologies: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+    name: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+    website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+    location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+    type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+    size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+    founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+    remoteWork: t.Optional(t.Boolean()),
+    technologies: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
         maxItems: SCHEMA_MAX_ITEMS_LARGE,
       }),
     ),
-    genres: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+    genres: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
         maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
       }),
     ),
-    platforms: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+    platforms: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
         maxItems: SCHEMA_MAX_ITEMS_SMALL,
       }),
     ),
-    culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-    benefits: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+    culture: t.Optional(t.Record(t.String(), t.Unknown())),
+    benefits: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
         maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
       }),
     ),
-    socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
-    notableGames: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+    socialMedia: t.Optional(t.Record(t.String(), t.String())),
+    notableGames: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
         maxItems: SCHEMA_MAX_ITEMS_LARGE,
       }),
     ),
   },
   { required: ["name"] },
 );
-export type StudioMutationRouteBody = StaticParse<typeof studioMutationBodySchema>;
+export type StudioMutationRouteBody = Static<typeof studioMutationBodySchema>;
 
-export const studioUpdateBodySchema = Type.Object({
-  name: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-  website: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
-  location: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  type: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  size: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
-  founded: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
-  remoteWork: Type.Optional(Type.Boolean()),
-  technologies: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+export const studioUpdateBodySchema = t.Object({
+  name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
+  website: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL })),
+  location: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  size: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  founded: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_TINY })),
+  remoteWork: t.Optional(t.Boolean()),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_LARGE,
     }),
   ),
-  genres: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+  genres: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
     }),
   ),
-  platforms: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+  platforms: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_SMALL,
     }),
   ),
-  culture: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  benefits: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+  culture: t.Optional(t.Record(t.String(), t.Unknown())),
+  benefits: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
       maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
     }),
   ),
-  socialMedia: Type.Optional(Type.Record(Type.String(), Type.String())),
-  notableGames: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
+  socialMedia: t.Optional(t.Record(t.String(), t.String())),
+  notableGames: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }), {
       maxItems: SCHEMA_MAX_ITEMS_LARGE,
     }),
   ),
 });
-export type StudioUpdateRouteBody = StaticParse<typeof studioUpdateBodySchema>;
+export type StudioUpdateRouteBody = Static<typeof studioUpdateBodySchema>;

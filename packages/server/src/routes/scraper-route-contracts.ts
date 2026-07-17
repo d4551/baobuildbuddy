@@ -1,10 +1,11 @@
-import Type, { type StaticParse } from "baobox";
+import type { Static } from "typebox";
+import { t } from "elysia";
 
-export const scraperPortalParamsSchema = Type.Object(
+export const scraperPortalParamsSchema = t.Object(
   {
-    portalId: Type.String({ minLength: 1 }),
+    portalId: t.String({ minLength: 1 }),
   },
   { required: ["portalId"] },
 );
 
-export type ScraperPortalParams = StaticParse<typeof scraperPortalParamsSchema>;
+export type ScraperPortalParams = Static<typeof scraperPortalParamsSchema>;

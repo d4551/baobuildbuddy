@@ -1,3 +1,4 @@
+import { t, Elysia } from "elysia";
 import { join } from "node:path";
 import {
   API_ERROR_INVALID_RUN_ID,
@@ -12,9 +13,7 @@ import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints"
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
 import { settle } from "@bao/shared/utils/promise";
-import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -111,23 +110,17 @@ const readScreenshotPayload = async (filePath: string): Promise<BinaryPayload | 
  */
 export const automationScreenshotRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.automationScreenshotsBase),
-  tags: ["Automation"],
 }).get(
   "/:runId/:index",
-  {
-    params: automationScreenshotParams,
+  { detail: { tags: ["Automation"] }, params: automationScreenshotParams,
     response: {
-      200: StandardSchemaV1(Type.Unknown()),
-      400: StandardSchemaV1(
-        Type.Object({
-          error: Type.String(),
+      200: t.Unknown(),
+      400: t.Object({
+          error: t.String(),
         }),
-      ),
-      404: StandardSchemaV1(
-        Type.Object({
-          error: Type.String(),
+      404: t.Object({
+          error: t.String(),
         }),
-      ),
     },
   }, async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {

@@ -1,10 +1,9 @@
+import { t, Elysia } from "elysia";
 import { API_ERROR_USER_PROFILE_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
-import Type, { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 import { simpleRouteErrorResponses } from "./route-error-envelope";
@@ -13,63 +12,59 @@ import {
   userProfileUpdateBodySchema,
 } from "./user-route-contracts";
 
-const userProfileResponseSchema = StandardSchemaV1(
-  Type.Object({
-    id: Type.String(),
-    name: Type.String(),
-    email: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    phone: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    location: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    website: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    linkedin: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    github: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    summary: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    currentRole: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    currentCompany: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-    yearsExperience: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-    technicalSkills: Type.Optional(Type.Array(Type.String())),
-    softSkills: Type.Optional(Type.Array(Type.String())),
-    gamingExperience: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-    careerGoals: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-    createdAt: Type.Optional(Type.String()),
-    updatedAt: Type.Optional(Type.String()),
-  }),
-);
+const userProfileResponseSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  email: t.Union([t.String(), t.Null()]),
+  phone: t.Union([t.String(), t.Null()]),
+  location: t.Union([t.String(), t.Null()]),
+  website: t.Union([t.String(), t.Null()]),
+  linkedin: t.Union([t.String(), t.Null()]),
+  github: t.Union([t.String(), t.Null()]),
+  summary: t.Union([t.String(), t.Null()]),
+  currentRole: t.Union([t.String(), t.Null()]),
+  currentCompany: t.Union([t.String(), t.Null()]),
+  yearsExperience: t.Union([t.Number(), t.Null()]),
+  technicalSkills: t.Array(t.String()),
+  softSkills: t.Array(t.String()),
+  gamingExperience: t.Record(t.String(), t.Unknown()),
+  careerGoals: t.Record(t.String(), t.Unknown()),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
 
 export const userRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.userBase),
-  tags: ["User"],
 })
   .get(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
-    {
-      response: {
+    { detail: { tags: ["User"] }, response: {
         [HTTP_STATUS_OK]: userProfileResponseSchema,
         ...simpleRouteErrorResponses,
       },
     },
-    async ({ set }) => {
+    async ({ status }) => {
       const rows = await db
         .select()
         .from(userProfile)
         .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
       if (rows.length === 0) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_USER_PROFILE_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_USER_PROFILE_NOT_FOUND });
       }
-      return rows[0];
+      return status(HTTP_STATUS_OK, rows[0]);
     },
   )
   .put(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     {
-      body: StandardSchemaV1(userProfileUpdateBodySchema),
+      detail: { tags: ["User"] },
+      body: userProfileUpdateBodySchema,
       response: {
         [HTTP_STATUS_OK]: userProfileResponseSchema,
         ...simpleRouteErrorResponses,
       },
     },
-    async ({ body }: { body: UserProfileUpdateRouteBody }) => {
+    async ({ body, status }) => {
       const existing = await db
         .select()
         .from(userProfile)
@@ -86,6 +81,6 @@ export const userRoutes = new Elysia({
         .select()
         .from(userProfile)
         .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
-      return updated[0];
+      return status(HTTP_STATUS_OK, updated[0]);
     },
   );

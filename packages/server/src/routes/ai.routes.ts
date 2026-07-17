@@ -1,7 +1,6 @@
+import { t, Elysia } from "elysia";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import type { RouteSetState } from "../types/route-state";
@@ -29,7 +28,7 @@ import {
 } from "./ai-route-contracts";
 import { buildProviderModelsResponse } from "./ai-route-support";
 
-export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBase), tags: ["AI"] })
+export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBase) })
   .use(
     rateLimit({
       scoping: "scoped",
@@ -40,34 +39,30 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   )
   .post(
     "/chat",
-    {
-      body: StandardSchemaV1(chatRouteBodySchema),
+    { detail: { tags: ["AI"] }, body: chatRouteBodySchema,
     }, async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
       handleChatRoute(body, set),
   )
   .post(
     "/analyze-resume",
-    {
-      body: StandardSchemaV1(analyzeResumeRouteBodySchema),
+    { detail: { tags: ["AI"] }, body: analyzeResumeRouteBodySchema,
     }, async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
       handleAnalyzeResumeRoute(body, set),
   )
   .post(
     "/generate-cover-letter",
-    {
-      body: StandardSchemaV1(generateCoverLetterRouteBodySchema),
+    { detail: { tags: ["AI"] }, body: generateCoverLetterRouteBodySchema,
     }, async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
       handleGenerateCoverLetterRoute(body, set),
   )
   .post(
     "/match-jobs",
-    {
-      body: StandardSchemaV1(matchJobsRouteBodySchema),
+    { detail: { tags: ["AI"] }, body: matchJobsRouteBodySchema,
     }, async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
       handleMatchJobsRoute(body, set),
   )
-  .get("/models", async () => buildProviderModelsResponse())
-  .get("/usage", async () => {
+  .get("/models",{ detail: { tags: ["AI"] } }, async () => buildProviderModelsResponse())
+  .get("/usage",{ detail: { tags: ["AI"] } }, async () => {
     const chatMessages = await db.select().from(chatHistory);
 
     return {
@@ -84,8 +79,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   })
   .post(
     "/automation-action",
-    {
-      body: StandardSchemaV1(automationActionRouteBodySchema),
+    { detail: { tags: ["AI"] }, body: automationActionRouteBodySchema,
     }, async ({ body, set }: { body: AutomationActionRouteBody; set: RouteSetState }) =>
       handleAutomationActionRoute(body, set),
   );

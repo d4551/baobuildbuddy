@@ -1,11 +1,10 @@
+import { t, Elysia } from "elysia";
 import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
-import { StandardSchemaV1 } from "baobox";
 import { desc, eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
 import type { RouteSetState } from "../types/route-state";
@@ -30,12 +29,10 @@ export interface StudioAnalytics {
 
 export const studioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.studiosBase),
-  tags: ["Studios"],
 })
   .get(
     "/",
-    {
-      query: StandardSchemaV1(studioListQuerySchema),
+    { detail: { tags: ["Studios"] }, query: studioListQuerySchema,
     }, async ({ query }: { query: StudioListRouteQuery }) => {
       const { q = "", type, size, remoteWork } = query;
 
@@ -73,8 +70,7 @@ export const studioRoutes = new Elysia({
   )
   .get(
     "/:id",
-    {
-      params: StandardSchemaV1(studioIdParamsSchema),
+    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
     }, async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
@@ -86,8 +82,7 @@ export const studioRoutes = new Elysia({
   )
   .post(
     "/",
-    {
-      body: StandardSchemaV1(studioMutationBodySchema),
+    { detail: { tags: ["Studios"] }, body: studioMutationBodySchema,
     }, async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
       const newStudio = {
         id: generateId(),
@@ -115,9 +110,8 @@ export const studioRoutes = new Elysia({
   )
   .put(
     "/:id",
-    {
-      params: StandardSchemaV1(studioIdParamsSchema),
-      body: StandardSchemaV1(studioUpdateBodySchema),
+    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
+      body: studioUpdateBodySchema,
     }, async ({
       params,
       body,
@@ -145,8 +139,7 @@ export const studioRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    {
-      params: StandardSchemaV1(studioIdParamsSchema),
+    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
     }, async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
@@ -158,7 +151,7 @@ export const studioRoutes = new Elysia({
       return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
     },
   )
-  .get("/analytics", async (): Promise<StudioAnalytics> => {
+  .get("/analytics",{ detail: { tags: ["Studios"] } }, async (): Promise<StudioAnalytics> => {
     const allStudios = await db.select().from(studios);
 
     const analytics: StudioAnalytics = {

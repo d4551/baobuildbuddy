@@ -5,43 +5,43 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
-import Type, { StandardSchemaV1 } from "baobox";
+import { t } from "elysia";
 
 /**
  * Canonical HTTP route error body (baobox SSOT for API error envelopes).
  * Matches automation route error shape used across handlers.
  */
-export const routeErrorBodySchema = Type.Object({
-  error: Type.Object({
-    code: Type.String({ minLength: 1 }),
-    message: Type.String({ minLength: 1 }),
-    details: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+export const routeErrorBodySchema = t.Object({
+  error: t.Object({
+    code: t.String({ minLength: 1 }),
+    message: t.String({ minLength: 1 }),
+    details: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
 });
 
 /**
  * Simple `{ error, code?, fields? }` envelope used by global error handler / app model.
  */
-export const simpleErrorBodySchema = Type.Object(
+export const simpleErrorBodySchema = t.Object(
   {
-    error: Type.String(),
-    code: Type.Optional(Type.String()),
-    fields: Type.Optional(Type.Array(Type.String())),
+    error: t.String(),
+    code: t.Optional(t.String()),
+    fields: t.Optional(t.Array(t.String())),
   },
   { required: ["error"] },
 );
 
-export const simpleErrorResponseSchema = StandardSchemaV1(simpleErrorBodySchema);
+export const simpleErrorResponseSchema = simpleErrorBodySchema;
 
 /**
  * Standard error status map for routes that return the nested automation-style envelope.
  */
 export const nestedRouteErrorResponses = {
-  [HTTP_STATUS_BAD_REQUEST]: StandardSchemaV1(routeErrorBodySchema),
-  [HTTP_STATUS_NOT_FOUND]: StandardSchemaV1(routeErrorBodySchema),
-  [HTTP_STATUS_CONFLICT]: StandardSchemaV1(routeErrorBodySchema),
-  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: StandardSchemaV1(routeErrorBodySchema),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: StandardSchemaV1(routeErrorBodySchema),
+  [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
+  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+  [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
+  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
 } as const;
 
 /**
