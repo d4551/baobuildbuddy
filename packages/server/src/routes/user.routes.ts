@@ -7,10 +7,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 import { simpleRouteErrorResponses } from "./route-error-envelope";
-import {
-  type UserProfileUpdateRouteBody,
-  userProfileUpdateBodySchema,
-} from "./user-route-contracts";
+import { userProfileUpdateBodySchema } from "./user-route-contracts";
 
 const userProfileResponseSchema = t.Object({
   id: t.String(),

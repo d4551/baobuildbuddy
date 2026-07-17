@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
   AI_MAX_TOKENS_WS,

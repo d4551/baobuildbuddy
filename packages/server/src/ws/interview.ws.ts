@@ -1,4 +1,4 @@
-import { t, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { eq } from "drizzle-orm";

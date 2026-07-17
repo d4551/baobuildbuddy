@@ -106,8 +106,8 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.0.3",
     "playwright": "^1.58.2",
-    "typescript": "7.0.2",
-    "typescript-eslint": "^8.57.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.64.0",
     "vue-router": "^5.0.3"
   }
 }

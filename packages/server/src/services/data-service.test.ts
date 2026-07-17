@@ -36,7 +36,7 @@ describe("data-service", () => {
 
   test("importAll rejects unsupported version", async () => {
     const result = await dataService.importAll({
-      version: "2.0" as "1.0",
+      version: "2.0",
       exportedAt: new Date().toISOString(),
       profile: null,
       settings: null,

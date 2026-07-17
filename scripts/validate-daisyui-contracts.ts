@@ -101,7 +101,6 @@ const BTN_SEMANTIC_MODIFIERS = [
   "btn-disabled",
 ] as const;
 
-const BRAND_PREVIEW_FILE_PATH = "packages/client/components/settings/brand/BrandPreviewCard.vue";
 const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
 const BRAND_PREVIEW_REQUIRED_THEME_VARIABLES = [
   "--color-base-100",
