@@ -5,7 +5,9 @@ import {
   type SearchAutocompleteQuery,
   type SearchQuery,
   type SearchType,
+  searchAllResponses,
   searchAutocompleteQuery,
+  searchAutocompleteResponses,
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";
@@ -28,8 +30,12 @@ export const searchRoutes = new Elysia({
 })
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
-    { detail: { tags: ["Search"] }, query: searchQuery,
-    }, ({ query }: { query: SearchQuery }) => {
+    {
+      detail: { tags: ["Search"] },
+      query: searchQuery,
+      response: searchAllResponses,
+    },
+    ({ query }: { query: SearchQuery }) => {
       const q = query.q || "";
       if (q.length < 2) {
         return {
@@ -45,8 +51,12 @@ export const searchRoutes = new Elysia({
   )
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
-    { detail: { tags: ["Search"] }, query: searchAutocompleteQuery,
-    }, async ({ query }: { query: SearchAutocompleteQuery }) => {
+    {
+      detail: { tags: ["Search"] },
+      query: searchAutocompleteQuery,
+      response: searchAutocompleteResponses,
+    },
+    async ({ query }: { query: SearchAutocompleteQuery }) => {
       const prefix = query.prefix || "";
       return await searchService.autocomplete(prefix);
     },

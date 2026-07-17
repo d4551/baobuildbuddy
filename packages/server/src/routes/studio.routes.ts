@@ -1,10 +1,10 @@
-import { t, Elysia } from "elysia";
 import { API_ERROR_STUDIO_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_STUDIO_DELETED } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
 import { desc, eq } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
 import type { RouteSetState } from "../types/route-state";
@@ -13,11 +13,17 @@ import {
   type StudioListRouteQuery,
   type StudioMutationRouteBody,
   type StudioUpdateRouteBody,
+  studioAnalyticsResponses,
+  studioDeleteResponses,
+  studioEntityResponses,
   studioIdParamsSchema,
   studioListQuerySchema,
+  studioListResponses,
   studioMutationBodySchema,
   studioUpdateBodySchema,
 } from "./studio-route-contracts";
+
+type StudioInsert = typeof studios.$inferInsert;
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -32,13 +38,16 @@ export const studioRoutes = new Elysia({
 })
   .get(
     "/",
-    { detail: { tags: ["Studios"] }, query: studioListQuerySchema,
-    }, async ({ query }: { query: StudioListRouteQuery }) => {
+    {
+      detail: { tags: ["Studios"] },
+      query: studioListQuerySchema,
+      response: studioListResponses,
+    },
+    async ({ query }: { query: StudioListRouteQuery }) => {
       const { q = "", type, size, remoteWork } = query;
 
       let results = await db.select().from(studios).orderBy(desc(studios.createdAt));
 
-      // Filter by search query
       if (q) {
         results = results.filter(
           (studio) =>
@@ -48,17 +57,14 @@ export const studioRoutes = new Elysia({
         );
       }
 
-      // Filter by type
       if (type) {
         results = results.filter((studio) => studio.type === type);
       }
 
-      // Filter by size
       if (size) {
         results = results.filter((studio) => studio.size === size);
       }
 
-      // Filter by remote work
       if (remoteWork === "true") {
         results = results.filter((studio) => studio.remoteWork === true);
       } else if (remoteWork === "false") {
@@ -69,9 +75,59 @@ export const studioRoutes = new Elysia({
     },
   )
   .get(
+    "/analytics",
+    {
+      detail: { tags: ["Studios"] },
+      response: studioAnalyticsResponses,
+    },
+    async (): Promise<StudioAnalytics> => {
+      const allStudios = await db.select().from(studios);
+
+      const analytics: StudioAnalytics = {
+        totalStudios: allStudios.length,
+        byType: {},
+        bySize: {},
+        remoteWorkStudios: allStudios.filter((studio) => studio.remoteWork === true).length,
+        topTechnologies: [],
+      };
+
+      for (const studio of allStudios) {
+        if (studio.type) {
+          analytics.byType[studio.type] = (analytics.byType[studio.type] || 0) + 1;
+        }
+      }
+
+      for (const studio of allStudios) {
+        if (studio.size) {
+          analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
+        }
+      }
+
+      const techCount: Record<string, number> = {};
+      for (const studio of allStudios) {
+        if (studio.technologies) {
+          for (const tech of studio.technologies) {
+            techCount[tech] = (techCount[tech] || 0) + 1;
+          }
+        }
+      }
+
+      analytics.topTechnologies = Object.entries(techCount)
+        .map(([name, count]) => ({ name, count }))
+        .sort((left, right) => right.count - left.count)
+        .slice(0, 10);
+
+      return analytics;
+    },
+  )
+  .get(
     "/:id",
-    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
-    }, async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Studios"] },
+      params: studioIdParamsSchema,
+      response: studioEntityResponses,
+    },
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -82,25 +138,26 @@ export const studioRoutes = new Elysia({
   )
   .post(
     "/",
-    { detail: { tags: ["Studios"] }, body: studioMutationBodySchema,
-    }, async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
-      const newStudio = {
+    {
+      detail: { tags: ["Studios"] },
+      body: studioMutationBodySchema,
+      response: studioEntityResponses,
+    },
+    async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
+      const newStudio: StudioInsert = {
         id: generateId(),
         name: body.name,
-        description: body.description || null,
-        website: body.website || null,
-        location: body.location || null,
-        type: body.type || null,
-        size: body.size || null,
-        founded: body.founded || null,
+        description: body.description ?? null,
+        website: body.website ?? null,
+        location: body.location ?? null,
+        type: body.type ?? null,
+        size: body.size ?? null,
         remoteWork: body.remoteWork,
-        technologies: body.technologies || [],
-        genres: body.genres || [],
-        platforms: body.platforms || [],
-        culture: body.culture || null,
-        benefits: body.benefits || [],
-        socialMedia: body.socialMedia || null,
-        notableGames: body.notableGames || [],
+        technologies: body.technologies ?? [],
+        games: body.games ?? [],
+        culture: body.culture ?? null,
+        interviewStyle: body.interviewStyle ?? null,
+        logo: body.logo ?? null,
       };
 
       await db.insert(studios).values(newStudio);
@@ -110,9 +167,13 @@ export const studioRoutes = new Elysia({
   )
   .put(
     "/:id",
-    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
+    {
+      detail: { tags: ["Studios"] },
+      params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
-    }, async ({
+      response: studioEntityResponses,
+    },
+    async ({
       params,
       body,
       set,
@@ -127,10 +188,19 @@ export const studioRoutes = new Elysia({
         return { error: API_ERROR_STUDIO_NOT_FOUND };
       }
 
-      const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
-      for (const [key, val] of Object.entries(body)) {
-        if (val !== undefined) updates[key] = val;
-      }
+      const updates: Partial<StudioInsert> = { updatedAt: new Date().toISOString() };
+      if (body.name !== undefined) updates.name = body.name;
+      if (body.description !== undefined) updates.description = body.description;
+      if (body.website !== undefined) updates.website = body.website;
+      if (body.location !== undefined) updates.location = body.location;
+      if (body.type !== undefined) updates.type = body.type;
+      if (body.size !== undefined) updates.size = body.size;
+      if (body.remoteWork !== undefined) updates.remoteWork = body.remoteWork;
+      if (body.technologies !== undefined) updates.technologies = body.technologies;
+      if (body.games !== undefined) updates.games = body.games;
+      if (body.culture !== undefined) updates.culture = body.culture;
+      if (body.interviewStyle !== undefined) updates.interviewStyle = body.interviewStyle;
+      if (body.logo !== undefined) updates.logo = body.logo;
 
       await db.update(studios).set(updates).where(eq(studios.id, params.id));
       const updated = await db.select().from(studios).where(eq(studios.id, params.id));
@@ -139,8 +209,12 @@ export const studioRoutes = new Elysia({
   )
   .delete(
     "/:id",
-    { detail: { tags: ["Studios"] }, params: studioIdParamsSchema,
-    }, async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Studios"] },
+      params: studioIdParamsSchema,
+      response: studioDeleteResponses,
+    },
+    async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -150,46 +224,4 @@ export const studioRoutes = new Elysia({
       await db.delete(studios).where(eq(studios.id, params.id));
       return { message: API_MESSAGE_STUDIO_DELETED, id: params.id };
     },
-  )
-  .get("/analytics",{ detail: { tags: ["Studios"] } }, async (): Promise<StudioAnalytics> => {
-    const allStudios = await db.select().from(studios);
-
-    const analytics: StudioAnalytics = {
-      totalStudios: allStudios.length,
-      byType: {},
-      bySize: {},
-      remoteWorkStudios: allStudios.filter((s) => s.remoteWork === true).length,
-      topTechnologies: [],
-    };
-
-    // Count by type
-    for (const studio of allStudios) {
-      if (studio.type) {
-        analytics.byType[studio.type] = (analytics.byType[studio.type] || 0) + 1;
-      }
-    }
-
-    // Count by size
-    for (const studio of allStudios) {
-      if (studio.size) {
-        analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
-      }
-    }
-
-    // Count technologies
-    const techCount: Record<string, number> = {};
-    for (const studio of allStudios) {
-      if (studio.technologies) {
-        for (const tech of studio.technologies) {
-          techCount[tech] = (techCount[tech] || 0) + 1;
-        }
-      }
-    }
-
-    analytics.topTechnologies = Object.entries(techCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    return analytics;
-  });
+  );

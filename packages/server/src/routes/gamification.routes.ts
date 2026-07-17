@@ -10,21 +10,37 @@ import { gamificationService } from "../services/gamification-service";
 import type { RouteSetState } from "../types/route-state";
 import {
   type AwardXpBody,
+  achievementsResponses,
   awardXpBody,
+  awardXpResponses,
   type ChallengeIdParams,
+  challengeCompleteResponses,
   challengeIdParams,
+  challengesListResponses,
+  gamificationProgressResponses,
+  monthlyStatsResponses,
+  weeklyProgressResponses,
 } from "./gamification-route-contracts";
 
 export const gamificationRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.gamificationBase),
 })
-  .get("/progress",{ detail: { tags: ["Gamification"] } }, async () => {
-    return gamificationService.getProgress();
-  })
+  .get(
+    "/progress",
+    {
+      detail: { tags: ["Gamification"] },
+      response: gamificationProgressResponses,
+    },
+    async () => gamificationService.getProgress(),
+  )
   .post(
     "/award-xp",
-    { detail: { tags: ["Gamification"] }, body: awardXpBody,
-    }, async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Gamification"] },
+      body: awardXpBody,
+      response: awardXpResponses,
+    },
+    async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
       if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return { error: API_ERROR_XP_AMOUNT_REASON_REQUIRED };
@@ -45,25 +61,41 @@ export const gamificationRoutes = new Elysia({
       };
     },
   )
-  .get("/achievements",{ detail: { tags: ["Gamification"] } }, async () => {
-    return gamificationService.getAchievements();
-  })
-  .get("/challenges",{ detail: { tags: ["Gamification"] } }, async () => {
-    const challenges = await gamificationService.getDailyChallenges();
-    const today = new Date().toISOString().split("T")[0];
-    const completedCount = challenges.filter((c) => c.completed).length;
+  .get(
+    "/achievements",
+    {
+      detail: { tags: ["Gamification"] },
+      response: achievementsResponses,
+    },
+    async () => gamificationService.getAchievements(),
+  )
+  .get(
+    "/challenges",
+    {
+      detail: { tags: ["Gamification"] },
+      response: challengesListResponses,
+    },
+    async () => {
+      const challenges = await gamificationService.getDailyChallenges();
+      const today = new Date().toISOString().split("T")[0];
+      const completedCount = challenges.filter((challenge) => challenge.completed).length;
 
-    return {
-      date: today,
-      challenges,
-      completedCount,
-      totalCount: challenges.length,
-    };
-  })
+      return {
+        date: today,
+        challenges,
+        completedCount,
+        totalCount: challenges.length,
+      };
+    },
+  )
   .post(
     "/challenges/:id/complete",
-    { detail: { tags: ["Gamification"] }, params: challengeIdParams,
-    }, async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
+    {
+      detail: { tags: ["Gamification"] },
+      params: challengeIdParams,
+      response: challengeCompleteResponses,
+    },
+    async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
       if (!params.id) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
@@ -87,9 +119,19 @@ export const gamificationRoutes = new Elysia({
       };
     },
   )
-  .get("/weekly",{ detail: { tags: ["Gamification"] } }, async () => {
-    return gamificationService.getWeeklyProgress();
-  })
-  .get("/monthly",{ detail: { tags: ["Gamification"] } }, async () => {
-    return gamificationService.getMonthlyStats();
-  });
+  .get(
+    "/weekly",
+    {
+      detail: { tags: ["Gamification"] },
+      response: weeklyProgressResponses,
+    },
+    async () => gamificationService.getWeeklyProgress(),
+  )
+  .get(
+    "/monthly",
+    {
+      detail: { tags: ["Gamification"] },
+      response: monthlyStatsResponses,
+    },
+    async () => gamificationService.getMonthlyStats(),
+  );
