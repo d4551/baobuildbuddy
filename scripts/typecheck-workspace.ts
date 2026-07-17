@@ -13,11 +13,19 @@ const tscBin = join(process.cwd(), "node_modules", "@typescript", "native", "bin
 
 const packageResults = packages.map((pkg) => {
   const cwd = join(process.cwd(), "packages", pkg);
-  const result = spawnSync(process.execPath, [tscBin, "--noEmit", "--pretty", "false"], {
-    cwd,
-    encoding: "utf8",
-    env: process.env,
-  });
+  // Client typecheck self-bootstraps Nuxt + server generated types; use package script.
+  const result =
+    pkg === "client"
+      ? spawnSync("bun", ["run", "typecheck"], {
+          cwd,
+          encoding: "utf8",
+          env: process.env,
+        })
+      : spawnSync(process.execPath, [tscBin, "--noEmit", "--pretty", "false"], {
+          cwd,
+          encoding: "utf8",
+          env: process.env,
+        });
   const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
   const lines = output
     .split("\n")

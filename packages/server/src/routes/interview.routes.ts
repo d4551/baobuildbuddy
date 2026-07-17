@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, type status } from "elysia";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_REQUEST,
@@ -30,13 +30,13 @@ import {
   submitInterviewResponse,
 } from "./interview-route-support";
 
-type RouteStatus = (code: number, body: unknown) => unknown;
+type RouteStatus = typeof status;
 
 export const interviewRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.interviewBase),
 })
   .post(
-    "/sessions",
+    toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions),
     {
       detail: { tags: ["Interview"] },
       body: createSessionBodySchema,
@@ -48,7 +48,7 @@ export const interviewRoutes = new Elysia({
     },
   )
   .get(
-    "/sessions",
+    toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions),
     {
       detail: { tags: ["Interview"] },
       response: interviewSessionsListResponses,
@@ -59,7 +59,7 @@ export const interviewRoutes = new Elysia({
     },
   )
   .get(
-    "/sessions/:id",
+    `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id`,
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
@@ -74,7 +74,7 @@ export const interviewRoutes = new Elysia({
     },
   )
   .post(
-    "/sessions/:id/response",
+    `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id/response`,
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
@@ -101,7 +101,7 @@ export const interviewRoutes = new Elysia({
     },
   )
   .post(
-    "/sessions/:id/complete",
+    `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id/complete`,
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,

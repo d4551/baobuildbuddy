@@ -1,5 +1,8 @@
 import { Elysia } from "elysia";
-import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import {
+  OPENAI_V1_ENDPOINT_PREFIX,
+  OPENAI_V1_ENDPOINTS,
+} from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { authGuard } from "../middleware/auth";
@@ -16,6 +19,16 @@ import {
   getOpenAIV1Model,
   listOpenAIV1Models,
 } from "./openai-v1-route-support";
+
+function toOpenAIV1ChildPath(endpointPath: string): string {
+  if (endpointPath === OPENAI_V1_ENDPOINT_PREFIX) {
+    return "/";
+  }
+  if (!endpointPath.startsWith(OPENAI_V1_ENDPOINT_PREFIX)) {
+    return endpointPath;
+  }
+  return endpointPath.slice(OPENAI_V1_ENDPOINT_PREFIX.length) || "/";
+}
 
 /**
  * OpenAI Chat Completions API surface for external SDK clients.
@@ -35,7 +48,7 @@ export const openaiV1Routes = new Elysia({
     }),
   )
   .get(
-    "/models",
+    toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models),
     {
       detail: { tags: ["OpenAI V1"] },
       response: openaiV1ModelsListResponses,
@@ -46,10 +59,7 @@ export const openaiV1Routes = new Elysia({
     },
   )
   .get(
-    "/models/*",
-    {
-      detail: { tags: ["OpenAI V1"] },
-    },
+    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`,
     async ({ params, status }) => {
       const modelId = decodeURIComponent(params["*"] ?? "");
       const result = await getOpenAIV1Model(modelId);
@@ -57,7 +67,7 @@ export const openaiV1Routes = new Elysia({
     },
   )
   .post(
-    "/chat/completions",
+    toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {
       detail: { tags: ["OpenAI V1"] },
       body: openaiV1ChatCompletionsBodySchema,

@@ -19,6 +19,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { InterviewConfig, InterviewSession, VoiceSettings } from "@bao/shared/types/interview";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;
@@ -232,6 +233,8 @@ export const interviewStatsResponseSchema = t.Object({
   improvementTrend: t.Number(),
 });
 
+// Concrete `interviewSessionResponseSchema` is the payload SSOT. Response maps stay
+// open until handlers emit SelectiveStatus-compatible branches without dynamic envelopes.
 export const createInterviewSessionResponses = {
   [HTTP_STATUS_CREATED]: t.Unknown(),
 };
@@ -242,18 +245,18 @@ export const interviewSessionsListResponses = {
 
 export const interviewSessionResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const submitInterviewResponseResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_BAD_REQUEST]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const completeInterviewSessionResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const interviewStatsResponses = {
