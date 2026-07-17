@@ -8,7 +8,7 @@ import {
 import { t } from "elysia";
 
 /**
- * Canonical HTTP route error body (baobox SSOT for API error envelopes).
+ * Canonical HTTP route error body (TypeBox SSOT for API error envelopes).
  * Matches automation route error shape used across handlers.
  */
 export const routeErrorBodySchema = t.Object({

@@ -9,7 +9,7 @@ import { useCookie, useState } from "#imports";
 
 /**
  * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.
- * Persists via cookie (SSOT with settings sync) — never localStorage.
+ * Persists via cookie (SSOT with settings sync).
  */
 export function useTheme() {
   const theme = useState<AppDataTheme>(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
