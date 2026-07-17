@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   portfolioForm: PortfolioMetadata;
@@ -30,7 +31,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
   <section id="portfolio-profile-card" class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.titleLegend") }}</legend>
           <input
@@ -78,7 +79,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
             @input="updatePortfolioField('bio', $event)"
           ></textarea>
         </fieldset>
-      </div>
+      </SectionGrid>
 
       <div class="card-actions justify-end">
         <button class="btn btn-primary" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">

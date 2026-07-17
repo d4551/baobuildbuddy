@@ -3,6 +3,7 @@ import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/port
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   currentPage: number;
@@ -52,7 +53,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
         message-key="portfolioPage.projects.filteredEmptyState"
       />
 
-      <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <SectionGrid v-else grid-token="threeColumnResponsive">
         <div
           v-for="(project, idx) in props.paginatedProjects"
           :key="project.id || `${project.title}-${idx}`"
@@ -149,7 +150,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             </div>
           </div>
         </div>
-      </div>
+      </SectionGrid>
 
       <AppPagination
         :current-page="props.currentPage"

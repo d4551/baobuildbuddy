@@ -1,5 +1,10 @@
 import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST, DEFAULT_AI_ROUTING } from "../constants/ai";
+import {
+  BRAND_THEME_COLOR_PATTERN,
+  BRAND_THEME_LENGTH_PATTERN,
+  BRAND_THEME_UNITLESS_FLAG_PATTERN,
+} from "../constants/brand-theme-css";
 import { DEFAULT_BRAND_SETTINGS, normalizeAppDataTheme, THEME_NAMES } from "../constants/branding";
 import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import {
@@ -27,6 +32,27 @@ import {
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
+
+const brandThemeColorValueSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(SCHEMA_MAX_LENGTH_SHORT)
+  .regex(BRAND_THEME_COLOR_PATTERN);
+
+const brandThemeLengthValueSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(SCHEMA_MAX_LENGTH_SHORT)
+  .regex(BRAND_THEME_LENGTH_PATTERN);
+
+const brandThemeUnitlessFlagSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(SCHEMA_MAX_LENGTH_SHORT)
+  .regex(BRAND_THEME_UNITLESS_FLAG_PATTERN);
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),
@@ -237,34 +263,34 @@ export const emailTransportSettingsSchema = z
   .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS);
 
 export const brandThemePaletteSchema = z.object({
-  base100: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  base200: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  base300: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  baseContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  primary: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  primaryContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  secondary: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  secondaryContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  accent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  accentContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  neutral: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  neutralContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  info: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  infoContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  success: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  successContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  warning: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  warningContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  error: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  errorContent: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  radiusSelector: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  radiusField: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  radiusBox: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  sizeSelector: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  sizeField: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  border: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  depth: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  noise: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
+  base100: brandThemeColorValueSchema,
+  base200: brandThemeColorValueSchema,
+  base300: brandThemeColorValueSchema,
+  baseContent: brandThemeColorValueSchema,
+  primary: brandThemeColorValueSchema,
+  primaryContent: brandThemeColorValueSchema,
+  secondary: brandThemeColorValueSchema,
+  secondaryContent: brandThemeColorValueSchema,
+  accent: brandThemeColorValueSchema,
+  accentContent: brandThemeColorValueSchema,
+  neutral: brandThemeColorValueSchema,
+  neutralContent: brandThemeColorValueSchema,
+  info: brandThemeColorValueSchema,
+  infoContent: brandThemeColorValueSchema,
+  success: brandThemeColorValueSchema,
+  successContent: brandThemeColorValueSchema,
+  warning: brandThemeColorValueSchema,
+  warningContent: brandThemeColorValueSchema,
+  error: brandThemeColorValueSchema,
+  errorContent: brandThemeColorValueSchema,
+  radiusSelector: brandThemeLengthValueSchema,
+  radiusField: brandThemeLengthValueSchema,
+  radiusBox: brandThemeLengthValueSchema,
+  sizeSelector: brandThemeLengthValueSchema,
+  sizeField: brandThemeLengthValueSchema,
+  border: brandThemeLengthValueSchema,
+  depth: brandThemeUnitlessFlagSchema,
+  noise: brandThemeUnitlessFlagSchema,
 });
 
 export const brandTypographySettingsSchema = z.object({

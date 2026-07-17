@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ApiEndpoint, ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{
@@ -66,7 +67,7 @@ const { t } = useI18n();
             </button>
           </header>
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <SectionGrid grid-token="twoColumn">
             <div class="rounded-lg border border-base-200 p-3">
               <p class="text-xs font-semibold uppercase text-base-content/60">
                 {{ t("apiDocs.endpoint.methodLabel") }}
@@ -81,7 +82,7 @@ const { t } = useI18n();
                 {{ endpoint.operation.operationId || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>
-          </div>
+          </SectionGrid>
         </article>
       </div>
     </section>

@@ -6,6 +6,7 @@ import type {
   ProviderConnectivityResult,
   ProviderHealth,
 } from "~/types/ai-dashboard";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   providers: readonly ProviderConfig[];
@@ -46,7 +47,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <SectionGrid grid-token="twoColumnMdGap6">
     <div
       v-for="provider in providers"
       :key="provider.id"
@@ -111,5 +112,5 @@ function resolveProviderStatus(provider: ProviderConfig): {
         </div>
       </div>
     </div>
-  </div>
+  </SectionGrid>
 </template>

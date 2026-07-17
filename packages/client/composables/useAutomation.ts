@@ -20,9 +20,15 @@ import {
 } from "@bao/shared/schemas/rpa-events.schema";
 import { safeParseJson } from "@bao/shared/utils/json";
 import type { AsyncData } from "nuxt/app";
-import { $fetch, type FetchError } from "ofetch";
+import type { FetchError } from "ofetch";
 import type { MaybeRef } from "vue";
-import { useFetch, useRequestURL, useRuntimeConfig } from "#imports";
+import { useFetch, useRuntimeConfig } from "#imports";
+import {
+  buildClientApiHeaders,
+  requestApi,
+  useClientApiRequestRuntime,
+  type ClientApiRequestRuntime,
+} from "~/composables/api-request";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
 
 interface JobApplyBody {
@@ -56,9 +62,8 @@ interface FetchRunsParams {
 }
 
 interface AutomationRuntime {
-  apiBase: string;
+  api: ClientApiRequestRuntime;
   wsBase: string;
-  requestUrl: URL;
 }
 
 type RunListAsyncData = AsyncData<RpaRunExecutionEnvelope[] | undefined, FetchError | undefined>;
@@ -68,20 +73,9 @@ type CapabilityAuditAsyncData = AsyncData<
   FetchError | undefined
 >;
 
-function resolveAutomationRuntime(
-  config: ReturnType<typeof useRuntimeConfig>,
-  requestUrl: URL,
-): AutomationRuntime {
-  return {
-    apiBase: String(config.public.apiBase || "/"),
-    wsBase: String(config.public.wsBase || config.public.apiBase || "/"),
-    requestUrl,
-  };
-}
-
 function createPostMutation(runtime: AutomationRuntime) {
   return <TResponse>(endpoint: string, body: object): Promise<TResponse> =>
-    $fetch<TResponse>(resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint), {
+    requestApi<TResponse>(runtime.api, endpoint, {
       method: "POST",
       body,
     });
@@ -119,41 +113,58 @@ function createRunMutations(runtime: AutomationRuntime) {
 }
 
 function createRunQueries(runtime: AutomationRuntime) {
+  const authHeaders = buildClientApiHeaders();
   const runsEndpoint = resolveApiEndpoint(
-    runtime.apiBase,
-    runtime.requestUrl,
+    runtime.api.apiBase,
+    runtime.api.requestUrl,
     API_ENDPOINTS.automationRuns,
   );
 
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}): RunListAsyncData =>
     useFetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
       query: params,
+      headers: authHeaders,
     });
 
   const fetchRun = (id: string): RunAsyncData =>
     useFetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
+      resolveApiEndpoint(
+        runtime.api.apiBase,
+        runtime.api.requestUrl,
+        buildAutomationRunEndpoint(id),
+      ),
+      {
+        headers: authHeaders,
+      },
     );
 
   const getRun = (id: string): Promise<RpaRunExecutionEnvelope> =>
-    $fetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, buildAutomationRunEndpoint(id)),
-    );
+    requestApi<RpaRunExecutionEnvelope>(runtime.api, buildAutomationRunEndpoint(id), {
+      method: "GET",
+    });
 
   const getRuns = (params: FetchRunsParams = {}): Promise<RpaRunExecutionEnvelope[]> =>
-    $fetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
+    requestApi<RpaRunExecutionEnvelope[]>(runtime.api, API_ENDPOINTS.automationRuns, {
+      method: "GET",
       query: params,
     });
 
   const fetchRpaCapabilities = (): CapabilityAuditAsyncData =>
     useFetch<RpaCapabilityAuditReport>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
+      resolveApiEndpoint(
+        runtime.api.apiBase,
+        runtime.api.requestUrl,
+        API_ENDPOINTS.automationCapabilities,
+      ),
+      {
+        headers: authHeaders,
+      },
     );
 
   const getRpaCapabilities = (): Promise<RpaCapabilityAuditReport> =>
-    $fetch<RpaCapabilityAuditReport>(
-      resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, API_ENDPOINTS.automationCapabilities),
-    );
+    requestApi<RpaCapabilityAuditReport>(runtime.api, API_ENDPOINTS.automationCapabilities, {
+      method: "GET",
+    });
 
   return {
     fetchRuns,
@@ -169,7 +180,7 @@ function createRunSubscription(runtime: AutomationRuntime) {
   return (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
     const wsUrl = resolveWebSocketEndpoint(
       runtime.wsBase,
-      runtime.requestUrl,
+      runtime.api.requestUrl,
       WS_ENDPOINTS.automation,
     );
     const ws = new WebSocket(wsUrl);
@@ -212,7 +223,11 @@ function createRunSubscription(runtime: AutomationRuntime) {
  * Automation feature composable using shared run/event contracts.
  */
 export function useAutomation() {
-  const runtime = resolveAutomationRuntime(useRuntimeConfig(), useRequestURL());
+  const config = useRuntimeConfig();
+  const runtime: AutomationRuntime = {
+    api: useClientApiRequestRuntime(),
+    wsBase: String(config.public.wsBase || config.public.apiBase || "/"),
+  };
 
   return {
     ...createRunMutations(runtime),

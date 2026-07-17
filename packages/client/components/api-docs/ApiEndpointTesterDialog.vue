@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type {
   ApiEndpoint,
   ApiHttpMethod,
@@ -115,7 +116,7 @@ function updateRequestBodyValue(event: Event): void {
         class="space-y-2"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.pathParametersIntro") }}</h3>
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <SectionGrid grid-token="twoColumnMdGap3">
           <div
             v-for="parameterName in selectedEndpoint.pathParameters"
             :key="`path-${parameterName}`"
@@ -133,7 +134,7 @@ function updateRequestBodyValue(event: Event): void {
               @input="updatePathParameter(parameterName, $event)"
             />
           </div>
-        </div>
+        </SectionGrid>
       </section>
 
       <section
@@ -142,7 +143,7 @@ function updateRequestBodyValue(event: Event): void {
         class="space-y-2"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.queryParametersIntro") }}</h3>
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <SectionGrid grid-token="twoColumnMdGap3">
           <div
             v-for="parameter in selectedEndpoint.queryParameters"
             :key="`query-${parameter.name}`"
@@ -160,7 +161,7 @@ function updateRequestBodyValue(event: Event): void {
               @input="updateQueryParameter(parameter.name, $event)"
             />
           </div>
-        </div>
+        </SectionGrid>
       </section>
 
       <section

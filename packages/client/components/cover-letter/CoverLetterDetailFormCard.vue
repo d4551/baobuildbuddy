@@ -5,6 +5,7 @@ import {
   COVER_LETTER_TEMPLATE_OPTIONS,
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
   templateLabel: (template: CoverLetterTemplate) => string;
@@ -23,7 +24,7 @@ const formData = defineModel<{
   <section class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.details.title") }}</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <SectionGrid grid-token="threeColumnMd">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.companyLegend") }}</legend>
           <input
@@ -66,7 +67,7 @@ const formData = defineModel<{
             </option>
           </select>
         </fieldset>
-      </div>
+      </SectionGrid>
     </div>
   </section>
 </template>

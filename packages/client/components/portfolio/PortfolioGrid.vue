@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   projects: PortfolioProject[];
@@ -69,7 +70,7 @@ function handleToggleFeatured(project: PortfolioProject) {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+  <SectionGrid grid-token="threeColumnLgFromMd" role="list">
     <div
       v-for="(project, index) in localProjects"
       :key="project.id"
@@ -87,5 +88,5 @@ function handleToggleFeatured(project: PortfolioProject) {
         @drop="handleDrop($event, index)"
       />
     </div>
-  </div>
+  </SectionGrid>
 </template>

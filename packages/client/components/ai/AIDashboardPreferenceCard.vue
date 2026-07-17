@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ProviderConfig } from "~/types/ai-dashboard";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
   loading: boolean;
@@ -22,7 +23,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
       <p class="text-sm text-base-content/70">{{ t("aiDashboard.preference.description") }}</p>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
           <select
@@ -56,7 +57,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
             </option>
           </select>
         </fieldset>
-      </div>
+      </SectionGrid>
 
       <div class="card-actions justify-end">
         <button

@@ -2,6 +2,7 @@
 import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
   readinessAssessment: ReadinessAssessment | null;
@@ -31,7 +32,7 @@ const { t } = useI18n();
     <div class="card-body gap-4">
       <h2 class="card-title text-2xl">{{ t("skillsPathwaysPage.readiness.title") }}</h2>
 
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <SectionGrid grid-token="threeColumnXlGap6">
         <div class="space-y-2">
           <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
           <UiRadialMeter
@@ -100,7 +101,7 @@ const { t } = useI18n();
             </ul>
           </div>
         </div>
-      </div>
+      </SectionGrid>
     </div>
   </section>
 

@@ -89,10 +89,13 @@ const collectPageWidthViolations = (filePath: string, fileContent: string): Viol
 };
 
 const collectPageGridViolations = (filePath: string, fileContent: string): Violation[] => {
-  if (!filePath.startsWith(`${clientRoot}/pages/`)) {
+  const isPage = filePath.startsWith(`${clientRoot}/pages/`);
+  const isComponent = filePath.startsWith(`${clientRoot}/components/`);
+  if (!isPage && !isComponent) {
     return [];
   }
 
+  const surface = isPage ? "Pages" : "Components";
   const violations: Violation[] = [];
   for (const match of fileContent.matchAll(adHocGridBreakpointPattern)) {
     const classMarkup = match[0];
@@ -102,7 +105,7 @@ const collectPageGridViolations = (filePath: string, fileContent: string): Viola
     violations.push({
       filePath,
       line: getLineFromOffset(fileContent, match.index ?? 0),
-      message: "Pages must use SectionGrid tokens instead of ad-hoc grid breakpoint classes.",
+      message: `${surface} must use SectionGrid tokens instead of ad-hoc grid breakpoint classes.`,
     });
   }
 
@@ -110,8 +113,7 @@ const collectPageGridViolations = (filePath: string, fileContent: string): Viola
     violations.push({
       filePath,
       line: getLineFromOffset(fileContent, match.index ?? 0),
-      message:
-        "Pages must not pass grid breakpoint classes via SectionGrid extra-class. Add or use a UiGridToken instead.",
+      message: `${surface} must not pass grid breakpoint classes via SectionGrid extra-class. Add or use a UiGridToken instead.`,
     });
   }
 
@@ -124,13 +126,14 @@ const collectViolations = async (): Promise<Violation[]> => {
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
-      const pageScoped = pageFileSet.has(filePath)
-        ? [
-            ...collectPageWidthViolations(filePath, fileContent),
-            ...collectPageGridViolations(filePath, fileContent),
-          ]
+      const pageWidth = pageFileSet.has(filePath)
+        ? collectPageWidthViolations(filePath, fileContent)
         : [];
-      return [...collectModalSizeViolations(filePath, fileContent), ...pageScoped];
+      return [
+        ...collectModalSizeViolations(filePath, fileContent),
+        ...pageWidth,
+        ...collectPageGridViolations(filePath, fileContent),
+      ];
     }),
   );
   return violationGroups.flat();

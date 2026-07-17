@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 interface SpeechModelProfileFieldsProps {
   readonly sttProvider: SpeechProviderOption;
@@ -68,7 +69,7 @@ function handleTtsModelChange(event: Event): void {
 <template>
   <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-3">
     <legend class="fieldset-legend text-xs">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <SectionGrid grid-token="twoColumnSmGap2">
       <label class="label py-0 text-xs" for="speech-profile-stt-provider">
         {{ t("aiChatPage.voiceSettings.sttProviderLabel") }}
       </label>
@@ -148,7 +149,7 @@ function handleTtsModelChange(event: Event): void {
           :value="model"
         />
       </datalist>
-    </div>
+    </SectionGrid>
     <div class="mt-2 flex items-center justify-between gap-2">
       <p class="text-xs text-base-content/70">
         {{ t("aiChatPage.voiceSettings.hint") }}

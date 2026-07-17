@@ -3,6 +3,7 @@ import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type BrandPreviewTheme = "light" | "dark";
 
@@ -63,7 +64,7 @@ const brandPreviewThemes = computed<
         <span class="badge badge-outline">{{ brandDraft.assistantName }}</span>
       </div>
 
-      <div class="grid gap-4 xl:grid-cols-2">
+      <SectionGrid grid-token="twoColumnXlGap4">
         <section
           v-for="themeSurface in brandPreviewThemes"
           :key="themeSurface.id"
@@ -127,7 +128,7 @@ const brandPreviewThemes = computed<
             </span>
           </div>
         </section>
-      </div>
+      </SectionGrid>
     </div>
   </div>
 </template>

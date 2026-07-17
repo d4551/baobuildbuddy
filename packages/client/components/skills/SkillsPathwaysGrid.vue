@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
   pathways: readonly CareerPathway[];
@@ -18,7 +19,7 @@ const { t } = useI18n();
     <div class="card-body gap-4">
       <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <SectionGrid grid-token="threeColumn">
         <article
           v-for="pathway in pathways"
           :key="pathway.id"
@@ -75,7 +76,7 @@ const { t } = useI18n();
             </p>
           </div>
         </article>
-      </div>
+      </SectionGrid>
 
       <EmptyState
         v-if="pathways.length === 0"

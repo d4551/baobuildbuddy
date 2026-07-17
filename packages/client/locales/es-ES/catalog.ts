@@ -166,6 +166,7 @@ const catalog = {
     "interview": "Entrevista",
     "skills": "Habilidades",
     "studios": "Estudios",
+    "aiDashboard": "Panel de IA",
     "aiChat": "Chat IA",
     "automation": "Automatización",
     "gamification": "Gamificación",
@@ -2275,6 +2276,7 @@ const catalog = {
       "successRateTitle": "Tasa de Éxito",
       "successRateDesc": "Respuestas del asistente respecto a las solicitudes",
       "averageResponseTitle": "Tiempo de Respuesta Medio",
+      "averageResponseValue": "{seconds}s",
       "averageResponseDesc": "Latencia medida en solicitudes de chat",
       "sessionsTitle": "Sesiones",
       "sessionsDesc": "Proveedor activo: {provider}"

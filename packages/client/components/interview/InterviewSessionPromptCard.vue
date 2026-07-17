@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   currentQuestion: InterviewQuestion | undefined;
@@ -64,7 +65,7 @@ const promptExpectedMinutes = computed(() => {
         </p>
       </div>
 
-      <div v-if="currentQuestion" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <SectionGrid v-if="currentQuestion" grid-token="threeColumnMd">
         <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
           <p class="text-sm font-medium text-base-content/70">
             {{ t("interviewSession.promptTypeLabel") }}
@@ -87,7 +88,7 @@ const promptExpectedMinutes = computed(() => {
             {{ t("interviewSession.promptExpectedDurationValue", { count: promptExpectedMinutes }) }}
           </p>
         </div>
-      </div>
+      </SectionGrid>
 
       <div class="space-y-2">
         <p class="text-sm font-medium text-base-content/70">

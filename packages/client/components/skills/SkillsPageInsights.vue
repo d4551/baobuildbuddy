@@ -2,6 +2,7 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
   mappingMetrics: {
@@ -36,7 +37,7 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <section class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+    <SectionGrid tag="section" grid-token="twoColumnXlGap4">
       <article class="card card-border bg-base-100 shadow-sm">
         <div class="card-body gap-4">
           <div class="space-y-1">
@@ -110,6 +111,6 @@ const { t } = useI18n();
           />
         </div>
       </article>
-    </section>
+    </SectionGrid>
   </div>
 </template>

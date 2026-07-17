@@ -4,6 +4,7 @@ import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type ProviderField =
   | "localModelEndpoint"
@@ -156,7 +157,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </div>
       </div>
 
-      <div class="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <SectionGrid grid-token="providersSplit">
         <section class="card card-border bg-base-200/60" :aria-label="t('settings.aiProviders.title')">
           <div class="card-body gap-4 p-4">
             <div class="flex items-start justify-between gap-3">
@@ -171,7 +172,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               </span>
             </div>
 
-            <div class="grid gap-3 md:grid-cols-2">
+            <SectionGrid grid-token="twoColumnMdGap3">
               <article
                 v-for="provider in props.providerInputs"
                 :key="provider.id"
@@ -202,7 +203,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
                   }}
                 </p>
               </article>
-            </div>
+            </SectionGrid>
           </div>
         </section>
 
@@ -254,7 +255,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             </div>
           </div>
         </section>
-      </div>
+      </SectionGrid>
 
       <SettingsAiRoutingCard
         v-model:ai-routing-draft="aiRoutingDraft"

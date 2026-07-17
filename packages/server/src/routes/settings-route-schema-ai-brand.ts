@@ -1,5 +1,10 @@
 import { AI_PROVIDER_ID_LIST } from "@bao/shared/constants/ai-provider";
 import {
+  BRAND_THEME_COLOR_PATTERN_SOURCE,
+  BRAND_THEME_LENGTH_PATTERN_SOURCE,
+  BRAND_THEME_UNITLESS_FLAG_PATTERN_SOURCE,
+} from "@bao/shared/constants/brand-theme-css";
+import {
   SCHEMA_MAX_LENGTH_LONG,
   SCHEMA_MAX_LENGTH_MODEL,
   SCHEMA_MAX_LENGTH_SHORT,
@@ -12,6 +17,24 @@ import {
 } from "@bao/shared/constants/settings";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import { t } from "elysia";
+
+const brandThemeColorBodyValue = t.String({
+  minLength: 1,
+  maxLength: SCHEMA_MAX_LENGTH_SHORT,
+  pattern: BRAND_THEME_COLOR_PATTERN_SOURCE,
+});
+
+const brandThemeLengthBodyValue = t.String({
+  minLength: 1,
+  maxLength: SCHEMA_MAX_LENGTH_SHORT,
+  pattern: BRAND_THEME_LENGTH_PATTERN_SOURCE,
+});
+
+const brandThemeUnitlessFlagBodyValue = t.String({
+  minLength: 1,
+  maxLength: SCHEMA_MAX_LENGTH_SHORT,
+  pattern: BRAND_THEME_UNITLESS_FLAG_PATTERN_SOURCE,
+});
 
 export const VALID_PROVIDERS = AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]];
 
@@ -75,34 +98,34 @@ export const aiRoutingBodySchema = t.Object(
 );
 
 export const brandThemePaletteBodySchema = t.Object({
-  base100: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  base200: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  base300: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  baseContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  primary: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  primaryContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  secondary: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  secondaryContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  accent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  accentContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  neutral: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  neutralContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  info: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  infoContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  success: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  successContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  warning: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  warningContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  error: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  errorContent: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  radiusSelector: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  radiusField: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  radiusBox: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  sizeSelector: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  sizeField: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  border: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  depth: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-  noise: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  base100: brandThemeColorBodyValue,
+  base200: brandThemeColorBodyValue,
+  base300: brandThemeColorBodyValue,
+  baseContent: brandThemeColorBodyValue,
+  primary: brandThemeColorBodyValue,
+  primaryContent: brandThemeColorBodyValue,
+  secondary: brandThemeColorBodyValue,
+  secondaryContent: brandThemeColorBodyValue,
+  accent: brandThemeColorBodyValue,
+  accentContent: brandThemeColorBodyValue,
+  neutral: brandThemeColorBodyValue,
+  neutralContent: brandThemeColorBodyValue,
+  info: brandThemeColorBodyValue,
+  infoContent: brandThemeColorBodyValue,
+  success: brandThemeColorBodyValue,
+  successContent: brandThemeColorBodyValue,
+  warning: brandThemeColorBodyValue,
+  warningContent: brandThemeColorBodyValue,
+  error: brandThemeColorBodyValue,
+  errorContent: brandThemeColorBodyValue,
+  radiusSelector: brandThemeLengthBodyValue,
+  radiusField: brandThemeLengthBodyValue,
+  radiusBox: brandThemeLengthBodyValue,
+  sizeSelector: brandThemeLengthBodyValue,
+  sizeField: brandThemeLengthBodyValue,
+  border: brandThemeLengthBodyValue,
+  depth: brandThemeUnitlessFlagBodyValue,
+  noise: brandThemeUnitlessFlagBodyValue,
 });
 
 const brandThemePalettePatchBodySchema = t.Partial(brandThemePaletteBodySchema);
