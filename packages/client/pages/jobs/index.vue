@@ -136,7 +136,7 @@ const page = useJobsIndexPage();
             <article
               v-for="job in page.paginatedJobs.value"
               :key="job.id"
-              class="card-glass card-glass-interactive relative h-full overflow-hidden"
+              class="card card-border card-glass card-glass-interactive relative h-full overflow-hidden"
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"

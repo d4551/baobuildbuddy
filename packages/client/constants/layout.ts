@@ -51,7 +51,7 @@ export const SHELL_NAVBAR_CLASS = "sticky top-0 z-10 border-b border-base-300 bg
  * Glass surface for elevated cards/panels (fluid depth without palette literals).
  */
 export const SURFACE_GLASS_CARD_CLASS =
-  "card card-border border-base-300/60 bg-base-100/80 shadow-sm backdrop-blur-md transition-[box-shadow,transform,background-color] duration-200";
+  "card card-border card-glass shadow-sm transition-[box-shadow,transform,background-color] duration-200";
 
 /**
  * Interactive glass card hover affordance (motion-safe).

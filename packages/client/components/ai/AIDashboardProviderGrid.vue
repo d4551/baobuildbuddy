@@ -50,7 +50,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
     <div
       v-for="provider in providers"
       :key="provider.id"
-      class="card-glass card-glass-interactive"
+      class="card card-border card-glass card-glass-interactive"
     >
       <div class="card-body gap-4">
         <div class="flex items-start justify-between gap-3">
