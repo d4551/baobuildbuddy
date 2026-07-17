@@ -82,7 +82,6 @@ export const errorHandler = new Elysia({ name: "error-handler" }).error((context
     };
   }
 
-  // Log internally but don't leak raw error details to the client
   logger.error(`[${code}]`, error instanceof Error ? error.message : error);
   set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
   return { error: API_ERROR_INTERNAL_SERVER, code };

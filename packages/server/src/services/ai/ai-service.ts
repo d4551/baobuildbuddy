@@ -131,7 +131,6 @@ export class AIService {
       return this.providers.get(name) || null;
     }
 
-    // Return preferred provider or first in fallback order
     if (this.preferredProvider && this.providers.has(this.preferredProvider)) {
       return this.providers.get(this.preferredProvider) || null;
     }
@@ -238,10 +237,8 @@ export class AIService {
     const deleted = this.providers.delete(provider);
 
     if (deleted) {
-      // Remove from fallback order
       this.fallbackOrder = this.fallbackOrder.filter((p) => p !== provider);
 
-      // Update preferred if it was removed
       if (this.preferredProvider === provider) {
         this.preferredProvider = this.fallbackOrder[0];
         if (!this.preferredProvider) {

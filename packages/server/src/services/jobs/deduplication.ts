@@ -61,7 +61,6 @@ export function findDuplicates(jobs: RawJob[]): Map<string, RawJob[]> {
     hashMap.set(hash, existing);
   }
 
-  // Filter to only duplicates (more than one job with same hash)
   const duplicates = new Map<string, RawJob[]>();
   for (const [hash, matches] of hashMap.entries()) {
     if (matches.length > 1) {
@@ -97,10 +96,8 @@ export function mergeJobs(jobs: RawJob[]): RawJob {
     return jobs[0];
   }
 
-  // Start with the first job as base
   const merged: RawJob = { ...jobs[0] };
 
-  // Collect all sources
   const sources = new Set<string>();
   const urls = new Set<string>();
 
@@ -110,7 +107,6 @@ export function mergeJobs(jobs: RawJob[]): RawJob {
     mergeJobValues(merged, job);
   }
 
-  // Add metadata about sources
   merged.sources = Array.from(sources);
   merged.alternativeUrls = Array.from(urls);
 

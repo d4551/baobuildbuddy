@@ -22,10 +22,8 @@ const runBackgroundTask = (task: Promise<unknown>, onError?: (error: unknown) =>
   );
 };
 
-// Initialize database
 initializeDatabase(sqlite);
 
-// Seed database with gaming studios (idempotent — only seeds if empty)
 runBackgroundTask(
   (async () => {
     const seedResult = await settle(Promise.resolve().then(() => seedDatabase(db)));
@@ -63,7 +61,6 @@ const runJobRefresh = (): void => {
 runJobRefresh();
 setInterval(runJobRefresh, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
 
-// Start server: API app + OpenAI Chat Completions facade on one listener.
 const serverApp = new Elysia().use(openaiV1Routes).use(app);
 const server = serverApp.listen(config.port);
 
@@ -73,7 +70,6 @@ logger.info(
   `OpenAI Chat Completions API: http://${config.host}:${config.port}${OPENAI_V1_ENDPOINT_PREFIX}`,
 );
 
-// Graceful shutdown
 async function gracefulShutdown(signal: string): Promise<void> {
   logger.warn(`Received ${signal}, shutting down gracefully...`);
   await server.stop();

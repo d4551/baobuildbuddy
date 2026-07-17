@@ -236,7 +236,5 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
       ...(data.sessionId ? { sessionId: data.sessionId } : {}),
     });
   },
-  close() {
-    // Connection closed
-  },
+  close() {},
 });
