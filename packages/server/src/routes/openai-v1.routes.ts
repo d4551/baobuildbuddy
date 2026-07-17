@@ -1,10 +1,7 @@
-import { Elysia } from "elysia";
-import {
-  OPENAI_V1_ENDPOINT_PREFIX,
-  OPENAI_V1_ENDPOINTS,
-} from "@bao/shared/constants/endpoints";
+import { OPENAI_V1_ENDPOINT_PREFIX, OPENAI_V1_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
+import { Elysia } from "elysia";
 import { authGuard } from "../middleware/auth";
 import { corsPlugin } from "../middleware/cors";
 import { rateLimit } from "../utils/rate-limit";
@@ -58,14 +55,11 @@ export const openaiV1Routes = new Elysia({
       return status(HTTP_STATUS_OK, { object: "list" as const, data });
     },
   )
-  .get(
-    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`,
-    async ({ params, status }) => {
-      const modelId = decodeURIComponent(params["*"] ?? "");
-      const result = await getOpenAIV1Model(modelId);
-      return status(result.status, result.body);
-    },
-  )
+  .get(`${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`, async ({ params, status }) => {
+    const modelId = decodeURIComponent(params["*"] ?? "");
+    const result = await getOpenAIV1Model(modelId);
+    return status(result.status, result.body);
+  })
   .post(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {

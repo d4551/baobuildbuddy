@@ -1,4 +1,4 @@
-import { THEME_NAMES, resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveBrandSettings, THEME_NAMES } from "@bao/shared/constants/branding";
 import type { BrandSettings, BrandThemePalette } from "@bao/shared/types/settings-contracts";
 import { computed, readonly } from "vue";
 import { useSettings } from "./useSettings";

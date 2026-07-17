@@ -1,3 +1,4 @@
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import type { InterviewResponse } from "@bao/shared/types/interview";
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 export declare const createInterviewSession: (studioId: string | undefined, config: CreateSessionConfigInput | undefined) => Promise<{
@@ -27,21 +28,26 @@ export declare const createInterviewSession: (studioId: string | undefined, conf
     };
 }>;
 export declare const getInterviewSession: (id: string) => Promise<{
-    status: number;
+    status: typeof HTTP_STATUS_NOT_FOUND;
     body: {
         error: string;
     };
 } | {
-    status: null;
+    status: typeof HTTP_STATUS_OK;
     body: import("./interview-route-contracts").SessionPayload;
 }>;
 export declare const submitInterviewResponse: (id: string, body: SubmitResponseBody) => Promise<{
-    status: number;
+    status: typeof HTTP_STATUS_NOT_FOUND;
     body: {
         error: string;
     };
 } | {
-    status: null;
+    status: typeof HTTP_STATUS_BAD_REQUEST;
+    body: {
+        error: string;
+    };
+} | {
+    status: typeof HTTP_STATUS_OK;
     body: {
         error?: undefined;
         id: string;
@@ -68,12 +74,12 @@ export declare const submitInterviewResponse: (id: string, body: SubmitResponseB
     };
 }>;
 export declare const completeInterviewSession: (id: string) => Promise<{
-    status: number;
+    status: typeof HTTP_STATUS_NOT_FOUND;
     body: {
         error: string;
     };
 } | {
-    status: null;
+    status: typeof HTTP_STATUS_OK;
     body: {
         error?: undefined;
         id: string;

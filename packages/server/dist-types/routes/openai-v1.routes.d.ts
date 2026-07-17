@@ -13,7 +13,7 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
     v1: {};
 } & {
     v1: {
-        models: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -43,7 +43,7 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
     };
 } & {
     v1: {
-        models: {
+        [x: string]: {
             "*": {
                 get: {
                     body: unknown;
@@ -89,7 +89,7 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
     schemas: {};
     response: {};
     error: [];
-}, "post", "/chat/completions", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+}, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
     };
@@ -103,7 +103,7 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
         max_tokens: import("typebox").TOptional<import("typebox").TNumber>;
         stream: import("typebox").TOptional<import("typebox").TBoolean>;
     }>;
-}, {}, "/v1/chat/completions">, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
+}, {}, `/v1/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
     body: {
         model: string;
         messages: {

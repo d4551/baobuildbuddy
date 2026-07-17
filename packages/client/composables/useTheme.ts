@@ -1,7 +1,7 @@
 import {
-  THEME_NAMES,
-  normalizeAppDataTheme,
   type AppDataTheme,
+  normalizeAppDataTheme,
+  THEME_NAMES,
 } from "@bao/shared/constants/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import { readonly } from "vue";

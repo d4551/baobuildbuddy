@@ -66,9 +66,7 @@ function createHandleToggleTheme(state: SettingsPageState) {
   return async () => {
     const previousTheme = state.theme.value;
     const nextTheme =
-      previousTheme === state.THEME_NAMES.light
-        ? state.THEME_NAMES.dark
-        : state.THEME_NAMES.light;
+      previousTheme === state.THEME_NAMES.light ? state.THEME_NAMES.dark : state.THEME_NAMES.light;
     // Preview locally; persist cookie only after settings SSOT save succeeds.
     state.setTheme(nextTheme, { persist: false });
     const savedTheme = await runToastTask(
