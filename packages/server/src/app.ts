@@ -7,16 +7,14 @@ import {
 } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
-import { cors } from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
+import { openapi } from "@elysiajs/openapi";
 import Type, { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
-import { rateLimit } from "elysia-rate-limit";
-import { config } from "./config/env";
+import { Elysia, setupTypebox } from "elysia";
 import { isProductionRuntime } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
 import { authGuard } from "./middleware/auth";
+import { corsPlugin } from "./middleware/cors";
 import { errorHandler } from "./middleware/error-handler";
 import { logger } from "./middleware/logger";
 import { aiRoutes } from "./routes/ai.routes";
@@ -36,28 +34,12 @@ import { skillMappingRoutes } from "./routes/skill-mapping.routes";
 import { statsRoutes } from "./routes/stats.routes";
 import { studioRoutes } from "./routes/studio.routes";
 import { userRoutes } from "./routes/user.routes";
+import { rateLimit } from "./utils/rate-limit";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
 
-const getRequestOrigin = (request: Request): string | null =>
-  request.headers.get("origin") ?? request.headers.get("Origin");
-
-const applyAllowedOriginHeader = (
-  headers: Record<string, string | number>,
-  request: Request,
-): void => {
-  const requestOrigin = getRequestOrigin(request);
-  if (!(requestOrigin && config.corsOrigins.includes(requestOrigin))) {
-    return;
-  }
-
-  headers["access-control-allow-origin"] = requestOrigin;
-  const varyHeader = typeof headers.vary === "string" ? headers.vary : "";
-  if (varyHeader !== "Origin" && varyHeader !== "*") {
-    headers.vary = varyHeader ? `${varyHeader}, Origin` : "Origin";
-  }
-};
+setupTypebox();
 
 const OPENAPI_TAGS = [
   { name: "Health", description: "Service health and readiness endpoints." },
@@ -79,18 +61,10 @@ const OPENAPI_TAGS = [
   { name: "Automation", description: "Automation execution, scheduling, history, and artifacts." },
 ] as const;
 
-export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticResponse: true })
-  .onRequest(({ request, set }) => {
-    applyAllowedOriginHeader(set.headers, request);
-  })
+export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
+  .use(corsPlugin)
   .use(
-    cors({
-      origin: config.corsOrigins,
-      credentials: true,
-    }),
-  )
-  .use(
-    swagger({
+    openapi({
       path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
       specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
       documentation: {
@@ -126,10 +100,15 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
       ),
     ),
   })
-  .use(rateLimit({ duration: RATE_LIMIT_GLOBAL_DURATION_MS, max: RATE_LIMIT_GLOBAL_MAX_REQUESTS }))
+  .use(
+    rateLimit({
+      duration: RATE_LIMIT_GLOBAL_DURATION_MS,
+      max: RATE_LIMIT_GLOBAL_MAX_REQUESTS,
+    }),
+  )
   .use(logger)
   .use(errorHandler)
-  .onAfterHandle(({ set }) => {
+  .afterHandle(({ set }) => {
     set.headers["x-content-type-options"] = "nosniff";
     set.headers["x-frame-options"] = "DENY";
     set.headers["referrer-policy"] = "strict-origin-when-cross-origin";
@@ -142,6 +121,14 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
   })
   .get(
     toApiScopedPath(API_ENDPOINTS.health),
+    {
+      response: {
+        [HTTP_STATUS_OK]: "HealthResponse",
+      },
+      detail: {
+        tags: ["Health"],
+      },
+    },
     async () => {
       const healthResult = await settle(
         Promise.resolve().then(() => {
@@ -156,14 +143,6 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX, nativeStaticRespons
         database: dbOk ? "ok" : "error",
         uptime: process.uptime(),
       };
-    },
-    {
-      response: {
-        [HTTP_STATUS_OK]: "HealthResponse",
-      },
-      detail: {
-        tags: ["Health"],
-      },
     },
   )
   .use(authRoutes)

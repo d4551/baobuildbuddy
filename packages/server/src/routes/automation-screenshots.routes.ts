@@ -114,7 +114,22 @@ export const automationScreenshotRoutes = new Elysia({
   tags: ["Automation"],
 }).get(
   "/:runId/:index",
-  async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
+  {
+    params: automationScreenshotParams,
+    response: {
+      200: StandardSchemaV1(Type.Unknown()),
+      400: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
+      404: StandardSchemaV1(
+        Type.Object({
+          error: Type.String(),
+        }),
+      ),
+    },
+  }, async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: API_ERROR_INVALID_SCREENSHOT_INDEX };
@@ -152,21 +167,5 @@ export const automationScreenshotRoutes = new Elysia({
 
     const extension = `.${getScreenshotExtension(fileName)}`;
     return createScreenshotResponse(contents, extension);
-  },
-  {
-    params: automationScreenshotParams,
-    response: {
-      200: StandardSchemaV1(Type.Unknown()),
-      400: StandardSchemaV1(
-        Type.Object({
-          error: Type.String(),
-        }),
-      ),
-      404: StandardSchemaV1(
-        Type.Object({
-          error: Type.String(),
-        }),
-      ),
-    },
   },
 );

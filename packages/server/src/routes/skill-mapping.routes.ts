@@ -34,14 +34,13 @@ export const skillMappingRoutes = new Elysia({
   .use(skillAnalysisRateLimit)
   .get(
     "/mappings",
-    async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
     {
       query: StandardSchemaV1(skillMappingsQuerySchema),
-    },
+    }, async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
   )
   .post(
     "/mappings",
-    async ({
+    { body: StandardSchemaV1(skillMappingCreateBodySchema) }, async ({
       body,
       set,
     }: {
@@ -52,11 +51,13 @@ export const skillMappingRoutes = new Elysia({
       set.status = result.statusCode;
       return result.mapping;
     },
-    { body: StandardSchemaV1(skillMappingCreateBodySchema) },
   )
   .put(
     "/mappings/:id",
-    async ({
+    {
+      params: StandardSchemaV1(skillMappingIdParamsSchema),
+      body: StandardSchemaV1(skillMappingUpdateBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -65,35 +66,28 @@ export const skillMappingRoutes = new Elysia({
       body: SkillMappingUpdateRouteBody;
       set: SkillMappingRouteSetState;
     }) => updateSkillMappingFromBody(params.id, body, set),
-    {
-      params: StandardSchemaV1(skillMappingIdParamsSchema),
-      body: StandardSchemaV1(skillMappingUpdateBodySchema),
-    },
   )
   .delete(
     "/mappings/:id",
-    async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
+    { params: StandardSchemaV1(skillMappingIdParamsSchema) }, async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
       const result = await deleteSkillMappingById(params.id, set);
       if (result.kind === "gone" || result.kind === "deleted") {
         return status(result.statusCode, result.payload);
       }
       return result.payload;
     },
-    { params: StandardSchemaV1(skillMappingIdParamsSchema) },
   )
   .get("/pathways", async () => skillMappingService.getPathways())
   .get(
     "/readiness",
-    async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
     {
       query: StandardSchemaV1(skillReadinessQuerySchema),
-    },
+    }, async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
   )
   .post(
     "/ai-analyze",
-    async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
-      analyzeSkillMappingsSafely(body, set),
     {
       body: StandardSchemaV1(skillAnalysisBodySchema),
-    },
+    }, async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
+      analyzeSkillMappingsSafely(body, set),
   );

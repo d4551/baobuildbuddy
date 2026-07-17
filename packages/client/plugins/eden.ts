@@ -36,7 +36,7 @@ function writeStoredApiKey(cookieRef: AuthKeyCookieRef, apiKey: string | null): 
 }
 
 /**
- * Reads API key from local storage or server-synced auth cookie.
+ * Reads API key from the httpOnly auth cookie.
  *
  * @returns Stored API key when available.
  */
@@ -45,7 +45,7 @@ export function getStoredApiKey(): string | null {
 }
 
 /**
- * Persists or clears API key in local storage and auth cookie.
+ * Persists or clears API key in the httpOnly auth cookie.
  *
  * @param key API key value.
  */

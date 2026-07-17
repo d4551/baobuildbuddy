@@ -46,16 +46,17 @@ export const portfolioRoutes = new Elysia({
   })
   .put(
     "/",
-    async ({ body }: { body: PortfolioUpdateRouteBody }) => {
-      return await portfolioService.updatePortfolio({ metadata: body.metadata });
-    },
     {
       body: StandardSchemaV1(portfolioUpdateBodySchema),
+    }, async ({ body }: { body: PortfolioUpdateRouteBody }) => {
+      return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
   )
   .post(
     "/projects",
-    async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
+    {
+      body: StandardSchemaV1(portfolioProjectCreateBodySchema),
+    }, async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -83,13 +84,12 @@ export const portfolioRoutes = new Elysia({
       );
       return newProject;
     },
-    {
-      body: StandardSchemaV1(portfolioProjectCreateBodySchema),
-    },
   )
   .post(
     "/projects/reorder",
-    async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
+    {
+      body: StandardSchemaV1(portfolioProjectReorderBodySchema),
+    }, async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -98,13 +98,13 @@ export const portfolioRoutes = new Elysia({
       await portfolioService.reorderProjects(portfolio.id, body.orderedIds);
       return await portfolioService.getPortfolioPayload();
     },
-    {
-      body: StandardSchemaV1(portfolioProjectReorderBodySchema),
-    },
   )
   .put(
     "/projects/:id",
-    async ({
+    {
+      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
+      body: StandardSchemaV1(portfolioProjectUpdateBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -135,14 +135,12 @@ export const portfolioRoutes = new Elysia({
 
       return updated;
     },
-    {
-      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
-      body: StandardSchemaV1(portfolioProjectUpdateBodySchema),
-    },
   )
   .delete(
     "/projects/:id",
-    async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
+    {
+      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
+    }, async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -151,13 +149,12 @@ export const portfolioRoutes = new Elysia({
 
       return { success: true, id: params.id };
     },
-    {
-      params: StandardSchemaV1(portfolioProjectIdParamsSchema),
-    },
   )
   .post(
     "/export",
-    async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
+    {
+      body: StandardSchemaV1(portfolioExportBodySchema),
+    }, async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -197,8 +194,5 @@ export const portfolioRoutes = new Elysia({
         Buffer.from(exportResult.value),
         `portfolio-${portfolio.id}.pdf`,
       );
-    },
-    {
-      body: StandardSchemaV1(portfolioExportBodySchema),
     },
   );

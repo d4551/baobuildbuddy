@@ -22,6 +22,9 @@ import {
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import Type, { type StaticParse } from "baobox";
+import { routeErrorBodySchema } from "./route-error-envelope";
+
+export { routeErrorBodySchema } from "./route-error-envelope";
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
@@ -127,14 +130,6 @@ export const automationRunEnvelopeBodySchema = Type.Object({
   timedOut: Type.Boolean(),
   aborted: Type.Boolean(),
   executionMs: Type.Union([Type.Number(), Type.Null()]),
-});
-
-export const routeErrorBodySchema = Type.Object({
-  error: Type.Object({
-    code: Type.String({ minLength: 1 }),
-    message: Type.String({ minLength: 1 }),
-    details: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  }),
 });
 
 export const capabilityAuditEntryBodySchema = Type.Object({

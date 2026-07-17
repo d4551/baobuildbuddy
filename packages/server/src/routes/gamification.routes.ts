@@ -1,4 +1,7 @@
-import { API_ERROR_CHALLENGE_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_CHALLENGE_NOT_FOUND,
+  API_ERROR_XP_AMOUNT_REASON_REQUIRED,
+} from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_CHALLENGE_COMPLETED } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
@@ -21,10 +24,12 @@ export const gamificationRoutes = new Elysia({
   })
   .post(
     "/award-xp",
-    async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
+    {
+      body: awardXpBody,
+    }, async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
       if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
         set.status = HTTP_STATUS_BAD_REQUEST;
-        return { error: "amount and reason are required." };
+        return { error: API_ERROR_XP_AMOUNT_REASON_REQUIRED };
       }
 
       const levelUp = await gamificationService.awardXP(body.amount, body.reason);
@@ -40,9 +45,6 @@ export const gamificationRoutes = new Elysia({
           ? `Level up! You're now level ${levelUp.newLevel} — ${levelUp.newTitle}`
           : `+${body.amount} XP earned`,
       };
-    },
-    {
-      body: awardXpBody,
     },
   )
   .get("/achievements", async () => {
@@ -62,7 +64,9 @@ export const gamificationRoutes = new Elysia({
   })
   .post(
     "/challenges/:id/complete",
-    async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
+    {
+      params: challengeIdParams,
+    }, async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
       if (!params.id) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return { message: API_ERROR_CHALLENGE_NOT_FOUND, completed: false };
@@ -84,9 +88,6 @@ export const gamificationRoutes = new Elysia({
         totalXP: progress.xp,
         level: progress.level,
       };
-    },
-    {
-      params: challengeIdParams,
     },
   )
   .get("/weekly", async () => {

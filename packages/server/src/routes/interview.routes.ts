@@ -27,13 +27,12 @@ export const interviewRoutes = new Elysia({
 })
   .post(
     "/sessions",
-    async ({ body, set }: { body: CreateSessionBody; set: RouteSetState }) => {
+    {
+      body: StandardSchemaV1(createSessionBodySchema),
+    }, async ({ body, set }: { body: CreateSessionBody; set: RouteSetState }) => {
       const result = await createInterviewSession(body.studioId, body.config);
       set.status = HTTP_STATUS_CREATED;
       return result.body;
-    },
-    {
-      body: StandardSchemaV1(createSessionBodySchema),
     },
   )
   .get("/sessions", async () => {
@@ -42,20 +41,22 @@ export const interviewRoutes = new Elysia({
   })
   .get(
     "/sessions/:id",
-    async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
+    {
+      params: StandardSchemaV1(interviewSessionParamsSchema),
+    }, async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await getInterviewSession(params.id);
       if (result.status !== null) {
         set.status = result.status;
       }
       return result.body;
     },
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
-    },
   )
   .post(
     "/sessions/:id/response",
-    async ({
+    {
+      params: StandardSchemaV1(interviewSessionParamsSchema),
+      body: StandardSchemaV1(submitResponseBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -70,22 +71,17 @@ export const interviewRoutes = new Elysia({
       }
       return result.body;
     },
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
-      body: StandardSchemaV1(submitResponseBodySchema),
-    },
   )
   .post(
     "/sessions/:id/complete",
-    async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
+    {
+      params: StandardSchemaV1(interviewSessionParamsSchema),
+    }, async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await completeInterviewSession(params.id);
       if (result.status !== null) {
         set.status = result.status;
       }
       return result.body;
-    },
-    {
-      params: StandardSchemaV1(interviewSessionParamsSchema),
     },
   )
   .get(toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats), async () =>

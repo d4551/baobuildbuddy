@@ -38,7 +38,9 @@ export const scraperRoutes = new Elysia({
   })
   .post(
     toApiChildPath(SCRAPER_BASE_PATH, `${API_ENDPOINTS.scraperJobsBase}/:portalId`),
-    async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
+    {
+      params: StandardSchemaV1(scraperPortalParamsSchema),
+    }, async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -60,8 +62,5 @@ export const scraperRoutes = new Elysia({
         };
       }
       return scrapeJobsResult.value;
-    },
-    {
-      params: StandardSchemaV1(scraperPortalParamsSchema),
     },
   );

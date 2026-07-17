@@ -12,7 +12,6 @@ import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { rateLimit } from "elysia-rate-limit";
 import {
   RATE_LIMIT_SETTINGS_DURATION_MS,
   RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS,
@@ -21,6 +20,7 @@ import {
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
+import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   type ApiKeysUpdateBody,
@@ -73,7 +73,9 @@ export const settingsRoutes = new Elysia({
       )
       .put(
         "/",
-        async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
+        {
+          body: StandardSchemaV1(settingsUpdateBodySchema),
+        }, async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
             set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
@@ -96,23 +98,21 @@ export const settingsRoutes = new Elysia({
 
           return { success: true };
         },
-        {
-          body: StandardSchemaV1(settingsUpdateBodySchema),
-        },
       )
       .put(
         "/job-taxonomy",
-        async ({ body }: { body: JobTaxonomyUpdateBody }) => {
-          const jobTaxonomy = await updateJobTaxonomy(body);
-          return { success: true, jobTaxonomy };
-        },
         {
           body: StandardSchemaV1(jobTaxonomyUpdateBodySchema),
+        }, async ({ body }: { body: JobTaxonomyUpdateBody }) => {
+          const jobTaxonomy = await updateJobTaxonomy(body);
+          return { success: true, jobTaxonomy };
         },
       )
       .put(
         "/api-keys",
-        async ({ body }: { body: ApiKeysUpdateBody }) => {
+        {
+          body: StandardSchemaV1(apiKeysUpdateBodySchema),
+        }, async ({ body }: { body: ApiKeysUpdateBody }) => {
           await readOrCreateSettingsRow();
           await db
             .update(settings)
@@ -121,16 +121,12 @@ export const settingsRoutes = new Elysia({
 
           return { success: true };
         },
-        {
-          body: StandardSchemaV1(apiKeysUpdateBodySchema),
-        },
       )
       .post(
         "/test-api-key",
-        async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
         {
           body: StandardSchemaV1(providerTestBodySchema),
-        },
+        }, async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
       )
       .get("/export", async () => {
         const { dataService } = await import("../services/data-service");
@@ -138,7 +134,9 @@ export const settingsRoutes = new Elysia({
       })
       .post(
         "/import",
-        async ({ body }: { body: ImportSettingsBody }) => {
+        {
+          body: StandardSchemaV1(importSettingsBodySchema),
+        }, async ({ body }: { body: ImportSettingsBody }) => {
           const { dataService } = await import("../services/data-service");
           return dataService.importAll({
             version: body.version,
@@ -156,9 +154,6 @@ export const settingsRoutes = new Elysia({
             applications: body.applications,
             chatHistory: body.chatHistory,
           });
-        },
-        {
-          body: StandardSchemaV1(importSettingsBodySchema),
         },
       ),
   );

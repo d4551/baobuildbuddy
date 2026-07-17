@@ -86,9 +86,7 @@ export const API_ENDPOINTS = {
   automationRuns: `${API_ENDPOINT_PREFIX}/automation/runs`,
   automationScreenshotsBase: `${API_ENDPOINT_PREFIX}/automation/screenshots`,
   apiDocsUi: `${API_ENDPOINT_PREFIX}/docs/api`,
-  apiDocsUiLegacy: `${API_ENDPOINT_PREFIX}/swagger`,
   apiDocsJson: `${API_ENDPOINT_PREFIX}/docs/api/json`,
-  apiDocsJsonLegacy: `${API_ENDPOINT_PREFIX}/swagger/json`,
 } as const;
 
 /**

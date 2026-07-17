@@ -34,24 +34,25 @@ export const coverLetterRoutes = new Elysia({
   .get("/", async () => listCoverLetters())
   .post(
     "/",
-    async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
+    { body: StandardSchemaV1(coverLetterMutationBodySchema) }, async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
       const result = await createCoverLetter(body);
       set.status = result.statusCode;
       return result.coverLetter;
     },
-    { body: StandardSchemaV1(coverLetterMutationBodySchema) },
   )
   .get(
     "/:id",
-    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
+    { params: StandardSchemaV1(coverLetterIdParamsSchema) }, async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
       const coverLetter = await getCoverLetterById(params.id, set);
       return coverLetter ?? { error: API_ERROR_COVER_LETTER_NOT_FOUND };
     },
-    { params: StandardSchemaV1(coverLetterIdParamsSchema) },
   )
   .put(
     "/:id",
-    async ({
+    {
+      params: StandardSchemaV1(coverLetterIdParamsSchema),
+      body: StandardSchemaV1(coverLetterUpdateBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -60,30 +61,27 @@ export const coverLetterRoutes = new Elysia({
       body: CoverLetterUpdateBody;
       set: RouteSetState;
     }) => updateCoverLetter(params.id, body, set),
-    {
-      params: StandardSchemaV1(coverLetterIdParamsSchema),
-      body: StandardSchemaV1(coverLetterUpdateBodySchema),
-    },
   )
   .delete(
     "/:id",
-    async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
-      deleteCoverLetter(params.id, set),
     {
       params: StandardSchemaV1(coverLetterIdParamsSchema),
-    },
+    }, async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
+      deleteCoverLetter(params.id, set),
   )
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
-    async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
-      handleGenerateCoverLetter(body, set),
     {
       body: StandardSchemaV1(generateCoverLetterBodySchema),
-    },
+    }, async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
+      handleGenerateCoverLetter(body, set),
   )
   .post(
     "/:id/export",
-    async ({
+    {
+      params: StandardSchemaV1(coverLetterIdParamsSchema),
+      body: StandardSchemaV1(coverLetterExportBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -92,8 +90,4 @@ export const coverLetterRoutes = new Elysia({
       body: CoverLetterExportBody;
       set: RouteSetState;
     }) => exportCoverLetterAttachment(params.id, body.format, set),
-    {
-      params: StandardSchemaV1(coverLetterIdParamsSchema),
-      body: StandardSchemaV1(coverLetterExportBodySchema),
-    },
   );

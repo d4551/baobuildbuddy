@@ -29,7 +29,9 @@ export const searchRoutes = new Elysia({
 })
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
-    ({ query }: { query: SearchQuery }) => {
+    {
+      query: searchQuery,
+    }, ({ query }: { query: SearchQuery }) => {
       const q = query.q || "";
       if (q.length < 2) {
         return {
@@ -42,17 +44,13 @@ export const searchRoutes = new Elysia({
       const types = parseSearchTypes(query.types);
       return searchService.searchAll(q, types);
     },
-    {
-      query: searchQuery,
-    },
   )
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
-    async ({ query }: { query: SearchAutocompleteQuery }) => {
-      const prefix = query.prefix || "";
-      return await searchService.autocomplete(prefix);
-    },
     {
       query: searchAutocompleteQuery,
+    }, async ({ query }: { query: SearchAutocompleteQuery }) => {
+      const prefix = query.prefix || "";
+      return await searchService.autocomplete(prefix);
     },
   );

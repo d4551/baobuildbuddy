@@ -57,7 +57,7 @@ function isUnknownArray(value: unknown): value is unknown[] {
  */
 const logger = createServerLogger("error-handler");
 
-export const errorHandler = new Elysia({ name: "error-handler" }).onError(
+export const errorHandler = new Elysia({ name: "error-handler" }).error(
   ({ code, error, set }) => {
     if (code === "NOT_FOUND") {
       set.status = HTTP_STATUS_NOT_FOUND;

@@ -44,12 +44,14 @@ export const jobsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.jobsBase),
   tags: ["Jobs"],
 })
-  .get("/", async ({ query }: { query: JobListQuery }) => listJobs(query), {
+  .get("/", {
     query: StandardSchemaV1(jobsListQuerySchema),
-  })
+  }, async ({ query }: { query: JobListQuery }) => listJobs(query))
   .get(
     "/:id",
-    async ({ params, set }: { params: JobIdParams; set: { status?: number | string } }) => {
+    {
+      params: StandardSchemaV1(jobIdParamsSchema),
+    }, async ({ params, set }: { params: JobIdParams; set: { status?: number | string } }) => {
       const job = await getJobById(params.id);
       if (!job) {
         set.status = HTTP_STATUS_NOT_FOUND;
@@ -57,47 +59,44 @@ export const jobsRoutes = new Elysia({
       }
       return job;
     },
-    {
-      params: StandardSchemaV1(jobIdParamsSchema),
-    },
   )
   .post(
     "/save",
-    async ({ body, set }: { body: SaveJobBody; set: { status?: number | string } }) => {
+    {
+      body: StandardSchemaV1(saveJobBodySchema),
+    }, async ({ body, set }: { body: SaveJobBody; set: { status?: number | string } }) => {
       const result = await saveJob(body.jobId);
       if (result.status !== null) {
         set.status = result.status;
       }
       return result.body;
     },
-    {
-      body: StandardSchemaV1(saveJobBodySchema),
-    },
   )
   .delete(
     "/save/:jobId",
-    async ({ params }: { params: SavedJobParams }) => deleteSavedJob(params.jobId),
     {
       params: StandardSchemaV1(savedJobParamsSchema),
-    },
+    }, async ({ params }: { params: SavedJobParams }) => deleteSavedJob(params.jobId),
   )
   .get("/saved", async () => listSavedJobs())
   .post(
     "/apply",
-    async ({ body, set }: { body: ApplyJobBody; set: { status?: number | string } }) => {
+    {
+      body: StandardSchemaV1(applyJobBodySchema),
+    }, async ({ body, set }: { body: ApplyJobBody; set: { status?: number | string } }) => {
       const result = await createApplication(body.jobId, body.notes ?? "");
       if (result.status !== null) {
         set.status = result.status;
       }
       return result.body;
     },
-    {
-      body: StandardSchemaV1(applyJobBodySchema),
-    },
   )
   .put(
     "/apply/:id",
-    async ({
+    {
+      params: StandardSchemaV1(updateApplicationParamsSchema),
+      body: StandardSchemaV1(updateApplicationBodySchema),
+    }, async ({
       params,
       body,
       set,
@@ -111,10 +110,6 @@ export const jobsRoutes = new Elysia({
         set.status = result.status;
       }
       return result.body;
-    },
-    {
-      params: StandardSchemaV1(updateApplicationParamsSchema),
-      body: StandardSchemaV1(updateApplicationBodySchema),
     },
   )
   .get("/applications", async () => listApplications())

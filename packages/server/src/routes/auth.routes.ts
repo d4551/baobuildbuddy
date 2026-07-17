@@ -19,7 +19,6 @@ import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/cons
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { rateLimit } from "elysia-rate-limit";
 import { config } from "../config/env";
 import {
   RATE_LIMIT_AUTH_BOOTSTRAP_DURATION_MS,
@@ -28,7 +27,7 @@ import {
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
 import type { RouteSetState } from "../types/route-state";
-import { resolveRateLimitClientKey } from "../utils/rate-limit";
+import { rateLimit, resolveRateLimitClientKey } from "../utils/rate-limit";
 import { type AuthBootstrapBody, authBootstrapBody } from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /[=]+$/u;
@@ -100,7 +99,9 @@ export const authRoutes = new Elysia({
       )
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
-        async ({
+        {
+          body: authBootstrapBody,
+        }, async ({
           body,
           request,
           set,
@@ -161,9 +162,6 @@ export const authRoutes = new Elysia({
             apiKey,
             message: API_MESSAGE_SAVE_API_KEY_ONCE,
           };
-        },
-        {
-          body: authBootstrapBody,
         },
       ),
   );

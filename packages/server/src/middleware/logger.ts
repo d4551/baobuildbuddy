@@ -1,9 +1,13 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { DEFAULT_LOG_LEVEL } from "@bao/shared/constants/runtime";
-import { createPinoLogger } from "@bogeychan/elysia-logger";
+import { Elysia } from "elysia";
+import pino from "pino";
 import { config, shouldUsePrettyLogTransport } from "../config/env";
 
-export const log = createPinoLogger({
+/**
+ * Canonical pino root logger for server runtime (SSOT for structured logs).
+ */
+export const log = pino({
   level: config.logLevel || DEFAULT_LOG_LEVEL,
   transport: shouldUsePrettyLogTransport()
     ? {
@@ -13,10 +17,21 @@ export const log = createPinoLogger({
     : undefined,
 });
 
-export const logger = log.into({
-  autoLogging: {
-    ignore(ctx) {
-      return new URL(ctx.request.url).pathname === API_ENDPOINTS.health;
+/**
+ * Request-access logging plugin for Elysia 2 (replaces @bogeychan/elysia-logger).
+ */
+export const logger = new Elysia({ name: "request-logger" }).afterHandle(({ request, set }) => {
+  const pathname = new URL(request.url).pathname;
+  if (pathname === API_ENDPOINTS.health) {
+    return;
+  }
+
+  log.info(
+    {
+      method: request.method,
+      path: pathname,
+      status: set.status ?? 200,
     },
-  },
+    "request",
+  );
 });
