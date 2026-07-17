@@ -1,10 +1,12 @@
 import { JOB_AGGREGATOR_CACHE_EXPIRY_MS } from "@bao/shared/constants/jobs";
 import { settle } from "@bao/shared/utils/promise";
+import { Elysia } from "elysia";
 import { app } from "./app";
 import { config } from "./config/env";
 import { db, sqlite } from "./db/client";
 import { initializeDatabase } from "./db/init";
 import { seedDatabase } from "./db/seed";
+import { openaiCompatRoutes } from "./routes/openai-compat.routes";
 import { JobAggregator } from "./services/jobs/job-aggregator";
 import { createServerLogger } from "./utils/logger";
 
@@ -60,11 +62,13 @@ const runJobRefresh = (): void => {
 runJobRefresh();
 setInterval(runJobRefresh, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
 
-// Start server
-const server = app.listen(config.port);
+// Start server: `/api/*` app + OpenAI-compatible `/v1/*` facade on one listener.
+const serverApp = new Elysia().use(openaiCompatRoutes).use(app);
+const server = serverApp.listen(config.port);
 
 logger.info(`BaoBuildBuddy server running at http://${config.host}:${config.port}`);
 logger.info(`Health check: http://${config.host}:${config.port}/api/health`);
+logger.info(`OpenAI-compatible API: http://${config.host}:${config.port}/v1`);
 
 // Graceful shutdown
 async function gracefulShutdown(signal: string): Promise<void> {

@@ -16,6 +16,20 @@ export const OPENAPI_VERSION = "0.1.0" as const;
 export const API_ENDPOINT_PREFIX = "/api";
 
 /**
+ * OpenAI-compatible public API prefix for external SDK clients.
+ * Mounted alongside `/api` (not under it) so `baseURL` can be `http://host:3000/v1`.
+ */
+export const OPENAI_COMPAT_ENDPOINT_PREFIX = "/v1";
+
+/**
+ * OpenAI-compatible HTTP endpoints (Chat Completions API surface).
+ */
+export const OPENAI_COMPAT_ENDPOINTS = {
+  models: `${OPENAI_COMPAT_ENDPOINT_PREFIX}/models`,
+  chatCompletions: `${OPENAI_COMPAT_ENDPOINT_PREFIX}/chat/completions`,
+} as const;
+
+/**
  * Canonical HTTP endpoints consumed by client-side data and mutation flows.
  */
 export const API_ENDPOINTS = {

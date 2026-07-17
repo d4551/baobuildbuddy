@@ -1,6 +1,7 @@
 import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
 import { API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared/constants/api-messages";
 import { eq } from "drizzle-orm";
+import { isTestRuntime } from "../config/env";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
@@ -12,6 +13,9 @@ export async function getAISettingsRow() {
 }
 
 export async function getAIService(settingsRow?: Awaited<ReturnType<typeof getAISettingsRow>>) {
+  if (isTestRuntime) {
+    return AIService.fromSettings();
+  }
   const resolvedSettingsRow = settingsRow ?? (await getAISettingsRow());
   return AIService.fromSettings(resolvedSettingsRow);
 }
