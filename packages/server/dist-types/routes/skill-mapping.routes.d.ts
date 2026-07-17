@@ -1,28 +1,11 @@
-import { Elysia } from "elysia";
-export declare const skillMappingRoutes: Elysia<string, {
+export declare const skillMappingRoutes: import("elysia/types").AddRoute<string, "local", {
     decorator: {};
     store: {};
     derive: {};
-    resolve: {};
 }, {
     typebox: {};
-    error: {};
-} & {
-    error: {};
-    typebox: import("@sinclair/typebox").TModule<{}, {}>;
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-} & {
-    schema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {};
 } & {
     [x: string]: {
@@ -30,7 +13,7 @@ export declare const skillMappingRoutes: Elysia<string, {
             get: {
                 body: unknown;
                 params: {};
-                query: {} & {
+                query: {
                     category?: string | undefined;
                     search?: string | undefined;
                 };
@@ -51,14 +34,16 @@ export declare const skillMappingRoutes: Elysia<string, {
                     }[];
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -69,29 +54,49 @@ export declare const skillMappingRoutes: Elysia<string, {
                 body: {
                     gameExpression: string;
                     transferableSkill: string;
-                } & {
-                    aiGenerated?: boolean | undefined;
-                    category?: string | undefined;
-                    confidence?: number | undefined;
-                    demandLevel?: string | undefined;
-                    evidence?: Record<string, unknown>[] | undefined;
                     industryApplications?: string[] | undefined;
+                    evidence?: Record<string, unknown>[] | undefined;
+                    confidence?: number | undefined;
+                    category?: string | undefined;
+                    demandLevel?: string | undefined;
+                    aiGenerated?: boolean | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/skill-mapping").SkillMapping;
+                    201: {
+                        id: string;
+                        gameExpression: string;
+                        transferableSkill: string;
+                        industryApplications: string[];
+                        evidenceSuggestions?: string[] | undefined;
+                        evidence: {
+                            id: string;
+                            type: string;
+                            title: string;
+                            description: string;
+                            url?: string | undefined;
+                            verificationStatus: string;
+                        }[];
+                        confidence: number;
+                        category: string;
+                        demandLevel: string;
+                        verified: boolean;
+                        aiGenerated?: boolean | undefined;
+                    };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -100,35 +105,61 @@ export declare const skillMappingRoutes: Elysia<string, {
         mappings: {
             ":id": {
                 put: {
-                    body: {} & {
-                        aiGenerated?: boolean | undefined;
-                        category?: string | undefined;
-                        confidence?: number | undefined;
-                        demandLevel?: string | undefined;
-                        evidence?: Record<string, unknown>[] | undefined;
+                    body: {
                         gameExpression?: string | undefined;
-                        industryApplications?: string[] | undefined;
                         transferableSkill?: string | undefined;
+                        industryApplications?: string[] | undefined;
+                        evidence?: Record<string, unknown>[] | undefined;
+                        confidence?: number | undefined;
+                        category?: string | undefined;
+                        demandLevel?: string | undefined;
+                        aiGenerated?: boolean | undefined;
                     };
                     params: {
                         id: string;
-                    } & {};
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared/types/skill-mapping").SkillMapping | {
+                        200: {
+                            id: string;
+                            gameExpression: string;
+                            transferableSkill: string;
+                            industryApplications: string[];
+                            evidenceSuggestions?: string[] | undefined;
+                            evidence: {
+                                id: string;
+                                type: string;
+                                title: string;
+                                description: string;
+                                url?: string | undefined;
+                                verificationStatus: string;
+                            }[];
+                            confidence: number;
+                            category: string;
+                            demandLevel: string;
+                            verified: boolean;
+                            aiGenerated?: boolean | undefined;
+                        };
+                        404: {
                             error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                         422: {
                             type: 'validation';
+                            title: 'Validation Error';
+                            status: 422;
+                            detail?: string;
                             on: string;
-                            summary?: string;
-                            message?: string;
                             found?: unknown;
                             property?: string;
                             expected?: string;
                         };
                     };
+                    error: never;
                 };
             };
         };
@@ -141,20 +172,15 @@ export declare const skillMappingRoutes: Elysia<string, {
                     body: unknown;
                     params: {
                         id: string;
-                    } & {};
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
-                        [x: number]: {
-                            message?: undefined;
-                            error: string;
-                            id: string;
-                        } | {
-                            error?: undefined;
-                            message: string;
-                            id: string;
-                        };
+                        200: unknown;
+                        404: unknown;
+                        410: unknown;
                     };
+                    error: never;
                 };
             };
         };
@@ -168,8 +194,33 @@ export declare const skillMappingRoutes: Elysia<string, {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/skill-mapping").CareerPathway[];
+                    200: {
+                        id: string;
+                        title: string;
+                        description: string;
+                        detailedDescription?: string | undefined;
+                        matchScore: number;
+                        stages: {
+                            title: string;
+                            duration: string;
+                            description: string;
+                            completed?: boolean | undefined;
+                            current?: boolean | undefined;
+                            requirements?: string[] | undefined;
+                            outcomes?: string[] | undefined;
+                        }[];
+                        requiredSkills: string[];
+                        estimatedTimeToEntry: string;
+                        icon?: string | undefined;
+                        averageSalary?: {
+                            min: number;
+                            max: number;
+                            currency?: string | undefined;
+                        } | undefined;
+                        jobMarketTrend: string;
+                    }[];
                 };
+                error: never;
             };
         };
     };
@@ -179,88 +230,146 @@ export declare const skillMappingRoutes: Elysia<string, {
             get: {
                 body: unknown;
                 params: {};
-                query: {} & {
+                query: {
                     jobId?: string | undefined;
                 };
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
+                    200: {
                         overallScore: number;
                         categories: {
-                            technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            softSkills: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            industryKnowledge: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            portfolio: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            technical: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            softSkills: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            industryKnowledge: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            portfolio: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
                         };
-                        improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
-                        nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
-                        targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
-                        jobId: string;
+                        improvementSuggestions: string[];
+                        nextSteps: string[];
+                        targetRoleReadiness?: {
+                            roleId: string;
+                            roleTitle: string;
+                            readinessScore: number;
+                            missingSkills: string[];
+                            matchingSkills: string[];
+                            timeToReady?: string | undefined;
+                            recommendedActions: string[];
+                        }[] | undefined;
+                        jobId?: string | undefined;
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        "ai-analyze": {
-            post: {
-                body: {} & {
-                    autoCreateMappings?: boolean | undefined;
-                    gameExperience?: Record<string, unknown> | undefined;
-                    resume?: Record<string, unknown> | undefined;
-                };
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        message: string;
-                        detectedSkills: string[];
-                        suggestedMappings: Record<string, unknown>[];
-                        recommendations: string[];
-                        provider?: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, {
+    derive: {};
+    schema: {};
+    schemas: {};
+    response: {};
+    error: [];
+}, "post", "/ai-analyze", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}>;
+    body: import("typebox").TObject<{
+        gameExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        resume: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        autoCreateMappings: import("typebox").TOptional<import("typebox").TBoolean>;
+    }>;
+    response: {
+        200: import("typebox").TObject<{
+            message: import("typebox").TString;
+            detectedSkills: import("typebox").TArray<import("typebox").TString>;
+            suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        500: import("typebox").TObject<{
+            message: import("typebox").TString;
+            detectedSkills: import("typebox").TArray<import("typebox").TString>;
+            suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    };
+}, {}, `${string}/ai-analyze`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
+    body: {
+        gameExperience?: Record<string, unknown> | undefined;
+        resume?: Record<string, unknown> | undefined;
+        autoCreateMappings?: boolean | undefined;
+    };
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    status: import("elysia").SelectiveStatus<{
+        200: {
+            message: string;
+            detectedSkills: string[];
+            suggestedMappings: Record<string, unknown>[];
+            recommendations: string[];
+            provider?: string | undefined;
+        };
+        500: {
+            message: string;
+            detectedSkills: string[];
+            suggestedMappings: Record<string, unknown>[];
+            recommendations: string[];
+            provider?: string | undefined;
+        };
+    }>;
+}) => Promise<import("elysia").ElysiaStatus<200, {
+    message: string;
+    detectedSkills: string[];
+    suggestedMappings: Record<string, unknown>[];
+    recommendations: string[];
+    provider?: string;
+}, 200> | import("elysia").ElysiaStatus<500, {
+    message: string;
+    detectedSkills: string[];
+    suggestedMappings: Record<string, unknown>[];
+    recommendations: string[];
+    provider?: string;
+}, 500>>>;

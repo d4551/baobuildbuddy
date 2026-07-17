@@ -172,7 +172,6 @@ export const useSkillsPathwaysPage = () => {
     getReadinessNextStepLabel: presentation.getReadinessNextStepLabel,
     getReadinessColor: presentation.getReadinessColor,
     getReadinessBadgeColor: presentation.getReadinessBadgeColor,
-    getReadinessDialStyle: presentation.getReadinessDialStyle,
     getPathwayIcon: presentation.getPathwayIcon,
   };
 };

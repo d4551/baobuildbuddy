@@ -1,8 +1,7 @@
+import { Elysia } from "elysia";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { authenticateApiKey } from "../middleware/auth";
@@ -13,7 +12,7 @@ import {
 } from "./interview-ws-contracts";
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
-  body: StandardSchemaV1(interviewWebSocketBodySchema),
+  body: interviewWebSocketBodySchema,
   async beforeHandle({ request }) {
     const failure = await authenticateApiKey(request);
     if (failure) {

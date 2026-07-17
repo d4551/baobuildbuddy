@@ -1,85 +1,71 @@
-import { Elysia } from "elysia";
-export declare const interviewRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const interviewRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         sessions: {
             post: {
-                body: {} & {
-                    config?: ({} & {
-                        candidateContext?: ({} & {
-                            coverLetterId?: string | undefined;
-                            portfolioId?: string | undefined;
-                            resumeId?: string | undefined;
-                        }) | undefined;
-                        conversationStyle?: "natural" | "structured" | undefined;
-                        duration?: number | undefined;
-                        enableVoiceMode?: boolean | undefined;
+                body: {
+                    studioId?: string | undefined;
+                    config?: {
+                        roleType?: string | undefined;
+                        roleCategory?: string | undefined;
                         experienceLevel?: string | undefined;
                         focusAreas?: string[] | undefined;
+                        duration?: number | undefined;
+                        questionCount?: number | undefined;
+                        includeTechnical?: boolean | undefined;
                         includeBehavioral?: boolean | undefined;
                         includeStudioSpecific?: boolean | undefined;
-                        includeTechnical?: boolean | undefined;
-                        interviewMode?: "job" | "studio" | undefined;
-                        questionCount?: number | undefined;
-                        roleCategory?: string | undefined;
-                        roleType?: string | undefined;
-                        targetJob?: ({
-                            company: string;
-                            id: string;
-                            location: string;
-                            title: string;
-                        } & {
-                            description?: string | undefined;
-                            postedDate?: string | undefined;
-                            requirements?: string[] | undefined;
-                            source?: string | undefined;
-                            technologies?: string[] | undefined;
-                            url?: string | undefined;
-                        }) | undefined;
+                        enableVoiceMode?: boolean | undefined;
                         technologies?: string[] | undefined;
-                        voiceSettings?: ({} & {
-                            language?: string | undefined;
+                        voiceSettings?: {
                             microphoneId?: string | undefined;
-                            pitch?: number | undefined;
-                            rate?: number | undefined;
                             speakerId?: string | undefined;
                             voiceId?: string | undefined;
+                            rate?: number | undefined;
+                            pitch?: number | undefined;
                             volume?: number | undefined;
-                        }) | undefined;
-                    }) | undefined;
-                    studioId?: string | undefined;
+                            language?: string | undefined;
+                        } | undefined;
+                        interviewMode?: "job" | "studio" | undefined;
+                        conversationStyle?: "natural" | "structured" | undefined;
+                        targetJob?: {
+                            id: string;
+                            title: string;
+                            company: string;
+                            location: string;
+                            description?: string | undefined;
+                            requirements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                            source?: string | undefined;
+                            postedDate?: string | undefined;
+                            url?: string | undefined;
+                        } | undefined;
+                        candidateContext?: {
+                            resumeId?: string | undefined;
+                            coverLetterId?: string | undefined;
+                            portfolioId?: string | undefined;
+                        } | undefined;
+                    } | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                    };
+                    201: unknown;
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -92,8 +78,9 @@ export declare const interviewRoutes: Elysia<string, {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("./interview-route-contracts").SessionPayload[];
+                    200: unknown;
                 };
+                error: never;
             };
         };
     };
@@ -105,23 +92,14 @@ export declare const interviewRoutes: Elysia<string, {
                     body: unknown;
                     params: {
                         id: string;
-                    } & {};
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("./interview-route-contracts").SessionPayload | {
-                            error: string;
-                        };
-                        422: {
-                            type: 'validation';
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
+                        200: unknown;
+                        404: unknown;
                     };
+                    error: never;
                 };
             };
         };
@@ -133,33 +111,31 @@ export declare const interviewRoutes: Elysia<string, {
                 response: {
                     post: {
                         body: {
-                            response: string;
-                        } & {
                             questionId?: string | undefined;
                             questionIndex?: number | undefined;
+                            response: string;
                         };
                         params: {
                             id: string;
-                        } & {};
+                        };
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                error: string;
-                            } | {
-                                error?: undefined;
-                                message: string;
-                            };
+                            200: unknown;
+                            400: unknown;
+                            404: unknown;
                             422: {
                                 type: 'validation';
+                                title: 'Validation Error';
+                                status: 422;
+                                detail?: string;
                                 on: string;
-                                summary?: string;
-                                message?: string;
                                 found?: unknown;
                                 property?: string;
                                 expected?: string;
                             };
                         };
+                        error: never;
                     };
                 };
             };
@@ -174,65 +150,75 @@ export declare const interviewRoutes: Elysia<string, {
                         body: unknown;
                         params: {
                             id: string;
-                        } & {};
+                        };
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                error: string;
-                            } | {
-                                error?: undefined;
-                                message: string;
-                            };
-                            422: {
-                                type: 'validation';
-                                on: string;
-                                summary?: string;
-                                message?: string;
-                                found?: unknown;
-                                property?: string;
-                                expected?: string;
-                            };
+                            200: unknown;
+                            404: unknown;
                         };
+                        error: never;
                     };
                 };
             };
         };
     };
-} & {
-    [x: string]: {
-        [x: string]: {
-            get: {
-                body: unknown;
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        totalSessions: number;
-                        completedSessions: number;
-                        inProgressSessions: number;
-                        averageQuestions: number;
-                        averageResponses: number;
-                        totalInterviews: number;
-                        completedInterviews: number;
-                        averageScore: number;
-                        improvementTrend: number;
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    response: {
+        200: import("typebox").TObject<{
+            totalSessions: import("typebox").TNumber;
+            completedSessions: import("typebox").TNumber;
+            inProgressSessions: import("typebox").TNumber;
+            averageQuestions: import("typebox").TNumber;
+            averageResponses: import("typebox").TNumber;
+            totalInterviews: import("typebox").TNumber;
+            completedInterviews: import("typebox").TNumber;
+            averageScore: import("typebox").TNumber;
+            improvementTrend: import("typebox").TNumber;
+        }>;
+    };
+}, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ status }: {
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    status: import("elysia").SelectiveStatus<{
+        200: {
+            totalSessions: number;
+            completedSessions: number;
+            inProgressSessions: number;
+            averageQuestions: number;
+            averageResponses: number;
+            totalInterviews: number;
+            completedInterviews: number;
+            averageScore: number;
+            improvementTrend: number;
+        };
+    }>;
+}) => Promise<import("elysia").ElysiaStatus<200, {
+    totalSessions: number;
+    completedSessions: number;
+    inProgressSessions: number;
+    averageQuestions: number;
+    averageResponses: number;
+    totalInterviews: number;
+    completedInterviews: number;
+    averageScore: number;
+    improvementTrend: number;
+}, 200>>>;

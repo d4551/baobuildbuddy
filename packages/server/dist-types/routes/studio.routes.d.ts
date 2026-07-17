@@ -1,4 +1,3 @@
-import { Elysia } from "elysia";
 export interface StudioAnalytics {
     totalStudios: number;
     byType: Record<string, number>;
@@ -9,31 +8,19 @@ export interface StudioAnalytics {
         count: number;
     }>;
 }
-export declare const studioRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const studioRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         get: {
             body: unknown;
             params: {};
-            query: {} & {
+            query: {
                 q?: string | undefined;
-                remoteWork?: string | undefined;
-                size?: string | undefined;
                 type?: string | undefined;
+                size?: string | undefined;
+                remoteWork?: string | undefined;
             };
             headers: unknown;
             response: {
@@ -46,217 +33,27 @@ export declare const studioRoutes: Elysia<string, {
                     size: string | null;
                     type: string | null;
                     description: string | null;
-                    games: string[] | null;
-                    technologies: string[] | null;
-                    culture: Record<string, unknown> | null;
-                    interviewStyle: string | null;
-                    remoteWork: boolean | null;
-                    enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                    createdAt: string;
-                    updatedAt: string;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: unknown;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: unknown;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
                 }[];
                 422: {
                     type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
                     on: string;
-                    summary?: string;
-                    message?: string;
                     found?: unknown;
                     property?: string;
                     expected?: string;
                 };
             };
-        };
-    };
-} & {
-    [x: string]: {
-        ":id": {
-            get: {
-                body: unknown;
-                params: {
-                    id: string;
-                } & {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        id: string;
-                        name: string;
-                        logo: string | null;
-                        website: string | null;
-                        location: string | null;
-                        size: string | null;
-                        type: string | null;
-                        description: string | null;
-                        games: string[] | null;
-                        technologies: string[] | null;
-                        culture: Record<string, unknown> | null;
-                        interviewStyle: string | null;
-                        remoteWork: boolean | null;
-                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
-                        error: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
-    };
-} & {
-    [x: string]: {
-        post: {
-            body: {
-                name: string;
-            } & {
-                benefits?: string[] | undefined;
-                culture?: Record<string, unknown> | undefined;
-                description?: string | undefined;
-                founded?: string | undefined;
-                genres?: string[] | undefined;
-                location?: string | undefined;
-                notableGames?: string[] | undefined;
-                platforms?: string[] | undefined;
-                remoteWork?: boolean | undefined;
-                size?: string | undefined;
-                socialMedia?: Record<string, string> | undefined;
-                technologies?: string[] | undefined;
-                type?: string | undefined;
-                website?: string | undefined;
-            };
-            params: {};
-            query: unknown;
-            headers: unknown;
-            response: {
-                200: {
-                    id: string;
-                    name: string;
-                    description: string | null;
-                    website: string | null;
-                    location: string | null;
-                    type: string | null;
-                    size: string | null;
-                    founded: string | null;
-                    remoteWork: boolean | undefined;
-                    technologies: string[];
-                    genres: string[];
-                    platforms: string[];
-                    culture: Record<string, unknown> | null;
-                    benefits: string[];
-                    socialMedia: Record<string, string> | null;
-                    notableGames: string[];
-                };
-                422: {
-                    type: 'validation';
-                    on: string;
-                    summary?: string;
-                    message?: string;
-                    found?: unknown;
-                    property?: string;
-                    expected?: string;
-                };
-            };
-        };
-    };
-} & {
-    [x: string]: {
-        ":id": {
-            put: {
-                body: {} & {
-                    benefits?: string[] | undefined;
-                    culture?: Record<string, unknown> | undefined;
-                    description?: string | undefined;
-                    founded?: string | undefined;
-                    genres?: string[] | undefined;
-                    location?: string | undefined;
-                    name?: string | undefined;
-                    notableGames?: string[] | undefined;
-                    platforms?: string[] | undefined;
-                    remoteWork?: boolean | undefined;
-                    size?: string | undefined;
-                    socialMedia?: Record<string, string> | undefined;
-                    technologies?: string[] | undefined;
-                    type?: string | undefined;
-                    website?: string | undefined;
-                };
-                params: {
-                    id: string;
-                } & {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        id: string;
-                        name: string;
-                        logo: string | null;
-                        website: string | null;
-                        location: string | null;
-                        size: string | null;
-                        type: string | null;
-                        description: string | null;
-                        games: string[] | null;
-                        technologies: string[] | null;
-                        culture: Record<string, unknown> | null;
-                        interviewStyle: string | null;
-                        remoteWork: boolean | null;
-                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
-                        error: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
-        };
-    };
-} & {
-    [x: string]: {
-        ":id": {
-            delete: {
-                body: unknown;
-                params: {
-                    id: string;
-                } & {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        message?: undefined;
-                        id?: undefined;
-                        error: string;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        id: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
-                };
-            };
+            error: never;
         };
     };
 } & {
@@ -268,21 +65,296 @@ export declare const studioRoutes: Elysia<string, {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: StudioAnalytics;
+                    200: {
+                        totalStudios: number;
+                        byType: Record<string, number>;
+                        bySize: Record<string, number>;
+                        remoteWorkStudios: number;
+                        topTechnologies: {
+                            name: string;
+                            count: number;
+                        }[];
+                    };
                 };
+                error: never;
             };
         };
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+} & {
+    [x: string]: {
+        ":id": {
+            get: {
+                body: unknown;
+                params: {
+                    id: string;
+                };
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: unknown;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: unknown;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: unknown;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: unknown;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                };
+                error: never;
+            };
+        };
+    };
+} & {
+    [x: string]: {
+        post: {
+            body: {
+                name: string;
+                description?: string | undefined;
+                website?: string | undefined;
+                location?: string | undefined;
+                type?: string | undefined;
+                size?: string | undefined;
+                remoteWork?: boolean | undefined;
+                technologies?: string[] | undefined;
+                games?: string[] | undefined;
+                culture?: Record<string, unknown> | undefined;
+                interviewStyle?: string | undefined;
+                logo?: string | undefined;
+            };
+            params: {};
+            query: unknown;
+            headers: unknown;
+            response: {
+                200: {
+                    id: string;
+                    name: string;
+                    logo: string | null;
+                    website: string | null;
+                    location: string | null;
+                    size: string | null;
+                    type: string | null;
+                    description: string | null;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: unknown;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: unknown;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                201: {
+                    id: string;
+                    name: string;
+                    logo: string | null;
+                    website: string | null;
+                    location: string | null;
+                    size: string | null;
+                    type: string | null;
+                    description: string | null;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: unknown;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: unknown;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                404: {
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
+                };
+                422: {
+                    type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
+                    on: string;
+                    found?: unknown;
+                    property?: string;
+                    expected?: string;
+                };
+            };
+            error: never;
+        };
+    };
+} & {
+    [x: string]: {
+        ":id": {
+            put: {
+                body: {
+                    name?: string | undefined;
+                    description?: string | undefined;
+                    website?: string | undefined;
+                    location?: string | undefined;
+                    type?: string | undefined;
+                    size?: string | undefined;
+                    remoteWork?: boolean | undefined;
+                    technologies?: string[] | undefined;
+                    games?: string[] | undefined;
+                    culture?: Record<string, unknown> | undefined;
+                    interviewStyle?: string | undefined;
+                    logo?: string | undefined;
+                };
+                params: {
+                    id: string;
+                };
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: unknown;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: unknown;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: unknown;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: unknown;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    422: {
+                        type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
+                        on: string;
+                        found?: unknown;
+                        property?: string;
+                        expected?: string;
+                    };
+                };
+                error: never;
+            };
+        };
+    };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "delete", "/:id", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
+    };
+    params: import("typebox").TObject<{
+        id: import("typebox").TString;
+    }>;
+    response: {
+        readonly 200: import("typebox").TObject<{
+            message: import("typebox").TString;
+            id: import("typebox").TString;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    };
+}, {}, `${string}/:id`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, status }: {
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {
+        id: string;
+    };
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    status: import("elysia").SelectiveStatus<{
+        readonly 200: {
+            message: string;
+            id: string;
+        };
+        readonly 404: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+    }>;
+}) => Promise<import("elysia").ElysiaStatus<200, {
+    message: string;
+    id: string;
+}, 200> | import("elysia").ElysiaStatus<404, {
+    error: string;
+}, 404>>>;

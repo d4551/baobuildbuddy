@@ -8,25 +8,29 @@ import {
 import type { ApiEndpoint, ApiTesterState, FetchEndpointResultOk } from "~/types/api-docs";
 import { toApiDocsUiStateFromStatusCode } from "~/utils/api-docs-status";
 
+type MutableRef<T> = {
+  value: T;
+};
+
 export interface ApiDocsEndpointTesterActionOptions {
   readonly t: ApiDocsTranslate;
   readonly apiBase: string;
   readonly requestUrl: URL;
   readonly toast: ApiDocsToast;
-  readonly testerInvoker: Ref<HTMLElement | null>;
-  readonly testerDialogOpen: Ref<boolean>;
-  readonly selectedEndpoint: Ref<ApiEndpoint | null>;
-  readonly testerState: Ref<ApiTesterState>;
-  readonly testerErrorMessage: Ref<string>;
-  readonly testerResponse: Ref<FetchEndpointResultOk | null>;
-  readonly pathParameterValues: Ref<Record<string, string>>;
-  readonly queryParameterValues: Ref<Record<string, string>>;
-  readonly requestBodyValue: Ref<string>;
+  readonly testerInvoker: MutableRef<{ focus?: () => void } | null>;
+  readonly testerDialogOpen: MutableRef<boolean>;
+  readonly selectedEndpoint: MutableRef<ApiEndpoint | null>;
+  readonly testerState: MutableRef<ApiTesterState>;
+  readonly testerErrorMessage: MutableRef<string>;
+  readonly testerResponse: MutableRef<FetchEndpointResultOk | null>;
+  readonly pathParameterValues: MutableRef<Record<string, string>>;
+  readonly queryParameterValues: MutableRef<Record<string, string>>;
+  readonly requestBodyValue: MutableRef<string>;
 }
 
 const applyApiDocsTesterFailure = (input: {
-  testerState: Ref<ApiTesterState>;
-  testerErrorMessage: Ref<string>;
+  testerState: MutableRef<ApiTesterState>;
+  testerErrorMessage: MutableRef<string>;
   toast: ApiDocsToast;
   t: ApiDocsTranslate;
   message: string;
@@ -38,9 +42,9 @@ const applyApiDocsTesterFailure = (input: {
 };
 
 const applyApiDocsTesterSuccess = (input: {
-  testerState: Ref<ApiTesterState>;
-  testerErrorMessage: Ref<string>;
-  testerResponse: Ref<FetchEndpointResultOk | null>;
+  testerState: MutableRef<ApiTesterState>;
+  testerErrorMessage: MutableRef<string>;
+  testerResponse: MutableRef<FetchEndpointResultOk | null>;
   toast: ApiDocsToast;
   t: ApiDocsTranslate;
   responseResult: FetchEndpointResultOk;
@@ -95,7 +99,7 @@ const closeApiEndpointTester = async (input: ApiDocsEndpointTesterActionOptions)
     return;
   }
   await nextTick();
-  invoker.focus();
+  invoker.focus?.();
 };
 
 const executeApiEndpointTesterRequest = async (

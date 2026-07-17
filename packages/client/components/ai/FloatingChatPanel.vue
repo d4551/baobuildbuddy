@@ -183,24 +183,26 @@ const draft = defineModel<string>("draft", { required: true });
           <div class="flex items-center justify-between gap-3">
             <p class="text-xs text-base-content/70">{{ t("floatingChat.composerHint") }}</p>
             <div class="flex items-center gap-2">
-              <ChatVoiceControls
-                :selected-voice-id="selectedVoiceId"
-                :auto-speak-replies="autoSpeakReplies"
-                compact
-                :loading="loading"
-                :supports-recognition="supportsRecognition"
-                :supports-synthesis="supportsSynthesis"
-                :can-replay-assistant="canReplayAssistant"
-                :is-listening="isVoiceListening"
-                :is-speaking="isVoiceSpeaking"
-                :voices="availableVoices"
-                :support-hint-key="voiceSupportHintKey"
-                :error-label="voiceErrorLabel"
-                @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
-                @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
-                @toggle-listening="emit('toggleListening')"
-                @replay-assistant="emit('replayAssistant')"
-              />
+              <ClientOnly>
+                <ChatVoiceControls
+                  :selected-voice-id="selectedVoiceId"
+                  :auto-speak-replies="autoSpeakReplies"
+                  compact
+                  :loading="loading"
+                  :supports-recognition="supportsRecognition"
+                  :supports-synthesis="supportsSynthesis"
+                  :can-replay-assistant="canReplayAssistant"
+                  :is-listening="isVoiceListening"
+                  :is-speaking="isVoiceSpeaking"
+                  :voices="availableVoices"
+                  :support-hint-key="voiceSupportHintKey"
+                  :error-label="voiceErrorLabel"
+                  @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
+                  @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
+                  @toggle-listening="emit('toggleListening')"
+                  @replay-assistant="emit('replayAssistant')"
+                />
+              </ClientOnly>
               <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
                 <span v-if="loading" class="loading loading-spinner loading-xs" />
                 <IconSend v-else class="h-4 w-4" />

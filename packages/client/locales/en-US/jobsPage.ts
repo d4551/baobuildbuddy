@@ -7,6 +7,11 @@ const jobsPage = {
     emptyStateTitle: "No jobs match your filters",
     emptyStateDescription:
       "Adjust your search query or filters to widen the current job discovery view.",
+    emptyCatalogTitle: "No jobs loaded yet",
+    emptyCatalogDescription:
+      "Refresh the job feed or configure job providers in Settings to start discovery.",
+    configureProvidersButton: "Configure job providers",
+    configureProvidersAria: "Open Settings to configure job providers",
     refreshButton: "Refresh Jobs",
     refreshAria: "Refresh job feed",
     searchPlaceholder: "Search jobs by title, company, or keywords...",

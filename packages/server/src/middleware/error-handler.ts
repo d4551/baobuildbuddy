@@ -57,25 +57,35 @@ function isUnknownArray(value: unknown): value is unknown[] {
  */
 const logger = createServerLogger("error-handler");
 
-export const errorHandler = new Elysia({ name: "error-handler" }).onError(
-  ({ code, error, set }) => {
-    if (code === "NOT_FOUND") {
-      set.status = HTTP_STATUS_NOT_FOUND;
-      return { error: API_ERROR_NOT_FOUND, code };
-    }
+export const errorHandler = new Elysia({ name: "error-handler" }).error((context) => {
+  const { error, set } = context;
+  const code =
+    "code" in context && typeof context.code === "string" ? context.code : undefined;
 
-    if (code === "VALIDATION") {
-      set.status = HTTP_STATUS_BAD_REQUEST;
-      return {
-        error: API_ERROR_VALIDATION_FAILED,
-        code,
-        fields: readValidationFields(error),
-      };
-    }
+  if (code === "NOT_FOUND") {
+    set.status = HTTP_STATUS_NOT_FOUND;
+    return { error: API_ERROR_NOT_FOUND, code };
+  }
 
-    // Log internally but don't leak raw error details to the client
-    logger.error(`[${code}]`, error instanceof Error ? error.message : error);
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: API_ERROR_INTERNAL_SERVER, code };
-  },
-);
+  const isValidation =
+    code === "VALIDATION" ||
+    (typeof error === "object" &&
+      error !== null &&
+      "constructor" in error &&
+      error.constructor.name === "ValidationError");
+
+  if (isValidation) {
+    set.status = HTTP_STATUS_BAD_REQUEST;
+    return {
+      error: API_ERROR_VALIDATION_FAILED,
+      code: "VALIDATION",
+      fields: readValidationFields(error),
+    };
+  }
+
+  // Log internally but don't leak raw error details to the client
+  logger.error(`[${code}]`, error instanceof Error ? error.message : error);
+  set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  return { error: API_ERROR_INTERNAL_SERVER, code };
+});
+

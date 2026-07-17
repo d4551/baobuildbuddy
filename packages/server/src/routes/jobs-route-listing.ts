@@ -8,7 +8,7 @@ import {
 } from "@bao/shared/constants/api-messages";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
-import { HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
 import {
   JOB_EXPERIENCE_LEVELS,
   JOB_GAME_GENRES,
@@ -26,6 +26,28 @@ import { gamificationService } from "../services/gamification-service";
 import type { JobListQuery } from "./jobs-route-contracts";
 
 type JobRow = typeof jobs.$inferSelect;
+type SavedJobRow = typeof savedJobs.$inferSelect;
+type ApplicationRow = typeof applications.$inferSelect;
+type RouteErrorBody = { error: string };
+type SaveJobResult =
+  | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
+  | { status: null; body: { message: string; saved: SavedJobRow } }
+  | { status: typeof HTTP_STATUS_CREATED; body: SavedJobRow };
+type NewApplicationBody = {
+  id: string;
+  jobId: string;
+  status: string;
+  appliedDate: string;
+  notes: string;
+  timeline: Array<{ status: string; date: string; notes: string }>;
+};
+type CreateApplicationResult =
+  | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
+  | { status: null; body: { message: string; application: ApplicationRow } }
+  | { status: typeof HTTP_STATUS_CREATED; body: NewApplicationBody };
+type UpdateApplicationResult =
+  | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
+  | { status: null; body: ApplicationRow };
 
 const isOneOf = <T extends string>(values: readonly T[], value: string): value is T =>
   values.some((entry) => entry === value);
@@ -110,7 +132,7 @@ export const getJobById = async (id: string) => {
   return rows[0] ?? null;
 };
 
-export const saveJob = async (jobId: string) => {
+export const saveJob = async (jobId: string): Promise<SaveJobResult> => {
   const job = await getJobById(jobId);
   if (!job) {
     return {
@@ -140,7 +162,7 @@ export const saveJob = async (jobId: string) => {
     "job_saved",
   );
   return {
-    status: 201,
+    status: HTTP_STATUS_CREATED,
     body: newSaved,
   };
 };
@@ -162,7 +184,10 @@ export const listSavedJobs = async () =>
     .leftJoin(jobs, eq(savedJobs.jobId, jobs.id))
     .orderBy(desc(savedJobs.savedAt));
 
-export const createApplication = async (jobId: string, notes: string) => {
+export const createApplication = async (
+  jobId: string,
+  notes: string,
+): Promise<CreateApplicationResult> => {
   const job = await getJobById(jobId);
   if (!job) {
     return {
@@ -202,7 +227,7 @@ export const createApplication = async (jobId: string, notes: string) => {
     "job_applied",
   );
   return {
-    status: 201,
+    status: HTTP_STATUS_CREATED,
     body: newApplication,
   };
 };
@@ -211,7 +236,7 @@ export const updateApplication = async (
   id: string,
   newStatus: string | undefined,
   notes: string | undefined,
-) => {
+): Promise<UpdateApplicationResult> => {
   const existing = await db.select().from(applications).where(eq(applications.id, id));
   if (existing.length === 0) {
     return {

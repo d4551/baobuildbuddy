@@ -183,7 +183,7 @@ const collectRootRuleCopies = async (): Promise<string[]> => {
     ),
   );
 
-  return rootRuleCopies.filter((value) => value !== null) as string[];
+  return rootRuleCopies.filter((value) => value !== null);
 };
 
 const buildReleaseScripts = (

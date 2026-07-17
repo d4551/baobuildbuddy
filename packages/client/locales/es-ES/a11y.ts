@@ -16,6 +16,7 @@ const catalog = {
     dismissNotification: "Descartar notificación",
     localeSwitcher: "Cambiar idioma",
     localeOptionAria: "Cambiar idioma a {locale}",
+    aiConfigIncompleteAria: "Los proveedores de IA necesitan configuración en Ajustes",
   },
 } as const;
 

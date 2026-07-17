@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { createTestDbPath, requestJson } from "../test-utils";
 
 type OpenApiOperation = {
@@ -22,7 +21,7 @@ const routeTagMatchers = [
   { prefix: toApiScopedPath(API_ENDPOINTS.resumes), tag: "Resumes" },
   { prefix: toApiScopedPath(API_ENDPOINTS.coverLettersBase), tag: "Cover Letters" },
   { prefix: toApiScopedPath(API_ENDPOINTS.portfolioBase), tag: "Portfolio" },
-  { prefix: APP_ROUTES.interview, tag: "Interview" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.interviewBase), tag: "Interview" },
   { prefix: toApiScopedPath(API_ENDPOINTS.studiosBase), tag: "Studios" },
   { prefix: toApiScopedPath(API_ENDPOINTS.scraperBase), tag: "Scraper" },
   { prefix: toApiScopedPath(API_ENDPOINTS.aiBase), tag: "AI" },
@@ -72,6 +71,11 @@ describe("openapi tags", () => {
       for (const method of OPENAPI_METHODS) {
         const operation = operations[method];
         if (!operation) {
+          continue;
+        }
+
+        // WebSocket operations are documented without HTTP OpenAPI tags.
+        if (path.includes("/ws/")) {
           continue;
         }
 

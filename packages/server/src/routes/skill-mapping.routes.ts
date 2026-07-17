@@ -1,23 +1,36 @@
+import { Elysia, type status } from "elysia";
+import {
+  API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
+  API_ERROR_SKILL_MAPPING_NOT_FOUND,
+} from "@bao/shared/constants/api-errors";
+import { API_MESSAGE_SKILL_MAPPING_DELETED } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia, status } from "elysia";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_GONE,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 import {
-  type SkillAnalysisRouteBody,
-  type SkillMappingCreateRouteBody,
   type SkillMappingIdParams,
   type SkillMappingRouteSetState,
-  type SkillMappingsRouteQuery,
-  type SkillMappingUpdateRouteBody,
-  type SkillReadinessRouteQuery,
   skillAnalysisBodySchema,
+  skillAnalysisResponses,
   skillMappingCreateBodySchema,
+  skillMappingCreateResponses,
+  skillMappingDeleteResponses,
   skillMappingIdParamsSchema,
+  skillMappingUpdateResponses,
   skillMappingsQuerySchema,
+  skillMappingsListResponses,
   skillMappingUpdateBodySchema,
   skillReadinessQuerySchema,
+  skillPathwaysResponses,
+  skillReadinessResponses,
 } from "./skill-mapping-route-contracts";
 import {
   createSkillMappingFromBody,
@@ -27,73 +40,102 @@ import {
   updateSkillMappingFromBody,
 } from "./skill-mapping-route-support";
 
+type RouteStatus = typeof status;
+
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
-  tags: ["Skill Mapping"],
 })
   .use(skillAnalysisRateLimit)
   .get(
     "/mappings",
-    async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
     {
-      query: StandardSchemaV1(skillMappingsQuerySchema),
+      detail: { tags: ["Skill Mapping"] },
+      query: skillMappingsQuerySchema,
+      response: skillMappingsListResponses,
     },
+    async ({ query, status }) => status(HTTP_STATUS_OK, await listSkillMappings(query)),
   )
   .post(
     "/mappings",
-    async ({
-      body,
-      set,
-    }: {
-      body: SkillMappingCreateRouteBody;
-      set: SkillMappingRouteSetState;
-    }) => {
-      const result = await createSkillMappingFromBody(body);
-      set.status = result.statusCode;
-      return result.mapping;
+    {
+      detail: { tags: ["Skill Mapping"] },
+      body: skillMappingCreateBodySchema,
+      response: skillMappingCreateResponses,
     },
-    { body: StandardSchemaV1(skillMappingCreateBodySchema) },
+    async ({ body, status }) => {
+      const result = await createSkillMappingFromBody(body);
+      return status(HTTP_STATUS_CREATED, result.mapping);
+    },
   )
   .put(
     "/mappings/:id",
-    async ({
-      params,
-      body,
-      set,
-    }: {
-      params: SkillMappingIdParams;
-      body: SkillMappingUpdateRouteBody;
-      set: SkillMappingRouteSetState;
-    }) => updateSkillMappingFromBody(params.id, body, set),
     {
-      params: StandardSchemaV1(skillMappingIdParamsSchema),
-      body: StandardSchemaV1(skillMappingUpdateBodySchema),
+      detail: { tags: ["Skill Mapping"] },
+      params: skillMappingIdParamsSchema,
+      body: skillMappingUpdateBodySchema,
+      response: skillMappingUpdateResponses,
+    },
+    async ({ params, body, status }) => {
+      const state: SkillMappingRouteSetState = {};
+      const result = await updateSkillMappingFromBody(params.id, body, state);
+      if ("error" in result) {
+        return status(HTTP_STATUS_NOT_FOUND, result);
+      }
+      return status(HTTP_STATUS_OK, result);
     },
   )
   .delete(
     "/mappings/:id",
-    async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
-      const result = await deleteSkillMappingById(params.id, set);
-      if (result.kind === "gone" || result.kind === "deleted") {
-        return status(result.statusCode, result.payload);
-      }
-      return result.payload;
+    {
+      detail: { tags: ["Skill Mapping"] },
+      params: skillMappingIdParamsSchema,
+      response: skillMappingDeleteResponses,
     },
-    { params: StandardSchemaV1(skillMappingIdParamsSchema) },
+    async ({ params, status }: { params: SkillMappingIdParams; status: RouteStatus }) => {
+      const state: SkillMappingRouteSetState = {};
+      const result = await deleteSkillMappingById(params.id, state);
+      if (result.kind === "not-found") {
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_SKILL_MAPPING_NOT_FOUND });
+      }
+      if (result.kind === "gone") {
+        return status(HTTP_STATUS_GONE, {
+          error: API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
+          id: params.id,
+        });
+      }
+      return status(HTTP_STATUS_OK, { message: API_MESSAGE_SKILL_MAPPING_DELETED, id: params.id });
+    },
   )
-  .get("/pathways", async () => skillMappingService.getPathways())
+  .get(
+    "/pathways",
+    {
+      detail: { tags: ["Skill Mapping"] },
+      response: skillPathwaysResponses,
+    },
+    async ({ status }) => status(HTTP_STATUS_OK, await skillMappingService.getPathways()),
+  )
   .get(
     "/readiness",
-    async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
     {
-      query: StandardSchemaV1(skillReadinessQuerySchema),
+      detail: { tags: ["Skill Mapping"] },
+      query: skillReadinessQuerySchema,
+      response: skillReadinessResponses,
     },
+    async ({ query, status }) => status(HTTP_STATUS_OK, await getSkillReadiness(query.jobId)),
   )
   .post(
     "/ai-analyze",
-    async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
-      analyzeSkillMappingsSafely(body, set),
     {
-      body: StandardSchemaV1(skillAnalysisBodySchema),
+      detail: { tags: ["Skill Mapping"] },
+      body: skillAnalysisBodySchema,
+      response: skillAnalysisResponses,
+    },
+    async ({ body, status }) => {
+      const state: SkillMappingRouteSetState = {};
+      const result = await analyzeSkillMappingsSafely(body, state);
+      if (state.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result);
+      }
+      return status(HTTP_STATUS_OK, result);
     },
   );

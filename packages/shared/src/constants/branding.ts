@@ -35,18 +35,18 @@ export const THEME_NAMES = {
   storageKey: "bao-theme",
 } as const;
 
-const LEGACY_DARK_THEMES = new Set<string>(["bao-dark", THEME_NAMES.dark]);
-const LEGACY_LIGHT_THEMES = new Set<string>(["bao-light", THEME_NAMES.light]);
+const PREVIOUS_DARK_THEME_ALIASES = new Set<string>(["bao-dark", THEME_NAMES.dark]);
+const PREVIOUS_LIGHT_THEME_ALIASES = new Set<string>(["bao-light", THEME_NAMES.light]);
 
 /**
- * Maps persisted theme strings (including legacy `bao-*`) to daisyUI theme ids.
+ * Maps persisted theme strings (including previous `bao-*` ids) to daisyUI theme ids.
  */
 export function normalizeAppDataTheme(value: string | null | undefined): AppDataTheme {
   const trimmed = value?.trim();
-  if (trimmed && LEGACY_DARK_THEMES.has(trimmed)) {
+  if (trimmed && PREVIOUS_DARK_THEME_ALIASES.has(trimmed)) {
     return THEME_NAMES.dark;
   }
-  if (trimmed && LEGACY_LIGHT_THEMES.has(trimmed)) {
+  if (trimmed && PREVIOUS_LIGHT_THEME_ALIASES.has(trimmed)) {
     return THEME_NAMES.light;
   }
   return THEME_NAMES.light;

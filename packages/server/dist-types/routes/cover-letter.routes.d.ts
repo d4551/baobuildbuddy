@@ -1,20 +1,10 @@
-import { Elysia } from "elysia";
-export declare const coverLetterRoutes: Elysia<string, {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+import { type status } from "elysia";
+import { type CoverLetterExportBody, type CoverLetterIdParams } from "./cover-letter-route-contracts";
+type RouteStatus = typeof status;
+export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {
         get: {
             body: unknown;
@@ -26,13 +16,14 @@ export declare const coverLetterRoutes: Elysia<string, {
                     id: string;
                     company: string;
                     position: string;
-                    jobInfo: Record<string, unknown> | null;
-                    content: Record<string, unknown> | null;
-                    template: string | null;
-                    createdAt: string;
-                    updatedAt: string;
+                    jobInfo?: Record<string, unknown> | null | undefined;
+                    content?: Record<string, unknown> | null | undefined;
+                    template?: string | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
                 }[];
             };
+            error: never;
         };
     };
 } & {
@@ -41,10 +32,9 @@ export declare const coverLetterRoutes: Elysia<string, {
             body: {
                 company: string;
                 position: string;
-            } & {
-                content?: Record<string, unknown> | undefined;
                 jobInfo?: Record<string, unknown> | undefined;
-                template?: "creative" | "executive" | "gaming" | "professional" | "technical" | undefined;
+                content?: Record<string, unknown> | undefined;
+                template?: undefined;
             };
             params: {};
             query: unknown;
@@ -54,20 +44,41 @@ export declare const coverLetterRoutes: Elysia<string, {
                     id: string;
                     company: string;
                     position: string;
-                    jobInfo: Record<string, unknown>;
-                    content: Record<string, unknown>;
-                    template: "creative" | "executive" | "gaming" | "professional" | "technical";
+                    jobInfo?: Record<string, unknown> | null | undefined;
+                    content?: Record<string, unknown> | null | undefined;
+                    template?: string | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                201: {
+                    id: string;
+                    company: string;
+                    position: string;
+                    jobInfo?: Record<string, unknown> | null | undefined;
+                    content?: Record<string, unknown> | null | undefined;
+                    template?: string | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                404: {
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
                 };
                 422: {
                     type: 'validation';
+                    title: 'Validation Error';
+                    status: 422;
+                    detail?: string;
                     on: string;
-                    summary?: string;
-                    message?: string;
                     found?: unknown;
                     property?: string;
                     expected?: string;
                 };
             };
+            error: never;
         };
     };
 } & {
@@ -77,7 +88,7 @@ export declare const coverLetterRoutes: Elysia<string, {
                 body: unknown;
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -85,24 +96,31 @@ export declare const coverLetterRoutes: Elysia<string, {
                         id: string;
                         company: string;
                         position: string;
-                        jobInfo: Record<string, unknown> | null;
-                        content: Record<string, unknown> | null;
-                        template: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
-                        error: string;
+                        jobInfo?: Record<string, unknown> | null | undefined;
+                        content?: Record<string, unknown> | null | undefined;
+                        template?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
                     };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+                    201: {
+                        id: string;
+                        company: string;
+                        position: string;
+                        jobInfo?: Record<string, unknown> | null | undefined;
+                        content?: Record<string, unknown> | null | undefined;
+                        template?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -110,16 +128,16 @@ export declare const coverLetterRoutes: Elysia<string, {
     [x: string]: {
         ":id": {
             put: {
-                body: {} & {
+                body: {
                     company?: string | undefined;
-                    content?: Record<string, unknown> | undefined;
-                    jobInfo?: Record<string, unknown> | undefined;
                     position?: string | undefined;
-                    template?: "creative" | "executive" | "gaming" | "professional" | "technical" | undefined;
+                    jobInfo?: Record<string, unknown> | undefined;
+                    content?: Record<string, unknown> | undefined;
+                    template?: undefined;
                 };
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
@@ -127,24 +145,41 @@ export declare const coverLetterRoutes: Elysia<string, {
                         id: string;
                         company: string;
                         position: string;
-                        jobInfo: Record<string, unknown> | null;
-                        content: Record<string, unknown> | null;
-                        template: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
+                        jobInfo?: Record<string, unknown> | null | undefined;
+                        content?: Record<string, unknown> | null | undefined;
+                        template?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id: string;
+                        company: string;
+                        position: string;
+                        jobInfo?: Record<string, unknown> | null | undefined;
+                        content?: Record<string, unknown> | null | undefined;
+                        template?: string | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
                         error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -155,29 +190,14 @@ export declare const coverLetterRoutes: Elysia<string, {
                 body: unknown;
                 params: {
                     id: string;
-                } & {};
+                };
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        error: string;
-                        success?: undefined;
-                        id?: undefined;
-                    } | {
-                        error?: undefined;
-                        success: boolean;
-                        id: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
-                    };
+                    200: unknown;
+                    404: unknown;
                 };
+                error: never;
             };
         };
     };
@@ -188,105 +208,69 @@ export declare const coverLetterRoutes: Elysia<string, {
                 body: {
                     company: string;
                     position: string;
-                } & {
                     jobInfo?: Record<string, unknown> | undefined;
                     resumeId?: string | undefined;
+                    template?: undefined;
                     save?: boolean | undefined;
-                    template?: "creative" | "executive" | "gaming" | "professional" | "technical" | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message?: undefined;
-                        content?: undefined;
-                        error: string;
-                        details?: undefined;
-                        coverLetter?: undefined;
-                    } | {
-                        message?: undefined;
-                        content?: undefined;
-                        error: string;
-                        details: string;
-                        coverLetter?: undefined;
-                    } | {
-                        error?: undefined;
-                        details?: undefined;
-                        message: string;
-                        content: import("./cover-letter-route-generation-support").GeneratedCoverLetterContent;
-                        coverLetter?: undefined;
-                    } | {
-                        error?: undefined;
-                        content?: undefined;
-                        details?: undefined;
-                        message: string;
-                        coverLetter: {
-                            id: string;
-                            company: string;
-                            position: string;
-                            jobInfo: Record<string, unknown>;
-                            content: import("./cover-letter-route-generation-support").GeneratedCoverLetterContent;
-                            template: "creative" | "executive" | "gaming" | "professional" | "technical";
-                        };
-                    };
+                    200: unknown;
+                    201: unknown;
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
+                    500: unknown;
+                    503: unknown;
                 };
+                error: never;
             };
         };
     };
-} & {
-    [x: string]: {
-        ":id": {
-            export: {
-                post: {
-                    body: {} & {
-                        format?: string | undefined;
-                    };
-                    params: {
-                        id: string;
-                    } & {};
-                    query: unknown;
-                    headers: unknown;
-                    response: {
-                        200: Response | {
-                            error: string;
-                            details: string;
-                        } | {
-                            error: string;
-                        };
-                        422: {
-                            type: 'validation';
-                            on: string;
-                            summary?: string;
-                            message?: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
-                        };
-                    };
-                };
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/:id/export", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}>;
+    params: import("typebox").TObject<{
+        id: import("typebox").TString;
+    }>;
+    body: import("typebox").TObject<{
+        format: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    response: {
+        200: import("typebox").TUnknown;
+        404: import("typebox").TUnknown;
+        500: import("typebox").TUnknown;
+    };
+}, {}, `${string}/:id/export`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, status, }: {
+    params: CoverLetterIdParams;
+    body: CoverLetterExportBody;
+    status: RouteStatus;
+}) => Promise<import("elysia").ElysiaStatus<200, Response | {
+    error: string;
+    details: string;
+} | {
+    error: string;
+}, 200> | import("elysia").ElysiaStatus<404, {
+    error: string;
+    details: string;
+} | {
+    details?: undefined;
+    error: string;
+}, 404> | import("elysia").ElysiaStatus<500, {
+    error: string;
+    details: string;
+} | {
+    details?: undefined;
+    error: string;
+}, 500>>>;
+export {};

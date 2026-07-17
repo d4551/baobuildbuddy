@@ -8,9 +8,9 @@ const props = withDefaults(
     titleKey: string;
     /** Translation key for the description (supports interpolation) */
     descriptionKey: string;
-    /** Optional translation key for CTA button label */
+    /** Optional translation key for primary CTA button label */
     ctaLabelKey?: string;
-    /** Optional route path for CTA button */
+    /** Optional route path for CTA button (link mode) */
     ctaTo?: string;
     /** Optional icon (emoji or icon name). Default: document icon SVG path */
     icon?: string;
@@ -22,10 +22,18 @@ const props = withDefaults(
   },
 );
 
+const emit = defineEmits<{
+  cta: [];
+}>();
+
 const { t } = useI18n();
 
-const hasCta = computed(
-  () => (props.ctaLabelKey ?? "").trim().length > 0 && (props.ctaTo ?? "").trim().length > 0,
+const hasCtaLabel = computed(() => (props.ctaLabelKey ?? "").trim().length > 0);
+const hasCtaLink = computed(
+  () => hasCtaLabel.value && (props.ctaTo ?? "").trim().length > 0,
+);
+const hasCtaButton = computed(
+  () => hasCtaLabel.value && (props.ctaTo ?? "").trim().length === 0,
 );
 </script>
 
@@ -49,12 +57,24 @@ const hasCta = computed(
       {{ t(descriptionKey) }}
     </p>
     <NuxtLink
-      v-if="hasCta"
+      v-if="hasCtaLink"
       :to="ctaTo"
-      class="btn btn-primary mt-6"
+      class="btn btn-primary mt-2"
       :aria-label="t(ctaLabelKey)"
     >
       {{ t(ctaLabelKey) }}
     </NuxtLink>
+    <button
+      v-else-if="hasCtaButton"
+      type="button"
+      class="btn btn-primary mt-2"
+      :aria-label="t(ctaLabelKey)"
+      @click="emit('cta')"
+    >
+      {{ t(ctaLabelKey) }}
+    </button>
+    <div v-if="$slots.actions" class="mt-2 flex flex-wrap items-center justify-center gap-2">
+      <slot name="actions" />
+    </div>
   </div>
 </template>

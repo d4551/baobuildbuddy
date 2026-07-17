@@ -57,7 +57,7 @@ const createEvaluatePage = (html: string): PageEvaluator => {
         Promise.resolve(
           typeof arg === "undefined"
             ? (pageFunction as () => Result)()
-            : (pageFunction as (value: Arg) => Result)(arg),
+            : (pageFunction)(arg),
         ),
       ]);
       restoreDomGlobals(previousGlobals);

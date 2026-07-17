@@ -7,9 +7,9 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 type LocaleModule = Record<string, unknown>;
 
 const locales: Array<{ filePath: string; value: LocaleModule }> = [
-  { filePath: "packages/client/locales/es-ES.ts", value: esES as LocaleModule },
-  { filePath: "packages/client/locales/fr-FR.ts", value: frFR as LocaleModule },
-  { filePath: "packages/client/locales/ja-JP.ts", value: jaJP as LocaleModule },
+  { filePath: "packages/client/locales/es-ES.ts", value: esES },
+  { filePath: "packages/client/locales/fr-FR.ts", value: frFR },
+  { filePath: "packages/client/locales/ja-JP.ts", value: jaJP },
 ];
 
 const collectPaths = (value: unknown, prefix: string = ""): string[] => {
@@ -30,7 +30,7 @@ const collectPaths = (value: unknown, prefix: string = ""): string[] => {
   );
 };
 
-const referenceKeys = new Set(collectPaths(enUS as LocaleModule));
+const referenceKeys = new Set(collectPaths(enUS));
 
 const collectViolations = (): ValidationViolation[] =>
   locales.flatMap(({ filePath, value }) => {

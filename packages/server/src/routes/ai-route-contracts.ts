@@ -1,4 +1,14 @@
+import type { Static } from "typebox";
 import { AI_CHAT_CONTEXT_TAIL_LIMIT } from "@bao/shared/constants/ai-chat";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CONFLICT,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
+} from "@bao/shared/constants/http";
 import {
   SCHEMA_MAX_ITEMS_XXLARGE,
   SCHEMA_MAX_LENGTH_ID,
@@ -7,106 +17,235 @@ import {
   SCHEMA_MAX_LENGTH_MESSAGE,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
+import { aiRoutingBodySchema, preferredProviderBodySchema } from "./settings-route-schema-ai-brand";
 
-export type AnalyzeResumeBody = {
-  resumeId: string;
-  jobId?: string;
-};
-
-export type GenerateCoverLetterBody = {
-  resumeId: string;
-  jobId?: string;
-  company: string;
-  position: string;
-};
-
-export type MatchJobsBody = {
-  resumeId?: string;
-  skills?: string[];
-};
-
-export type MatchJobsResponse = {
-  message: string;
-  matches: Array<{
-    jobId: string;
-    title: string;
-    company: string;
-    location: string | null;
-    remote: boolean;
-    score: number;
-    strengths: string[];
-    concerns: string[];
-    highlightSkills: string[];
-  }>;
-  recommendations: string[];
-};
-
-export type CoverLetterSections = {
-  introduction: string;
-  body: string;
-  conclusion: string;
-};
-
-export type ResumeAnalysisResult = {
-  score: number;
-  strengths: string[];
-  improvements: string[];
-  keywords: string[];
-};
-
-export const chatRouteBodySchema = Type.Object(
+export const chatRouteBodySchema = t.Object(
   {
-    message: Type.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
-    sessionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    context: Type.Optional(chatContextSchema),
+    message: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+    sessionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    context: t.Optional(chatContextSchema),
   },
   { required: ["message"] },
 );
-export type ChatRouteBody = StaticParse<typeof chatRouteBodySchema>;
+export type ChatRouteBody = Static<typeof chatRouteBodySchema>;
 
-export const analyzeResumeRouteBodySchema = Type.Object(
+export const analyzeResumeRouteBodySchema = t.Object(
   {
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   },
   { required: ["resumeId"] },
 );
-export type AnalyzeResumeRouteBody = StaticParse<typeof analyzeResumeRouteBodySchema>;
+export type AnalyzeResumeRouteBody = Static<typeof analyzeResumeRouteBodySchema>;
 
-export const generateCoverLetterRouteBodySchema = Type.Object(
+export const generateCoverLetterRouteBodySchema = t.Object(
   {
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    company: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    position: Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    company: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
   },
   { required: ["resumeId", "company", "position"] },
 );
-export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterRouteBodySchema>;
+export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterRouteBodySchema>;
 
-export const matchJobsRouteBodySchema = Type.Object({
-  resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  skills: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
+export const matchJobsRouteBodySchema = t.Object({
+  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  skills: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }), {
       maxItems: SCHEMA_MAX_ITEMS_XXLARGE,
     }),
   ),
-  preferences: Type.Optional(aiPreferenceSchema),
+  preferences: t.Optional(aiPreferenceSchema),
 });
-export type MatchJobsRouteBody = StaticParse<typeof matchJobsRouteBodySchema>;
+export type MatchJobsRouteBody = Static<typeof matchJobsRouteBodySchema>;
 
-export const automationActionRouteBodySchema = Type.Object(
+export const automationActionRouteBodySchema = t.Object(
   {
-    action: Type.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
-    jobUrl: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
-    resumeId: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
-    coverLetterId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    jobId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    action: t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL }),
+    jobUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
+    resumeId: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   },
   { required: ["action", "jobUrl", "resumeId"] },
 );
-export type AutomationActionRouteBody = StaticParse<typeof automationActionRouteBodySchema>;
+export type AutomationActionRouteBody = Static<typeof automationActionRouteBodySchema>;
+
+export type AnalyzeResumeBody = AnalyzeResumeRouteBody;
+export type GenerateCoverLetterBody = GenerateCoverLetterRouteBody;
+export type MatchJobsBody = MatchJobsRouteBody;
+
+const nullableStringSchema = t.Union([t.String(), t.Null()]);
+
+const aiProviderDiagnosticResponseSchema = t.Object({
+  provider: preferredProviderBodySchema,
+  code: t.String(),
+  checkedAt: t.String(),
+  endpoint: t.Optional(t.String()),
+  selectedModel: t.Optional(t.String()),
+  availableModels: t.Optional(t.Array(t.String())),
+  message: t.Optional(t.String()),
+});
+
+const aiProviderHealthResponseSchema = t.Union([
+  t.Literal("healthy"),
+  t.Literal("degraded"),
+  t.Literal("down"),
+  t.Literal("unconfigured"),
+]);
+
+const aiControlPlaneProviderResponseSchema = t.Object({
+  id: preferredProviderBodySchema,
+  nameKey: t.String(),
+  descriptionKey: t.String(),
+  iconId: preferredProviderBodySchema,
+  models: t.Array(t.String()),
+  available: t.Boolean(),
+  health: aiProviderHealthResponseSchema,
+  selectedModel: t.Optional(t.String()),
+  diagnosticCode: t.Optional(t.String()),
+  availableModels: t.Optional(t.Array(t.String())),
+  error: t.Optional(t.String()),
+});
+
+export const aiModelsResponseSchema = t.Object({
+  aiRouting: t.Optional(aiRoutingBodySchema),
+  configuredProviders: t.Optional(t.Array(preferredProviderBodySchema)),
+  error: t.Optional(t.String()),
+  preferredModel: t.Optional(nullableStringSchema),
+  preferredProvider: t.Optional(preferredProviderBodySchema),
+  providerDiagnostics: t.Optional(t.Record(t.String(), aiProviderDiagnosticResponseSchema)),
+  providers: t.Array(aiControlPlaneProviderResponseSchema),
+});
+
+export const chatRouteResponseSchema = t.Object({
+  message: t.String(),
+  sessionId: t.String(),
+  timestamp: t.String(),
+  provider: preferredProviderBodySchema,
+  model: t.String(),
+  followUps: t.Array(t.String()),
+  contextDomain: t.String(),
+});
+
+export const resumeAnalysisResultResponseSchema = t.Object({
+  score: t.Number(),
+  strengths: t.Array(t.String()),
+  improvements: t.Array(t.String()),
+  keywords: t.Array(t.String()),
+});
+export type ResumeAnalysisResult = Static<typeof resumeAnalysisResultResponseSchema>;
+
+export const analyzeResumeResponseSchema = t.Object({
+  message: t.String(),
+  resumeId: t.String(),
+  jobId: nullableStringSchema,
+  analysis: resumeAnalysisResultResponseSchema,
+  provider: preferredProviderBodySchema,
+  model: t.String(),
+});
+
+export const coverLetterSectionsResponseSchema = t.Object({
+  introduction: t.String(),
+  body: t.String(),
+  conclusion: t.String(),
+});
+export type CoverLetterSections = Static<typeof coverLetterSectionsResponseSchema>;
+
+export const generateCoverLetterResponseSchema = t.Object({
+  message: t.String(),
+  content: coverLetterSectionsResponseSchema,
+  provider: preferredProviderBodySchema,
+  model: t.String(),
+});
+
+const matchJobResponseSchema = t.Object({
+  jobId: t.String(),
+  title: t.String(),
+  company: t.String(),
+  location: nullableStringSchema,
+  remote: t.Boolean(),
+  score: t.Number(),
+  strengths: t.Array(t.String()),
+  concerns: t.Array(t.String()),
+  highlightSkills: t.Array(t.String()),
+});
+
+export const matchJobsResponseSchema = t.Object({
+  message: t.String(),
+  matches: t.Array(matchJobResponseSchema),
+  recommendations: t.Array(t.String()),
+});
+export type MatchJobsResponse = Static<typeof matchJobsResponseSchema>;
+
+export const aiUsageResponseSchema = t.Object({
+  totalMessages: t.Number(),
+  userMessages: t.Number(),
+  assistantMessages: t.Number(),
+  sessions: t.Number(),
+  recentActivity: t.Array(
+    t.Object({
+      timestamp: t.String(),
+      role: t.String(),
+      sessionId: nullableStringSchema,
+    }),
+  ),
+});
+
+export const automationActionResponseSchema = t.Object({
+  runId: t.String(),
+  status: t.String(),
+  message: t.String(),
+});
+
+export const chatRouteResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const analyzeResumeResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const generateCoverLetterResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const matchJobsResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const aiModelsResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const aiUsageResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const automationActionResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_CONFLICT]: simpleErrorResponseSchema,
+  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
 
 export const usageTailLimit = AI_CHAT_CONTEXT_TAIL_LIMIT;

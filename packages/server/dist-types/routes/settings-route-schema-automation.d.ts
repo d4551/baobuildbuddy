@@ -1,100 +1,99 @@
-import Type from "baobox";
-export declare const jobProviderSettingsBodySchema: Type.TRequired<Type.TObject<{
-    readonly providerTimeoutMs: Type.TNumber;
-    readonly companyBoardResultLimit: Type.TNumber;
-    readonly gamingBoardResultLimit: Type.TNumber;
-    readonly unknownLocationLabel: Type.TString;
-    readonly unknownCompanyLabel: Type.TString;
-    readonly hitmarkerEnabled: Type.TBoolean;
-    readonly hitmarkerApiBaseUrl: Type.TString;
-    readonly hitmarkerDefaultQuery: Type.TString;
-    readonly hitmarkerDefaultLocation: Type.TString;
-    readonly greenhouseApiBaseUrl: Type.TString;
-    readonly greenhouseMaxPages: Type.TNumber;
-    readonly greenhouseBoards: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly board: Type.TString;
-        readonly company: Type.TString;
-        readonly enabled: Type.TBoolean;
-    }, "board" | "company" | "enabled", never>>>;
-    readonly leverApiBaseUrl: Type.TString;
-    readonly leverMaxPages: Type.TNumber;
-    readonly leverCompanies: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly slug: Type.TString;
-        readonly company: Type.TString;
-        readonly enabled: Type.TBoolean;
-    }, "company" | "enabled" | "slug", never>>>;
-    readonly companyBoardApiTemplates: Type.TRequired<Type.TObject<{
-        readonly greenhouse: Type.TString;
-        readonly lever: Type.TString;
-        readonly recruitee: Type.TString;
-        readonly workable: Type.TString;
-        readonly ashby: Type.TString;
-        readonly smartrecruiters: Type.TString;
-        readonly teamtailor: Type.TString;
-        readonly workday: Type.TString;
-    }, "ashby" | "greenhouse" | "lever" | "recruitee" | "smartrecruiters" | "teamtailor" | "workable" | "workday", never>>;
-    readonly companyBoards: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly name: Type.TString;
-        readonly token: Type.TString;
-        readonly type: Type.TUnion<(Type.TLiteral<"ashby"> | Type.TLiteral<"greenhouse"> | Type.TLiteral<"lever"> | Type.TLiteral<"recruitee"> | Type.TLiteral<"smartrecruiters"> | Type.TLiteral<"teamtailor"> | Type.TLiteral<"workable"> | Type.TLiteral<"workday">)[]>;
-        readonly enabled: Type.TBoolean;
-        readonly priority: Type.TNumber;
-    }, "enabled" | "name" | "priority" | "token" | "type", never>>>;
-    readonly gamingPortals: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly id: Type.TUnion<(Type.TLiteral<"gamesjobsdirect"> | Type.TLiteral<"grackle"> | Type.TLiteral<"hitmarker"> | Type.TLiteral<"pocketgamer"> | Type.TLiteral<"remotegamejobs"> | Type.TLiteral<"workwithindies">)[]>;
-        readonly name: Type.TString;
-        readonly source: Type.TString;
-        readonly fallbackUrl: Type.TString;
-        readonly enabled: Type.TBoolean;
-    }, "enabled" | "fallbackUrl" | "id" | "name" | "source", never>>>;
-}, "companyBoardApiTemplates" | "companyBoardResultLimit" | "companyBoards" | "gamingBoardResultLimit" | "gamingPortals" | "greenhouseApiBaseUrl" | "greenhouseBoards" | "greenhouseMaxPages" | "hitmarkerApiBaseUrl" | "hitmarkerDefaultLocation" | "hitmarkerDefaultQuery" | "hitmarkerEnabled" | "leverApiBaseUrl" | "leverCompanies" | "leverMaxPages" | "providerTimeoutMs" | "unknownCompanyLabel" | "unknownLocationLabel", never>>;
-export declare const speechSettingsBodySchema: Type.TRequired<Type.TObject<{
-    readonly locale: Type.TString;
-    readonly stt: Type.TRequired<Type.TObject<{
-        provider: Type.TUnion<(Type.TLiteral<"browser"> | Type.TLiteral<"custom"> | Type.TLiteral<"huggingface"> | Type.TLiteral<"local"> | Type.TLiteral<"openai">)[]>;
-        model: Type.TString;
-        endpoint: Type.TString;
-    }, "endpoint" | "model" | "provider", never>>;
-    readonly tts: Type.TRequired<Type.TObject<{
-        provider: Type.TUnion<(Type.TLiteral<"browser"> | Type.TLiteral<"custom"> | Type.TLiteral<"huggingface"> | Type.TLiteral<"local"> | Type.TLiteral<"openai">)[]>;
-        model: Type.TString;
-        endpoint: Type.TString;
-        voice: Type.TString;
-        format: Type.TUnion<(Type.TLiteral<"mp3"> | Type.TLiteral<"wav">)[]>;
-    }, "endpoint" | "format" | "model" | "provider" | "voice", never>>;
-}, "locale" | "stt" | "tts", never>>;
-export declare const jobTaxonomyKeywordEntryBodySchema: Type.TRequired<Type.TObject<{
-    readonly id: Type.TString;
-    readonly category: Type.TUnion<(Type.TLiteral<"genre"> | Type.TLiteral<"hybrid-location"> | Type.TLiteral<"platform"> | Type.TLiteral<"remote-location"> | Type.TLiteral<"requirement"> | Type.TLiteral<"role"> | Type.TLiteral<"technology">)[]>;
-    readonly label: Type.TString;
-    readonly synonyms: Type.TArray<Type.TString>;
-    readonly sortOrder: Type.TNumber;
-    readonly enabled: Type.TBoolean;
-}, "category" | "enabled" | "id" | "label" | "sortOrder" | "synonyms", never>>;
-export declare const studioClassificationRuleBodySchema: Type.TRequired<Type.TObject<{
-    readonly id: Type.TString;
-    readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared/types/jobs").StudioType>[]>;
-    readonly keyword: Type.TString;
-    readonly sortOrder: Type.TNumber;
-    readonly enabled: Type.TBoolean;
-}, "enabled" | "id" | "keyword" | "sortOrder" | "studioType", never>>;
-export declare const jobTaxonomySettingsBodySchema: Type.TRequired<Type.TObject<{
-    readonly keywords: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly id: Type.TString;
-        readonly category: Type.TUnion<(Type.TLiteral<"genre"> | Type.TLiteral<"hybrid-location"> | Type.TLiteral<"platform"> | Type.TLiteral<"remote-location"> | Type.TLiteral<"requirement"> | Type.TLiteral<"role"> | Type.TLiteral<"technology">)[]>;
-        readonly label: Type.TString;
-        readonly synonyms: Type.TArray<Type.TString>;
-        readonly sortOrder: Type.TNumber;
-        readonly enabled: Type.TBoolean;
-    }, "category" | "enabled" | "id" | "label" | "sortOrder" | "synonyms", never>>>;
-    readonly studioRules: Type.TArray<Type.TRequired<Type.TObject<{
-        readonly id: Type.TString;
-        readonly studioType: Type.TUnion<Type.TLiteral<import("@bao/shared/types/jobs").StudioType>[]>;
-        readonly keyword: Type.TString;
-        readonly sortOrder: Type.TNumber;
-        readonly enabled: Type.TBoolean;
-    }, "enabled" | "id" | "keyword" | "sortOrder" | "studioType", never>>>;
-}, "keywords" | "studioRules", never>>;
-declare const jsonValueBodySchema: Type.TRecursive<Type.TSchema>;
-export declare const nullableJsonValueBodySchema: Type.TUnion<(Type.TNull | Type.TRecursive<Type.TSchema>)[]>;
+export declare const jobProviderSettingsBodySchema: import("typebox").TObject<{
+    providerTimeoutMs: import("typebox").TNumber;
+    companyBoardResultLimit: import("typebox").TNumber;
+    gamingBoardResultLimit: import("typebox").TNumber;
+    unknownLocationLabel: import("typebox").TString;
+    unknownCompanyLabel: import("typebox").TString;
+    hitmarkerEnabled: import("typebox").TBoolean;
+    hitmarkerApiBaseUrl: import("typebox").TString;
+    hitmarkerDefaultQuery: import("typebox").TString;
+    hitmarkerDefaultLocation: import("typebox").TString;
+    greenhouseApiBaseUrl: import("typebox").TString;
+    greenhouseMaxPages: import("typebox").TNumber;
+    greenhouseBoards: import("typebox").TArray<import("typebox").TObject<{
+        board: import("typebox").TString;
+        company: import("typebox").TString;
+        enabled: import("typebox").TBoolean;
+    }>>;
+    leverApiBaseUrl: import("typebox").TString;
+    leverMaxPages: import("typebox").TNumber;
+    leverCompanies: import("typebox").TArray<import("typebox").TObject<{
+        slug: import("typebox").TString;
+        company: import("typebox").TString;
+        enabled: import("typebox").TBoolean;
+    }>>;
+    companyBoardApiTemplates: import("typebox").TObject<{
+        greenhouse: import("typebox").TString;
+        lever: import("typebox").TString;
+        recruitee: import("typebox").TString;
+        workable: import("typebox").TString;
+        ashby: import("typebox").TString;
+        smartrecruiters: import("typebox").TString;
+        teamtailor: import("typebox").TString;
+        workday: import("typebox").TString;
+    }>;
+    companyBoards: import("typebox").TArray<import("typebox").TObject<{
+        name: import("typebox").TString;
+        token: import("typebox").TString;
+        type: import("typebox").TUnion<[import("typebox").TLiteral<"greenhouse">, import("typebox").TLiteral<"lever">, import("typebox").TLiteral<"recruitee">, import("typebox").TLiteral<"workable">, import("typebox").TLiteral<"ashby">, import("typebox").TLiteral<"smartrecruiters">, import("typebox").TLiteral<"teamtailor">, import("typebox").TLiteral<"workday">]>;
+        enabled: import("typebox").TBoolean;
+        priority: import("typebox").TNumber;
+    }>>;
+    gamingPortals: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TUnion<[import("typebox").TLiteral<"hitmarker">, import("typebox").TLiteral<"grackle">, import("typebox").TLiteral<"workwithindies">, import("typebox").TLiteral<"remotegamejobs">, import("typebox").TLiteral<"gamesjobsdirect">, import("typebox").TLiteral<"pocketgamer">]>;
+        name: import("typebox").TString;
+        source: import("typebox").TString;
+        fallbackUrl: import("typebox").TString;
+        enabled: import("typebox").TBoolean;
+    }>>;
+}>;
+export declare const speechSettingsBodySchema: import("typebox").TObject<{
+    locale: import("typebox").TString;
+    stt: import("typebox").TObject<{
+        provider: import("typebox").TUnion<[import("typebox").TLiteral<"browser">, import("typebox").TLiteral<"openai">, import("typebox").TLiteral<"huggingface">, import("typebox").TLiteral<"local">, import("typebox").TLiteral<"custom">]>;
+        model: import("typebox").TString;
+        endpoint: import("typebox").TString;
+    }>;
+    tts: import("typebox").TObject<{
+        provider: import("typebox").TUnion<[import("typebox").TLiteral<"browser">, import("typebox").TLiteral<"openai">, import("typebox").TLiteral<"huggingface">, import("typebox").TLiteral<"local">, import("typebox").TLiteral<"custom">]>;
+        model: import("typebox").TString;
+        endpoint: import("typebox").TString;
+        voice: import("typebox").TString;
+        format: import("typebox").TUnion<[import("typebox").TLiteral<"mp3">, import("typebox").TLiteral<"wav">]>;
+    }>;
+}>;
+export declare const jobTaxonomyKeywordEntryBodySchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    category: import("typebox").TUnion<[import("typebox").TLiteral<"remote-location">, import("typebox").TLiteral<"hybrid-location">, import("typebox").TLiteral<"requirement">, import("typebox").TLiteral<"technology">, import("typebox").TLiteral<"genre">, import("typebox").TLiteral<"platform">, import("typebox").TLiteral<"role">]>;
+    label: import("typebox").TString;
+    synonyms: import("typebox").TArray<import("typebox").TString>;
+    sortOrder: import("typebox").TNumber;
+    enabled: import("typebox").TBoolean;
+}>;
+export declare const studioClassificationRuleBodySchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    studioType: import("typebox").TUnion<[import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>]>;
+    keyword: import("typebox").TString;
+    sortOrder: import("typebox").TNumber;
+    enabled: import("typebox").TBoolean;
+}>;
+export declare const jobTaxonomySettingsBodySchema: import("typebox").TObject<{
+    keywords: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        category: import("typebox").TUnion<[import("typebox").TLiteral<"remote-location">, import("typebox").TLiteral<"hybrid-location">, import("typebox").TLiteral<"requirement">, import("typebox").TLiteral<"technology">, import("typebox").TLiteral<"genre">, import("typebox").TLiteral<"platform">, import("typebox").TLiteral<"role">]>;
+        label: import("typebox").TString;
+        synonyms: import("typebox").TArray<import("typebox").TString>;
+        sortOrder: import("typebox").TNumber;
+        enabled: import("typebox").TBoolean;
+    }>>;
+    studioRules: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        studioType: import("typebox").TUnion<[import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>]>;
+        keyword: import("typebox").TString;
+        sortOrder: import("typebox").TNumber;
+        enabled: import("typebox").TBoolean;
+    }>>;
+}>;
+declare const jsonValueBodySchema: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>, import("typebox").TArray<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>, import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>, import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>, import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>, import("typebox").TArray<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>]>>]>;
+export declare const nullableJsonValueBodySchema: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>, import("typebox").TArray<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>, import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>, import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>, import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>, import("typebox").TArray<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>]>>]>, import("typebox").TNull]>;
 export { jsonValueBodySchema };

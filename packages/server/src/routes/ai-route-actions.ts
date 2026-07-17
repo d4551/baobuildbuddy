@@ -15,6 +15,7 @@ import {
 } from "@bao/shared/constants/api-messages";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import {
+  HTTP_STATUS_OK,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
 } from "@bao/shared/constants/http";
@@ -29,7 +30,6 @@ import { chatHistory } from "../db/schema/chat-history";
 import { resumes } from "../db/schema/resumes";
 import { contextManager } from "../services/ai/context-manager";
 import { buildSystemPrompt } from "../services/ai/prompts-system";
-import type { RouteSetState } from "../types/route-state";
 import {
   type ChatContextPayload,
   composeChatSystemPrompt,
@@ -49,6 +49,11 @@ import { runJobMatchingFlow } from "./ai-route-job-matching";
 import { getAIService, getAISettingsRow } from "./ai-route-support";
 
 type ChatHistoryInsert = typeof chatHistory.$inferInsert;
+
+const routeResult = <const Status extends number, Body>(status: Status, body: Body) => ({
+  status,
+  body,
+});
 
 const createChatMessage = (
   role: "user" | "assistant",
@@ -80,19 +85,19 @@ const buildChatRouteResponse = (
   contextDomain: preferredDomain,
 });
 
-export const handleChatRoute = async (
-  body: { message: string; sessionId?: string; context?: ChatContextPayload },
-  set: RouteSetState,
-) => {
+export const handleChatRoute = async (body: {
+  message: string;
+  sessionId?: string;
+  context?: ChatContextPayload;
+}) => {
   const sessionId = body.sessionId ?? generateId();
   const persistUserMessageResult = await persistChatMessage(
     createChatMessage("user", body.message, sessionId),
   );
   if (persistUserMessageResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return {
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
       error: toErrorMessage(persistUserMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
-    };
+    });
   }
 
   const clientContext = normalizeClientChatContext(body.context);
@@ -121,34 +126,35 @@ export const handleChatRoute = async (
     }),
   );
   if (generationResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: toErrorMessage(generationResult.reason, API_ERROR_GENERATE_AI_RESPONSE) };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(generationResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
+    });
   }
 
   const response = generationResult.value;
   if (response.error) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: response.error };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: response.error });
   }
 
   const assistantMessage = createChatMessage("assistant", response.content, sessionId);
   const persistAssistantMessageResult = await persistChatMessage(assistantMessage);
   if (persistAssistantMessageResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return {
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
       error: toErrorMessage(persistAssistantMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
-    };
+    });
   }
 
-  return buildChatRouteResponse(assistantMessage, response, preferredDomain);
+  return routeResult(
+    HTTP_STATUS_OK,
+    buildChatRouteResponse(assistantMessage, response, preferredDomain),
+  );
 };
 
-export const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: RouteSetState) => {
+export const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody) => {
   const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
   const resume = resumeRows[0];
   if (!resume) {
-    set.status = HTTP_STATUS_NOT_FOUND;
-    return { error: API_ERROR_RESUME_NOT_FOUND };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
   }
 
   const resumeText = serializeResume(resume);
@@ -162,35 +168,31 @@ export const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody, set: Rou
     }),
   );
   if (responseResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: toErrorMessage(responseResult.reason, API_ERROR_ANALYZE_RESUME) };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(responseResult.reason, API_ERROR_ANALYZE_RESUME),
+    });
   }
 
   const response = responseResult.value;
   if (response.error) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: response.error };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: response.error });
   }
 
-  return {
+  return routeResult(HTTP_STATUS_OK, {
     message: API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
     resumeId: body.resumeId,
     jobId: body.jobId || null,
     analysis: parseResumeAnalysisResult(response.content),
     provider: response.provider,
     model: response.model,
-  };
+  });
 };
 
-export const handleGenerateCoverLetterRoute = async (
-  body: GenerateCoverLetterBody,
-  set: RouteSetState,
-) => {
+export const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBody) => {
   const resumeRows = await db.select().from(resumes).where(eq(resumes.id, body.resumeId));
   const resume = resumeRows[0];
   if (!resume) {
-    set.status = HTTP_STATUS_NOT_FOUND;
-    return { error: API_ERROR_RESUME_NOT_FOUND };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
   }
 
   const resumeText = serializeResume(resume);
@@ -207,32 +209,30 @@ export const handleGenerateCoverLetterRoute = async (
     ),
   );
   if (responseResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: toErrorMessage(responseResult.reason, API_ERROR_GENERATE_COVER_LETTER) };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(responseResult.reason, API_ERROR_GENERATE_COVER_LETTER),
+    });
   }
 
   const response = responseResult.value;
   if (response.error) {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: response.error };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: response.error });
   }
 
-  return {
+  return routeResult(HTTP_STATUS_OK, {
     message: API_MESSAGE_COVER_LETTER_GENERATED,
     content: parseCoverLetterSections(response.content),
     provider: response.provider,
     model: response.model,
-  };
+  });
 };
 
-export const handleMatchJobsRoute = async (
-  body: { resumeId?: string; skills?: string[] },
-  set: RouteSetState,
-) => {
+export const handleMatchJobsRoute = async (body: { resumeId?: string; skills?: string[] }) => {
   const flowResult = await settle(runJobMatchingFlow(body.resumeId, body.skills));
   if (flowResult.status === "rejected") {
-    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: toErrorMessage(flowResult.reason, API_ERROR_MATCH_JOBS) };
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(flowResult.reason, API_ERROR_MATCH_JOBS),
+    });
   }
-  return flowResult.value;
+  return routeResult(HTTP_STATUS_OK, flowResult.value);
 };

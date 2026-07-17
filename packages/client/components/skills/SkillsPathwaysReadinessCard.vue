@@ -18,7 +18,6 @@ defineProps<{
   ) => string;
   getReadinessNextStepLabel: (item: ReadinessAssessment["nextSteps"][number]) => string;
   getReadinessColor: (score: number) => string;
-  getReadinessDialStyle: (score: number) => Record<string, string>;
 }>();
 
 const { t } = useI18n();
@@ -35,17 +34,16 @@ const { t } = useI18n();
       <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div class="space-y-2">
           <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
-          <div
-            class="radial-progress border-4 border-primary-content/20 bg-primary-content/20 text-primary-content"
-            :style="getReadinessDialStyle(readinessAssessment.overallScore)"
-            role="progressbar"
-            :aria-valuenow="readinessAssessment.overallScore"
-            :aria-valuemin="readinessMin"
-            :aria-valuemax="readinessMax"
+          <UiRadialMeter
+            :value="readinessAssessment.overallScore"
+            :max="readinessMax"
+            size-class="h-28 w-28"
+            track-class="stroke-primary-content/30"
+            fill-class="stroke-primary-content"
             :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
           >
             <span class="text-2xl font-bold">{{ readinessAssessment.overallScore }}%</span>
-          </div>
+          </UiRadialMeter>
         </div>
 
         <div class="space-y-3">

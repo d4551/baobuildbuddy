@@ -5,22 +5,28 @@ import {
 } from "@bao/shared/constants/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import { readonly } from "vue";
-import { useState } from "#imports";
+import { useCookie, useState } from "#imports";
 
 /**
  * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.
- * Persists to localStorage and stays aligned with settings on the server.
+ * Persists via cookie (SSOT with settings sync).
  */
 export function useTheme() {
   const theme = useState<AppDataTheme>(STATE_KEYS.APP_THEME, () => THEME_NAMES.light);
+  const themeCookie = useCookie<string | null>(THEME_NAMES.storageKey, {
+    default: () => null,
+    path: "/",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 365,
+  });
 
-  function setTheme(newTheme: AppDataTheme, options: { persistLocal?: boolean } = {}) {
+  function setTheme(newTheme: AppDataTheme, options: { persist?: boolean } = {}) {
     theme.value = newTheme;
     if (import.meta.client) {
       document.documentElement.setAttribute("data-theme", newTheme);
-      if (options.persistLocal !== false) {
-        localStorage.setItem(THEME_NAMES.storageKey, newTheme);
-      }
+    }
+    if (options.persist !== false) {
+      themeCookie.value = newTheme;
     }
   }
 
@@ -29,18 +35,20 @@ export function useTheme() {
   }
 
   function initTheme(preferredTheme?: AppDataTheme) {
-    if (import.meta.client) {
-      const savedRaw = localStorage.getItem(THEME_NAMES.storageKey);
-      if (savedRaw) {
-        const normalized = normalizeAppDataTheme(savedRaw);
-        setTheme(normalized, { persistLocal: normalized !== savedRaw });
-      } else if (preferredTheme) {
-        setTheme(preferredTheme, { persistLocal: false });
-      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        setTheme(THEME_NAMES.dark, { persistLocal: false });
-      }
-    } else if (preferredTheme) {
-      theme.value = preferredTheme;
+    const savedRaw = themeCookie.value;
+    if (savedRaw) {
+      const normalized = normalizeAppDataTheme(savedRaw);
+      setTheme(normalized, { persist: normalized !== savedRaw });
+      return;
+    }
+
+    if (preferredTheme) {
+      setTheme(preferredTheme, { persist: false });
+      return;
+    }
+
+    if (import.meta.client && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme(THEME_NAMES.dark, { persist: false });
     }
   }
 

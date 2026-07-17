@@ -741,7 +741,7 @@ const runStandardTauriBuildFlow = async ({
 
 /** Tauri CLI's `--ci` flag reads `CI`; values like `1` are invalid (only `true` / `false`). */
 const desktopReleaseEnvForTauri = (): NodeJS.ProcessEnv => {
-  const env = { ...process.env } as NodeJS.ProcessEnv;
+  const env = { ...process.env };
   if (env.CI === "1") {
     env.CI = "true";
   }

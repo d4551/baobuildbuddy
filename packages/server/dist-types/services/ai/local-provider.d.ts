@@ -1,7 +1,7 @@
 import type { AIProviderDiagnostic, AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { BaseAIProvider } from "./provider-interface";
 /**
- * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
+ * Local AI Provider for RamaLama, Ollama, and other OpenAI Chat Completions local servers
  * Uses the OpenAI SDK pointed at a local endpoint
  */
 export declare class LocalProvider extends BaseAIProvider {
@@ -21,7 +21,7 @@ export declare class LocalProvider extends BaseAIProvider {
      */
     static detectFirstModel(baseUrl: string): Promise<string | null>;
     /**
-     * Inspect a local OpenAI-compatible endpoint and return structured diagnostics.
+     * Inspect a local OpenAI Chat Completions endpoint and return structured diagnostics.
      */
     static inspectEndpoint(baseUrl: string, selectedModel?: string): Promise<AIProviderDiagnostic>;
     /**

@@ -161,3 +161,44 @@ export const API_ERROR_INTERVIEW_RESPONSE_REQUIRED =
 /** Unable to resolve question for this response. */
 export const API_ERROR_INTERVIEW_QUESTION_UNRESOLVED =
   "Unable to resolve question for this response";
+
+/** Gamification XP award payload incomplete. */
+export const API_ERROR_XP_AMOUNT_REASON_REQUIRED = "amount and reason are required.";
+
+/** Automation job-apply payload incomplete. */
+export const API_ERROR_JOB_APPLY_FIELDS_REQUIRED = "jobUrl and resumeId are required.";
+
+/** Scheduled automation job-apply payload incomplete. */
+export const API_ERROR_SCHEDULED_JOB_APPLY_FIELDS_REQUIRED =
+  "jobUrl, resumeId, and runAt are required.";
+
+/** Automation email response payload incomplete. */
+export const API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED = "subject and message are required.";
+
+/** Scheduled automation email response payload incomplete. */
+export const API_ERROR_SCHEDULED_EMAIL_RESPONSE_FIELDS_REQUIRED =
+  "subject, message, and runAt are required.";
+
+/** Automation scrape target missing. */
+export const API_ERROR_SCRAPE_TARGET_REQUIRED = "target is required.";
+
+/** Scheduled scrape payload incomplete. */
+export const API_ERROR_SCHEDULED_SCRAPE_FIELDS_REQUIRED = "target and runAt are required.";
+
+/** Automation run id missing. */
+export const API_ERROR_AUTOMATION_RUN_ID_REQUIRED = "id is required.";
+
+/** User profile row missing (should be seeded at DB init). */
+export const API_ERROR_USER_PROFILE_NOT_FOUND = "User profile not found";
+
+/** Rate limit exceeded. */
+export const API_ERROR_RATE_LIMIT_EXCEEDED = "Rate limit exceeded";
+
+/** OpenAI Chat Completions: model id missing or unknown. */
+export const API_ERROR_OPENAI_V1_MODEL_NOT_FOUND = "The model does not exist";
+
+/** OpenAI Chat Completions: chat messages missing. */
+export const API_ERROR_OPENAI_V1_MESSAGES_REQUIRED = "messages is required";
+
+/** OpenAI Chat Completions: generation failed. */
+export const API_ERROR_OPENAI_V1_GENERATION_FAILED = "Failed to generate chat completion";

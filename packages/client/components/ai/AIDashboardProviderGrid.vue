@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type {
   ProviderConfig,
@@ -7,7 +7,7 @@ import type {
   ProviderHealth,
 } from "~/types/ai-dashboard";
 
-defineProps<{
+const props = defineProps<{
   providers: readonly ProviderConfig[];
   testingProvider: AIProviderType | null;
   testResults: Record<AIProviderType, ProviderConnectivityResult | null>;
@@ -20,6 +20,29 @@ defineProps<{
   onTestProvider: (providerId: AIProviderType) => Promise<void> | void;
   t: (key: string, params?: Record<string, string | number>) => string;
 }>();
+
+function resolveProviderStatus(provider: ProviderConfig): {
+  label: string;
+  badgeClass: string;
+} {
+  const configured = props.isProviderConfigured(provider.id);
+  if (!configured) {
+    return {
+      label: props.t("aiDashboard.providerCard.notConfiguredBadge"),
+      badgeClass: "badge-warning badge-soft",
+    };
+  }
+  if (!provider.available) {
+    return {
+      label: props.providerAvailabilityLabel(false),
+      badgeClass: "badge-neutral badge-soft",
+    };
+  }
+  return {
+    label: props.providerHealthLabel(provider.health),
+    badgeClass: props.providerHealthBadgeClass(provider.health),
+  };
+}
 </script>
 
 <template>
@@ -27,10 +50,10 @@ defineProps<{
     <div
       v-for="provider in providers"
       :key="provider.id"
-      class="card card-border bg-base-100 shadow-sm"
+      class="card card-border card-glass card-glass-interactive"
     >
       <div class="card-body gap-4">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-start justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
             <AIProviderIcon
               :provider-id="provider.iconId"
@@ -41,31 +64,15 @@ defineProps<{
               <p class="text-xs text-base-content/70">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
-          <span
-            class="badge"
-            :class="isProviderConfigured(provider.id) ? 'badge-success' : 'badge-ghost'"
-          >
-            {{
-              isProviderConfigured(provider.id)
-                ? t("aiDashboard.providerCard.configuredBadge")
-                : t("aiDashboard.providerCard.notConfiguredBadge")
-            }}
-          </span>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="badge" :class="provider.available ? 'badge-success' : 'badge-neutral'">
-            {{ providerAvailabilityLabel(provider.available) }}
-          </span>
-          <span class="badge badge-outline" :class="providerHealthBadgeClass(provider.health)">
-            {{ providerHealthLabel(provider.health) }}
+          <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">
+            {{ resolveProviderStatus(provider).label }}
           </span>
         </div>
 
         <div
           v-if="testResults[provider.id]"
           role="status"
-          class="alert alert-vertical sm:alert-horizontal"
+          class="alert alert-soft"
           :class="testResults[provider.id]?.valid ? 'alert-success' : 'alert-error'"
         >
           <div>
@@ -83,7 +90,7 @@ defineProps<{
         <div class="card-actions justify-end">
           <button
             class="btn btn-outline btn-sm"
-            :disabled="testingProvider === provider.id"
+            :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
             @click="onTestProvider(provider.id)"
           >
@@ -95,7 +102,7 @@ defineProps<{
             }}</span>
           </button>
           <NuxtLink
-            :to="APP_ROUTES.settings"
+            :to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
             class="btn btn-primary btn-sm"
             :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"
           >

@@ -2,29 +2,33 @@ import { API_ERROR_JOB_NOT_FOUND, API_ERROR_UNKNOWN } from "@bao/shared/constant
 import { API_MESSAGE_JOB_REFRESH_COMPLETE } from "@bao/shared/constants/api-messages";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
+  HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
 import { Elysia } from "elysia";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
 import {
-  type ApplyJobBody,
   applyJobBodySchema,
-  type JobIdParams,
-  type JobListQuery,
+  applicationsListResponses,
+  applyJobResponses,
+  deleteSavedJobResponses,
+  jobEntityResponses,
   jobIdParamsSchema,
+  jobsListResponses,
   jobsListQuerySchema,
-  type SavedJobParams,
-  type SaveJobBody,
-  savedJobParamsSchema,
+  jobsRefreshResponses,
+  recommendationsResponses,
+  savedJobsListResponses,
+  saveJobResponses,
   saveJobBodySchema,
-  type UpdateApplicationBody,
-  type UpdateApplicationParams,
+  savedJobParamsSchema,
   updateApplicationBodySchema,
   updateApplicationParamsSchema,
+  updateApplicationResponses,
 } from "./jobs-route-contracts";
 import {
   createApplication,
@@ -42,103 +46,141 @@ const jobsRoutesLogger = createServerLogger("jobs-routes");
 
 export const jobsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.jobsBase),
-  tags: ["Jobs"],
 })
-  .get("/", async ({ query }: { query: JobListQuery }) => listJobs(query), {
-    query: StandardSchemaV1(jobsListQuerySchema),
-  })
+  .get(
+    "/",
+    {
+      detail: { tags: ["Jobs"] },
+      query: jobsListQuerySchema,
+      response: jobsListResponses,
+    },
+    async ({ query, status }) => status(HTTP_STATUS_OK, await listJobs(query)),
+  )
   .get(
     "/:id",
-    async ({ params, set }: { params: JobIdParams; set: { status?: number | string } }) => {
+    {
+      detail: { tags: ["Jobs"] },
+      params: jobIdParamsSchema,
+      response: jobEntityResponses,
+    },
+    async ({ params, status }) => {
       const job = await getJobById(params.id);
       if (!job) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_JOB_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_JOB_NOT_FOUND });
       }
-      return job;
-    },
-    {
-      params: StandardSchemaV1(jobIdParamsSchema),
+      return status(HTTP_STATUS_OK, job);
     },
   )
   .post(
     "/save",
-    async ({ body, set }: { body: SaveJobBody; set: { status?: number | string } }) => {
-      const result = await saveJob(body.jobId);
-      if (result.status !== null) {
-        set.status = result.status;
-      }
-      return result.body;
-    },
     {
-      body: StandardSchemaV1(saveJobBodySchema),
+      detail: { tags: ["Jobs"] },
+      body: saveJobBodySchema,
+      response: saveJobResponses,
+    },
+    async ({ body, status }) => {
+      const result = await saveJob(body.jobId);
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      if (result.status === HTTP_STATUS_CREATED) {
+        return status(HTTP_STATUS_CREATED, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .delete(
     "/save/:jobId",
-    async ({ params }: { params: SavedJobParams }) => deleteSavedJob(params.jobId),
     {
-      params: StandardSchemaV1(savedJobParamsSchema),
+      detail: { tags: ["Jobs"] },
+      params: savedJobParamsSchema,
+      response: deleteSavedJobResponses,
     },
+    async ({ params, status }) =>
+      status(HTTP_STATUS_OK, await deleteSavedJob(params.jobId)),
   )
-  .get("/saved", async () => listSavedJobs())
+  .get(
+    "/saved",
+    {
+      detail: { tags: ["Jobs"] },
+      response: savedJobsListResponses,
+    },
+    async ({ status }) => status(HTTP_STATUS_OK, await listSavedJobs()),
+  )
   .post(
     "/apply",
-    async ({ body, set }: { body: ApplyJobBody; set: { status?: number | string } }) => {
-      const result = await createApplication(body.jobId, body.notes ?? "");
-      if (result.status !== null) {
-        set.status = result.status;
-      }
-      return result.body;
-    },
     {
-      body: StandardSchemaV1(applyJobBodySchema),
+      detail: { tags: ["Jobs"] },
+      body: applyJobBodySchema,
+      response: applyJobResponses,
+    },
+    async ({ body, status }) => {
+      const result = await createApplication(body.jobId, body.notes ?? "");
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      if (result.status === HTTP_STATUS_CREATED) {
+        return status(HTTP_STATUS_CREATED, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .put(
     "/apply/:id",
-    async ({
-      params,
-      body,
-      set,
-    }: {
-      params: UpdateApplicationParams;
-      body: UpdateApplicationBody;
-      set: { status?: number | string };
-    }) => {
-      const result = await updateApplication(params.id, body.status, body.notes);
-      if (result.status !== null) {
-        set.status = result.status;
-      }
-      return result.body;
-    },
     {
-      params: StandardSchemaV1(updateApplicationParamsSchema),
-      body: StandardSchemaV1(updateApplicationBodySchema),
+      detail: { tags: ["Jobs"] },
+      params: updateApplicationParamsSchema,
+      body: updateApplicationBodySchema,
+      response: updateApplicationResponses,
+    },
+    async ({ params, body, status }) => {
+      const result = await updateApplication(params.id, body.status, body.notes);
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
-  .get("/applications", async () => listApplications())
-  .get("/recommendations", async () => getRecommendations())
-  .post("/refresh", async ({ set }) => {
-    const aggregator = new JobAggregator();
-    const refreshResult = await settle(aggregator.refreshJobs());
-    if (refreshResult.status === "rejected") {
-      jobsRoutesLogger.error("Job refresh error:", refreshResult.reason);
-      set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-      return {
-        message: `Job refresh failed: ${refreshResult.reason instanceof Error ? refreshResult.reason.message : API_ERROR_UNKNOWN}`,
-        status: "failed",
-        totalJobs: 0,
-        newJobs: 0,
-        updatedJobs: 0,
-      };
-    }
+  .get(
+    "/applications",
+    {
+      detail: { tags: ["Jobs"] },
+      response: applicationsListResponses,
+    },
+    async ({ status }) => status(HTTP_STATUS_OK, await listApplications()),
+  )
+  .get(
+    "/recommendations",
+    {
+      detail: { tags: ["Jobs"] },
+      response: recommendationsResponses,
+    },
+    async ({ status }) => status(HTTP_STATUS_OK, await getRecommendations()),
+  )
+  .post(
+    "/refresh",
+    {
+      detail: { tags: ["Jobs"] },
+      response: jobsRefreshResponses,
+    },
+    async ({ status }) => {
+      const aggregator = new JobAggregator();
+      const refreshResult = await settle(aggregator.refreshJobs());
+      if (refreshResult.status === "rejected") {
+        jobsRoutesLogger.error("Job refresh error:", refreshResult.reason);
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+          error: `Job refresh failed: ${
+            refreshResult.reason instanceof Error ? refreshResult.reason.message : API_ERROR_UNKNOWN
+          }`,
+        });
+      }
 
-    return {
-      message: API_MESSAGE_JOB_REFRESH_COMPLETE,
-      status: "completed",
-      totalJobs: refreshResult.value.total,
-      newJobs: refreshResult.value.new,
-      updatedJobs: refreshResult.value.updated,
-    };
-  });
+      return status(HTTP_STATUS_OK, {
+        message: API_MESSAGE_JOB_REFRESH_COMPLETE,
+        status: "completed",
+        totalJobs: refreshResult.value.total,
+        newJobs: refreshResult.value.new,
+        updatedJobs: refreshResult.value.updated,
+      });
+    },
+  );

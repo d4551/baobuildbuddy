@@ -1,28 +1,14 @@
-import { Elysia } from "elysia";
-export declare const aiRoutes: Elysia<string, {
+import { type status } from "elysia";
+import { type AutomationActionRouteBody } from "./ai-route-contracts";
+type RouteStatus = typeof status;
+export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", {
     decorator: {};
     store: {};
     derive: {};
-    resolve: {};
 }, {
     typebox: {};
-    error: {};
-} & {
-    error: {};
-    typebox: import("@sinclair/typebox").TModule<{}, {}>;
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-} & {
-    schema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-}, {
+    error: [];
+}, import("elysia/types").DefaultMetadata, {
     [x: string]: {};
 } & {
     [x: string]: {
@@ -30,64 +16,66 @@ export declare const aiRoutes: Elysia<string, {
             post: {
                 body: {
                     message: string;
-                } & {
-                    context?: ({
-                        route: {
-                            params: Record<string, string>;
-                            path: string;
-                            query: Record<string, string>;
-                        } & {
-                            name?: string | undefined;
-                        };
-                        source: string;
-                        state: {
-                            hasInterviewSessions: boolean;
-                            hasJobs: boolean;
-                            hasPortfolioProjects: boolean;
-                            hasResumes: boolean;
-                            hasStudios: boolean;
-                            interviewSessionCount: number;
-                            jobCount: number;
-                            portfolioProjectCount: number;
-                            resumeCount: number;
-                            studioCount: number;
-                        } & {};
-                    } & {
-                        domain?: string | undefined;
-                        entity?: ({
-                            id: string;
-                            type: string;
-                        } & {
-                            label?: string | undefined;
-                        }) | undefined;
-                    }) | undefined;
                     sessionId?: string | undefined;
+                    context?: {
+                        source: string;
+                        domain?: string | undefined;
+                        route: {
+                            path: string;
+                            name?: string | undefined;
+                            params: Record<string, string>;
+                            query: Record<string, string>;
+                        };
+                        entity?: {
+                            type: string;
+                            id: string;
+                            label?: string | undefined;
+                        } | undefined;
+                        state: {
+                            hasResumes: boolean;
+                            resumeCount: number;
+                            hasJobs: boolean;
+                            jobCount: number;
+                            hasStudios: boolean;
+                            studioCount: number;
+                            hasInterviewSessions: boolean;
+                            interviewSessionCount: number;
+                            hasPortfolioProjects: boolean;
+                            portfolioProjectCount: number;
+                        };
+                    } | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                        sessionId: string | null | undefined;
-                        timestamp: string;
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
-                        followUps: string[];
-                        contextDomain: "automation" | "general" | "interview" | "job_search" | "portfolio" | "resume" | "skills";
-                    } | {
-                        error: string;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
+                error: never;
             };
         };
     };
@@ -97,40 +85,46 @@ export declare const aiRoutes: Elysia<string, {
             post: {
                 body: {
                     resumeId: string;
-                } & {
                     jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        model?: undefined;
+                    200: unknown;
+                    404: {
                         error: string;
-                        message?: undefined;
-                        resumeId?: undefined;
-                        jobId?: undefined;
-                        analysis?: undefined;
-                        provider?: undefined;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        resumeId: string;
-                        jobId: string | null;
-                        analysis: import("./ai-route-contracts").ResumeAnalysisResult;
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
+                error: never;
             };
         };
     };
@@ -139,39 +133,49 @@ export declare const aiRoutes: Elysia<string, {
         "generate-cover-letter": {
             post: {
                 body: {
+                    resumeId: string;
+                    jobId?: string | undefined;
                     company: string;
                     position: string;
-                    resumeId: string;
-                } & {
-                    jobId?: string | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        model?: undefined;
-                        message?: undefined;
-                        provider?: undefined;
+                    200: unknown;
+                    404: {
                         error: string;
-                        content?: undefined;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        content: import("./ai-route-contracts").CoverLetterSections;
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
+                error: never;
             };
         };
     };
@@ -179,28 +183,42 @@ export declare const aiRoutes: Elysia<string, {
     [x: string]: {
         "match-jobs": {
             post: {
-                body: {} & {
-                    preferences?: Record<string, string | number | boolean> | undefined;
+                body: {
                     resumeId?: string | undefined;
                     skills?: string[] | undefined;
+                    preferences?: Record<string, string | number | boolean> | undefined;
                 };
                 params: {};
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("./ai-route-contracts").MatchJobsResponse | {
-                        error: string;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
+                        title: 'Validation Error';
+                        status: 422;
+                        detail?: string;
                         on: string;
-                        summary?: string;
-                        message?: string;
                         found?: unknown;
                         property?: string;
                         expected?: string;
                     };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
+                error: never;
             };
         };
     };
@@ -213,19 +231,16 @@ export declare const aiRoutes: Elysia<string, {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/ai/control-plane").AIControlPlaneState | {
-                        providers: {
-                            id: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                            nameKey: string;
-                            descriptionKey: string;
-                            iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                            models: string[];
-                            available: boolean;
-                            health: "unconfigured";
-                        }[];
+                    200: unknown;
+                    429: {
                         error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
+                error: never;
             };
         };
     };
@@ -238,79 +253,91 @@ export declare const aiRoutes: Elysia<string, {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        totalMessages: number;
-                        userMessages: number;
-                        assistantMessages: number;
-                        sessions: number;
-                        recentActivity: {
-                            timestamp: string;
-                            role: string;
-                            sessionId: string | null;
-                        }[];
-                    };
-                };
-            };
-        };
-    };
-} & {
-    [x: string]: {
-        "automation-action": {
-            post: {
-                body: {
-                    action: string;
-                    jobUrl: string;
-                    resumeId: string;
-                } & {
-                    coverLetterId?: string | undefined;
-                    jobId?: string | undefined;
-                };
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        message?: undefined;
+                    200: unknown;
+                    429: {
                         error: string;
-                        runId?: undefined;
-                        status?: undefined;
-                    } | {
-                        error?: undefined;
-                        runId: string;
-                        status: string;
-                        message: string;
-                    };
-                    422: {
-                        type: 'validation';
-                        on: string;
-                        summary?: string;
-                        message?: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
+                error: never;
             };
         };
     };
-}, {
+}, import("elysia/types").DefaultEphemeral, {
     derive: {};
-    resolve: {};
     schema: {};
-    standaloneSchema: {};
+    schemas: {};
     response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-} & {
-    derive: {};
-    resolve: {};
-    schema: {};
-}>;
+    error: [];
+}, "post", "/automation-action", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
+    };
+    body: import("typebox").TObject<{
+        action: import("typebox").TString;
+        jobUrl: import("typebox").TString;
+        resumeId: import("typebox").TString;
+        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+        jobId: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    response: {
+        readonly 200: import("typebox").TUnknown;
+        readonly 400: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 409: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 422: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 500: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 429: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    };
+}, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
+    body: AutomationActionRouteBody;
+    status: RouteStatus;
+}) => Promise<import("elysia").ElysiaStatus<200 | 400 | 404 | 409 | 422 | 500, {
+    error: string;
+} | {
+    error: string;
+} | {
+    runId: string;
+    status: string;
+    message: string;
+}, 200 | 400 | 404 | 409 | 422 | 500>>>;
+export {};

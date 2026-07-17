@@ -47,7 +47,7 @@ const activeDescription = computed<string>(() => {
 
 <template>
   <div class="space-y-6">
-    <section class="card card-border bg-base-100 shadow-sm" :aria-label="t(ariaLabelKey)">
+    <section class="card card-border card-glass" :aria-label="t(ariaLabelKey)">
       <div class="card-body gap-4 p-4 lg:p-5">
         <div
           v-if="activeSectionEntry"

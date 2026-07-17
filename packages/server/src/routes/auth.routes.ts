@@ -15,11 +15,14 @@ import {
   AUTH_SETUP_TOKEN_HEADER,
 } from "@bao/shared/constants/auth";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { rateLimit } from "elysia-rate-limit";
 import { config } from "../config/env";
 import {
   RATE_LIMIT_AUTH_BOOTSTRAP_DURATION_MS,
@@ -27,9 +30,14 @@ import {
 } from "../config/rate-limit";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
-import type { RouteSetState } from "../types/route-state";
-import { resolveRateLimitClientKey } from "../utils/rate-limit";
-import { type AuthBootstrapBody, authBootstrapBody } from "./auth-route-contracts";
+import { rateLimit } from "../utils/rate-limit";
+import { resolveRateLimitClientKey } from "../utils/request";
+import {
+  authBootstrapBody,
+  authConfiguredResponses,
+  authInitResponses,
+  authStatusResponses,
+} from "./auth-route-contracts";
 
 const BASE64URL_PADDING_PATTERN = /[=]+$/u;
 
@@ -60,34 +68,47 @@ function generateApiKey(): string {
 
 export const authRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.authBase),
-  tags: ["Auth"],
 })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus), async () => {
-    if (config.disableAuth) {
-      return {
-        configured: false,
-        authRequired: false,
-        bootstrapRequired: false,
-        setupTokenConfigured: false,
-      };
-    }
-    const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-    const hasKey = Boolean(rows[0]?.apiKey);
-    return {
-      authRequired: true,
-      configured: hasKey,
-      bootstrapRequired: !hasKey,
-      setupTokenConfigured: config.authSetupToken !== null,
-    };
-  })
-  .get(toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured), async () => {
-    if (config.disableAuth) {
-      return { configured: false };
-    }
-    const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-    const hasKey = Boolean(rows[0]?.apiKey);
-    return { configured: hasKey };
-  })
+  .get(
+    toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),
+    {
+      detail: { tags: ["Auth"] },
+      response: authStatusResponses,
+    },
+    async ({ status }) => {
+      if (config.disableAuth) {
+        return status(HTTP_STATUS_OK, {
+          configured: false,
+          authRequired: false,
+          bootstrapRequired: false,
+          setupTokenConfigured: false,
+        });
+      }
+      const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+      const hasKey = Boolean(rows[0]?.apiKey);
+      return status(HTTP_STATUS_OK, {
+        authRequired: true,
+        configured: hasKey,
+        bootstrapRequired: !hasKey,
+        setupTokenConfigured: config.authSetupToken !== null,
+      });
+    },
+  )
+  .get(
+    toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
+    {
+      detail: { tags: ["Auth"] },
+      response: authConfiguredResponses,
+    },
+    async ({ status }) => {
+      if (config.disableAuth) {
+        return status(HTTP_STATUS_OK, { configured: false });
+      }
+      const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+      const hasKey = Boolean(rows[0]?.apiKey);
+      return status(HTTP_STATUS_OK, { configured: hasKey });
+    },
+  )
   .use(
     new Elysia()
       .use(
@@ -100,54 +121,49 @@ export const authRoutes = new Elysia({
       )
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
-        async ({
-          body,
-          request,
-          set,
-        }: {
-          body: AuthBootstrapBody;
-          request: Request;
-          set: RouteSetState;
-        }) => {
+        {
+          detail: { tags: ["Auth"] },
+          body: authBootstrapBody,
+          response: authInitResponses,
+        },
+        async ({ body, request, status }) => {
           if (config.disableAuth) {
-            return { configured: false, message: API_MESSAGE_AUTH_DISABLED };
+            return status(HTTP_STATUS_OK, { configured: false, message: API_MESSAGE_AUTH_DISABLED });
           }
 
           const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
           const existingApiKey = rows[0]?.apiKey;
 
           if (existingApiKey) {
-            return {
+            return status(HTTP_STATUS_OK, {
               configured: true,
               message: API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
-            };
+            });
           }
 
           const expectedSetupToken = config.authSetupToken;
           if (!expectedSetupToken) {
-            set.status = HTTP_STATUS_FORBIDDEN;
-            return {
+            return status(HTTP_STATUS_FORBIDDEN, {
               error: API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
-            };
+            });
           }
 
           const providedSetupToken = resolveSetupToken(request, body);
           if (!providedSetupToken) {
-            set.status = HTTP_STATUS_BAD_REQUEST;
-            return {
+            return status(HTTP_STATUS_BAD_REQUEST, {
               error: API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
-            };
+            });
           }
+
+          const providedSetupTokenBytes = Buffer.from(providedSetupToken, "utf8");
+          const expectedSetupTokenBytes = Buffer.from(expectedSetupToken, "utf8");
           if (
-            !timingSafeEqual(
-              Buffer.from(providedSetupToken, "utf8"),
-              Buffer.from(expectedSetupToken, "utf8"),
-            )
+            providedSetupTokenBytes.length !== expectedSetupTokenBytes.length ||
+            !timingSafeEqual(providedSetupTokenBytes, expectedSetupTokenBytes)
           ) {
-            set.status = HTTP_STATUS_FORBIDDEN;
-            return {
+            return status(HTTP_STATUS_FORBIDDEN, {
               error: API_ERROR_AUTH_SETUP_TOKEN_INVALID,
-            };
+            });
           }
 
           const apiKey = generateApiKey();
@@ -156,14 +172,11 @@ export const authRoutes = new Elysia({
             set: { apiKey },
           });
 
-          return {
+          return status(HTTP_STATUS_OK, {
             configured: true,
             apiKey,
             message: API_MESSAGE_SAVE_API_KEY_ONCE,
-          };
-        },
-        {
-          body: authBootstrapBody,
+          });
         },
       ),
   );

@@ -48,7 +48,7 @@ export const useApiDocsPageTester = ({
   requestUrl,
   toast,
 }: ApiDocsPageTesterOptions) => {
-  const testerInvoker = ref<HTMLElement | null>(null);
+  const testerInvoker = ref<{ focus?: () => void } | null>(null);
   const testerDialogOpen = ref(false);
   const selectedEndpoint = ref<ApiEndpoint | null>(null);
   const testerState = ref<ApiTesterState>("idle");

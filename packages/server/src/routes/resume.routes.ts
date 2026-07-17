@@ -1,3 +1,4 @@
+import { Elysia, type status } from "elysia";
 import {
   API_ERROR_GENERATE_QUESTIONS,
   API_ERROR_RESUME_NOT_FOUND,
@@ -10,11 +11,16 @@ import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
-import { RESUME_DEFAULT_NAME_QUESTIONNAIRE } from "@bao/shared/constants/resume";
+import {
+  RESUME_DEFAULT_NAME,
+  RESUME_DEFAULT_NAME_QUESTIONNAIRE,
+  RESUME_DEFAULT_THEME,
+  RESUME_TEMPLATE_DEFAULT,
+} from "@bao/shared/constants/resume";
+import type { ResumeData } from "@bao/shared/types/resume";
 import { settle } from "@bao/shared/utils/promise";
-import { StandardSchemaV1 } from "baobox";
-import { Elysia } from "elysia";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
@@ -26,7 +32,7 @@ import {
   type ResumeQuestionGenerateRouteBody,
   type ResumeQuestionSynthesizeRouteBody,
   type ResumeRouteSetState,
-  type ResumeScoreBody,
+  type ResumeScoreRouteBody,
   resumeEnhanceBodySchema,
   resumeExportBodySchema,
   resumeIdParamsSchema,
@@ -36,6 +42,18 @@ import {
   resumeScoreBodySchema,
 } from "./resume-route-contracts";
 import {
+  resumeCreateResponses,
+  resumeDeleteResponses,
+  resumeEnhanceResponses,
+  resumeEntityResponses,
+  resumeExportResponses,
+  resumeListResponses,
+  resumeQuestionGenerateResponses,
+  resumeQuestionSynthesizeResponses,
+  resumeScoreResponses,
+  resumeUpdateResponses,
+} from "./resume-route-response-contracts";
+import {
   buildResumeCreatePayload,
   buildResumeUpdatePayload,
   enhanceResumeWithAi,
@@ -43,13 +61,48 @@ import {
   handleResumeAiScore,
 } from "./resume-route-support";
 
+type RouteStatus = typeof status;
+
+const toResumeEntityResponse = (resume: ResumeData) => ({
+  id: resume.id ?? "",
+  name: resume.name ?? RESUME_DEFAULT_NAME,
+  personalInfo: resume.personalInfo,
+  summary: resume.summary ?? "",
+  experience: resume.experience ?? [],
+  education: resume.education ?? [],
+  skills: resume.skills,
+  projects: resume.projects ?? [],
+  gamingExperience: resume.gamingExperience,
+  template: resume.template ?? RESUME_TEMPLATE_DEFAULT,
+  theme: resume.theme ?? RESUME_DEFAULT_THEME,
+  isDefault: resume.isDefault === true,
+});
+
+const toSimpleRouteErrorPayload = (payload: unknown, fallbackError: string) => {
+  if (typeof payload === "object" && payload !== null && "error" in payload) {
+    const error = payload.error;
+    const details = "details" in payload ? payload.details : undefined;
+    if (typeof error === "string" && typeof details === "string") {
+      return { error, details };
+    }
+    if (typeof error === "string") {
+      return { error };
+    }
+  }
+  return { error: fallbackError };
+};
+
 export const resumeRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.resumes),
-  tags: ["Resumes"],
 })
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
-    async ({ body, set }: { body: ResumeQuestionGenerateRouteBody; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeQuestionGenerateBodySchema,
+      response: resumeQuestionGenerateResponses,
+    },
+    async ({ body, status }: { body: ResumeQuestionGenerateRouteBody; status: RouteStatus }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
           targetRole: body.targetRole,
@@ -58,39 +111,33 @@ export const resumeRoutes = new Elysia({
         }),
       );
       if (result.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_GENERATE_QUESTIONS,
           details: result.reason instanceof Error ? result.reason.message : API_ERROR_UNKNOWN,
-        };
+        });
       }
-      return { questions: result.value };
-    },
-    {
-      body: StandardSchemaV1(resumeQuestionGenerateBodySchema),
+      return status(HTTP_STATUS_OK, { questions: result.value });
     },
   )
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
-    async ({
-      body,
-      set,
-    }: {
-      body: ResumeQuestionSynthesizeRouteBody;
-      set: ResumeRouteSetState;
-    }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeQuestionSynthesizeBodySchema,
+      response: resumeQuestionSynthesizeResponses,
+    },
+    async ({ body, status }: { body: ResumeQuestionSynthesizeRouteBody; status: RouteStatus }) => {
       const synthesizeResult = await settle(
         cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
       );
       if (synthesizeResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_SYNTHESIZE_RESUME,
           details:
             synthesizeResult.reason instanceof Error
               ? synthesizeResult.reason.message
               : API_ERROR_UNKNOWN,
-        };
+        });
       }
 
       const createResult = await settle(
@@ -100,139 +147,212 @@ export const resumeRoutes = new Elysia({
         }),
       );
       if (createResult.status === "rejected") {
-        set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-        return {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
           error: API_ERROR_SYNTHESIZE_RESUME,
           details:
             createResult.reason instanceof Error ? createResult.reason.message : API_ERROR_UNKNOWN,
-        };
+        });
       }
 
-      set.status = HTTP_STATUS_CREATED;
-      return createResult.value;
-    },
-    {
-      body: StandardSchemaV1(resumeQuestionSynthesizeBodySchema),
+      return status(HTTP_STATUS_CREATED, toResumeEntityResponse(createResult.value));
     },
   )
-  .get("/", async () => {
-    return resumeService.getResumes();
-  })
+  .get(
+    "/",
+    {
+      detail: { tags: ["Resumes"] },
+      response: resumeListResponses,
+    },
+    async ({ status }: { status: RouteStatus }) =>
+      status(HTTP_STATUS_OK, (await resumeService.getResumes()).map(toResumeEntityResponse)),
+  )
   .post(
     "/",
-    async ({ body, set }: { body: ResumeMutationBody; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      body: resumeMutationBodySchema,
+      response: resumeCreateResponses,
+    },
+    async ({ body, status }: { body: ResumeMutationBody; status: RouteStatus }) => {
       const created = await resumeService.createResume(buildResumeCreatePayload(body));
-      set.status = HTTP_STATUS_CREATED;
       gamificationService.trackActionFireAndForget(
         "resumesGenerated",
         ROUTE_GAMIFICATION_XP.resumesGenerated,
         "resume_created",
       );
-      return created;
-    },
-    {
-      body: StandardSchemaV1(resumeMutationBodySchema),
+      return status(HTTP_STATUS_CREATED, toResumeEntityResponse(created));
     },
   )
   .get(
     "/:id",
-    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      response: resumeEntityResponses,
+    },
+    async ({ params, status }: { params: ResumeIdParams; status: RouteStatus }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return {
-          error: API_ERROR_RESUME_NOT_FOUND,
-        };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
       }
-      return resume;
-    },
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
+      return status(HTTP_STATUS_OK, toResumeEntityResponse(resume));
     },
   )
   .put(
     "/:id",
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      body: resumeMutationBodySchema,
+      response: resumeUpdateResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: ResumeIdParams;
       body: ResumeMutationBody;
-      set: ResumeRouteSetState;
+      status: RouteStatus;
     }) => {
       const updated = await resumeService.updateResume(params.id, buildResumeUpdatePayload(body));
       if (!updated) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_RESUME_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
       }
-      return updated;
-    },
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeMutationBodySchema),
+      return status(HTTP_STATUS_OK, toResumeEntityResponse(updated));
     },
   )
   .delete(
     "/:id",
-    async ({ params, set }: { params: ResumeIdParams; set: ResumeRouteSetState }) => {
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      response: resumeDeleteResponses,
+    },
+    async ({ params, status }: { params: ResumeIdParams; status: RouteStatus }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
-        set.status = HTTP_STATUS_NOT_FOUND;
-        return { error: API_ERROR_RESUME_NOT_FOUND };
+        return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
       }
       await resumeService.deleteResume(params.id);
-      return { success: true, id: params.id };
-    },
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
+      return status(HTTP_STATUS_OK, { success: true, id: params.id });
     },
   )
   .post(
     "/:id/export",
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      body: resumeExportBodySchema,
+      response: resumeExportResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: ResumeIdParams;
       body: ResumeExportRouteBody;
-      set: ResumeRouteSetState;
-    }) => exportResumeAsset(params.id, body, set),
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeExportBodySchema),
+      status: RouteStatus;
+    }) => {
+      const state: ResumeRouteSetState = {};
+      const result = await exportResumeAsset(params.id, body, state);
+      if (state.status === HTTP_STATUS_NOT_FOUND) {
+        return status(
+          HTTP_STATUS_NOT_FOUND,
+          toSimpleRouteErrorPayload(result, API_ERROR_RESUME_NOT_FOUND),
+        );
+      }
+      if (state.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(
+          HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          toSimpleRouteErrorPayload(result, API_ERROR_UNKNOWN),
+        );
+      }
+      return status(HTTP_STATUS_OK, result);
     },
   )
   .post(
     "/:id/ai-enhance",
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      body: resumeEnhanceBodySchema,
+      response: resumeEnhanceResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: ResumeIdParams;
       body: ResumeEnhanceRouteBody;
-      set: ResumeRouteSetState;
-    }) => enhanceResumeWithAi(params.id, body, set),
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeEnhanceBodySchema),
+      status: RouteStatus;
+    }) => {
+      const state: ResumeRouteSetState = {};
+      const result = await enhanceResumeWithAi(params.id, body, state);
+      if (state.status === HTTP_STATUS_NOT_FOUND) {
+        return status(
+          HTTP_STATUS_NOT_FOUND,
+          toSimpleRouteErrorPayload(result, API_ERROR_RESUME_NOT_FOUND),
+        );
+      }
+      if (state.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(
+          HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          toSimpleRouteErrorPayload(result, API_ERROR_UNKNOWN),
+        );
+      }
+      if ("resume" in result && result.resume) {
+        return status(HTTP_STATUS_OK, {
+          resume: toResumeEntityResponse(result.resume),
+          suggestions: result.suggestions,
+          section: result.section,
+        });
+      }
+      return status(
+        HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        toSimpleRouteErrorPayload(result, API_ERROR_UNKNOWN),
+      );
     },
   )
   .post(
     "/:id/ai-score",
+    {
+      detail: { tags: ["Resumes"] },
+      params: resumeIdParamsSchema,
+      body: resumeScoreBodySchema,
+      response: resumeScoreResponses,
+    },
     async ({
       params,
       body,
-      set,
+      status,
     }: {
       params: ResumeIdParams;
-      body: ResumeScoreBody;
-      set: ResumeRouteSetState;
-    }) => handleResumeAiScore(params.id, body, set),
-    {
-      params: StandardSchemaV1(resumeIdParamsSchema),
-      body: StandardSchemaV1(resumeScoreBodySchema),
+      body: ResumeScoreRouteBody;
+      status: RouteStatus;
+    }) => {
+      const state: ResumeRouteSetState = {};
+      const result = await handleResumeAiScore(params.id, body, state);
+      if (state.status === HTTP_STATUS_NOT_FOUND) {
+        return status(
+          HTTP_STATUS_NOT_FOUND,
+          toSimpleRouteErrorPayload(result, API_ERROR_RESUME_NOT_FOUND),
+        );
+      }
+      if (state.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(
+          HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          toSimpleRouteErrorPayload(result, API_ERROR_UNKNOWN),
+        );
+      }
+      if ("score" in result && typeof result.score === "number") {
+        return status(HTTP_STATUS_OK, result);
+      }
+      return status(
+        HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        toSimpleRouteErrorPayload(result, API_ERROR_UNKNOWN),
+      );
     },
   );

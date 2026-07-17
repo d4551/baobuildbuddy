@@ -103,16 +103,40 @@ const page = useJobsIndexPage();
 
         <EmptyState
           v-else-if="page.paginatedJobs.value.length === 0"
-          title-key="jobsPage.emptyStateTitle"
-          description-key="jobsPage.emptyStateDescription"
-        />
+          :title-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.emptyCatalogTitle'
+              : 'jobsPage.emptyStateTitle'
+          "
+          :description-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.emptyCatalogDescription'
+              : 'jobsPage.emptyStateDescription'
+          "
+          :cta-label-key="
+            page.isCatalogEmpty.value ? 'jobsPage.refreshButton' : 'jobsPage.clearFiltersButton'
+          "
+          @cta="
+            page.isCatalogEmpty.value ? page.handleRefresh() : page.clearFilters()
+          "
+        >
+          <template v-if="page.isCatalogEmpty.value" #actions>
+            <NuxtLink
+              :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
+              class="btn btn-outline btn-sm"
+              :aria-label="t('jobsPage.configureProvidersAria')"
+            >
+              {{ t("jobsPage.configureProvidersButton") }}
+            </NuxtLink>
+          </template>
+        </EmptyState>
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" extra-class="mb-6">
             <article
               v-for="job in page.paginatedJobs.value"
               :key="job.id"
-              class="card card-border relative h-full overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
+              class="card card-border card-glass card-glass-interactive relative h-full overflow-hidden"
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"

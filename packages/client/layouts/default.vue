@@ -15,15 +15,13 @@ import {
 
 const { initTheme, theme, setTheme } = useTheme();
 const { settings } = useSettings();
-const { brandCssVars } = useBrand();
+useBrand();
 const { t } = useI18n();
 const route = useRoute();
 const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
 const isDesktopViewport = ref(false);
 let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
-
-const shellStyle = computed(() => brandCssVars.value);
 
 const showFloatingChatWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
 
@@ -53,7 +51,7 @@ watch(
   () => settings.value?.theme,
   (nextTheme) => {
     if (nextTheme) {
-      setTheme(nextTheme, { persistLocal: false });
+      setTheme(nextTheme, { persist: false });
     }
   },
   { immediate: true },
@@ -78,7 +76,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="drawer" :class="SHELL_DRAWER_CLASS" :data-theme="theme" :style="shellStyle">
+  <div class="drawer" :class="SHELL_DRAWER_CLASS" :data-theme="theme">
     <input
       :id="APP_DRAWER_ID"
       type="checkbox"

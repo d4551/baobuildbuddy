@@ -90,7 +90,7 @@ If you see a prompt and can ask a question, Ollama is working. Type `/bye` or pr
 5. Click the test button.
 6. Save your settings.
 
-The app defaults already match Ollama's local OpenAI-compatible endpoint, so many users only need to install Ollama and test the connection.
+The app defaults already match Ollama's local OpenAI Chat Completions endpoint, so many users only need to install Ollama and test the connection.
 
 ## What the test button checks
 

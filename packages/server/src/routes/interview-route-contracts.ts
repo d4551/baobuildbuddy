@@ -1,3 +1,10 @@
+import type { Static } from "typebox";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import {
   SCHEMA_MAX_ITEMS_MEDIUM,
   SCHEMA_MAX_ITEMS_XLARGE,
@@ -10,14 +17,16 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
-import type { InterviewConfig, VoiceSettings } from "@bao/shared/types/interview";
-import Type, { type StaticParse } from "baobox";
+import type { InterviewConfig, InterviewSession, VoiceSettings } from "@bao/shared/types/interview";
+import { t } from "elysia";
 
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
   voiceSettings?: Partial<VoiceSettings>;
 };
 
-export type SessionPayload = Record<string, unknown>;
+export type SessionPayload = InterviewSession & {
+  message?: string;
+};
 
 export type SubmitResponseBody = {
   questionId?: string;
@@ -25,99 +34,228 @@ export type SubmitResponseBody = {
   response: string;
 };
 
-const interviewModeSchema = Type.Union([Type.Literal("studio"), Type.Literal("job")]);
-const interviewConversationStyleSchema = Type.Union([
-  Type.Literal("natural"),
-  Type.Literal("structured"),
-]);
+const interviewModeSchema = t.Union([t.Literal("studio"), t.Literal("job")]);
+const interviewConversationStyleSchema = t.Union([t.Literal("natural"), t.Literal("structured")]);
 
-const voiceSettingsSchema = Type.Object({
-  microphoneId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-  speakerId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-  voiceId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-  rate: Type.Optional(Type.Number({ minimum: 0.25, maximum: 3 })),
-  pitch: Type.Optional(Type.Number({ minimum: 0.5, maximum: 2 })),
-  volume: Type.Optional(Type.Number({ minimum: 0, maximum: 2 })),
-  language: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+const voiceSettingsSchema = t.Object({
+  microphoneId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  speakerId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  voiceId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  rate: t.Optional(t.Number({ minimum: 0.25, maximum: 3 })),
+  pitch: t.Optional(t.Number({ minimum: 0.5, maximum: 2 })),
+  volume: t.Optional(t.Number({ minimum: 0, maximum: 2 })),
+  language: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
 });
 
-const targetJobSchema = Type.Object(
+const targetJobSchema = t.Object(
   {
-    id: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
-    title: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    company: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    location: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
-    description: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_JOB_DESCRIPTION })),
-    requirements: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_URL }), {
+    id: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
+    title: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    company: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    location: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_DEVICE }),
+    description: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_JOB_DESCRIPTION })),
+    requirements: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_URL }), {
         maxItems: SCHEMA_MAX_ITEMS_XLARGE,
       }),
     ),
-    technologies: Type.Optional(
-      Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+    technologies: t.Optional(
+      t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
         maxItems: SCHEMA_MAX_ITEMS_XLARGE,
       }),
     ),
-    source: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-    postedDate: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-    url: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_LONG })),
+    source: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+    postedDate: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+    url: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LONG })),
   },
   { required: ["id", "title", "company", "location"] },
 );
 
-const candidateContextSchema = Type.Object({
-  resumeId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  coverLetterId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  portfolioId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+const candidateContextSchema = t.Object({
+  resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  coverLetterId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  portfolioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
 
-export const sessionConfigSchema = Type.Object({
-  roleType: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-  roleCategory: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-  experienceLevel: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
-  focusAreas: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+export const sessionConfigSchema = t.Object({
+  roleType: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  roleCategory: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  experienceLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE })),
+  focusAreas: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
       maxItems: SCHEMA_MAX_ITEMS_MEDIUM,
     }),
   ),
-  duration: Type.Optional(Type.Integer({ minimum: 5, maximum: 120 })),
-  questionCount: Type.Optional(Type.Integer({ minimum: 1, maximum: 20 })),
-  includeTechnical: Type.Optional(Type.Boolean()),
-  includeBehavioral: Type.Optional(Type.Boolean()),
-  includeStudioSpecific: Type.Optional(Type.Boolean()),
-  enableVoiceMode: Type.Optional(Type.Boolean()),
-  technologies: Type.Optional(
-    Type.Array(Type.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
+  duration: t.Optional(t.Integer({ minimum: 5, maximum: 120 })),
+  questionCount: t.Optional(t.Integer({ minimum: 1, maximum: 20 })),
+  includeTechnical: t.Optional(t.Boolean()),
+  includeBehavioral: t.Optional(t.Boolean()),
+  includeStudioSpecific: t.Optional(t.Boolean()),
+  enableVoiceMode: t.Optional(t.Boolean()),
+  technologies: t.Optional(
+    t.Array(t.String({ maxLength: SCHEMA_MAX_LENGTH_DEVICE }), {
       maxItems: SCHEMA_MAX_ITEMS_XLARGE,
     }),
   ),
-  voiceSettings: Type.Optional(voiceSettingsSchema),
-  interviewMode: Type.Optional(interviewModeSchema),
-  conversationStyle: Type.Optional(interviewConversationStyleSchema),
-  targetJob: Type.Optional(targetJobSchema),
-  candidateContext: Type.Optional(candidateContextSchema),
+  voiceSettings: t.Optional(voiceSettingsSchema),
+  interviewMode: t.Optional(interviewModeSchema),
+  conversationStyle: t.Optional(interviewConversationStyleSchema),
+  targetJob: t.Optional(targetJobSchema),
+  candidateContext: t.Optional(candidateContextSchema),
 });
 
-export const createSessionBodySchema = Type.Object({
-  studioId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-  config: Type.Optional(sessionConfigSchema),
+export const createSessionBodySchema = t.Object({
+  studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  config: t.Optional(sessionConfigSchema),
 });
-export type CreateSessionBody = StaticParse<typeof createSessionBodySchema>;
+export type CreateSessionBody = Static<typeof createSessionBodySchema>;
 
-export const interviewSessionParamsSchema = Type.Object(
+export const interviewSessionParamsSchema = t.Object(
   {
-    id: Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
+    id: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
   },
   { required: ["id"] },
 );
-export type InterviewSessionParams = StaticParse<typeof interviewSessionParamsSchema>;
+export type InterviewSessionParams = Static<typeof interviewSessionParamsSchema>;
 
-export const submitResponseBodySchema = Type.Object(
+export const submitResponseBodySchema = t.Object(
   {
-    questionId: Type.Optional(Type.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
-    questionIndex: Type.Optional(Type.Integer({ minimum: 0 })),
-    response: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
+    questionId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    questionIndex: t.Optional(t.Integer({ minimum: 0 })),
+    response: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),
   },
   { required: ["response"] },
 );
-export type SubmitResponseRouteBody = StaticParse<typeof submitResponseBodySchema>;
+export type SubmitResponseRouteBody = Static<typeof submitResponseBodySchema>;
+
+const interviewQuestionTypeResponseSchema = t.Union([
+  t.Literal("behavioral"),
+  t.Literal("technical"),
+  t.Literal("studio-specific"),
+  t.Literal("intro"),
+  t.Literal("closing"),
+]);
+
+const interviewQuestionDifficultyResponseSchema = t.Union([
+  t.Literal("easy"),
+  t.Literal("medium"),
+  t.Literal("hard"),
+]);
+
+const interviewSessionStatusResponseSchema = t.Union([
+  t.Literal("preparing"),
+  t.Literal("active"),
+  t.Literal("paused"),
+  t.Literal("completed"),
+  t.Literal("cancelled"),
+]);
+
+const interviewAiAnalysisResponseSchema = t.Object({
+  score: t.Number(),
+  feedback: t.String(),
+  strengths: t.Array(t.String()),
+  improvements: t.Array(t.String()),
+});
+
+const interviewQuestionResponseSchema = t.Object({
+  id: t.String(),
+  type: interviewQuestionTypeResponseSchema,
+  question: t.String(),
+  followUps: t.Array(t.String()),
+  expectedDuration: t.Number(),
+  difficulty: interviewQuestionDifficultyResponseSchema,
+  tags: t.Array(t.String()),
+  score: t.Optional(t.Number()),
+  feedback: t.Optional(t.String()),
+  response: t.Optional(t.String()),
+});
+
+const interviewResponseSchema = t.Object({
+  questionId: t.String(),
+  transcript: t.String(),
+  duration: t.Number(),
+  timestamp: t.Number(),
+  confidence: t.Number(),
+  aiAnalysis: t.Optional(interviewAiAnalysisResponseSchema),
+});
+
+const interviewFinalAnalysisResponseSchema = t.Object({
+  overallScore: t.Number(),
+  strengths: t.Array(t.String()),
+  improvements: t.Array(t.String()),
+  recommendations: t.Array(t.String()),
+  feedback: t.Optional(t.String()),
+});
+
+const interviewerPersonaResponseSchema = t.Object({
+  name: t.String(),
+  role: t.String(),
+  studioName: t.String(),
+  background: t.String(),
+  style: t.String(),
+  experience: t.String(),
+});
+
+export const interviewSessionResponseSchema = t.Object({
+  id: t.String(),
+  studioId: t.String(),
+  config: sessionConfigSchema,
+  questions: t.Array(interviewQuestionResponseSchema),
+  currentQuestionIndex: t.Number(),
+  totalQuestions: t.Number(),
+  startTime: t.Number(),
+  endTime: t.Optional(t.Number()),
+  status: interviewSessionStatusResponseSchema,
+  responses: t.Array(interviewResponseSchema),
+  finalAnalysis: t.Optional(interviewFinalAnalysisResponseSchema),
+  interviewerPersona: t.Optional(interviewerPersonaResponseSchema),
+  role: t.Optional(t.String()),
+  studioName: t.Optional(t.String()),
+  score: t.Optional(t.Number()),
+  duration: t.Optional(t.String()),
+  overallFeedback: t.Optional(t.String()),
+  totalResponses: t.Optional(t.Number()),
+  createdAt: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
+  message: t.Optional(t.String()),
+});
+
+export const interviewStatsResponseSchema = t.Object({
+  totalSessions: t.Number(),
+  completedSessions: t.Number(),
+  inProgressSessions: t.Number(),
+  averageQuestions: t.Number(),
+  averageResponses: t.Number(),
+  totalInterviews: t.Number(),
+  completedInterviews: t.Number(),
+  averageScore: t.Number(),
+  improvementTrend: t.Number(),
+});
+
+export const createInterviewSessionResponses = {
+  [HTTP_STATUS_CREATED]: t.Unknown(),
+};
+
+export const interviewSessionsListResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+};
+
+export const interviewSessionResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+};
+
+export const submitInterviewResponseResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_BAD_REQUEST]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+};
+
+export const completeInterviewSessionResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+};
+
+export const interviewStatsResponses = {
+  [HTTP_STATUS_OK]: interviewStatsResponseSchema,
+};

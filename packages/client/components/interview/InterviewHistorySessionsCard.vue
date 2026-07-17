@@ -2,7 +2,7 @@
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
-import { createInterviewHistoryRadialProgressStyle } from "./interview-history-radial-progress";
+import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 
 const props = defineProps<{
   filteredSessions: InterviewSession[];
@@ -42,8 +42,6 @@ const viewSession = (id: string): void => {
   emit("view", id);
 };
 
-const buildTimelineScoreStyle = (score: number | undefined): Record<string, string> =>
-  createInterviewHistoryRadialProgressStyle(score ?? 0, "compact");
 </script>
 
 <template>
@@ -135,18 +133,14 @@ const buildTimelineScoreStyle = (score: number | undefined): Record<string, stri
               {{ props.formatDate(session.createdAt) }}
             </div>
             <div class="timeline-middle">
-              <div
-                class="radial-progress text-xs font-semibold"
-                :class="props.getScoreColorClass(session.score ?? 0)"
-                :style="buildTimelineScoreStyle(session.score)"
-                role="progressbar"
+              <UiRadialMeter
+                :value="session.score ?? 0"
+                size-class="h-12 w-12"
+                fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
-                :aria-valuenow="session.score ?? 0"
-                aria-valuemin="0"
-                aria-valuemax="100"
               >
-                {{ props.formatScore(session.score) }}
-              </div>
+                <span class="text-xs font-semibold">{{ props.formatScore(session.score) }}</span>
+              </UiRadialMeter>
             </div>
             <div class="timeline-end timeline-box">
               <p class="font-semibold">{{ session.studioName }}</p>

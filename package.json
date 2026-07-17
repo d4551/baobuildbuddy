@@ -44,7 +44,9 @@
     "verify:production-client": "bun run scripts/verify-production-client-output.ts",
     "proof:pages": "bun run scripts/capture-page-proof.ts",
     "build:verify": "bun run build && bun run verify:production-client",
-    "typecheck": "bun run --cwd packages/shared typecheck && bun run --cwd packages/scraper typecheck && bun run --cwd packages/server typecheck && bun run --cwd packages/client typecheck",
+    "postinstall": "bun run scripts/patch-upstream-dts-nocheck.ts",
+    "typecheck": "bun run scripts/typecheck-workspace.ts",
+    "typecheck:packages": "bun run --cwd packages/shared typecheck && bun run --cwd packages/scraper typecheck && bun run --cwd packages/server typecheck && bun run --cwd packages/client typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",
     "db:studio": "bun --env-file=.env run drizzle-kit studio",
@@ -73,6 +75,7 @@
     "validate:aria": "bun run scripts/validate-ui-aria-labels.ts",
     "validate:no-try-catch": "bun run scripts/validate-no-try-catch.ts",
     "validate:no-unsafe-casts": "bun run scripts/validate-no-unsafe-casts.ts",
+    "validate:skip-libcheck-waiver": "bun run scripts/validate-skip-libcheck-waiver.ts",
     "validate:no-hardcoded-paths": "bun run scripts/validate-no-hardcoded-paths.ts",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
     "validate:page-seo": "bun run scripts/validate-page-seo-metadata.ts",
@@ -93,21 +96,22 @@
     "verify:pages": "bun run scripts/verify-pages.ts",
     "lint:typed": "bun --bun run eslint --config eslint.config.mjs .",
     "lint:typed:fix": "bun --bun run eslint --config eslint.config.mjs . --fix",
-    "lint": "bun run validate:alignment && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck",
-    "lint:fix": "bun run validate:alignment && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write && bun run --cwd packages/client lint --fix && bun run typecheck"
+    "lint": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck",
+    "lint:fix": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write && bun run --cwd packages/client lint --fix && bun run typecheck"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.3",
+    "@biomejs/biome": "^2.5.4",
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/cli": "^4.3.2",
-    "@typescript/native": "npm:typescript@^7.0.2",
+    "@tailwindcss/cli": "^4.3.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@typescript/native": "npm:typescript@7.0.2",
     "better-sqlite3": "^12.8.0",
     "bun-types": "1.3.14",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.0.3",
     "playwright": "^1.58.2",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.57.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.64.0",
     "vue-router": "^5.0.3"
   }
 }

@@ -73,8 +73,11 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             <span class="indicator">
               <span
                 v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-                class="indicator-item badge badge-warning badge-xs"
-              ></span>
+                class="indicator-item badge badge-warning badge-xs font-bold"
+                role="status"
+                :aria-label="t('a11y.aiConfigIncompleteAria')"
+                :title="t('a11y.aiConfigIncompleteAria')"
+              >!</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
               </svg>

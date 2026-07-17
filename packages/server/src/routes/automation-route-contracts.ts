@@ -1,3 +1,4 @@
+import type { Static } from "typebox";
 import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
@@ -10,6 +11,8 @@ import {
   HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import {
@@ -21,7 +24,10 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
+import { routeErrorBodySchema, simpleErrorResponseSchema } from "./route-error-envelope";
+
+export { routeErrorBodySchema };
 
 const [AUTOMATION_TYPE_SCRAPE, AUTOMATION_TYPE_JOB_APPLY, AUTOMATION_TYPE_EMAIL] =
   AUTOMATION_RUN_TYPES;
@@ -65,110 +71,115 @@ export type ScheduleScrapeRequestBody = {
 
 export const RUN_ID_PATTERN = new RegExp(RUN_ID_SAFE_PATTERN_SOURCE);
 
-export const AUTOMATION_TYPE_SCHEMA = Type.Union([
-  Type.Literal(AUTOMATION_TYPE_SCRAPE),
-  Type.Literal(AUTOMATION_TYPE_JOB_APPLY),
-  Type.Literal(AUTOMATION_TYPE_EMAIL),
+export const AUTOMATION_TYPE_SCHEMA = t.Union([
+  t.Literal(AUTOMATION_TYPE_SCRAPE),
+  t.Literal(AUTOMATION_TYPE_JOB_APPLY),
+  t.Literal(AUTOMATION_TYPE_EMAIL),
 ]);
-export const AUTOMATION_STATUS_SCHEMA = Type.Union([
-  Type.Literal(AUTOMATION_STATUS_PENDING),
-  Type.Literal(AUTOMATION_STATUS_RUNNING),
-  Type.Literal(AUTOMATION_STATUS_SUCCESS),
-  Type.Literal(AUTOMATION_STATUS_ERROR),
+export const AUTOMATION_STATUS_SCHEMA = t.Union([
+  t.Literal(AUTOMATION_STATUS_PENDING),
+  t.Literal(AUTOMATION_STATUS_RUNNING),
+  t.Literal(AUTOMATION_STATUS_SUCCESS),
+  t.Literal(AUTOMATION_STATUS_ERROR),
 ]);
-export const EMAIL_RESPONSE_TONE_SCHEMA = Type.Union([
-  Type.Literal("professional"),
-  Type.Literal("friendly"),
-  Type.Literal("concise"),
+export const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
+  t.Literal("professional"),
+  t.Literal("friendly"),
+  t.Literal("concise"),
 ]);
-export const SCRAPE_TARGET_SCHEMA = Type.Union([
-  Type.Literal(SCRAPE_TARGET_STUDIOS),
-  Type.Literal(SCRAPE_TARGET_HITMARKER),
-  Type.Literal(SCRAPE_TARGET_GRACKLE),
-  Type.Literal(SCRAPE_TARGET_WORKWITHINDIES),
-  Type.Literal(SCRAPE_TARGET_REMOTEGAMEJOBS),
-  Type.Literal(SCRAPE_TARGET_GAMESJOBSDIRECT),
-  Type.Literal(SCRAPE_TARGET_POCKETGAMER),
+export const SCRAPE_TARGET_SCHEMA = t.Union([
+  t.Literal(SCRAPE_TARGET_STUDIOS),
+  t.Literal(SCRAPE_TARGET_HITMARKER),
+  t.Literal(SCRAPE_TARGET_GRACKLE),
+  t.Literal(SCRAPE_TARGET_WORKWITHINDIES),
+  t.Literal(SCRAPE_TARGET_REMOTEGAMEJOBS),
+  t.Literal(SCRAPE_TARGET_GAMESJOBSDIRECT),
+  t.Literal(SCRAPE_TARGET_POCKETGAMER),
 ]);
 
-const nullableJsonRecordBodySchema = Type.Union([
-  Type.Record(Type.String(), Type.Unknown()),
-  Type.Null(),
-]);
-const nullableRunErrorSchema = Type.Union([
-  Type.String({ minLength: 1 }),
-  Type.Object({
-    code: Type.String({ minLength: 1 }),
-    message: Type.String({ minLength: 1 }),
-    source: Type.String({ minLength: 1 }),
-    details: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+const nullableJsonRecordBodySchema = t.Union([t.Record(t.String(), t.Unknown()), t.Null()]);
+const nullableRunErrorSchema = t.Union([
+  t.String({ minLength: 1 }),
+  t.Object({
+    code: t.String({ minLength: 1 }),
+    message: t.String({ minLength: 1 }),
+    source: t.String({ minLength: 1 }),
+    details: t.Optional(t.Record(t.String(), t.Unknown())),
   }),
-  Type.Null(),
+  t.Null(),
 ]);
 
-export const automationRunEnvelopeBodySchema = Type.Object({
-  id: Type.String(),
+export const automationRunEnvelopeBodySchema = t.Object({
+  id: t.String(),
   type: AUTOMATION_TYPE_SCHEMA,
   status: AUTOMATION_STATUS_SCHEMA,
-  jobId: Type.Union([Type.String(), Type.Null()]),
-  userId: Type.Union([Type.String(), Type.Null()]),
+  jobId: t.Union([t.String(), t.Null()]),
+  userId: t.Union([t.String(), t.Null()]),
   input: nullableJsonRecordBodySchema,
-  output: Type.Union([nullableJsonRecordBodySchema, Type.Null()]),
-  screenshots: Type.Union([Type.Array(Type.String()), Type.Null()]),
+  output: t.Union([nullableJsonRecordBodySchema, t.Null()]),
+  screenshots: t.Union([t.Array(t.String()), t.Null()]),
   error: nullableRunErrorSchema,
-  progress: Type.Union([Type.Number(), Type.Null()]),
-  currentStep: Type.Union([Type.Number(), Type.Null()]),
-  totalSteps: Type.Union([Type.Number(), Type.Null()]),
-  startedAt: Type.Union([Type.String(), Type.Null()]),
-  completedAt: Type.Union([Type.String(), Type.Null()]),
-  createdAt: Type.String(),
-  updatedAt: Type.String(),
-  exitCode: Type.Union([Type.Number(), Type.Null()]),
-  timedOut: Type.Boolean(),
-  aborted: Type.Boolean(),
-  executionMs: Type.Union([Type.Number(), Type.Null()]),
+  progress: t.Union([t.Number(), t.Null()]),
+  currentStep: t.Union([t.Number(), t.Null()]),
+  totalSteps: t.Union([t.Number(), t.Null()]),
+  startedAt: t.Union([t.String(), t.Null()]),
+  completedAt: t.Union([t.String(), t.Null()]),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+  exitCode: t.Union([t.Number(), t.Null()]),
+  timedOut: t.Boolean(),
+  aborted: t.Boolean(),
+  executionMs: t.Union([t.Number(), t.Null()]),
 });
 
-export const routeErrorBodySchema = Type.Object({
-  error: Type.Object({
-    code: Type.String({ minLength: 1 }),
-    message: Type.String({ minLength: 1 }),
-    details: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-  }),
-});
-
-export const capabilityAuditEntryBodySchema = Type.Object({
-  id: Type.String({ minLength: 1 }),
-  category: Type.Union([Type.Literal("job_apply"), Type.Literal("scrape")]),
-  name: Type.String({ minLength: 1 }),
-  target: Type.Union([SCRAPE_TARGET_SCHEMA, Type.Null()]),
-  implemented: Type.Boolean(),
-  configured: Type.Boolean(),
-  enabled: Type.Boolean(),
-  manualRunAvailable: Type.Boolean(),
-  scheduledRunAvailable: Type.Boolean(),
-  runHistoryAvailable: Type.Boolean(),
-  liveUpdatesAvailable: Type.Boolean(),
-  issues: Type.Array(
-    Type.Object({
-      code: Type.Union(RPA_CAPABILITY_ISSUE_CODES.map((code) => Type.Literal(code))),
-      portalId: Type.Optional(Type.String({ minLength: 1 })),
-      portalName: Type.Optional(Type.String({ minLength: 1 })),
+export const capabilityAuditEntryBodySchema = t.Object({
+  id: t.String({ minLength: 1 }),
+  category: t.Union([t.Literal("job_apply"), t.Literal("scrape")]),
+  name: t.String({ minLength: 1 }),
+  target: t.Union([SCRAPE_TARGET_SCHEMA, t.Null()]),
+  implemented: t.Boolean(),
+  configured: t.Boolean(),
+  enabled: t.Boolean(),
+  manualRunAvailable: t.Boolean(),
+  scheduledRunAvailable: t.Boolean(),
+  runHistoryAvailable: t.Boolean(),
+  liveUpdatesAvailable: t.Boolean(),
+  issues: t.Array(
+    t.Object({
+      code: t.Union(RPA_CAPABILITY_ISSUE_CODES.map((code) => t.Literal(code))),
+      portalId: t.Optional(t.String({ minLength: 1 })),
+      portalName: t.Optional(t.String({ minLength: 1 })),
     }),
   ),
 });
 
-export const capabilityAuditReportBodySchema = Type.Object({
-  generatedAt: Type.String({ minLength: 1 }),
-  summary: Type.Object({
-    total: Type.Number(),
-    configured: Type.Number(),
-    manualRunAvailable: Type.Number(),
-    scheduledRunAvailable: Type.Number(),
-    runHistoryAvailable: Type.Number(),
-    liveUpdatesAvailable: Type.Number(),
+export const capabilityAuditReportBodySchema = t.Object({
+  generatedAt: t.String({ minLength: 1 }),
+  summary: t.Object({
+    total: t.Number(),
+    configured: t.Number(),
+    manualRunAvailable: t.Number(),
+    scheduledRunAvailable: t.Number(),
+    runHistoryAvailable: t.Number(),
+    liveUpdatesAvailable: t.Number(),
   }),
-  capabilities: Type.Array(capabilityAuditEntryBodySchema),
+  capabilities: t.Array(capabilityAuditEntryBodySchema),
+});
+
+export const automationVerifyContextResponseSchema = t.Object({
+  resumeId: t.String({ minLength: 1 }),
+});
+
+export const automationEmailResponseBodySchema = t.Object({
+  runId: t.String({ minLength: 1 }),
+  status: t.Literal("success"),
+  reply: t.String({ minLength: 1 }),
+  provider: t.String({ minLength: 1 }),
+  model: t.String({ minLength: 1 }),
+  delivered: t.Boolean(),
+  recipientEmail: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+  deliveredAt: t.Optional(t.String({ minLength: 1 })),
+  messageId: t.Optional(t.String({ minLength: 1 })),
 });
 
 export const automationRouteErrorResponses = {
@@ -176,95 +187,119 @@ export const automationRouteErrorResponses = {
   [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
   [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
   [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-};
+} as const;
 
-export const jobApplyBodySchema = Type.Object(
+export const automationVerifyContextResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const automationRunResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  ...automationRouteErrorResponses,
+} as const;
+
+export const automationEmailResponseResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  ...automationRouteErrorResponses,
+} as const;
+
+export const automationCapabilitiesResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const automationRunsListResponses = {
+  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
+} as const;
+
+export const jobApplyBodySchema = t.Object(
   {
-    jobUrl: Type.String({ minLength: 1 }),
-    resumeId: Type.String({ minLength: 1 }),
-    coverLetterId: Type.Optional(Type.String({ minLength: 1 })),
-    jobId: Type.Optional(Type.String({ minLength: 1 })),
-    customAnswers: Type.Optional(Type.Record(Type.String(), Type.String())),
+    jobUrl: t.String({ minLength: 1 }),
+    resumeId: t.String({ minLength: 1 }),
+    coverLetterId: t.Optional(t.String({ minLength: 1 })),
+    jobId: t.Optional(t.String({ minLength: 1 })),
+    customAnswers: t.Optional(t.Record(t.String(), t.String())),
   },
   { required: ["jobUrl", "resumeId"] },
 );
-export type JobApplyBody = StaticParse<typeof jobApplyBodySchema>;
+export type JobApplyBody = Static<typeof jobApplyBodySchema>;
 
-export const scheduledJobApplyBodySchema = Type.Object(
+export const scheduledJobApplyBodySchema = t.Object(
   {
-    jobUrl: Type.String({ minLength: 1 }),
-    resumeId: Type.String({ minLength: 1 }),
-    coverLetterId: Type.Optional(Type.String({ minLength: 1 })),
-    jobId: Type.Optional(Type.String({ minLength: 1 })),
-    customAnswers: Type.Optional(Type.Record(Type.String(), Type.String())),
-    runAt: Type.String({ minLength: 1 }),
+    jobUrl: t.String({ minLength: 1 }),
+    resumeId: t.String({ minLength: 1 }),
+    coverLetterId: t.Optional(t.String({ minLength: 1 })),
+    jobId: t.Optional(t.String({ minLength: 1 })),
+    customAnswers: t.Optional(t.Record(t.String(), t.String())),
+    runAt: t.String({ minLength: 1 }),
   },
   { required: ["jobUrl", "resumeId", "runAt"] },
 );
-export type ScheduledJobApplyBody = StaticParse<typeof scheduledJobApplyBodySchema>;
+export type ScheduledJobApplyBody = Static<typeof scheduledJobApplyBodySchema>;
 
-export const emailResponseBodySchema = Type.Object(
+export const emailResponseBodySchema = t.Object(
   {
-    subject: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    message: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
-    sender: Type.Optional(Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-    tone: Type.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-    recipientEmail: Type.Optional(
-      Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL }),
-    ),
-    deliverAfterGeneration: Type.Optional(Type.Boolean()),
+    subject: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
+    sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+    tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
+    recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+    deliverAfterGeneration: t.Optional(t.Boolean()),
   },
   { required: ["subject", "message"] },
 );
-export type EmailResponseBody = StaticParse<typeof emailResponseBodySchema>;
+export type EmailResponseBody = Static<typeof emailResponseBodySchema>;
 
-export const scheduledEmailResponseBodySchema = Type.Object(
+export const scheduledEmailResponseBodySchema = t.Object(
   {
-    subject: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
-    message: Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
-    sender: Type.Optional(Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
-    tone: Type.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
-    recipientEmail: Type.Optional(
-      Type.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL }),
-    ),
-    deliverAfterGeneration: Type.Optional(Type.Boolean()),
-    runAt: Type.String({ minLength: 1 }),
+    subject: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+    message: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL_MESSAGE }),
+    sender: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+    tone: t.Optional(EMAIL_RESPONSE_TONE_SCHEMA),
+    recipientEmail: t.Optional(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
+    deliverAfterGeneration: t.Optional(t.Boolean()),
+    runAt: t.String({ minLength: 1 }),
   },
   { required: ["subject", "message", "runAt"] },
 );
-export type ScheduledEmailResponseBody = StaticParse<typeof scheduledEmailResponseBodySchema>;
+export type ScheduledEmailResponseBody = Static<typeof scheduledEmailResponseBodySchema>;
 
-export const scrapeBodySchema = Type.Object(
+export const scrapeBodySchema = t.Object(
   {
     target: SCRAPE_TARGET_SCHEMA,
   },
   { required: ["target"] },
 );
-export type ScrapeBody = StaticParse<typeof scrapeBodySchema>;
+export type ScrapeBody = Static<typeof scrapeBodySchema>;
 
-export const scheduledScrapeBodySchema = Type.Object(
+export const scheduledScrapeBodySchema = t.Object(
   {
     target: SCRAPE_TARGET_SCHEMA,
-    runAt: Type.String({ minLength: 1 }),
+    runAt: t.String({ minLength: 1 }),
   },
   { required: ["target", "runAt"] },
 );
-export type ScheduledScrapeBody = StaticParse<typeof scheduledScrapeBodySchema>;
+export type ScheduledScrapeBody = Static<typeof scheduledScrapeBodySchema>;
 
-export const automationRunQuerySchema = Type.Object({
-  type: Type.Optional(AUTOMATION_TYPE_SCHEMA),
-  status: Type.Optional(AUTOMATION_STATUS_SCHEMA),
+export const automationRunQuerySchema = t.Object({
+  type: t.Optional(AUTOMATION_TYPE_SCHEMA),
+  status: t.Optional(AUTOMATION_STATUS_SCHEMA),
 });
-export type AutomationRunQuery = StaticParse<typeof automationRunQuerySchema>;
+export type AutomationRunQuery = Static<typeof automationRunQuerySchema>;
 
-export const automationRunIdParamsSchema = Type.Object(
+export const automationRunIdParamsSchema = t.Object(
   {
-    id: Type.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
+    id: t.String({ minLength: RUN_ID_MIN_LENGTH, pattern: RUN_ID_SAFE_PATTERN_SOURCE }),
   },
   { required: ["id"] },
 );
-export type AutomationRunIdParams = StaticParse<typeof automationRunIdParamsSchema>;
+export type AutomationRunIdParams = Static<typeof automationRunIdParamsSchema>;
 
 export {
   AUTOMATION_RUN_STATUSES,

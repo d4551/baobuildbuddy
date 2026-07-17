@@ -1,3 +1,4 @@
+import { Elysia } from "elysia";
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
   AI_MAX_TOKENS_WS,
@@ -8,9 +9,7 @@ import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
-import { StandardSchemaV1 } from "baobox";
 import { eq } from "drizzle-orm";
-import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
@@ -207,7 +206,7 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
 }
 
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
-  body: StandardSchemaV1(chatWebSocketBodySchema),
+  body: chatWebSocketBodySchema,
   async beforeHandle({ request }) {
     const failure = await authenticateApiKey(request);
     if (failure) {

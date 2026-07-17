@@ -12,46 +12,9 @@ import { collectPageStateViolationsForContent } from "./validate-page-state-cont
 import { collectNoTryCatchViolationsForContent } from "./validate-no-try-catch";
 import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-source-of-truth";
 
-const BRAND_PREVIEW_FILE_PATH = "packages/client/components/settings/brand/BrandPreviewCard.vue";
-const BROKEN_BRAND_PREVIEW_SAMPLE = [
-  '<script setup lang="ts">',
-  "const createPreviewSurfaceStyle = () => ({ '--brand-preview-base-100': '#fff' });",
-  "</script>",
-].join("\n");
-const VALID_BRAND_PREVIEW_SAMPLE = [
-  '<script setup lang="ts">',
-  "const createPreviewSurfaceStyle = () => ({",
-  "  '--color-base-100': '#fff',",
-  "  '--color-base-200': '#f8f8f8',",
-  "  '--color-base-300': '#efefef',",
-  "  '--color-base-content': '#111',",
-  "  '--color-primary': '#1d4ed8',",
-  "  '--color-primary-content': '#fff',",
-  "  '--color-secondary': '#0f766e',",
-  "  '--color-secondary-content': '#fff',",
-  "  '--color-accent': '#65a30d',",
-  "  '--color-accent-content': '#111',",
-  "  '--color-neutral': '#1f2937',",
-  "  '--color-neutral-content': '#fff',",
-  "  '--color-info': '#0284c7',",
-  "  '--color-info-content': '#fff',",
-  "  '--color-success': '#15803d',",
-  "  '--color-success-content': '#fff',",
-  "  '--color-warning': '#f59e0b',",
-  "  '--color-warning-content': '#111',",
-  "  '--color-error': '#dc2626',",
-  "  '--color-error-content': '#fff',",
-  "  '--radius-selector': '0.5rem',",
-  "  '--radius-field': '0.25rem',",
-  "  '--radius-box': '0.75rem',",
-  "  '--size-selector': '0.25rem',",
-  "  '--size-field': '0.25rem',",
-  "  '--border': '1px',",
-  "  '--depth': '1',",
-  "  '--noise': '0',",
-  "});",
-  "</script>",
-].join("\n");
+const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
+const BROKEN_BRAND_PREVIEW_SAMPLE = "function missingOwner() { return true; }\n";
+const VALID_BRAND_PREVIEW_SAMPLE = readFileSync(BRAND_PREVIEW_STYLES_FILE_PATH, "utf8");
 const PAGE_STATE_EXAMPLE_PATH = "packages/client/pages/example.vue";
 const PAGE_STATE_DOCS_PATH = "packages/client/pages/docs.vue";
 const PAGE_STATE_MISSING_SUCCESS_SAMPLE = [
@@ -231,18 +194,18 @@ describe("collectUiSingleSourceViolationsForContent settings bootstrap", () => {
 describe("collectDaisyUiContractViolationsForContent", () => {
   test("requires brand previews to scope daisyUI theme variables locally", () => {
     const violations = collectDaisyUiContractViolationsForContent(
-      BRAND_PREVIEW_FILE_PATH,
+      BRAND_PREVIEW_STYLES_FILE_PATH,
       BROKEN_BRAND_PREVIEW_SAMPLE,
     );
 
     expect(
-      violations.some((violation) => violation.message.includes("Brand preview surfaces")),
+      violations.some((violation) => violation.message.includes("Brand preview")),
     ).toBe(true);
   });
 
   test("accepts brand previews that scope the full daisyUI theme contract", () => {
     const violations = collectDaisyUiContractViolationsForContent(
-      BRAND_PREVIEW_FILE_PATH,
+      BRAND_PREVIEW_STYLES_FILE_PATH,
       VALID_BRAND_PREVIEW_SAMPLE,
     );
 

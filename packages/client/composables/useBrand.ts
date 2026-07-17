@@ -1,6 +1,6 @@
 import { THEME_NAMES, resolveBrandSettings } from "@bao/shared/constants/branding";
 import type { BrandSettings, BrandThemePalette } from "@bao/shared/types/settings-contracts";
-import { computed, readonly } from "vue";
+import { computed, readonly, watchEffect } from "vue";
 import { useSettings } from "./useSettings";
 import { useTheme } from "./useTheme";
 
@@ -49,9 +49,9 @@ function toDaisySemanticColorVars(palette: BrandThemePalette): Record<string, st
 }
 
 /**
- * Resolves persisted brand settings and runtime CSS variables for the app shell.
+ * Resolves persisted brand settings and applies CSS variables on `documentElement`.
  *
- * @returns White-label brand settings and CSS variable map.
+ * @returns White-label brand settings (CSS vars applied outside Vue `:style`).
  */
 export function useBrand() {
   const { settings } = useSettings();
@@ -66,6 +66,22 @@ export function useBrand() {
       ...toDaisySemanticColorVars(palette),
     };
   });
+
+  if (import.meta.client) {
+    watchEffect((onCleanup) => {
+      const nextVars = brandCssVars.value;
+      const root = document.documentElement;
+      const appliedKeys = Object.keys(nextVars);
+      for (const [key, value] of Object.entries(nextVars)) {
+        root.style.setProperty(key, value);
+      }
+      onCleanup(() => {
+        for (const key of appliedKeys) {
+          root.style.removeProperty(key);
+        }
+      });
+    });
+  }
 
   return {
     resolvedBrand: readonly(resolvedBrand),

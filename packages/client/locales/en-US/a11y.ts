@@ -16,6 +16,7 @@ const a11y = {
     dismissNotification: "Dismiss notification",
     localeSwitcher: "Change language",
     localeOptionAria: "Switch language to {locale}",
+    aiConfigIncompleteAria: "AI providers need configuration in Settings",
   },
 } as const;
 

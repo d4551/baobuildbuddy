@@ -76,7 +76,7 @@ const readCompletionContent = (
 };
 
 /**
- * Local AI Provider for RamaLama, Ollama, and other OpenAI-compatible local servers
+ * Local AI Provider for RamaLama, Ollama, and other OpenAI Chat Completions local servers
  * Uses the OpenAI SDK pointed at a local endpoint
  */
 export class LocalProvider extends BaseAIProvider {
@@ -242,7 +242,7 @@ export class LocalProvider extends BaseAIProvider {
   }
 
   /**
-   * Inspect a local OpenAI-compatible endpoint and return structured diagnostics.
+   * Inspect a local OpenAI Chat Completions endpoint and return structured diagnostics.
    */
   static async inspectEndpoint(
     baseUrl: string,

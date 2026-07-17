@@ -1,5 +1,4 @@
 import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
-import { Elysia } from "elysia";
 type AuthFailure = {
     error: string;
     status: typeof HTTP_STATUS_UNAUTHORIZED;
@@ -19,36 +18,12 @@ export declare function authenticateApiKey(request: Request): Promise<AuthFailur
  * Elysia plugin that validates Bearer API key for protected HTTP routes.
  * Skipped only when auth is explicitly disabled via the config module.
  */
-export declare const authGuard: Elysia<"", {
-    decorator: {};
-    store: {};
-    derive: {};
-    resolve: {};
-}, {
+export declare const authGuard: import("elysia/types").LocalHookReturn<"", "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
-    error: {};
-}, {
-    schema: {};
-    standaloneSchema: {};
-    macro: {};
-    macroFn: {};
-    parser: {};
-    response: {};
-}, {}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {};
-}, {
-    derive: {};
-    resolve: {};
-    schema: {};
-    standaloneSchema: {};
-    response: {
-        401: {
-            readonly error: string;
-        };
+    error: [];
+}, import("elysia/types").DefaultMetadata, {}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, {
+    401: {
+        readonly error: string;
     };
 }>;
 export {};

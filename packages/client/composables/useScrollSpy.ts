@@ -14,10 +14,14 @@ const MANUAL_SCROLL_LOCK_MS = 250;
 const normalizeHashValue = (value: string, hashPrefix: string): string =>
   value.replace(new RegExp(`^${escapeRegExp(hashPrefix)}`, "u"), "").trim();
 
+type ObserverHolder = {
+  value: IntersectionObserver | null;
+};
+
 interface ScrollSpyState {
   activeSectionId: ReturnType<typeof ref<string>>;
   sectionNodes: Map<string, HTMLElement>;
-  observer: ReturnType<typeof ref<IntersectionObserver | null>>;
+  observer: ObserverHolder;
   hashPrefix: string;
   lastManualScrollAt: number;
 }
@@ -26,7 +30,7 @@ function createScrollSpyState(options: ScrollSpyOptions): ScrollSpyState {
   return {
     activeSectionId: ref(""),
     sectionNodes: new Map<string, HTMLElement>(),
-    observer: ref<IntersectionObserver | null>(null),
+    observer: { value: null },
     hashPrefix: options.hashPrefix ?? DEFAULT_HASH_PREFIX,
     lastManualScrollAt: 0,
   };

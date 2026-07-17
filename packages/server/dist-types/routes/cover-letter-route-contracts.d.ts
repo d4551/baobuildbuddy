@@ -1,4 +1,4 @@
-import Type, { type StaticParse } from "baobox";
+import type { Static } from "typebox";
 export type GenerateCoverLetterBody = {
     company: string;
     position: string;
@@ -7,56 +7,133 @@ export type GenerateCoverLetterBody = {
     template?: string;
     save?: boolean;
 };
-export declare const coverLetterTemplateBodySchema: Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>;
-export declare const coverLetterIdParamsSchema: Type.TObject<{
-    readonly id: Type.TString;
-}, "id", never>;
-export type CoverLetterIdParams = StaticParse<typeof coverLetterIdParamsSchema>;
-export declare const coverLetterMutationBodySchema: Type.TObject<{
-    readonly company: Type.TString;
-    readonly position: Type.TString;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-}, "company" | "position", Type.InferOptionalKeys<{
-    readonly company: Type.TString;
-    readonly position: Type.TString;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-}>>;
-export type CoverLetterMutationBody = StaticParse<typeof coverLetterMutationBodySchema>;
-export declare const coverLetterUpdateBodySchema: Type.TObject<{
-    readonly company: Type.TOptional<Type.TString>;
-    readonly position: Type.TOptional<Type.TString>;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-}, never, Type.InferOptionalKeys<{
-    readonly company: Type.TOptional<Type.TString>;
-    readonly position: Type.TOptional<Type.TString>;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly content: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-}>>;
-export type CoverLetterUpdateBody = StaticParse<typeof coverLetterUpdateBodySchema>;
-export declare const generateCoverLetterBodySchema: Type.TObject<{
-    readonly company: Type.TString;
-    readonly position: Type.TString;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly resumeId: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-    readonly save: Type.TOptional<Type.TBoolean>;
-}, "company" | "position", Type.InferOptionalKeys<{
-    readonly company: Type.TString;
-    readonly position: Type.TString;
-    readonly jobInfo: Type.TOptional<Type.TRecord<Type.TString, Type.TUnknown>>;
-    readonly resumeId: Type.TOptional<Type.TString>;
-    readonly template: Type.TOptional<Type.TUnion<Type.TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
-    readonly save: Type.TOptional<Type.TBoolean>;
-}>>;
-export type GenerateCoverLetterRouteBody = StaticParse<typeof generateCoverLetterBodySchema>;
-export declare const coverLetterExportBodySchema: Type.TObject<{
-    readonly format: Type.TOptional<Type.TString>;
-}, never, "format">;
-export type CoverLetterExportBody = StaticParse<typeof coverLetterExportBodySchema>;
+export declare const coverLetterTemplateBodySchema: import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>;
+export declare const coverLetterIdParamsSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+}>;
+export type CoverLetterIdParams = Static<typeof coverLetterIdParamsSchema>;
+export declare const coverLetterMutationBodySchema: import("typebox").TObject<{
+    company: import("typebox").TString;
+    position: import("typebox").TString;
+    jobInfo: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    content: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
+}>;
+export type CoverLetterMutationBody = Static<typeof coverLetterMutationBodySchema>;
+export declare const coverLetterUpdateBodySchema: import("typebox").TObject<{
+    company: import("typebox").TOptional<import("typebox").TString>;
+    position: import("typebox").TOptional<import("typebox").TString>;
+    jobInfo: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    content: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
+}>;
+export type CoverLetterUpdateBody = Static<typeof coverLetterUpdateBodySchema>;
+export declare const generateCoverLetterBodySchema: import("typebox").TObject<{
+    company: import("typebox").TString;
+    position: import("typebox").TString;
+    jobInfo: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    resumeId: import("typebox").TOptional<import("typebox").TString>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
+    save: import("typebox").TOptional<import("typebox").TBoolean>;
+}>;
+export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterBodySchema>;
+export declare const coverLetterExportBodySchema: import("typebox").TObject<{
+    format: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type CoverLetterExportBody = Static<typeof coverLetterExportBodySchema>;
+export declare const coverLetterEntityResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    company: import("typebox").TString;
+    position: import("typebox").TString;
+    jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    createdAt: import("typebox").TOptional<import("typebox").TString>;
+    updatedAt: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const coverLetterDeleteResponseSchema: import("typebox").TObject<{
+    success: import("typebox").TBoolean;
+    id: import("typebox").TString;
+}>;
+export declare const generatedCoverLetterContentResponseSchema: import("typebox").TObject<{
+    introduction: import("typebox").TString;
+    body: import("typebox").TString;
+    conclusion: import("typebox").TString;
+}>;
+export declare const generateCoverLetterResponseSchema: import("typebox").TObject<{
+    message: import("typebox").TString;
+    content: import("typebox").TObject<{
+        introduction: import("typebox").TString;
+        body: import("typebox").TString;
+        conclusion: import("typebox").TString;
+    }>;
+}>;
+export declare const generateCoverLetterSavedResponseSchema: import("typebox").TObject<{
+    message: import("typebox").TString;
+    coverLetter: import("typebox").TObject<{
+        id: import("typebox").TString;
+        company: import("typebox").TString;
+        position: import("typebox").TString;
+        jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+}>;
+export declare const coverLettersListResponses: {
+    200: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        company: import("typebox").TString;
+        position: import("typebox").TString;
+        jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>>;
+};
+export declare const coverLetterEntityResponses: {
+    200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        company: import("typebox").TString;
+        position: import("typebox").TString;
+        jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    201: import("typebox").TObject<{
+        id: import("typebox").TString;
+        company: import("typebox").TString;
+        position: import("typebox").TString;
+        jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
+export declare const coverLetterDeleteResponses: {
+    200: import("typebox").TUnknown;
+    404: import("typebox").TUnknown;
+};
+export declare const generateCoverLetterResponses: {
+    200: import("typebox").TUnknown;
+    201: import("typebox").TUnknown;
+    500: import("typebox").TUnknown;
+    503: import("typebox").TUnknown;
+};
+export declare const coverLetterExportResponses: {
+    200: import("typebox").TUnknown;
+    404: import("typebox").TUnknown;
+    500: import("typebox").TUnknown;
+};

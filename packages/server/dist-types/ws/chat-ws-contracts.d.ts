@@ -1,6 +1,6 @@
-import Type, { type StaticParse } from "baobox";
-export declare const chatWebSocketBodySchema: Type.TObject<{
-    readonly content: Type.TString;
-    readonly sessionId: Type.TOptional<Type.TString>;
-}, "content", "sessionId">;
-export type ChatWebSocketBody = StaticParse<typeof chatWebSocketBodySchema>;
+import type { Static } from "typebox";
+export declare const chatWebSocketBodySchema: import("typebox").TObject<{
+    content: import("typebox").TString;
+    sessionId: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export type ChatWebSocketBody = Static<typeof chatWebSocketBodySchema>;

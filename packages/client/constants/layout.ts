@@ -47,7 +47,20 @@ export const SHELL_DRAWER_SIDE_CLASS = "z-20 is-drawer-close:overflow-visible";
 /** Shared navbar classes for authenticated shell pages. */
 export const SHELL_NAVBAR_CLASS = "sticky top-0 z-10 border-b border-base-300 bg-base-200";
 
+/**
+ * Glass surface for elevated cards/panels (fluid depth without palette literals).
+ */
+export const SURFACE_GLASS_CARD_CLASS =
+  "card card-border card-glass shadow-sm transition-[box-shadow,transform,background-color] duration-200";
+
+/**
+ * Interactive glass card hover affordance (motion-safe).
+ */
+export const SURFACE_GLASS_CARD_INTERACTIVE_CLASS =
+  "motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md";
+
 /** Shared sidebar surface classes. */
+
 export const SHELL_SIDEBAR_ASIDE_CLASS =
   "flex min-h-full flex-col items-start bg-base-200 transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64";
 
@@ -108,4 +121,4 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
  * Centered empty-state column (playbook: hero / empty vertical rhythm).
  */
 export const EMPTY_STATE_STACK_CLASS =
-  "flex flex-col items-center justify-center py-12 text-center gap-4";
+  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300/70 bg-base-100/50 px-6 py-10 text-center backdrop-blur-sm";

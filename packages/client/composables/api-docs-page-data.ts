@@ -19,11 +19,7 @@ interface ApiDocsPageDataOptions {
 
 export const useApiDocsPageData = ({ t, apiBase, requestUrl }: ApiDocsPageDataOptions) => {
   const fetchOpenApiSpec = (): Promise<unknown> =>
-    $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson)).then(
-      (value) => value,
-      () =>
-        $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJsonLegacy)),
-    );
+    $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson));
 
   const {
     data: rawSpec,

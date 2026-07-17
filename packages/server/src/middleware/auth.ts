@@ -86,7 +86,7 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
  * Elysia plugin that validates Bearer API key for protected HTTP routes.
  * Skipped only when auth is explicitly disabled via the config module.
  */
-export const authGuard = new Elysia({ name: "auth-guard" }).onBeforeHandle(
+export const authGuard = new Elysia({ name: "auth-guard" }).beforeHandle(
   async ({ request, status }) => {
     const failure = await authenticateApiKey(request);
     if (failure) {

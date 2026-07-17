@@ -39,7 +39,7 @@ const page = reactive(useAIDashboardPage());
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="page.loading && !page.providerStats" :lines="8" />
+    <LoadingSkeleton v-if="page.loading" :lines="8" />
     <BootstrapErrorAlert
       v-else-if="page.dashboardBootstrapError"
       :message="getErrorMessage(page.dashboardBootstrapError, t('aiDashboard.toasts.loadFailed'))"
@@ -51,17 +51,22 @@ const page = reactive(useAIDashboardPage());
     <div v-else class="space-y-6">
       <StatsRow v-if="page.providerStats" :stats="page.statsItems" />
 
-      <AIDashboardPreferenceCard
-        v-model:selected-provider="page.selectedProvider"
-        v-model:selected-model="page.selectedModel"
-        :loading="page.loading"
-        :providers="page.providers"
-        :selected-provider-models="page.selectedProviderModels"
-        :is-provider-configured="page.isProviderConfigured"
-        :provider-select-option-label="page.providerSelectOptionLabel"
-        :on-save="page.handleSetPreference"
-        :t="page.t"
-      />
+      <ClientOnly>
+        <AIDashboardPreferenceCard
+          v-model:selected-provider="page.selectedProvider"
+          v-model:selected-model="page.selectedModel"
+          :loading="page.loading"
+          :providers="page.providers"
+          :selected-provider-models="page.selectedProviderModels"
+          :is-provider-configured="page.isProviderConfigured"
+          :provider-select-option-label="page.providerSelectOptionLabel"
+          :on-save="page.handleSetPreference"
+          :t="page.t"
+        />
+        <template #fallback>
+          <LoadingSkeleton :lines="5" />
+        </template>
+      </ClientOnly>
 
       <div
         v-if="page.providers.length === 0"

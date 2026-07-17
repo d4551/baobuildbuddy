@@ -1,9 +1,10 @@
+import type { Static } from "typebox";
 import { SCHEMA_MAX_LENGTH_RUN_ID } from "@bao/shared/constants/schema-limits";
-import Type, { type StaticParse } from "baobox";
+import { t } from "elysia";
 
-export const automationWebSocketBodySchema = Type.Object({
-  type: Type.Union([Type.Literal("subscribe"), Type.Literal("unsubscribe")]),
-  runId: Type.Optional(Type.String({ minLength: 8, maxLength: SCHEMA_MAX_LENGTH_RUN_ID })),
+export const automationWebSocketBodySchema = t.Object({
+  type: t.Union([t.Literal("subscribe"), t.Literal("unsubscribe")]),
+  runId: t.Optional(t.String({ minLength: 8, maxLength: SCHEMA_MAX_LENGTH_RUN_ID })),
 });
 
-export type AutomationWebSocketMessage = StaticParse<typeof automationWebSocketBodySchema>;
+export type AutomationWebSocketMessage = Static<typeof automationWebSocketBodySchema>;
