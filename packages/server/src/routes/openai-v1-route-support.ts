@@ -3,8 +3,8 @@ import {
 } from "@bao/shared/constants/ai-generation";
 import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
 import {
-  API_ERROR_OPENAI_COMPAT_GENERATION_FAILED,
-  API_ERROR_OPENAI_COMPAT_MODEL_NOT_FOUND,
+  API_ERROR_OPENAI_V1_GENERATION_FAILED,
+  API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
 } from "@bao/shared/constants/api-errors";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -17,15 +17,15 @@ import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { getAIService } from "./ai-route-support";
-import type { OpenAICompatChatCompletionsBody } from "./openai-compat-route-contracts";
+import type { OpenAIV1ChatCompletionsBody } from "./openai-v1-route-contracts";
 
 const isAIProviderType = (value: string): value is AIProviderType =>
   (AI_PROVIDER_IDS as readonly string[]).includes(value);
 
 const MODEL_ID_SEPARATOR = "/";
-const OPENAI_COMPAT_EPOCH_SECONDS = () => Math.floor(Date.now() / 1000);
+const OPENAI_V1_EPOCH_SECONDS = () => Math.floor(Date.now() / 1000);
 
-export type OpenAICompatModelRecord = {
+export type OpenAIV1ModelRecord = {
   id: string;
   object: "model";
   created: number;
@@ -37,14 +37,14 @@ const routeResult = <const Status extends number, Body>(status: Status, body: Bo
   body,
 });
 
-export const toOpenAICompatError = (message: string, type = "invalid_request_error", code: string | null = null) => ({
+export const toOpenAIV1Error = (message: string, type = "invalid_request_error", code: string | null = null) => ({
   error: { message, type, code },
 });
 
-export const buildOpenAICompatModelId = (provider: AIProviderType, model: string): string =>
+export const buildOpenAIV1ModelId = (provider: AIProviderType, model: string): string =>
   `${provider}${MODEL_ID_SEPARATOR}${model}`;
 
-export const parseOpenAICompatModelId = (
+export const parseOpenAIV1ModelId = (
   modelId: string,
 ): { provider: AIProviderType | null; model: string } => {
   const separatorIndex = modelId.indexOf(MODEL_ID_SEPARATOR);
@@ -59,11 +59,11 @@ export const parseOpenAICompatModelId = (
   };
 };
 
-export const listOpenAICompatModels = async (): Promise<OpenAICompatModelRecord[]> => {
+export const listOpenAIV1Models = async (): Promise<OpenAIV1ModelRecord[]> => {
   const aiService = await getAIService();
-  const created = OPENAI_COMPAT_EPOCH_SECONDS();
+  const created = OPENAI_V1_EPOCH_SECONDS();
   const statuses = await aiService.getAvailableProviders();
-  const models: OpenAICompatModelRecord[] = [];
+  const models: OpenAIV1ModelRecord[] = [];
 
   for (const status of statuses) {
     if (!status.available) {
@@ -78,7 +78,7 @@ export const listOpenAICompatModels = async (): Promise<OpenAICompatModelRecord[
     ].filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
     const modelName = modelCandidates[0] ?? "default";
     models.push({
-      id: buildOpenAICompatModelId(status.provider, modelName),
+      id: buildOpenAIV1ModelId(status.provider, modelName),
       object: "model",
       created,
       owned_by: status.provider,
@@ -90,7 +90,7 @@ export const listOpenAICompatModels = async (): Promise<OpenAICompatModelRecord[
     for (const provider of AI_PROVIDER_CATALOG) {
       const hint = provider.modelHints[0] ?? "default";
       models.push({
-        id: buildOpenAICompatModelId(provider.id, hint),
+        id: buildOpenAIV1ModelId(provider.id, hint),
         object: "model",
         created,
         owned_by: provider.id,
@@ -101,26 +101,26 @@ export const listOpenAICompatModels = async (): Promise<OpenAICompatModelRecord[
   return models;
 };
 
-export const getOpenAICompatModel = async (modelId: string) => {
-  const models = await listOpenAICompatModels();
+export const getOpenAIV1Model = async (modelId: string) => {
+  const models = await listOpenAIV1Models();
   const match = models.find((entry) => entry.id === modelId);
   if (!match) {
     return routeResult(
       HTTP_STATUS_NOT_FOUND,
-      toOpenAICompatError(API_ERROR_OPENAI_COMPAT_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
+      toOpenAIV1Error(API_ERROR_OPENAI_V1_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
     );
   }
   return routeResult(HTTP_STATUS_OK, match);
 };
 
-const extractUserPrompt = (messages: OpenAICompatChatCompletionsBody["messages"]): string => {
+const extractUserPrompt = (messages: OpenAIV1ChatCompletionsBody["messages"]): string => {
   const reversed = [...messages].reverse();
   const lastUser = reversed.find((message) => message.role === "user");
   return lastUser?.content ?? messages[messages.length - 1]?.content ?? "";
 };
 
 const extractSystemPrompt = (
-  messages: OpenAICompatChatCompletionsBody["messages"],
+  messages: OpenAIV1ChatCompletionsBody["messages"],
 ): string | undefined => {
   const systemMessages = messages.filter((message) => message.role === "system");
   if (systemMessages.length === 0) {
@@ -129,17 +129,17 @@ const extractSystemPrompt = (
   return systemMessages.map((message) => message.content).join("\n\n");
 };
 
-export const createOpenAICompatChatCompletion = async (body: OpenAICompatChatCompletionsBody) => {
-  const models = await listOpenAICompatModels();
+export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
+  const models = await listOpenAIV1Models();
   const requested = models.find((entry) => entry.id === body.model);
   if (!requested) {
     return routeResult(
       HTTP_STATUS_NOT_FOUND,
-      toOpenAICompatError(API_ERROR_OPENAI_COMPAT_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
+      toOpenAIV1Error(API_ERROR_OPENAI_V1_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
     );
   }
 
-  const parsed = parseOpenAICompatModelId(body.model);
+  const parsed = parseOpenAIV1ModelId(body.model);
   const aiService = await getAIService();
   const prompt = extractUserPrompt(body.messages);
   const systemPrompt = extractSystemPrompt(body.messages);
@@ -165,8 +165,8 @@ export const createOpenAICompatChatCompletion = async (body: OpenAICompatChatCom
   if (generationResult.status === "rejected") {
     return routeResult(
       HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAICompatError(
-        toErrorMessage(generationResult.reason, API_ERROR_OPENAI_COMPAT_GENERATION_FAILED),
+      toOpenAIV1Error(
+        toErrorMessage(generationResult.reason, API_ERROR_OPENAI_V1_GENERATION_FAILED),
         "server_error",
       ),
     );
@@ -176,7 +176,7 @@ export const createOpenAICompatChatCompletion = async (body: OpenAICompatChatCom
   if (response.error) {
     return routeResult(
       HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAICompatError(response.error, "server_error"),
+      toOpenAIV1Error(response.error, "server_error"),
     );
   }
 
@@ -187,7 +187,7 @@ export const createOpenAICompatChatCompletion = async (body: OpenAICompatChatCom
   return routeResult(HTTP_STATUS_OK, {
     id: completionId,
     object: "chat.completion" as const,
-    created: OPENAI_COMPAT_EPOCH_SECONDS(),
+    created: OPENAI_V1_EPOCH_SECONDS(),
     model: body.model,
     choices: [
       {
@@ -207,10 +207,10 @@ export const createOpenAICompatChatCompletion = async (body: OpenAICompatChatCom
   });
 };
 
-export const createOpenAICompatChatCompletionStream = async (
-  body: OpenAICompatChatCompletionsBody,
+export const createOpenAIV1ChatCompletionStream = async (
+  body: OpenAIV1ChatCompletionsBody,
 ): Promise<Response> => {
-  const completionResult = await createOpenAICompatChatCompletion(body);
+  const completionResult = await createOpenAIV1ChatCompletion(body);
   if (completionResult.status !== HTTP_STATUS_OK) {
     return new Response(JSON.stringify(completionResult.body), {
       status: completionResult.status,

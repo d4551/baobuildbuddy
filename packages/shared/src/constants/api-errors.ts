@@ -194,11 +194,11 @@ export const API_ERROR_USER_PROFILE_NOT_FOUND = "User profile not found";
 /** Rate limit exceeded. */
 export const API_ERROR_RATE_LIMIT_EXCEEDED = "Rate limit exceeded";
 
-/** OpenAI-compatible: model id missing or unknown. */
-export const API_ERROR_OPENAI_COMPAT_MODEL_NOT_FOUND = "The model does not exist";
+/** OpenAI Chat Completions: model id missing or unknown. */
+export const API_ERROR_OPENAI_V1_MODEL_NOT_FOUND = "The model does not exist";
 
-/** OpenAI-compatible: chat messages missing. */
-export const API_ERROR_OPENAI_COMPAT_MESSAGES_REQUIRED = "messages is required";
+/** OpenAI Chat Completions: chat messages missing. */
+export const API_ERROR_OPENAI_V1_MESSAGES_REQUIRED = "messages is required";
 
-/** OpenAI-compatible: generation failed. */
-export const API_ERROR_OPENAI_COMPAT_GENERATION_FAILED = "Failed to generate chat completion";
+/** OpenAI Chat Completions: generation failed. */
+export const API_ERROR_OPENAI_V1_GENERATION_FAILED = "Failed to generate chat completion";

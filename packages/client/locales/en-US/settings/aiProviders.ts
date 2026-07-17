@@ -3,10 +3,10 @@ const settingsaiProviders = {
     aiProviders: {
       title: "AI Providers",
       subtitle: "Keep local providers as primary and cloud providers as controlled fallbacks.",
-      openaiCompatTitle: "OpenAI-compatible API",
-      openaiCompatDescription:
+      openaiV1Title: "OpenAI Chat Completions API",
+      openaiV1Description:
         "Point OpenAI SDKs at this base URL with your Bao API key as the Bearer token (models + chat/completions).",
-      openaiCompatAria: "OpenAI-compatible API base URL",
+      openaiV1Aria: "OpenAI Chat Completions API base URL",
       expandAria: "Expand {provider} provider settings",
       configuredBadge: "Configured",
       endpointLabel: "Endpoint URL",

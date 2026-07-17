@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
-import { OPENAI_COMPAT_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -51,10 +51,10 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const runtimeConfig = useRuntimeConfig();
 
-const openaiCompatBaseUrl = computed(() => {
+const openaiV1BaseUrl = computed(() => {
   const rawBase = String(runtimeConfig.public.apiBase ?? "http://localhost:3000");
   const apiBase = rawBase.endsWith("/") ? rawBase.slice(0, -1) : rawBase;
-  return `${apiBase}${OPENAI_COMPAT_ENDPOINT_PREFIX}`;
+  return `${apiBase}${OPENAI_V1_ENDPOINT_PREFIX}`;
 });
 
 const configuredProviderCount = computed(
@@ -125,13 +125,13 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       <div
         role="note"
         class="alert alert-info alert-soft"
-        :aria-label="t('settings.aiProviders.openaiCompatAria')"
+        :aria-label="t('settings.aiProviders.openaiV1Aria')"
       >
         <div class="min-w-0 space-y-1">
-          <p class="font-semibold">{{ t("settings.aiProviders.openaiCompatTitle") }}</p>
-          <p class="text-sm opacity-80">{{ t("settings.aiProviders.openaiCompatDescription") }}</p>
+          <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
+          <p class="text-sm opacity-80">{{ t("settings.aiProviders.openaiV1Description") }}</p>
           <code class="block break-all rounded-box bg-base-100/70 px-3 py-2 text-sm">
-            {{ openaiCompatBaseUrl }}
+            {{ openaiV1BaseUrl }}
           </code>
         </div>
       </div>

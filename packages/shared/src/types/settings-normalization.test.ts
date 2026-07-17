@@ -73,7 +73,7 @@ describe("normalizeAutomationSettings", () => {
 });
 
 describe("normalizeLocalModelEndpoint", () => {
-  test("upgrades the legacy Ollama root endpoint to the OpenAI-compatible v1 route", () => {
+  test("upgrades the legacy Ollama root endpoint to the OpenAI Chat Completions v1 route", () => {
     expect(normalizeLocalModelEndpoint("http://localhost:11434")).toBe("http://localhost:11434/v1");
     expect(normalizeLocalModelEndpoint("http://127.0.0.1:11434/")).toBe(
       "http://localhost:11434/v1",

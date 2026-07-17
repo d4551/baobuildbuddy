@@ -7,7 +7,7 @@ This document overrides generic “full-stack audit” prompts that assume **Pri
 | Layer | Technology | Notes |
 |-------|------------|--------|
 | Runtime / PM | **Bun** | `bun run *` for dev, test, lint, build |
-| API | **Elysia 2** (`>=2.0.0-exp.42`) on Bun | Port **3000**; `/api/*` app routes + OpenAI-compatible **`/v1/models`** and **`/v1/chat/completions`**; OpenAPI via `@elysiajs/openapi` |
+| API | **Elysia 2** (`>=2.0.0-exp.42`) on Bun | Port **3000**; `/api/*` app routes + OpenAI Chat Completions **`/v1/models`** and **`/v1/chat/completions`**; OpenAPI via `@elysiajs/openapi` |
 | TypeScript | **7** (`@typescript/native`) + **6.0.3** API peer | Typecheck uses TS7 native; ESLint/typescript-eslint stays on TS 6.0.3 until TS 7.1 programmatic API lands |
 | `skipLibCheck` | **false** | Enforced. Upstream Elysia/Drizzle/OpenAPI `.d.ts` are marked `// @ts-nocheck` by `scripts/patch-upstream-dts-nocheck.ts` (`postinstall`) until those packages ship TS7-clean declarations. First-party source remains fully checked (`scripts/typecheck-workspace.ts`). |
 | API client types | **Eden Treaty** | Generated from server |
