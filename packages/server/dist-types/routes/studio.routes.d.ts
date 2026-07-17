@@ -1,3 +1,5 @@
+import type { RouteSetState } from "../types/route-state";
+import { type StudioIdParams } from "./studio-route-contracts";
 export interface StudioAnalytics {
     totalStudios: number;
     byType: Record<string, number>;
@@ -33,14 +35,14 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                     size: string | null;
                     type: string | null;
                     description: string | null;
-                    games: string[] | null;
-                    technologies: string[] | null;
-                    culture: Record<string, unknown> | null;
-                    interviewStyle: string | null;
-                    remoteWork: boolean | null;
-                    enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                    createdAt: string;
-                    updatedAt: string;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: Record<string, unknown> | null | undefined;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: Record<string, unknown> | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
                 }[];
                 422: {
                     type: 'validation';
@@ -54,6 +56,30 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                 };
             };
             error: never;
+        };
+    };
+} & {
+    [x: string]: {
+        analytics: {
+            get: {
+                body: unknown;
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        totalStudios: number;
+                        byType: Record<string, number>;
+                        bySize: Record<string, number>;
+                        remoteWorkStudios: number;
+                        topTechnologies: {
+                            name: string;
+                            count: number;
+                        }[];
+                    };
+                };
+                error: never;
+            };
         };
     };
 } & {
@@ -76,16 +102,37 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         size: string | null;
                         type: string | null;
                         description: string | null;
-                        games: string[] | null;
-                        technologies: string[] | null;
-                        culture: Record<string, unknown> | null;
-                        interviewStyle: string | null;
-                        remoteWork: boolean | null;
-                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: Record<string, unknown> | null | undefined;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: Record<string, unknown> | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: Record<string, unknown> | null | undefined;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: Record<string, unknown> | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
                         error: string;
+                        code?: string | undefined;
+                        fields?: string[] | undefined;
                     };
                 };
                 error: never;
@@ -102,15 +149,12 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                 location?: string | undefined;
                 type?: string | undefined;
                 size?: string | undefined;
-                founded?: string | undefined;
                 remoteWork?: boolean | undefined;
                 technologies?: string[] | undefined;
-                genres?: string[] | undefined;
-                platforms?: string[] | undefined;
+                games?: string[] | undefined;
                 culture?: Record<string, unknown> | undefined;
-                benefits?: string[] | undefined;
-                socialMedia?: Record<string, string> | undefined;
-                notableGames?: string[] | undefined;
+                interviewStyle?: string | undefined;
+                logo?: string | undefined;
             };
             params: {};
             query: unknown;
@@ -119,20 +163,43 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                 200: {
                     id: string;
                     name: string;
-                    description: string | null;
+                    logo: string | null;
                     website: string | null;
                     location: string | null;
-                    type: string | null;
                     size: string | null;
-                    founded: string | null;
-                    remoteWork: boolean | undefined;
-                    technologies: string[];
-                    genres: string[];
-                    platforms: string[];
-                    culture: Record<string, unknown> | null;
-                    benefits: string[];
-                    socialMedia: Record<string, string> | null;
-                    notableGames: string[];
+                    type: string | null;
+                    description: string | null;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: Record<string, unknown> | null | undefined;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: Record<string, unknown> | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                201: {
+                    id: string;
+                    name: string;
+                    logo: string | null;
+                    website: string | null;
+                    location: string | null;
+                    size: string | null;
+                    type: string | null;
+                    description: string | null;
+                    games?: string[] | null | undefined;
+                    technologies?: string[] | null | undefined;
+                    culture?: Record<string, unknown> | null | undefined;
+                    interviewStyle?: string | null | undefined;
+                    remoteWork?: boolean | null | undefined;
+                    enrichment?: Record<string, unknown> | null | undefined;
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
+                404: {
+                    error: string;
+                    code?: string | undefined;
+                    fields?: string[] | undefined;
                 };
                 422: {
                     type: 'validation';
@@ -159,15 +226,12 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                     location?: string | undefined;
                     type?: string | undefined;
                     size?: string | undefined;
-                    founded?: string | undefined;
                     remoteWork?: boolean | undefined;
                     technologies?: string[] | undefined;
-                    genres?: string[] | undefined;
-                    platforms?: string[] | undefined;
+                    games?: string[] | undefined;
                     culture?: Record<string, unknown> | undefined;
-                    benefits?: string[] | undefined;
-                    socialMedia?: Record<string, string> | undefined;
-                    notableGames?: string[] | undefined;
+                    interviewStyle?: string | undefined;
+                    logo?: string | undefined;
                 };
                 params: {
                     id: string;
@@ -184,16 +248,37 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         size: string | null;
                         type: string | null;
                         description: string | null;
-                        games: string[] | null;
-                        technologies: string[] | null;
-                        culture: Record<string, unknown> | null;
-                        interviewStyle: string | null;
-                        remoteWork: boolean | null;
-                        enrichment: import("@bao/shared/types/jobs").ScrapePersonaEnrichment | null;
-                        createdAt: string;
-                        updatedAt: string;
-                    } | {
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: Record<string, unknown> | null | undefined;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: Record<string, unknown> | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id: string;
+                        name: string;
+                        logo: string | null;
+                        website: string | null;
+                        location: string | null;
+                        size: string | null;
+                        type: string | null;
+                        description: string | null;
+                        games?: string[] | null | undefined;
+                        technologies?: string[] | null | undefined;
+                        culture?: Record<string, unknown> | null | undefined;
+                        interviewStyle?: string | null | undefined;
+                        remoteWork?: boolean | null | undefined;
+                        enrichment?: Record<string, unknown> | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
                         error: string;
+                        code?: string | undefined;
+                        fields?: string[] | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -210,29 +295,33 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
             };
         };
     };
-} & {
-    [x: string]: {
-        ":id": {
-            delete: {
-                body: unknown;
-                params: {
-                    id: string;
-                };
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        message?: undefined;
-                        id?: undefined;
-                        error: string;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        id: string;
-                    };
-                };
-                error: never;
-            };
-        };
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "delete", "/:id", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
     };
-}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/analytics", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/analytics`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<StudioAnalytics>>;
+    params: import("typebox").TObject<{
+        id: import("typebox").TString;
+    }>;
+    response: {
+        readonly 200: import("typebox").TObject<{
+            message: import("typebox").TString;
+            id: import("typebox").TString;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        }>;
+    };
+}, {}, `${string}/:id`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, set }: {
+    params: StudioIdParams;
+    set: RouteSetState;
+}) => Promise<{
+    message?: undefined;
+    id?: undefined;
+    error: string;
+} | {
+    error?: undefined;
+    message: string;
+    id: string;
+}>>;

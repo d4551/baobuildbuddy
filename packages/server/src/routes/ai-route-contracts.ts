@@ -204,27 +204,21 @@ export const automationActionResponseSchema = t.Object({
 
 export const chatRouteResponses = {
   [HTTP_STATUS_OK]: chatRouteResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const analyzeResumeResponses = {
   [HTTP_STATUS_OK]: analyzeResumeResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const generateCoverLetterResponses = {
   [HTTP_STATUS_OK]: generateCoverLetterResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const matchJobsResponses = {
   [HTTP_STATUS_OK]: matchJobsResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
@@ -240,11 +234,6 @@ export const aiUsageResponses = {
 
 export const automationActionResponses = {
   [HTTP_STATUS_OK]: automationActionResponseSchema,
-  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_CONFLICT]: simpleErrorResponseSchema,
-  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 

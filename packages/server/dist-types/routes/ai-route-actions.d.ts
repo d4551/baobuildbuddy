@@ -29,7 +29,12 @@ export declare const handleAnalyzeResumeRoute: (body: AnalyzeResumeBody, set: Ro
     message: string;
     resumeId: string;
     jobId: string | null;
-    analysis: import("./ai-route-contracts").ResumeAnalysisResult;
+    analysis: {
+        score: number;
+        strengths: string[];
+        improvements: string[];
+        keywords: string[];
+    };
     provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
     model: string;
 }>;
@@ -42,13 +47,31 @@ export declare const handleGenerateCoverLetterRoute: (body: GenerateCoverLetterB
 } | {
     error?: undefined;
     message: string;
-    content: import("./ai-route-contracts").CoverLetterSections;
+    content: {
+        introduction: string;
+        body: string;
+        conclusion: string;
+    };
     provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
     model: string;
 }>;
 export declare const handleMatchJobsRoute: (body: {
     resumeId?: string;
     skills?: string[];
-}, set: RouteSetState) => Promise<import("./ai-route-contracts").MatchJobsResponse | {
+}, set: RouteSetState) => Promise<{
+    message: string;
+    matches: {
+        jobId: string;
+        title: string;
+        company: string;
+        location: string | null;
+        remote: boolean;
+        score: number;
+        strengths: string[];
+        concerns: string[];
+        highlightSkills: string[];
+    }[];
+    recommendations: string[];
+} | {
     error: string;
 }>;

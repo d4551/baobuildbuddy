@@ -267,14 +267,11 @@ export const settingsImportResponseSchema = t.Object({
 
 export const settingsReadResponses = {
   [HTTP_STATUS_OK]: settingsResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const settingsUpdateResponses = {
   [HTTP_STATUS_OK]: settingsMutationResponseSchema,
-  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 

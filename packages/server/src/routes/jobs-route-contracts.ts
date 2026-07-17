@@ -153,7 +153,6 @@ export const jobsListResponses = {
 
 export const jobEntityResponses = {
   [HTTP_STATUS_OK]: jobEntityResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const saveJobResponses = {
@@ -166,7 +165,6 @@ export const saveJobResponses = {
     error: t.Optional(t.String()),
   }),
   [HTTP_STATUS_CREATED]: savedJobResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const deleteSavedJobResponses = {
@@ -200,12 +198,10 @@ export const applyJobResponses = {
     error: t.Optional(t.String()),
   }),
   [HTTP_STATUS_CREATED]: applicationResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const updateApplicationResponses = {
   [HTTP_STATUS_OK]: applicationResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const applicationsListResponses = {
@@ -223,7 +219,6 @@ export const recommendationsResponses = {
 
 export const jobsRefreshResponses = {
   [HTTP_STATUS_OK]: jobsRefreshResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: jobsRefreshResponseSchema,
 } as const;
 
 export { HTTP_STATUS_CREATED };

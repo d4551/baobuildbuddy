@@ -70,8 +70,7 @@ export const authRoutes = new Elysia({
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),
     {
       detail: { tags: ["Auth"] },
-      response: authStatusResponses,
-    },
+      },
     async () => {
     if (config.disableAuth) {
       return {
@@ -95,8 +94,7 @@ export const authRoutes = new Elysia({
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
     {
       detail: { tags: ["Auth"] },
-      response: authConfiguredResponses,
-    },
+      },
     async () => {
     if (config.disableAuth) {
       return { configured: false };
@@ -121,8 +119,7 @@ export const authRoutes = new Elysia({
         {
           detail: { tags: ["Auth"] },
           body: authBootstrapBody,
-          response: authInitResponses,
-        }, async ({
+          }, async ({
           body,
           request,
           set,

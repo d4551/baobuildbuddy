@@ -241,18 +241,14 @@ export const interviewSessionsListResponses = {
 
 export const interviewSessionResponses = {
   [HTTP_STATUS_OK]: interviewSessionResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const submitInterviewResponseResponses = {
   [HTTP_STATUS_OK]: interviewSessionResponseSchema,
-  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const completeInterviewSessionResponses = {
   [HTTP_STATUS_OK]: interviewSessionResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const interviewStatsResponses = {

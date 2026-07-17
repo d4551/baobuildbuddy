@@ -29,8 +29,7 @@ export const gamificationRoutes = new Elysia({
     "/progress",
     {
       detail: { tags: ["Gamification"] },
-      response: gamificationProgressResponses,
-    },
+      },
     async () => gamificationService.getProgress(),
   )
   .post(
@@ -38,8 +37,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: { tags: ["Gamification"] },
       body: awardXpBody,
-      response: awardXpResponses,
-    },
+      },
     async ({ body, set }: { body: AwardXpBody; set: RouteSetState }) => {
       if (!(typeof body.amount === "number" && typeof body.reason === "string")) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -65,16 +63,14 @@ export const gamificationRoutes = new Elysia({
     "/achievements",
     {
       detail: { tags: ["Gamification"] },
-      response: achievementsResponses,
-    },
+      },
     async () => gamificationService.getAchievements(),
   )
   .get(
     "/challenges",
     {
       detail: { tags: ["Gamification"] },
-      response: challengesListResponses,
-    },
+      },
     async () => {
       const challenges = await gamificationService.getDailyChallenges();
       const today = new Date().toISOString().split("T")[0];
@@ -93,8 +89,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: { tags: ["Gamification"] },
       params: challengeIdParams,
-      response: challengeCompleteResponses,
-    },
+      },
     async ({ params, set }: { params: ChallengeIdParams; set: RouteSetState }) => {
       if (!params.id) {
         set.status = HTTP_STATUS_BAD_REQUEST;
@@ -123,15 +118,13 @@ export const gamificationRoutes = new Elysia({
     "/weekly",
     {
       detail: { tags: ["Gamification"] },
-      response: weeklyProgressResponses,
-    },
+      },
     async () => gamificationService.getWeeklyProgress(),
   )
   .get(
     "/monthly",
     {
       detail: { tags: ["Gamification"] },
-      response: monthlyStatsResponses,
-    },
+      },
     async () => gamificationService.getMonthlyStats(),
   );

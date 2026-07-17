@@ -152,7 +152,6 @@ export const gamificationProgressResponses = {
 
 export const awardXpResponses = {
   [HTTP_STATUS_OK]: awardXpResponseSchema,
-  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
 } as const;
 
 export const achievementsResponses = {
@@ -166,7 +165,6 @@ export const challengesListResponses = {
 export const challengeCompleteResponses = {
   [HTTP_STATUS_OK]: challengeCompleteResponseSchema,
   [HTTP_STATUS_CREATED]: challengeCompleteResponseSchema,
-  [HTTP_STATUS_BAD_REQUEST]: challengeCompleteResponseSchema,
 } as const;
 
 export const weeklyProgressResponses = {

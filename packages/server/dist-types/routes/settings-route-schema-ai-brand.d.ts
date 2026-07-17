@@ -2,6 +2,10 @@ import type { AIProviderType } from "@bao/shared/types/ai";
 export declare const VALID_PROVIDERS: [AIProviderType, ...AIProviderType[]];
 export declare const resolveKnownProvider: (value?: string | null) => AIProviderType;
 export declare const preferredProviderBodySchema: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+export declare const aiRoutingTargetBodySchema: import("typebox").TObject<{
+    provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+    model: import("typebox").TOptional<import("typebox").TString>;
+}>;
 export declare const aiRoutingBodySchema: import("typebox").TObject<{
     chat: import("typebox").TObject<{
         provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
@@ -38,6 +42,127 @@ export declare const aiRoutingBodySchema: import("typebox").TObject<{
     automationFieldMapping: import("typebox").TObject<{
         provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
         model: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+}>;
+export declare const brandThemePaletteBodySchema: import("typebox").TObject<{
+    base100: import("typebox").TString;
+    base200: import("typebox").TString;
+    base300: import("typebox").TString;
+    baseContent: import("typebox").TString;
+    primary: import("typebox").TString;
+    primaryContent: import("typebox").TString;
+    secondary: import("typebox").TString;
+    secondaryContent: import("typebox").TString;
+    accent: import("typebox").TString;
+    accentContent: import("typebox").TString;
+    neutral: import("typebox").TString;
+    neutralContent: import("typebox").TString;
+    info: import("typebox").TString;
+    infoContent: import("typebox").TString;
+    success: import("typebox").TString;
+    successContent: import("typebox").TString;
+    warning: import("typebox").TString;
+    warningContent: import("typebox").TString;
+    error: import("typebox").TString;
+    errorContent: import("typebox").TString;
+    radiusSelector: import("typebox").TString;
+    radiusField: import("typebox").TString;
+    radiusBox: import("typebox").TString;
+    sizeSelector: import("typebox").TString;
+    sizeField: import("typebox").TString;
+    border: import("typebox").TString;
+    depth: import("typebox").TString;
+    noise: import("typebox").TString;
+}>;
+export declare const brandTypographyBodySchema: import("typebox").TObject<{
+    fontStylesheetUrl: import("typebox").TString;
+    displayFontFamily: import("typebox").TString;
+    bodyFontFamily: import("typebox").TString;
+    monoFontFamily: import("typebox").TString;
+}>;
+export declare const brandContentBodySchema: import("typebox").TObject<{
+    tagline: import("typebox").TString;
+    defaultTitle: import("typebox").TString;
+    defaultDescription: import("typebox").TString;
+    contentOverrides: import("typebox").TRecord<"^.*$", import("typebox").TString>;
+}>;
+export declare const brandSettingsBodySchema: import("typebox").TObject<{
+    name: import("typebox").TString;
+    assistantName: import("typebox").TString;
+    apiName: import("typebox").TString;
+    logoPath: import("typebox").TString;
+    faviconPath: import("typebox").TString;
+    typography: import("typebox").TObject<{
+        fontStylesheetUrl: import("typebox").TString;
+        displayFontFamily: import("typebox").TString;
+        bodyFontFamily: import("typebox").TString;
+        monoFontFamily: import("typebox").TString;
+    }>;
+    lightTheme: import("typebox").TObject<{
+        base100: import("typebox").TString;
+        base200: import("typebox").TString;
+        base300: import("typebox").TString;
+        baseContent: import("typebox").TString;
+        primary: import("typebox").TString;
+        primaryContent: import("typebox").TString;
+        secondary: import("typebox").TString;
+        secondaryContent: import("typebox").TString;
+        accent: import("typebox").TString;
+        accentContent: import("typebox").TString;
+        neutral: import("typebox").TString;
+        neutralContent: import("typebox").TString;
+        info: import("typebox").TString;
+        infoContent: import("typebox").TString;
+        success: import("typebox").TString;
+        successContent: import("typebox").TString;
+        warning: import("typebox").TString;
+        warningContent: import("typebox").TString;
+        error: import("typebox").TString;
+        errorContent: import("typebox").TString;
+        radiusSelector: import("typebox").TString;
+        radiusField: import("typebox").TString;
+        radiusBox: import("typebox").TString;
+        sizeSelector: import("typebox").TString;
+        sizeField: import("typebox").TString;
+        border: import("typebox").TString;
+        depth: import("typebox").TString;
+        noise: import("typebox").TString;
+    }>;
+    darkTheme: import("typebox").TObject<{
+        base100: import("typebox").TString;
+        base200: import("typebox").TString;
+        base300: import("typebox").TString;
+        baseContent: import("typebox").TString;
+        primary: import("typebox").TString;
+        primaryContent: import("typebox").TString;
+        secondary: import("typebox").TString;
+        secondaryContent: import("typebox").TString;
+        accent: import("typebox").TString;
+        accentContent: import("typebox").TString;
+        neutral: import("typebox").TString;
+        neutralContent: import("typebox").TString;
+        info: import("typebox").TString;
+        infoContent: import("typebox").TString;
+        success: import("typebox").TString;
+        successContent: import("typebox").TString;
+        warning: import("typebox").TString;
+        warningContent: import("typebox").TString;
+        error: import("typebox").TString;
+        errorContent: import("typebox").TString;
+        radiusSelector: import("typebox").TString;
+        radiusField: import("typebox").TString;
+        radiusBox: import("typebox").TString;
+        sizeSelector: import("typebox").TString;
+        sizeField: import("typebox").TString;
+        border: import("typebox").TString;
+        depth: import("typebox").TString;
+        noise: import("typebox").TString;
+    }>;
+    content: import("typebox").TObject<{
+        tagline: import("typebox").TString;
+        defaultTitle: import("typebox").TString;
+        defaultDescription: import("typebox").TString;
+        contentOverrides: import("typebox").TRecord<"^.*$", import("typebox").TString>;
     }>;
 }>;
 export declare const brandSettingsPatchBodySchema: import("typebox").TObject<{

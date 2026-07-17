@@ -28,8 +28,7 @@ export const scraperRoutes = new Elysia({
     toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios),
     {
       detail: { tags: ["Scraper"] },
-      response: scraperOperationResponses,
-    },
+      },
     async ({ set }) => {
       const scrapeStudiosResult = await settle(scraperService.scrapeStudios());
       if (scrapeStudiosResult.status === "rejected") {
@@ -50,8 +49,7 @@ export const scraperRoutes = new Elysia({
     {
       detail: { tags: ["Scraper"] },
       params: scraperPortalParamsSchema,
-      response: scraperOperationResponses,
-    },
+      },
     async ({ params, set }: { params: ScraperPortalParams; set: RouteSetState }) => {
       const portalId = params.portalId.trim();
       if (!isAutomationScrapePortalId(portalId)) {

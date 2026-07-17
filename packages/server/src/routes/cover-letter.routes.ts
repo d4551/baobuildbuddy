@@ -38,8 +38,7 @@ export const coverLetterRoutes = new Elysia({
     "/",
     {
       detail: { tags: ["Cover Letters"] },
-      response: coverLettersListResponses,
-    },
+      },
     async () => listCoverLetters(),
   )
   .post(
@@ -47,8 +46,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: { tags: ["Cover Letters"] },
       body: coverLetterMutationBodySchema,
-      response: coverLetterEntityResponses,
-    },
+      },
     async ({ body, set }: { body: CoverLetterMutationBody; set: RouteSetState }) => {
       const result = await createCoverLetter(body);
       set.status = result.statusCode;
@@ -60,8 +58,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: { tags: ["Cover Letters"] },
       params: coverLetterIdParamsSchema,
-      response: coverLetterEntityResponses,
-    },
+      },
     async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) => {
       const coverLetter = await getCoverLetterById(params.id, set);
       return coverLetter ?? { error: API_ERROR_COVER_LETTER_NOT_FOUND };
@@ -73,8 +70,7 @@ export const coverLetterRoutes = new Elysia({
       detail: { tags: ["Cover Letters"] },
       params: coverLetterIdParamsSchema,
       body: coverLetterUpdateBodySchema,
-      response: coverLetterEntityResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -90,8 +86,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: { tags: ["Cover Letters"] },
       params: coverLetterIdParamsSchema,
-      response: coverLetterDeleteResponses,
-    },
+      },
     async ({ params, set }: { params: CoverLetterIdParams; set: RouteSetState }) =>
       deleteCoverLetter(params.id, set),
   )
@@ -100,8 +95,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: { tags: ["Cover Letters"] },
       body: generateCoverLetterBodySchema,
-      response: generateCoverLetterResponses,
-    },
+      },
     async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
       handleGenerateCoverLetter(body, set),
   )
@@ -111,8 +105,7 @@ export const coverLetterRoutes = new Elysia({
       detail: { tags: ["Cover Letters"] },
       params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,
-      response: coverLetterExportResponses,
-    },
+      },
     async ({
       params,
       body,

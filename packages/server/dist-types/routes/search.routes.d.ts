@@ -14,7 +14,24 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
                 };
                 headers: unknown;
                 response: {
-                    200: import("../services/search-service").UnifiedSearchResult;
+                    200: {
+                        query: string;
+                        results: {
+                            type: "jobs" | "resumes" | "skills" | "studios";
+                            id: string;
+                            title: string;
+                            subtitle: string;
+                            snippet: string;
+                            relevance: number;
+                        }[];
+                        counts: {
+                            jobs: number;
+                            studios: number;
+                            skills: number;
+                            resumes: number;
+                        };
+                        totalTime: number;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -37,6 +54,12 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
     query: import("typebox").TObject<{
         prefix: import("typebox").TOptional<import("typebox").TString>;
     }>;
+    response: {
+        readonly 200: import("typebox").TArray<import("typebox").TObject<{
+            text: import("typebox").TString;
+            type: import("typebox").TString;
+        }>>;
+    };
 }, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ query }: {
     query: SearchAutocompleteQuery;
 }) => Promise<{

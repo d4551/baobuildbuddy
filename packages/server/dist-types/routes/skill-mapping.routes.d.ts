@@ -67,6 +67,26 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
                 headers: unknown;
                 response: {
                     200: import("@bao/shared/types/skill-mapping").SkillMapping;
+                    201: {
+                        id: string;
+                        gameExpression: string;
+                        transferableSkill: string;
+                        industryApplications: string[];
+                        evidenceSuggestions?: string[] | undefined;
+                        evidence: {
+                            id: string;
+                            type: string;
+                            title: string;
+                            description: string;
+                            url?: string | undefined;
+                            verificationStatus: string;
+                        }[];
+                        confidence: number;
+                        category: string;
+                        demandLevel: string;
+                        verified: boolean;
+                        aiGenerated?: boolean | undefined;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -103,8 +123,30 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("@bao/shared/types/skill-mapping").SkillMapping | {
+                        200: {
+                            id: string;
+                            gameExpression: string;
+                            transferableSkill: string;
+                            industryApplications: string[];
+                            evidenceSuggestions?: string[] | undefined;
+                            evidence: {
+                                id: string;
+                                type: string;
+                                title: string;
+                                description: string;
+                                url?: string | undefined;
+                                verificationStatus: string;
+                            }[];
+                            confidence: number;
+                            category: string;
+                            demandLevel: string;
+                            verified: boolean;
+                            aiGenerated?: boolean | undefined;
+                        };
+                        404: {
                             error: string;
+                            code?: string | undefined;
+                            fields?: string[] | undefined;
                         };
                         422: {
                             type: 'validation';
@@ -134,14 +176,19 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
                     query: unknown;
                     headers: unknown;
                     response: {
-                        [x: number]: {
-                            message?: undefined;
-                            error: string;
-                            id: string;
-                        } | {
-                            error?: undefined;
+                        200: {
                             message: string;
                             id: string;
+                        };
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            fields?: string[] | undefined;
+                        };
+                        410: {
+                            error: string;
+                            code?: string | undefined;
+                            fields?: string[] | undefined;
                         };
                     };
                     error: never;
@@ -158,7 +205,31 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/skill-mapping").CareerPathway[];
+                    200: {
+                        id: string;
+                        title: string;
+                        description: string;
+                        detailedDescription?: string | undefined;
+                        matchScore: number;
+                        stages: {
+                            title: string;
+                            duration: string;
+                            description: string;
+                            completed?: boolean | undefined;
+                            current?: boolean | undefined;
+                            requirements?: string[] | undefined;
+                            outcomes?: string[] | undefined;
+                        }[];
+                        requiredSkills: string[];
+                        estimatedTimeToEntry: string;
+                        icon?: string | undefined;
+                        averageSalary?: {
+                            min: number;
+                            max: number;
+                            currency?: string | undefined;
+                        } | undefined;
+                        jobMarketTrend: string;
+                    }[];
                 };
                 error: never;
             };
@@ -175,18 +246,46 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
                 };
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/skill-mapping").ReadinessAssessment | {
+                    200: {
                         overallScore: number;
                         categories: {
-                            technical: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            softSkills: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            industryKnowledge: import("@bao/shared/types/skill-mapping").CategoryAssessment;
-                            portfolio: import("@bao/shared/types/skill-mapping").CategoryAssessment;
+                            technical: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            softSkills: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            industryKnowledge: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
+                            portfolio: {
+                                score: number;
+                                feedbackId: string;
+                                strengths?: string[] | undefined;
+                                improvements?: string[] | undefined;
+                            };
                         };
-                        improvementSuggestions: import("@bao/shared/types/skill-mapping").SkillReadinessImprovementId[];
-                        nextSteps: import("@bao/shared/types/skill-mapping").SkillReadinessNextStepId[];
-                        targetRoleReadiness?: import("@bao/shared/types/skill-mapping").RoleReadiness[];
-                        jobId: string;
+                        improvementSuggestions: string[];
+                        nextSteps: string[];
+                        targetRoleReadiness?: {
+                            roleId: string;
+                            roleTitle: string;
+                            readinessScore: number;
+                            missingSkills: string[];
+                            matchingSkills: string[];
+                            timeToReady?: string | undefined;
+                            recommendedActions: string[];
+                        }[] | undefined;
+                        jobId?: string | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -218,6 +317,22 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
         resume: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
         autoCreateMappings: import("typebox").TOptional<import("typebox").TBoolean>;
     }>;
+    response: {
+        200: import("typebox").TObject<{
+            message: import("typebox").TString;
+            detectedSkills: import("typebox").TArray<import("typebox").TString>;
+            suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        500: import("typebox").TObject<{
+            message: import("typebox").TString;
+            detectedSkills: import("typebox").TArray<import("typebox").TString>;
+            suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    };
 }, {}, `${string}/ai-analyze`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
     body: SkillAnalysisRouteBody;
     set: SkillMappingRouteSetState;

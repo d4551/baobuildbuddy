@@ -61,8 +61,7 @@ export const settingsRoutes = new Elysia({
         "/",
         {
           detail: { tags: ["Settings"] },
-          response: settingsReadResponses,
-        },
+          },
         async ({ set }: { set: { status?: number | string } }) => {
           const row = await readOrCreateSettingsRow();
           if (!row) {
@@ -89,8 +88,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: settingsUpdateBodySchema,
-          response: settingsUpdateResponses,
-        },
+          },
         async ({ body, set }: { body: SettingsUpdateBody; set: { status?: number | string } }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
@@ -120,8 +118,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: jobTaxonomyUpdateBodySchema,
-          response: jobTaxonomyUpdateResponses,
-        },
+          },
         async ({ body }: { body: JobTaxonomyUpdateBody }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
           return { success: true, jobTaxonomy };
@@ -132,8 +129,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: apiKeysUpdateBodySchema,
-          response: apiKeysUpdateResponses,
-        },
+          },
         async ({ body }: { body: ApiKeysUpdateBody }) => {
           await readOrCreateSettingsRow();
           await db
@@ -149,16 +145,14 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: providerTestBodySchema,
-          response: providerTestResponses,
-        },
+          },
         async ({ body }: { body: ProviderTestBody }) => testProviderConnection(body),
       )
       .get(
         "/export",
         {
           detail: { tags: ["Settings"] },
-          response: settingsExportResponses,
-        },
+          },
         async () => {
           const { dataService } = await import("../services/data-service");
           return dataService.exportAll();
@@ -169,8 +163,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: { tags: ["Settings"] },
           body: importSettingsBodySchema,
-          response: settingsImportResponses,
-        },
+          },
         async ({ body }: { body: ImportSettingsBody }) => {
           const { dataService } = await import("../services/data-service");
           return dataService.importAll({

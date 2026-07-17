@@ -93,25 +93,11 @@ export const automationRoutes = new Elysia({
     set.status = HTTP_STATUS_UNPROCESSABLE_ENTITY;
     return toRouteError("OUTPUT_VALIDATION_ERROR", readValidationErrorMessage(error));
   })
-  .get("/verify/context", { detail: { tags: ["Automation"] }, response: {
-      [HTTP_STATUS_OK]: t.Object({
-          resumeId: t.String({ minLength: 1 }),
-        }),
-      [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-    },
-  }, async ({ set }) => handleVerifyAutomationContext(set))
+  .get("/verify/context", { detail: { tags: ["Automation"] }, }, async ({ set }) => handleVerifyAutomationContext(set))
   .post(
     "/job-apply",
     { detail: { tags: ["Automation"] }, body: jobApplyBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: JobApplyBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: JobApplyBody; set: RouteSetState }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId))) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_JOB_APPLY_FIELDS_REQUIRED);
@@ -132,15 +118,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/job-apply/schedule",
     { detail: { tags: ["Automation"] }, body: scheduledJobApplyBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: ScheduledJobApplyBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: ScheduledJobApplyBody; set: RouteSetState }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId) && hasText(body.runAt))) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError(
@@ -165,25 +143,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response",
     { detail: { tags: ["Automation"] }, body: emailResponseBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: t.Object({
-            runId: t.String(),
-            status: t.Literal(AUTOMATION_STATUS_SUCCESS),
-            reply: t.String(),
-            provider: t.String(),
-            model: t.String(),
-            delivered: t.Boolean(),
-            recipientEmail: t.Optional(t.String()),
-            deliveredAt: t.Optional(t.String()),
-            messageId: t.Optional(t.String()),
-          }),
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: EmailResponseBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: EmailResponseBody; set: RouteSetState }) => {
       if (!(hasText(body.subject) && hasText(body.message))) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED);
@@ -207,15 +167,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response/schedule",
     { detail: { tags: ["Automation"] }, body: scheduledEmailResponseBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: ScheduledEmailResponseBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: ScheduledEmailResponseBody; set: RouteSetState }) => {
       if (!(hasText(body.subject) && hasText(body.message) && hasText(body.runAt))) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError(
@@ -243,15 +195,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape",
     { detail: { tags: ["Automation"] }, body: scrapeBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: ScrapeBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: ScrapeBody; set: RouteSetState }) => {
       if (!body.target) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCRAPE_TARGET_REQUIRED);
@@ -263,15 +207,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape/schedule",
     { detail: { tags: ["Automation"] }, body: scheduledScrapeBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-        [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    }, async ({ body, set }: { body: ScheduledScrapeBody; set: RouteSetState }) => {
+      }, async ({ body, set }: { body: ScheduledScrapeBody; set: RouteSetState }) => {
       if (!(body.target && hasText(body.runAt))) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_SCHEDULED_SCRAPE_FIELDS_REQUIRED);
@@ -280,35 +216,20 @@ export const automationRoutes = new Elysia({
       return handleScheduledScrapeRoute({ target: body.target, runAt: body.runAt }, set);
     },
   )
-  .get(
-    "/capabilities",
-    {
-      detail: { tags: ["Automation"] },
-      response: {
-        [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
-        [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-      },
-    },
-    async ({ status }) => {
-      const result = await handleAutomationCapabilitiesRoute();
-      if (!result.ok) {
-        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
-      }
-      return status(HTTP_STATUS_OK, result.body);
-    },
-  )
-  .get("/runs", { detail: { tags: ["Automation"] }, response: t.Array(automationRunEnvelopeBodySchema),
-    query: automationRunQuerySchema,
+  .get("/capabilities", { detail: { tags: ["Automation"] } }, async ({ set }) => {
+    const result = await handleAutomationCapabilitiesRoute();
+    if (!result.ok) {
+      set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+      return result.body;
+    }
+    return result.body;
+  })
+  .get("/runs", { detail: { tags: ["Automation"] }, query: automationRunQuerySchema,
   }, async ({ query }: { query: AutomationRunQuery }) => listAutomationRuns(query))
   .get(
     "/runs/:id",
     { detail: { tags: ["Automation"] }, params: automationRunIdParamsSchema,
-      response: {
-        [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-        [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-        [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
-      },
-    }, async ({ params, set }: { params: AutomationRunIdParams; set: RouteSetState }) => {
+      }, async ({ params, set }: { params: AutomationRunIdParams; set: RouteSetState }) => {
       if (!hasText(params.id)) {
         set.status = HTTP_STATUS_BAD_REQUEST;
         return toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_AUTOMATION_RUN_ID_REQUIRED);

@@ -58,11 +58,7 @@ export const userRoutes = new Elysia({
 })
   .get(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
-    { detail: { tags: ["User"] }, response: {
-        [HTTP_STATUS_OK]: userProfileResponseSchema,
-        ...simpleRouteErrorResponses,
-      },
-    },
+    { detail: { tags: ["User"] }, },
     async ({ status }) => {
       const rows = await db
         .select()
@@ -79,11 +75,7 @@ export const userRoutes = new Elysia({
     {
       detail: { tags: ["User"] },
       body: userProfileUpdateBodySchema,
-      response: {
-        [HTTP_STATUS_OK]: userProfileResponseSchema,
-        ...simpleRouteErrorResponses,
       },
-    },
     async ({ body, status }) => {
       const existing = await db
         .select()

@@ -235,12 +235,10 @@ export const skillMappingCreateResponses = {
 
 export const skillMappingUpdateResponses = {
   [HTTP_STATUS_OK]: skillMappingResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const skillMappingDeleteResponses = {
   [HTTP_STATUS_OK]: skillMappingDeleteResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
   [HTTP_STATUS_GONE]: simpleErrorResponseSchema,
 };
 
@@ -254,5 +252,4 @@ export const skillReadinessResponses = {
 
 export const skillAnalysisResponses = {
   [HTTP_STATUS_OK]: skillAnalysisResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: skillAnalysisResponseSchema,
 };

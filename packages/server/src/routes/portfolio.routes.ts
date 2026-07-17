@@ -49,8 +49,7 @@ export const portfolioRoutes = new Elysia({
     "/",
     {
       detail: { tags: ["Portfolio"] },
-      response: portfolioResponses,
-    },
+      },
     async () => {
       return await portfolioService.getPortfolioPayload();
     },
@@ -60,8 +59,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioUpdateBodySchema,
-      response: portfolioMutationResponses,
-    },
+      },
     async ({ body }: { body: PortfolioUpdateRouteBody }) => {
       return await portfolioService.updatePortfolio({ metadata: body.metadata });
     },
@@ -71,8 +69,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioProjectCreateBodySchema,
-      response: portfolioProjectMutationResponses,
-    },
+      },
     async ({ body, set }: { body: PortfolioProjectCreateRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
@@ -107,8 +104,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioProjectReorderBodySchema,
-      response: portfolioProjectReorderResponses,
-    },
+      },
     async ({ body, set }: { body: PortfolioProjectReorderRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
@@ -125,8 +121,7 @@ export const portfolioRoutes = new Elysia({
       detail: { tags: ["Portfolio"] },
       params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
-      response: portfolioProjectMutationResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -164,8 +159,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       params: portfolioProjectIdParamsSchema,
-      response: portfolioProjectDeleteResponses,
-    },
+      },
     async ({ params, set }: { params: PortfolioProjectIdParams; set: RouteSetState }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
@@ -181,8 +175,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: { tags: ["Portfolio"] },
       body: portfolioExportBodySchema,
-      response: portfolioExportResponses,
-    },
+      },
     async ({ body, set }: { body: PortfolioExportRouteBody; set: RouteSetState }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio) {

@@ -154,3 +154,5 @@ export type ResumeEnhanceRouteBody = Static<typeof resumeEnhanceBodySchema>;
 export declare const resumeScoreBodySchema: import("typebox").TObject<{
     jobId: import("typebox").TString;
 }>;
+export type ResumeScoreRouteBody = Static<typeof resumeScoreBodySchema>;
+export { resumeCreateResponses, resumeDeleteResponses, resumeEnhanceResponses, resumeEntityResponseSchema, resumeEntityResponses, resumeExportResponses, resumeListResponses, resumeQuestionGenerateResponseSchema, resumeQuestionGenerateResponses, resumeQuestionSynthesizeResponses, resumeScoreResponses, resumeUpdateResponses, type ResumeEntityResponse, type ResumeQuestionGenerateResponse, } from "./resume-route-response-contracts";

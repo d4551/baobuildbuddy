@@ -127,12 +127,10 @@ export const studioListResponses = {
 export const studioEntityResponses = {
   [HTTP_STATUS_OK]: studioEntityResponseSchema,
   [HTTP_STATUS_CREATED]: studioEntityResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const studioDeleteResponses = {
   [HTTP_STATUS_OK]: studioDeleteResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;
 
 export const studioAnalyticsResponses = {

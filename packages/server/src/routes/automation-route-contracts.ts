@@ -168,11 +168,7 @@ export const capabilityAuditReportBodySchema = t.Object({
 });
 
 export const automationRouteErrorResponses = {
-  [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-  [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
+
 };
 
 export const jobApplyBodySchema = t.Object(

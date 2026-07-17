@@ -38,6 +38,4 @@ export const authConfiguredResponses = {
 
 export const authInitResponses = {
   [HTTP_STATUS_OK]: authInitSuccessResponseSchema,
-  [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
-  [HTTP_STATUS_FORBIDDEN]: simpleErrorResponseSchema,
 } as const;

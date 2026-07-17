@@ -165,12 +165,10 @@ export const resumeScoreResponseSchema = t.Object(
 
 export const resumeQuestionGenerateResponses = {
   [HTTP_STATUS_OK]: resumeQuestionGenerateResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const resumeQuestionSynthesizeResponses = {
   [HTTP_STATUS_CREATED]: resumeEntityResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const resumeListResponses = {
@@ -179,7 +177,6 @@ export const resumeListResponses = {
 
 export const resumeEntityResponses = {
   [HTTP_STATUS_OK]: resumeEntityResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const resumeCreateResponses = {
@@ -188,28 +185,20 @@ export const resumeCreateResponses = {
 
 export const resumeUpdateResponses = {
   [HTTP_STATUS_OK]: resumeEntityResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const resumeDeleteResponses = {
   [HTTP_STATUS_OK]: resumeDeleteResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const resumeExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const resumeEnhanceResponses = {
   [HTTP_STATUS_OK]: resumeEnhanceResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const resumeScoreResponses = {
   [HTTP_STATUS_OK]: resumeScoreResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };

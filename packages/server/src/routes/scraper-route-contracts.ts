@@ -40,6 +40,4 @@ export const scraperErrorResponseSchema = t.Object({
 
 export const scraperOperationResponses = {
   [HTTP_STATUS_OK]: scraperOperationResultSchema,
-  [HTTP_STATUS_BAD_REQUEST]: scraperErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: scraperErrorResponseSchema,
 } as const;

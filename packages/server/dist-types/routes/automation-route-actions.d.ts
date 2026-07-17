@@ -246,8 +246,14 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
 } | {
     error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
 }>;
-export declare const handleAutomationCapabilitiesRoute: (set: RouteSetState) => Promise<import("@bao/shared/constants/automation").RpaCapabilityAuditReport | {
-    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+export declare const handleAutomationCapabilitiesRoute: () => Promise<{
+    ok: false;
+    body: {
+        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+    };
+} | {
+    ok: true;
+    body: import("@bao/shared/constants/automation").RpaCapabilityAuditReport;
 }>;
 export declare const handleAutomationRunByIdRoute: (runId: string, set: RouteSetState) => Promise<{
     id: string;

@@ -113,16 +113,7 @@ export const automationScreenshotRoutes = new Elysia({
 }).get(
   "/:runId/:index",
   { detail: { tags: ["Automation"] }, params: automationScreenshotParams,
-    response: {
-      200: t.Unknown(),
-      400: t.Object({
-          error: t.String(),
-        }),
-      404: t.Object({
-          error: t.String(),
-        }),
-    },
-  }, async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
+    }, async ({ params, set }: { params: AutomationScreenshotParams; set: RouteSetState }) => {
     if (typeof params.index !== "string" || isInvalidScreenshotIndex(params.index)) {
       set.status = HTTP_STATUS_BAD_REQUEST;
       return { error: API_ERROR_INVALID_SCREENSHOT_INDEX };

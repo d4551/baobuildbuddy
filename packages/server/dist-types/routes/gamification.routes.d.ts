@@ -10,7 +10,18 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/gamification").UserGamificationData;
+                    200: {
+                        xp: number;
+                        level: number;
+                        achievements: string[];
+                        dailyChallenges: Record<string, string[]>;
+                        longestStreak: number;
+                        currentStreak: number;
+                        lastActiveDate?: string | undefined;
+                        stats: Record<string, unknown>;
+                        xpForNextLevel?: number | undefined;
+                        streak?: number | undefined;
+                    };
                 };
                 error: never;
             };
@@ -29,21 +40,25 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                 headers: unknown;
                 response: {
                     200: {
-                        message?: undefined;
-                        error: string;
-                        xp?: undefined;
-                        level?: undefined;
-                        leveledUp?: undefined;
-                        levelUp?: undefined;
-                        reason?: undefined;
-                    } | {
-                        error?: undefined;
                         xp: number;
                         level: number;
                         leveledUp: boolean;
-                        levelUp: import("@bao/shared/types/gamification").LevelUpResult | null;
+                        levelUp: {
+                            xpGained: number;
+                            oldLevel: number;
+                            newLevel: number;
+                            oldTitle: string;
+                            newTitle: string;
+                            unlockedFeatures: string[];
+                            bonusXP?: number | undefined;
+                        } | null;
                         reason: string;
                         message: string;
+                    };
+                    400: {
+                        error: string;
+                        code?: string | undefined;
+                        fields?: string[] | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -69,7 +84,20 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/gamification").Achievement[];
+                    200: {
+                        id: string;
+                        name: string;
+                        description: string;
+                        icon: string;
+                        iconType: "custom" | "emoji";
+                        category: "milestone" | "progress" | "skill" | "social" | "special";
+                        xpReward: number;
+                        requirements: Record<string, number>;
+                        unlocked: boolean;
+                        unlockedAt?: string | undefined;
+                        rarity: "common" | "epic" | "legendary" | "rare";
+                        hidden?: boolean | undefined;
+                    }[];
                 };
                 error: never;
             };
@@ -86,7 +114,20 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                 response: {
                     200: {
                         date: string;
-                        challenges: import("@bao/shared/types/gamification").DailyChallenge[];
+                        challenges: {
+                            id: string;
+                            name: string;
+                            description: string;
+                            icon: string;
+                            iconType: "custom" | "emoji";
+                            xpReward: number;
+                            category: "engagement" | "job_search" | "profile" | "skill_building" | "social";
+                            completed: boolean;
+                            requirements?: Record<string, number> | undefined;
+                            validUntil?: string | undefined;
+                            progress?: number | undefined;
+                            goal?: number | undefined;
+                        }[];
                         completedCount: number;
                         totalCount: number;
                     };
@@ -109,17 +150,25 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                         headers: unknown;
                         response: {
                             200: {
-                                level?: undefined;
                                 message: string;
+                                challengeId?: string | undefined;
                                 completed: boolean;
-                                challengeId?: undefined;
-                                totalXP?: undefined;
-                            } | {
+                                totalXP?: number | undefined;
+                                level?: number | undefined;
+                            };
+                            201: {
                                 message: string;
-                                challengeId: string;
+                                challengeId?: string | undefined;
                                 completed: boolean;
-                                totalXP: number;
-                                level: number;
+                                totalXP?: number | undefined;
+                                level?: number | undefined;
+                            };
+                            400: {
+                                message: string;
+                                challengeId?: string | undefined;
+                                completed: boolean;
+                                totalXP?: number | undefined;
+                                level?: number | undefined;
                             };
                         };
                         error: never;
@@ -137,13 +186,37 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/gamification-definitions").WeeklyProgressResult;
+                    200: {
+                        challengesCompleted: number;
+                        xpEarned: number;
+                        actionsCount: number;
+                        days: {
+                            date: string;
+                            actions: number;
+                            xpEarned: number;
+                        }[];
+                        topCategory: string;
+                    };
                 };
                 error: never;
             };
         };
     };
-}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/monthly", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/monthly`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<{
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/monthly", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
+    };
+    response: {
+        readonly 200: import("typebox").TObject<{
+            totalXP: import("typebox").TNumber;
+            levelsGained: import("typebox").TNumber;
+            achievementsUnlocked: import("typebox").TNumber;
+            challengesCompleted: import("typebox").TNumber;
+            actionsCount: import("typebox").TNumber;
+            streakDays: import("typebox").TNumber;
+        }>;
+    };
+}, {}, `${string}/monthly`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<{
     totalXP: number;
     levelsGained: number;
     achievementsUnlocked: number;

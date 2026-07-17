@@ -15,23 +15,20 @@ export const statsRoutes = new Elysia({
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsDashboard),
     {
       detail: { tags: ["Stats"] },
-      response: { [HTTP_STATUS_OK]: statsDashboardResponseSchema },
-    },
+      },
     async () => statisticsService.getDashboardStats(),
   )
   .get(
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsWeekly),
     {
       detail: { tags: ["Stats"] },
-      response: { [HTTP_STATUS_OK]: statsWeeklyResponseSchema },
-    },
+      },
     async () => statisticsService.getWeeklyActivity(),
   )
   .get(
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsCareer),
     {
       detail: { tags: ["Stats"] },
-      response: { [HTTP_STATUS_OK]: statsCareerResponseSchema },
-    },
+      },
     async () => statisticsService.getCareerProgress(),
   );

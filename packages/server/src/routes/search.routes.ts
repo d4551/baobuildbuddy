@@ -33,8 +33,7 @@ export const searchRoutes = new Elysia({
     {
       detail: { tags: ["Search"] },
       query: searchQuery,
-      response: searchAllResponses,
-    },
+      },
     ({ query }: { query: SearchQuery }) => {
       const q = query.q || "";
       if (q.length < 2) {
@@ -54,8 +53,7 @@ export const searchRoutes = new Elysia({
     {
       detail: { tags: ["Search"] },
       query: searchAutocompleteQuery,
-      response: searchAutocompleteResponses,
-    },
+      },
     async ({ query }: { query: SearchAutocompleteQuery }) => {
       const prefix = query.prefix || "";
       return await searchService.autocomplete(prefix);

@@ -34,8 +34,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       body: createSessionBodySchema,
-      response: createInterviewSessionResponses,
-    },
+      },
     async ({ body, set }: { body: CreateSessionBody; set: RouteSetState }) => {
       const result = await createInterviewSession(body.studioId, body.config);
       set.status = HTTP_STATUS_CREATED;
@@ -46,8 +45,7 @@ export const interviewRoutes = new Elysia({
     "/sessions",
     {
       detail: { tags: ["Interview"] },
-      response: interviewSessionsListResponses,
-    },
+      },
     async () => {
       const sessions = await interviewService.getSessions();
       return Promise.all(sessions.map(sessionWithDerivedFields));
@@ -58,8 +56,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
-      response: interviewSessionResponses,
-    },
+      },
     async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await getInterviewSession(params.id);
       if (result.status !== null) {
@@ -74,8 +71,7 @@ export const interviewRoutes = new Elysia({
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
       body: submitResponseBodySchema,
-      response: submitInterviewResponseResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -97,8 +93,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: { tags: ["Interview"] },
       params: interviewSessionParamsSchema,
-      response: completeInterviewSessionResponses,
-    },
+      },
     async ({ params, set }: { params: InterviewSessionParams; set: RouteSetState }) => {
       const result = await completeInterviewSession(params.id);
       if (result.status !== null) {
@@ -111,7 +106,6 @@ export const interviewRoutes = new Elysia({
     toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats),
     {
       detail: { tags: ["Interview"] },
-      response: interviewStatsResponses,
-    },
+      },
     async () => getInterviewStats(),
   );

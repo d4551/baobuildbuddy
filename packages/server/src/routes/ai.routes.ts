@@ -49,8 +49,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: { tags: ["AI"] },
       body: chatRouteBodySchema,
-      response: chatRouteResponses,
-    },
+      },
     async ({ body, set }: { body: ChatRouteBody; set: RouteSetState }) =>
       handleChatRoute(body, set),
   )
@@ -59,8 +58,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: { tags: ["AI"] },
       body: analyzeResumeRouteBodySchema,
-      response: analyzeResumeResponses,
-    },
+      },
     async ({ body, set }: { body: AnalyzeResumeRouteBody; set: RouteSetState }) =>
       handleAnalyzeResumeRoute(body, set),
   )
@@ -69,8 +67,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: { tags: ["AI"] },
       body: generateCoverLetterRouteBodySchema,
-      response: generateCoverLetterResponses,
-    },
+      },
     async ({ body, set }: { body: GenerateCoverLetterRouteBody; set: RouteSetState }) =>
       handleGenerateCoverLetterRoute(body, set),
   )
@@ -79,8 +76,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: { tags: ["AI"] },
       body: matchJobsRouteBodySchema,
-      response: matchJobsResponses,
-    },
+      },
     async ({ body, set }: { body: MatchJobsRouteBody; set: RouteSetState }) =>
       handleMatchJobsRoute(body, set),
   )
@@ -88,16 +84,14 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     "/models",
     {
       detail: { tags: ["AI"] },
-      response: aiModelsResponses,
-    },
+      },
     async () => buildProviderModelsResponse(),
   )
   .get(
     "/usage",
     {
       detail: { tags: ["AI"] },
-      response: aiUsageResponses,
-    },
+      },
     async () => {
       const chatMessages = await db.select().from(chatHistory);
 
@@ -119,8 +113,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: { tags: ["AI"] },
       body: automationActionRouteBodySchema,
-      response: automationActionResponses,
-    },
+      },
     async ({ body, set }: { body: AutomationActionRouteBody; set: RouteSetState }) =>
       handleAutomationActionRoute(body, set),
   );

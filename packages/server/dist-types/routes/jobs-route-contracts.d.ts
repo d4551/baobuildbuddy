@@ -48,4 +48,341 @@ export declare const updateApplicationBodySchema: import("typebox").TObject<{
     notes: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export type UpdateApplicationBody = Static<typeof updateApplicationBodySchema>;
+export declare const jobEntityResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    title: import("typebox").TString;
+    company: import("typebox").TString;
+    location: import("typebox").TString;
+    remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+    hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+    technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+    experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+    platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+    contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+    companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    createdAt: import("typebox").TOptional<import("typebox").TString>;
+    updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+    matchReason: import("typebox").TOptional<import("typebox").TString>;
+    rank: import("typebox").TOptional<import("typebox").TNumber>;
+}>;
+export declare const jobsListResponseSchema: import("typebox").TObject<{
+    jobs: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        title: import("typebox").TString;
+        company: import("typebox").TString;
+        location: import("typebox").TString;
+        remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+        hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+        matchReason: import("typebox").TOptional<import("typebox").TString>;
+        rank: import("typebox").TOptional<import("typebox").TNumber>;
+    }>>;
+    page: import("typebox").TNumber;
+    limit: import("typebox").TNumber;
+    total: import("typebox").TNumber;
+}>;
+export declare const savedJobResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    jobId: import("typebox").TString;
+    savedAt: import("typebox").TString;
+}>;
+export declare const applicationResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    jobId: import("typebox").TString;
+    status: import("typebox").TString;
+    appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+    timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+}>;
+export declare const jobsRefreshResponseSchema: import("typebox").TObject<{
+    message: import("typebox").TString;
+    status: import("typebox").TString;
+    totalJobs: import("typebox").TNumber;
+    newJobs: import("typebox").TNumber;
+    updatedJobs: import("typebox").TNumber;
+}>;
+export declare const jobsListResponses: {
+    readonly 200: import("typebox").TObject<{
+        jobs: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            title: import("typebox").TString;
+            company: import("typebox").TString;
+            location: import("typebox").TString;
+            remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            createdAt: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+            matchReason: import("typebox").TOptional<import("typebox").TString>;
+            rank: import("typebox").TOptional<import("typebox").TNumber>;
+        }>>;
+        page: import("typebox").TNumber;
+        limit: import("typebox").TNumber;
+        total: import("typebox").TNumber;
+    }>;
+};
+export declare const jobEntityResponses: {
+    readonly 200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        title: import("typebox").TString;
+        company: import("typebox").TString;
+        location: import("typebox").TString;
+        remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+        hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+        companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+        matchReason: import("typebox").TOptional<import("typebox").TString>;
+        rank: import("typebox").TOptional<import("typebox").TNumber>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    }>;
+};
+export declare const saveJobResponses: {
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TOptional<import("typebox").TString>;
+        saved: import("typebox").TOptional<import("typebox").TObject<{
+            id: import("typebox").TString;
+            jobId: import("typebox").TString;
+            savedAt: import("typebox").TString;
+        }>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+        jobId: import("typebox").TOptional<import("typebox").TString>;
+        savedAt: import("typebox").TOptional<import("typebox").TString>;
+        error: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 201: import("typebox").TObject<{
+        id: import("typebox").TString;
+        jobId: import("typebox").TString;
+        savedAt: import("typebox").TString;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    }>;
+};
+export declare const deleteSavedJobResponses: {
+    readonly 200: import("typebox").TObject<{
+        success: import("typebox").TBoolean;
+        deleted: import("typebox").TUnknown;
+    }>;
+};
+export declare const savedJobsListResponses: {
+    readonly 200: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        jobId: import("typebox").TString;
+        savedAt: import("typebox").TString;
+        job: import("typebox").TUnion<[import("typebox").TObject<{
+            id: import("typebox").TString;
+            title: import("typebox").TString;
+            company: import("typebox").TString;
+            location: import("typebox").TString;
+            remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            createdAt: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+            matchReason: import("typebox").TOptional<import("typebox").TString>;
+            rank: import("typebox").TOptional<import("typebox").TNumber>;
+        }>, import("typebox").TNull]>;
+    }>>;
+};
+export declare const applyJobResponses: {
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TOptional<import("typebox").TString>;
+        application: import("typebox").TOptional<import("typebox").TObject<{
+            id: import("typebox").TString;
+            jobId: import("typebox").TString;
+            status: import("typebox").TString;
+            appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+        }>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+        jobId: import("typebox").TOptional<import("typebox").TString>;
+        status: import("typebox").TOptional<import("typebox").TString>;
+        appliedDate: import("typebox").TOptional<import("typebox").TString>;
+        notes: import("typebox").TOptional<import("typebox").TString>;
+        timeline: import("typebox").TOptional<import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>>;
+        error: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 201: import("typebox").TObject<{
+        id: import("typebox").TString;
+        jobId: import("typebox").TString;
+        status: import("typebox").TString;
+        appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    }>;
+};
+export declare const updateApplicationResponses: {
+    readonly 200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        jobId: import("typebox").TString;
+        status: import("typebox").TString;
+        appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+    }>;
+};
+export declare const applicationsListResponses: {
+    readonly 200: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        jobId: import("typebox").TString;
+        status: import("typebox").TString;
+        appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+    }>>;
+};
+export declare const recommendationsResponses: {
+    readonly 200: import("typebox").TObject<{
+        recommendations: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            title: import("typebox").TString;
+            company: import("typebox").TString;
+            location: import("typebox").TString;
+            remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            postedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            url: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            source: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            studioType: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            gameGenres: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            contentHash: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
+            companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            createdAt: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            matchScore: import("typebox").TOptional<import("typebox").TNumber>;
+            matchReason: import("typebox").TOptional<import("typebox").TString>;
+            rank: import("typebox").TOptional<import("typebox").TNumber>;
+        }>>;
+        reason: import("typebox").TString;
+        aiPowered: import("typebox").TBoolean;
+        provider: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
+export declare const jobsRefreshResponses: {
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        status: import("typebox").TString;
+        totalJobs: import("typebox").TNumber;
+        newJobs: import("typebox").TNumber;
+        updatedJobs: import("typebox").TNumber;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        message: import("typebox").TString;
+        status: import("typebox").TString;
+        totalJobs: import("typebox").TNumber;
+        newJobs: import("typebox").TNumber;
+        updatedJobs: import("typebox").TNumber;
+    }>;
+};
 export { HTTP_STATUS_CREATED };

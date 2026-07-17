@@ -34,25 +34,25 @@ export declare const testProviderConnection: (body: {
     key: string;
     model?: string;
 }) => Promise<{
+    error?: undefined;
     valid: boolean;
     provider: "local";
     diagnosticCode: "empty-model-list" | "error" | "healthy" | "invalid-model" | "timeout" | "unconfigured" | "unreachable";
     message: string | undefined;
     availableModels: readonly string[] | undefined;
     selectedModel: string | undefined;
-    error?: undefined;
 } | {
+    message?: undefined;
     availableModels?: undefined;
     selectedModel?: undefined;
     valid: boolean;
     provider: "claude" | "gemini" | "huggingface" | "openai";
     error: string;
     diagnosticCode?: undefined;
-    message?: undefined;
 } | {
+    error?: undefined;
     availableModels?: undefined;
     selectedModel?: undefined;
-    error?: undefined;
     valid: boolean;
     provider: "claude" | "gemini" | "huggingface" | "openai";
     diagnosticCode: "error" | "healthy";

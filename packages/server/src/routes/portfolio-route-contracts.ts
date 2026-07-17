@@ -163,22 +163,16 @@ export const portfolioMutationResponses = {
 export const portfolioProjectMutationResponses = {
   [HTTP_STATUS_OK]: portfolioProjectResponseSchema,
   [HTTP_STATUS_CREATED]: portfolioProjectResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const portfolioProjectReorderResponses = {
   [HTTP_STATUS_OK]: portfolioResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const portfolioProjectDeleteResponses = {
   [HTTP_STATUS_OK]: portfolioProjectDeleteResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const portfolioExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };

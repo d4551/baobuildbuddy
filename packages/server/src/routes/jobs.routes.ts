@@ -57,8 +57,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: { tags: ["Jobs"] },
       query: jobsListQuerySchema,
-      response: jobsListResponses,
-    },
+      },
     async ({ query }: { query: JobListQuery }) => listJobs(query),
   )
   .get(
@@ -66,8 +65,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: { tags: ["Jobs"] },
       params: jobIdParamsSchema,
-      response: jobEntityResponses,
-    },
+      },
     async ({ params, set }: { params: JobIdParams; set: { status?: number | string } }) => {
       const job = await getJobById(params.id);
       if (!job) {
@@ -82,8 +80,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: { tags: ["Jobs"] },
       body: saveJobBodySchema,
-      response: saveJobResponses,
-    },
+      },
     async ({ body, set }: { body: SaveJobBody; set: { status?: number | string } }) => {
       const result = await saveJob(body.jobId);
       if (result.status !== null) {
@@ -97,16 +94,14 @@ export const jobsRoutes = new Elysia({
     {
       detail: { tags: ["Jobs"] },
       params: savedJobParamsSchema,
-      response: deleteSavedJobResponses,
-    },
+      },
     async ({ params }: { params: SavedJobParams }) => deleteSavedJob(params.jobId),
   )
   .get(
     "/saved",
     {
       detail: { tags: ["Jobs"] },
-      response: savedJobsListResponses,
-    },
+      },
     async () => listSavedJobs(),
   )
   .post(
@@ -114,8 +109,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: { tags: ["Jobs"] },
       body: applyJobBodySchema,
-      response: applyJobResponses,
-    },
+      },
     async ({ body, set }: { body: ApplyJobBody; set: { status?: number | string } }) => {
       const result = await createApplication(body.jobId, body.notes ?? "");
       if (result.status !== null) {
@@ -130,8 +124,7 @@ export const jobsRoutes = new Elysia({
       detail: { tags: ["Jobs"] },
       params: updateApplicationParamsSchema,
       body: updateApplicationBodySchema,
-      response: updateApplicationResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -152,24 +145,21 @@ export const jobsRoutes = new Elysia({
     "/applications",
     {
       detail: { tags: ["Jobs"] },
-      response: applicationsListResponses,
-    },
+      },
     async () => listApplications(),
   )
   .get(
     "/recommendations",
     {
       detail: { tags: ["Jobs"] },
-      response: recommendationsResponses,
-    },
+      },
     async () => getRecommendations(),
   )
   .post(
     "/refresh",
     {
       detail: { tags: ["Jobs"] },
-      response: jobsRefreshResponses,
-    },
+      },
     async ({ set }) => {
       const aggregator = new JobAggregator();
       const refreshResult = await settle(aggregator.refreshJobs());

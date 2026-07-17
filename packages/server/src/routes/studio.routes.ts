@@ -41,8 +41,7 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       query: studioListQuerySchema,
-      response: studioListResponses,
-    },
+      },
     async ({ query }: { query: StudioListRouteQuery }) => {
       const { q = "", type, size, remoteWork } = query;
 
@@ -78,8 +77,7 @@ export const studioRoutes = new Elysia({
     "/analytics",
     {
       detail: { tags: ["Studios"] },
-      response: studioAnalyticsResponses,
-    },
+      },
     async (): Promise<StudioAnalytics> => {
       const allStudios = await db.select().from(studios);
 
@@ -125,8 +123,7 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
-      response: studioEntityResponses,
-    },
+      },
     async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const rows = await db.select().from(studios).where(eq(studios.id, params.id));
       if (rows.length === 0) {
@@ -141,8 +138,7 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       body: studioMutationBodySchema,
-      response: studioEntityResponses,
-    },
+      },
     async ({ body, set }: { body: StudioMutationRouteBody; set: RouteSetState }) => {
       const newStudio: StudioInsert = {
         id: generateId(),
@@ -171,8 +167,7 @@ export const studioRoutes = new Elysia({
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
-      response: studioEntityResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -212,8 +207,7 @@ export const studioRoutes = new Elysia({
     {
       detail: { tags: ["Studios"] },
       params: studioIdParamsSchema,
-      response: studioDeleteResponses,
-    },
+      },
     async ({ params, set }: { params: StudioIdParams; set: RouteSetState }) => {
       const existing = await db.select().from(studios).where(eq(studios.id, params.id));
       if (existing.length === 0) {

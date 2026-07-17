@@ -4,11 +4,15 @@ import { settlePromise } from "./async-flow";
 import type { useSpeechModelProfiles } from "./useSpeechModelProfiles";
 import { getErrorMessage } from "~/utils/errors";
 
+type FocusableInputRef = {
+  value: { focus: () => void } | null;
+};
+
 export const createFloatingChatWidgetPanelActions = (options: {
   isOpen: Ref<boolean>;
   isSpeechSettingsOpen: Ref<boolean>;
   unreadCount: Ref<number>;
-  inputRef: ReturnType<typeof useTemplateRef<HTMLTextAreaElement>>;
+  inputRef: FocusableInputRef;
   ensureSpeechConfigLoaded: ReturnType<typeof useSpeechModelProfiles>["ensureSpeechConfigLoaded"];
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: ReturnType<typeof useI18n>["t"];
@@ -64,7 +68,7 @@ export const createFloatingChatWidgetMessageActions = (options: {
   stopListening: () => void;
   shouldStickToBottom: Ref<boolean>;
   sendMessage: ReturnType<typeof useAI>["sendMessage"];
-  inputRef: ReturnType<typeof useTemplateRef<HTMLTextAreaElement>>;
+  inputRef: FocusableInputRef;
   scrollToBottom: (force?: boolean) => void;
 }) => {
   const handleSendMessage = async () => {

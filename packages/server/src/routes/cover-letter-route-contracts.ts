@@ -114,23 +114,18 @@ export const coverLettersListResponses = {
 export const coverLetterEntityResponses = {
   [HTTP_STATUS_OK]: coverLetterEntityResponseSchema,
   [HTTP_STATUS_CREATED]: coverLetterEntityResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const coverLetterDeleteResponses = {
   [HTTP_STATUS_OK]: coverLetterDeleteResponseSchema,
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const generateCoverLetterResponses = {
   [HTTP_STATUS_OK]: generateCoverLetterResponseSchema,
   [HTTP_STATUS_CREATED]: generateCoverLetterSavedResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_SERVICE_UNAVAILABLE]: simpleErrorResponseSchema,
 };
 
 export const coverLetterExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };

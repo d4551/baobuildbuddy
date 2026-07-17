@@ -42,8 +42,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: { tags: ["Skill Mapping"] },
       query: skillMappingsQuerySchema,
-      response: skillMappingsListResponses,
-    },
+      },
     async ({ query }: { query: SkillMappingsRouteQuery }) => listSkillMappings(query),
   )
   .post(
@@ -51,8 +50,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: { tags: ["Skill Mapping"] },
       body: skillMappingCreateBodySchema,
-      response: skillMappingCreateResponses,
-    },
+      },
     async ({
       body,
       set,
@@ -71,8 +69,7 @@ export const skillMappingRoutes = new Elysia({
       detail: { tags: ["Skill Mapping"] },
       params: skillMappingIdParamsSchema,
       body: skillMappingUpdateBodySchema,
-      response: skillMappingUpdateResponses,
-    },
+      },
     async ({
       params,
       body,
@@ -88,8 +85,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: { tags: ["Skill Mapping"] },
       params: skillMappingIdParamsSchema,
-      response: skillMappingDeleteResponses,
-    },
+      },
     async ({ params, set }: { params: SkillMappingIdParams; set: SkillMappingRouteSetState }) => {
       const result = await deleteSkillMappingById(params.id, set);
       if (result.kind === "gone" || result.kind === "deleted") {
@@ -102,8 +98,7 @@ export const skillMappingRoutes = new Elysia({
     "/pathways",
     {
       detail: { tags: ["Skill Mapping"] },
-      response: skillPathwaysResponses,
-    },
+      },
     async () => skillMappingService.getPathways(),
   )
   .get(
@@ -111,8 +106,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: { tags: ["Skill Mapping"] },
       query: skillReadinessQuerySchema,
-      response: skillReadinessResponses,
-    },
+      },
     async ({ query }: { query: SkillReadinessRouteQuery }) => getSkillReadiness(query.jobId),
   )
   .post(
@@ -120,8 +114,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: { tags: ["Skill Mapping"] },
       body: skillAnalysisBodySchema,
-      response: skillAnalysisResponses,
-    },
+      },
     async ({ body, set }: { body: SkillAnalysisRouteBody; set: SkillMappingRouteSetState }) =>
       analyzeSkillMappingsSafely(body, set),
   );
