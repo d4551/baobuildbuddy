@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
-import { toRef } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
@@ -15,8 +14,6 @@ useBrandPreviewStyles(() => props.brandDraft);
 
 const brandLightSwatchLabel = t("settings.brand.lightThemeLegend");
 const brandDarkSwatchLabel = t("settings.brand.darkThemeLegend");
-
-void toRef(props, "brandDraft");
 </script>
 
 <template>
