@@ -24,7 +24,7 @@ const page = reactive(useAIDashboardPage());
       title-id="ai-dashboard-title"
       :title="t('aiDashboard.title')"
       :description="t('aiDashboard.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
     >
       <template #actions>
         <button

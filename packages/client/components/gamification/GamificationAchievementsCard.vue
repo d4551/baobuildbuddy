@@ -27,13 +27,12 @@ defineProps<{
       </div>
 
       <div v-if="lockedAchievements.length">
-        <h3 class="mb-3 font-semibold text-base-content/60">{{ t("gamificationPage.achievementsLockedLabel") }}</h3>
+        <h3 class="mb-3 font-semibold text-muted">{{ t("gamificationPage.achievementsLockedLabel") }}</h3>
         <SectionGrid grid-token="fourColumnFromTwo">
           <AchievementBadge
             v-for="achievement in lockedAchievements"
             :key="achievement.id"
             :achievement="achievement"
-            class="card bg-base-100 opacity-60"
           />
         </SectionGrid>
       </div>

@@ -49,6 +49,7 @@ const isLocaleCatalogEntrypoint = (filePath: string): boolean =>
 
 const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
+  filePath.endsWith(".d.ts") ||
   filePath === "packages/client/app.vue" ||
   filePath === "packages/client/error.vue" ||
   filePath === "packages/client/nuxt.config.ts" ||

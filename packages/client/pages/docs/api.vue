@@ -44,7 +44,7 @@ const {
       title-id="api-docs-title"
       :title="t('apiDocs.title')"
       :description="t('apiDocs.intro')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
     />
 
     <div v-if="docsUiState === 'loading'" role="status" aria-live="polite" :aria-label="t('apiDocs.state.loading')">

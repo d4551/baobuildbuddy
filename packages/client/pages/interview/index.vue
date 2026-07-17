@@ -71,7 +71,7 @@ const {
       title-id="interview-hub-title"
       :title="t('interviewHub.title')"
       :description="t('interviewHub.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
       density="comfortable"
     >
       <template #actions>
@@ -131,7 +131,7 @@ const {
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 class="card-title">{{ t("interviewHub.prep.title") }}</h2>
-              <p class="text-sm text-base-content/70">{{ t("interviewHub.prep.subtitle") }}</p>
+              <p class="text-sm text-secondary">{{ t("interviewHub.prep.subtitle") }}</p>
             </div>
             <span class="badge badge-primary badge-outline">
               {{ t("interviewHub.prep.progressLabel", { done: prepReadyCount, total: prepChecklist.length }) }}
@@ -154,7 +154,7 @@ const {
                     {{ item.ready ? t("interviewHub.prep.readyBadge") : t("interviewHub.prep.pendingBadge") }}
                   </span>
                 </div>
-                <p class="text-xs text-base-content/70">{{ item.description }}</p>
+                <p class="text-xs text-secondary">{{ item.description }}</p>
                 <div class="card-actions justify-end">
                   <NuxtLink
                     :to="item.route"
@@ -177,7 +177,7 @@ const {
               <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
               <span class="badge badge-primary badge-outline">{{ t("interviewHub.cards.recommendedBadge") }}</span>
             </div>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ t("interviewHub.cards.jobPracticeDescription") }}
             </p>
             <div v-if="selectedJob" class="alert alert-info alert-vertical sm:alert-horizontal mt-2">
@@ -208,7 +208,7 @@ const {
         <div class="card card-border bg-base-100">
           <div class="card-body">
             <h2 class="card-title">{{ t("interviewHub.cards.studioDrillTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ t("interviewHub.cards.studioDrillDescription") }}
             </p>
             <div v-if="selectedStudioName" class="alert alert-soft mt-2">

@@ -16,7 +16,7 @@ const { t } = useI18n();
           {{ t("automation.scraper.overview.eyebrow") }}
         </p>
         <h2 class="card-title">{{ t("automation.scraper.overview.title") }}</h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-secondary">
           {{ t("automation.scraper.overview.description") }}
         </p>
       </div>
@@ -34,7 +34,7 @@ const { t } = useI18n();
         <p class="text-sm font-medium text-base-content">
           {{ t("automation.scraper.overview.workflowTitle") }}
         </p>
-        <p class="mt-1 text-sm text-base-content/70">
+        <p class="mt-1 text-sm text-secondary">
           {{ t("automation.scraper.overview.workflowDescription") }}
         </p>
       </div>

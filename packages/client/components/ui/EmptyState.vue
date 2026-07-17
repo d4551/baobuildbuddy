@@ -29,31 +29,27 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const hasCtaLabel = computed(() => (props.ctaLabelKey ?? "").trim().length > 0);
-const hasCtaLink = computed(
-  () => hasCtaLabel.value && (props.ctaTo ?? "").trim().length > 0,
-);
-const hasCtaButton = computed(
-  () => hasCtaLabel.value && (props.ctaTo ?? "").trim().length === 0,
-);
+const hasCtaLink = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").trim().length > 0);
+const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").trim().length === 0);
 </script>
 
 <template>
   <div :class="EMPTY_STATE_STACK_CLASS">
     <div
       v-if="icon"
-      class="text-4xl text-base-content/40"
+      class="text-4xl text-muted"
       aria-hidden="true"
     >
       {{ icon }}
     </div>
     <IconDocumentText
       v-else
-      class="h-16 w-16 shrink-0 text-base-content/20"
+      class="h-16 w-16 shrink-0 text-muted"
     />
     <h3 class="text-lg font-semibold">
       {{ t(titleKey) }}
     </h3>
-    <p class="max-w-sm text-base-content/60">
+    <p class="max-w-sm text-muted">
       {{ t(descriptionKey) }}
     </p>
     <NuxtLink

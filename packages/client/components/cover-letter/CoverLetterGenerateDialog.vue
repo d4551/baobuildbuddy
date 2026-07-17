@@ -33,7 +33,7 @@ defineEmits<{
     <h2 :id="titleId" class="text-lg font-bold">
       {{ $t("coverLetterPage.generate.title") }}
     </h2>
-    <p class="mt-1 text-sm text-base-content/70">
+    <p class="mt-1 text-sm text-secondary">
       {{ $t("coverLetterPage.generate.subtitle") }}
     </p>
 

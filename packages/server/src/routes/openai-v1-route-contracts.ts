@@ -6,7 +6,10 @@ import {
   HTTP_STATUS_OK,
   HTTP_STATUS_UNAUTHORIZED,
 } from "@bao/shared/constants/http";
-import { SCHEMA_MAX_ITEMS_LARGE, SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_LONG,
+} from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
 
 export const openaiV1ChatMessageSchema = t.Object({

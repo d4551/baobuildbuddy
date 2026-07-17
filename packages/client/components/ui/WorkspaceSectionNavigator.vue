@@ -75,7 +75,7 @@ const activeDescription = computed<string>(() => {
               </h2>
               <p
                 v-if="activeDescription"
-                class="max-w-3xl text-sm leading-6 text-base-content/70"
+                class="max-w-3xl text-sm leading-6 text-secondary"
               >
                 {{ activeDescription }}
               </p>
@@ -86,7 +86,7 @@ const activeDescription = computed<string>(() => {
             class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain xl:max-w-4xl"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max min-w-full gap-2 bg-base-200/70 p-2 xl:min-w-0">
+            <div class="tabs tabs-box w-max min-w-full gap-2 glass-subtle p-2 xl:min-w-0">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"
@@ -104,7 +104,7 @@ const activeDescription = computed<string>(() => {
                     :class="
                       activeSection === section.id
                         ? 'border-primary/30 bg-primary/10 text-primary'
-                        : 'border-base-300 bg-base-100 text-base-content/60'
+                        : 'border-base-300 bg-base-100 text-muted'
                     "
                   >
                     <component

@@ -67,7 +67,7 @@ const emit = defineEmits<{
         </span>
       </summary>
       <div class="collapse-content space-y-3">
-        <p class="text-sm text-base-content/60">{{ provider.description }}</p>
+        <p class="text-sm text-muted">{{ provider.description }}</p>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ providerKeyLabel(provider.id) }}</legend>
           <div class="join w-full">
@@ -117,11 +117,11 @@ const emit = defineEmits<{
         </span>
         <p
           v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message"
-          class="text-sm text-base-content/60"
+          class="text-sm text-muted"
         >
           {{ providerDiagnostics[provider.id]?.message }}
         </p>
-        <p v-else-if="testResults[provider.id]?.message" class="text-sm text-base-content/60">
+        <p v-else-if="testResults[provider.id]?.message" class="text-sm text-muted">
           {{ testResults[provider.id]?.message }}
         </p>
       </div>

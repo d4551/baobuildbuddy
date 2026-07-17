@@ -51,14 +51,14 @@ const promptExpectedMinutes = computed(() => {
         <h2 id="interview-session-prompt-title" class="card-title text-xl">
           {{ t("interviewSession.promptTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-muted">
           {{ t("interviewSession.promptDescription") }}
         </p>
       </div>
 
       <div
         v-if="currentQuestion"
-        class="rounded-box border border-base-300 bg-base-200/60 p-5"
+        class="rounded-box border border-base-300 glass-subtle p-5"
       >
         <p class="text-xl font-semibold leading-relaxed text-base-content">
           {{ currentQuestion.question }}
@@ -66,22 +66,22 @@ const promptExpectedMinutes = computed(() => {
       </div>
 
       <SectionGrid v-if="currentQuestion" grid-token="threeColumnMd">
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+        <div class="rounded-box border border-base-300 glass-subtle p-4">
+          <p class="text-sm font-medium text-secondary">
             {{ t("interviewSession.promptTypeLabel") }}
           </p>
           <p class="mt-2 text-base font-semibold text-base-content">{{ promptType }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+        <div class="rounded-box border border-base-300 glass-subtle p-4">
+          <p class="text-sm font-medium text-secondary">
             {{ t("interviewSession.promptDifficultyLabel") }}
           </p>
           <p class="mt-2 text-base font-semibold text-base-content">{{ promptDifficulty }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+        <div class="rounded-box border border-base-300 glass-subtle p-4">
+          <p class="text-sm font-medium text-secondary">
             {{ t("interviewSession.promptExpectedDurationLabel") }}
           </p>
           <p class="mt-2 text-base font-semibold text-base-content">
@@ -91,7 +91,7 @@ const promptExpectedMinutes = computed(() => {
       </SectionGrid>
 
       <div class="space-y-2">
-        <p class="text-sm font-medium text-base-content/70">
+        <p class="text-sm font-medium text-secondary">
           {{ t("interviewSession.promptTagsLabel") }}
         </p>
 
@@ -105,7 +105,7 @@ const promptExpectedMinutes = computed(() => {
           </span>
         </div>
 
-        <p v-else class="text-sm text-base-content/60">
+        <p v-else class="text-sm text-muted">
           {{ t("interviewSession.promptTagsEmpty") }}
         </p>
       </div>

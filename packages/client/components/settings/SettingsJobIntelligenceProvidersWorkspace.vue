@@ -92,11 +92,11 @@ const sourceCollectionCount = computed(
         </div>
       </div>
 
-      <section class="card card-border bg-base-200/60" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
+      <section class="card card-border card-glass" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
         <div class="card-body gap-4 p-4">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.defaultsTitle") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.jobIntelligence.defaultsDescription") }}
             </p>
           </div>
@@ -161,7 +161,7 @@ const sourceCollectionCount = computed(
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
               <label class="flex items-center justify-between gap-4 rounded-box border border-base-300 bg-base-100 px-4 py-3">
-                <span class="text-sm text-base-content/70">
+                <span class="text-sm text-secondary">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>
                 <input

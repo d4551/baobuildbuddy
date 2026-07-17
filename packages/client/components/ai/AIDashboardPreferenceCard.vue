@@ -21,7 +21,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
   <div class="card card-border card-glass">
     <div class="card-body gap-4">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
-      <p class="text-sm text-base-content/70">{{ t("aiDashboard.preference.description") }}</p>
+      <p class="text-sm text-secondary">{{ t("aiDashboard.preference.description") }}</p>
 
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">

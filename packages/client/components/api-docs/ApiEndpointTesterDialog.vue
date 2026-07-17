@@ -77,7 +77,7 @@ function updateRequestBodyValue(event: Event): void {
         <p
           v-if="selectedEndpoint"
           :id="dialogDescriptionId"
-          class="font-mono text-sm text-base-content/80"
+          class="font-mono text-sm text-secondary"
         >
           <span :class="methodBadgeClass(selectedEndpoint.method)">
             {{ methodLabel(selectedEndpoint.method) }}
@@ -179,7 +179,7 @@ function updateRequestBodyValue(event: Event): void {
         />
         <p
           v-if="!selectedEndpoint.requestBodyTemplate && !selectedEndpoint.requestBodyRequired"
-          class="text-xs text-base-content/60"
+          class="text-xs text-muted"
         >
           {{ t("apiDocs.tester.noRequestBodyTemplate") }}
         </p>
@@ -208,7 +208,7 @@ function updateRequestBodyValue(event: Event): void {
 
       <section class="space-y-3" :aria-label="t('apiDocs.tester.responseTitle')">
         <h3 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h3>
-        <p class="text-sm text-base-content/70">{{ testerStateLabel }}</p>
+        <p class="text-sm text-secondary">{{ testerStateLabel }}</p>
 
         <div
           v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"

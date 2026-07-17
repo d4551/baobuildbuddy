@@ -15,16 +15,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card card-border overflow-hidden bg-base-100 shadow-sm">
-    <div class="card-body relative gap-4 bg-linear-to-br from-primary/12 via-base-100 to-secondary/12">
-      <div
-        class="absolute right-0 top-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl"
-        aria-hidden="true"
-      ></div>
-      <div
-        class="absolute bottom-0 left-0 h-28 w-28 rounded-full bg-secondary/10 blur-3xl"
-        aria-hidden="true"
-      ></div>
+  <section class="card card-border card-glass glass-interactive overflow-hidden">
+    <div class="card-body relative gap-4">
       <div class="relative space-y-3">
         <div class="badge badge-primary badge-soft w-fit">
           {{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}
@@ -32,10 +24,10 @@ const { t } = useI18n();
         <h2 class="card-title text-2xl md:text-3xl">
           {{ welcomeHeading }}
         </h2>
-        <p class="text-base text-base-content/70">
+        <p class="text-base text-secondary">
           {{ t(DASHBOARD_COPY_KEYS.welcomeDescription) }}
         </p>
-        <div class="badge badge-outline badge-lg text-rotate w-fit bg-base-100/70">
+        <div class="badge badge-outline badge-lg text-rotate w-fit bg-base-100">
           <Transition name="hero-text-rotate" mode="out-in">
             <span :key="activeHeroPhrase">{{ activeHeroPhrase }}</span>
           </Transition>

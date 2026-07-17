@@ -132,7 +132,7 @@ useSeoMeta({
       <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
-          <p class="mb-4 text-sm text-base-content/70">
+          <p class="mb-4 text-sm text-secondary">
             {{ t("studioAnalytics.sections.topTechnologiesDescription") }}
           </p>
 

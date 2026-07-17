@@ -149,7 +149,7 @@ const page = useJobsIndexPage();
                   <JobMatchScore v-if="typeof job.matchScore === 'number'" :score="job.matchScore" compact />
                 </div>
 
-                <p class="font-medium text-base-content/70">{{ job.company }}</p>
+                <p class="font-medium text-secondary">{{ job.company }}</p>
 
                 <div class="mt-2 flex flex-wrap gap-2">
                   <span class="badge badge-sm">
@@ -169,12 +169,12 @@ const page = useJobsIndexPage();
                   </span>
                 </div>
 
-                <p class="mt-2 line-clamp-2 text-sm text-base-content/60">
+                <p class="mt-2 line-clamp-2 text-sm text-muted">
                   {{ job.description }}
                 </p>
 
                 <div class="card-actions mt-2 items-center justify-between">
-                  <span class="text-xs text-base-content/50">
+                  <span class="text-xs text-muted">
                     {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div class="flex gap-2">

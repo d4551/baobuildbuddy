@@ -1,6 +1,10 @@
 import { resolveBrandSettings, THEME_NAMES } from "@bao/shared/constants/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
-import type { AppSettings, BrandSettings, BrandThemePalette } from "@bao/shared/types/settings-contracts";
+import type {
+  AppSettings,
+  BrandSettings,
+  BrandThemePalette,
+} from "@bao/shared/types/settings-contracts";
 import { computed, readonly } from "vue";
 import { useNuxtState } from "./nuxtRuntime";
 import { useTheme } from "./useTheme";

@@ -17,7 +17,8 @@
       "!**/bun.lock",
       "!**/packages/desktop/src-tauri/target",
       "!**/packages/desktop/src-tauri/gen",
-      "!**/packages/desktop/src-tauri/icons"
+      "!**/packages/desktop/src-tauri/icons",
+      "!**/.omo"
     ]
   },
   "formatter": {

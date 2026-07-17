@@ -61,11 +61,11 @@ const populatedTaxonomyCount = computed(
       </SettingsPanelHeader>
 
       <SectionGrid grid-token="twoColumnWide">
-        <article class="card card-border bg-base-200/60">
+        <article class="card card-border card-glass">
           <div class="card-body gap-4 p-4">
             <div class="space-y-1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</h3>
-              <p class="text-sm text-base-content/60">
+              <p class="text-sm text-muted">
                 {{ t("settings.jobIntelligence.taxonomyKeywordsDescription") }}
               </p>
             </div>
@@ -81,11 +81,11 @@ const populatedTaxonomyCount = computed(
           </div>
         </article>
 
-        <article class="card card-border bg-base-200/60">
+        <article class="card card-border card-glass">
           <div class="card-body gap-4 p-4">
             <div class="space-y-1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</h3>
-              <p class="text-sm text-base-content/60">
+              <p class="text-sm text-muted">
                 {{ t("settings.jobIntelligence.taxonomyStudiosDescription") }}
               </p>
             </div>

@@ -22,7 +22,7 @@ const brandForm = defineModel<{
 <template>
   <div class="card card-border bg-base-100 shadow-sm">
     <div class="card-body gap-4 p-4 md:p-6">
-      <p class="text-sm text-base-content/70">
+      <p class="text-sm text-secondary">
         {{ t("settings.brand.tabs.typographyDescription") }}
       </p>
 

@@ -78,22 +78,22 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   )
   .model({
     HealthResponse: t.Object(
-        {
-          status: t.String(),
-          timestamp: t.String(),
-          database: t.String(),
-          uptime: t.Number(),
-        },
-        { required: ["status", "timestamp", "database", "uptime"] },
-      ),
+      {
+        status: t.String(),
+        timestamp: t.String(),
+        database: t.String(),
+        uptime: t.Number(),
+      },
+      { required: ["status", "timestamp", "database", "uptime"] },
+    ),
     ErrorResponse: t.Object(
-        {
-          error: t.String(),
-          code: t.Optional(t.String()),
-          fields: t.Optional(t.Array(t.String())),
-        },
-        { required: ["error"] },
-      ),
+      {
+        error: t.String(),
+        code: t.Optional(t.String()),
+        fields: t.Optional(t.Array(t.String())),
+      },
+      { required: ["error"] },
+    ),
   })
   .use(
     rateLimit({

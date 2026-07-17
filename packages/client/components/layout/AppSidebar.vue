@@ -83,7 +83,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
               </svg>
             </span>
             <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
-            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 text-base-content/60">
+            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 text-muted">
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>
             </span>
@@ -107,7 +107,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
       </ul>
     </nav>
     <footer
-      class="border-t border-base-300 p-4 text-xs text-base-content/40 is-drawer-close:hidden"
+      class="border-t border-base-300 p-4 text-xs text-muted is-drawer-close:hidden"
       :aria-label="t('layout.shell.versionFooterAria')"
     >
       {{ t("layout.shell.appVersion", { version: APP_SEMVER }) }}

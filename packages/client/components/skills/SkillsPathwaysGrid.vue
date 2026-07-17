@@ -36,8 +36,8 @@ const { t } = useI18n();
               </span>
             </div>
 
-            <p class="text-sm text-base-content/70">{{ pathway.description }}</p>
-            <p v-if="pathway.detailedDescription" class="text-xs text-base-content/70">
+            <p class="text-sm text-secondary">{{ pathway.description }}</p>
+            <p v-if="pathway.detailedDescription" class="text-xs text-secondary">
               {{ pathway.detailedDescription }}
             </p>
 

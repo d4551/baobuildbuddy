@@ -62,7 +62,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
             />
             <div class="min-w-0">
               <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
-              <p class="text-xs text-base-content/70">{{ providerDescription(provider.id) }}</p>
+              <p class="text-xs text-secondary">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
           <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">

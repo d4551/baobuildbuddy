@@ -75,7 +75,7 @@ const emit = defineEmits<{
         </article>
       </div>
 
-      <p v-else class="text-sm text-base-content/60">{{ t("gamificationPage.noChallengesLabel") }}</p>
+      <p v-else class="text-sm text-muted">{{ t("gamificationPage.noChallengesLabel") }}</p>
     </div>
   </section>
 </template>

@@ -16,7 +16,7 @@ const { t } = useI18n();
   <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
-      <div v-if="screenshotPaths.length === 0" class="text-sm opacity-70">
+      <div v-if="screenshotPaths.length === 0" class="text-sm text-muted">
         {{ t("automation.runDetail.noScreenshots") }}
       </div>
       <SectionGrid v-else grid-token="threeColumn">
@@ -35,7 +35,7 @@ const { t } = useI18n();
             />
             <div
               v-else
-              class="w-full rounded-lg border border-dashed border-base-content/30 p-4 text-sm text-base-content/70"
+              class="w-full rounded-lg border border-dashed border-base-content/30 p-4 text-sm text-secondary"
               role="status"
             >
               {{ t("automation.runDetail.screenshotLoadError", { index: index + 1 }) }}

@@ -128,7 +128,10 @@ export const authRoutes = new Elysia({
         },
         async ({ body, request, status }) => {
           if (config.disableAuth) {
-            return status(HTTP_STATUS_OK, { configured: false, message: API_MESSAGE_AUTH_DISABLED });
+            return status(HTTP_STATUS_OK, {
+              configured: false,
+              message: API_MESSAGE_AUTH_DISABLED,
+            });
           }
 
           const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));

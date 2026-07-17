@@ -217,22 +217,22 @@ function studioDetailLocation(location: string | undefined): string {
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
             <div class="space-y-3">
               <div>
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.workStyleLabel") }}</p>
+                <p class="text-xs text-muted">{{ t("studioDetail.culture.workStyleLabel") }}</p>
                 <p>{{ cultureWorkStyle }}</p>
               </div>
               <div v-if="cultureEnvironment">
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.environmentLabel") }}</p>
+                <p class="text-xs text-muted">{{ t("studioDetail.culture.environmentLabel") }}</p>
                 <p>{{ cultureEnvironment }}</p>
               </div>
               <div v-if="cultureValues.length > 0">
-                <p class="text-xs text-base-content/60">{{ t("studioDetail.culture.valuesLabel") }}</p>
+                <p class="text-xs text-muted">{{ t("studioDetail.culture.valuesLabel") }}</p>
                 <div class="mt-1 flex flex-wrap gap-2">
                   <span v-for="value in cultureValues" :key="value" class="badge badge-outline badge-sm">
                     {{ value }}
                   </span>
                 </div>
               </div>
-              <p v-else class="text-sm text-base-content/70">
+              <p v-else class="text-sm text-secondary">
                 {{ t("studioDetail.culture.noValues") }}
               </p>
             </div>

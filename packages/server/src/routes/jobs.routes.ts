@@ -96,8 +96,7 @@ export const jobsRoutes = new Elysia({
       params: savedJobParamsSchema,
       response: deleteSavedJobResponses,
     },
-    async ({ params, status }) =>
-      status(HTTP_STATUS_OK, await deleteSavedJob(params.jobId)),
+    async ({ params, status }) => status(HTTP_STATUS_OK, await deleteSavedJob(params.jobId)),
   )
   .get(
     "/saved",

@@ -45,7 +45,7 @@ function emitValue(): void {
 <template>
   <div class="space-y-4 p-6">
     <h2 class="text-lg font-semibold">{{ t("resumePage.gaming.title") }}</h2>
-    <p class="mb-4 text-sm text-base-content/70">
+    <p class="mb-4 text-sm text-secondary">
       {{ t("resumePage.gaming.description") }}
     </p>
     <fieldset class="fieldset">

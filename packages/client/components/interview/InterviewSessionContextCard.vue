@@ -28,12 +28,12 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         <h2 id="interview-session-context-title" class="card-title text-lg">
           {{ t("interviewSession.overviewTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-muted">
           {{ t("interviewSession.overviewDescription") }}
         </p>
       </div>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200/60">
+      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.targetTitle") }}
         </summary>
@@ -42,14 +42,14 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
             <p class="text-base font-semibold text-base-content">
               {{ targetJob?.title ?? activeSession.role }}
             </p>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ targetJob?.company ?? activeSession.studioName }}
               <span v-if="targetJob?.location"> · {{ targetJob.location }}</span>
             </p>
           </div>
 
           <div class="space-y-2">
-            <p class="text-sm font-medium text-base-content/70">
+            <p class="text-sm font-medium text-secondary">
               {{ t("interviewSession.focusAreasTitle") }}
             </p>
             <div v-if="focusAreas.length > 0" class="flex flex-wrap gap-2">
@@ -61,13 +61,13 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
                 {{ focusArea }}
               </span>
             </div>
-            <p v-else class="text-sm text-base-content/60">
+            <p v-else class="text-sm text-muted">
               {{ t("interviewSession.focusAreasEmpty") }}
             </p>
           </div>
 
           <div v-if="targetSignals.length > 0" class="space-y-2">
-            <p class="text-sm font-medium text-base-content/70">
+            <p class="text-sm font-medium text-secondary">
               {{ t("interviewSession.promptTagsLabel") }}
             </p>
             <div class="flex flex-wrap gap-2">
@@ -83,7 +83,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </div>
       </details>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200/60">
+      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.interviewerTitle") }}
         </summary>
@@ -91,26 +91,26 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
           <template v-if="interviewerPersona">
             <div class="space-y-1">
               <p class="text-base font-semibold text-base-content">{{ interviewerPersona.name }}</p>
-              <p class="text-sm text-base-content/70">
+              <p class="text-sm text-secondary">
                 {{ interviewerPersona.role }} · {{ interviewerPersona.studioName }}
               </p>
             </div>
 
             <dl class="space-y-3">
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+                <dt class="text-sm font-medium text-secondary">
                   {{ t("interviewSession.interviewerRoleLabel") }}
                 </dt>
                 <dd class="text-sm text-base-content">{{ interviewerPersona.role }}</dd>
               </div>
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+                <dt class="text-sm font-medium text-secondary">
                   {{ t("interviewSession.interviewerStyleLabel") }}
                 </dt>
                 <dd class="text-sm text-base-content">{{ interviewerPersona.style }}</dd>
               </div>
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+                <dt class="text-sm font-medium text-secondary">
                   {{ t("interviewSession.interviewerBackgroundLabel") }}
                 </dt>
                 <dd class="text-sm text-base-content">{{ interviewerPersona.background }}</dd>
@@ -118,7 +118,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
             </dl>
           </template>
 
-          <p v-else class="text-sm text-base-content/60">
+          <p v-else class="text-sm text-muted">
             {{ t("interviewSession.interviewerFallback") }}
           </p>
         </div>

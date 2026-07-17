@@ -59,8 +59,7 @@ const logger = createServerLogger("error-handler");
 
 export const errorHandler = new Elysia({ name: "error-handler" }).error((context) => {
   const { error, set } = context;
-  const code =
-    "code" in context && typeof context.code === "string" ? context.code : undefined;
+  const code = "code" in context && typeof context.code === "string" ? context.code : undefined;
 
   if (code === "NOT_FOUND") {
     set.status = HTTP_STATUS_NOT_FOUND;
@@ -88,4 +87,3 @@ export const errorHandler = new Elysia({ name: "error-handler" }).error((context
   set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
   return { error: API_ERROR_INTERNAL_SERVER, code };
 });
-

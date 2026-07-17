@@ -85,7 +85,7 @@ function handleScheduleInput(event: Event): void {
               {{ runStateLabel(runState) }}
             </span>
           </div>
-          <p class="text-sm text-base-content/70">
+          <p class="text-sm text-secondary">
             {{ cardDescription(capability.target) }}
           </p>
           <AutomationCoverageChips
@@ -185,7 +185,7 @@ function handleScheduleInput(event: Event): void {
 
       <div
         v-if="issueCount > 0 && compactMode"
-        class="rounded-box border border-base-300 bg-base-200 p-4 text-sm text-base-content/75"
+        class="rounded-box border border-base-300 bg-base-200 p-4 text-sm text-secondary"
       >
         <div class="space-y-4">
           <p class="font-semibold text-base-content">
@@ -211,7 +211,7 @@ function handleScheduleInput(event: Event): void {
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
         </summary>
-        <div class="collapse-content space-y-4 text-sm text-base-content/75">
+        <div class="collapse-content space-y-4 text-sm text-secondary">
           <ul class="space-y-2">
             <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
               {{ issue }}
@@ -269,7 +269,7 @@ function handleScheduleInput(event: Event): void {
           {{ latestRunNoticeText(capability.target) }}
         </summary>
         <div class="collapse-content space-y-4">
-          <p class="text-sm text-base-content/75">
+          <p class="text-sm text-secondary">
             {{ latestRunStatusText(capability.target) }}
           </p>
           <div class="card-actions justify-end">

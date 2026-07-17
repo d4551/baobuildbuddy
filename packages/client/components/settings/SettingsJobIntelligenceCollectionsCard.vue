@@ -19,12 +19,12 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <section class="card card-border bg-base-200/60" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
+  <section class="card card-border card-glass" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
     <div class="card-body gap-4 p-4">
       <div class="flex items-start justify-between gap-3">
         <div class="space-y-1">
           <h3 class="card-title text-base">{{ t("settings.jobIntelligence.advancedCollectionsTitle") }}</h3>
-          <p class="text-sm text-base-content/60">
+          <p class="text-sm text-muted">
             {{ t("settings.jobIntelligence.advancedCollectionsDescription") }}
           </p>
         </div>

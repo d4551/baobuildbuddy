@@ -21,7 +21,7 @@ const emit = defineEmits<{
   <div class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">{{ t("resumeBuildPage.target.title") }}</h2>
-      <p class="mb-4 text-sm text-base-content/70">{{ t("resumeBuildPage.target.description") }}</p>
+      <p class="mb-4 text-sm text-secondary">{{ t("resumeBuildPage.target.description") }}</p>
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.roleLegend") }}</legend>

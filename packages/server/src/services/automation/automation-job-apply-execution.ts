@@ -134,7 +134,10 @@ const finalizeJobApplySuccess = async (
     gamificationService.awardXP(ROUTE_GAMIFICATION_XP.automationCompleted, "automation_success"),
   );
   if (awardXpResult.status === "rejected") {
-    logger.warn({ err: String(awardXpResult.reason) }, "XP award failed after job apply automation");
+    logger.warn(
+      { err: String(awardXpResult.reason) },
+      "XP award failed after job apply automation",
+    );
   }
 };
 

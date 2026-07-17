@@ -19,12 +19,12 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
 <template>
   <SectionGrid grid-token="threeColumn">
-    <article class="card card-border bg-base-200/60">
+    <article class="card card-border card-glass">
       <div class="card-body gap-4 p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.hitmarkerTitle") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.jobIntelligence.hitmarkerDescription") }}
             </p>
           </div>
@@ -73,12 +73,12 @@ function providerBadgeLabel(isConfigured: boolean): string {
       </div>
     </article>
 
-    <article class="card card-border bg-base-200/60">
+    <article class="card card-border card-glass">
       <div class="card-body gap-4 p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.greenhouseTitle") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.jobIntelligence.greenhouseDescription") }}
             </p>
           </div>
@@ -114,12 +114,12 @@ function providerBadgeLabel(isConfigured: boolean): string {
       </div>
     </article>
 
-    <article class="card card-border bg-base-200/60">
+    <article class="card card-border card-glass">
       <div class="card-body gap-4 p-4">
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.leverTitle") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.jobIntelligence.leverDescription") }}
             </p>
           </div>

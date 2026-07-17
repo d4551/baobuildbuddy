@@ -18,10 +18,10 @@ defineProps<{
       <div class="card-body flex flex-col justify-between p-5 md:p-6">
         <div class="mb-4 flex items-start justify-between">
           <div>
-            <div class="mb-1 text-sm font-medium text-base-content/60">{{ statCard.title }}</div>
+            <div class="mb-1 text-sm font-medium text-muted">{{ statCard.title }}</div>
             <div class="text-3xl font-bold">{{ statCard.value }}</div>
           </div>
-          <div class="rounded-2xl bg-base-200/50 p-3" :class="statCard.accentClass">
+          <div class="rounded-2xl glass-subtle p-3" :class="statCard.accentClass">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
             </svg>

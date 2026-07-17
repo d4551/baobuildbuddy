@@ -1,7 +1,4 @@
-import {
-  API_ENDPOINTS,
-  OPENAI_V1_ENDPOINT_PREFIX,
-} from "@bao/shared/constants/endpoints";
+import { API_ENDPOINTS, OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { JOB_AGGREGATOR_CACHE_EXPIRY_MS } from "@bao/shared/constants/jobs";
 import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
@@ -71,9 +68,7 @@ const serverApp = new Elysia().use(openaiV1Routes).use(app);
 const server = serverApp.listen(config.port);
 
 logger.info(`BaoBuildBuddy server running at http://${config.host}:${config.port}`);
-logger.info(
-  `Health check: http://${config.host}:${config.port}${API_ENDPOINTS.health}`,
-);
+logger.info(`Health check: http://${config.host}:${config.port}${API_ENDPOINTS.health}`);
 logger.info(
   `OpenAI Chat Completions API: http://${config.host}:${config.port}${OPENAI_V1_ENDPOINT_PREFIX}`,
 );

@@ -109,10 +109,10 @@ const { t } = useI18n();
         >
           <div class="card-body flex-row items-center justify-between gap-4">
             <div class="space-y-1">
-              <p class="text-sm font-medium text-base-content/70">
+              <p class="text-sm font-medium text-secondary">
                 {{ t("interviewSession.voiceTitle") }}
               </p>
-              <p class="text-sm text-base-content/60">
+              <p class="text-sm text-muted">
                 {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
               </p>
             </div>

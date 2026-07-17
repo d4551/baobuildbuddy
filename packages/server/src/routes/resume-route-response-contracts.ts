@@ -118,9 +118,7 @@ export const resumeQuestionGenerateResponseSchema = t.Object(
   },
   { required: ["questions"] },
 );
-export type ResumeQuestionGenerateResponse = Static<
-  typeof resumeQuestionGenerateResponseSchema
->;
+export type ResumeQuestionGenerateResponse = Static<typeof resumeQuestionGenerateResponseSchema>;
 
 export const resumeDeleteResponseSchema = t.Object(
   {
@@ -150,15 +148,7 @@ export const resumeScoreResponseSchema = t.Object(
     analysis: t.Record(t.String(), t.Unknown()),
   },
   {
-    required: [
-      "resumeId",
-      "jobId",
-      "score",
-      "strengths",
-      "improvements",
-      "keywords",
-      "analysis",
-    ],
+    required: ["resumeId", "jobId", "score", "strengths", "improvements", "keywords", "analysis"],
   },
 );
 

@@ -154,15 +154,21 @@ export const buildFallbackStudioEnrichment = (
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,
-    studioRow.games?.length ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.` : undefined,
+    studioRow.games?.length
+      ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.`
+      : undefined,
     studioRow.technologies?.length
       ? `Experience with technologies such as ${studioRow.technologies.slice(0, 2).join(", ")}.`
       : undefined,
-    studioRow.interviewStyle ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.` : undefined,
+    studioRow.interviewStyle
+      ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.`
+      : undefined,
   ]),
   candidatePitchAngles: compactList([
     `Explain why ${studioRow.name} matches your target studios.`,
-    studioRow.description ? "Use the studio description to mirror product or team language." : undefined,
+    studioRow.description
+      ? "Use the studio description to mirror product or team language."
+      : undefined,
     studioRow.remoteWork ? "Highlight async collaboration and ownership." : undefined,
     studioRow.website ? `Reference the public studio presence at ${studioRow.website}.` : undefined,
   ]),

@@ -32,7 +32,7 @@ const emit = defineEmits<{
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div class="space-y-1">
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
-          <p class="text-sm text-base-content/60">{{ t("settings.aiProviders.routingSubtitle") }}</p>
+          <p class="text-sm text-muted">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
         <button class="btn btn-primary btn-sm" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
@@ -53,7 +53,7 @@ const emit = defineEmits<{
               <th scope="row" class="align-top">
                 <div class="space-y-1">
                   <p class="font-medium">{{ section.label }}</p>
-                  <p class="text-xs leading-5 text-base-content/60">{{ section.description }}</p>
+                  <p class="text-xs leading-5 text-muted">{{ section.description }}</p>
                 </div>
               </th>
               <td class="align-top">
@@ -90,7 +90,7 @@ const emit = defineEmits<{
                       {{ model }}
                     </option>
                   </datalist>
-                  <p class="text-xs text-base-content/50">
+                  <p class="text-xs text-muted">
                     {{ t("settings.aiProviders.purposeModelHint") }}
                   </p>
                 </div>

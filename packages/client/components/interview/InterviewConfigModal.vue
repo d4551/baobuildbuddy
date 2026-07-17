@@ -71,7 +71,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     <h3 :id="titleId" class="text-lg font-bold">
       {{ t("interviewHub.config.title") }}
     </h3>
-    <p :id="descriptionId" class="mt-1 text-sm text-base-content/70">
+    <p :id="descriptionId" class="mt-1 text-sm text-secondary">
       {{ t("interviewHub.config.subtitle") }}
     </p>
 
@@ -167,7 +167,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
           <div class="card-body p-4">
             <h4 class="font-semibold">{{ selectedJob.title }}</h4>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ selectedJob.company }} · {{ selectedJob.location }}
             </p>
             <div class="mt-2 flex flex-wrap gap-2">
@@ -191,7 +191,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
             :studios="[...studiosForSelector]"
             @update:model-value="emit('update:studio-id', $event)"
           />
-          <p v-if="studiosForSelector.length === 0" class="mt-2 text-xs text-base-content/60">
+          <p v-if="studiosForSelector.length === 0" class="mt-2 text-xs text-muted">
             {{ t("interviewHub.config.noStudiosHint") }}
           </p>
         </fieldset>

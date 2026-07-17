@@ -47,17 +47,17 @@ const brandPreviewThemes = computed<
 </script>
 
 <template>
-  <div class="card card-border bg-base-200/30 shadow-sm">
+  <div class="card card-border card-glass">
     <div class="card-body gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-base-content/45">
+          <p class="text-xs font-semibold uppercase tracking-widest text-muted">
             {{ t("settings.brand.previewEyebrow") }}
           </p>
           <h3 class="card-title mt-2">
             {{ t("settings.brand.previewTitle") }}
           </h3>
-          <p class="text-sm text-base-content/70">
+          <p class="text-sm text-secondary">
             {{ t("settings.brand.previewSubtitle") }}
           </p>
         </div>
@@ -78,19 +78,19 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="h-10 w-10 rounded-box border border-base-300/40 bg-base-100/80 object-contain p-1 shadow-sm"
+                class="h-10 w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1 shadow-sm"
               />
               <div
                 v-else
-                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300/40 bg-base-100/80 text-sm font-semibold shadow-sm"
+                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-sm font-semibold shadow-sm"
               >
                 {{ brandPreviewInitial }}
               </div>
               <div class="min-w-0">
-                <p class="text-xs uppercase tracking-widest text-base-content/60">
+                <p class="text-xs uppercase tracking-widest text-muted">
                   {{ t("settings.brand.previewEyebrow") }}
                 </p>
-                <p class="truncate text-sm font-medium text-base-content/80">
+                <p class="truncate text-sm font-medium text-secondary">
                   {{ brandDraft.apiName }}
                 </p>
               </div>
@@ -104,8 +104,8 @@ const brandPreviewThemes = computed<
             <h4 class="brand-display text-2xl font-semibold text-base-content">
               {{ brandDraft.name }}
             </h4>
-            <p class="max-w-md text-sm text-base-content/80">{{ brandDraft.content.tagline }}</p>
-            <p class="max-w-md text-xs text-base-content/60">
+            <p class="max-w-md text-sm text-secondary">{{ brandDraft.content.tagline }}</p>
+            <p class="max-w-md text-xs text-muted">
               {{ brandDraft.content.defaultDescription }}
             </p>
           </div>

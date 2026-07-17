@@ -13,11 +13,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
-    class="hero overflow-hidden rounded-box border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/10 shadow-sm"
-  >
+  <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200 shadow-sm">
     <div class="hero-content w-full max-w-none px-0">
-      <div class="card w-full bg-base-100/90 backdrop-blur">
+      <div class="card card-border card-glass w-full">
         <div class="card-body gap-5 p-6 lg:p-8">
           <div class="space-y-2">
             <div class="badge badge-primary badge-outline w-fit">
@@ -26,7 +24,7 @@ const { t } = useI18n();
             <h2 class="card-title text-2xl">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}
             </h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}
             </p>
           </div>

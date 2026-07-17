@@ -142,7 +142,7 @@ watch(
 <template>
   <div v-if="hasPages && hasNormalizedPages" class="card card-border bg-base-100">
     <div class="card-body gap-3 py-4 md:flex-row md:items-center md:justify-between">
-      <p class="text-xs text-base-content/70">{{ summary }}</p>
+      <p class="text-xs text-secondary">{{ summary }}</p>
 
       <nav class="join" :aria-label="navigationAria">
         <button

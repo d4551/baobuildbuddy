@@ -19,8 +19,8 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="card bg-base-100 shadow-md relative overflow-hidden"
-    :class="challenge.completed ? 'opacity-75' : 'hover:shadow-lg transition-shadow'"
+    class="card card-border card-glass relative overflow-hidden"
+    :class="challenge.completed ? 'glass-disabled' : 'hover:shadow-lg transition-shadow'"
   >
     <div
       v-if="challenge.completed"
@@ -43,7 +43,7 @@ const { t } = useI18n();
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70">{{ challenge.description }}</p>
+      <p class="text-sm text-secondary">{{ challenge.description }}</p>
 
       <div class="card-actions justify-end mt-4">
         <button

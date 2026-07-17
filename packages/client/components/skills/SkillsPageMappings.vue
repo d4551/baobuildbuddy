@@ -75,7 +75,7 @@ function normalizedConfidence(confidence: number): number {
               <div class="space-y-1">
                 <div class="flex items-center justify-between text-xs font-semibold">
                   <span>{{ mapping.confidence }}%</span>
-                  <span class="text-base-content/60">
+                  <span class="text-muted">
                     {{ resolveCategoryLabel(mapping.category) }}
                   </span>
                 </div>
@@ -117,7 +117,7 @@ function normalizedConfidence(confidence: number): number {
           <div class="flex items-start justify-between gap-3">
             <div>
               <h2 class="card-title text-base">{{ mapping.transferableSkill }}</h2>
-              <p class="text-sm text-base-content/70">{{ mapping.gameExpression }}</p>
+              <p class="text-sm text-secondary">{{ mapping.gameExpression }}</p>
             </div>
             <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
           </div>

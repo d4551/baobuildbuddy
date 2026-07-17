@@ -181,7 +181,7 @@ function handleAutoSpeakChange(event: Event): void {
         @change="handleAutoSpeakChange"
       />
     </label>
-    <p class="text-xs text-base-content/70" aria-live="polite">
+    <p class="text-xs text-secondary" aria-live="polite">
       {{
         props.isListening
           ? t("aiChatCommon.voice.listeningStatus")
@@ -194,7 +194,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <p
     v-if="!props.compact && props.supportHintKey"
-    class="mt-2 text-xs text-base-content/70"
+    class="mt-2 text-xs text-secondary"
     role="status"
     aria-live="polite"
   >

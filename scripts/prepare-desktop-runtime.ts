@@ -730,17 +730,33 @@ const buildLauncherScript = (payloadBasename: string): string => {
   const lines: string[] = [];
   lines.push("#!/usr/bin/env sh");
   lines.push("set -eu");
-  const cd = [36, 40, 67, 68, 80, 65, 84, 72, 61, 32, 99, 100, 32, 45, 45, 32, 36, 40, 100, 105, 114, 110, 97, 109, 101, 32, 36, 48, 41, 32, 38, 38, 32, 112, 119, 100, 41];
-  lines.push(`here=${String.fromCharCode(34)}${String.fromCharCode(...cd)}${String.fromCharCode(34)}`);
+  const cd = [
+    36, 40, 67, 68, 80, 65, 84, 72, 61, 32, 99, 100, 32, 45, 45, 32, 36, 40, 100, 105, 114, 110, 97,
+    109, 101, 32, 36, 48, 41, 32, 38, 38, 32, 112, 119, 100, 41,
+  ];
+  lines.push(
+    `here=${String.fromCharCode(34)}${String.fromCharCode(...cd)}${String.fromCharCode(34)}`,
+  );
   lines.push(`payload="$here/${payloadBasename}"`);
-  const tmpChars = [36, 40, 109, 107, 116, 101, 109, 112, 32, 36, 123, 84, 77, 80, 68, 73, 82, 58, 45, 47, 116, 109, 112, 125, 47, 98, 97, 111, 45, 114, 116, 46, 88, 88, 88, 88, 88, 41];
-  lines.push(`tmp=${String.fromCharCode(34)}${String.fromCharCode(...tmpChars)}${String.fromCharCode(34)}`);
+  const tmpChars = [
+    36, 40, 109, 107, 116, 101, 109, 112, 32, 36, 123, 84, 77, 80, 68, 73, 82, 58, 45, 47, 116, 109,
+    112, 125, 47, 98, 97, 111, 45, 114, 116, 46, 88, 88, 88, 88, 88, 41,
+  ];
+  lines.push(
+    `tmp=${String.fromCharCode(34)}${String.fromCharCode(...tmpChars)}${String.fromCharCode(34)}`,
+  );
   lines.push(`cleanup() { rm -f ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}; }`);
   lines.push("trap cleanup EXIT INT HUP TERM");
-  lines.push(`command -v gzip >/dev/null 2>&1 || { echo ${String.fromCharCode(34)}error: gzip is not installed or not in PATH${String.fromCharCode(34)} >&2; exit 1; }`);
-  lines.push(`gzip -dc ${String.fromCharCode(34)}$payload${String.fromCharCode(34)} > ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}`);
+  lines.push(
+    `command -v gzip >/dev/null 2>&1 || { echo ${String.fromCharCode(34)}error: gzip is not installed or not in PATH${String.fromCharCode(34)} >&2; exit 1; }`,
+  );
+  lines.push(
+    `gzip -dc ${String.fromCharCode(34)}$payload${String.fromCharCode(34)} > ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}`,
+  );
   lines.push(`chmod 700 ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}`);
-  lines.push(`exec ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)} ${String.fromCharCode(34)}$@${String.fromCharCode(34)}`);
+  lines.push(
+    `exec ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)} ${String.fromCharCode(34)}$@${String.fromCharCode(34)}`,
+  );
   return `${lines.join("\n")}\n`;
 };
 

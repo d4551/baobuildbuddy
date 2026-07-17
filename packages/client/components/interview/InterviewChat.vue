@@ -159,7 +159,7 @@ watch(renderedMessages, async () => {
           <h2 id="interview-chat-workspace-title" class="text-lg font-semibold">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
-          <p class="text-sm text-base-content/60">
+          <p class="text-sm text-muted">
             {{ t("interviewSession.responseWorkspaceDescription") }}
           </p>
         </div>
@@ -167,7 +167,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        class="min-h-80 flex-1 space-y-4 overflow-y-auto bg-base-200/60 px-6 py-5"
+        class="min-h-80 flex-1 space-y-4 overflow-y-auto glass-subtle px-6 py-5"
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"
@@ -204,13 +204,13 @@ watch(renderedMessages, async () => {
               @keyup.ctrl.enter.prevent="submitResponse"
               @keyup.meta.enter.prevent="submitResponse"
             ></textarea>
-            <p :id="responseHintId" class="validator-hint text-sm text-base-content/60">
+            <p :id="responseHintId" class="validator-hint text-sm text-muted">
               {{ responseHintText }}
             </p>
           </fieldset>
 
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ currentQuestionProgressLabel }}
             </p>
             <button

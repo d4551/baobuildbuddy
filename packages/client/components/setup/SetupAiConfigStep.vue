@@ -90,10 +90,10 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
         <div class="group relative mt-2 w-full overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content">
           <div class="overflow-x-auto whitespace-nowrap p-3 pr-14 text-sm font-mono">
-            <span class="mr-2 text-base-content/50">$</span>{{ ollamaCommand }}
+            <span class="mr-2 text-muted">$</span>{{ ollamaCommand }}
           </div>
           <button
-            class="btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 bg-base-300/80 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+            class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
@@ -107,7 +107,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="h-4 w-4 shrink-0 opacity-70"
+              class="h-4 w-4 shrink-0"
               aria-hidden="true"
             >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />

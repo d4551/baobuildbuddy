@@ -48,7 +48,7 @@ const { t } = useI18n();
               <h3 class="text-lg font-semibold break-words">
                 {{ endpoint.operation.summary || endpoint.operation.operationId || endpoint.path }}
               </h3>
-              <p class="text-sm text-base-content/80 break-words">
+              <p class="text-sm text-secondary break-words">
                 {{ endpoint.operation.description || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>
@@ -69,13 +69,13 @@ const { t } = useI18n();
 
           <SectionGrid grid-token="twoColumn">
             <div class="rounded-lg border border-base-200 p-3">
-              <p class="text-xs font-semibold uppercase text-base-content/60">
+              <p class="text-xs font-semibold uppercase text-muted">
                 {{ t("apiDocs.endpoint.methodLabel") }}
               </p>
               <p class="mt-1 font-mono text-sm">{{ methodLabel(endpoint.method) }}</p>
             </div>
             <div class="rounded-lg border border-base-200 p-3">
-              <p class="text-xs font-semibold uppercase text-base-content/60">
+              <p class="text-xs font-semibold uppercase text-muted">
                 {{ t("apiDocs.endpoint.operationIdLabel") }}
               </p>
               <p class="mt-1 text-sm">

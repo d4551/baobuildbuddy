@@ -56,7 +56,7 @@ export const gamificationRoutes = new Elysia({
         levelUp,
         reason: body.reason,
         message: levelUp
-          ? `Level up! You're now level ${levelUp.newLevel} — ${levelUp.newTitle}`
+          ? `+${body.amount} XP earned — level up! You're now level ${levelUp.newLevel} (${levelUp.newTitle})`
           : `+${body.amount} XP earned`,
       });
     },

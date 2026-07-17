@@ -104,7 +104,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       title-id="automation-scraper-title"
       :title="t('automation.scraper.title')"
       :description="t('automation.scraper.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
       density="compact"
     >
       <template #actions>

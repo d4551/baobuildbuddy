@@ -44,25 +44,44 @@ export const SHELL_DRAWER_CONTENT_CLASS = "flex min-h-screen min-w-0 flex-col ov
 /** Drawer side container. */
 export const SHELL_DRAWER_SIDE_CLASS = "z-20 is-drawer-close:overflow-visible";
 
-/** Shared navbar classes for authenticated shell pages. */
-export const SHELL_NAVBAR_CLASS = "sticky top-0 z-10 border-b border-base-300 bg-base-200";
+/** Shared navbar classes for authenticated shell pages. Persistent control layer (§5.1). */
+export const SHELL_NAVBAR_CLASS = "glass-subtle sticky top-0 z-10 border-b border-base-300";
 
 /**
  * Glass surface for elevated cards/panels (fluid depth without palette literals).
+ * Strong material = card-glass-strong; Modal material = card-glass-modal.
+ * All variants consume the `.glass-*` token system in `assets/css/main.css`.
  */
-export const SURFACE_GLASS_CARD_CLASS =
-  "card card-border card-glass shadow-sm transition-[box-shadow,transform,background-color] duration-200";
+export const SURFACE_GLASS_CARD_CLASS = "card card-border card-glass glass-interactive";
+export const SURFACE_GLASS_CARD_STRONG_CLASS =
+  "card card-border card-glass-strong glass-interactive";
+export const SURFACE_GLASS_CARD_MODAL_CLASS = "card card-border card-glass-modal glass-interactive";
 
 /**
- * Interactive glass card hover affordance (motion-safe).
+ * Selected state for glass cards in grids (jobs, providers, portfolio).
  */
-export const SURFACE_GLASS_CARD_INTERACTIVE_CLASS =
-  "motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md";
+export const SURFACE_GLASS_CARD_SELECTED_CLASS = "glass-selected";
 
-/** Shared sidebar surface classes. */
+/**
+ * Disabled state for glass cards representing unavailable capabilities.
+ */
+export const SURFACE_GLASS_CARD_DISABLED_CLASS = "glass-disabled";
 
+/**
+ * Error state for glass cards carrying a surfaced failure.
+ */
+export const SURFACE_GLASS_CARD_ERROR_CLASS = "glass-error";
+
+/**
+ * Interactive glass card hover affordance — legacy alias kept for existing
+ * callers; prefer `SURFACE_GLASS_CARD_CLASS` which already includes
+ * `.glass-interactive` (handles hover/focus-visible/active + a11y media queries).
+ */
+export const SURFACE_GLASS_CARD_INTERACTIVE_CLASS = "glass-interactive";
+
+/** Shared sidebar surface classes. Floating drawer = glass candidate (§5.2). */
 export const SHELL_SIDEBAR_ASIDE_CLASS =
-  "flex min-h-full flex-col items-start bg-base-200 transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64";
+  "glass-subtle flex min-h-full flex-col items-start transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64";
 
 /** Shared sidebar menu layout classes. */
 export const SHELL_SIDEBAR_MENU_CLASS =
@@ -94,13 +113,13 @@ export const PAGE_HEADER_OUTER_CLASS =
 export const PAGE_HEADER_TITLE_CLASS = "text-2xl font-bold";
 
 /** Default subtitle under the page title. */
-export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-base-content/60";
+export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-muted";
 
 /** Measured page subtitle used by hero headers that need a readable line length. */
-export const PAGE_HEADER_DESCRIPTION_MEASURE_CLASS = "max-w-2xl text-base-content/70";
+export const PAGE_HEADER_DESCRIPTION_MEASURE_CLASS = "max-w-2xl text-secondary";
 
 /** Measured centered prose block for portfolio/preview bios and similar copy. */
-export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-base-content/70";
+export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-secondary";
 
 /**
  * Shared hero surface for page-level headers that need elevated context.
@@ -129,6 +148,8 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
 
 /**
  * Centered empty-state column (playbook: hero / empty vertical rhythm).
+ * Empty states are content planes (design.md §4: keep content plane mostly solid),
+ * not control layers — solid surface, no backdrop blur.
  */
 export const EMPTY_STATE_STACK_CLASS =
-  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300/70 bg-base-100/50 px-6 py-10 text-center backdrop-blur-sm";
+  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center";

@@ -23,17 +23,17 @@ defineProps<{
         <h2 class="card-title text-lg">{{ t("jobDetail.companyInfoTitle") }}</h2>
         <div class="space-y-3">
           <div v-if="job.company">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.companyLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("jobDetail.companyLabel") }}</p>
             <p class="font-medium">{{ job.company }}</p>
           </div>
 
           <div v-if="job.studioType">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.studioTypeLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("jobDetail.studioTypeLabel") }}</p>
             <p class="font-medium">{{ studioTypeLabel(job.studioType) }}</p>
           </div>
 
           <div v-if="job.url">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.websiteLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("jobDetail.websiteLabel") }}</p>
             <a
               :href="job.url"
               target="_blank"
@@ -46,7 +46,7 @@ defineProps<{
           </div>
 
           <div v-if="job.postedDate">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.postedLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("jobDetail.postedLabel") }}</p>
             <p class="font-medium">{{ formatDate(job.postedDate) }}</p>
           </div>
         </div>

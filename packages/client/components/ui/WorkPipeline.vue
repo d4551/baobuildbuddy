@@ -29,7 +29,7 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
     <div class="card-body gap-4">
       <div>
         <h2 class="card-title text-lg">{{ props.title }}</h2>
-        <p class="text-sm text-base-content/70">{{ props.description }}</p>
+        <p class="text-sm text-secondary">{{ props.description }}</p>
       </div>
 
       <ul class="steps steps-vertical xl:steps-horizontal w-full" :aria-label="props.ariaLabel">

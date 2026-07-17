@@ -151,7 +151,7 @@ function handleTtsModelChange(event: Event): void {
       </datalist>
     </SectionGrid>
     <div class="mt-2 flex items-center justify-between gap-2">
-      <p class="text-xs text-base-content/70">
+      <p class="text-xs text-secondary">
         {{ t("aiChatPage.voiceSettings.hint") }}
       </p>
       <button

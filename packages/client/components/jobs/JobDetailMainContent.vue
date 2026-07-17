@@ -67,7 +67,7 @@ const emit = defineEmits<{
             <div class="flex items-center justify-start lg:justify-end">
               <div class="rounded-box bg-base-100 p-4">
                 <JobMatchScore :score="job.matchScore" />
-                <p class="mt-2 text-center text-xs text-base-content/60">{{ t("jobDetail.matchScoreLabel") }}</p>
+                <p class="mt-2 text-center text-xs text-muted">{{ t("jobDetail.matchScoreLabel") }}</p>
               </div>
             </div>
           </template>

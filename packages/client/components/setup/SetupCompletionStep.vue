@@ -52,7 +52,7 @@ function updateTextValue(
       <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
     </div>
     <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
-    <p class="text-base-content/70">
+    <p class="text-secondary">
       {{ t("setup.doneDescription", { assistant: assistantName }) }}
     </p>
 

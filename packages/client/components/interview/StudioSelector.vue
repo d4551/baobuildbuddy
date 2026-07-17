@@ -209,7 +209,7 @@ function studioLocationLabel(location: string): string {
           {{ resolvedStudioTypeLabel(selectedStudio.type) }}
         </span>
       </span>
-      <span v-else class="text-base-content/50">{{ t("studioSelector.selectPlaceholder") }}</span>
+      <span v-else class="text-muted">{{ t("studioSelector.selectPlaceholder") }}</span>
       <IconChevronDown class="h-5 w-5 shrink-0" />
     </button>
 
@@ -265,11 +265,11 @@ function studioLocationLabel(location: string): string {
                 {{ resolvedStudioTypeLabel(studio.type) }}
               </span>
             </div>
-            <span class="text-xs text-base-content/60">{{ studioLocationLabel(studio.location) }}</span>
+            <span class="text-xs text-muted">{{ studioLocationLabel(studio.location) }}</span>
           </button>
         </li>
         <li v-if="filteredStudios.length === 0">
-          <span class="text-base-content/50">{{ t("studioSelector.emptyState") }}</span>
+          <span class="text-muted">{{ t("studioSelector.emptyState") }}</span>
         </li>
       </ul>
     </div>

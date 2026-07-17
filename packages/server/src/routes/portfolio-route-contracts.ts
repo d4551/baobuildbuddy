@@ -70,9 +70,7 @@ export const portfolioProjectReorderBodySchema = t.Object(
   },
   { required: ["orderedIds"] },
 );
-export type PortfolioProjectReorderRouteBody = Static<
-  typeof portfolioProjectReorderBodySchema
->;
+export type PortfolioProjectReorderRouteBody = Static<typeof portfolioProjectReorderBodySchema>;
 
 export const portfolioProjectIdParamsSchema = t.Object(
   {

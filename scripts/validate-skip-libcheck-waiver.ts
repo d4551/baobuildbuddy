@@ -41,9 +41,7 @@ export const collectSkipLibCheckWaiverViolations = (input?: {
 }): Violation[] => {
   const tsconfig =
     input?.tsconfigText !== undefined
-      ? (JSON.parse(
-          input.tsconfigText.replace(/^\s*\/\/.*$/gm, ""),
-        ) as Record<string, unknown>)
+      ? (JSON.parse(input.tsconfigText.replace(/^\s*\/\/.*$/gm, "")) as Record<string, unknown>)
       : readJsonCommentTolerant(TSCONFIG_PATH);
   const compilerOptions = tsconfig.compilerOptions;
   if (
@@ -68,8 +66,7 @@ export const collectSkipLibCheckWaiverViolations = (input?: {
   }
 
   const violations: Violation[] = [];
-  const stackContract =
-    input?.stackContractText ?? readFileSync(STACK_CONTRACT_PATH, "utf8");
+  const stackContract = input?.stackContractText ?? readFileSync(STACK_CONTRACT_PATH, "utf8");
   const stackLower = stackContract.toLowerCase();
   for (const marker of REQUIRED_WAIVER_MARKERS) {
     if (!stackLower.includes(marker.toLowerCase())) {

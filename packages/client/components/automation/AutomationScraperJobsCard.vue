@@ -58,7 +58,7 @@ const { t } = useI18n();
               <td>
                 <div class="space-y-1">
                   <div class="font-medium">{{ job.title }}</div>
-                  <p v-if="hasJobEnrichment(job)" class="text-sm text-base-content/70">
+                  <p v-if="hasJobEnrichment(job)" class="text-sm text-secondary">
                     <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
                     {{ job.enrichment?.summary }}
                   </p>
@@ -82,7 +82,7 @@ const { t } = useI18n();
               <td>
                 <div class="space-y-1">
                   <div class="font-medium">{{ job.company }}</div>
-                  <div v-if="job.source" class="text-xs text-base-content/60">
+                  <div v-if="job.source" class="text-xs text-muted">
                     {{ job.source }}
                   </div>
                 </div>

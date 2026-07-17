@@ -113,7 +113,7 @@ watch(
       title-id="settings-page-title"
       :title="t('settings.title')"
       :description="t('settings.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
     />
 
     <BootstrapErrorAlert

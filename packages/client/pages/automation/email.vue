@@ -131,7 +131,7 @@ useSeoMeta({
             <p class="validator-hint">{{ t("automation.email.messageHint") }}</p>
           </fieldset>
 
-          <div class="rounded-box border border-base-300 bg-base-200/60 p-4">
+          <div class="rounded-box border border-base-300 glass-subtle p-4">
             <label class="label cursor-pointer justify-start gap-3">
               <input
                 v-model="form.deliverAfterGeneration"
@@ -144,7 +144,7 @@ useSeoMeta({
                 {{ t("automation.email.deliverLabel") }}
               </span>
             </label>
-            <p class="mt-2 text-sm text-base-content/70">
+            <p class="mt-2 text-sm text-secondary">
               {{
                 emailDeliveryConfigured
                   ? t("automation.email.deliveryConfiguredDescription")

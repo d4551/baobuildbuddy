@@ -32,7 +32,7 @@ const { t } = useI18n();
               <td>{{ entry.message }}</td>
             </tr>
             <tr v-if="timelineEntries.length === 0">
-              <td colspan="4" class="text-center text-sm text-base-content/60">
+              <td colspan="4" class="text-center text-sm text-muted">
                 {{ t("automation.runDetail.timeline.empty") }}
               </td>
             </tr>

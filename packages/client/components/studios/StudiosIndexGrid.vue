@@ -50,11 +50,11 @@ function studioLocation(location: string): string {
             </div>
             <div class="min-w-0">
               <h2 class="card-title text-lg truncate">{{ studio.name }}</h2>
-              <p class="text-xs text-base-content/60 truncate">{{ studioLocation(studio.location) }}</p>
+              <p class="text-xs text-muted truncate">{{ studioLocation(studio.location) }}</p>
             </div>
           </div>
 
-          <p class="text-sm text-base-content/70 min-h-14">
+          <p class="text-sm text-secondary min-h-14">
             {{ studioDescription(studio.description) }}
           </p>
 

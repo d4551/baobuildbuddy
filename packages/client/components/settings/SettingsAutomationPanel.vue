@@ -32,7 +32,7 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.headlessTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.automation.headlessDescription") }}
             </p>
           </div>
@@ -49,7 +49,7 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.smartSelectorsTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.automation.smartSelectorsDescription") }}
             </p>
           </div>
@@ -66,7 +66,7 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.autoScreenshotsTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.automation.autoScreenshotsDescription") }}
             </p>
           </div>

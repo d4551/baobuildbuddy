@@ -19,7 +19,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-
 </script>
 
 <template>
@@ -54,17 +53,17 @@ const { t } = useI18n();
 
         <div class="space-y-4">
           <div>
-            <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailStudioLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("interviewHistory.detailStudioLabel") }}</p>
             <p class="font-semibold">{{ selectedSession.studioName }}</p>
           </div>
 
           <div>
-            <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailRoleLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("interviewHistory.detailRoleLabel") }}</p>
             <p class="font-semibold">{{ selectedSession.role }}</p>
           </div>
 
           <div>
-            <p class="text-xs text-base-content/60">{{ t("interviewHistory.detailScoreLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("interviewHistory.detailScoreLabel") }}</p>
             <div class="flex items-center gap-2">
               <UiRadialMeter
                 :value="selectedSession.score ?? 0"
@@ -78,7 +77,7 @@ const { t } = useI18n();
           </div>
 
           <div>
-            <p class="mb-2 text-xs text-base-content/60">{{ t("interviewHistory.questionsLabel") }}</p>
+            <p class="mb-2 text-xs text-muted">{{ t("interviewHistory.questionsLabel") }}</p>
             <div class="space-y-2">
               <div
                 v-for="(question, idx) in selectedSession.questions"
@@ -100,15 +99,15 @@ const { t } = useI18n();
                 </div>
                 <div class="collapse-content text-xs">
                   <p class="mb-1 font-semibold">{{ question.question }}</p>
-                  <p class="mb-2 text-base-content/60">{{ question.response }}</p>
-                  <p class="text-base-content/80">{{ question.feedback }}</p>
+                  <p class="mb-2 text-muted">{{ question.response }}</p>
+                  <p class="text-secondary">{{ question.feedback }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div v-if="selectedSession.overallFeedback">
-            <p class="mb-1 text-xs text-base-content/60">
+            <p class="mb-1 text-xs text-muted">
               {{ t("interviewHistory.overallFeedbackLabel") }}
             </p>
             <p class="text-sm">{{ selectedSession.overallFeedback }}</p>

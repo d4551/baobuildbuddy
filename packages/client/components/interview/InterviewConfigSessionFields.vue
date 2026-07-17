@@ -146,7 +146,7 @@ function updateEnableVoiceMode(event: Event): void {
           {{ t("interviewHub.config.conversationStyleStructured") }}
         </option>
       </select>
-      <p class="mt-2 text-xs text-base-content/60">
+      <p class="mt-2 text-xs text-muted">
         {{ t("interviewHub.config.conversationStyleHint") }}
       </p>
     </fieldset>

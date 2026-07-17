@@ -125,7 +125,7 @@ const ariaLabel = computed(() => {
       {{ messageTitle }}
       <time
         v-if="formattedTime"
-        class="text-xs opacity-50 ml-1"
+        class="text-xs text-muted ml-1"
         :datetime="props.message.timestamp ?? undefined"
       >
         {{ formattedTime }}
@@ -157,7 +157,7 @@ const ariaLabel = computed(() => {
     <div
       v-if="isStreamingStatusVisible"
       :id="statusTextId"
-      class="chat-footer opacity-50"
+      class="chat-footer text-muted"
       role="status"
       aria-live="polite"
     >

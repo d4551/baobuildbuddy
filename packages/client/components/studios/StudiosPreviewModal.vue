@@ -49,7 +49,7 @@ function studioLocation(location: string): string {
       <h3 :id="titleId" class="text-xl font-bold">
         {{ studio.name }}
       </h3>
-      <p class="mt-2 text-sm text-base-content/70">
+      <p class="mt-2 text-sm text-secondary">
         {{ studioDescription(studio.description) }}
       </p>
 
@@ -116,7 +116,7 @@ function studioLocation(location: string): string {
       <h3 :id="titleId" class="text-xl font-bold">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
-      <p class="mt-2 text-sm text-base-content/70">
+      <p class="mt-2 text-sm text-secondary">
         {{ t("studiosIndex.preview.missingDescription") }}
       </p>
       <div class="modal-action">

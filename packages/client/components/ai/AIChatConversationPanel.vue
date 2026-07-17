@@ -78,7 +78,7 @@ const updateInput = (event: Event): void => {
               <h1 class="text-3xl font-bold">
                 {{ t("aiChatPage.title", { brand: resolvedBrand.name }) }}
               </h1>
-              <p class="text-base text-base-content/70">{{ t("aiChatPage.subtitle") }}</p>
+              <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <span class="badge badge-soft badge-info">
@@ -105,7 +105,7 @@ const updateInput = (event: Event): void => {
 
       <div
         ref="aiChatContainer"
-        class="min-h-0 flex-1 overflow-y-auto bg-base-200/40 px-4 py-4 sm:px-6"
+        class="min-h-0 flex-1 overflow-y-auto glass-subtle px-4 py-4 sm:px-6"
         role="log"
         aria-live="polite"
         aria-atomic="false"
@@ -126,7 +126,7 @@ const updateInput = (event: Event): void => {
               </div>
               <div class="space-y-2">
                 <h2 class="card-title text-xl">{{ t("aiChatPage.emptyTitle") }}</h2>
-                <p class="text-sm leading-6 text-base-content/70">
+                <p class="text-sm leading-6 text-secondary">
                   {{ t("aiChatPage.emptyDescription") }}
                 </p>
               </div>
@@ -203,12 +203,12 @@ const updateInput = (event: Event): void => {
                 <p class="text-sm font-medium">
                   {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
                 </p>
-                <p class="text-xs text-base-content/70">
+                <p class="text-xs text-secondary">
                   {{ t("aiChatPage.composerHint") }}
                 </p>
               </div>
               <div class="flex items-center justify-end gap-3">
-                <p class="text-xs text-base-content/70" role="status" aria-live="polite">
+                <p class="text-xs text-secondary" role="status" aria-live="polite">
                   {{ composerStatusLabel }}
                 </p>
                 <button
@@ -258,7 +258,7 @@ const updateInput = (event: Event): void => {
             />
           </ClientOnly>
 
-          <p v-if="isSpeechConfigDirty" class="text-xs text-base-content/60">
+          <p v-if="isSpeechConfigDirty" class="text-xs text-muted">
             {{ t("aiChatPage.voiceSettings.unsavedHint") }}
           </p>
         </form>

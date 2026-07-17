@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability set for the BaoBuildBuddy desktop window",
+  "description": "Default capability set for the BaoBuildBuddy desktop main window. The frontend is a static Nuxt prerender wrapped in a Tauri webview; no plugin APIs are invoked from the renderer, so only the core default permission set is granted (least privilege).",
   "windows": ["main"],
-  "permissions": ["core:default", "dialog:default"]
+  "permissions": ["core:default"]
 }

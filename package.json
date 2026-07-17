@@ -17,7 +17,8 @@
     "packages/*"
   ],
   "overrides": {
-    "elysia": "2.0.0-exp.45"
+    "elysia": "2.0.0-exp.45",
+    "typescript": "6.0.3"
   },
   "scripts": {
     "dev": "bun run scripts/dev-stack.ts",
@@ -72,6 +73,7 @@
     "validate:seo-contracts": "bun run scripts/validate-seo-contracts.ts",
     "validate:accessibility-landmarks": "bun run scripts/validate-accessibility-landmarks.ts",
     "validate:no-dead-exports": "bun run scripts/validate-no-dead-exports.ts",
+    "validate:no-dead-vue-components": "bun run scripts/validate-no-dead-vue-components.ts",
     "validate:no-fallback-shims": "bun run scripts/validate-no-fallback-shims.ts",
     "validate:ui-ssot": "bun run scripts/validate-ui-single-source-of-truth.ts",
     "validate:ui-layout-tokens": "bun run scripts/validate-ui-layout-tokens.ts",
@@ -99,8 +101,8 @@
     "verify:pages": "bun run scripts/verify-pages.ts",
     "lint:typed": "bun --bun run eslint --config eslint.config.mjs .",
     "lint:typed:fix": "bun --bun run eslint --config eslint.config.mjs . --fix",
-    "lint": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck",
-    "lint:fix": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write && bun run --cwd packages/client lint --fix && bun run typecheck"
+    "lint": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-dead-vue-components && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck",
+    "lint:fix": "bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-dead-vue-components && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ascii && bun run lint:typed:fix && bun --bun run biome lint . --write && bun run --cwd packages/client lint --fix && bun run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",

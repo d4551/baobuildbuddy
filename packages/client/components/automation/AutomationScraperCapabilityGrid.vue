@@ -63,7 +63,7 @@ function handleScheduledRunAtUpdate(payload: {
         <h2 class="text-lg font-semibold text-base-content">
           {{ t("automation.scraper.sections.providers.label") }}
         </h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-secondary">
           {{ t("automation.scraper.sections.providers.description") }}
         </p>
       </div>
@@ -102,7 +102,7 @@ function handleScheduledRunAtUpdate(payload: {
         <h2 class="text-lg font-semibold text-base-content">
           {{ t("automation.scraper.providerCard.issuesTitle") }}
         </h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-secondary">
           {{ t("automation.scraper.providerCard.issuesNeedsAttention") }}
         </p>
       </div>

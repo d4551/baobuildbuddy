@@ -64,7 +64,7 @@ const readyEntries = computed(() =>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 class="card-title">{{ t("automation.hub.audit.title") }}</h2>
-          <p class="text-sm text-base-content/70">
+          <p class="text-sm text-secondary">
             {{ t("automation.hub.audit.description") }}
           </p>
         </div>
@@ -109,7 +109,7 @@ const readyEntries = computed(() =>
                 <h3 id="automation-capability-attention-title" class="card-title text-lg">
                   {{ t("automation.hub.audit.groups.attentionTitle") }}
                 </h3>
-                <p class="text-sm text-base-content/70">
+                <p class="text-sm text-secondary">
                   {{ t("automation.hub.audit.groups.attentionDescription") }}
                 </p>
               </div>
@@ -158,7 +158,7 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="space-y-1 text-sm text-base-content/80">
+                      <ul class="space-y-1 text-sm text-secondary">
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -187,7 +187,7 @@ const readyEntries = computed(() =>
                 <h3 id="automation-capability-ready-title" class="card-title text-lg">
                   {{ t("automation.hub.audit.groups.readyTitle") }}
                 </h3>
-                <p class="text-sm text-base-content/70">
+                <p class="text-sm text-secondary">
                   {{ t("automation.hub.audit.groups.readyDescription") }}
                 </p>
               </div>

@@ -130,8 +130,8 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       >
         <div class="min-w-0 space-y-1">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
-          <p class="text-sm opacity-80">{{ t("settings.aiProviders.openaiV1Description") }}</p>
-          <code class="block break-all rounded-box bg-base-100/70 px-3 py-2 text-sm">
+          <p class="text-sm text-secondary">{{ t("settings.aiProviders.openaiV1Description") }}</p>
+          <code class="glass-subtle block break-all rounded-box px-3 py-2 text-sm">
             {{ openaiV1BaseUrl }}
           </code>
         </div>
@@ -158,12 +158,12 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       </div>
 
       <SectionGrid grid-token="providersSplit">
-        <section class="card card-border bg-base-200/60" :aria-label="t('settings.aiProviders.title')">
+        <section class="card card-border card-glass" :aria-label="t('settings.aiProviders.title')">
           <div class="card-body gap-4 p-4">
             <div class="flex items-start justify-between gap-3">
               <div class="space-y-1">
                 <h3 class="card-title text-base">{{ t("settings.aiProviders.readinessTitle") }}</h3>
-                <p class="text-sm text-base-content/60">
+                <p class="text-sm text-muted">
                   {{ t("settings.aiProviders.readinessDescription") }}
                 </p>
               </div>
@@ -183,7 +183,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
                     <AIProviderIcon :provider-id="provider.id" class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                     <div class="min-w-0">
                       <p class="font-medium">{{ provider.label }}</p>
-                      <p class="mt-1 text-sm text-base-content/60">
+                      <p class="mt-1 text-sm text-muted">
                         {{ provider.description }}
                       </p>
                     </div>
@@ -195,7 +195,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 
                 <p
                   v-if="props.testResults[provider.id]?.message || props.providerDiagnostics[provider.id]?.message"
-                  class="mt-3 text-xs text-base-content/60"
+                  class="mt-3 text-xs text-muted"
                 >
                   {{
                     props.testResults[provider.id]?.message ||
@@ -208,13 +208,13 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </section>
 
         <section
-          class="card card-border bg-base-200/60"
+          class="card card-border card-glass"
           :aria-label="t('settings.aiProviders.preferredProviderLegend')"
         >
           <div class="card-body gap-4 p-4">
             <div class="space-y-1">
               <h3 class="card-title text-base">{{ t("settings.aiProviders.preferredProviderLegend") }}</h3>
-              <p class="text-sm text-base-content/60">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
+              <p class="text-sm text-muted">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
             </div>
 
             <div class="stats stats-vertical w-full bg-base-100 shadow-sm">
@@ -266,11 +266,11 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         @save="emit('saveRouting')"
       />
 
-      <section class="card card-border bg-base-200/60" :aria-label="t('settings.aiProviders.saveAria')">
+      <section class="card card-border card-glass" :aria-label="t('settings.aiProviders.saveAria')">
         <div class="card-body gap-4 p-4">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.aiProviders.saveButton") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-sm text-muted">
               {{ t("settings.aiProviders.credentialsDescription") }}
             </p>
           </div>

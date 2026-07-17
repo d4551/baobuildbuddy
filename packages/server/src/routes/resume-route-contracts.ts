@@ -143,16 +143,10 @@ export const resumeMutationBodySchema = t.Object({
   name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
   personalInfo: t.Optional(resumePersonalInfoBodySchema),
   summary: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
-  experience: t.Optional(
-    t.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
-  ),
-  education: t.Optional(
-    t.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL }),
-  ),
+  experience: t.Optional(t.Array(resumeExperienceBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
+  education: t.Optional(t.Array(resumeEducationBodySchema, { maxItems: SCHEMA_MAX_ITEMS_SMALL })),
   skills: t.Optional(resumeSkillsBodySchema),
-  projects: t.Optional(
-    t.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
-  ),
+  projects: t.Optional(t.Array(resumeProjectBodySchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
   gamingExperience: t.Optional(resumeGamingExperienceBodySchema),
   template: t.Optional(resumeTemplateBodySchema),
   theme: t.Optional(resumeThemeBodySchema),
@@ -193,9 +187,7 @@ export const resumeQuestionSynthesizeBodySchema = t.Object(
   },
   { required: ["questionsAndAnswers"] },
 );
-export type ResumeQuestionSynthesizeRouteBody = Static<
-  typeof resumeQuestionSynthesizeBodySchema
->;
+export type ResumeQuestionSynthesizeRouteBody = Static<typeof resumeQuestionSynthesizeBodySchema>;
 
 export const resumeExportBodySchema = t.Object({
   format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),

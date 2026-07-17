@@ -21,12 +21,12 @@ defineProps<{
 
 <template>
   <div class="space-y-6">
-    <section class="card bg-linear-to-br from-primary to-secondary text-primary-content">
+    <section class="card card-border card-glass-strong glass-interactive text-on-glass">
       <div class="card-body">
         <div class="mb-4 flex items-center justify-between">
           <div>
             <h2 class="text-4xl font-bold">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
-            <p class="opacity-80">
+            <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
           </div>
@@ -34,7 +34,7 @@ defineProps<{
         </div>
 
         <progress
-          class="progress progress-primary-content h-4 w-full"
+          class="progress progress-primary h-4 w-full"
           :value="levelProgress"
           :max="GAMIFICATION_PROGRESS_MAX"
           :aria-valuenow="levelProgress"
@@ -43,7 +43,7 @@ defineProps<{
           :aria-label="t('gamificationPage.a11y.levelProgress')"
         ></progress>
 
-        <p class="mt-2 text-sm opacity-80">
+        <p class="mt-2 text-sm text-secondary">
           {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
         </p>
       </div>

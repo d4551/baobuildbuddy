@@ -78,13 +78,13 @@ const { t } = useI18n();
             </div>
             <div class="list-col-grow">
               <p class="text-sm font-medium">{{ activity.description }}</p>
-              <p class="text-xs text-base-content/60">{{ formatTimeAgo(activity.timestamp) }}</p>
+              <p class="text-xs text-muted">{{ formatTimeAgo(activity.timestamp) }}</p>
             </div>
           </li>
 
           <li
             v-if="recentActivity.length === 0"
-            class="list-row text-center text-sm text-base-content/60"
+            class="list-row text-center text-sm text-muted"
           >
             {{ t(DASHBOARD_COPY_KEYS.recentActivityEmptyLabel) }}
           </li>

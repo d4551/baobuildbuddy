@@ -187,18 +187,18 @@ const bootstrapErrorMessage = computed(() =>
           <div class="flex items-start justify-between gap-2">
             <div>
               <h2 class="card-title text-lg">{{ letter.position }}</h2>
-              <p class="text-sm text-base-content/70">{{ letter.company }}</p>
+              <p class="text-sm text-secondary">{{ letter.company }}</p>
             </div>
             <span class="badge badge-outline badge-sm">
               {{ letter.templateLabel }}
             </span>
           </div>
 
-          <p class="line-clamp-4 text-sm text-base-content/80">
+          <p class="line-clamp-4 text-sm text-secondary">
             {{ letter.previewText }}
           </p>
 
-          <div class="flex items-center justify-between text-xs text-base-content/60">
+          <div class="flex items-center justify-between text-xs text-muted">
             <span>{{ t("coverLetterPage.cards.updatedAtLabel") }}</span>
             <time>{{ letter.updatedAtLabel }}</time>
           </div>

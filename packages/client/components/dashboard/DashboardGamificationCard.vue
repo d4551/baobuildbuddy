@@ -29,7 +29,7 @@ const { t } = useI18n();
           <div class="flex items-center gap-3">
             <span class="text-2xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
             <div>
-              <p class="text-sm text-base-content/60">
+              <p class="text-sm text-muted">
                 {{ t("dashboard.levelLabel") }} {{ gamification.level }}
               </p>
               <p class="font-bold">
@@ -67,7 +67,7 @@ const { t } = useI18n();
           <div v-if="gamification.currentStreak" class="text-center">
             <div class="text-3xl" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
             <p class="text-2xl font-bold">{{ gamification.currentStreak }}</p>
-            <p class="text-xs text-base-content/60">{{ t("dashboard.streakLabel") }}</p>
+            <p class="text-xs text-muted">{{ t("dashboard.streakLabel") }}</p>
           </div>
         </div>
       </div>

@@ -28,7 +28,7 @@ useSeoMeta({
       title-id="studios-index-title"
       :title="t('studiosIndex.title')"
       :description="t('studiosIndex.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
       density="comfortable"
     />
 

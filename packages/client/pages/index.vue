@@ -39,7 +39,7 @@ useSeoMeta({
       title-id="dashboard-title"
       :title="t(DASHBOARD_COPY_KEYS.pageTitle)"
       :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: resolvedBrand.name })"
-      description-class="text-sm text-base-content/60"
+      description-class="text-sm text-muted"
     />
 
     <LoadingSkeleton

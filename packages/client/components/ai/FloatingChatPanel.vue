@@ -73,7 +73,7 @@ const draft = defineModel<string>("draft", { required: true });
         <div>
           <h2 class="text-sm font-semibold">{{ resolvedBrand.assistantName }}</h2>
           <div class="mt-1 flex items-center gap-2">
-            <p class="text-xs text-base-content/60">{{ t("floatingChat.subtitle") }}</p>
+            <p class="text-xs text-muted">{{ t("floatingChat.subtitle") }}</p>
             <span class="badge badge-soft badge-info badge-xs" :aria-label="t('floatingChat.contextAria', { context: currentContextLabel })">
               {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
             </span>
@@ -133,10 +133,10 @@ const draft = defineModel<string>("draft", { required: true });
         @scroll="emit('scroll')"
       >
         <div v-if="!hasConversation" class="flex h-full min-h-60 items-center justify-center">
-          <div class="card w-full border border-base-300 bg-base-200/60 shadow-sm">
+          <div class="card w-full border border-base-300 glass-subtle shadow-sm">
             <div class="card-body gap-3 p-4">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
-              <p class="text-sm leading-6 text-base-content/70">{{ t("floatingChat.emptyDescription") }}</p>
+              <p class="text-sm leading-6 text-secondary">{{ t("floatingChat.emptyDescription") }}</p>
             </div>
           </div>
         </div>
@@ -181,7 +181,7 @@ const draft = defineModel<string>("draft", { required: true });
             @keydown="emit('draftKeydown', $event)"
           />
           <div class="flex items-center justify-between gap-3">
-            <p class="text-xs text-base-content/70">{{ t("floatingChat.composerHint") }}</p>
+            <p class="text-xs text-secondary">{{ t("floatingChat.composerHint") }}</p>
             <div class="flex items-center gap-2">
               <ClientOnly>
                 <ChatVoiceControls
@@ -210,13 +210,13 @@ const draft = defineModel<string>("draft", { required: true });
             </div>
           </div>
         </form>
-        <p v-if="voiceSupportHintKey" class="mt-2 text-xs text-base-content/70" role="status" aria-live="polite">
+        <p v-if="voiceSupportHintKey" class="mt-2 text-xs text-secondary" role="status" aria-live="polite">
           {{ t(voiceSupportHintKey) }}
         </p>
         <p v-if="voiceErrorLabel" class="mt-1 text-xs text-error" role="status" aria-live="assertive">
           {{ voiceErrorLabel }}
         </p>
-        <p v-if="isSpeechConfigDirty && isSpeechSettingsOpen" class="mt-2 text-xs text-base-content/60">
+        <p v-if="isSpeechConfigDirty && isSpeechSettingsOpen" class="mt-2 text-xs text-muted">
           {{ t("aiChatPage.voiceSettings.unsavedHint") }}
         </p>
         <SpeechModelProfileFields

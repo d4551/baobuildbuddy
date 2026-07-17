@@ -27,7 +27,7 @@ const { t } = useI18n();
   <div class="card card-border bg-base-100 shadow-sm">
     <div class="card-body gap-4">
       <label class="input input-sm flex w-full items-center gap-2">
-        <svg class="h-4 w-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input

@@ -22,7 +22,7 @@ const coverageEnabledById = computed<Record<AutomationCoverageItem["id"], boolea
 function resolveCoverageClass(item: AutomationCoverageItem): string {
   return coverageEnabledById.value[item.id]
     ? "border-success/40 bg-success/10 text-success"
-    : "border-base-300 bg-base-100 text-base-content/55";
+    : "border-base-300 bg-base-100 text-muted";
 }
 </script>
 

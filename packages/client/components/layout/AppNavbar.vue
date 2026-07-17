@@ -90,7 +90,7 @@ async function onThemeControllerChange(event: Event): Promise<void> {
       </div>
     </div>
     <div class="navbar-center hidden lg:flex">
-      <span class="text-sm text-base-content/60">{{ resolvedBrand.content.tagline }}</span>
+      <span class="text-sm text-muted">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end gap-1">
       <label class="swap swap-rotate btn btn-ghost btn-circle">

@@ -31,7 +31,7 @@ const { t } = useI18n();
 
     <div class="card card-border bg-base-100 shadow-sm">
       <div class="card-body">
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-secondary">
           {{ t("skillsPage.description") }}
         </p>
       </div>
@@ -42,12 +42,12 @@ const { t } = useI18n();
         <div class="card-body gap-4">
           <div class="space-y-1">
             <h2 class="card-title text-lg">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ t("skillsPage.insights.pathwaysDescription") }}
             </p>
           </div>
 
-          <ul class="list rounded-box bg-base-200/60">
+          <ul class="list rounded-box glass-subtle">
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
               <span class="list-col-grow"></span>
@@ -81,14 +81,14 @@ const { t } = useI18n();
         <div class="card-body gap-4">
           <div class="space-y-1">
             <h2 class="card-title text-lg">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-secondary">
               {{ t("skillsPage.insights.topMappingsDescription") }}
             </p>
           </div>
 
           <ul
             v-if="topMappings.length > 0"
-            class="list rounded-box bg-base-200/60"
+            class="list rounded-box glass-subtle"
             :aria-label="t('skillsPage.insights.topMappingsAria')"
           >
             <li
@@ -98,7 +98,7 @@ const { t } = useI18n();
             >
               <div class="list-col-grow">
                 <p class="font-medium">{{ mapping.transferableSkill }}</p>
-                <p class="text-xs text-base-content/70">{{ mapping.gameExpression }}</p>
+                <p class="text-xs text-secondary">{{ mapping.gameExpression }}</p>
               </div>
               <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
             </li>

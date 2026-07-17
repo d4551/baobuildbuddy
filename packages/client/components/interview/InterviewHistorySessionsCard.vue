@@ -41,7 +41,6 @@ const updateStudioFilter = (event: Event): void => {
 const viewSession = (id: string): void => {
   emit("view", id);
 };
-
 </script>
 
 <template>
@@ -129,7 +128,7 @@ const viewSession = (id: string): void => {
         <ul class="timeline timeline-vertical timeline-compact w-full">
           <li v-for="(session, index) in filteredSessions" :key="session.id">
             <hr v-if="index !== 0" :class="props.getTimelineLineClass(session.score)" />
-            <div class="timeline-start text-sm text-base-content/70">
+            <div class="timeline-start text-sm text-secondary">
               {{ props.formatDate(session.createdAt) }}
             </div>
             <div class="timeline-middle">
@@ -144,8 +143,8 @@ const viewSession = (id: string): void => {
             </div>
             <div class="timeline-end timeline-box">
               <p class="font-semibold">{{ session.studioName }}</p>
-              <p class="text-sm text-base-content/70">{{ session.role }}</p>
-              <p class="text-xs text-base-content/60">{{ props.formatDuration(session.duration ?? 0) }}</p>
+              <p class="text-sm text-secondary">{{ session.role }}</p>
+              <p class="text-xs text-muted">{{ props.formatDuration(session.duration ?? 0) }}</p>
               <button
                 class="btn btn-ghost btn-xs mt-2"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"

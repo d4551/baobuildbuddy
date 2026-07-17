@@ -23,7 +23,7 @@ const { t } = useI18n();
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
         <ul class="space-y-4">
           <li v-for="group in endpointGroups" :key="group.id" class="space-y-2">
-            <p class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+            <p class="text-sm font-semibold uppercase tracking-wide text-muted">
               {{ group.label }}
             </p>
             <ul class="space-y-2">

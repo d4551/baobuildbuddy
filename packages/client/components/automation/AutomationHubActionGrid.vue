@@ -40,7 +40,7 @@ const { t } = useI18n();
             {{ t("automation.hub.pipelineTitle") }}
           </span>
         </div>
-        <p class="text-sm text-base-content/70">{{ t(card.descriptionKey) }}</p>
+        <p class="text-sm text-secondary">{{ t(card.descriptionKey) }}</p>
         <div class="card-actions mt-4 justify-end">
           <NuxtLink
             :to="card.to"

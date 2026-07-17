@@ -198,9 +198,7 @@ describe("collectDaisyUiContractViolationsForContent", () => {
       BROKEN_BRAND_PREVIEW_SAMPLE,
     );
 
-    expect(
-      violations.some((violation) => violation.message.includes("Brand preview")),
-    ).toBe(true);
+    expect(violations.some((violation) => violation.message.includes("Brand preview"))).toBe(true);
   });
 
   test("accepts brand previews that scope the full daisyUI theme contract", () => {

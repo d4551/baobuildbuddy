@@ -95,7 +95,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
   <div class="card card-border bg-base-100 shadow-sm">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
-      <p class="text-sm text-base-content/70">{{ t("automation.jobApply.stream.subtitle") }}</p>
+      <p class="text-sm text-secondary">{{ t("automation.jobApply.stream.subtitle") }}</p>
 
       <ul class="steps steps-vertical mt-2 w-full lg:steps-horizontal">
         <li :class="lifecycleStepClasses[0]">{{ t("automation.jobApply.stream.steps.queued") }}</li>
@@ -194,7 +194,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
                 <td>{{ resolveStreamEventMessage(event) }}</td>
               </tr>
               <tr v-if="eventRows.length === 0">
-                <td colspan="4" class="text-center text-sm text-base-content/60">
+                <td colspan="4" class="text-center text-sm text-muted">
                   {{ t("automation.jobApply.stream.events.empty") }}
                 </td>
               </tr>

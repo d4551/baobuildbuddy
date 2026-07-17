@@ -61,7 +61,7 @@ defineProps<{
               </td>
             </tr>
             <tr v-if="!isLoading && runs.length === 0">
-              <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
+              <td colspan="7" class="text-center text-muted">{{ t("automation.runs.emptyState") }}</td>
             </tr>
           </tbody>
         </table>

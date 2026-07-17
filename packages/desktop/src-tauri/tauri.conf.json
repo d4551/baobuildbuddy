@@ -20,23 +20,30 @@
         "minWidth": 960,
         "minHeight": 640,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "maximizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "shadow": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* https://tauri.localhost tauri://localhost ipc:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https:; font-src 'self' data:; media-src 'self' blob:"
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:3000 ws://127.0.0.1:3000 https://tauri.localhost tauri://localhost ipc:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: https:; font-src 'self' data:; media-src 'self' blob:"
     }
   },
   "bundle": {
     "active": true,
     "targets": ["deb", "rpm", "nsis", "app", "dmg"],
     "category": "DeveloperTools",
+    "publisher": "BaoBuildBuddy",
     "linux": {
       "appimage": {}
     },
     "macOS": {
       "hardenedRuntime": true,
-      "minimumSystemVersion": "10.13"
+      "minimumSystemVersion": "10.13",
+      "entitlements": "./Entitlements.plist"
     },
     "windows": {
       "webviewInstallMode": {

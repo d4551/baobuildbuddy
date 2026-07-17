@@ -13,7 +13,7 @@ defineProps<{
         <div v-if="contentText.trim().length > 0" class="whitespace-pre-wrap text-sm leading-relaxed">
           {{ contentText }}
         </div>
-        <p v-else class="text-sm text-base-content/60">{{ t("coverLetterDetailPage.preview.empty") }}</p>
+        <p v-else class="text-sm text-muted">{{ t("coverLetterDetailPage.preview.empty") }}</p>
       </div>
     </div>
   </section>

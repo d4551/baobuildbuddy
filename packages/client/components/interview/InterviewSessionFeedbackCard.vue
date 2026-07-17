@@ -21,7 +21,7 @@ const { t } = useI18n();
         <h2 id="interview-session-feedback-title" class="card-title text-lg">
           {{ t("interviewSession.feedbackTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-muted">
           {{ t("interviewSession.feedbackDescription") }}
         </p>
       </div>

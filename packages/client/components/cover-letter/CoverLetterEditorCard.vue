@@ -31,7 +31,7 @@ const emit = defineEmits<{
       ></textarea>
 
       <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <span class="text-sm text-base-content/60">
+        <span class="text-sm text-muted">
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
         <div class="flex gap-2">

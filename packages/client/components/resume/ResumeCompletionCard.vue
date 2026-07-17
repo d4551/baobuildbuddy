@@ -40,7 +40,7 @@ const { t } = useI18n();
         max="100"
         :aria-label="t('resumePage.completion.progressAria')"
       ></progress>
-      <p class="text-xs text-base-content/70">
+      <p class="text-xs text-secondary">
         {{
           t("resumePage.completion.summary", {
             completed: completedSectionCount,
@@ -61,7 +61,7 @@ const { t } = useI18n();
         </button>
       </div>
       <div class="card-actions justify-between">
-        <p class="text-xs text-base-content/70">
+        <p class="text-xs text-secondary">
           {{
             nextRecommendedTab
               ? t("resumePage.completion.nextStep", { section: tabLabel(nextRecommendedTab) })

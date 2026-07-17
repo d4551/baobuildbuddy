@@ -21,7 +21,7 @@ const { t } = useI18n();
     <section class="card border border-base-300 bg-base-100 shadow-sm">
       <div class="card-body gap-3">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
-        <p class="text-sm leading-6 text-base-content/70">
+        <p class="text-sm leading-6 text-secondary">
           {{ t("aiChatPage.contextPanelDescription") }}
         </p>
         <div class="flex flex-wrap gap-2">
@@ -41,7 +41,7 @@ const { t } = useI18n();
     <section class="card border border-base-300 bg-base-100 shadow-sm">
       <div class="card-body gap-3">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
-        <p class="text-sm leading-6 text-base-content/70">
+        <p class="text-sm leading-6 text-secondary">
           {{ t("aiChatPage.promptsDescription") }}
         </p>
         <ul class="flex flex-wrap gap-2" :aria-label="t('floatingChat.suggestionsAria')">

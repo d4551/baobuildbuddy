@@ -160,15 +160,15 @@ useSeoMeta({
                   <h2 id="automation-next-action-title" class="card-title">
                     {{ t("automation.hub.nextAction.title") }}
                   </h2>
-                  <p class="text-sm text-base-content/70">
+                  <p class="text-sm text-secondary">
                     {{ t("automation.hub.nextAction.description") }}
                   </p>
                 </div>
                 <div class="space-y-3 rounded-box border border-base-300 bg-base-200 p-4">
-                  <p class="text-sm font-medium text-base-content/80">
+                  <p class="text-sm font-medium text-secondary">
                     {{ nextPipelineStepLabel }}
                   </p>
-                  <p class="text-sm text-base-content/70">
+                  <p class="text-sm text-secondary">
                     {{ t(primaryCard?.descriptionKey ?? "automation.hub.cards.scraper.description") }}
                   </p>
                   <div class="card-actions justify-end">

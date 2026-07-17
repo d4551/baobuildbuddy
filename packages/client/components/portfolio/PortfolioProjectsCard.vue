@@ -72,12 +72,12 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
           <div class="card-body">
             <div class="flex items-start justify-between gap-2">
               <h3 class="card-title text-base">{{ project.title }}</h3>
-              <svg class="h-5 w-5 shrink-0 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg class="h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
               </svg>
             </div>
 
-            <p class="line-clamp-3 text-sm text-base-content/70">{{ project.description }}</p>
+            <p class="line-clamp-3 text-sm text-secondary">{{ project.description }}</p>
 
             <div v-if="hasTechnologies(project)" class="mt-2 flex flex-wrap gap-1">
               <span

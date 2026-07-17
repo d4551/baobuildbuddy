@@ -18,11 +18,11 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="card bg-base-100 shadow-md hover:shadow-lg transition-all"
+    class="card card-border card-glass transition-all"
     :class="[
       achievement.unlocked
-        ? 'ring-2 ring-primary cursor-pointer'
-        : 'opacity-50 grayscale'
+        ? 'ring-2 ring-primary cursor-pointer hover:shadow-lg'
+        : 'glass-disabled'
     ]"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
@@ -31,7 +31,7 @@ const { t } = useI18n();
       <div class="flex items-center gap-3">
         <div
           class="w-12 h-12 rounded-full flex items-center justify-center"
-          :class="achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
+          :class="achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-muted'"
         >
           <span class="text-2xl" aria-hidden="true">
             {{ achievement.icon ?? GAMIFICATION_ICON_FALLBACK }}
@@ -40,7 +40,7 @@ const { t } = useI18n();
 
         <div class="flex-1">
           <h3 class="font-bold">{{ achievement.name }}</h3>
-          <p class="text-xs text-base-content/70">{{ achievement.description }}</p>
+          <p class="text-xs text-secondary">{{ achievement.description }}</p>
           <span class="badge badge-soft badge-sm mt-2">
             +{{ achievement.xpReward }} {{ t("gamificationPage.xpSuffix") }}
           </span>

@@ -27,14 +27,14 @@ const { t } = useI18n();
 <template>
   <section
     v-if="readinessAssessment"
-    class="card bg-linear-to-br from-primary to-secondary text-primary-content"
+    class="card card-border bg-linear-to-br from-primary to-secondary text-on-primary"
   >
     <div class="card-body gap-4">
       <h2 class="card-title text-2xl">{{ t("skillsPathwaysPage.readiness.title") }}</h2>
 
       <SectionGrid grid-token="threeColumnXlGap6">
         <div class="space-y-2">
-          <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
+          <p class="text-sm text-on-primary">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
           <UiRadialMeter
             :value="readinessAssessment.overallScore"
             :max="readinessMax"
@@ -48,7 +48,7 @@ const { t } = useI18n();
         </div>
 
         <div class="space-y-3">
-          <p class="text-sm opacity-85">{{ t("skillsPathwaysPage.readiness.categoryScoresLabel") }}</p>
+          <p class="text-sm text-on-primary">{{ t("skillsPathwaysPage.readiness.categoryScoresLabel") }}</p>
           <div
             v-for="category in readinessCategories"
             :key="category.key"
@@ -64,7 +64,7 @@ const { t } = useI18n();
               :max="readinessMax"
               :aria-label="t('skillsPathwaysPage.readiness.categoryScoreAria', { category: getCategoryLabel(category.key), score: category.score })"
             ></progress>
-            <p class="text-xs opacity-85">
+            <p class="text-xs text-on-primary">
               {{ getCategoryFeedbackLabel(category.key, category.feedbackId) }}
             </p>
           </div>
