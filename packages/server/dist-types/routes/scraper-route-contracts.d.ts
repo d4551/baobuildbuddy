@@ -7,7 +7,7 @@ export declare const scrapeEnrichmentSummarySchema: import("typebox").TObject<{
     enabled: import("typebox").TBoolean;
     enrichedRecords: import("typebox").TNumber;
     warnings: import("typebox").TArray<import("typebox").TString>;
-    provider: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">[]>>;
+    provider: import("typebox").TOptional<import("typebox").TString>;
     model: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export declare const scraperOperationResultSchema: import("typebox").TObject<{
@@ -18,7 +18,7 @@ export declare const scraperOperationResultSchema: import("typebox").TObject<{
         enabled: import("typebox").TBoolean;
         enrichedRecords: import("typebox").TNumber;
         warnings: import("typebox").TArray<import("typebox").TString>;
-        provider: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">[]>>;
+        provider: import("typebox").TOptional<import("typebox").TString>;
         model: import("typebox").TOptional<import("typebox").TString>;
     }>;
 }>;
@@ -35,8 +35,16 @@ export declare const scraperOperationResponses: {
             enabled: import("typebox").TBoolean;
             enrichedRecords: import("typebox").TNumber;
             warnings: import("typebox").TArray<import("typebox").TString>;
-            provider: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">[]>>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
             model: import("typebox").TOptional<import("typebox").TString>;
         }>;
+    }>;
+    readonly 400: import("typebox").TObject<{
+        error: import("typebox").TString;
+        details: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TString;
+        details: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };

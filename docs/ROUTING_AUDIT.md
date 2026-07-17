@@ -12,7 +12,7 @@
 - Request/response contracts use Elysia/`typebox` `t` schemas (not baobox).
 - OpenAPI is served by `@elysiajs/openapi`; operation tags come from per-route `detail.tags`.
 - Canonical response schema objects live in `*-route-contracts.ts` / `route-response-registry.ts`.
-  Wiring `response:` maps onto handlers is deferred where Elysia 2 type inference collapses multi-outcome handlers to `Response` (schemas remain SSOT for future `status()` migration).
+- Handlers attach `response:` maps and return exclusively via Elysia `status(code, body)` (required for Elysia 2 multi-outcome typing).
 
 ---
 
@@ -20,7 +20,7 @@
 
 | Finding | Status |
 |---------|--------|
-| Response schema coverage near-zero | **Contracts added** for all route families; registry keeps schemas live. Handler `response:` maps deferred for Elysia 2 typing. |
+| Response schema coverage near-zero | **Fixed** — contracts + per-route `response:` maps + `status()` returns on all HTTP route families. |
 | Hardcoded automation/gamification error strings | **Fixed** — `API_ERROR_*` constants |
 | GET `/user/profile` write side-effect | **Fixed** — read-only; profile seeded at DB init |
 | Studio `Record<string, unknown>` update bag | **Fixed** — typed `Partial<StudioInsert>` |

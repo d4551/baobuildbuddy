@@ -1,5 +1,6 @@
-import type { RouteSetState } from "../types/route-state";
+import { type status } from "elysia";
 import { type AutomationRunIdParams } from "./automation-route-contracts";
+type RouteStatus = typeof status;
 /**
  * Automation API routes for RPA-driven workflows and run history.
  */
@@ -22,10 +23,23 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
+                        200: unknown;
+                        404: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        422: {
                             error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                        } | {
-                            resumeId: string;
+                        };
+                        429: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                     };
                     error: never;
@@ -48,62 +62,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        id: string;
-                        type: "email" | "job_apply" | "scrape";
-                        status: "error" | "pending" | "running" | "success";
-                        jobId: string | null;
-                        userId: string | null;
-                        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                            success: boolean;
-                            error: string | null;
-                            screenshots: string[];
-                            artifacts: {
-                                id: string;
-                                kind: "document" | "log" | "screenshot" | "trace";
-                                path: string;
-                                label?: string | undefined;
-                                mimeType?: string | undefined;
-                            }[];
-                            steps: {
-                                action: string;
-                                status: "error" | "ok";
-                                message?: string | undefined;
-                            }[];
-                        } | null;
-                        screenshots: string[] | null;
-                        error: string | {
-                            code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
+                    200: unknown;
+                    400: {
+                        error: {
+                            code: string;
                             message: string;
-                            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                            source: string;
-                        } | null;
-                        progress: number | null;
-                        currentStep: number | null;
-                        totalSteps: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        aborted: boolean;
-                        executionMs: number | null;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    404: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    409: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                     422: {
-                        type: 'validation';
-                        title: 'Validation Error';
-                        status: 422;
-                        detail?: string;
-                        on: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                 };
                 error: never;
@@ -127,62 +127,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            id: string;
-                            type: "email" | "job_apply" | "scrape";
-                            status: "error" | "pending" | "running" | "success";
-                            jobId: string | null;
-                            userId: string | null;
-                            input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                            output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                                success: boolean;
-                                error: string | null;
-                                screenshots: string[];
-                                artifacts: {
-                                    id: string;
-                                    kind: "document" | "log" | "screenshot" | "trace";
-                                    path: string;
-                                    label?: string | undefined;
-                                    mimeType?: string | undefined;
-                                }[];
-                                steps: {
-                                    action: string;
-                                    status: "error" | "ok";
-                                    message?: string | undefined;
-                                }[];
-                            } | null;
-                            screenshots: string[] | null;
-                            error: string | {
-                                code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
+                        200: unknown;
+                        400: {
+                            error: {
+                                code: string;
                                 message: string;
-                                details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                                source: string;
-                            } | null;
-                            progress: number | null;
-                            currentStep: number | null;
-                            totalSteps: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            createdAt: string;
-                            updatedAt: string;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            aborted: boolean;
-                            executionMs: number | null;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        404: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        409: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                         422: {
-                            type: 'validation';
-                            title: 'Validation Error';
-                            status: 422;
-                            detail?: string;
-                            on: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        429: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
+                        500: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                     };
                     error: never;
@@ -206,30 +192,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        runId: string;
-                        status: "success";
-                        reply: string;
-                        provider: string;
-                        model: string;
-                        delivered: boolean;
-                        recipientEmail?: string | undefined;
-                        deliveredAt?: string | undefined;
-                        messageId?: string | undefined;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                    200: unknown;
+                    400: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    404: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    409: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                     422: {
-                        type: 'validation';
-                        title: 'Validation Error';
-                        status: 422;
-                        detail?: string;
-                        on: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                 };
                 error: never;
@@ -254,62 +258,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            id: string;
-                            type: "email" | "job_apply" | "scrape";
-                            status: "error" | "pending" | "running" | "success";
-                            jobId: string | null;
-                            userId: string | null;
-                            input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                            output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                                success: boolean;
-                                error: string | null;
-                                screenshots: string[];
-                                artifacts: {
-                                    id: string;
-                                    kind: "document" | "log" | "screenshot" | "trace";
-                                    path: string;
-                                    label?: string | undefined;
-                                    mimeType?: string | undefined;
-                                }[];
-                                steps: {
-                                    action: string;
-                                    status: "error" | "ok";
-                                    message?: string | undefined;
-                                }[];
-                            } | null;
-                            screenshots: string[] | null;
-                            error: string | {
-                                code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
+                        200: unknown;
+                        400: {
+                            error: {
+                                code: string;
                                 message: string;
-                                details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                                source: string;
-                            } | null;
-                            progress: number | null;
-                            currentStep: number | null;
-                            totalSteps: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            createdAt: string;
-                            updatedAt: string;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            aborted: boolean;
-                            executionMs: number | null;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        404: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        409: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                         422: {
-                            type: 'validation';
-                            title: 'Validation Error';
-                            status: 422;
-                            detail?: string;
-                            on: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        429: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
+                        500: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                     };
                     error: never;
@@ -328,62 +318,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        id: string;
-                        type: "email" | "job_apply" | "scrape";
-                        status: "error" | "pending" | "running" | "success";
-                        jobId: string | null;
-                        userId: string | null;
-                        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                            success: boolean;
-                            error: string | null;
-                            screenshots: string[];
-                            artifacts: {
-                                id: string;
-                                kind: "document" | "log" | "screenshot" | "trace";
-                                path: string;
-                                label?: string | undefined;
-                                mimeType?: string | undefined;
-                            }[];
-                            steps: {
-                                action: string;
-                                status: "error" | "ok";
-                                message?: string | undefined;
-                            }[];
-                        } | null;
-                        screenshots: string[] | null;
-                        error: string | {
-                            code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
+                    200: unknown;
+                    400: {
+                        error: {
+                            code: string;
                             message: string;
-                            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                            source: string;
-                        } | null;
-                        progress: number | null;
-                        currentStep: number | null;
-                        totalSteps: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        aborted: boolean;
-                        executionMs: number | null;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                    } | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    404: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    409: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                     422: {
-                        type: 'validation';
-                        title: 'Validation Error';
-                        status: 422;
-                        detail?: string;
-                        on: string;
-                        found?: unknown;
-                        property?: string;
-                        expected?: string;
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                 };
                 error: never;
@@ -403,62 +379,48 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            id: string;
-                            type: "email" | "job_apply" | "scrape";
-                            status: "error" | "pending" | "running" | "success";
-                            jobId: string | null;
-                            userId: string | null;
-                            input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                            output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                                success: boolean;
-                                error: string | null;
-                                screenshots: string[];
-                                artifacts: {
-                                    id: string;
-                                    kind: "document" | "log" | "screenshot" | "trace";
-                                    path: string;
-                                    label?: string | undefined;
-                                    mimeType?: string | undefined;
-                                }[];
-                                steps: {
-                                    action: string;
-                                    status: "error" | "ok";
-                                    message?: string | undefined;
-                                }[];
-                            } | null;
-                            screenshots: string[] | null;
-                            error: string | {
-                                code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
+                        200: unknown;
+                        400: {
+                            error: {
+                                code: string;
                                 message: string;
-                                details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                                source: string;
-                            } | null;
-                            progress: number | null;
-                            currentStep: number | null;
-                            totalSteps: number | null;
-                            startedAt: string | null;
-                            completedAt: string | null;
-                            createdAt: string;
-                            updatedAt: string;
-                            exitCode: number | null;
-                            timedOut: boolean;
-                            aborted: boolean;
-                            executionMs: number | null;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                        } | {
-                            error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        404: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        409: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                         422: {
-                            type: 'validation';
-                            title: 'Validation Error';
-                            status: 422;
-                            detail?: string;
-                            on: string;
-                            found?: unknown;
-                            property?: string;
-                            expected?: string;
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
+                        };
+                        429: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
+                        500: {
+                            error: {
+                                code: string;
+                                message: string;
+                                details?: Record<string, unknown> | undefined;
+                            };
                         };
                     };
                     error: never;
@@ -475,8 +437,23 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/constants/automation").RpaCapabilityAuditReport | {
+                    200: unknown;
+                    422: {
                         error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: {
+                            code: string;
+                            message: string;
+                            details?: Record<string, unknown> | undefined;
+                        };
                     };
                 };
                 error: never;
@@ -495,52 +472,10 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                 };
                 headers: unknown;
                 response: {
-                    200: {
-                        id: string;
-                        type: "email" | "job_apply" | "scrape";
-                        status: "error" | "pending" | "running" | "success";
-                        jobId: string | null;
-                        userId: string | null;
-                        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-                        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
-                            success: boolean;
-                            error: string | null;
-                            screenshots: string[];
-                            artifacts: {
-                                id: string;
-                                kind: "document" | "log" | "screenshot" | "trace";
-                                path: string;
-                                label?: string | undefined;
-                                mimeType?: string | undefined;
-                            }[];
-                            steps: {
-                                action: string;
-                                status: "error" | "ok";
-                                message?: string | undefined;
-                            }[];
-                        } | null;
-                        screenshots: string[] | null;
-                        error: string | {
-                            code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
-                            message: string;
-                            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
-                            source: string;
-                        } | null;
-                        progress: number | null;
-                        currentStep: number | null;
-                        totalSteps: number | null;
-                        startedAt: string | null;
-                        completedAt: string | null;
-                        createdAt: string;
-                        updatedAt: string;
-                        exitCode: number | null;
-                        timedOut: boolean;
-                        aborted: boolean;
-                        executionMs: number | null;
-                    }[] | {
-                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-                    };
+                    200: unknown;
                     422: {
+                        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+                    } & {
                         type: 'validation';
                         title: 'Validation Error';
                         status: 422;
@@ -549,6 +484,13 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -560,7 +502,7 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
     schema: {};
     schemas: {};
     response: {
-        200: {
+        422: {
             error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
         };
     };
@@ -572,10 +514,57 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
     params: import("typebox").TObject<{
         id: import("typebox").TString;
     }>;
-}, {}, `${string}/runs/:id`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, set }: {
+    response: {
+        readonly 400: import("typebox").TObject<{
+            error: import("typebox").TObject<{
+                code: import("typebox").TString;
+                message: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            }>;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TObject<{
+                code: import("typebox").TString;
+                message: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            }>;
+        }>;
+        readonly 409: import("typebox").TObject<{
+            error: import("typebox").TObject<{
+                code: import("typebox").TString;
+                message: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            }>;
+        }>;
+        readonly 422: import("typebox").TObject<{
+            error: import("typebox").TObject<{
+                code: import("typebox").TString;
+                message: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            }>;
+        }>;
+        readonly 429: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 500: import("typebox").TObject<{
+            error: import("typebox").TObject<{
+                code: import("typebox").TString;
+                message: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+            }>;
+        }>;
+        readonly 200: import("typebox").TUnknown;
+    };
+}, {}, `${string}/runs/:id`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, status }: {
     params: AutomationRunIdParams;
-    set: RouteSetState;
-}) => Promise<{
+    status: RouteStatus;
+}) => Promise<import("elysia").ElysiaStatus<400, {
+    error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+}, 400> | import("elysia").ElysiaStatus<200 | 400 | 404, {
     id: string;
     type: "email" | "job_apply" | "scrape";
     status: "error" | "pending" | "running" | "success";
@@ -619,4 +608,5 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
     executionMs: number | null;
 } | {
     error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-}>>;
+}, 200 | 400 | 404>>>;
+export {};

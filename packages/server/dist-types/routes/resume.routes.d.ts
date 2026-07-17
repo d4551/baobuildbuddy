@@ -1,4 +1,6 @@
-import { type ResumeIdParams, type ResumeRouteSetState, type ResumeScoreBody } from "./resume-route-contracts";
+import { type status } from "elysia";
+import { type ResumeIdParams, type ResumeScoreRouteBody } from "./resume-route-contracts";
+type RouteStatus = typeof status;
 export declare const resumeRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
     error: [];
@@ -15,15 +17,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        error: string;
-                        details: string;
-                        questions?: undefined;
-                    } | {
-                        error?: undefined;
-                        details?: undefined;
-                        questions: import("../services/cv-questionnaire-service").CvQuestion[];
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -34,6 +28,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                         property?: string;
                         expected?: string;
                     };
+                    500: unknown;
                 };
                 error: never;
             };
@@ -55,10 +50,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/resume").ResumeData | {
-                        error: string;
-                        details: string;
-                    };
+                    201: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -69,6 +61,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                         property?: string;
                         expected?: string;
                     };
+                    500: unknown;
                 };
                 error: never;
             };
@@ -82,7 +75,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared/types/resume").ResumeData[];
+                200: unknown;
             };
             error: never;
         };
@@ -145,7 +138,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
             query: unknown;
             headers: unknown;
             response: {
-                200: import("@bao/shared/types/resume").ResumeData;
+                201: unknown;
                 422: {
                     type: 'validation';
                     title: 'Validation Error';
@@ -171,9 +164,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/resume").ResumeData | {
-                        error: string;
-                    };
+                    200: unknown;
+                    404: unknown;
                 };
                 error: never;
             };
@@ -240,9 +232,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("@bao/shared/types/resume").ResumeData | {
-                        error: string;
-                    };
+                    200: unknown;
+                    404: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -269,15 +260,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        success?: undefined;
-                        id?: undefined;
-                        error: string;
-                    } | {
-                        error?: undefined;
-                        success: boolean;
-                        id: string;
-                    };
+                    200: unknown;
+                    404: unknown;
                 };
                 error: never;
             };
@@ -298,13 +282,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: Response | {
-                            details?: undefined;
-                            error: string;
-                        } | {
-                            error: string;
-                            details: string;
-                        };
+                        200: unknown;
+                        404: unknown;
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -315,6 +294,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                             property?: string;
                             expected?: string;
                         };
+                        500: unknown;
                     };
                     error: never;
                 };
@@ -335,25 +315,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: {
-                            details?: undefined;
-                            error: string;
-                            resume?: undefined;
-                            suggestions?: undefined;
-                            section?: undefined;
-                        } | {
-                            error: string;
-                            details: string;
-                            resume?: undefined;
-                            suggestions?: undefined;
-                            section?: undefined;
-                        } | {
-                            error?: undefined;
-                            details?: undefined;
-                            resume: import("@bao/shared/types/resume").ResumeData;
-                            suggestions: import("@bao/shared/utils/json").JsonArray;
-                            section: string;
-                        };
+                        200: unknown;
+                        404: unknown;
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -364,6 +327,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                             property?: string;
                             expected?: string;
                         };
+                        500: unknown;
                     };
                     error: never;
                 };
@@ -380,31 +344,16 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
     body: import("typebox").TObject<{
         jobId: import("typebox").TString;
     }>;
-}, {}, `${string}/:id/ai-score`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, set, }: {
+    response: {
+        200: import("typebox").TUnknown;
+        404: import("typebox").TUnknown;
+        500: import("typebox").TUnknown;
+    };
+}, {}, `${string}/:id/ai-score`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, status, }: {
     params: ResumeIdParams;
-    body: ResumeScoreBody;
-    set: ResumeRouteSetState;
-}) => Promise<{
-    details?: undefined;
-    error: string;
-    resumeId?: undefined;
-    jobId?: undefined;
-    score?: undefined;
-    strengths?: undefined;
-    improvements?: undefined;
-    keywords?: undefined;
-    analysis?: undefined;
-} | {
-    error: string;
-    details: string;
-    resumeId?: undefined;
-    jobId?: undefined;
-    score?: undefined;
-    strengths?: undefined;
-    improvements?: undefined;
-    keywords?: undefined;
-    analysis?: undefined;
-} | {
+    body: ResumeScoreRouteBody;
+    status: RouteStatus;
+}) => Promise<import("elysia").ElysiaStatus<200, {
     error?: undefined;
     details?: undefined;
     resumeId: string;
@@ -414,4 +363,17 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
     improvements: string[];
     keywords: string[];
     analysis: Record<string, unknown>;
-}>>;
+}, 200> | import("elysia").ElysiaStatus<404, {
+    error: string;
+    details: string;
+} | {
+    details?: undefined;
+    error: string;
+}, 404> | import("elysia").ElysiaStatus<500, {
+    error: string;
+    details: string;
+} | {
+    details?: undefined;
+    error: string;
+}, 500>>>;
+export {};

@@ -55,7 +55,7 @@ export declare const jobEntityResponseSchema: import("typebox").TObject<{
     location: import("typebox").TString;
     remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
     hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
     description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
     requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -71,7 +71,7 @@ export declare const jobEntityResponseSchema: import("typebox").TObject<{
     tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
     companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
     applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
     createdAt: import("typebox").TOptional<import("typebox").TString>;
     updatedAt: import("typebox").TOptional<import("typebox").TString>;
     matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -86,7 +86,7 @@ export declare const jobsListResponseSchema: import("typebox").TObject<{
         location: import("typebox").TString;
         remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
         hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -102,7 +102,7 @@ export declare const jobsListResponseSchema: import("typebox").TObject<{
         tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
         matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -121,10 +121,12 @@ export declare const savedJobResponseSchema: import("typebox").TObject<{
 export declare const applicationResponseSchema: import("typebox").TObject<{
     id: import("typebox").TString;
     jobId: import("typebox").TString;
-    status: import("typebox").TString;
+    status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
     appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
     notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-    timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+    timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+    createdAt: import("typebox").TOptional<import("typebox").TString>;
+    updatedAt: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export declare const jobsRefreshResponseSchema: import("typebox").TObject<{
     message: import("typebox").TString;
@@ -142,7 +144,7 @@ export declare const jobsListResponses: {
             location: import("typebox").TString;
             remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
             hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -158,7 +160,7 @@ export declare const jobsListResponses: {
             tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             createdAt: import("typebox").TOptional<import("typebox").TString>;
             updatedAt: import("typebox").TOptional<import("typebox").TString>;
             matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -178,7 +180,7 @@ export declare const jobEntityResponses: {
         location: import("typebox").TString;
         remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
         hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -194,12 +196,19 @@ export declare const jobEntityResponses: {
         tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
         matchScore: import("typebox").TOptional<import("typebox").TNumber>;
         matchReason: import("typebox").TOptional<import("typebox").TString>;
         rank: import("typebox").TOptional<import("typebox").TNumber>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const saveJobResponses: {
@@ -213,12 +222,18 @@ export declare const saveJobResponses: {
         id: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
         savedAt: import("typebox").TOptional<import("typebox").TString>;
-        error: import("typebox").TOptional<import("typebox").TString>;
     }>;
     readonly 201: import("typebox").TObject<{
         id: import("typebox").TString;
         jobId: import("typebox").TString;
         savedAt: import("typebox").TString;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const deleteSavedJobResponses: {
@@ -239,7 +254,7 @@ export declare const savedJobsListResponses: {
             location: import("typebox").TString;
             remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
             hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -255,7 +270,7 @@ export declare const savedJobsListResponses: {
             tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             createdAt: import("typebox").TOptional<import("typebox").TString>;
             updatedAt: import("typebox").TOptional<import("typebox").TString>;
             matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -270,46 +285,67 @@ export declare const applyJobResponses: {
         application: import("typebox").TOptional<import("typebox").TObject<{
             id: import("typebox").TString;
             jobId: import("typebox").TString;
-            status: import("typebox").TString;
+            status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
             appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-            timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+            timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+            createdAt: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
         }>>;
         id: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
         status: import("typebox").TOptional<import("typebox").TString>;
         appliedDate: import("typebox").TOptional<import("typebox").TString>;
         notes: import("typebox").TOptional<import("typebox").TString>;
-        timeline: import("typebox").TOptional<import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>>;
-        error: import("typebox").TOptional<import("typebox").TString>;
+        timeline: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnknown>>;
     }>;
     readonly 201: import("typebox").TObject<{
         id: import("typebox").TString;
         jobId: import("typebox").TString;
-        status: import("typebox").TString;
+        status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const updateApplicationResponses: {
     readonly 200: import("typebox").TObject<{
         id: import("typebox").TString;
         jobId: import("typebox").TString;
-        status: import("typebox").TString;
+        status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const applicationsListResponses: {
     readonly 200: import("typebox").TArray<import("typebox").TObject<{
         id: import("typebox").TString;
         jobId: import("typebox").TString;
-        status: import("typebox").TString;
+        status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+        timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>>;
 };
 export declare const recommendationsResponses: {
@@ -321,7 +357,7 @@ export declare const recommendationsResponses: {
             location: import("typebox").TString;
             remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
             hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -337,7 +373,7 @@ export declare const recommendationsResponses: {
             tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
             companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
             applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
             createdAt: import("typebox").TOptional<import("typebox").TString>;
             updatedAt: import("typebox").TOptional<import("typebox").TString>;
             matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -356,6 +392,13 @@ export declare const jobsRefreshResponses: {
         totalJobs: import("typebox").TNumber;
         newJobs: import("typebox").TNumber;
         updatedJobs: import("typebox").TNumber;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export { HTTP_STATUS_CREATED };

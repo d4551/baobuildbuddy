@@ -126,7 +126,7 @@ export declare const monthlyStatsResponseSchema: import("typebox").TObject<{
     streakDays: import("typebox").TNumber;
 }>;
 export declare const gamificationProgressResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         xp: import("typebox").TNumber;
         level: import("typebox").TNumber;
         achievements: import("typebox").TArray<import("typebox").TString>;
@@ -140,7 +140,7 @@ export declare const gamificationProgressResponses: {
     }>;
 };
 export declare const awardXpResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         xp: import("typebox").TNumber;
         level: import("typebox").TNumber;
         leveledUp: import("typebox").TBoolean;
@@ -156,9 +156,16 @@ export declare const awardXpResponses: {
         reason: import("typebox").TString;
         message: import("typebox").TString;
     }>;
+    400: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const achievementsResponses: {
-    readonly 200: import("typebox").TArray<import("typebox").TObject<{
+    200: import("typebox").TArray<import("typebox").TObject<{
         id: import("typebox").TString;
         name: import("typebox").TString;
         description: import("typebox").TString;
@@ -174,7 +181,7 @@ export declare const achievementsResponses: {
     }>>;
 };
 export declare const challengesListResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         date: import("typebox").TString;
         challenges: import("typebox").TArray<import("typebox").TObject<{
             id: import("typebox").TString;
@@ -195,23 +202,30 @@ export declare const challengesListResponses: {
     }>;
 };
 export declare const challengeCompleteResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         message: import("typebox").TString;
         challengeId: import("typebox").TOptional<import("typebox").TString>;
         completed: import("typebox").TBoolean;
         totalXP: import("typebox").TOptional<import("typebox").TNumber>;
         level: import("typebox").TOptional<import("typebox").TNumber>;
     }>;
-    readonly 201: import("typebox").TObject<{
+    201: import("typebox").TObject<{
         message: import("typebox").TString;
         challengeId: import("typebox").TOptional<import("typebox").TString>;
         completed: import("typebox").TBoolean;
         totalXP: import("typebox").TOptional<import("typebox").TNumber>;
         level: import("typebox").TOptional<import("typebox").TNumber>;
+    }>;
+    400: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const weeklyProgressResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         challengesCompleted: import("typebox").TNumber;
         xpEarned: import("typebox").TNumber;
         actionsCount: import("typebox").TNumber;
@@ -224,7 +238,7 @@ export declare const weeklyProgressResponses: {
     }>;
 };
 export declare const monthlyStatsResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         totalXP: import("typebox").TNumber;
         levelsGained: import("typebox").TNumber;
         achievementsUnlocked: import("typebox").TNumber;

@@ -1,5 +1,6 @@
-import type { RouteSetState } from "../types/route-state";
+import { type status } from "elysia";
 import { type AutomationActionRouteBody } from "./ai-route-contracts";
+type RouteStatus = typeof status;
 export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", {
     decorator: {};
     store: {};
@@ -48,17 +49,7 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                        sessionId: string | null | undefined;
-                        timestamp: string;
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
-                        followUps: string[];
-                        contextDomain: "automation" | "general" | "interview" | "job_search" | "portfolio" | "resume" | "skills";
-                    } | {
-                        error: string;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -68,6 +59,20 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -86,27 +91,13 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
+                    200: unknown;
+                    404: {
                         error: string;
-                        message?: undefined;
-                        resumeId?: undefined;
-                        jobId?: undefined;
-                        analysis?: undefined;
-                        provider?: undefined;
-                        model?: undefined;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        resumeId: string;
-                        jobId: string | null;
-                        analysis: {
-                            score: number;
-                            strengths: string[];
-                            improvements: string[];
-                            keywords: string[];
-                        };
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -117,6 +108,20 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -137,22 +142,13 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message?: undefined;
-                        provider?: undefined;
-                        model?: undefined;
+                    200: unknown;
+                    404: {
                         error: string;
-                        content?: undefined;
-                    } | {
-                        error?: undefined;
-                        message: string;
-                        content: {
-                            introduction: string;
-                            body: string;
-                            conclusion: string;
-                        };
-                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                        model: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     422: {
                         type: 'validation';
@@ -163,6 +159,20 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -182,23 +192,7 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                        matches: {
-                            jobId: string;
-                            title: string;
-                            company: string;
-                            location: string | null;
-                            remote: boolean;
-                            score: number;
-                            strengths: string[];
-                            concerns: string[];
-                            highlightSkills: string[];
-                        }[];
-                        recommendations: string[];
-                    } | {
-                        error: string;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -208,6 +202,20 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -223,17 +231,13 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/ai/control-plane").AIControlPlaneState | {
-                        providers: {
-                            id: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                            nameKey: string;
-                            descriptionKey: string;
-                            iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
-                            models: string[];
-                            available: boolean;
-                            health: "unconfigured";
-                        }[];
+                    200: unknown;
+                    429: {
                         error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -249,16 +253,13 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        totalMessages: number;
-                        userMessages: number;
-                        assistantMessages: number;
-                        sessions: number;
-                        recentActivity: {
-                            timestamp: string;
-                            role: string;
-                            sessionId: string | null;
-                        }[];
+                    200: unknown;
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -282,17 +283,61 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
         coverLetterId: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
     }>;
-}, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, set }: {
+    response: {
+        readonly 200: import("typebox").TUnknown;
+        readonly 400: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 409: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 422: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 500: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 429: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    };
+}, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
     body: AutomationActionRouteBody;
-    set: RouteSetState;
-}) => Promise<{
-    message?: undefined;
+    status: RouteStatus;
+}) => Promise<import("elysia").ElysiaStatus<200 | 400 | 404 | 409 | 422 | 500, {
     error: string;
-    runId?: undefined;
-    status?: undefined;
 } | {
-    error?: undefined;
+    error: string;
+} | {
     runId: string;
     status: string;
     message: string;
-}>>;
+}, 200 | 400 | 404 | 409 | 422 | 500>>>;
+export {};

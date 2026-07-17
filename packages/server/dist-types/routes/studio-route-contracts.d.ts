@@ -51,10 +51,10 @@ export declare const studioEntityResponseSchema: import("typebox").TObject<{
     description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
     games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-    culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
     interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
     remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
     createdAt: import("typebox").TOptional<import("typebox").TString>;
     updatedAt: import("typebox").TOptional<import("typebox").TString>;
 }>;
@@ -84,10 +84,10 @@ export declare const studioListResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>>;
@@ -104,10 +104,10 @@ export declare const studioEntityResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
@@ -122,18 +122,32 @@ export declare const studioEntityResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const studioDeleteResponses: {
     readonly 200: import("typebox").TObject<{
         message: import("typebox").TString;
         id: import("typebox").TString;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
 export declare const studioAnalyticsResponses: {

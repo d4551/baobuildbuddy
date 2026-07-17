@@ -1,4 +1,56 @@
+import { HTTP_STATUS_CREATED, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import { applications, savedJobs } from "../db/schema/jobs";
 import type { JobListQuery } from "./jobs-route-contracts";
+type SavedJobRow = typeof savedJobs.$inferSelect;
+type ApplicationRow = typeof applications.$inferSelect;
+type RouteErrorBody = {
+    error: string;
+};
+type SaveJobResult = {
+    status: typeof HTTP_STATUS_NOT_FOUND;
+    body: RouteErrorBody;
+} | {
+    status: null;
+    body: {
+        message: string;
+        saved: SavedJobRow;
+    };
+} | {
+    status: typeof HTTP_STATUS_CREATED;
+    body: SavedJobRow;
+};
+type NewApplicationBody = {
+    id: string;
+    jobId: string;
+    status: string;
+    appliedDate: string;
+    notes: string;
+    timeline: Array<{
+        status: string;
+        date: string;
+        notes: string;
+    }>;
+};
+type CreateApplicationResult = {
+    status: typeof HTTP_STATUS_NOT_FOUND;
+    body: RouteErrorBody;
+} | {
+    status: null;
+    body: {
+        message: string;
+        application: ApplicationRow;
+    };
+} | {
+    status: typeof HTTP_STATUS_CREATED;
+    body: NewApplicationBody;
+};
+type UpdateApplicationResult = {
+    status: typeof HTTP_STATUS_NOT_FOUND;
+    body: RouteErrorBody;
+} | {
+    status: null;
+    body: ApplicationRow;
+};
 export declare const listJobs: (query: JobListQuery) => Promise<{
     jobs: {
         applicationUrl: string | null;
@@ -58,32 +110,7 @@ export declare const getJobById: (id: string) => Promise<{
     createdAt: string;
     updatedAt: string;
 }>;
-export declare const saveJob: (jobId: string) => Promise<{
-    status: number;
-    body: {
-        message?: undefined;
-        error: string;
-        saved?: undefined;
-    };
-} | {
-    status: null;
-    body: {
-        error?: undefined;
-        message: string;
-        saved: {
-            id: string;
-            jobId: string;
-            savedAt: string;
-        };
-    };
-} | {
-    status: number;
-    body: {
-        id: string;
-        jobId: string;
-        savedAt: string;
-    };
-}>;
+export declare const saveJob: (jobId: string) => Promise<SaveJobResult>;
 export declare const deleteSavedJob: (jobId: string) => Promise<{
     success: boolean;
     deleted: void;
@@ -120,62 +147,8 @@ export declare const listSavedJobs: () => Promise<{
         updatedAt: string;
     } | null;
 }[]>;
-export declare const createApplication: (jobId: string, notes: string) => Promise<{
-    status: number;
-    body: {
-        message?: undefined;
-        error: string;
-        application?: undefined;
-    };
-} | {
-    status: null;
-    body: {
-        error?: undefined;
-        message: string;
-        application: {
-            id: string;
-            jobId: string;
-            status: string | null;
-            appliedDate: string;
-            notes: string | null;
-            timeline: unknown[] | null;
-            createdAt: string;
-            updatedAt: string;
-        };
-    };
-} | {
-    status: number;
-    body: {
-        id: string;
-        jobId: string;
-        status: string;
-        appliedDate: string;
-        notes: string;
-        timeline: {
-            status: string;
-            date: string;
-            notes: string;
-        }[];
-    };
-}>;
-export declare const updateApplication: (id: string, newStatus: string | undefined, notes: string | undefined) => Promise<{
-    status: number;
-    body: {
-        error: string;
-    };
-} | {
-    status: null;
-    body: {
-        id: string;
-        jobId: string;
-        status: string | null;
-        appliedDate: string;
-        notes: string | null;
-        timeline: unknown[] | null;
-        createdAt: string;
-        updatedAt: string;
-    };
-}>;
+export declare const createApplication: (jobId: string, notes: string) => Promise<CreateApplicationResult>;
+export declare const updateApplication: (id: string, newStatus: string | undefined, notes: string | undefined) => Promise<UpdateApplicationResult>;
 export declare const listApplications: () => Promise<{
     id: string;
     jobId: string;
@@ -213,3 +186,4 @@ export declare const listApplications: () => Promise<{
         updatedAt: string;
     } | null;
 }[]>;
+export {};

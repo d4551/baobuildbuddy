@@ -48,7 +48,7 @@ export declare const searchAutocompleteResponseSchema: import("typebox").TArray<
     type: import("typebox").TString;
 }>>;
 export declare const searchAllResponses: {
-    readonly 200: import("typebox").TObject<{
+    200: import("typebox").TObject<{
         query: import("typebox").TString;
         results: import("typebox").TArray<import("typebox").TObject<{
             type: import("typebox").TUnion<[import("typebox").TLiteral<"jobs">, import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"skills">, import("typebox").TLiteral<"resumes">]>;
@@ -68,7 +68,7 @@ export declare const searchAllResponses: {
     }>;
 };
 export declare const searchAutocompleteResponses: {
-    readonly 200: import("typebox").TArray<import("typebox").TObject<{
+    200: import("typebox").TArray<import("typebox").TObject<{
         text: import("typebox").TString;
         type: import("typebox").TString;
     }>>;

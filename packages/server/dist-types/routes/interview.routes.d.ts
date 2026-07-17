@@ -53,9 +53,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        message: string;
-                    };
+                    201: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -80,7 +78,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("./interview-route-contracts").SessionPayload[];
+                    200: unknown;
                 };
                 error: never;
             };
@@ -98,9 +96,8 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: import("./interview-route-contracts").SessionPayload | {
-                            error: string;
-                        };
+                        200: unknown;
+                        404: unknown;
                     };
                     error: never;
                 };
@@ -124,12 +121,9 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                error: string;
-                            } | {
-                                error?: undefined;
-                                message: string;
-                            };
+                            200: unknown;
+                            400: unknown;
+                            404: unknown;
                             422: {
                                 type: 'validation';
                                 title: 'Validation Error';
@@ -160,12 +154,8 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: {
-                                error: string;
-                            } | {
-                                error?: undefined;
-                                message: string;
-                            };
+                            200: unknown;
+                            404: unknown;
                         };
                         error: never;
                     };
@@ -173,7 +163,55 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
             };
         };
     };
-}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<import("elysia").InputSchema<never>, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, () => Promise<{
+}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
+    detail: {
+        tags: string[];
+    };
+    response: {
+        200: import("typebox").TObject<{
+            totalSessions: import("typebox").TNumber;
+            completedSessions: import("typebox").TNumber;
+            inProgressSessions: import("typebox").TNumber;
+            averageQuestions: import("typebox").TNumber;
+            averageResponses: import("typebox").TNumber;
+            totalInterviews: import("typebox").TNumber;
+            completedInterviews: import("typebox").TNumber;
+            averageScore: import("typebox").TNumber;
+            improvementTrend: import("typebox").TNumber;
+        }>;
+    };
+}, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ status }: {
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    status: import("elysia").SelectiveStatus<{
+        200: {
+            totalSessions: number;
+            completedSessions: number;
+            inProgressSessions: number;
+            averageQuestions: number;
+            averageResponses: number;
+            totalInterviews: number;
+            completedInterviews: number;
+            averageScore: number;
+            improvementTrend: number;
+        };
+    }>;
+}) => Promise<import("elysia").ElysiaStatus<200, {
     totalSessions: number;
     completedSessions: number;
     inProgressSessions: number;
@@ -183,4 +221,4 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     completedInterviews: number;
     averageScore: number;
     improvementTrend: number;
-}>>;
+}, 200>>>;

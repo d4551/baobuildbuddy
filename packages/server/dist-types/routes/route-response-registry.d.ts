@@ -1,181 +1,150 @@
 export declare const ROUTE_RESPONSE_REGISTRY: {
     readonly ai: {
         readonly chat: {
-            readonly 200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                sessionId: import("typebox").TString;
-                timestamp: import("typebox").TString;
-                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                model: import("typebox").TString;
-                followUps: import("typebox").TArray<import("typebox").TString>;
-                contextDomain: import("typebox").TString;
+            readonly 200: import("typebox").TUnknown;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly analyzeResume: {
-            readonly 200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                resumeId: import("typebox").TString;
-                jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                analysis: import("typebox").TObject<{
-                    score: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    keywords: import("typebox").TArray<import("typebox").TString>;
-                }>;
-                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                model: import("typebox").TString;
+            readonly 200: import("typebox").TUnknown;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly generateCoverLetter: {
-            readonly 200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                content: import("typebox").TObject<{
-                    introduction: import("typebox").TString;
-                    body: import("typebox").TString;
-                    conclusion: import("typebox").TString;
-                }>;
-                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                model: import("typebox").TString;
+            readonly 200: import("typebox").TUnknown;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly matchJobs: {
-            readonly 200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                matches: import("typebox").TArray<import("typebox").TObject<{
-                    jobId: import("typebox").TString;
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    location: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                    remote: import("typebox").TBoolean;
-                    score: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    concerns: import("typebox").TArray<import("typebox").TString>;
-                    highlightSkills: import("typebox").TArray<import("typebox").TString>;
-                }>>;
-                recommendations: import("typebox").TArray<import("typebox").TString>;
+            readonly 200: import("typebox").TUnknown;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly models: {
-            readonly 200: import("typebox").TObject<{
-                aiRouting: import("typebox").TOptional<import("typebox").TObject<{
-                    chat: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    interviewQuestions: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    interviewFeedback: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    resume: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    coverLetter: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    emailResponse: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    jobMatch: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    scrapeEnrichment: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    automationFieldMapping: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                }>>;
-                configuredProviders: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>>>;
-                error: import("typebox").TOptional<import("typebox").TString>;
-                preferredModel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                preferredProvider: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>>;
-                providerDiagnostics: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TObject<{
-                    provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                    code: import("typebox").TString;
-                    checkedAt: import("typebox").TString;
-                    endpoint: import("typebox").TOptional<import("typebox").TString>;
-                    selectedModel: import("typebox").TOptional<import("typebox").TString>;
-                    availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    message: import("typebox").TOptional<import("typebox").TString>;
-                }>>>;
-                providers: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                    nameKey: import("typebox").TString;
-                    descriptionKey: import("typebox").TString;
-                    iconId: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                    models: import("typebox").TArray<import("typebox").TString>;
-                    available: import("typebox").TBoolean;
-                    health: import("typebox").TUnion<[import("typebox").TLiteral<"healthy">, import("typebox").TLiteral<"degraded">, import("typebox").TLiteral<"down">, import("typebox").TLiteral<"unconfigured">]>;
-                    selectedModel: import("typebox").TOptional<import("typebox").TString>;
-                    diagnosticCode: import("typebox").TOptional<import("typebox").TString>;
-                    availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    error: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly usage: {
-            readonly 200: import("typebox").TObject<{
-                totalMessages: import("typebox").TNumber;
-                userMessages: import("typebox").TNumber;
-                assistantMessages: import("typebox").TNumber;
-                sessions: import("typebox").TNumber;
-                recentActivity: import("typebox").TArray<import("typebox").TObject<{
-                    timestamp: import("typebox").TString;
-                    role: import("typebox").TString;
-                    sessionId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                }>>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly automationAction: {
-            readonly 200: import("typebox").TObject<{
-                runId: import("typebox").TString;
-                status: import("typebox").TString;
-                message: import("typebox").TString;
+            readonly 200: import("typebox").TUnknown;
+            readonly 400: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 409: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 422: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
     };
@@ -243,7 +212,50 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
             }>;
         }>;
-        readonly errors: {};
+        readonly errors: {
+            readonly 400: import("typebox").TObject<{
+                error: import("typebox").TObject<{
+                    code: import("typebox").TString;
+                    message: import("typebox").TString;
+                    details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                }>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TObject<{
+                    code: import("typebox").TString;
+                    message: import("typebox").TString;
+                    details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                }>;
+            }>;
+            readonly 409: import("typebox").TObject<{
+                error: import("typebox").TObject<{
+                    code: import("typebox").TString;
+                    message: import("typebox").TString;
+                    details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                }>;
+            }>;
+            readonly 422: import("typebox").TObject<{
+                error: import("typebox").TObject<{
+                    code: import("typebox").TString;
+                    message: import("typebox").TString;
+                    details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                }>;
+            }>;
+            readonly 429: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TObject<{
+                    code: import("typebox").TString;
+                    message: import("typebox").TString;
+                    details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                }>;
+            }>;
+        };
     };
     readonly auth: {
         readonly status: {
@@ -264,6 +276,20 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 configured: import("typebox").TBoolean;
                 apiKey: import("typebox").TOptional<import("typebox").TString>;
                 message: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 400: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 403: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
     };
@@ -301,48 +327,33 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 createdAt: import("typebox").TOptional<import("typebox").TString>;
                 updatedAt: import("typebox").TOptional<import("typebox").TString>;
             }>;
-        };
-        readonly delete: {
-            200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
-                id: import("typebox").TString;
-            }>;
-        };
-        readonly generate: {
-            200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                content: import("typebox").TObject<{
-                    introduction: import("typebox").TString;
-                    body: import("typebox").TString;
-                    conclusion: import("typebox").TString;
-                }>;
-            }>;
-            201: import("typebox").TObject<{
-                message: import("typebox").TString;
-                coverLetter: import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    company: import("typebox").TString;
-                    position: import("typebox").TString;
-                    jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
-                    content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
-                    template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    createdAt: import("typebox").TOptional<import("typebox").TString>;
-                    updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                }>;
-            }>;
-            503: import("typebox").TObject<{
+            404: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
+        };
+        readonly delete: {
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+        };
+        readonly generate: {
+            200: import("typebox").TUnknown;
+            201: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
+            503: import("typebox").TUnknown;
         };
         readonly export: {
             200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
     };
     readonly gamification: {
         readonly progress: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 xp: import("typebox").TNumber;
                 level: import("typebox").TNumber;
                 achievements: import("typebox").TArray<import("typebox").TString>;
@@ -356,7 +367,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
             }>;
         };
         readonly awardXp: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 xp: import("typebox").TNumber;
                 level: import("typebox").TNumber;
                 leveledUp: import("typebox").TBoolean;
@@ -372,9 +383,16 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 reason: import("typebox").TString;
                 message: import("typebox").TString;
             }>;
+            400: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
         };
         readonly achievements: {
-            readonly 200: import("typebox").TArray<import("typebox").TObject<{
+            200: import("typebox").TArray<import("typebox").TObject<{
                 id: import("typebox").TString;
                 name: import("typebox").TString;
                 description: import("typebox").TString;
@@ -390,7 +408,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
             }>>;
         };
         readonly challenges: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 date: import("typebox").TString;
                 challenges: import("typebox").TArray<import("typebox").TObject<{
                     id: import("typebox").TString;
@@ -411,23 +429,30 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
             }>;
         };
         readonly completeChallenge: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 message: import("typebox").TString;
                 challengeId: import("typebox").TOptional<import("typebox").TString>;
                 completed: import("typebox").TBoolean;
                 totalXP: import("typebox").TOptional<import("typebox").TNumber>;
                 level: import("typebox").TOptional<import("typebox").TNumber>;
             }>;
-            readonly 201: import("typebox").TObject<{
+            201: import("typebox").TObject<{
                 message: import("typebox").TString;
                 challengeId: import("typebox").TOptional<import("typebox").TString>;
                 completed: import("typebox").TBoolean;
                 totalXP: import("typebox").TOptional<import("typebox").TNumber>;
                 level: import("typebox").TOptional<import("typebox").TNumber>;
+            }>;
+            400: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly weeklyProgress: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 challengesCompleted: import("typebox").TNumber;
                 xpEarned: import("typebox").TNumber;
                 actionsCount: import("typebox").TNumber;
@@ -440,7 +465,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
             }>;
         };
         readonly monthlyStats: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 totalXP: import("typebox").TNumber;
                 levelsGained: import("typebox").TNumber;
                 achievementsUnlocked: import("typebox").TNumber;
@@ -452,509 +477,23 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
     };
     readonly interview: {
         readonly createSession: {
-            201: import("typebox").TObject<{
-                id: import("typebox").TString;
-                studioId: import("typebox").TString;
-                config: import("typebox").TObject<{
-                    roleType: import("typebox").TOptional<import("typebox").TString>;
-                    roleCategory: import("typebox").TOptional<import("typebox").TString>;
-                    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
-                    focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    duration: import("typebox").TOptional<import("typebox").TInteger>;
-                    questionCount: import("typebox").TOptional<import("typebox").TInteger>;
-                    includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
-                    enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
-                        microphoneId: import("typebox").TOptional<import("typebox").TString>;
-                        speakerId: import("typebox").TOptional<import("typebox").TString>;
-                        voiceId: import("typebox").TOptional<import("typebox").TString>;
-                        rate: import("typebox").TOptional<import("typebox").TNumber>;
-                        pitch: import("typebox").TOptional<import("typebox").TNumber>;
-                        volume: import("typebox").TOptional<import("typebox").TNumber>;
-                        language: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
-                    conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
-                    targetJob: import("typebox").TOptional<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        location: import("typebox").TString;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        source: import("typebox").TOptional<import("typebox").TString>;
-                        postedDate: import("typebox").TOptional<import("typebox").TString>;
-                        url: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    candidateContext: import("typebox").TOptional<import("typebox").TObject<{
-                        resumeId: import("typebox").TOptional<import("typebox").TString>;
-                        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
-                        portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                }>;
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
-                    question: import("typebox").TString;
-                    followUps: import("typebox").TArray<import("typebox").TString>;
-                    expectedDuration: import("typebox").TNumber;
-                    difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
-                    tags: import("typebox").TArray<import("typebox").TString>;
-                    score: import("typebox").TOptional<import("typebox").TNumber>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                    response: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                currentQuestionIndex: import("typebox").TNumber;
-                totalQuestions: import("typebox").TNumber;
-                startTime: import("typebox").TNumber;
-                endTime: import("typebox").TOptional<import("typebox").TNumber>;
-                status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
-                responses: import("typebox").TArray<import("typebox").TObject<{
-                    questionId: import("typebox").TString;
-                    transcript: import("typebox").TString;
-                    duration: import("typebox").TNumber;
-                    timestamp: import("typebox").TNumber;
-                    confidence: import("typebox").TNumber;
-                    aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                        score: import("typebox").TNumber;
-                        feedback: import("typebox").TString;
-                        strengths: import("typebox").TArray<import("typebox").TString>;
-                        improvements: import("typebox").TArray<import("typebox").TString>;
-                    }>>;
-                }>>;
-                finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                    overallScore: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    recommendations: import("typebox").TArray<import("typebox").TString>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    role: import("typebox").TString;
-                    studioName: import("typebox").TString;
-                    background: import("typebox").TString;
-                    style: import("typebox").TString;
-                    experience: import("typebox").TString;
-                }>>;
-                role: import("typebox").TOptional<import("typebox").TString>;
-                studioName: import("typebox").TOptional<import("typebox").TString>;
-                score: import("typebox").TOptional<import("typebox").TNumber>;
-                duration: import("typebox").TOptional<import("typebox").TString>;
-                overallFeedback: import("typebox").TOptional<import("typebox").TString>;
-                totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            201: import("typebox").TUnknown;
         };
         readonly listSessions: {
-            200: import("typebox").TArray<import("typebox").TObject<{
-                id: import("typebox").TString;
-                studioId: import("typebox").TString;
-                config: import("typebox").TObject<{
-                    roleType: import("typebox").TOptional<import("typebox").TString>;
-                    roleCategory: import("typebox").TOptional<import("typebox").TString>;
-                    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
-                    focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    duration: import("typebox").TOptional<import("typebox").TInteger>;
-                    questionCount: import("typebox").TOptional<import("typebox").TInteger>;
-                    includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
-                    enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
-                        microphoneId: import("typebox").TOptional<import("typebox").TString>;
-                        speakerId: import("typebox").TOptional<import("typebox").TString>;
-                        voiceId: import("typebox").TOptional<import("typebox").TString>;
-                        rate: import("typebox").TOptional<import("typebox").TNumber>;
-                        pitch: import("typebox").TOptional<import("typebox").TNumber>;
-                        volume: import("typebox").TOptional<import("typebox").TNumber>;
-                        language: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
-                    conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
-                    targetJob: import("typebox").TOptional<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        location: import("typebox").TString;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        source: import("typebox").TOptional<import("typebox").TString>;
-                        postedDate: import("typebox").TOptional<import("typebox").TString>;
-                        url: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    candidateContext: import("typebox").TOptional<import("typebox").TObject<{
-                        resumeId: import("typebox").TOptional<import("typebox").TString>;
-                        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
-                        portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                }>;
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
-                    question: import("typebox").TString;
-                    followUps: import("typebox").TArray<import("typebox").TString>;
-                    expectedDuration: import("typebox").TNumber;
-                    difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
-                    tags: import("typebox").TArray<import("typebox").TString>;
-                    score: import("typebox").TOptional<import("typebox").TNumber>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                    response: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                currentQuestionIndex: import("typebox").TNumber;
-                totalQuestions: import("typebox").TNumber;
-                startTime: import("typebox").TNumber;
-                endTime: import("typebox").TOptional<import("typebox").TNumber>;
-                status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
-                responses: import("typebox").TArray<import("typebox").TObject<{
-                    questionId: import("typebox").TString;
-                    transcript: import("typebox").TString;
-                    duration: import("typebox").TNumber;
-                    timestamp: import("typebox").TNumber;
-                    confidence: import("typebox").TNumber;
-                    aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                        score: import("typebox").TNumber;
-                        feedback: import("typebox").TString;
-                        strengths: import("typebox").TArray<import("typebox").TString>;
-                        improvements: import("typebox").TArray<import("typebox").TString>;
-                    }>>;
-                }>>;
-                finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                    overallScore: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    recommendations: import("typebox").TArray<import("typebox").TString>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    role: import("typebox").TString;
-                    studioName: import("typebox").TString;
-                    background: import("typebox").TString;
-                    style: import("typebox").TString;
-                    experience: import("typebox").TString;
-                }>>;
-                role: import("typebox").TOptional<import("typebox").TString>;
-                studioName: import("typebox").TOptional<import("typebox").TString>;
-                score: import("typebox").TOptional<import("typebox").TNumber>;
-                duration: import("typebox").TOptional<import("typebox").TString>;
-                overallFeedback: import("typebox").TOptional<import("typebox").TString>;
-                totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-            }>>;
+            200: import("typebox").TUnknown;
         };
         readonly session: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                studioId: import("typebox").TString;
-                config: import("typebox").TObject<{
-                    roleType: import("typebox").TOptional<import("typebox").TString>;
-                    roleCategory: import("typebox").TOptional<import("typebox").TString>;
-                    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
-                    focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    duration: import("typebox").TOptional<import("typebox").TInteger>;
-                    questionCount: import("typebox").TOptional<import("typebox").TInteger>;
-                    includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
-                    enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
-                        microphoneId: import("typebox").TOptional<import("typebox").TString>;
-                        speakerId: import("typebox").TOptional<import("typebox").TString>;
-                        voiceId: import("typebox").TOptional<import("typebox").TString>;
-                        rate: import("typebox").TOptional<import("typebox").TNumber>;
-                        pitch: import("typebox").TOptional<import("typebox").TNumber>;
-                        volume: import("typebox").TOptional<import("typebox").TNumber>;
-                        language: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
-                    conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
-                    targetJob: import("typebox").TOptional<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        location: import("typebox").TString;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        source: import("typebox").TOptional<import("typebox").TString>;
-                        postedDate: import("typebox").TOptional<import("typebox").TString>;
-                        url: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    candidateContext: import("typebox").TOptional<import("typebox").TObject<{
-                        resumeId: import("typebox").TOptional<import("typebox").TString>;
-                        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
-                        portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                }>;
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
-                    question: import("typebox").TString;
-                    followUps: import("typebox").TArray<import("typebox").TString>;
-                    expectedDuration: import("typebox").TNumber;
-                    difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
-                    tags: import("typebox").TArray<import("typebox").TString>;
-                    score: import("typebox").TOptional<import("typebox").TNumber>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                    response: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                currentQuestionIndex: import("typebox").TNumber;
-                totalQuestions: import("typebox").TNumber;
-                startTime: import("typebox").TNumber;
-                endTime: import("typebox").TOptional<import("typebox").TNumber>;
-                status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
-                responses: import("typebox").TArray<import("typebox").TObject<{
-                    questionId: import("typebox").TString;
-                    transcript: import("typebox").TString;
-                    duration: import("typebox").TNumber;
-                    timestamp: import("typebox").TNumber;
-                    confidence: import("typebox").TNumber;
-                    aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                        score: import("typebox").TNumber;
-                        feedback: import("typebox").TString;
-                        strengths: import("typebox").TArray<import("typebox").TString>;
-                        improvements: import("typebox").TArray<import("typebox").TString>;
-                    }>>;
-                }>>;
-                finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                    overallScore: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    recommendations: import("typebox").TArray<import("typebox").TString>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    role: import("typebox").TString;
-                    studioName: import("typebox").TString;
-                    background: import("typebox").TString;
-                    style: import("typebox").TString;
-                    experience: import("typebox").TString;
-                }>>;
-                role: import("typebox").TOptional<import("typebox").TString>;
-                studioName: import("typebox").TOptional<import("typebox").TString>;
-                score: import("typebox").TOptional<import("typebox").TNumber>;
-                duration: import("typebox").TOptional<import("typebox").TString>;
-                overallFeedback: import("typebox").TOptional<import("typebox").TString>;
-                totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly submitResponse: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                studioId: import("typebox").TString;
-                config: import("typebox").TObject<{
-                    roleType: import("typebox").TOptional<import("typebox").TString>;
-                    roleCategory: import("typebox").TOptional<import("typebox").TString>;
-                    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
-                    focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    duration: import("typebox").TOptional<import("typebox").TInteger>;
-                    questionCount: import("typebox").TOptional<import("typebox").TInteger>;
-                    includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
-                    enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
-                        microphoneId: import("typebox").TOptional<import("typebox").TString>;
-                        speakerId: import("typebox").TOptional<import("typebox").TString>;
-                        voiceId: import("typebox").TOptional<import("typebox").TString>;
-                        rate: import("typebox").TOptional<import("typebox").TNumber>;
-                        pitch: import("typebox").TOptional<import("typebox").TNumber>;
-                        volume: import("typebox").TOptional<import("typebox").TNumber>;
-                        language: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
-                    conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
-                    targetJob: import("typebox").TOptional<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        location: import("typebox").TString;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        source: import("typebox").TOptional<import("typebox").TString>;
-                        postedDate: import("typebox").TOptional<import("typebox").TString>;
-                        url: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    candidateContext: import("typebox").TOptional<import("typebox").TObject<{
-                        resumeId: import("typebox").TOptional<import("typebox").TString>;
-                        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
-                        portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                }>;
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
-                    question: import("typebox").TString;
-                    followUps: import("typebox").TArray<import("typebox").TString>;
-                    expectedDuration: import("typebox").TNumber;
-                    difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
-                    tags: import("typebox").TArray<import("typebox").TString>;
-                    score: import("typebox").TOptional<import("typebox").TNumber>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                    response: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                currentQuestionIndex: import("typebox").TNumber;
-                totalQuestions: import("typebox").TNumber;
-                startTime: import("typebox").TNumber;
-                endTime: import("typebox").TOptional<import("typebox").TNumber>;
-                status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
-                responses: import("typebox").TArray<import("typebox").TObject<{
-                    questionId: import("typebox").TString;
-                    transcript: import("typebox").TString;
-                    duration: import("typebox").TNumber;
-                    timestamp: import("typebox").TNumber;
-                    confidence: import("typebox").TNumber;
-                    aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                        score: import("typebox").TNumber;
-                        feedback: import("typebox").TString;
-                        strengths: import("typebox").TArray<import("typebox").TString>;
-                        improvements: import("typebox").TArray<import("typebox").TString>;
-                    }>>;
-                }>>;
-                finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                    overallScore: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    recommendations: import("typebox").TArray<import("typebox").TString>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    role: import("typebox").TString;
-                    studioName: import("typebox").TString;
-                    background: import("typebox").TString;
-                    style: import("typebox").TString;
-                    experience: import("typebox").TString;
-                }>>;
-                role: import("typebox").TOptional<import("typebox").TString>;
-                studioName: import("typebox").TOptional<import("typebox").TString>;
-                score: import("typebox").TOptional<import("typebox").TNumber>;
-                duration: import("typebox").TOptional<import("typebox").TString>;
-                overallFeedback: import("typebox").TOptional<import("typebox").TString>;
-                totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
+            400: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly completeSession: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                studioId: import("typebox").TString;
-                config: import("typebox").TObject<{
-                    roleType: import("typebox").TOptional<import("typebox").TString>;
-                    roleCategory: import("typebox").TOptional<import("typebox").TString>;
-                    experienceLevel: import("typebox").TOptional<import("typebox").TString>;
-                    focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    duration: import("typebox").TOptional<import("typebox").TInteger>;
-                    questionCount: import("typebox").TOptional<import("typebox").TInteger>;
-                    includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
-                    includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
-                    enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
-                        microphoneId: import("typebox").TOptional<import("typebox").TString>;
-                        speakerId: import("typebox").TOptional<import("typebox").TString>;
-                        voiceId: import("typebox").TOptional<import("typebox").TString>;
-                        rate: import("typebox").TOptional<import("typebox").TNumber>;
-                        pitch: import("typebox").TOptional<import("typebox").TNumber>;
-                        volume: import("typebox").TOptional<import("typebox").TNumber>;
-                        language: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
-                    conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
-                    targetJob: import("typebox").TOptional<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        location: import("typebox").TString;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        source: import("typebox").TOptional<import("typebox").TString>;
-                        postedDate: import("typebox").TOptional<import("typebox").TString>;
-                        url: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    candidateContext: import("typebox").TOptional<import("typebox").TObject<{
-                        resumeId: import("typebox").TOptional<import("typebox").TString>;
-                        coverLetterId: import("typebox").TOptional<import("typebox").TString>;
-                        portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                }>;
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
-                    question: import("typebox").TString;
-                    followUps: import("typebox").TArray<import("typebox").TString>;
-                    expectedDuration: import("typebox").TNumber;
-                    difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
-                    tags: import("typebox").TArray<import("typebox").TString>;
-                    score: import("typebox").TOptional<import("typebox").TNumber>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                    response: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                currentQuestionIndex: import("typebox").TNumber;
-                totalQuestions: import("typebox").TNumber;
-                startTime: import("typebox").TNumber;
-                endTime: import("typebox").TOptional<import("typebox").TNumber>;
-                status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
-                responses: import("typebox").TArray<import("typebox").TObject<{
-                    questionId: import("typebox").TString;
-                    transcript: import("typebox").TString;
-                    duration: import("typebox").TNumber;
-                    timestamp: import("typebox").TNumber;
-                    confidence: import("typebox").TNumber;
-                    aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                        score: import("typebox").TNumber;
-                        feedback: import("typebox").TString;
-                        strengths: import("typebox").TArray<import("typebox").TString>;
-                        improvements: import("typebox").TArray<import("typebox").TString>;
-                    }>>;
-                }>>;
-                finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
-                    overallScore: import("typebox").TNumber;
-                    strengths: import("typebox").TArray<import("typebox").TString>;
-                    improvements: import("typebox").TArray<import("typebox").TString>;
-                    recommendations: import("typebox").TArray<import("typebox").TString>;
-                    feedback: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    role: import("typebox").TString;
-                    studioName: import("typebox").TString;
-                    background: import("typebox").TString;
-                    style: import("typebox").TString;
-                    experience: import("typebox").TString;
-                }>>;
-                role: import("typebox").TOptional<import("typebox").TString>;
-                studioName: import("typebox").TOptional<import("typebox").TString>;
-                score: import("typebox").TOptional<import("typebox").TNumber>;
-                duration: import("typebox").TOptional<import("typebox").TString>;
-                overallFeedback: import("typebox").TOptional<import("typebox").TString>;
-                totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly stats: {
             200: import("typebox").TObject<{
@@ -980,7 +519,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     location: import("typebox").TString;
                     remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
                     hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -996,7 +535,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     createdAt: import("typebox").TOptional<import("typebox").TString>;
                     updatedAt: import("typebox").TOptional<import("typebox").TString>;
                     matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -1016,7 +555,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 location: import("typebox").TString;
                 remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
                 hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                 technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -1032,12 +571,19 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                 companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 createdAt: import("typebox").TOptional<import("typebox").TString>;
                 updatedAt: import("typebox").TOptional<import("typebox").TString>;
                 matchScore: import("typebox").TOptional<import("typebox").TNumber>;
                 matchReason: import("typebox").TOptional<import("typebox").TString>;
                 rank: import("typebox").TOptional<import("typebox").TNumber>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly save: {
@@ -1051,12 +597,18 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 id: import("typebox").TOptional<import("typebox").TString>;
                 jobId: import("typebox").TOptional<import("typebox").TString>;
                 savedAt: import("typebox").TOptional<import("typebox").TString>;
-                error: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 201: import("typebox").TObject<{
                 id: import("typebox").TString;
                 jobId: import("typebox").TString;
                 savedAt: import("typebox").TString;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly deleteSaved: {
@@ -1077,7 +629,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     location: import("typebox").TString;
                     remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
                     hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -1093,7 +645,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     createdAt: import("typebox").TOptional<import("typebox").TString>;
                     updatedAt: import("typebox").TOptional<import("typebox").TString>;
                     matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -1108,46 +660,67 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 application: import("typebox").TOptional<import("typebox").TObject<{
                     id: import("typebox").TString;
                     jobId: import("typebox").TString;
-                    status: import("typebox").TString;
+                    status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                     appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+                    timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    createdAt: import("typebox").TOptional<import("typebox").TString>;
+                    updatedAt: import("typebox").TOptional<import("typebox").TString>;
                 }>>;
                 id: import("typebox").TOptional<import("typebox").TString>;
                 jobId: import("typebox").TOptional<import("typebox").TString>;
                 status: import("typebox").TOptional<import("typebox").TString>;
                 appliedDate: import("typebox").TOptional<import("typebox").TString>;
                 notes: import("typebox").TOptional<import("typebox").TString>;
-                timeline: import("typebox").TOptional<import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>>;
-                error: import("typebox").TOptional<import("typebox").TString>;
+                timeline: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnknown>>;
             }>;
             readonly 201: import("typebox").TObject<{
                 id: import("typebox").TString;
                 jobId: import("typebox").TString;
-                status: import("typebox").TString;
+                status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+                createdAt: import("typebox").TOptional<import("typebox").TString>;
+                updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly updateApplication: {
             readonly 200: import("typebox").TObject<{
                 id: import("typebox").TString;
                 jobId: import("typebox").TString;
-                status: import("typebox").TString;
+                status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+                createdAt: import("typebox").TOptional<import("typebox").TString>;
+                updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly applicationsList: {
             readonly 200: import("typebox").TArray<import("typebox").TObject<{
                 id: import("typebox").TString;
                 jobId: import("typebox").TString;
-                status: import("typebox").TString;
+                status: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 appliedDate: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 notes: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>, import("typebox").TNull]>>;
+                timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
+                createdAt: import("typebox").TOptional<import("typebox").TString>;
+                updatedAt: import("typebox").TOptional<import("typebox").TString>;
             }>>;
         };
         readonly recommendations: {
@@ -1159,7 +732,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     location: import("typebox").TString;
                     remote: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
                     hybrid: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    salary: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     description: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     requirements: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
@@ -1175,7 +748,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                     companyLogo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                     applicationUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                     createdAt: import("typebox").TOptional<import("typebox").TString>;
                     updatedAt: import("typebox").TOptional<import("typebox").TString>;
                     matchScore: import("typebox").TOptional<import("typebox").TNumber>;
@@ -1195,492 +768,83 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 newJobs: import("typebox").TNumber;
                 updatedJobs: import("typebox").TNumber;
             }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
         };
     };
     readonly portfolio: {
         readonly profile: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TOptional<import("typebox").TString>;
-                metadata: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TOptional<import("typebox").TString>;
-                    portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    image: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    liveUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    githubUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    featured: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    role: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    engines: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    sortOrder: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
-                    createdAt: import("typebox").TOptional<import("typebox").TString>;
-                    updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
         };
         readonly mutation: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TOptional<import("typebox").TString>;
-                metadata: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TOptional<import("typebox").TString>;
-                    portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    image: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    liveUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    githubUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    featured: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    role: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    engines: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    sortOrder: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
-                    createdAt: import("typebox").TOptional<import("typebox").TString>;
-                    updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
         };
         readonly projectMutation: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TOptional<import("typebox").TString>;
-                portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                title: import("typebox").TString;
-                description: import("typebox").TString;
-                technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                image: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                liveUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                githubUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                featured: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                role: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                engines: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                sortOrder: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-            }>;
-            201: import("typebox").TObject<{
-                id: import("typebox").TOptional<import("typebox").TString>;
-                portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                title: import("typebox").TString;
-                description: import("typebox").TString;
-                technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                image: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                liveUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                githubUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                featured: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                role: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                engines: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                sortOrder: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
+            201: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly projectReorder: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TOptional<import("typebox").TString>;
-                metadata: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TOptional<import("typebox").TString>;
-                    portfolioId: import("typebox").TOptional<import("typebox").TString>;
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    image: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    liveUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    githubUrl: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    tags: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    featured: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                    role: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
-                    platforms: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    engines: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                    sortOrder: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
-                    createdAt: import("typebox").TOptional<import("typebox").TString>;
-                    updatedAt: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                createdAt: import("typebox").TOptional<import("typebox").TString>;
-                updatedAt: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            200: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly projectDelete: {
-            200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
-                id: import("typebox").TString;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly export: {
             200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
     };
     readonly resume: {
         readonly questionGenerate: {
-            200: import("typebox").TObject<{
-                questions: import("typebox").TArray<import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    question: import("typebox").TString;
-                    category: import("typebox").TString;
-                }>>;
-            }>;
+            200: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly questionSynthesize: {
-            201: import("typebox").TObject<{
-                id: import("typebox").TString;
-                name: import("typebox").TString;
-                personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TOptional<import("typebox").TString>;
-                    email: import("typebox").TOptional<import("typebox").TString>;
-                    phone: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    website: import("typebox").TOptional<import("typebox").TString>;
-                    linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                    github: import("typebox").TOptional<import("typebox").TString>;
-                    portfolio: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                summary: import("typebox").TString;
-                experience: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    startDate: import("typebox").TString;
-                    endDate: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    description: import("typebox").TOptional<import("typebox").TString>;
-                    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                education: import("typebox").TArray<import("typebox").TObject<{
-                    degree: import("typebox").TString;
-                    field: import("typebox").TString;
-                    school: import("typebox").TString;
-                    year: import("typebox").TString;
-                    gpa: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                skills: import("typebox").TOptional<import("typebox").TObject<{
-                    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    link: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                    gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                    platforms: import("typebox").TOptional<import("typebox").TString>;
-                    genres: import("typebox").TOptional<import("typebox").TString>;
-                    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                isDefault: import("typebox").TBoolean;
-            }>;
+            201: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly list: {
-            200: import("typebox").TArray<import("typebox").TObject<{
-                id: import("typebox").TString;
-                name: import("typebox").TString;
-                personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TOptional<import("typebox").TString>;
-                    email: import("typebox").TOptional<import("typebox").TString>;
-                    phone: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    website: import("typebox").TOptional<import("typebox").TString>;
-                    linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                    github: import("typebox").TOptional<import("typebox").TString>;
-                    portfolio: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                summary: import("typebox").TString;
-                experience: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    startDate: import("typebox").TString;
-                    endDate: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    description: import("typebox").TOptional<import("typebox").TString>;
-                    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                education: import("typebox").TArray<import("typebox").TObject<{
-                    degree: import("typebox").TString;
-                    field: import("typebox").TString;
-                    school: import("typebox").TString;
-                    year: import("typebox").TString;
-                    gpa: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                skills: import("typebox").TOptional<import("typebox").TObject<{
-                    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    link: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                    gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                    platforms: import("typebox").TOptional<import("typebox").TString>;
-                    genres: import("typebox").TOptional<import("typebox").TString>;
-                    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                isDefault: import("typebox").TBoolean;
-            }>>;
+            200: import("typebox").TUnknown;
         };
         readonly entity: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                name: import("typebox").TString;
-                personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TOptional<import("typebox").TString>;
-                    email: import("typebox").TOptional<import("typebox").TString>;
-                    phone: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    website: import("typebox").TOptional<import("typebox").TString>;
-                    linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                    github: import("typebox").TOptional<import("typebox").TString>;
-                    portfolio: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                summary: import("typebox").TString;
-                experience: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    startDate: import("typebox").TString;
-                    endDate: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    description: import("typebox").TOptional<import("typebox").TString>;
-                    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                education: import("typebox").TArray<import("typebox").TObject<{
-                    degree: import("typebox").TString;
-                    field: import("typebox").TString;
-                    school: import("typebox").TString;
-                    year: import("typebox").TString;
-                    gpa: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                skills: import("typebox").TOptional<import("typebox").TObject<{
-                    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    link: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                    gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                    platforms: import("typebox").TOptional<import("typebox").TString>;
-                    genres: import("typebox").TOptional<import("typebox").TString>;
-                    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                isDefault: import("typebox").TBoolean;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly create: {
-            201: import("typebox").TObject<{
-                id: import("typebox").TString;
-                name: import("typebox").TString;
-                personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TOptional<import("typebox").TString>;
-                    email: import("typebox").TOptional<import("typebox").TString>;
-                    phone: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    website: import("typebox").TOptional<import("typebox").TString>;
-                    linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                    github: import("typebox").TOptional<import("typebox").TString>;
-                    portfolio: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                summary: import("typebox").TString;
-                experience: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    startDate: import("typebox").TString;
-                    endDate: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    description: import("typebox").TOptional<import("typebox").TString>;
-                    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                education: import("typebox").TArray<import("typebox").TObject<{
-                    degree: import("typebox").TString;
-                    field: import("typebox").TString;
-                    school: import("typebox").TString;
-                    year: import("typebox").TString;
-                    gpa: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                skills: import("typebox").TOptional<import("typebox").TObject<{
-                    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    link: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                    gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                    platforms: import("typebox").TOptional<import("typebox").TString>;
-                    genres: import("typebox").TOptional<import("typebox").TString>;
-                    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                isDefault: import("typebox").TBoolean;
-            }>;
+            201: import("typebox").TUnknown;
         };
         readonly update: {
-            200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                name: import("typebox").TString;
-                personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                    name: import("typebox").TOptional<import("typebox").TString>;
-                    email: import("typebox").TOptional<import("typebox").TString>;
-                    phone: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    website: import("typebox").TOptional<import("typebox").TString>;
-                    linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                    github: import("typebox").TOptional<import("typebox").TString>;
-                    portfolio: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                summary: import("typebox").TString;
-                experience: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    company: import("typebox").TString;
-                    startDate: import("typebox").TString;
-                    endDate: import("typebox").TOptional<import("typebox").TString>;
-                    location: import("typebox").TOptional<import("typebox").TString>;
-                    description: import("typebox").TOptional<import("typebox").TString>;
-                    achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                education: import("typebox").TArray<import("typebox").TObject<{
-                    degree: import("typebox").TString;
-                    field: import("typebox").TString;
-                    school: import("typebox").TString;
-                    year: import("typebox").TString;
-                    gpa: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                skills: import("typebox").TOptional<import("typebox").TObject<{
-                    technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                }>>;
-                projects: import("typebox").TArray<import("typebox").TObject<{
-                    title: import("typebox").TString;
-                    description: import("typebox").TString;
-                    technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    link: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                    gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                    platforms: import("typebox").TOptional<import("typebox").TString>;
-                    genres: import("typebox").TOptional<import("typebox").TString>;
-                    shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                }>>;
-                template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                isDefault: import("typebox").TBoolean;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly delete: {
-            200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
-                id: import("typebox").TString;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly export: {
             200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly enhance: {
-            200: import("typebox").TObject<{
-                resume: import("typebox").TObject<{
-                    id: import("typebox").TString;
-                    name: import("typebox").TString;
-                    personalInfo: import("typebox").TOptional<import("typebox").TObject<{
-                        name: import("typebox").TOptional<import("typebox").TString>;
-                        email: import("typebox").TOptional<import("typebox").TString>;
-                        phone: import("typebox").TOptional<import("typebox").TString>;
-                        location: import("typebox").TOptional<import("typebox").TString>;
-                        website: import("typebox").TOptional<import("typebox").TString>;
-                        linkedIn: import("typebox").TOptional<import("typebox").TString>;
-                        github: import("typebox").TOptional<import("typebox").TString>;
-                        portfolio: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    summary: import("typebox").TString;
-                    experience: import("typebox").TArray<import("typebox").TObject<{
-                        title: import("typebox").TString;
-                        company: import("typebox").TString;
-                        startDate: import("typebox").TString;
-                        endDate: import("typebox").TOptional<import("typebox").TString>;
-                        location: import("typebox").TOptional<import("typebox").TString>;
-                        description: import("typebox").TOptional<import("typebox").TString>;
-                        achievements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    }>>;
-                    education: import("typebox").TArray<import("typebox").TObject<{
-                        degree: import("typebox").TString;
-                        field: import("typebox").TString;
-                        school: import("typebox").TString;
-                        year: import("typebox").TString;
-                        gpa: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    skills: import("typebox").TOptional<import("typebox").TObject<{
-                        technical: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        soft: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        gaming: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    }>>;
-                    projects: import("typebox").TArray<import("typebox").TObject<{
-                        title: import("typebox").TString;
-                        description: import("typebox").TString;
-                        technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                        link: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
-                        gameEngines: import("typebox").TOptional<import("typebox").TString>;
-                        platforms: import("typebox").TOptional<import("typebox").TString>;
-                        genres: import("typebox").TOptional<import("typebox").TString>;
-                        shippedTitles: import("typebox").TOptional<import("typebox").TString>;
-                    }>>;
-                    template: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
-                    theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
-                    isDefault: import("typebox").TBoolean;
-                }>;
-                suggestions: import("typebox").TArray<import("typebox").TUnknown>;
-                section: import("typebox").TString;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
         readonly score: {
-            200: import("typebox").TObject<{
-                resumeId: import("typebox").TString;
-                jobId: import("typebox").TString;
-                score: import("typebox").TNumber;
-                strengths: import("typebox").TArray<import("typebox").TString>;
-                improvements: import("typebox").TArray<import("typebox").TString>;
-                keywords: import("typebox").TArray<import("typebox").TString>;
-                analysis: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
-            }>;
+            200: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
+            500: import("typebox").TUnknown;
         };
     };
     readonly scraper: {
@@ -1693,9 +857,17 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                     enabled: import("typebox").TBoolean;
                     enrichedRecords: import("typebox").TNumber;
                     warnings: import("typebox").TArray<import("typebox").TString>;
-                    provider: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">[]>>;
+                    provider: import("typebox").TOptional<import("typebox").TString>;
                     model: import("typebox").TOptional<import("typebox").TString>;
                 }>;
+            }>;
+            readonly 400: import("typebox").TObject<{
+                error: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                details: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly error: import("typebox").TObject<{
@@ -1705,7 +877,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
     };
     readonly search: {
         readonly all: {
-            readonly 200: import("typebox").TObject<{
+            200: import("typebox").TObject<{
                 query: import("typebox").TString;
                 results: import("typebox").TArray<import("typebox").TObject<{
                     type: import("typebox").TUnion<[import("typebox").TLiteral<"jobs">, import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"skills">, import("typebox").TLiteral<"resumes">]>;
@@ -1725,7 +897,7 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
             }>;
         };
         readonly autocomplete: {
-            readonly 200: import("typebox").TArray<import("typebox").TObject<{
+            200: import("typebox").TArray<import("typebox").TObject<{
                 text: import("typebox").TString;
                 type: import("typebox").TString;
             }>>;
@@ -1733,361 +905,101 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
     };
     readonly settings: {
         readonly read: {
-            readonly 200: import("typebox").TObject<{
-                id: import("typebox").TString;
-                geminiApiKey: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                openaiApiKey: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                claudeApiKey: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                huggingfaceToken: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                localModelEndpoint: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                localModelName: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                aiRouting: import("typebox").TObject<{
-                    chat: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    interviewQuestions: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    interviewFeedback: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    resume: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    coverLetter: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    emailResponse: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    jobMatch: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    scrapeEnrichment: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                    automationFieldMapping: import("typebox").TObject<{
-                        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                        model: import("typebox").TOptional<import("typebox").TString>;
-                    }>;
-                }>;
-                preferredProvider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                preferredModel: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-                theme: import("typebox").TUnion<[import("typebox").TLiteral<"corporate">, import("typebox").TLiteral<"business">]>;
-                language: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TLiteral<"en-US">, import("typebox").TLiteral<"es-ES">, import("typebox").TLiteral<"fr-FR">, import("typebox").TLiteral<"ja-JP">]>, import("typebox").TNull]>;
-                brandSettings: import("typebox").TObject<{
-                    name: import("typebox").TString;
-                    assistantName: import("typebox").TString;
-                    apiName: import("typebox").TString;
-                    logoPath: import("typebox").TString;
-                    faviconPath: import("typebox").TString;
-                    typography: import("typebox").TObject<{
-                        fontStylesheetUrl: import("typebox").TString;
-                        displayFontFamily: import("typebox").TString;
-                        bodyFontFamily: import("typebox").TString;
-                        monoFontFamily: import("typebox").TString;
-                    }>;
-                    lightTheme: import("typebox").TObject<{
-                        base100: import("typebox").TString;
-                        base200: import("typebox").TString;
-                        base300: import("typebox").TString;
-                        baseContent: import("typebox").TString;
-                        primary: import("typebox").TString;
-                        primaryContent: import("typebox").TString;
-                        secondary: import("typebox").TString;
-                        secondaryContent: import("typebox").TString;
-                        accent: import("typebox").TString;
-                        accentContent: import("typebox").TString;
-                        neutral: import("typebox").TString;
-                        neutralContent: import("typebox").TString;
-                        info: import("typebox").TString;
-                        infoContent: import("typebox").TString;
-                        success: import("typebox").TString;
-                        successContent: import("typebox").TString;
-                        warning: import("typebox").TString;
-                        warningContent: import("typebox").TString;
-                        error: import("typebox").TString;
-                        errorContent: import("typebox").TString;
-                        radiusSelector: import("typebox").TString;
-                        radiusField: import("typebox").TString;
-                        radiusBox: import("typebox").TString;
-                        sizeSelector: import("typebox").TString;
-                        sizeField: import("typebox").TString;
-                        border: import("typebox").TString;
-                        depth: import("typebox").TString;
-                        noise: import("typebox").TString;
-                    }>;
-                    darkTheme: import("typebox").TObject<{
-                        base100: import("typebox").TString;
-                        base200: import("typebox").TString;
-                        base300: import("typebox").TString;
-                        baseContent: import("typebox").TString;
-                        primary: import("typebox").TString;
-                        primaryContent: import("typebox").TString;
-                        secondary: import("typebox").TString;
-                        secondaryContent: import("typebox").TString;
-                        accent: import("typebox").TString;
-                        accentContent: import("typebox").TString;
-                        neutral: import("typebox").TString;
-                        neutralContent: import("typebox").TString;
-                        info: import("typebox").TString;
-                        infoContent: import("typebox").TString;
-                        success: import("typebox").TString;
-                        successContent: import("typebox").TString;
-                        warning: import("typebox").TString;
-                        warningContent: import("typebox").TString;
-                        error: import("typebox").TString;
-                        errorContent: import("typebox").TString;
-                        radiusSelector: import("typebox").TString;
-                        radiusField: import("typebox").TString;
-                        radiusBox: import("typebox").TString;
-                        sizeSelector: import("typebox").TString;
-                        sizeField: import("typebox").TString;
-                        border: import("typebox").TString;
-                        depth: import("typebox").TString;
-                        noise: import("typebox").TString;
-                    }>;
-                    content: import("typebox").TObject<{
-                        tagline: import("typebox").TString;
-                        defaultTitle: import("typebox").TString;
-                        defaultDescription: import("typebox").TString;
-                        contentOverrides: import("typebox").TRecord<"^.*$", import("typebox").TString>;
-                    }>;
-                }>;
-                notifications: import("typebox").TUnion<[import("typebox").TObject<{
-                    achievements: import("typebox").TBoolean;
-                    dailyChallenges: import("typebox").TBoolean;
-                    jobAlerts: import("typebox").TBoolean;
-                    levelUp: import("typebox").TBoolean;
-                }>, import("typebox").TNull]>;
-                automationSettings: import("typebox").TUnion<[import("typebox").TObject<{
-                    headless: import("typebox").TBoolean;
-                    defaultTimeout: import("typebox").TNumber;
-                    screenshotRetention: import("typebox").TNumber;
-                    maxConcurrentRuns: import("typebox").TNumber;
-                    defaultBrowser: import("typebox").TUnion<[import("typebox").TLiteral<"chrome">, import("typebox").TLiteral<"chromium">, import("typebox").TLiteral<"edge">]>;
-                    enableSmartSelectors: import("typebox").TBoolean;
-                    autoSaveScreenshots: import("typebox").TBoolean;
-                    speech: import("typebox").TObject<{
-                        locale: import("typebox").TString;
-                        stt: import("typebox").TObject<{
-                            provider: import("typebox").TUnion<[import("typebox").TLiteral<"browser">, import("typebox").TLiteral<"openai">, import("typebox").TLiteral<"huggingface">, import("typebox").TLiteral<"local">, import("typebox").TLiteral<"custom">]>;
-                            model: import("typebox").TString;
-                            endpoint: import("typebox").TString;
-                        }>;
-                        tts: import("typebox").TObject<{
-                            provider: import("typebox").TUnion<[import("typebox").TLiteral<"browser">, import("typebox").TLiteral<"openai">, import("typebox").TLiteral<"huggingface">, import("typebox").TLiteral<"local">, import("typebox").TLiteral<"custom">]>;
-                            model: import("typebox").TString;
-                            endpoint: import("typebox").TString;
-                            voice: import("typebox").TString;
-                            format: import("typebox").TUnion<[import("typebox").TLiteral<"mp3">, import("typebox").TLiteral<"wav">]>;
-                        }>;
-                    }>;
-                    jobProviders: import("typebox").TObject<{
-                        providerTimeoutMs: import("typebox").TNumber;
-                        companyBoardResultLimit: import("typebox").TNumber;
-                        gamingBoardResultLimit: import("typebox").TNumber;
-                        unknownLocationLabel: import("typebox").TString;
-                        unknownCompanyLabel: import("typebox").TString;
-                        hitmarkerEnabled: import("typebox").TBoolean;
-                        hitmarkerApiBaseUrl: import("typebox").TString;
-                        hitmarkerDefaultQuery: import("typebox").TString;
-                        hitmarkerDefaultLocation: import("typebox").TString;
-                        greenhouseApiBaseUrl: import("typebox").TString;
-                        greenhouseMaxPages: import("typebox").TNumber;
-                        greenhouseBoards: import("typebox").TArray<import("typebox").TObject<{
-                            board: import("typebox").TString;
-                            company: import("typebox").TString;
-                            enabled: import("typebox").TBoolean;
-                        }>>;
-                        leverApiBaseUrl: import("typebox").TString;
-                        leverMaxPages: import("typebox").TNumber;
-                        leverCompanies: import("typebox").TArray<import("typebox").TObject<{
-                            slug: import("typebox").TString;
-                            company: import("typebox").TString;
-                            enabled: import("typebox").TBoolean;
-                        }>>;
-                        companyBoardApiTemplates: import("typebox").TObject<{
-                            greenhouse: import("typebox").TString;
-                            lever: import("typebox").TString;
-                            recruitee: import("typebox").TString;
-                            workable: import("typebox").TString;
-                            ashby: import("typebox").TString;
-                            smartrecruiters: import("typebox").TString;
-                            teamtailor: import("typebox").TString;
-                            workday: import("typebox").TString;
-                        }>;
-                        companyBoards: import("typebox").TArray<import("typebox").TObject<{
-                            name: import("typebox").TString;
-                            token: import("typebox").TString;
-                            type: import("typebox").TUnion<[import("typebox").TLiteral<"greenhouse">, import("typebox").TLiteral<"lever">, import("typebox").TLiteral<"recruitee">, import("typebox").TLiteral<"workable">, import("typebox").TLiteral<"ashby">, import("typebox").TLiteral<"smartrecruiters">, import("typebox").TLiteral<"teamtailor">, import("typebox").TLiteral<"workday">]>;
-                            enabled: import("typebox").TBoolean;
-                            priority: import("typebox").TNumber;
-                        }>>;
-                        gamingPortals: import("typebox").TArray<import("typebox").TObject<{
-                            id: import("typebox").TUnion<[import("typebox").TLiteral<"hitmarker">, import("typebox").TLiteral<"grackle">, import("typebox").TLiteral<"workwithindies">, import("typebox").TLiteral<"remotegamejobs">, import("typebox").TLiteral<"gamesjobsdirect">, import("typebox").TLiteral<"pocketgamer">]>;
-                            name: import("typebox").TString;
-                            source: import("typebox").TString;
-                            fallbackUrl: import("typebox").TString;
-                            enabled: import("typebox").TBoolean;
-                        }>>;
-                    }>;
-                }>, import("typebox").TNull]>;
-                emailTransportSettings: import("typebox").TUnion<[import("typebox").TObject<{
-                    host: import("typebox").TString;
-                    port: import("typebox").TNumber;
-                    security: import("typebox").TUnion<[import("typebox").TLiteral<"tls">, import("typebox").TLiteral<"starttls">, import("typebox").TLiteral<"plain">]>;
-                    username: import("typebox").TString;
-                    fromEmail: import("typebox").TString;
-                    fromName: import("typebox").TString;
-                    authMethod: import("typebox").TUnion<[import("typebox").TLiteral<"plain">, import("typebox").TLiteral<"login">]>;
-                    connectionTimeoutSeconds: import("typebox").TNumber;
-                }>, import("typebox").TNull]>;
-                createdAt: import("typebox").TString;
-                updatedAt: import("typebox").TString;
-                providerDiagnostics: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TObject<{
-                    provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                    code: import("typebox").TString;
-                    checkedAt: import("typebox").TString;
-                    endpoint: import("typebox").TOptional<import("typebox").TString>;
-                    selectedModel: import("typebox").TOptional<import("typebox").TString>;
-                    availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                    message: import("typebox").TOptional<import("typebox").TString>;
-                }>>>;
-                hasGeminiKey: import("typebox").TBoolean;
-                hasOpenaiKey: import("typebox").TBoolean;
-                hasClaudeKey: import("typebox").TBoolean;
-                hasHuggingfaceToken: import("typebox").TBoolean;
-                hasEmailTransportPassword: import("typebox").TBoolean;
-                hasLocalKey: import("typebox").TBoolean;
-                jobTaxonomy: import("typebox").TObject<{
-                    keywords: import("typebox").TArray<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        category: import("typebox").TUnion<[import("typebox").TLiteral<"remote-location">, import("typebox").TLiteral<"hybrid-location">, import("typebox").TLiteral<"requirement">, import("typebox").TLiteral<"technology">, import("typebox").TLiteral<"genre">, import("typebox").TLiteral<"platform">, import("typebox").TLiteral<"role">]>;
-                        label: import("typebox").TString;
-                        synonyms: import("typebox").TArray<import("typebox").TString>;
-                        sortOrder: import("typebox").TNumber;
-                        enabled: import("typebox").TBoolean;
-                    }>>;
-                    studioRules: import("typebox").TArray<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        studioType: import("typebox").TUnion<[import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>]>;
-                        keyword: import("typebox").TString;
-                        sortOrder: import("typebox").TNumber;
-                        enabled: import("typebox").TBoolean;
-                    }>>;
-                }>;
+            readonly 200: import("typebox").TUnknown;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly update: {
-            readonly 200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
+            readonly 200: import("typebox").TUnknown;
+            readonly 422: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly jobTaxonomyUpdate: {
-            readonly 200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
-                jobTaxonomy: import("typebox").TObject<{
-                    keywords: import("typebox").TArray<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        category: import("typebox").TUnion<[import("typebox").TLiteral<"remote-location">, import("typebox").TLiteral<"hybrid-location">, import("typebox").TLiteral<"requirement">, import("typebox").TLiteral<"technology">, import("typebox").TLiteral<"genre">, import("typebox").TLiteral<"platform">, import("typebox").TLiteral<"role">]>;
-                        label: import("typebox").TString;
-                        synonyms: import("typebox").TArray<import("typebox").TString>;
-                        sortOrder: import("typebox").TNumber;
-                        enabled: import("typebox").TBoolean;
-                    }>>;
-                    studioRules: import("typebox").TArray<import("typebox").TObject<{
-                        id: import("typebox").TString;
-                        studioType: import("typebox").TUnion<[import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>, import("typebox").TLiteral<import("@bao/shared/types/jobs").StudioType>]>;
-                        keyword: import("typebox").TString;
-                        sortOrder: import("typebox").TNumber;
-                        enabled: import("typebox").TBoolean;
-                    }>>;
-                }>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly apiKeysUpdate: {
-            readonly 200: import("typebox").TObject<{
-                success: import("typebox").TBoolean;
+            readonly 200: import("typebox").TUnknown;
+            readonly 500: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly providerTest: {
-            readonly 200: import("typebox").TObject<{
-                valid: import("typebox").TBoolean;
-                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
-                diagnosticCode: import("typebox").TOptional<import("typebox").TString>;
-                message: import("typebox").TOptional<import("typebox").TString>;
-                availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-                selectedModel: import("typebox").TOptional<import("typebox").TString>;
-                error: import("typebox").TOptional<import("typebox").TString>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly export: {
-            readonly 200: import("typebox").TObject<{
-                version: import("typebox").TLiteral<"1.0">;
-                exportedAt: import("typebox").TString;
-                profile: import("typebox").TUnknown;
-                settings: import("typebox").TUnknown;
-                resumes: import("typebox").TArray<import("typebox").TUnknown>;
-                coverLetters: import("typebox").TArray<import("typebox").TUnknown>;
-                portfolio: import("typebox").TUnknown;
-                portfolioProjects: import("typebox").TArray<import("typebox").TUnknown>;
-                interviewSessions: import("typebox").TArray<import("typebox").TUnknown>;
-                gamification: import("typebox").TUnknown;
-                applications: import("typebox").TArray<import("typebox").TUnknown>;
-                chatHistory: import("typebox").TArray<import("typebox").TUnknown>;
-                savedJobs: import("typebox").TArray<import("typebox").TUnknown>;
-                skillMappings: import("typebox").TArray<import("typebox").TUnknown>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly import: {
-            readonly 200: import("typebox").TObject<{
-                imported: import("typebox").TRecord<"^.*$", import("typebox").TNumber>;
-                skipped: import("typebox").TRecord<"^.*$", import("typebox").TNumber>;
-                errors: import("typebox").TArray<import("typebox").TString>;
-            }>;
+            readonly 200: import("typebox").TUnknown;
             readonly 429: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
     };
@@ -2150,17 +1062,18 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 verified: import("typebox").TBoolean;
                 aiGenerated: import("typebox").TOptional<import("typebox").TBoolean>;
             }>;
-        };
-        readonly delete: {
-            200: import("typebox").TObject<{
-                message: import("typebox").TString;
-                id: import("typebox").TString;
-            }>;
-            410: import("typebox").TObject<{
+            404: import("typebox").TObject<{
                 error: import("typebox").TString;
                 code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
                 fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
+        };
+        readonly delete: {
+            200: import("typebox").TUnknown;
+            410: import("typebox").TUnknown;
+            404: import("typebox").TUnknown;
         };
         readonly pathways: {
             200: import("typebox").TArray<import("typebox").TObject<{
@@ -2234,6 +1147,13 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
         };
         readonly analysis: {
             200: import("typebox").TObject<{
+                message: import("typebox").TString;
+                detectedSkills: import("typebox").TArray<import("typebox").TString>;
+                suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+                recommendations: import("typebox").TArray<import("typebox").TString>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            500: import("typebox").TObject<{
                 message: import("typebox").TString;
                 detectedSkills: import("typebox").TArray<import("typebox").TString>;
                 suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
@@ -2327,10 +1247,10 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                 technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 createdAt: import("typebox").TOptional<import("typebox").TString>;
                 updatedAt: import("typebox").TOptional<import("typebox").TString>;
             }>>;
@@ -2347,10 +1267,10 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                 technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 createdAt: import("typebox").TOptional<import("typebox").TString>;
                 updatedAt: import("typebox").TOptional<import("typebox").TString>;
             }>;
@@ -2365,18 +1285,32 @@ export declare const ROUTE_RESPONSE_REGISTRY: {
                 description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
                 games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
                 technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
                 remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+                enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
                 createdAt: import("typebox").TOptional<import("typebox").TString>;
                 updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly delete: {
             readonly 200: import("typebox").TObject<{
                 message: import("typebox").TString;
                 id: import("typebox").TString;
+            }>;
+            readonly 404: import("typebox").TObject<{
+                error: import("typebox").TString;
+                code: import("typebox").TOptional<import("typebox").TString>;
+                details: import("typebox").TOptional<import("typebox").TString>;
+                fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                id: import("typebox").TOptional<import("typebox").TString>;
             }>;
         };
         readonly analytics: {

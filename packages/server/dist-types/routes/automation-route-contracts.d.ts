@@ -2,7 +2,8 @@ import type { Static } from "typebox";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES, type AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-export { routeErrorBodySchema } from "./route-error-envelope";
+import { routeErrorBodySchema } from "./route-error-envelope";
+export { routeErrorBodySchema };
 declare const AUTOMATION_STATUS_PENDING: "pending", AUTOMATION_STATUS_SUCCESS: "success", AUTOMATION_STATUS_ERROR: "error";
 export type AutomationJsonObject = NonNullable<RpaRunExecutionEnvelope["input"]>;
 export type JobApplyRequestBody = {
@@ -104,7 +105,198 @@ export declare const capabilityAuditReportBodySchema: import("typebox").TObject<
         }>>;
     }>>;
 }>;
-export declare const automationRouteErrorResponses: {};
+export declare const automationVerifyContextResponseSchema: import("typebox").TObject<{
+    resumeId: import("typebox").TString;
+}>;
+export declare const automationEmailResponseBodySchema: import("typebox").TObject<{
+    runId: import("typebox").TString;
+    status: import("typebox").TLiteral<"success">;
+    reply: import("typebox").TString;
+    provider: import("typebox").TString;
+    model: import("typebox").TString;
+    delivered: import("typebox").TBoolean;
+    recipientEmail: import("typebox").TOptional<import("typebox").TString>;
+    deliveredAt: import("typebox").TOptional<import("typebox").TString>;
+    messageId: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const automationRouteErrorResponses: {
+    readonly 400: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 409: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 422: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+};
+export declare const automationVerifyContextResponses: {
+    readonly 200: import("typebox").TUnknown;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
+export declare const automationRunResponses: {
+    readonly 400: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 409: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 422: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 200: import("typebox").TUnknown;
+};
+export declare const automationEmailResponseResponses: {
+    readonly 400: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 409: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 422: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 200: import("typebox").TUnknown;
+};
+export declare const automationCapabilitiesResponses: {
+    readonly 200: import("typebox").TUnknown;
+    readonly 500: import("typebox").TObject<{
+        error: import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>;
+    }>;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
+export declare const automationRunsListResponses: {
+    readonly 200: import("typebox").TUnknown;
+    readonly 429: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
 export declare const jobApplyBodySchema: import("typebox").TObject<{
     jobUrl: import("typebox").TString;
     resumeId: import("typebox").TString;

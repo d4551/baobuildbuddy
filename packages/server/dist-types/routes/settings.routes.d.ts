@@ -14,35 +14,20 @@ export declare const settingsRoutes: Elysia<string, "local", {
             query: unknown;
             headers: unknown;
             response: {
-                200: {
-                    automationSettings: import("@bao/shared/types/settings-contracts").AutomationSettings | null;
-                    localModelEndpoint: string | null;
-                    aiRouting: import("@bao/shared/types/ai").AIRouting;
-                    providerDiagnostics: Partial<Record<"claude" | "gemini" | "huggingface" | "local" | "openai", import("@bao/shared/types/ai").AIProviderDiagnostic>> | undefined;
-                    preferredProvider: string | null;
-                    preferredModel: string | null;
-                    theme: import("@bao/shared/constants/branding").AppDataTheme;
-                    brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
-                    geminiApiKey: string | null;
-                    openaiApiKey: string | null;
-                    claudeApiKey: string | null;
-                    huggingfaceToken: string | null;
-                    hasGeminiKey: boolean;
-                    hasOpenaiKey: boolean;
-                    hasClaudeKey: boolean;
-                    hasHuggingfaceToken: boolean;
-                    hasEmailTransportPassword: boolean;
-                    hasLocalKey: boolean;
-                    jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
-                    createdAt: string;
-                    emailTransportSettings: import("@bao/shared/types/settings-contracts").EmailTransportSettings | null;
-                    id: string;
-                    language: string | null;
-                    localModelName: string | null;
-                    notifications: Record<string, boolean> | null;
-                    updatedAt: string;
-                } | {
+                200: unknown;
+                429: {
                     error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
+                };
+                500: {
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
                 };
             };
             error: never;
@@ -267,22 +252,27 @@ export declare const settingsRoutes: Elysia<string, "local", {
             query: unknown;
             headers: unknown;
             response: {
-                200: {
-                    success: boolean;
-                    error: string;
-                } | {
-                    error?: undefined;
-                    success: boolean;
-                };
+                200: unknown;
                 422: {
-                    type: 'validation';
-                    title: 'Validation Error';
-                    status: 422;
-                    detail?: string;
-                    on: string;
-                    found?: unknown;
-                    property?: string;
-                    expected?: string;
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
+                };
+                429: {
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
+                };
+                500: {
+                    error: string;
+                    code?: string | undefined;
+                    details?: string | undefined;
+                    fields?: string[] | undefined;
+                    id?: string | undefined;
                 };
             };
             error: never;
@@ -311,10 +301,7 @@ export declare const settingsRoutes: Elysia<string, "local", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        success: boolean;
-                        jobTaxonomy: import("@bao/shared/types/jobs-taxonomy").JobTaxonomySettings;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -324,6 +311,13 @@ export declare const settingsRoutes: Elysia<string, "local", {
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -345,9 +339,7 @@ export declare const settingsRoutes: Elysia<string, "local", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        success: boolean;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -357,6 +349,20 @@ export declare const settingsRoutes: Elysia<string, "local", {
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -374,31 +380,7 @@ export declare const settingsRoutes: Elysia<string, "local", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: {
-                        error?: undefined;
-                        valid: boolean;
-                        provider: "local";
-                        diagnosticCode: "empty-model-list" | "error" | "healthy" | "invalid-model" | "timeout" | "unconfigured" | "unreachable";
-                        message: string | undefined;
-                        availableModels: readonly string[] | undefined;
-                        selectedModel: string | undefined;
-                    } | {
-                        message?: undefined;
-                        availableModels?: undefined;
-                        selectedModel?: undefined;
-                        valid: boolean;
-                        provider: "claude" | "gemini" | "huggingface" | "openai";
-                        error: string;
-                        diagnosticCode?: undefined;
-                    } | {
-                        error?: undefined;
-                        availableModels?: undefined;
-                        selectedModel?: undefined;
-                        valid: boolean;
-                        provider: "claude" | "gemini" | "huggingface" | "openai";
-                        diagnosticCode: "error" | "healthy";
-                        message: string | undefined;
-                    };
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -408,6 +390,13 @@ export declare const settingsRoutes: Elysia<string, "local", {
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -421,7 +410,14 @@ export declare const settingsRoutes: Elysia<string, "local", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service-contracts").BaoExportData;
+                    200: unknown;
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -449,7 +445,7 @@ export declare const settingsRoutes: Elysia<string, "local", {
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: import("../services/data-service-contracts").ImportResult;
+                    200: unknown;
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -459,6 +455,13 @@ export declare const settingsRoutes: Elysia<string, "local", {
                         found?: unknown;
                         property?: string;
                         expected?: string;
+                    };
+                    429: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;

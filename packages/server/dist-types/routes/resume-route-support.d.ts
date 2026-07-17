@@ -29,25 +29,25 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
     section: string;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{
-    resumeId?: undefined;
-    jobId?: undefined;
-    analysis?: undefined;
     details?: undefined;
     error: string;
-    score?: undefined;
-    strengths?: undefined;
-    improvements?: undefined;
-    keywords?: undefined;
-} | {
     resumeId?: undefined;
     jobId?: undefined;
-    analysis?: undefined;
-    error: string;
-    details: string;
     score?: undefined;
     strengths?: undefined;
     improvements?: undefined;
     keywords?: undefined;
+    analysis?: undefined;
+} | {
+    error: string;
+    details: string;
+    resumeId?: undefined;
+    jobId?: undefined;
+    score?: undefined;
+    strengths?: undefined;
+    improvements?: undefined;
+    keywords?: undefined;
+    analysis?: undefined;
 } | {
     error?: undefined;
     details?: undefined;
