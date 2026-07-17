@@ -1,5 +1,10 @@
 import type { Static } from "typebox";
-import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import {
   SCHEMA_MAX_LENGTH_DESCRIPTION,
   SCHEMA_MAX_LENGTH_ID,
@@ -8,6 +13,7 @@ import {
   SCHEMA_MAX_LENGTH_TINY,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type JobListQuery = {
   q?: string;
@@ -79,5 +85,145 @@ export const updateApplicationBodySchema = t.Object({
   notes: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_DESCRIPTION })),
 });
 export type UpdateApplicationBody = Static<typeof updateApplicationBodySchema>;
+
+export const jobEntityResponseSchema = t.Object({
+  id: t.String(),
+  title: t.String(),
+  company: t.String(),
+  location: t.String(),
+  remote: t.Optional(t.Union([t.Boolean(), t.Null()])),
+  hybrid: t.Optional(t.Union([t.Boolean(), t.Null()])),
+  salary: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
+  description: t.Optional(t.Union([t.String(), t.Null()])),
+  requirements: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  technologies: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  experienceLevel: t.Optional(t.Union([t.String(), t.Null()])),
+  type: t.Optional(t.Union([t.String(), t.Null()])),
+  postedDate: t.Optional(t.Union([t.String(), t.Null()])),
+  url: t.Optional(t.Union([t.String(), t.Null()])),
+  source: t.Optional(t.Union([t.String(), t.Null()])),
+  studioType: t.Optional(t.Union([t.String(), t.Null()])),
+  gameGenres: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  platforms: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  contentHash: t.Optional(t.Union([t.String(), t.Null()])),
+  tags: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+  companyLogo: t.Optional(t.Union([t.String(), t.Null()])),
+  applicationUrl: t.Optional(t.Union([t.String(), t.Null()])),
+  enrichment: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
+  createdAt: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
+  matchScore: t.Optional(t.Number()),
+  matchReason: t.Optional(t.String()),
+  rank: t.Optional(t.Number()),
+});
+
+export const jobsListResponseSchema = t.Object({
+  jobs: t.Array(jobEntityResponseSchema),
+  page: t.Number(),
+  limit: t.Number(),
+  total: t.Number(),
+});
+
+export const savedJobResponseSchema = t.Object({
+  id: t.String(),
+  jobId: t.String(),
+  savedAt: t.String(),
+});
+
+export const applicationResponseSchema = t.Object({
+  id: t.String(),
+  jobId: t.String(),
+  status: t.String(),
+  appliedDate: t.Optional(t.Union([t.String(), t.Null()])),
+  notes: t.Optional(t.Union([t.String(), t.Null()])),
+  timeline: t.Optional(t.Union([t.Array(t.Record(t.String(), t.Unknown())), t.Null()])),
+});
+
+export const jobsRefreshResponseSchema = t.Object({
+  message: t.String(),
+  status: t.String(),
+  totalJobs: t.Number(),
+  newJobs: t.Number(),
+  updatedJobs: t.Number(),
+});
+
+export const jobsListResponses = {
+  [HTTP_STATUS_OK]: jobsListResponseSchema,
+} as const;
+
+export const jobEntityResponses = {
+  [HTTP_STATUS_OK]: jobEntityResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
+
+export const saveJobResponses = {
+  [HTTP_STATUS_OK]: t.Object({
+    message: t.Optional(t.String()),
+    saved: t.Optional(savedJobResponseSchema),
+    id: t.Optional(t.String()),
+    jobId: t.Optional(t.String()),
+    savedAt: t.Optional(t.String()),
+    error: t.Optional(t.String()),
+  }),
+  [HTTP_STATUS_CREATED]: savedJobResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
+
+export const deleteSavedJobResponses = {
+  [HTTP_STATUS_OK]: t.Object({
+    success: t.Boolean(),
+    deleted: t.Unknown(),
+  }),
+} as const;
+
+export const savedJobsListResponses = {
+  [HTTP_STATUS_OK]: t.Array(
+    t.Object({
+      id: t.String(),
+      jobId: t.String(),
+      savedAt: t.String(),
+      job: t.Union([jobEntityResponseSchema, t.Null()]),
+    }),
+  ),
+} as const;
+
+export const applyJobResponses = {
+  [HTTP_STATUS_OK]: t.Object({
+    message: t.Optional(t.String()),
+    application: t.Optional(applicationResponseSchema),
+    id: t.Optional(t.String()),
+    jobId: t.Optional(t.String()),
+    status: t.Optional(t.String()),
+    appliedDate: t.Optional(t.String()),
+    notes: t.Optional(t.String()),
+    timeline: t.Optional(t.Array(t.Record(t.String(), t.Unknown()))),
+    error: t.Optional(t.String()),
+  }),
+  [HTTP_STATUS_CREATED]: applicationResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
+
+export const updateApplicationResponses = {
+  [HTTP_STATUS_OK]: applicationResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
+
+export const applicationsListResponses = {
+  [HTTP_STATUS_OK]: t.Array(applicationResponseSchema),
+} as const;
+
+export const recommendationsResponses = {
+  [HTTP_STATUS_OK]: t.Object({
+    recommendations: t.Array(jobEntityResponseSchema),
+    reason: t.String(),
+    aiPowered: t.Boolean(),
+    provider: t.Optional(t.String()),
+  }),
+} as const;
+
+export const jobsRefreshResponses = {
+  [HTTP_STATUS_OK]: jobsRefreshResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: jobsRefreshResponseSchema,
+} as const;
 
 export { HTTP_STATUS_CREATED };
