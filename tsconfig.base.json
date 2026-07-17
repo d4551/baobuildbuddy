@@ -4,11 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    // Mission wants false; Elysia 2.0.0-exp.45 + drizzle-orm 0.45.2 .d.ts fail under TS7
-    // (MacroContext indexing + unused dialect drivers). First-party source is gated by
-    // scripts/typecheck-workspace.ts (sourceErrors must be 0). Revisit when upstream ships
-    // TS7-clean declarations.
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

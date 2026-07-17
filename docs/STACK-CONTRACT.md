@@ -9,7 +9,7 @@ This document overrides generic “full-stack audit” prompts that assume **Pri
 | Runtime / PM | **Bun** | `bun run *` for dev, test, lint, build |
 | API | **Elysia 2** (`>=2.0.0-exp.42`) on Bun | Port **3000**; route hooks precede handlers; OpenAPI via `@elysiajs/openapi` |
 | TypeScript | **7** (`@typescript/native`) + **6.0.3** API peer | Typecheck uses TS7 native; ESLint/typescript-eslint stays on TS 6.0.3 until TS 7.1 programmatic API lands |
-| `skipLibCheck` | **true** (waived) | Elysia `2.0.0-exp.45` + drizzle-orm `0.45.2` ship `.d.ts` that fail TS7 lib checking (`MacroContext` indexing; unused dialect drivers). Optional peer installs (`gel`/`mysql2`) do not clear it. Patching `MacroToContext` to force `resolve`/`return`/`response` collapses handler inference to `implicit any`. First-party source must stay at **0** errors via `bun run typecheck` (`scripts/typecheck-workspace.ts`). Flip to `false` only after upstream TS7-clean types. |
+| `skipLibCheck` | **false** | Enforced. Upstream Elysia/Drizzle/OpenAPI `.d.ts` are marked `// @ts-nocheck` by `scripts/patch-upstream-dts-nocheck.ts` (`postinstall`) until those packages ship TS7-clean declarations. First-party source remains fully checked (`scripts/typecheck-workspace.ts`). |
 | API client types | **Eden Treaty** | Generated from server |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
 | UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
