@@ -8,6 +8,7 @@ const catalog = {
     interview: "面接",
     skills: "スキル",
     studios: "スタジオ",
+    aiDashboard: "AIダッシュボード",
     aiChat: "AIチャット",
     automation: "自動化",
     gamification: "ゲーミフィケーション",

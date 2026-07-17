@@ -11,24 +11,6 @@ const projectRoot = process.cwd();
 const clientRoot = "packages/client";
 const appModalFramePath = "packages/client/components/ui/AppModalFrame.vue";
 
-const coreLayoutPagePaths = new Set([
-  "packages/client/pages/index.vue",
-  "packages/client/pages/setup.vue",
-  "packages/client/pages/resume/index.vue",
-  "packages/client/pages/jobs/index.vue",
-  "packages/client/pages/jobs/[id].vue",
-  "packages/client/pages/interview/index.vue",
-  "packages/client/pages/studios/index.vue",
-  "packages/client/pages/studios/[id].vue",
-  "packages/client/pages/automation/index.vue",
-  "packages/client/pages/automation/email.vue",
-  "packages/client/pages/automation/job-apply.vue",
-  "packages/client/pages/automation/runs/index.vue",
-  "packages/client/pages/automation/runs/[id].vue",
-  "packages/client/pages/automation/scraper.vue",
-  "packages/client/pages/settings.vue",
-]);
-
 const modalSizeLiteralPattern =
   /modal-box[^\n"']*\b(?:w-11\/12|max-w-(?:sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|screen-[a-z0-9-]+))\b/gu;
 const pageWidthLiteralPattern = /\b(?:max-w-(?:2xl|3xl|4xl|5xl|6xl|7xl)|w-11\/12)\b/gu;
@@ -39,6 +21,21 @@ const sectionGridExtraClassPattern =
 const collectVueFiles = async (): Promise<string[]> => {
   const files: string[] = [];
   const glob = new Bun.Glob(`${clientRoot}/**/*.vue`);
+
+  for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
+    const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
+    if (shouldIgnorePath(normalizedPath)) {
+      continue;
+    }
+    files.push(normalizedPath);
+  }
+
+  return files;
+};
+
+const collectPageFiles = async (): Promise<string[]> => {
+  const files: string[] = [];
+  const glob = new Bun.Glob(`${clientRoot}/pages/**/*.vue`);
 
   for await (const relativeFilePath of glob.scan({ cwd: projectRoot, onlyFiles: true })) {
     const normalizedPath = relativeFilePath.replace(/\\/gu, "/");
@@ -68,25 +65,31 @@ const collectModalSizeViolations = (filePath: string, fileContent: string): Viol
   return violations;
 };
 
-const collectCorePageWidthViolations = (filePath: string, fileContent: string): Violation[] => {
-  if (!coreLayoutPagePaths.has(filePath)) {
+const collectPageWidthViolations = (filePath: string, fileContent: string): Violation[] => {
+  if (!filePath.startsWith(`${clientRoot}/pages/`)) {
     return [];
   }
 
+  // description-class is owned by PAGE_HEADER_* measure tokens; blank before shell scan.
+  const contentForWidthScan = fileContent.replace(
+    /:?(?:description-class|descriptionClass)\s*=\s*["'][^"']*["']/gu,
+    (match) => " ".repeat(match.length),
+  );
+
   const violations: Violation[] = [];
-  for (const match of fileContent.matchAll(pageWidthLiteralPattern)) {
+  for (const match of contentForWidthScan.matchAll(pageWidthLiteralPattern)) {
     violations.push({
       filePath,
-      line: getLineFromOffset(fileContent, match.index ?? 0),
+      line: getLineFromOffset(contentForWidthScan, match.index ?? 0),
       message:
-        "Core page width literals are forbidden. Use PageScaffold widthToken and shared layout tokens.",
+        "Page width literals are forbidden. Use PageScaffold widthToken and shared layout tokens.",
     });
   }
   return violations;
 };
 
-const collectCorePageGridViolations = (filePath: string, fileContent: string): Violation[] => {
-  if (!coreLayoutPagePaths.has(filePath)) {
+const collectPageGridViolations = (filePath: string, fileContent: string): Violation[] => {
+  if (!filePath.startsWith(`${clientRoot}/pages/`)) {
     return [];
   }
 
@@ -99,7 +102,7 @@ const collectCorePageGridViolations = (filePath: string, fileContent: string): V
     violations.push({
       filePath,
       line: getLineFromOffset(fileContent, match.index ?? 0),
-      message: "Core pages must use SectionGrid tokens instead of ad-hoc grid breakpoint classes.",
+      message: "Pages must use SectionGrid tokens instead of ad-hoc grid breakpoint classes.",
     });
   }
 
@@ -108,7 +111,7 @@ const collectCorePageGridViolations = (filePath: string, fileContent: string): V
       filePath,
       line: getLineFromOffset(fileContent, match.index ?? 0),
       message:
-        "Core pages must not pass grid breakpoint classes via SectionGrid extra-class. Add or use a UiGridToken instead.",
+        "Pages must not pass grid breakpoint classes via SectionGrid extra-class. Add or use a UiGridToken instead.",
     });
   }
 
@@ -116,15 +119,18 @@ const collectCorePageGridViolations = (filePath: string, fileContent: string): V
 };
 
 const collectViolations = async (): Promise<Violation[]> => {
-  const files = await collectVueFiles();
+  const [files, pageFiles] = await Promise.all([collectVueFiles(), collectPageFiles()]);
+  const pageFileSet = new Set(pageFiles);
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
-      return [
-        ...collectModalSizeViolations(filePath, fileContent),
-        ...collectCorePageWidthViolations(filePath, fileContent),
-        ...collectCorePageGridViolations(filePath, fileContent),
-      ];
+      const pageScoped = pageFileSet.has(filePath)
+        ? [
+            ...collectPageWidthViolations(filePath, fileContent),
+            ...collectPageGridViolations(filePath, fileContent),
+          ]
+        : [];
+      return [...collectModalSizeViolations(filePath, fileContent), ...pageScoped];
     }),
   );
   return violationGroups.flat();
@@ -138,7 +144,7 @@ const main = async (): Promise<void> => {
   }
 
   await writeError(
-    "UI layout token validation failed. Core pages must use shared layout primitives and modal tokens:",
+    "UI layout token validation failed. Pages must use shared layout primitives and modal tokens:",
   );
   const lines = violations.map(
     (violation) => `- ${violation.filePath}:${violation.line} ${violation.message}`,

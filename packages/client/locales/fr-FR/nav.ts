@@ -8,6 +8,7 @@ const catalog = {
     interview: "Entretien",
     skills: "Compétences",
     studios: "Studios de jeux",
+    aiDashboard: "Tableau de bord IA",
     aiChat: "Conversation IA",
     automation: "Automatisation",
     gamification: "Ludification",

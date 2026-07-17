@@ -66,6 +66,7 @@ export function createSettingsPageServices() {
     profileLoading: userApi.loading,
     resolvedBrand: brandState.resolvedBrand,
     theme: themeState.theme,
+    setTheme: themeState.setTheme,
     toggleTheme: themeState.toggleTheme,
     $toast: nuxtApp.$toast,
     t: i18n.t,

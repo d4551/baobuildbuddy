@@ -3,11 +3,13 @@ import { THEME_NAMES } from "@bao/shared/constants/branding";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
 import { resolveLocaleLabel } from "~/constants/i18n";
 import { APP_DRAWER_ID, SHELL_NAVBAR_CLASS } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
+const { updateSettings } = useSettings();
 const { resolvedBrand } = useBrand();
 const { navbarBreadcrumbs } = useNavbarBreadcrumbs();
 const { t, locale, availableLocales } = useI18n();
@@ -17,6 +19,7 @@ const isUserMenuOpen = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
 const userMenuId = `app-navbar-user-menu-${useId()}`;
 const getLocaleLabel = (localeCode: string): string => resolveLocaleLabel(t, localeCode);
+let themePersistRequestId = 0;
 
 function closeUserMenu(): void {
   if (userMenuRef.value) {
@@ -34,10 +37,26 @@ function syncUserMenuState(): void {
   isUserMenuOpen.value = userMenuRef.value?.open ?? false;
 }
 
-function onThemeControllerChange(event: Event): void {
+async function onThemeControllerChange(event: Event): Promise<void> {
   const { target } = event;
   if (!(target instanceof HTMLInputElement)) return;
-  setTheme(target.checked ? THEME_NAMES.dark : THEME_NAMES.light);
+  const previousTheme = theme.value;
+  const nextTheme = target.checked ? THEME_NAMES.dark : THEME_NAMES.light;
+  setTheme(nextTheme, { persist: false });
+  const requestId = ++themePersistRequestId;
+  const saveResult = await settlePromise(
+    updateSettings({ theme: nextTheme }),
+    t("settings.errors.failedToSaveTheme"),
+  );
+  if (requestId !== themePersistRequestId) {
+    return;
+  }
+  if (!saveResult.ok) {
+    setTheme(previousTheme, { persist: false });
+    target.checked = previousTheme === THEME_NAMES.dark;
+    return;
+  }
+  setTheme(nextTheme, { persist: true });
 }
 </script>
 

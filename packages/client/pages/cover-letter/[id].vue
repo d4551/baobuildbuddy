@@ -8,6 +8,7 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
@@ -220,7 +221,7 @@ async function handleExport(format: "pdf" | "docx") {
       title-id="cover-letter-detail-title"
       :title="heroTitle"
       :description="heroDescription"
-      description-class="max-w-2xl text-base-content/70"
+      :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #breadcrumbs>
         <AppBreadcrumbs :crumbs="breadcrumbs" />

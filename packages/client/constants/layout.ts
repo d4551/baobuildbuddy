@@ -96,10 +96,19 @@ export const PAGE_HEADER_TITLE_CLASS = "text-2xl font-bold";
 /** Default subtitle under the page title. */
 export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-base-content/60";
 
+/** Measured page subtitle used by hero headers that need a readable line length. */
+export const PAGE_HEADER_DESCRIPTION_MEASURE_CLASS = "max-w-2xl text-base-content/70";
+
+/** Measured centered prose block for portfolio/preview bios and similar copy. */
+export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-base-content/70";
+
 /**
  * Shared hero surface for page-level headers that need elevated context.
  */
 export const PAGE_HERO_SECTION_CLASS = "hero rounded-box border border-base-300 bg-base-200";
+
+/** Aside width contract inside page hero headers. */
+export const PAGE_HERO_ASIDE_CLASS = "w-full lg:max-w-2xl";
 
 /**
  * Base hero content layout for page-level header surfaces.

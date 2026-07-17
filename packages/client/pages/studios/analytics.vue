@@ -93,7 +93,7 @@ useSeoMeta({
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <SectionGrid grid-token="twoToFourLg">
             <div v-for="[type, count] in byTypeEntries" :key="type" class="stat rounded-lg bg-base-200">
               <div class="stat-title text-xs">{{ type }}</div>
               <div class="stat-value text-2xl">{{ count }}</div>
@@ -101,7 +101,7 @@ useSeoMeta({
                 {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((count / totalStudios) * 100) : 0 }) }}
               </div>
             </div>
-          </div>
+          </SectionGrid>
         </div>
       </div>
 
@@ -191,7 +191,7 @@ useSeoMeta({
             ></progress>
           </div>
 
-          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <SectionGrid grid-token="twoColumnSm" extra-class="mt-4">
             <div class="stat rounded-lg bg-base-200">
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
               <div class="stat-value text-success text-2xl">{{ remoteWorkStudios }}</div>
@@ -201,7 +201,7 @@ useSeoMeta({
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.onSiteOnlyTitle") }}</div>
               <div class="stat-value text-warning text-2xl">{{ onSiteOnlyCount }}</div>
             </div>
-          </div>
+          </SectionGrid>
         </div>
       </div>
     </div>

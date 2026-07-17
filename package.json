@@ -16,6 +16,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "overrides": {
+    "elysia": "2.0.0-exp.45"
+  },
   "scripts": {
     "dev": "bun run scripts/dev-stack.ts",
     "dev:server": "bun --env-file=.env run --cwd packages/server dev",

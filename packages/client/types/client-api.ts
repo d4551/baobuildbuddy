@@ -31,6 +31,9 @@ export interface ClientApi {
   studios: {
     analytics: StudioAnalyticsApi;
   };
+  automation: object;
+  search: object;
+  scraper: object;
 }
 
 const REQUIRED_API_BRANCHES = [
@@ -47,6 +50,9 @@ const REQUIRED_API_BRANCHES = [
   "skills",
   "stats",
   "studios",
+  "automation",
+  "search",
+  "scraper",
 ] as const satisfies readonly (keyof ClientApi)[];
 
 const isRouteGroup = (value: unknown): value is object =>

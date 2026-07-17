@@ -15,7 +15,6 @@ import {
 
 const { initTheme, theme, setTheme } = useTheme();
 const { settings } = useSettings();
-useBrand();
 const { t } = useI18n();
 const route = useRoute();
 const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);

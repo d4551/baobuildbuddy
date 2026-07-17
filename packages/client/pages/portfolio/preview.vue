@@ -6,6 +6,8 @@ definePageMeta({
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { PROSE_MEASURE_CENTER_CLASS } from "~/constants/layout";
+import { UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const router = useRouter();
@@ -95,14 +97,14 @@ async function handleExport(format: "pdf" | "docx") {
       :cta-to="APP_ROUTES.portfolio"
     />
 
-    <div v-else class="mx-auto max-w-6xl space-y-8">
+    <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
       <div class="card card-border bg-base-100 shadow-sm">
         <div class="card-body items-center gap-6 py-12 text-center">
           <div class="space-y-4">
             <h2 class="text-4xl font-bold sm:text-5xl">
               {{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}
             </h2>
-            <p class="mx-auto max-w-2xl text-base-content/70">{{ portfolio.metadata?.bio }}</p>
+            <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
           </div>
           <div class="flex flex-wrap justify-center gap-4">
             <a
@@ -136,7 +138,7 @@ async function handleExport(format: "pdf" | "docx") {
           title-id="portfolio-featured-projects-title"
           :title="t('portfolioPage.preview.featuredProjectsTitle')"
         />
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <SectionGrid grid-token="twoColumnMdGap6">
           <div
             v-for="project in featuredProjects"
             :key="project.id"
@@ -177,7 +179,7 @@ async function handleExport(format: "pdf" | "docx") {
               </div>
             </div>
           </div>
-        </div>
+        </SectionGrid>
       </div>
 
       <div v-if="regularProjects.length" class="space-y-6">
@@ -185,7 +187,7 @@ async function handleExport(format: "pdf" | "docx") {
           title-id="portfolio-all-projects-title"
           :title="featuredProjects.length ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
         />
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <SectionGrid grid-token="threeColumnMdGap6">
           <div
             v-for="project in regularProjects"
             :key="project.id"
@@ -226,7 +228,7 @@ async function handleExport(format: "pdf" | "docx") {
               </div>
             </div>
           </div>
-        </div>
+        </SectionGrid>
       </div>
 
       <EmptyState

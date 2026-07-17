@@ -8,6 +8,7 @@ const nav = {
     interview: "Interview",
     skills: "Skills",
     studios: "Studios",
+    aiDashboard: "AI Dashboard",
     aiChat: "AI Chat",
     automation: "Automation",
     gamification: "Gamification",

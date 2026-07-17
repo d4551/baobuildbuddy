@@ -65,7 +65,7 @@ useSeoMeta({
       description-key="interviewHistory.emptyStateDescription"
     />
 
-    <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <SectionGrid v-else grid-token="threeColumnLg">
       <div class="lg:col-span-2 space-y-6">
         <InterviewHistorySessionsCard
           :filtered-sessions="filteredSessions"
@@ -96,6 +96,6 @@ useSeoMeta({
           @close="closeDetail"
         />
       </div>
-    </div>
+    </SectionGrid>
   </PageScaffold>
 </template>

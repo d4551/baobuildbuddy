@@ -124,6 +124,7 @@ function buildSettingsPageStateResult(options: SettingsPageStateResultOptions) {
     profile: options.services.profile,
     resolvedBrand: options.services.resolvedBrand,
     theme: options.services.theme,
+    setTheme: options.services.setTheme,
     toggleTheme: options.services.toggleTheme,
     THEME_NAMES,
     fetchSettings: options.services.fetchSettings,

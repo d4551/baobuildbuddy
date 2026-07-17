@@ -35,15 +35,16 @@ export function useTheme() {
   }
 
   function initTheme(preferredTheme?: AppDataTheme) {
+    // Settings are the persisted SSOT; cookie is a hydration cache only.
+    if (preferredTheme) {
+      setTheme(preferredTheme, { persist: true });
+      return;
+    }
+
     const savedRaw = themeCookie.value;
     if (savedRaw) {
       const normalized = normalizeAppDataTheme(savedRaw);
       setTheme(normalized, { persist: normalized !== savedRaw });
-      return;
-    }
-
-    if (preferredTheme) {
-      setTheme(preferredTheme, { persist: false });
       return;
     }
 

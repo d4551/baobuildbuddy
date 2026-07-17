@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -87,7 +88,7 @@ function updateProjectForm(value: typeof projectForm): void {
       title-id="portfolio-page-title"
       :title="t('portfolioPage.title')"
       :description="t('portfolioPage.subtitle')"
-      description-class="max-w-2xl text-base-content/70"
+      :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>
         <NuxtLink
@@ -152,7 +153,7 @@ function updateProjectForm(value: typeof projectForm): void {
 
       <section class="card card-border bg-base-100">
         <div class="card-body">
-          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">
               <legend class="fieldset-legend">{{ t("portfolioPage.filters.searchLegend") }}</legend>
               <input
@@ -163,7 +164,7 @@ function updateProjectForm(value: typeof projectForm): void {
                 :aria-label="t('portfolioPage.filters.searchAria')"
               />
             </fieldset>
-          </div>
+          </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
             <button class="btn btn-sm btn-ghost" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">

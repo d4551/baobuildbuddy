@@ -2,6 +2,7 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
+import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -67,7 +68,7 @@ const bootstrapErrorMessage = computed(() =>
       title-id="cover-letter-page-title"
       :title="t('coverLetterPage.title')"
       :description="t('coverLetterPage.subtitle')"
-      description-class="max-w-2xl text-base-content/70"
+      :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>
         <button
@@ -93,7 +94,7 @@ const bootstrapErrorMessage = computed(() =>
 
     <section class="card card-border bg-base-100">
       <div class="card-body">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.searchLegend") }}</legend>
             <input
@@ -138,7 +139,7 @@ const bootstrapErrorMessage = computed(() =>
               </option>
             </select>
           </fieldset>
-        </div>
+        </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
           <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
@@ -171,7 +172,7 @@ const bootstrapErrorMessage = computed(() =>
       message-key="coverLetterPage.filteredEmptyState"
     />
 
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <SectionGrid v-else grid-token="threeColumnResponsive">
       <article
         v-for="letter in coverLetterCards"
         :key="letter.id"
@@ -220,7 +221,7 @@ const bootstrapErrorMessage = computed(() =>
           </div>
         </div>
       </article>
-    </div>
+    </SectionGrid>
 
     <AppPagination
       :current-page="coverLetterPagination.currentPage.value"
