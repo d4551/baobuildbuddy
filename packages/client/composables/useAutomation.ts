@@ -146,7 +146,10 @@ function createRunQueries(runtime: AutomationRuntime) {
   const getRuns = (params: FetchRunsParams = {}): Promise<RpaRunExecutionEnvelope[]> =>
     requestApi<RpaRunExecutionEnvelope[]>(runtime.api, API_ENDPOINTS.automationRuns, {
       method: "GET",
-      query: params,
+      query: {
+        type: params.type,
+        status: params.status,
+      },
     });
 
   const fetchRpaCapabilities = (): CapabilityAuditAsyncData =>
