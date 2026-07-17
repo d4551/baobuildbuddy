@@ -225,36 +225,38 @@ const updateInput = (event: Event): void => {
             </div>
           </div>
 
-          <ChatVoiceControls
-            :selected-voice-id="selectedVoiceId"
-            :auto-speak-replies="autoSpeakReplies"
-            :stt-provider="speechConfig.sttProvider"
-            :stt-model="speechConfig.sttModel"
-            :tts-provider="speechConfig.ttsProvider"
-            :tts-model="speechConfig.ttsModel"
-            :loading="loading"
-            :supports-recognition="supportsRecognition"
-            :supports-synthesis="supportsSynthesis"
-            :can-replay-assistant="canReplayAssistant"
-            :is-listening="isVoiceListening"
-            :is-speaking="isVoiceSpeaking"
-            :voices="availableVoices"
-            :speech-provider-options="speechProviderOptions"
-            :stt-model-options="sttModelOptions"
-            :tts-model-options="ttsModelOptions"
-            :speech-config-saving="speechConfigSaving"
-            :support-hint-key="voiceSupportHintKey"
-            :error-label="voiceErrorLabel"
-            @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
-            @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
-            @update:stt-provider="emit('update:sttProvider', $event)"
-            @update:stt-model="emit('update:sttModel', $event)"
-            @update:tts-provider="emit('update:ttsProvider', $event)"
-            @update:tts-model="emit('update:ttsModel', $event)"
-            @save-speech-settings="emit('saveSpeech')"
-            @toggle-listening="emit('toggleListening')"
-            @replay-assistant="emit('replayAssistant')"
-          />
+          <ClientOnly>
+            <ChatVoiceControls
+              :selected-voice-id="selectedVoiceId"
+              :auto-speak-replies="autoSpeakReplies"
+              :stt-provider="speechConfig.sttProvider"
+              :stt-model="speechConfig.sttModel"
+              :tts-provider="speechConfig.ttsProvider"
+              :tts-model="speechConfig.ttsModel"
+              :loading="loading"
+              :supports-recognition="supportsRecognition"
+              :supports-synthesis="supportsSynthesis"
+              :can-replay-assistant="canReplayAssistant"
+              :is-listening="isVoiceListening"
+              :is-speaking="isVoiceSpeaking"
+              :voices="availableVoices"
+              :speech-provider-options="speechProviderOptions"
+              :stt-model-options="sttModelOptions"
+              :tts-model-options="ttsModelOptions"
+              :speech-config-saving="speechConfigSaving"
+              :support-hint-key="voiceSupportHintKey"
+              :error-label="voiceErrorLabel"
+              @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
+              @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
+              @update:stt-provider="emit('update:sttProvider', $event)"
+              @update:stt-model="emit('update:sttModel', $event)"
+              @update:tts-provider="emit('update:ttsProvider', $event)"
+              @update:tts-model="emit('update:ttsModel', $event)"
+              @save-speech-settings="emit('saveSpeech')"
+              @toggle-listening="emit('toggleListening')"
+              @replay-assistant="emit('replayAssistant')"
+            />
+          </ClientOnly>
 
           <p v-if="isSpeechConfigDirty" class="text-xs text-base-content/60">
             {{ t("aiChatPage.voiceSettings.unsavedHint") }}
