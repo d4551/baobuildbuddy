@@ -45,6 +45,7 @@ const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").tri
     <IconDocumentText
       v-else
       class="h-16 w-16 shrink-0 text-muted"
+      aria-hidden="true"
     />
     <h3 class="text-lg font-semibold">
       {{ t(titleKey) }}

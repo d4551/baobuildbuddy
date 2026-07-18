@@ -87,7 +87,7 @@ onUnmounted(() => {
     <div class="drawer-content" :class="SHELL_DRAWER_CONTENT_CLASS">
       <a :href="`#${APP_MAIN_CONTENT_ID}`" :class="SHELL_SKIP_LINK_CLASS" :aria-label="t('a11y.skipToContent')">{{ t("a11y.skipToContent") }}</a>
       <AppNavbar />
-      <main :id="APP_MAIN_CONTENT_ID" class="flex flex-1 flex-col">
+      <main :id="APP_MAIN_CONTENT_ID" tabindex="-1" class="flex flex-1 flex-col">
         <div :class="SHELL_MAIN_INNER_CLASS">
           <slot />
         </div>

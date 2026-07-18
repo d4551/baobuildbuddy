@@ -67,4 +67,24 @@ describe("collectAriaLabelViolationsForContent", () => {
     );
     expect(violations.length).toBeGreaterThan(0);
   });
+
+  test('landmark regression: passes <main tabindex="-1"> as skip-link target', () => {
+    const violations = collectAriaLabelViolationsForContent(
+      CONSUMER_PATH,
+      '<template><main id="main-content" tabindex="-1"><slot /></main></template>',
+    );
+    expect(violations.every((v) => !v.message.includes("Focusable non-native containers"))).toBe(
+      true,
+    );
+  });
+
+  test('landmark regression: still flags <main tabindex="0"> in tab order', () => {
+    const violations = collectAriaLabelViolationsForContent(
+      CONSUMER_PATH,
+      '<template><main id="main-content" tabindex="0"><slot /></main></template>',
+    );
+    expect(violations.some((v) => v.message.includes("Focusable non-native containers"))).toBe(
+      true,
+    );
+  });
 });
