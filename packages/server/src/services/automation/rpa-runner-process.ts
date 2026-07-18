@@ -170,20 +170,18 @@ const resolveAutomationCommand = (scriptPath: string): string[] => {
 const buildAutomationProcessEnv = (): NodeJS.ProcessEnv => {
   const env = { ...process.env };
   const configured = env.PLAYWRIGHT_BROWSERS_PATH;
-  if (!configured || !configured.includes(CURSOR_SANDBOX_BROWSER_CACHE_MARKER)) {
-    return env;
+  if (configured?.includes(CURSOR_SANDBOX_BROWSER_CACHE_MARKER)) {
+    const hostDefault =
+      process.platform === "darwin"
+        ? join(homedir(), "Library/Caches/ms-playwright")
+        : join(homedir(), ".cache/ms-playwright");
+    if (existsSync(hostDefault)) {
+      env.PLAYWRIGHT_BROWSERS_PATH = hostDefault;
+    } else {
+      delete env.PLAYWRIGHT_BROWSERS_PATH;
+    }
   }
 
-  const hostDefault =
-    process.platform === "darwin"
-      ? join(homedir(), "Library/Caches/ms-playwright")
-      : join(homedir(), ".cache/ms-playwright");
-  if (existsSync(hostDefault)) {
-    env.PLAYWRIGHT_BROWSERS_PATH = hostDefault;
-    return env;
-  }
-
-  delete env.PLAYWRIGHT_BROWSERS_PATH;
   return env;
 };
 

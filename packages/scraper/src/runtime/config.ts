@@ -40,5 +40,7 @@ export const automationRuntimeConfig: AutomationRuntimeConfig = {
     2_000,
   ),
   postSubmitDelayMs: parsePositiveInt(Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS, 3_000),
-  enableAutomationVerify: Bun.env.BAO_ENABLE_AUTOMATION_VERIFY === "true",
+  get enableAutomationVerify(): boolean {
+    return Bun.env.BAO_ENABLE_AUTOMATION_VERIFY === "true";
+  },
 };

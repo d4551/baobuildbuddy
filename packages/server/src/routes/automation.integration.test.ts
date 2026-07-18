@@ -33,8 +33,9 @@ import { createSmtpHarness } from "../test-support/email/smtp-harness";
 
 process.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS = "true";
 Bun.env.BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS = "true";
-process.env.BAO_ENABLE_AUTOMATION_VERIFY = "true";
-Bun.env.BAO_ENABLE_AUTOMATION_VERIFY = "true";
+// Real Playwright job-apply (not BAO_ENABLE_AUTOMATION_VERIFY stub) — assertions require fixture submissions.
+delete process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+delete Bun.env.BAO_ENABLE_AUTOMATION_VERIFY;
 
 const AUTOMATION_INTEGRATION_TIMEOUT_MS = 90_000;
 const WAIT_INTERVAL_MS = 1_000;

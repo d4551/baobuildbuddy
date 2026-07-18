@@ -59,18 +59,6 @@ export const SURFACE_GLASS_CARD_STRONG_CLASS =
 export const SURFACE_GLASS_CARD_MODAL_CLASS = "card card-border card-glass-modal glass-interactive";
 
 /**
- * Glass card hover animation (lift + shadow elevation). Applied automatically
- * by UiGlassCard; never compose manually outside .bao canonical primitives.
- */
-export const GLASS_CARD_HOVER_CLASS = "glass-card-hover";
-
-/**
- * Glass card staggered entrance animation base class.
- * Paired with `glass-card-enter-N` delay classes (0–11) in main.css.
- */
-export const GLASS_CARD_ENTER_CLASS = "glass-card-enter";
-
-/**
  * Glass-clear surface for media controls, decorative indicators, and floating
  * chips where the most transparent material is desired (§3).
  */
@@ -390,6 +378,8 @@ export {
   type FlexGapToken,
   FONT_WEIGHT_TOKEN_CLASS,
   type FontWeightToken,
+  GLASS_CARD_HOVER_CLASS,
+  GLASS_CARD_ENTER_CLASS,
   MARGIN_TOKEN_CLASS,
   type MarginToken,
   PADDING_TOKEN_CLASS,

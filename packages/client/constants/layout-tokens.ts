@@ -110,3 +110,12 @@ export const FONT_WEIGHT_TOKEN_CLASS = {
   normal: "font-normal",
 } as const;
 export type FontWeightToken = keyof typeof FONT_WEIGHT_TOKEN_CLASS;
+
+/**
+ * Glass card animation tokens. Consumed by UiGlassCard and CSS animations
+ * in assets/css/main.css. Stagger index classes map to :nth-child-style
+ * delay selectors.
+ */
+export const GLASS_CARD_HOVER_CLASS = "glass-card-hover";
+
+export const GLASS_CARD_ENTER_CLASS = "glass-card-enter";

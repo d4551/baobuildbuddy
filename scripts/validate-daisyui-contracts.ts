@@ -115,6 +115,8 @@ const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
   "SURFACE_GLASS_CARD_STRONG_CLASS",
   "SURFACE_GLASS_CARD_MODAL_CLASS",
   "AUTH_CARD_SHELL_CLASS",
+  // Canonical glass card primitive wraps SURFACE_GLASS_CARD_CLASS internally.
+  "UiGlassCard",
 ] as const;
 
 const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(
@@ -188,6 +190,10 @@ const collectRequiredClassViolations = (filePath: string, fileContent: string): 
   if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
     classTokens.add("card");
   }
+  // UiGlassCard component usage implicitly carries the `card` class
+  if (/<UiGlassCard\b/u.test(fileContent)) {
+    classTokens.add("card");
+  }
 
   const fileContract = REQUIRED_FILE_CONTRACTS.find((contract) => contract.filePath === filePath);
   if (!fileContract) {
@@ -246,6 +252,16 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
     const firstSurfaceMatch = SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.exec(fileContent);
     if (firstSurfaceMatch && !firstLineByClass.has("card")) {
       firstLineByClass.set("card", getLineFromOffset(fileContent, firstSurfaceMatch.index));
+    }
+  }
+  // UiGlassCard component usage implicitly carries the `card` class
+  if (/<UiGlassCard\b/u.test(fileContent)) {
+    classTokens.add("card");
+    if (!firstLineByClass.has("card")) {
+      const match = /<UiGlassCard\b/u.exec(fileContent);
+      if (match) {
+        firstLineByClass.set("card", getLineFromOffset(fileContent, match.index));
+      }
     }
   }
 
