@@ -97,7 +97,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
     </div>
 
-    <SectionGrid grid-token="twoColumnWide" extra-class="mt-6">
+    <SectionGrid grid-token="twoColumnWide" extra-:class="MARGIN_TOKEN_CLASS.mt6">
       <div v-if="selectedMode === 'job'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
@@ -130,7 +130,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               </thead>
               <tbody>
                 <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
-                  <td class="max-w-64 truncate">{{ job.title }}</td>
+                  <td :class="MAX_W_64_CLASS" truncate">{{ job.title }}</td>
                   <td>{{ job.company }}</td>
                   <td class="text-right">
                     <button

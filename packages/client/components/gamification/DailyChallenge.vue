@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -30,7 +35,7 @@ const { t } = useI18n();
       :aria-label="t('dailyChallengeCard.completedBanner')"
     >
       <div class="flex items-center text-success font-bold" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <IconCheckCircle class="h-12 w-12" />
+        <IconCheckCircle :class="ICON_SIZE_CLASS['12']" />
         <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("dailyChallengeCard.completedBanner") }}</span>
       </div>
     </div>
@@ -38,8 +43,8 @@ const { t } = useI18n();
     <div class="card-body">
       <div class="flex justify-between items-start">
         <h2 class="card-title">{{ challenge.title }}</h2>
-        <div class="badge badge-accent gap-1">
-          <IconSparkles class="h-3 w-3" />
+        <div class="badge badge-accent" :class="FLEX_GAP_TOKEN_CLASS.gap1">
+          <IconSparkles :class="ICON_SIZE_CLASS.xs" />
           {{ t("dashboard.dailyChallengeXpLabel", { xp: challenge.xpReward }) }}
         </div>
       </div>

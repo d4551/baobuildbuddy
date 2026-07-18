@@ -15,8 +15,8 @@ defineProps<{
     <div class="card-body">
       <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4]">{{ t("gamificationPage.achievementsTitle") }}</h2>
 
-      <div v-if="unlockedAchievements.length" class="mb-6">
-        <h3 class="mb-3 font-semibold text-success">{{ t("gamificationPage.achievementsUnlockedLabel") }}</h3>
+      <div v-if="unlockedAchievements.length" :class="MARGIN_TOKEN_CLASS.mb6">
+        <h3 class="font-semibold text-success" :class="MARGIN_TOKEN_CLASS.mb3">{{ t("gamificationPage.achievementsUnlockedLabel") }}</h3>
         <SectionGrid grid-token="fourColumnFromTwo">
           <AchievementBadge
             v-for="achievement in unlockedAchievements"
@@ -28,7 +28,7 @@ defineProps<{
       </div>
 
       <div v-if="lockedAchievements.length">
-        <h3 class="mb-3 font-semibold text-muted">{{ t("gamificationPage.achievementsLockedLabel") }}</h3>
+        <h3 class="font-semibold text-muted" :class="MARGIN_TOKEN_CLASS.mb3">{{ t("gamificationPage.achievementsLockedLabel") }}</h3>
         <SectionGrid grid-token="fourColumnFromTwo">
           <AchievementBadge
             v-for="achievement in lockedAchievements"

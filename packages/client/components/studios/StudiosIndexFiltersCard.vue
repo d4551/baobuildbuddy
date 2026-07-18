@@ -65,7 +65,7 @@ const { t } = useI18n();
       </SectionGrid>
 
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <label class="label cursor-pointer justify-start py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+        <label class="label cursor-pointer justify-start" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
           <input
             v-model="remoteWork"
             type="checkbox"

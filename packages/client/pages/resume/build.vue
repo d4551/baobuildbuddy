@@ -186,7 +186,7 @@ function backToTarget() {
     />
 
     <progress
-      class="progress progress-primary mb-8" :class="[FLUID_WIDTH_CLASS]"
+      class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mb8, FLUID_WIDTH_CLASS]"
       :value="progressValue"
       max="100"
       :aria-label="t('resumeBuildPage.progressAria')"

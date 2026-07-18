@@ -31,7 +31,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 <template>
   <div
     v-if="compact"
-    class="w-20 shrink-0 text-right" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+    :class="ICON_SIZE_CLASS['20']" shrink-0 text-right" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
   >
     <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, scoreTextClass]">
       {{ score }}%
@@ -45,7 +45,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
   </div>
 
   <div v-else class="flex flex-col items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-    <div class="max-w-xs text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+    <div :class="MAX_W_XS_CLASS" text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
       <div class="flex justify-center">
         <span class="badge badge-lg" :class="scoreBadgeClass">
           {{ score }}%

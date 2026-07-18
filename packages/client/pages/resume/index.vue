@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
@@ -81,7 +86,7 @@ const {
           :aria-label="t('resumePage.createButtonAria')"
           @click="showCreateModal = true"
         >
-          <IconPlus class="h-4 w-4" />
+          <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("resumePage.createButton") }}
         </button>
         <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
@@ -180,7 +185,7 @@ const {
       :close-aria-label="t('resumePage.createModal.closeBackdropAria')"
       :close-backdrop-label="t('resumePage.createModal.closeBackdropButton')"
     >
-      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
+      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg, 'font-bold']">
         {{ t("resumePage.createModal.title") }}
       </h3>
 

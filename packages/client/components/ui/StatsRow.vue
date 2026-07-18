@@ -24,7 +24,7 @@ const { t } = useI18n();
     class="stats stats-vertical sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? 'border border-base-300 bg-base-100']"
   >
     <div v-for="(stat, index) in stats" :key="index" class="stat">
-      <div v-if="stat.figure" class="stat-figure text-4xl" aria-hidden="true">
+      <div v-if="stat.figure" class="stat-figure" aria-hidden="true" :class="TYPOGRAPHY_SCALE_CLASS.xl4">
         {{ stat.figure }}
       </div>
       <div class="stat-title">{{ t(stat.titleKey) }}</div>

@@ -32,8 +32,8 @@ function isDockItemActive(item: NavigationItem): boolean {
       :aria-current="isDockItemActive(item) ? 'page' : undefined"
       :aria-label="t(item.labelKey)"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
+      <svg xmlns="http://www.w3.org/2000/svg" :class="ICON_SIZE_CLASS['5']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="item.iconPath" />
       </svg>
       <span class="dock-label">{{ t(item.labelKey) }}</span>
     </NuxtLink>

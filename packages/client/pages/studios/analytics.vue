@@ -115,7 +115,7 @@ useSeoMeta({
               v-for="[size, count] in bySizeEntries"
               :key="size"
             >
-              <div class="flex justify-between items-center mb-2">
+              <div class="flex justify-between items-center" :class="MARGIN_TOKEN_CLASS.mb2">
                 <span class="font-medium">{{ size }}</span>
                 <span class="badge badge-lg">{{ count }}</span>
               </div>
@@ -143,7 +143,7 @@ useSeoMeta({
               :key="tech.name"
               class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
             >
-              <span class="w-32 font-medium">{{ tech.name }}</span>
+              <span :class="FORM_WIDTH_32_CLASS" font-medium">{{ tech.name }}</span>
               <div class="flex-1">
                 <progress
                   class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"

@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SVG_SIZE_13,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -47,7 +55,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 </script>
 
 <template>
-  <div class="space-y-5">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.aiConfigTitle") }}</h2>
     <div role="alert" class="alert alert-info alert-soft">
       <span>{{ t("setup.localFirstInfo", { brand: brandName }) }}</span>
@@ -62,12 +70,12 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
         <h3 class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1]">
           {{ t("settings.aiProviders.ollamaTipTitle") }}
         </h3>
-        <p class="mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p :class="MARGIN_TOKEN_CLASS.mb3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("settings.aiProviders.ollamaTipDescription") }}
           <NuxtLink
             :to="ollamaWebsiteUrl"
             target="_blank"
-            class="link link-primary inline-flex items-center gap-1"
+            class="link link-primary inline-flex items-center min-w-0" :class="FLEX_GAP_TOKEN_CLASS.gap1"
             :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
           >
             {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
@@ -76,7 +84,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
               stroke-linecap="round"
               stroke-linejoin="round"
               class="h-3 w-3 shrink-0"
@@ -91,7 +99,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
         <div class="group relative overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
           <div class="overflow-x-auto whitespace-nowrap pr-14 font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm]">
-            <span class="mr-2 text-muted">$</span>{{ ollamaCommand }}
+            <span :class="MARGIN_TOKEN_CLASS.mr2" text-muted">$</span>{{ ollamaCommand }}
           </div>
           <button
             class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"
@@ -105,13 +113,13 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
               stroke-linecap="round"
               stroke-linejoin="round"
               class="h-4 w-4 shrink-0"
               aria-hidden="true"
             >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <rect x="9" y="9" :width="SVG_SIZE_13" :height="SVG_SIZE_13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
           </button>

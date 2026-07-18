@@ -2,7 +2,14 @@
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import type { ToastType } from "~/composables/useToast";
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, TOAST_CONTAINER_DOM_ID, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  SHADOW_TOKEN_CLASS,
+  TOAST_CONTAINER_DOM_ID,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();
@@ -39,7 +46,7 @@ function resolveIconPath(type: ToastType): string {
     aria-atomic="false"
     :aria-label="t('a11y.notifications')"
   >
-    <TransitionGroup name="toast-motion" tag="div" class="flex max-w-md flex-col" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+    <TransitionGroup name="toast-motion" tag="div" class="flex flex-col" :class="[AUTH_CARD_MAX_WIDTH_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
       <div
         v-for="toast in toasts"
         :key="toast.id"
@@ -48,13 +55,13 @@ function resolveIconPath(type: ToastType): string {
         :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
       >
         <svg
-          class="mt-0.5 h-5 w-5 shrink-0"
+          class="shrink-0" :class="[MARGIN_TOKEN_CLASS.mt0, ICON_SIZE_CLASS.sm]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="resolveIconPath(toast.type)" />
+          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="resolveIconPath(toast.type)" />
         </svg>
 
         <div class="grow" :class="[TRUNCATE_FLEX_CHILD_CLASS]">

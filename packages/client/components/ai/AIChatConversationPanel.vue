@@ -200,7 +200,7 @@ const updateInput = (event: Event): void => {
               @keydown="emit('keydown', $event)"
             />
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-              <div class="space-y-1">
+              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
                 <p class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
                 </p>
@@ -219,7 +219,7 @@ const updateInput = (event: Event): void => {
                   :aria-label="t('aiChatPage.sendAria')"
                 >
                   <LoadingSpinner v-if="loading" size="sm" :label="t('aiChatPage.sendAria')" />
-                  <IconSend v-else class="h-5 w-5" />
+                  <IconSend v-else :class="ICON_SIZE_CLASS.sm" />
                   <span>{{ t("aiChatPage.sendButton") }}</span>
                 </button>
               </div>

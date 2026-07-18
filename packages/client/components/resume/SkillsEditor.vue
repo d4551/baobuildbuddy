@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
@@ -45,7 +52,7 @@ function removeSkill(index: number): void {
 </script>
 
 <template>
-  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+  <div :class="[PADDING_TOKEN_CLASS.p6, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.skills.title") }}</h2>
     <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mb4]">
       <input
@@ -77,7 +84,7 @@ function removeSkill(index: number): void {
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >
-          <CloseIcon class="h-3 w-3" />
+          <CloseIcon :class="ICON_SIZE_CLASS.xs" />
         </button>
       </div>
     </div>

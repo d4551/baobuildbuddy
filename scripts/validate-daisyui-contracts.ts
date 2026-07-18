@@ -102,6 +102,31 @@ const BTN_SEMANTIC_MODIFIERS = [
 ] as const;
 
 const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
+
+/**
+ * .bao SSOT surface class constants that carry the `card` base class.
+ * When a Vue file uses a `:class` binding to one of these constants, the
+ * validator recognizes that the file satisfies the card → card-body/title/actions
+ * contract even though the raw string `card` does not appear in a static
+ * `class="..."` attribute.
+ */
+const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
+  "SURFACE_GLASS_CARD_CLASS",
+  "SURFACE_GLASS_CARD_STRONG_CLASS",
+  "SURFACE_GLASS_CARD_MODAL_CLASS",
+] as const;
+
+const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(
+  `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_CARD.join("|")})\\b`,
+  "u",
+);
+
+// Also create a global variant for matchAll-style scanning
+const SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL = new RegExp(
+  SSOT_SURFACE_CONSTANT_USAGE_PATTERN.source,
+  "gu",
+);
+
 const BRAND_PREVIEW_REQUIRED_THEME_VARIABLES = [
   "--color-base-100",
   "--color-base-200",
@@ -152,10 +177,15 @@ const collectVueFiles = async (): Promise<string[]> => {
 
 const collectRequiredClassViolations = (filePath: string, fileContent: string): Violation[] => {
   const classTokens = new Set<string>();
+  // Scan static class="..." attributes
   for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
     for (const token of extractClassTokens(classMatch[1])) {
       classTokens.add(token);
     }
+  }
+  // Recognize SSOT surface constants that carry `card` implicitly
+  if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    classTokens.add("card");
   }
 
   const fileContract = REQUIRED_FILE_CONTRACTS.find((contract) => contract.filePath === filePath);
@@ -196,6 +226,7 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
   const firstLineByClass = new Map<string, number>();
   const classTokens = new Set<string>();
 
+  // Scan static class="..." attributes
   for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
     const line = getLineFromOffset(fileContent, classMatch.index ?? 0);
     for (const token of extractClassTokens(classMatch[1])) {
@@ -203,6 +234,17 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
       if (!firstLineByClass.has(token)) {
         firstLineByClass.set(token, line);
       }
+    }
+  }
+  // Scan SSOT surface constant bindings that carry `card` implicitly
+  if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    classTokens.add("card");
+    // Find the first SURFACE_GLASS_CARD_CLASS occurrence for line reporting
+    // Reset the global variant since .test() advanced lastIndex on the non-global won't matter
+    SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.lastIndex = 0;
+    const firstSurfaceMatch = SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.exec(fileContent);
+    if (firstSurfaceMatch && !firstLineByClass.has("card")) {
+      firstLineByClass.set("card", getLineFromOffset(fileContent, firstSurfaceMatch.index));
     }
   }
 

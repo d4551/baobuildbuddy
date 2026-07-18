@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {
+  DROPDOWN_MENU_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 type ExportFormat = "pdf" | "docx";
@@ -240,14 +246,14 @@ function emitExport(format: ExportFormat): void {
       @click="handleTriggerClick"
       @keydown="handleTriggerKeydown"
     >
-      <IconDownload class="h-4 w-4" />
+      <IconDownload :class="ICON_SIZE_CLASS['4']" />
       {{ props.buttonLabel }}
     </button>
 
     <ul
       v-show="isOpen"
       :id="exportMenuId"
-      class="menu dropdown-content z-20 w-40 rounded-box border border-base-300 bg-base-100 p-2" :class="[MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
+      class="menu dropdown-content z-20 rounded-box border border-base-300 bg-base-100" :class="[DROPDOWN_MENU_WIDTH_CLASS, PADDING_TOKEN_CLASS.p2, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
       role="menu"
       aria-orientation="vertical"
       :aria-labelledby="exportTriggerId"

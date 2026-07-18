@@ -113,3 +113,9 @@ export const UI_MODAL_SIZE_CLASS_BY_TOKEN: Record<UiModalSizeToken, string> = {
   wide: "w-11/12 max-w-5xl",
   full: "w-11/12 max-w-screen-xl",
 };
+
+/** Workspace navigator max-width at xl breakpoint. */
+export const WORKSPACE_NAV_MAX_WIDTH_XL_CLASS = "xl:max-w-4xl";
+
+/** Hero page title responsive sizing. */
+export const HERO_TITLE_RESPONSIVE_CLASS = "sm:text-5xl";

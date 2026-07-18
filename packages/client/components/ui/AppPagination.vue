@@ -142,7 +142,7 @@ watch(
 
 <template>
   <div v-if="hasPages && hasNormalizedPages" class="card card-border bg-base-100">
-    <div class="card-body py-4 md:flex-row md:items-center md:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+    <div class="card-body md:flex-row md:items-center md:justify-between" :class="[PADDING_TOKEN_CLASS.py4, FLEX_GAP_TOKEN_CLASS.gap3]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ summary }}</p>
 
       <nav class="join" :aria-label="navigationAria">

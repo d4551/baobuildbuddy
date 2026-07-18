@@ -130,7 +130,7 @@ function handleClose(): void {
     @close="handleClose"
   >
     <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ title }}</h3>
-    <p :id="descriptionId" class="py-4">{{ message }}</p>
+    <p :id="descriptionId" :class="PADDING_TOKEN_CLASS.py4">{{ message }}</p>
     <div class="modal-action">
       <button
         ref="cancelButton"

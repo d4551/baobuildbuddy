@@ -135,7 +135,7 @@ const viewSession = (id: string): void => {
             <div class="timeline-middle">
               <UiRadialMeter
                 :value="session.score ?? 0"
-                size-class="h-12 w-12"
+                size-:class="ICON_SIZE_CLASS['12']"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
               >

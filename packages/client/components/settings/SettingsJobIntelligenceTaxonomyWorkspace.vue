@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import type { JobTaxonomyForm } from "./job-intelligence";
@@ -29,7 +35,7 @@ const populatedTaxonomyCount = computed(
 
 <template>
   <div class="card card-border bg-base-100">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
         :description="t('settings.jobIntelligence.taxonomyDescription')"
@@ -64,7 +70,7 @@ const populatedTaxonomyCount = computed(
       <SectionGrid grid-token="twoColumnWide">
         <article :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div class="space-y-1">
+            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</h3>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyKeywordsDescription") }}
@@ -76,7 +82,7 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.keywordsJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+                class="textarea font-mono" :class="[MIN_HEIGHT_EDITOR_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
               />
             </fieldset>
           </div>
@@ -84,7 +90,7 @@ const populatedTaxonomyCount = computed(
 
         <article :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div class="space-y-1">
+            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</h3>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyStudiosDescription") }}
@@ -96,7 +102,7 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.studioRulesJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+                class="textarea font-mono" :class="[MIN_HEIGHT_EDITOR_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
               />
             </fieldset>
           </div>

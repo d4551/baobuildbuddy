@@ -3,7 +3,7 @@ import {
   type AutomationScrapeTarget,
   automationScrapeTargetToPortalId,
   isAutomationJobScrapeTarget,
-} from "./automation";
+} from "./automation-types";
 
 /**
  * OpenAPI/Swagger documentation version.

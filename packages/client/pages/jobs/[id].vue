@@ -140,7 +140,7 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
     spacing-token="comfortable"
     labelled-by="job-detail-title"
   >
-    <AppBreadcrumbs :crumbs="breadcrumbs" class="mb-6" />
+    <AppBreadcrumbs :crumbs="breadcrumbs" :class="MARGIN_TOKEN_CLASS.mb6" />
 
     <LoadingSkeleton v-if="jobDetailPending" :lines="10" />
 

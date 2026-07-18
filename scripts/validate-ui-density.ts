@@ -114,7 +114,7 @@ const collectDensityViolations = (filePath: string, content: string): Validation
     if (hasIcon && visibleText.length > 24) {
       violations.push({
         filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
+        line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
         message: `Button with icon + verbose label ("${visibleText.slice(0, 30)}…", ${visibleText.length} chars). Icon already communicates the action; shorten the label or use aria-label + icon-only on tight surfaces.`,
       });
     }
@@ -124,7 +124,7 @@ const collectDensityViolations = (filePath: string, content: string): Validation
   for (const match of template.matchAll(longParagraphInControlPattern)) {
     violations.push({
       filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
+      line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
       message: `Long-form copy (${(match[0] ?? "").length} chars) inside a control surface. Enterprise density requires scannable labels; move prose to a help docs page or a collapsible disclosure.`,
     });
   }

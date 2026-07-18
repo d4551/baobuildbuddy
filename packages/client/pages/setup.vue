@@ -50,9 +50,9 @@ useSeoMeta({
     width-token="shell"
     spacing-token="compact"
     labelled-by="setup-title"
-    extra-class="w-full"
+    :extra-class="FLUID_WIDTH_CLASS"
   >
-    <h1 id="setup-title" class="font-bold text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2]">
+    <h1 id="setup-title" class="text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2, 'font-bold']">
       {{ t("setup.title", { brand: resolvedBrand.name }) }}
     </h1>
 

@@ -18,7 +18,7 @@ const { t } = useI18n();
     aria-labelledby="interview-session-feedback-title"
   >
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-      <div class="space-y-1">
+      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
         <h2 id="interview-session-feedback-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.feedbackTitle") }}
         </h2>

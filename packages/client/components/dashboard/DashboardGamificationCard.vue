@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
@@ -25,7 +31,7 @@ const { t } = useI18n();
 <template>
   <section class="card bg-base-200">
     <div class="card-body">
-      <div class="flex items-center justify-between gap-6">
+      <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
         <div class="flex-1" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
@@ -54,11 +60,11 @@ const { t } = useI18n();
           ></progress>
         </div>
 
-        <div class="flex items-center gap-6">
+        <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
           <UiRadialMeter
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
-            size-class="h-20 w-20"
+            :size-class="ICON_SIZE_CLASS['20']"
             fill-class="stroke-primary"
             :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
           >

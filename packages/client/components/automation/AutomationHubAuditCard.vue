@@ -136,7 +136,7 @@ const readyEntries = computed(() =>
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
+                              :class="ICON_SIZE_CLASS['4']"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
@@ -208,7 +208,7 @@ const readyEntries = computed(() =>
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
+                              :class="ICON_SIZE_CLASS['4']"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>

@@ -29,11 +29,11 @@ const emit = defineEmits<{
       :aria-controls="chatPanelId"
       @click="emit('toggle')"
     >
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          stroke-width="2"
+          :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
           d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z"
         />
       </svg>

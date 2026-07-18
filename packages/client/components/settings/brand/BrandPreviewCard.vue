@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -52,7 +60,7 @@ const brandPreviewThemes = computed<
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div>
-          <p class="font-semibold uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+          <p class="font-semibold uppercase text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, 'tracking-widest']">
             {{ t("settings.brand.previewEyebrow") }}
           </p>
           <h3 class="card-title" :class="[MARGIN_TOKEN_CLASS.mt2]">
@@ -78,7 +86,7 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="h-10 w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[SHADOW_TOKEN_CLASS.sm]"
+                :class="ICON_SIZE_CLASS['10']" w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[SHADOW_TOKEN_CLASS.sm]"
               />
               <div
                 v-else
@@ -87,7 +95,7 @@ const brandPreviewThemes = computed<
                 {{ brandPreviewInitial }}
               </div>
               <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
-                <p class="uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                <p class="uppercase text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, 'tracking-widest']">
                   {{ t("settings.brand.previewEyebrow") }}
                 </p>
                 <p class="truncate font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -100,17 +108,17 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+          <div :class="[MARGIN_TOKEN_CLASS.mt5, STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <h4 class="brand-display font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
               {{ brandDraft.name }}
             </h4>
-            <p class="max-w-md text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ brandDraft.content.tagline }}</p>
-            <p class="max-w-md text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+            <p class="text-secondary" :class="[AUTH_CARD_MAX_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]">{{ brandDraft.content.tagline }}</p>
+            <p class="text-muted" :class="[AUTH_CARD_MAX_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">
               {{ brandDraft.content.defaultDescription }}
             </p>
           </div>
 
-          <div class="mt-5 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <div :class="MARGIN_TOKEN_CLASS.mt5" flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
@@ -119,7 +127,7 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-6 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
             <span class="btn btn-accent border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>

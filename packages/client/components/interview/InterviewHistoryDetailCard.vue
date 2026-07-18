@@ -48,7 +48,7 @@ const { t } = useI18n();
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >
-            <CloseIcon class="h-4 w-4" />
+            <CloseIcon :class="ICON_SIZE_CLASS['4']" />
           </button>
         </div>
 
@@ -68,7 +68,7 @@ const { t } = useI18n();
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <UiRadialMeter
                 :value="selectedSession.score ?? 0"
-                size-class="h-16 w-16"
+                size-:class="ICON_SIZE_CLASS['16']" w-16"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
               >

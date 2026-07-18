@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 
@@ -44,7 +50,7 @@ function emitValue(): void {
 </script>
 
 <template>
-  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+  <div :class="[PADDING_TOKEN_CLASS.p6, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.gaming.title") }}</h2>
     <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ t("resumePage.gaming.description") }}

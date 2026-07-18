@@ -22,7 +22,7 @@ const message = computed(() => {
   <div class="min-h-screen hero bg-base-200">
     <div class="hero-content text-center">
       <div class="max-w-lg" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-        <h1 class="text-4xl font-bold">{{ t("errorPage.title", { brand: resolvedBrand.name }) }}</h1>
+        <h1 :class="[TYPOGRAPHY_SCALE_CLASS.xl4, 'font-bold']">{{ t("errorPage.title", { brand: resolvedBrand.name }) }}</h1>
         <p class="text-secondary">
           {{ message }}
         </p>

@@ -41,7 +41,7 @@ function resolveCoverageClass(item: AutomationCoverageItem): string {
       <span
         class="inline-flex h-8 w-8 items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, resolveCoverageClass(item)]"
       >
-        <component :is="resolveAppIconComponent(item.iconName)" class="h-4 w-4" aria-hidden="true" />
+        <component :is="resolveAppIconComponent(item.iconName)" :class="ICON_SIZE_CLASS['4']" aria-hidden="true" />
         <span class="sr-only">{{ t(item.labelKey) }}</span>
       </span>
     </span>

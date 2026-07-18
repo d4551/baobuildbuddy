@@ -234,7 +234,7 @@ async function handleExport(format: "pdf" | "docx") {
           @click="requestRegenerate"
         >
           <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
-          <IconRefresh v-else class="h-4 w-4" />
+          <IconRefresh v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 

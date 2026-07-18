@@ -60,7 +60,7 @@ function handleScheduledRunAtUpdate(payload: {
 <template>
   <div class="space-y-8">
     <section v-if="readyCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-      <div class="space-y-1">
+      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
         <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.sections.providers.label") }}
         </h2>
@@ -99,7 +99,7 @@ function handleScheduledRunAtUpdate(payload: {
     </section>
 
     <section v-if="attentionCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-      <div class="space-y-1">
+      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
         <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.providerCard.issuesTitle") }}
         </h2>

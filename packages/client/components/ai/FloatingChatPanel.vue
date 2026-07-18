@@ -91,7 +91,7 @@ const draft = defineModel<string>("draft", { required: true });
             </li>
           </ul>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center" :class="FLEX_GAP_TOKEN_CLASS.gap1">
           <NuxtLink :to="aiChatPagePath" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.expandAria')">
             {{ t("floatingChat.expandButton") }}
           </NuxtLink>
@@ -102,7 +102,7 @@ const draft = defineModel<string>("draft", { required: true });
             {{ t("floatingChat.clearButton") }}
           </button>
           <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.closeAria')" @click="emit('close')">
-            <CloseIcon class="h-4 w-4" />
+            <CloseIcon :class="ICON_SIZE_CLASS['4']" />
           </button>
         </div>
       </header>
@@ -205,7 +205,7 @@ const draft = defineModel<string>("draft", { required: true });
               </ClientOnly>
               <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
                 <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
-                <IconSend v-else class="h-4 w-4" />
+                <IconSend v-else :class="ICON_SIZE_CLASS['4']" />
               </button>
             </div>
           </div>

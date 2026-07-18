@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -122,7 +130,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
             <textarea
               v-model="form.message"
-              class="textarea min-h-36" :class="[FLUID_WIDTH_CLASS]"
+              class="textarea" :class="[MIN_H_36_CLASS, FLUID_WIDTH_CLASS]"
               required
               minlength="10"
               maxlength="12000"
@@ -155,7 +163,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTES.settings"
-              class="btn btn-link btn-sm px-0"
+              class="btn btn-link btn-sm" :class="PADDING_TOKEN_CLASS.px0"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -174,7 +182,7 @@ useSeoMeta({
           </fieldset>
         </div>
 
-        <div class="mt-6 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
           <button
             class="btn btn-primary"
             :disabled="pending || !canSubmit"
@@ -259,7 +267,7 @@ useSeoMeta({
         <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
           <legend class="fieldset-legend">{{ t("automation.email.replyLegend") }}</legend>
           <textarea
-            class="textarea min-h-40" :class="[FLUID_WIDTH_CLASS]"
+            class="textarea" :class="[MIN_HEIGHT_SCROLL_CLASS, FLUID_WIDTH_CLASS]"
             readonly
             :value="lastResult.reply"
             :aria-label="t('automation.email.replyAria')"

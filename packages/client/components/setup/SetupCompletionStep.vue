@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -39,10 +47,11 @@ function updateTextValue(
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
-        class="h-14 w-14 text-success"
+        class="text-success"
+        :class="[ICON_SIZE_CLASS['14']]"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"

@@ -48,7 +48,7 @@ const promptExpectedMinutes = computed(() => {
 <template>
   <section class="card card-border bg-base-100" aria-labelledby="interview-session-prompt-title">
     <div class="card-body gap-5">
-      <div class="space-y-1">
+      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
         <h2 id="interview-session-prompt-title" class="card-title text-xl">
           {{ t("interviewSession.promptTitle") }}
         </h2>

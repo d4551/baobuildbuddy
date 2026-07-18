@@ -39,13 +39,13 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("portfolioPage.projects.title") }}</h2>
         <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
-          <IconPlus class="h-4 w-4" />
+          <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("portfolioPage.projects.addButton") }}
         </button>
       </div>
 
       <div v-if="props.allProjectsLength === 0" class="alert alert-soft" role="status">
-        <IconInfoCircle class="h-6 w-6" />
+        <IconInfoCircle :class="ICON_SIZE_CLASS.md" />
         <span>{{ t("portfolioPage.projects.emptyState") }}</span>
       </div>
 
@@ -60,7 +60,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
           :key="project.id || `${project.title}-${idx}`"
           class="card bg-base-100"
         >
-          <figure v-if="project.image" class="h-48">
+          <figure v-if="project.image" :class="HEIGHT_48_CLASS">
             <NuxtImg
               :src="project.image"
               :alt="project.title"
@@ -74,13 +74,13 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <h3 class="card-title text-base">{{ project.title }}</h3>
               <svg class="h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M4 8h16M4 16h16" />
               </svg>
             </div>
 
             <p class="line-clamp-3 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
 
-            <div v-if="hasTechnologies(project)" class="flex flex-wrap gap-1" :class="[MARGIN_TOKEN_CLASS.mt2]">
+            <div v-if="hasTechnologies(project)" class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <span
                 v-for="tech in project.technologies.slice(0, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT)"
                 :key="tech"

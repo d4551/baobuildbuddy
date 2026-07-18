@@ -21,19 +21,20 @@ import {
 import { DEFAULT_CLIENT_DEV_PORT, DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
 import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import { defineNuxtConfig } from "nuxt/config";
+import { clientEnv } from "./config/env";
 import { buildApiProxyWildcardTarget, normalizeApiProxyTarget } from "./utils/api-proxy-target";
 
 const DEFAULT_CLIENT_PORT = String(DEFAULT_CLIENT_DEV_PORT);
 const DEFAULT_API_SERVER_PORT = String(DEFAULT_SERVER_PORT);
 const API_ENDPOINT_WILDCARD = `${API_ENDPOINT_PREFIX}/**`;
-const configuredApiBase = process.env.NUXT_PUBLIC_API_BASE;
-const configuredApiProxy = process.env.NUXT_PUBLIC_API_PROXY;
-const configuredServerPort = process.env.SERVER_PORT || process.env.PORT;
+const configuredApiBase = clientEnv.apiBase;
+const configuredApiProxy = clientEnv.apiProxy;
+const configuredServerPort = clientEnv.serverPort;
 const resolvedApiServerPort =
   configuredServerPort && configuredServerPort.length > 0
     ? configuredServerPort
     : DEFAULT_API_SERVER_PORT;
-const configuredClientPort = process.env.CLIENT_PORT || process.env.NUXT_CLIENT_PORT;
+const configuredClientPort = clientEnv.clientPort;
 const resolvedDevServerPort =
   configuredClientPort && configuredClientPort.length > 0
     ? configuredClientPort
@@ -169,7 +170,7 @@ const resolveManualChunkName = (moduleId: string): string | undefined => {
 };
 
 const resolvedApiBase = configuredApiBase && configuredApiBase.length > 0 ? configuredApiBase : "/";
-const configuredWsBase = process.env.NUXT_PUBLIC_WS_BASE;
+const configuredWsBase = clientEnv.wsBase;
 const resolvedWsBase =
   configuredWsBase && configuredWsBase !== "/" ? configuredWsBase : resolvedApiBase;
 const shouldPrerenderApplicationRoutes =
@@ -285,24 +286,22 @@ export default defineNuxtConfig({
     public: {
       apiBase: resolvedApiBase,
       wsBase: resolvedWsBase,
-      appTitle: process.env.NUXT_PUBLIC_APP_TITLE || DEFAULT_APP_TITLE,
-      appDescription: process.env.NUXT_PUBLIC_APP_DESCRIPTION || DEFAULT_APP_DESCRIPTION,
+      appTitle: clientEnv.appTitle || DEFAULT_APP_TITLE,
+      appDescription: clientEnv.appDescription || DEFAULT_APP_DESCRIPTION,
       queryStaleTimeMs: Number.parseInt(
-        process.env.NUXT_PUBLIC_QUERY_STALE_TIME_MS || String(DEFAULT_QUERY_STALE_TIME_MS),
+        clientEnv.queryStaleTimeMs || String(DEFAULT_QUERY_STALE_TIME_MS),
         DECIMAL_RADIX,
       ),
       queryRetryCount: Number.parseInt(
-        process.env.NUXT_PUBLIC_QUERY_RETRY_COUNT || String(DEFAULT_QUERY_RETRY_COUNT),
+        clientEnv.queryRetryCount || String(DEFAULT_QUERY_RETRY_COUNT),
         DECIMAL_RADIX,
       ),
-      queryRefetchOnFocus:
-        process.env.NUXT_PUBLIC_QUERY_REFETCH_ON_FOCUS !== QUERY_REFETCH_ON_FOCUS_DISABLED,
+      queryRefetchOnFocus: clientEnv.queryRefetchOnFocus !== QUERY_REFETCH_ON_FOCUS_DISABLED,
       i18n: {
-        defaultLocale: process.env.NUXT_PUBLIC_I18N_DEFAULT_LOCALE || DEFAULT_I18N_LOCALE,
-        fallbackLocale: process.env.NUXT_PUBLIC_I18N_FALLBACK_LOCALE || DEFAULT_I18N_LOCALE,
-        localeCookieKey:
-          process.env.NUXT_PUBLIC_I18N_LOCALE_COOKIE_KEY || DEFAULT_I18N_LOCALE_COOKIE_KEY,
-        supportedLocales: parseSupportedLocales(process.env.NUXT_PUBLIC_I18N_SUPPORTED_LOCALES),
+        defaultLocale: clientEnv.i18nDefaultLocale || DEFAULT_I18N_LOCALE,
+        fallbackLocale: clientEnv.i18nFallbackLocale || DEFAULT_I18N_LOCALE,
+        localeCookieKey: clientEnv.i18nLocaleCookieKey || DEFAULT_I18N_LOCALE_COOKIE_KEY,
+        supportedLocales: parseSupportedLocales(clientEnv.i18nSupportedLocales),
       },
     },
   },
@@ -317,13 +316,13 @@ export default defineNuxtConfig({
       mode: "out-in",
     },
     head: {
-      title: process.env.NUXT_PUBLIC_APP_TITLE || DEFAULT_APP_TITLE,
+      title: clientEnv.appTitle || DEFAULT_APP_TITLE,
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
         {
           name: "description",
-          content: process.env.NUXT_PUBLIC_APP_DESCRIPTION || DEFAULT_APP_DESCRIPTION,
+          content: clientEnv.appDescription || DEFAULT_APP_DESCRIPTION,
         },
       ],
       link: [
@@ -331,7 +330,7 @@ export default defineNuxtConfig({
         { rel: "alternate icon", href: "/favicon.svg" },
       ],
       htmlAttrs: {
-        lang: process.env.NUXT_PUBLIC_I18N_DEFAULT_LOCALE || DEFAULT_I18N_LOCALE,
+        lang: clientEnv.i18nDefaultLocale || DEFAULT_I18N_LOCALE,
       },
     },
   },

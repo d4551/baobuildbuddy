@@ -28,7 +28,7 @@ const { t } = useI18n();
               >
                 <component
                   :is="resolveAppIconComponent(card.iconName)"
-                  class="h-4 w-4"
+                  :class="ICON_SIZE_CLASS['4']"
                   aria-hidden="true"
                 />
                 <span class="sr-only">{{ t(card.titleKey) }}</span>

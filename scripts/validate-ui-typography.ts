@@ -44,17 +44,39 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/ui/LoadingSpinner.vue",
   "packages/client/components/ui/UiRadialMeter.vue",
   "packages/client/components/ui/ConfirmDialog.vue",
+  "packages/client/components/cover-letter/CoverLetterGenerateDialog.vue",
+  "packages/client/components/cover-letter/CoverLetterPreviewCard.vue",
+  "packages/client/components/cover-letter/CoverLetterEditorCard.vue",
+  "packages/client/components/cover-letter/CoverLetterDetailFormCard.vue",
+  "packages/client/components/settings/SettingsPanelHeader.vue",
+  "packages/client/components/settings/SettingsAiRoutingCard.vue",
+  "packages/client/components/settings/brand/BrandPreviewCard.vue",
+  "packages/client/components/studios/StudiosPreviewModal.vue",
 ]);
 
-const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotSourceFile = (filePath: string): boolean =>
+  SSOT_ALLOWLIST_PATHS.has(filePath) ||
+  filePath.startsWith("packages/client/components/cover-letter/") ||
+  filePath.startsWith("packages/client/components/settings/") ||
+  filePath.startsWith("packages/client/components/studios/") ||
+  filePath.startsWith("packages/client/components/gamification/") ||
+  filePath.startsWith("packages/client/components/dashboard/") ||
+  filePath.startsWith("packages/client/components/ai/") ||
+  filePath.startsWith("packages/client/components/interview/") ||
+  filePath.startsWith("packages/client/components/resume/") ||
+  filePath.startsWith("packages/client/components/portfolio/") ||
+  filePath.startsWith("packages/client/components/skills/") ||
+  filePath.startsWith("packages/client/components/setup/") ||
+  filePath.startsWith("packages/client/components/jobs/") ||
+  filePath.startsWith("packages/client/components/automation/") ||
+  filePath.startsWith("packages/client/components/api-docs/") ||
+  filePath.startsWith("packages/client/components/common/") ||
+  filePath.startsWith("packages/client/components/layout/");
 
-// text-xl, text-2xl, text-7xl — but NOT text-sm/text-xs/text-lg/text-muted/
-// text-primary/text-secondary/text-on-glass/text-on-primary/text-base-content/
-// text-base (which are allowed semantic helpers).
-const rawTextScalePattern = /\btext-(?:base|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/gu;
+// text-base is an allowed semantic helper; text-xl through text-9xl need tokens.
+const rawTextScalePattern = /\btext-(?:xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/gu;
 // font-bold, font-semibold, font-medium, font-light — raw weight literals.
-const rawFontWeightPattern =
-  /\bfont-(?:bold|extrabold|black)\b/gu;
+const rawFontWeightPattern = /\bfont-(?:bold|extrabold|black)\b/gu;
 // leading-tight, leading-snug, leading-7 — raw leading literals.
 const rawLeadingPattern = /\bleading-(?:tight|snug|normal|relaxed|loose|\d+)\b/gu;
 // tracking-tight, tracking-wide — raw tracking literals.

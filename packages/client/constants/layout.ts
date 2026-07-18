@@ -160,8 +160,7 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
 export const EMPTY_STATE_STACK_CLASS =
   "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center";
 
-/**
- * Canonical icon size tokens. Consumed by any component that sizes an icon
+/** Canonical icon size tokens. Consumed by any component that sizes an icon
  * inside a control, badge, or stat surface so icon dimensions stay SSOT.
  */
 export const ICON_SIZE_CLASS = {
@@ -169,7 +168,15 @@ export const ICON_SIZE_CLASS = {
   sm: "h-5 w-5",
   md: "h-6 w-6",
   lg: "h-8 w-8",
+  "3": "h-3 w-3",
   "4": "h-4 w-4",
+  "5": "h-5 w-5",
+  "6": "h-6 w-6",
+  "10": "h-10 w-10",
+  "12": "h-12 w-12",
+  "14": "h-14 w-14",
+  "16": "h-16 w-16",
+  "20": "h-20 w-20",
 } as const;
 
 export type IconSizeToken = keyof typeof ICON_SIZE_CLASS;
@@ -192,6 +199,13 @@ export const RADIAL_METER_GEOMETRY = {
 export const ICON_DECORATIVE_STROKE_WIDTH = 2;
 
 /**
+ * SVG dimension override constants (used when a specific icon needs a non-token dimension).
+ * Prefer ICON_SIZE_CLASS for standard icon sizes; these are for SVG root attributes only.
+ */
+export const SVG_SIZE_13 = 13;
+export const SVG_SIZE_24 = 24;
+
+/**
  * Sidebar width contract at the lg breakpoint (matches the documented
  * `lg:w-64 shrink-0` contract in constants/ui-layout.ts sidebar token).
  */
@@ -204,6 +218,9 @@ export const SHELL_SIDEBAR_ITEM_CLASS =
 /** Navbar dropdown menu surface (daisyUI dropdown-content with shell tokens). */
 export const SHELL_NAVBAR_DROPDOWN_CLASS =
   "menu menu-sm dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg";
+
+/** Dropdown menu width token (used by AppExportMenu and similar transient menus). */
+export const DROPDOWN_MENU_WIDTH_CLASS = "w-40";
 
 /** Stat card icon badge surface (accent container on glass-subtle). */
 export const STAT_CARD_ICON_BADGE_CLASS = "rounded-box glass-subtle p-3";
@@ -285,46 +302,77 @@ export const FLUID_HEIGHT_CLASS = "h-full";
 /** Truncation block primitive (min-w-0 to enable flexbox text truncation). */
 export const TRUNCATE_FLEX_CHILD_CLASS = "min-w-0";
 
-/** Common vertical stack spacing. */
-export const STACK_SPACE_Y_TOKEN_CLASS = {
-  stack2: "space-y-2",
-  stack3: "space-y-3",
-  stack4: "space-y-4",
-  stack6: "space-y-6",
-} as const;
-export type StackSpaceYToken = keyof typeof STACK_SPACE_Y_TOKEN_CLASS;
+/** Flex min-height zero (enables flex children to shrink to content). */
+export const MIN_HEIGHT_ZERO_CLASS = "min-h-0";
 
-/** Common flex gap tokens. */
-export const FLEX_GAP_TOKEN_CLASS = {
-  gap2: "gap-2",
-  gap3: "gap-3",
-  gap4: "gap-4",
-} as const;
-export type FlexGapToken = keyof typeof FLEX_GAP_TOKEN_CLASS;
+/** Minimum height for card description areas (3.5rem = ~2 lines at text-sm). */
+export const MIN_HEIGHT_DESCRIPTION_CLASS = "min-h-14";
 
-/** Common margin tokens (auto-generated for the 1-6 range). */
-export const MARGIN_TOKEN_CLASS = {
-  mt1: "mt-1",
-  mt2: "mt-2",
-  mt4: "mt-4",
-  mb1: "mb-1",
-  mb4: "mb-4",
-} as const;
-export type MarginToken = keyof typeof MARGIN_TOKEN_CLASS;
+/** Minimum widths for form/table columns. */
+export const MIN_WIDTH_FORM_COL_CLASS = "min-w-40";
+export const MIN_WIDTH_SELECT_CLASS = "min-w-52";
 
-/** Common padding tokens. */
-export const PADDING_TOKEN_CLASS = {
-  p3: "p-3",
-  p4: "p-4",
-} as const;
-export type PaddingToken = keyof typeof PADDING_TOKEN_CLASS;
+/** Minimum height for scrollable content areas. */
+export const MIN_HEIGHT_SCROLL_CLASS = "min-h-40";
 
-/** Typography scale tokens for body copy and headings. */
-export const TYPOGRAPHY_SCALE_CLASS = {
-  sm: "text-sm",
-  xs: "text-xs",
-  lg: "text-lg",
-  xl2: "text-2xl",
-  xl3: "text-3xl",
-} as const;
-export type TypographyScaleToken = keyof typeof TYPOGRAPHY_SCALE_CLASS;
+/** Minimum height for taxonomy/schema editor panels. */
+export const MIN_HEIGHT_EDITOR_CLASS = "min-h-64";
+
+/** Minimum height for chat input panels. */
+export const MIN_HEIGHT_CHAT_CLASS = "min-h-24";
+
+/** Minimum height for content areas (7rem). */
+export const MIN_HEIGHT_CONTENT_CLASS = "min-h-28";
+
+/** Fixed height/min-height for content blocks (12rem). */
+export const HEIGHT_48_CLASS = "min-h-48";
+
+/** Fixed height for scrollable panels (24rem). */
+export const HEIGHT_96_CLASS = "h-96";
+
+/** Expanded sidebar width. */
+export const SIDEBAR_WIDE_WIDTH_CLASS = "w-80";
+
+/** Form/panel helper widths. */
+export const FORM_WIDTH_10_CLASS = "w-10";
+export const FORM_WIDTH_16_CLASS = "w-16";
+export const FORM_WIDTH_28_CLASS = "w-28";
+export const FORM_WIDTH_32_CLASS = "w-32";
+
+/** Content height tokens. */
+export const CONTENT_H_28_CLASS = "h-28";
+export const CONTENT_H_64_CLASS = "h-64";
+export const CONTENT_H_72_CLASS = "h-72";
+
+/** Min-height extended tokens. */
+export const MIN_H_36_CLASS = "min-h-36";
+export const MIN_H_60_CLASS = "min-h-60";
+export const MIN_H_80_CLASS = "min-h-80";
+
+/** Max-width extended tokens. */
+export const MAX_W_2XL_CLASS = "max-w-2xl";
+export const MAX_W_3XL_CLASS = "max-w-3xl";
+export const MAX_W_64_CLASS = "max-w-64";
+export const MAX_W_XS_CLASS = "max-w-xs";
+
+/** Auth card max-width (matches AUTH_CARD_SHELL_CLASS). */
+export const AUTH_CARD_MAX_WIDTH_CLASS = "max-w-md";
+
+/** Error/empty page content max-width. */
+export const ERROR_PAGE_MAX_WIDTH_CLASS = "max-w-lg";
+
+// ── Extended token scale (split to keep file under 400 lines) ───────
+// All consumers still import from ~/constants/layout — we re-export from
+// layout-tokens.ts so the public API is unchanged.
+export {
+  STACK_SPACE_Y_TOKEN_CLASS,
+  type StackSpaceYToken,
+  FLEX_GAP_TOKEN_CLASS,
+  type FlexGapToken,
+  MARGIN_TOKEN_CLASS,
+  type MarginToken,
+  PADDING_TOKEN_CLASS,
+  type PaddingToken,
+  TYPOGRAPHY_SCALE_CLASS,
+  type TypographyScaleToken,
+} from "./layout-tokens";

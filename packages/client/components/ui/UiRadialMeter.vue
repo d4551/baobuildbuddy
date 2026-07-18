@@ -46,7 +46,7 @@ const dashOffset = computed(() => {
     :aria-valuemax="max"
     :aria-valuenow="clampedValue"
   >
-    <svg class="h-full w-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
+    <svg class="-rotate-90" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]" viewBox="0 0 100 100" aria-hidden="true">
       <circle
         class="fill-none"
         :class="trackClass"

@@ -175,7 +175,7 @@ function updateFeaturedFlag(event: Event): void {
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
-              <CloseIcon class="h-3 w-3" />
+              <CloseIcon :class="ICON_SIZE_CLASS.xs" />
             </button>
           </div>
         </div>

@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+} from "~/constants/layout";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 
@@ -70,7 +76,7 @@ function requestDelete(resumeId?: string): void {
     </section>
 
     <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
-      <IconInfoCircle class="h-6 w-6" />
+      <IconInfoCircle :class="ICON_SIZE_CLASS.md" />
       <span>{{ t("resumePage.emptyState") }}</span>
     </div>
 

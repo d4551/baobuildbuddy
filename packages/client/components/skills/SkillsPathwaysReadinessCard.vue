@@ -39,7 +39,7 @@ const { t } = useI18n();
           <UiRadialMeter
             :value="readinessAssessment.overallScore"
             :max="readinessMax"
-            size-class="h-28 w-28"
+            size-:class="CONTENT_H_28_CLASS" w-28"
             track-class="stroke-primary-content/30"
             fill-class="stroke-primary-content"
             :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
@@ -53,7 +53,7 @@ const { t } = useI18n();
           <div
             v-for="category in readinessCategories"
             :key="category.key"
-            class="space-y-1"
+            :class="STACK_SPACE_Y_TOKEN_CLASS.stack1"
           >
             <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ getCategoryLabel(category.key) }}: {{ category.score }}%

@@ -111,7 +111,7 @@ function handleAutoSpeakChange(event: Event): void {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6h12v12H6z" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M6 6h12v12H6z" />
     </svg>
     <svg
       v-else
@@ -124,10 +124,10 @@ function handleAutoSpeakChange(event: Event): void {
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
-        stroke-width="2"
+        :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
         d="M12 1a3 3 0 00-3 3v6a3 3 0 106 0V4a3 3 0 00-3-3z"
       />
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10a7 7 0 11-14 0M12 21v-3" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
   <button
@@ -146,11 +146,11 @@ function handleAutoSpeakChange(event: Event): void {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5 6 9H3v6h3l5 4V5z" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M11 5 6 9H3v6h3l5 4V5z" />
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
-        stroke-width="2"
+        :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
         d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"
       />
     </svg>
@@ -213,7 +213,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <SpeechModelProfileFields
     v-if="showAdvancedSpeechConfig"
-    class="mt-3"
+    :class="MARGIN_TOKEN_CLASS.mt3"
     :provider-options="props.speechProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"

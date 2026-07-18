@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 defineProps<{
   contentCharacterCount: number;
   t: (key: string, values?: Record<string, unknown>) => string;
@@ -19,7 +24,7 @@ const emit = defineEmits<{
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
       <div class="alert alert-info alert-soft" role="status">
-        <IconInfoCircle class="h-5 w-5" />
+        <IconInfoCircle :class="ICON_SIZE_CLASS.sm" />
         <span>{{ t("coverLetterDetailPage.editor.info") }}</span>
       </div>
 

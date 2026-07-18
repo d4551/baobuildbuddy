@@ -59,7 +59,7 @@ function normalizedConfidence(confidence: number): number {
             <td class="font-medium">{{ mapping.gameExpression }}</td>
             <td>{{ mapping.transferableSkill }}</td>
             <td>
-              <div class="flex flex-wrap gap-1">
+              <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
                 <span
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
@@ -73,7 +73,7 @@ function normalizedConfidence(confidence: number): number {
               </div>
             </td>
             <td class="w-40">
-              <div class="space-y-1">
+              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
                 <div class="flex items-center justify-between font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <span>{{ mapping.confidence }}%</span>
                   <span class="text-muted">
@@ -130,7 +130,7 @@ function normalizedConfidence(confidence: number): number {
             :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
           ></progress>
 
-          <div class="flex flex-wrap gap-1">
+          <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
             <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
             <span
               v-for="application in mapping.industryApplications.slice(0, 3)"

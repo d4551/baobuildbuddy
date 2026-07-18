@@ -2,7 +2,14 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -76,7 +83,7 @@ const bootstrapErrorMessage = computed(() =>
           :aria-label="t('coverLetterPage.generateButtonAria')"
           @click="showGenerateModal = true"
         >
-          <IconBolt class="h-4 w-4" />
+          <IconBolt :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterPage.generateButton") }}
         </button>
       </template>
@@ -92,7 +99,7 @@ const bootstrapErrorMessage = computed(() =>
       </template>
     </PageHeroHeader>
 
-    <section class="card card-border bg-base-100">
+    <section :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
@@ -176,7 +183,7 @@ const bootstrapErrorMessage = computed(() =>
       <article
         v-for="letter in coverLetterCards"
         :key="letter.id"
-        class="card card-border relative overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'relative overflow-hidden']"
       >
         <NuxtLink
           :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"

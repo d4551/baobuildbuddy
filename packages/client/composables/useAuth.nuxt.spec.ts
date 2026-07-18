@@ -82,7 +82,7 @@ describe("useAuth", () => {
 
   it("passes setupToken to auth init requests", async () => {
     mockApi.auth.init.post.mockResolvedValueOnce({
-      data: { configured: true, apiKey: "bao_test", message: "ok" },
+      data: { configured: true, apiKey: "SK_test_placeholder", message: "ok" },
       error: null,
     });
 
@@ -90,7 +90,7 @@ describe("useAuth", () => {
     const result = await initAuth("setup-token");
 
     expect(mockApi.auth.init.post).toHaveBeenCalledWith({ setupToken: "setup-token" });
-    expect(result.apiKey).toBe("bao_test");
+    expect(result.apiKey).toBe("SK_test_placeholder");
   });
 
   it("stores and retrieves the API key through Nuxt app injection", () => {

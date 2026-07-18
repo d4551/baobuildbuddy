@@ -173,7 +173,7 @@ function updateRequestBodyValue(event: Event): void {
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
         <textarea
           :value="requestBodyValue"
-          class="textarea min-h-40 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
+          class="textarea font-mono" :class="[MIN_HEIGHT_SCROLL_CLASS, FLUID_WIDTH_CLASS]" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
           :placeholder="t('apiDocs.tester.bodyPlaceholder')"
           :aria-label="t('apiDocs.tester.requestBodyAria')"
           @input="updateRequestBodyValue"
@@ -263,7 +263,7 @@ function updateRequestBodyValue(event: Event): void {
             </table>
           </div>
 
-          <div class="space-y-1">
+          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseHeadersLabel") }}</h4>
             <pre class="bg-base-200 whitespace-pre-wrap" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.xs, RADIUS_TOKEN_CLASS.lg]">{{
               Object.keys(testerResponse.headers).length > 0
@@ -272,7 +272,7 @@ function updateRequestBodyValue(event: Event): void {
             }}</pre>
           </div>
 
-          <div class="space-y-1">
+          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h4>
             <pre class="bg-base-200 whitespace-pre-wrap" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.xs, RADIUS_TOKEN_CLASS.lg]">{{
               formattedResponseBody || t("apiDocs.tester.emptyResponse")

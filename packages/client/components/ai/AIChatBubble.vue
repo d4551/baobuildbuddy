@@ -105,7 +105,7 @@ const ariaLabel = computed(() => {
       <div
         class="flex items-center justify-center border border-base-300 bg-base-200 text-base-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
-        <IconLightbulb class="h-6 w-6" />
+        <IconLightbulb :class="ICON_SIZE_CLASS.md" />
       </div>
     </div>
     <div

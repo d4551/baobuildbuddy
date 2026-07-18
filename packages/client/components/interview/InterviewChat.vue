@@ -156,7 +156,7 @@ watch(renderedMessages, async () => {
   <section class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body gap-0 p-0">
       <div class="border-b border-base-300 px-6 py-5">
-        <div class="space-y-1">
+        <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
           <h2 id="interview-chat-workspace-title" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
@@ -168,7 +168,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        class="min-h-80 flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
+        :class="MIN_H_80_CLASS" flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"

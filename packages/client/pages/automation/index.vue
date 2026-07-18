@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -155,7 +161,7 @@ useSeoMeta({
           />
 
           <SectionGrid grid-token="twoColumnWide">
-            <section class="card card-border bg-base-100" aria-labelledby="automation-next-action-title">
+            <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-next-action-title">
               <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                   <h2 id="automation-next-action-title" class="card-title">

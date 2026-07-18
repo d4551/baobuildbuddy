@@ -44,14 +44,14 @@ const { t } = useI18n();
 
             <div>
               <p class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPathwaysPage.pathways.requiredSkillsTitle") }}</p>
-              <div class="flex flex-wrap gap-1">
+              <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
                 <span v-for="skill in pathway.requiredSkills" :key="skill" class="badge badge-xs">
                   {{ skill }}
                 </span>
               </div>
             </div>
 
-            <div class="space-y-1">
+            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
               <div class="flex items-center justify-between" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                 <span>{{ t("skillsPathwaysPage.pathways.matchScoreLabel") }}</span>
                 <span class="font-semibold">{{ pathway.matchScore }}%</span>

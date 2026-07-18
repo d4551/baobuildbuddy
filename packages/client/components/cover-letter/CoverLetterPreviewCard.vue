@@ -10,7 +10,7 @@ defineProps<{
   <section class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.preview.title") }}</h2>
-      <div class="border border-base-300 bg-base-100 p-6" :class="[SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg]">
+      <div class="border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p6, SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg]">
         <div v-if="contentText.trim().length > 0" class="whitespace-pre-wrap leading-relaxed" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ contentText }}
         </div>
