@@ -123,8 +123,10 @@ onUnmounted(() => {
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
       </div>
     </div>
-    <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
-      <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
+    <div class="navbar-center hidden lg:flex" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
+      <Transition name="navbar-tagline" mode="out-in">
+        <span v-if="!isScrolled" key="tagline" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
+      </Transition>
     </div>
     <div class="navbar-end" :class="FLEX_GAP_TOKEN_CLASS.gap1">
       <label class="swap swap-rotate btn btn-ghost btn-circle">

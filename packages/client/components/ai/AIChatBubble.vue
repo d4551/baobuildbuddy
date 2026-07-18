@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
@@ -130,7 +135,7 @@ const ariaLabel = computed(() => {
       </time>
     </div>
     <div
-      class="chat-bubble whitespace-pre-wrap break-words"
+      class="chat-bubble chat-bubble-enter whitespace-pre-wrap break-words"
       :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
       <ul

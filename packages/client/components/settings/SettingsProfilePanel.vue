@@ -37,7 +37,7 @@ const profileSaveStateLabel = computed(() => {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body">
       <SettingsPanelHeader :title="t('settings.profile.title')">
         <template #meta>

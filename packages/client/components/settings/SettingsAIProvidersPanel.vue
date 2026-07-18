@@ -120,7 +120,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
       <SettingsPanelHeader
         :title="t('settings.aiProviders.title')"
@@ -168,7 +168,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       </div>
 
       <SectionGrid grid-token="providersSplit">
-        <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.title')">
+        <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']" :aria-label="t('settings.aiProviders.title')">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
@@ -218,7 +218,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </section>
 
         <section
-          :class="SURFACE_GLASS_CARD_CLASS"
+          :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
           :aria-label="t('settings.aiProviders.preferredProviderLegend')"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
@@ -276,7 +276,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         @save="emit('saveRouting')"
       />
 
-      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.saveAria')">
+      <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']" :aria-label="t('settings.aiProviders.saveAria')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
             <h3 class="card-title text-base">{{ t("settings.aiProviders.saveButton") }}</h3>

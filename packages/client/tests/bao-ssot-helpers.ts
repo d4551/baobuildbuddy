@@ -4,9 +4,10 @@
  * Extracted from bao-ssot-compliance.spec.ts to keep files small and focused.
  */
 
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
-export const CLIENT_ROOT = join(import.meta.dirname, "..");
+const TESTS_DIR = dirname(import.meta.url ? new URL(import.meta.url).pathname : __dirname);
+export const CLIENT_ROOT = join(TESTS_DIR, "..");
 export const PAGES_DIR = join(CLIENT_ROOT, "pages");
 export const COMPONENTS_DIR = join(CLIENT_ROOT, "components");
 export const LAYOUTS_DIR = join(CLIENT_ROOT, "layouts");

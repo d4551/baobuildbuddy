@@ -52,7 +52,7 @@ const taxonomyAssetCount = computed(
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div class="card card-border bg-base-100">
+    <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
         <SettingsPanelHeader
           :title="t('settings.jobIntelligence.title')"

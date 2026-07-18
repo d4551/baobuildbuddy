@@ -57,7 +57,11 @@ function resolveSidebarLabel(item: NavigationItem): string {
 }
 
 function sidebarLinkClass(item: NavigationItem): string[] {
-  return [SHELL_SIDEBAR_ITEM_CLASS, isSidebarItemActive(item) ? "menu-active font-medium" : ""];
+  return [
+    SHELL_SIDEBAR_ITEM_CLASS,
+    "sidebar-active-indicator",
+    isSidebarItemActive(item) ? "menu-active font-medium" : "",
+  ];
 }
 </script>
 

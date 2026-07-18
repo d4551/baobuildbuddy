@@ -26,7 +26,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
 <template>
   <SectionGrid grid-token="threeColumn">
-    <article :class="SURFACE_GLASS_CARD_CLASS">
+    <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
@@ -80,7 +80,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
       </div>
     </article>
 
-    <article :class="SURFACE_GLASS_CARD_CLASS">
+    <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
@@ -121,7 +121,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
       </div>
     </article>
 
-    <article :class="SURFACE_GLASS_CARD_CLASS">
+    <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">

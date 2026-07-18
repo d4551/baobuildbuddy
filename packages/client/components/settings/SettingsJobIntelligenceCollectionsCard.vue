@@ -27,7 +27,7 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
+  <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">

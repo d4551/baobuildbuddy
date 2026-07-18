@@ -52,7 +52,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
     <div
       v-for="provider in providers"
       :key="provider.id"
-      :class="SURFACE_GLASS_CARD_CLASS"
+      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
     >
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">

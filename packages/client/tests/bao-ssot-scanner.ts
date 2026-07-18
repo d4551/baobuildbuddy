@@ -2,7 +2,7 @@
  * .bao SSOT UI/UX Scanner — runs all violation checks against a single file.
  */
 import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { join as pathJoin } from "node:path";
 import type { SSOTViolation } from "./bao-ssot-helpers";
 import {
   checkArbitraryValue,
@@ -17,7 +17,14 @@ import {
   checkRawGrid,
   checkShadowToken,
 } from "./bao-ssot-checks";
+import { CLIENT_ROOT } from "./bao-ssot-helpers";
 
+import { join } from "node:path";
+
+// Use a fixed path resolution to avoid import.meta.url type issues in test files.
+const _CLIENT_ROOT_SOURCE = pathJoin(process.cwd(), "packages/client");
+
+// Violation checks - typed loosely since this is test infrastructure
 const ALL_CHECKS = [
   checkBgBase100,
   checkBgBase200,
@@ -33,9 +40,9 @@ const ALL_CHECKS = [
 ];
 
 function scanFile(absPath: string): SSOTViolation[] {
-  const content = readFileSync(absPath, "utf8");
-  const lines = content.split("\n");
-  const rel = absPath.replace(join(import.meta.dirname, ".."), "").replace(/^\//, "");
+  const content: string = readFileSync(absPath, "utf8");
+  const lines: string[] = content.split("\n");
+  const rel: string = absPath.replace(_CLIENT_ROOT_SOURCE + "/", "");
 
   if (absPath.endsWith("main.css")) return [];
   if (absPath.includes("constants/layout.ts") || absPath.includes("constants/ui-layout.ts"))
@@ -48,8 +55,8 @@ function scanFile(absPath: string): SSOTViolation[] {
     const line = lines[i];
     const lineNum = i + 1;
     for (const check of ALL_CHECKS) {
-      const result = check(line, rel, lineNum, content);
-      if (result) violations.push(result);
+      const result = (check as any)(line, rel, lineNum, content);
+      if (result) violations.push(result as SSOTViolation);
     }
   }
   return violations;

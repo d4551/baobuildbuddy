@@ -117,7 +117,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">>
     <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"

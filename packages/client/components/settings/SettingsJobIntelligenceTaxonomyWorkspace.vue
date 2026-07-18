@@ -34,7 +34,7 @@ const populatedTaxonomyCount = computed(
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
@@ -68,7 +68,7 @@ const populatedTaxonomyCount = computed(
       </SettingsPanelHeader>
 
       <SectionGrid grid-token="twoColumnWide">
-        <article :class="SURFACE_GLASS_CARD_CLASS">
+        <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</h3>
@@ -88,7 +88,7 @@ const populatedTaxonomyCount = computed(
           </div>
         </article>
 
-        <article :class="SURFACE_GLASS_CARD_CLASS">
+        <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</h3>

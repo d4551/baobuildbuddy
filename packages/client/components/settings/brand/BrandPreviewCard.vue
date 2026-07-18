@@ -56,7 +56,7 @@ const brandPreviewThemes = computed<
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div>
