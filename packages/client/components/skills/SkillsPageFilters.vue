@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 import { useI18n } from "vue-i18n";
@@ -24,7 +25,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body gap-4">
       <label class="input input-sm flex w-full items-center gap-2">
         <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

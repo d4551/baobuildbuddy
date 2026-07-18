@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared/constants/gamification-icons";
 import { useI18n } from "vue-i18n";
+import {
+  ACHIEVEMENT_ICON_BADGE_CLASS,
+  ICON_SIZE_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   achievement: {
@@ -18,20 +23,14 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="card card-border card-glass transition-all"
-    :class="[
-      achievement.unlocked
-        ? 'ring-2 ring-primary cursor-pointer hover:shadow-lg'
-        : 'glass-disabled'
-    ]"
+    :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'glass-interactive ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >
     <div class="card-body p-4">
       <div class="flex items-center gap-3">
         <div
-          class="w-12 h-12 rounded-full flex items-center justify-center"
-          :class="achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-muted'"
+          :class="[ACHIEVEMENT_ICON_BADGE_CLASS, achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-muted']"
         >
           <span class="text-2xl" aria-hidden="true">
             {{ achievement.icon ?? GAMIFICATION_ICON_FALLBACK }}
@@ -47,7 +46,7 @@ const { t } = useI18n();
         </div>
 
         <div v-if="achievement.unlocked" class="text-success">
-          <IconCheckCircle class="h-6 w-6" />
+          <IconCheckCircle :class="ICON_SIZE_CLASS.md" />
         </div>
       </div>
     </div>

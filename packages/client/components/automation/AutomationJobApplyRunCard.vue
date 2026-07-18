@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
@@ -92,7 +93,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
       <p class="text-sm text-secondary">{{ t("automation.jobApply.stream.subtitle") }}</p>

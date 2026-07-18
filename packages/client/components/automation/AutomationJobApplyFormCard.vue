@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
@@ -25,7 +26,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body">
       <div class="space-y-4">
         <fieldset class="fieldset">

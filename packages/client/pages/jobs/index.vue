@@ -5,6 +5,22 @@ definePageMeta({
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import {
+  BODY_TEXT_SM_CLASS,
+  BODY_TEXT_XS_CLASS,
+  CARD_TITLE_LG_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  ICON_SIZE_CHEVRON_CLASS,
+  ICON_SIZE_XS_ALT_CLASS,
+  ROW_GAP_SM_CLASS,
+  ROW_GAP_XS_CLASS,
+  SECTION_GAP_BOTTOM_CLASS,
+  SIDEBAR_WIDTH_LG_CLASS,
+  STACK_SPACING_SM_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_BLOCK_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
@@ -30,16 +46,16 @@ const page = useJobsIndexPage();
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"
         >
-          <span v-if="page.refreshing.value" class="loading loading-spinner loading-sm"></span>
-          <IconRefresh v-else class="h-4 w-4" />
+          <LoadingSpinner v-if="page.refreshing.value" size="sm" :label="t('jobsPage.refreshButton')" />
+          <IconRefresh v-else :class="ICON_SIZE_XS_ALT_CLASS" />
           {{ t("jobsPage.refreshButton") }}
         </button>
       </template>
     </PageHeroHeader>
 
-    <div class="card mb-6 bg-base-200">
+    <div :class="['card', SECTION_GAP_BOTTOM_CLASS, 'bg-base-200']">
       <div class="card-body">
-        <div class="flex flex-col gap-3 sm:flex-row">
+        <div :class="['flex flex-col', ROW_GAP_SM_CLASS, 'sm:flex-row']">
           <input
             v-model="page.searchQuery.value"
             type="text"
@@ -49,7 +65,7 @@ const page = useJobsIndexPage();
             @keyup.enter="page.handleSearch()"
           />
           <button class="btn btn-primary" :aria-label="t('jobsPage.searchButtonAria')" @click="page.handleSearch()">
-            <IconSearch class="h-5 w-5" />
+            <IconSearch :class="ICON_SIZE_CLASS.sm" />
             {{ t("jobsPage.searchButton") }}
           </button>
           <button
@@ -57,8 +73,8 @@ const page = useJobsIndexPage();
             :aria-label="t('jobsPage.toggleFiltersAria')"
             @click="page.showFilters.value = !page.showFilters.value"
           >
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             {{ t("jobsPage.toggleFiltersButton") }}
           </button>
@@ -67,7 +83,7 @@ const page = useJobsIndexPage();
     </div>
 
     <SectionGrid grid-token="sidebar">
-      <div class="w-full shrink-0 lg:w-64" :class="{ 'hidden lg:block': !page.showFilters.value }">
+      <div :class="['w-full shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }]">
         <JobsPageFiltersCard
           v-model:location="page.localFilters.location"
           v-model:remote="page.localFilters.remote"
@@ -87,7 +103,7 @@ const page = useJobsIndexPage();
         />
       </div>
 
-      <div class="min-w-0 flex-1">
+      <div :class="[TRUNCATE_BLOCK_CLASS, 'flex-1']">
         <LoadingSkeleton
           v-if="page.loading.value || page.jobsBootstrapStatus.value === 'pending'"
           variant="cards"
@@ -132,11 +148,11 @@ const page = useJobsIndexPage();
         </EmptyState>
 
         <div v-else>
-          <SectionGrid grid-token="twoColumn" extra-class="mb-6">
+          <SectionGrid grid-token="twoColumn" :extra-class="SECTION_GAP_BOTTOM_CLASS">
             <article
               v-for="job in page.paginatedJobs.value"
               :key="job.id"
-              class="card card-border card-glass card-glass-interactive relative h-full overflow-hidden"
+              :class="[SURFACE_GLASS_CARD_CLASS, 'relative h-full overflow-hidden']"
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
@@ -144,18 +160,18 @@ const page = useJobsIndexPage();
                 :aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
               />
               <div class="card-body relative z-10">
-                <div class="flex items-start justify-between gap-2">
-                  <h3 class="card-title text-lg">{{ job.title }}</h3>
+                <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
+                  <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
                   <JobMatchScore v-if="typeof job.matchScore === 'number'" :score="job.matchScore" compact />
                 </div>
 
                 <p class="font-medium text-secondary">{{ job.company }}</p>
 
-                <div class="mt-2 flex flex-wrap gap-2">
+                <div :class="[STACK_SPACING_SM_CLASS, 'flex flex-wrap', ROW_GAP_XS_CLASS]">
                   <span class="badge badge-sm">
-                    <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg :class="['mr-1', ICON_SIZE_CHEVRON_CLASS]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     {{ job.location }}
                   </span>
@@ -169,15 +185,15 @@ const page = useJobsIndexPage();
                   </span>
                 </div>
 
-                <p class="mt-2 line-clamp-2 text-sm text-muted">
+                <p :class="['line-clamp-2', STACK_SPACING_SM_CLASS, BODY_TEXT_SM_CLASS]">
                   {{ job.description }}
                 </p>
 
-                <div class="card-actions mt-2 items-center justify-between">
-                  <span class="text-xs text-muted">
+                <div :class="['card-actions', STACK_SPACING_SM_CLASS, 'items-center justify-between']">
+                  <span :class="BODY_TEXT_XS_CLASS">
                     {{ page.formatDate(job.postedDate) }}
                   </span>
-                  <div class="flex gap-2">
+                  <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
                       class="btn btn-outline btn-sm relative z-20"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"

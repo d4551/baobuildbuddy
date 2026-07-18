@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
@@ -103,8 +104,7 @@ const ariaLabel = computed(() => {
       :aria-label="avatarLabel"
     >
       <div
-        class="flex items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content"
-        :class="avatarSizeClass"
+        class="flex items-center justify-center border border-base-300 bg-base-200 text-base-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
         <IconLightbulb class="h-6 w-6" />
       </div>
@@ -115,8 +115,7 @@ const ariaLabel = computed(() => {
       :aria-label="userLabel"
     >
       <div
-        class="flex items-center justify-center rounded-full bg-primary text-primary-content"
-        :class="avatarSizeClass"
+        class="flex items-center justify-center bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
         <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
       </div>

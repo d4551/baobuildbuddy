@@ -2,7 +2,7 @@
 import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
-import { APP_DRAWER_ID, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
+import { APP_DRAWER_ID, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_SIDEBAR_ITEM_CLASS, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
@@ -45,10 +45,7 @@ function resolveSidebarLabel(item: NavigationItem): string {
 }
 
 function sidebarLinkClass(item: NavigationItem): string[] {
-  return [
-    "flex min-h-10 items-center gap-2 rounded-box px-2 transition-colors duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right",
-    isSidebarItemActive(item) ? "menu-active font-medium" : "",
-  ];
+  return [SHELL_SIDEBAR_ITEM_CLASS, isSidebarItemActive(item) ? "menu-active font-medium" : ""];
 }
 </script>
 
@@ -56,7 +53,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
   <div class="flex min-h-full w-full flex-col">
     <div class="border-b border-base-300 p-4 is-drawer-close:hidden">
       <span class="flex items-center gap-2 text-lg font-bold text-primary">
-        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
       </span>
     </div>
@@ -78,7 +75,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
                 :aria-label="t('a11y.aiConfigIncompleteAria')"
                 :title="t('a11y.aiConfigIncompleteAria')"
               >!</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
               </svg>
             </span>
@@ -98,7 +95,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             :aria-expanded="isDrawerOpen"
             @click="setDrawerToggleState(!isDrawerOpen)"
           >
-            <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="h-5 w-5 transition-transform duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
             <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -111,7 +112,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"

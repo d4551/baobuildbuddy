@@ -466,25 +466,27 @@ const collectIconOnlyControlViolations = (filePath: string, fileContent: string)
   return violations;
 };
 
-const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
-  const fileContent = await Bun.file(filePath).text();
+export const collectAriaLabelViolationsForContent = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => [
+  ...formControlTagNames.flatMap((tagName) =>
+    collectFormControlViolations(filePath, fileContent, tagName),
+  ),
+  ...collectDialogViolations(filePath, fileContent),
+  ...collectInteractiveRoleViolations(filePath, fileContent),
+  ...collectFocusableViolations(filePath, fileContent),
+  ...collectMenuTriggerViolations(filePath, fileContent),
+  ...collectMenuKeyboardViolations(filePath, fileContent),
+  ...collectDisclosureMenuViolations(filePath, fileContent),
+  ...collectLabelControlViolations(filePath, fileContent),
+  ...collectTabContractViolations(filePath, fileContent),
+  ...collectPaginationViolations(filePath, fileContent),
+  ...collectIconOnlyControlViolations(filePath, fileContent),
+];
 
-  return [
-    ...formControlTagNames.flatMap((tagName) =>
-      collectFormControlViolations(filePath, fileContent, tagName),
-    ),
-    ...collectDialogViolations(filePath, fileContent),
-    ...collectInteractiveRoleViolations(filePath, fileContent),
-    ...collectFocusableViolations(filePath, fileContent),
-    ...collectMenuTriggerViolations(filePath, fileContent),
-    ...collectMenuKeyboardViolations(filePath, fileContent),
-    ...collectDisclosureMenuViolations(filePath, fileContent),
-    ...collectLabelControlViolations(filePath, fileContent),
-    ...collectTabContractViolations(filePath, fileContent),
-    ...collectPaginationViolations(filePath, fileContent),
-    ...collectIconOnlyControlViolations(filePath, fileContent),
-  ];
-};
+const collectFileViolations = async (filePath: string): Promise<Violation[]> =>
+  collectAriaLabelViolationsForContent(filePath, await Bun.file(filePath).text());
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectVueFiles();
@@ -518,4 +520,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

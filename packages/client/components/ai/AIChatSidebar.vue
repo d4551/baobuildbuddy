@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -18,7 +19,7 @@ const { t } = useI18n();
 
 <template>
   <aside class="flex min-h-0 flex-col gap-4">
-    <section class="card border border-base-300 bg-base-100 shadow-sm">
+    <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body gap-3">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
         <p class="text-sm leading-6 text-secondary">
@@ -38,7 +39,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <section class="card border border-base-300 bg-base-100 shadow-sm">
+    <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body gap-3">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
         <p class="text-sm leading-6 text-secondary">

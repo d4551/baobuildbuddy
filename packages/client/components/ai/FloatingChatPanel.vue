@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
 
@@ -65,8 +66,7 @@ const draft = defineModel<string>("draft", { required: true });
   <div
     v-if="isOpen"
     :id="chatPanelId"
-    class="card h-full border border-base-300 bg-base-100 shadow-xl"
-    :class="FLOATING_CHAT_PANEL_SIZE_CLASS"
+    class="card h-full border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
     <div class="card-body h-full p-0">
       <header class="flex items-center justify-between border-b border-base-300 p-3">
@@ -133,7 +133,7 @@ const draft = defineModel<string>("draft", { required: true });
         @scroll="emit('scroll')"
       >
         <div v-if="!hasConversation" class="flex h-full min-h-60 items-center justify-center">
-          <div class="card w-full border border-base-300 glass-subtle shadow-sm">
+          <div class="card w-full border border-base-300 glass-subtle" :class="[SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body gap-3 p-4">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
               <p class="text-sm leading-6 text-secondary">{{ t("floatingChat.emptyDescription") }}</p>

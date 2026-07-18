@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -13,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200 shadow-sm">
+  <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="hero-content w-full max-w-none px-0">
       <div class="card card-border card-glass w-full">
         <div class="card-body gap-5 p-6 lg:p-8">

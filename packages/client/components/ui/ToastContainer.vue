@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import type { ToastType } from "~/composables/useToast";
-import { TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
+import { SHADOW_TOKEN_CLASS, TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();
@@ -43,8 +43,7 @@ function resolveIconPath(type: ToastType): string {
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="alert shadow-lg pointer-events-auto items-start sm:alert-horizontal"
-        :class="resolveAlertClass(toast.type)"
+        class="alert pointer-events-auto items-start sm:alert-horizontal" :class="[SHADOW_TOKEN_CLASS.lg, resolveAlertClass(toast.type)]"
         :role="toast.type === 'error' ? 'alert' : 'status'"
         :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
       >

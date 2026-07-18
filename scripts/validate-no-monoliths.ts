@@ -159,36 +159,43 @@ const collectFunctionViolations = (
   return violations;
 };
 
+export const collectMonolithViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isIgnoredFile(filePath)) {
+    return [];
+  }
+
+  const violations: ValidationViolation[] = [];
+  const maxLines = filePath.endsWith(".vue") ? maxVueLines : maxTypeScriptLines;
+  const lineCount = countLines(content);
+
+  if (lineCount > maxLines) {
+    violations.push({
+      filePath,
+      line: 1,
+      message: `File exceeds ${maxLines} lines. Split the monolith into smaller modules.`,
+    });
+  }
+
+  return [
+    ...violations,
+    ...collectFunctionViolations(filePath, content, functionPattern),
+    ...collectFunctionViolations(filePath, content, methodPattern),
+    ...collectFunctionViolations(filePath, content, arrowPattern),
+  ];
+};
+
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({
     scanRoots,
     allowedExtensions: sourceExtensions,
   });
 
-  return files.flatMap(({ filePath, content }) => {
-    if (isIgnoredFile(filePath)) {
-      return [];
-    }
-
-    const violations: ValidationViolation[] = [];
-    const maxLines = filePath.endsWith(".vue") ? maxVueLines : maxTypeScriptLines;
-    const lineCount = countLines(content);
-
-    if (lineCount > maxLines) {
-      violations.push({
-        filePath,
-        line: 1,
-        message: `File exceeds ${maxLines} lines. Split the monolith into smaller modules.`,
-      });
-    }
-
-    return [
-      ...violations,
-      ...collectFunctionViolations(filePath, content, functionPattern),
-      ...collectFunctionViolations(filePath, content, methodPattern),
-      ...collectFunctionViolations(filePath, content, arrowPattern),
-    ];
-  });
+  return files.flatMap(({ filePath, content }) =>
+    collectMonolithViolationsForContent(filePath, content),
+  );
 };
 
 if (import.meta.main) {

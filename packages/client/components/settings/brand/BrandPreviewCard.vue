@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -68,8 +69,7 @@ const brandPreviewThemes = computed<
         <section
           v-for="themeSurface in brandPreviewThemes"
           :key="themeSurface.id"
-          class="rounded-box border p-5 shadow-sm"
-          :class="themeSurface.surfaceClass"
+          class="rounded-box border p-5" :class="[SHADOW_TOKEN_CLASS.sm, themeSurface.surfaceClass]"
           :aria-label="t('settings.brand.previewTitle')"
         >
           <div class="flex items-center justify-between gap-3">
@@ -78,11 +78,11 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="h-10 w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1 shadow-sm"
+                class="h-10 w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[SHADOW_TOKEN_CLASS.sm]"
               />
               <div
                 v-else
-                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-sm font-semibold shadow-sm"
+                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-sm font-semibold" :class="[SHADOW_TOKEN_CLASS.sm]"
               >
                 {{ brandPreviewInitial }}
               </div>
@@ -111,7 +111,7 @@ const brandPreviewThemes = computed<
           </div>
 
           <div class="mt-5 flex flex-wrap gap-2">
-            <span class="badge badge-accent badge-lg border-0 shadow-sm">
+            <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
             <span class="badge badge-secondary badge-outline">
@@ -120,7 +120,7 @@ const brandPreviewThemes = computed<
           </div>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <span class="btn btn-accent border-0 shadow-sm">
+            <span class="btn btn-accent border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>
             <span class="btn btn-secondary btn-outline">

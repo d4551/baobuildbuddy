@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
@@ -17,7 +18,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="card bg-base-100 shadow-sm lg:sticky lg:top-6 lg:w-80 lg:shrink-0">
+  <aside class="card bg-base-100 lg:sticky lg:top-6 lg:w-80 lg:shrink-0" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body gap-4">
       <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">

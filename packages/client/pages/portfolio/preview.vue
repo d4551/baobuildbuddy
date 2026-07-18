@@ -6,7 +6,7 @@ definePageMeta({
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { PROSE_MEASURE_CENTER_CLASS } from "~/constants/layout";
+import { PROSE_MEASURE_CENTER_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -98,7 +98,7 @@ async function handleExport(format: "pdf" | "docx") {
     />
 
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
-      <div class="card card-border bg-base-100 shadow-sm">
+      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body items-center gap-6 py-12 text-center">
           <div class="space-y-4">
             <h2 class="text-4xl font-bold sm:text-5xl">
@@ -142,7 +142,7 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in featuredProjects"
             :key="project.id"
-            class="card card-border bg-base-100 shadow-sm"
+            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
           >
             <figure v-if="project.image" class="h-64">
               <NuxtImg
@@ -191,7 +191,7 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in regularProjects"
             :key="project.id"
-            class="card card-border bg-base-100 shadow-sm"
+            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
           >
             <figure v-if="project.image" class="h-48">
               <NuxtImg

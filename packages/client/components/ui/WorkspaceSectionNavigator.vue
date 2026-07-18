@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
@@ -59,7 +60,7 @@ const activeDescription = computed<string>(() => {
               :data-tip="activeDescription || t(activeSectionEntry.labelKey)"
             >
               <span
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-sm"
+                class="inline-flex h-10 w-10 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
               >
                 <component
                   :is="resolveAppIconComponent(activeSectionEntry.iconName)"
@@ -100,12 +101,9 @@ const activeDescription = computed<string>(() => {
                   :data-tip="section.descriptionKey ? t(section.descriptionKey) : t(section.labelKey)"
                 >
                   <span
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border shadow-sm"
-                    :class="
-                      activeSection === section.id
+                    class="inline-flex h-8 w-8 items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, activeSection === section.id
                         ? 'border-primary/30 bg-primary/10 text-primary'
-                        : 'border-base-300 bg-base-100 text-muted'
-                    "
+                        : 'border-base-300 bg-base-100 text-muted']"
                   >
                     <component
                       :is="resolveAppIconComponent(section.iconName)"

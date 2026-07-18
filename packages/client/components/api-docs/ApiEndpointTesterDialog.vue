@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type {
@@ -264,7 +265,7 @@ function updateRequestBodyValue(event: Event): void {
 
           <div class="space-y-1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseHeadersLabel") }}</h4>
-            <pre class="rounded-lg bg-base-200 p-3 text-xs whitespace-pre-wrap">{{
+            <pre class="bg-base-200 p-3 text-xs whitespace-pre-wrap" :class="[RADIUS_TOKEN_CLASS.lg]">{{
               Object.keys(testerResponse.headers).length > 0
                 ? JSON.stringify(testerResponse.headers, null, 2)
                 : t("apiDocs.tester.noResponseHeaders")
@@ -273,7 +274,7 @@ function updateRequestBodyValue(event: Event): void {
 
           <div class="space-y-1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h4>
-            <pre class="rounded-lg bg-base-200 p-3 text-xs whitespace-pre-wrap">{{
+            <pre class="bg-base-200 p-3 text-xs whitespace-pre-wrap" :class="[RADIUS_TOKEN_CLASS.lg]">{{
               formattedResponseBody || t("apiDocs.tester.emptyResponse")
             }}</pre>
           </div>

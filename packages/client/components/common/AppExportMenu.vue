@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 type ExportFormat = "pdf" | "docx";
@@ -246,7 +247,7 @@ function emitExport(format: ExportFormat): void {
     <ul
       v-show="isOpen"
       :id="exportMenuId"
-      class="menu dropdown-content z-20 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg"
+      class="menu dropdown-content z-20 mt-2 w-40 rounded-box border border-base-300 bg-base-100 p-2" :class="[SHADOW_TOKEN_CLASS.lg]"
       role="menu"
       aria-orientation="vertical"
       :aria-labelledby="exportTriggerId"

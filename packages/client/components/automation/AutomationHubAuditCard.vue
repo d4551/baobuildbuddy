@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import type {
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
@@ -131,7 +132,7 @@ const readyEntries = computed(() =>
                       <div class="flex flex-wrap items-center gap-2">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-sm"
+                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
@@ -203,7 +204,7 @@ const readyEntries = computed(() =>
                       <div class="flex flex-wrap items-center gap-2">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-sm"
+                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"

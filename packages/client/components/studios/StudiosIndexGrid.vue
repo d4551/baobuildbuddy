@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
@@ -39,12 +40,12 @@ function studioLocation(location: string): string {
       <article
         v-for="studio in studios"
         :key="studio.id"
-        class="card card-border bg-base-100 transition-shadow hover:shadow-md"
+        class="card card-border bg-base-100 transition-shadow hover:" :class="[SHADOW_TOKEN_CLASS.md]"
       >
         <div class="card-body gap-3">
           <div class="flex items-center gap-3">
             <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-12">
+              <div class="bg-primary text-primary-content w-12" :class="[RADIUS_TOKEN_CLASS.full]">
                 <span class="text-xl">{{ studioInitial(studio.name) }}</span>
               </div>
             </div>

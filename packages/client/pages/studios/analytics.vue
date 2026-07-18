@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -89,12 +90,12 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100 shadow-sm">
+      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
           <SectionGrid grid-token="twoToFourLg">
-            <div v-for="[type, count] in byTypeEntries" :key="type" class="stat rounded-lg bg-base-200">
+            <div v-for="[type, count] in byTypeEntries" :key="type" class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
               <div class="stat-title text-xs">{{ type }}</div>
               <div class="stat-value text-2xl">{{ count }}</div>
               <div class="stat-desc">
@@ -105,7 +106,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100 shadow-sm">
+      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
@@ -129,7 +130,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100 shadow-sm">
+      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
           <p class="mb-4 text-sm text-secondary">
@@ -157,7 +158,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100 shadow-sm">
+      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
@@ -192,12 +193,12 @@ useSeoMeta({
           </div>
 
           <SectionGrid grid-token="twoColumnSm" extra-class="mt-4">
-            <div class="stat rounded-lg bg-base-200">
+            <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
               <div class="stat-value text-success text-2xl">{{ remoteWorkStudios }}</div>
             </div>
 
-            <div class="stat rounded-lg bg-base-200">
+            <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
               <div class="stat-title text-xs">{{ t("studioAnalytics.sections.onSiteOnlyTitle") }}</div>
               <div class="stat-value text-warning text-2xl">{{ onSiteOnlyCount }}</div>
             </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
@@ -67,7 +68,7 @@ function handleScheduleInput(event: Event): void {
           <div class="flex flex-wrap items-center gap-2">
             <span class="tooltip tooltip-bottom" :data-tip="capability.name">
               <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"
+                class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
               >
                 <component
                   :is="resolveAppIconComponent(capabilityIconName)"

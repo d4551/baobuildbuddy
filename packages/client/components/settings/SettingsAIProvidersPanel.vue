@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
@@ -137,7 +138,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </div>
       </div>
 
-      <div class="stats stats-vertical w-full bg-base-200 shadow-sm lg:stats-horizontal">
+      <div class="stats stats-vertical w-full bg-base-200 lg:stats-horizontal" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("settings.aiProviders.readinessTitle") }}</div>
           <div class="stat-value text-primary text-2xl">{{ configuredProviderCount }}</div>
@@ -217,7 +218,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               <p class="text-sm text-muted">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
             </div>
 
-            <div class="stats stats-vertical w-full bg-base-100 shadow-sm">
+            <div class="stats stats-vertical w-full bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
               <div class="stat px-4 py-3">
                 <div class="stat-title">{{ t("settings.aiProviders.preferredProviderLegend") }}</div>
                 <div class="stat-value text-primary text-2xl">{{ selectedProviderLabel }}</div>

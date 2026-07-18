@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -20,7 +21,7 @@ const { t } = useI18n();
 <template>
   <div
     class="card card-border card-glass relative overflow-hidden"
-    :class="challenge.completed ? 'glass-disabled' : 'hover:shadow-lg transition-shadow'"
+    :class="challenge.completed ? 'glass-disabled' : 'hover: transition-shadow'" :class="[SHADOW_TOKEN_CLASS.lg]"
   >
     <div
       v-if="challenge.completed"

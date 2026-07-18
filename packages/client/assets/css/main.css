@@ -25,11 +25,13 @@
     "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
 
   /* Glass material levels (§3). Tint opacity rises with content density. */
+  --glass-bg-clear: color-mix(in oklab, var(--color-base-100) 14%, transparent);
   --glass-bg-subtle: color-mix(in oklab, var(--color-base-100) 82%, transparent);
   --glass-bg-standard: color-mix(in oklab, var(--color-base-100) 88%, transparent);
   --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 94%, transparent);
   --glass-bg-modal: color-mix(in oklab, var(--color-base-100) 97%, transparent);
   --glass-bg-fallback: var(--color-base-100);
+  --glass-bg-solid: var(--color-base-100);
 
   /* Edge highlight + borders (§2.5). */
   --glass-border-rest: color-mix(in oklab, var(--color-base-300) 60%, transparent);
@@ -39,6 +41,7 @@
   --glass-highlight: color-mix(in oklab, var(--color-base-100) 40%, transparent);
 
   /* Backdrop blur (§2.3). Content-density-driven, not decorative. */
+  --glass-blur-clear: 12px;
   --glass-blur-subtle: 8px;
   --glass-blur-standard: 14px;
   --glass-blur-strong: 22px;
@@ -90,6 +93,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Dark glass needs greater opacity to suppress bright content (§3). */
+    --glass-bg-clear: color-mix(in oklab, var(--color-base-100) 42%, transparent);
     --glass-bg-subtle: color-mix(in oklab, var(--color-base-100) 68%, transparent);
     --glass-bg-standard: color-mix(in oklab, var(--color-base-100) 80%, transparent);
     --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 90%, transparent);
@@ -167,23 +171,16 @@ samp {
   color: var(--text-on-primary);
 }
 
-.text-on-primary {
-  color: var(--text-on-primary);
+.page-enter-active {
+  transition:
+    opacity var(--motion-slow) var(--ease-enter),
+    transform var(--motion-slow) var(--ease-enter);
 }
 
-.text-on-primary {
-  color: var(--text-on-primary);
-}
-
-.text-on-primary {
-  color: var(--text-on-primary);
-}
-
-.page-enter-active,
 .page-leave-active {
   transition:
-    opacity var(--motion-fast) var(--ease-response),
-    transform var(--motion-fast) var(--ease-response);
+    opacity var(--motion-standard) var(--ease-exit),
+    transform var(--motion-standard) var(--ease-exit);
 }
 
 .page-enter-from,
@@ -192,25 +189,49 @@ samp {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .page-enter-from,
-  .page-leave-to {
+  .page-enter-from {
     transform: translateY(0.5rem);
+  }
+
+  .page-leave-to {
+    transform: translateY(-0.25rem);
   }
 }
 
-.hero-text-rotate-enter-active,
-.hero-text-rotate-leave-active,
-.toast-motion-enter-active,
-.toast-motion-leave-active,
-.toast-motion-move {
+.hero-text-rotate-enter-active {
   transition:
-    opacity var(--motion-fast) var(--ease-response),
-    transform var(--motion-fast) var(--ease-response);
+    opacity var(--motion-standard) var(--ease-enter),
+    transform var(--motion-standard) var(--ease-enter);
+}
+
+.hero-text-rotate-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-exit),
+    transform var(--motion-fast) var(--ease-exit);
+}
+
+.toast-motion-enter-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-enter),
+    transform var(--motion-standard) var(--ease-enter);
+}
+
+.toast-motion-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-exit),
+    transform var(--motion-fast) var(--ease-exit);
+}
+
+.toast-motion-move {
+  transition: transform var(--motion-standard) var(--ease-response);
 }
 
 .hero-text-rotate-enter-from,
+.toast-motion-enter-from {
+  opacity: 0;
+}
+
 .hero-text-rotate-leave-to,
-.toast-motion-enter-from,
 .toast-motion-leave-to {
   opacity: 0;
 }
@@ -280,6 +301,20 @@ samp {
   }
 }
 
+/* Scroll-aware navbar elevation (§5.1, §7.5). Content passing beneath the
+ * sticky navbar increases tint + shadow for depth consistency. */
+.navbar.glass-subtle[data-scrolled] {
+  border-bottom-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-medium);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .navbar.glass-subtle[data-scrolled] {
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-standard)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur-standard)) saturate(var(--glass-saturation));
+  }
+}
+
 .glass-strong,
 .card.card-glass-strong {
   background: var(--glass-bg-fallback);
@@ -312,16 +347,62 @@ samp {
   }
 }
 
-/* Scrim layers (§5.8). */
+/* Scrim layers (§5.8). Modal dialogs require dim + strong surface. */
 .scrim-nonmodal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
   background: var(--glass-scrim-nonmodal);
 }
 .scrim-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
   background: var(--glass-scrim-modal);
+}
+
+/* Glass-clear: media controls, decorative indicators (§3). Most transparent material. */
+.glass-clear {
+  background: var(--glass-bg-fallback);
+  border-radius: var(--radius-control);
+  box-shadow: var(--glass-shadow-low);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-clear {
+    background: var(--glass-bg-clear);
+    backdrop-filter: blur(var(--glass-blur-clear)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur-clear)) saturate(var(--glass-saturation));
+  }
+}
+
+/* Glass-solid: accessibility/performance fallback surface (§3, §9.2). Fully opaque. */
+.glass-solid {
+  background: var(--glass-bg-solid);
+  border: 1px solid var(--glass-border-rest);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow-low);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Typography helpers — semantic text colors replace scattered opacity literals. */
+.text-primary {
+  color: var(--text-primary);
+}
+
+/* Glass text contexts get a sturdier line-height (§2.10). */
+.glass,
+.card.card-glass,
+.glass-strong,
+.card.card-glass-strong,
+.glass-modal,
+.card.card-glass-modal {
+  line-height: 1.55;
 }
 
 /* Interactive state system (§6). */
 .glass-interactive {
+  will-change: transform;
   transition:
     transform var(--motion-fast) var(--ease-response),
     background-color var(--motion-standard) var(--ease-response),
@@ -345,8 +426,10 @@ samp {
 .glass-interactive:focus-visible {
   outline: 2px solid var(--focus-color);
   outline-offset: var(--focus-ring-offset);
+  border-color: var(--glass-border-focus);
 }
 
+/* Selected state (§6). Persistent tint + filled icon + marker. */
 .glass-selected {
   border-color: var(--glass-border-selected);
   background: var(--glass-bg-fallback);
@@ -357,16 +440,19 @@ samp {
   }
 }
 
+/* Disabled state (§6). Remove elevation + chroma, keep label readable. */
 .glass-disabled {
   border-color: var(--glass-border-rest);
   box-shadow: none;
   pointer-events: none;
-  opacity: 0.65;
+  filter: saturate(0.6);
+  opacity: 0.75;
 }
 .glass-disabled::before {
   display: none;
 }
 
+/* Error state (§6). Never color alone — pair with icon/text signals. */
 .glass-error {
   border-color: var(--color-error);
   box-shadow:
@@ -374,39 +460,69 @@ samp {
     inset 0 0 0 1px color-mix(in oklab, var(--color-error) 30%, transparent);
 }
 
-/* Legacy compat alias consumed by SURFACE_GLASS_CARD_INTERACTIVE_CLASS until
- * all callers migrate. Prefer `.glass-interactive`.
- */
-.card-glass-interactive {
-  transition:
-    transform var(--motion-fast) var(--ease-response),
-    background-color var(--motion-standard) var(--ease-response),
-    border-color var(--motion-standard) var(--ease-response),
-    box-shadow var(--motion-standard) var(--ease-response);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .card-glass-interactive:hover {
-    border-color: var(--glass-border-hover);
-    box-shadow: var(--glass-shadow-medium);
-    transform: translateY(-0.125rem);
-  }
-}
-
-.card-glass-interactive:active {
-  transform: translateY(0) scale(0.985);
-}
-
-.card-glass-interactive:focus-visible {
-  outline: 2px solid var(--focus-color);
-  outline-offset: var(--focus-ring-offset);
+/* Error companion — pair the colored surface with an accessible text/icon signal (§6). */
+.glass-error-label {
+  color: var(--color-error);
+  font-weight: 600;
 }
 
 /* Coarse-pointer target sizing (§8.2, §9.4). */
 @media (pointer: coarse) {
-  .glass-interactive,
-  .card-glass-interactive {
+  .glass-interactive {
     min-block-size: 2.75rem;
+  }
+
+  /* Touch-target floor for native interactive elements (§11 blueprint). */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  .interactive-target {
+    min-block-size: 2.75rem;
+  }
+}
+
+/* Corner geometry wiring (§2.9). Nested-radius contract: inner < parent. */
+.btn-sm,
+.chip,
+.badge {
+  border-radius: var(--radius-control);
+}
+
+input,
+select,
+textarea {
+  border-radius: var(--radius-input);
+}
+
+/* Prevent nested backdrop roots inside glass (§10). Children must not
+ * establish their own backdrop-filter sampling context. */
+.glass > *,
+.card.card-glass > *,
+.glass-subtle > *,
+.glass-strong > *,
+.card.card-glass-strong > *,
+.glass-modal > *,
+.card.card-glass-modal > * {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Component-level responsiveness (§11 blueprint). */
+.glass-card-container {
+  container-type: inline-size;
+}
+
+.glass-card {
+  display: grid;
+  gap: 1rem;
+}
+
+@container (min-width: 42rem) {
+  .glass-card {
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.45fr);
+    align-items: start;
   }
 }
 
@@ -414,6 +530,7 @@ samp {
 @media (prefers-reduced-transparency: reduce) {
   .glass,
   .card.card-glass,
+  .glass-clear,
   .glass-subtle,
   .glass-strong,
   .card.card-glass-strong,
@@ -424,12 +541,26 @@ samp {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+
+  /* Remove decorative edge gradient — it is a translucent overlay (§9.2). */
+  .glass::before,
+  .card.card-glass::before,
+  .glass-clear::before,
+  .glass-subtle::before,
+  .glass-strong::before,
+  .card.card-glass-strong::before,
+  .glass-modal::before,
+  .card.card-glass-modal::before {
+    display: none;
+  }
 }
 
 /* Increased contrast — strengthen boundaries (§9.3). */
 @media (prefers-contrast: more) {
   .glass,
   .card.card-glass,
+  .glass-clear,
+  .glass-subtle,
   .glass-strong,
   .card.card-glass-strong,
   .glass-modal,
@@ -437,8 +568,20 @@ samp {
     background: var(--glass-bg-strong);
     border-width: 2px;
   }
-  .glass-interactive:focus-visible,
-  .card-glass-interactive:focus-visible {
+
+  /* Remove faint edge gradients that fight high-contrast (§9.3). */
+  .glass::before,
+  .card.card-glass::before,
+  .glass-clear::before,
+  .glass-subtle::before,
+  .glass-strong::before,
+  .card.card-glass-strong::before,
+  .glass-modal::before,
+  .card.card-glass-modal::before {
+    display: none;
+  }
+
+  .glass-interactive:focus-visible {
     outline-width: 3px;
   }
 }
@@ -447,6 +590,7 @@ samp {
 @media (forced-colors: active) {
   .glass,
   .card.card-glass,
+  .glass-clear,
   .glass-subtle,
   .glass-strong,
   .card.card-glass-strong,
@@ -463,11 +607,16 @@ samp {
     -webkit-backdrop-filter: none;
   }
   .glass::before,
-  .card.card-glass::before {
+  .card.card-glass::before,
+  .glass-clear::before,
+  .glass-subtle::before,
+  .glass-strong::before,
+  .card.card-glass-strong::before,
+  .glass-modal::before,
+  .card.card-glass-modal::before {
     display: none;
   }
-  .glass-interactive:focus-visible,
-  .card-glass-interactive:focus-visible {
+  .glass-interactive:focus-visible {
     outline: 2px solid Highlight;
   }
 }
@@ -487,9 +636,7 @@ samp {
     animation-iteration-count: 1;
   }
   .glass-interactive:hover,
-  .glass-interactive:active,
-  .card-glass-interactive:hover,
-  .card-glass-interactive:active {
+  .glass-interactive:active {
     transform: none;
   }
 }

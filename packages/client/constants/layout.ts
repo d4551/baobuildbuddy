@@ -58,6 +58,18 @@ export const SURFACE_GLASS_CARD_STRONG_CLASS =
 export const SURFACE_GLASS_CARD_MODAL_CLASS = "card card-border card-glass-modal glass-interactive";
 
 /**
+ * Glass-clear surface for media controls, decorative indicators, and floating
+ * chips where the most transparent material is desired (§3).
+ */
+export const SURFACE_GLASS_CLEAR_CLASS = "glass-clear";
+
+/**
+ * Glass-solid surface for accessibility/performance fallback contexts where a
+ * fully opaque panel is required (§3, §9.2).
+ */
+export const SURFACE_GLASS_SOLID_CLASS = "glass-solid";
+
+/**
  * Selected state for glass cards in grids (jobs, providers, portfolio).
  */
 export const SURFACE_GLASS_CARD_SELECTED_CLASS = "glass-selected";
@@ -72,16 +84,10 @@ export const SURFACE_GLASS_CARD_DISABLED_CLASS = "glass-disabled";
  */
 export const SURFACE_GLASS_CARD_ERROR_CLASS = "glass-error";
 
-/**
- * Interactive glass card hover affordance — legacy alias kept for existing
- * callers; prefer `SURFACE_GLASS_CARD_CLASS` which already includes
- * `.glass-interactive` (handles hover/focus-visible/active + a11y media queries).
- */
-export const SURFACE_GLASS_CARD_INTERACTIVE_CLASS = "glass-interactive";
-
-/** Shared sidebar surface classes. Floating drawer = glass candidate (§5.2). */
+/** Shared sidebar surface classes. Floating drawer = glass candidate (§5.2).
+ * Width transitions consume the motion token system (§7.2/§7.3). */
 export const SHELL_SIDEBAR_ASIDE_CLASS =
-  "glass-subtle flex min-h-full flex-col items-start transition-all duration-200 is-drawer-close:w-14 is-drawer-open:w-64";
+  "glass-subtle flex min-h-full flex-col items-start transition-[width] duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:w-14 is-drawer-open:w-64";
 
 /** Shared sidebar menu layout classes. */
 export const SHELL_SIDEBAR_MENU_CLASS =
@@ -153,3 +159,120 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
  */
 export const EMPTY_STATE_STACK_CLASS =
   "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center";
+
+/**
+ * Canonical icon size tokens. Consumed by any component that sizes an icon
+ * inside a control, badge, or stat surface so icon dimensions stay SSOT.
+ */
+export const ICON_SIZE_CLASS = {
+  xs: "h-3 w-3",
+  sm: "h-5 w-5",
+  md: "h-6 w-6",
+  lg: "h-8 w-8",
+} as const;
+
+export type IconSizeToken = keyof typeof ICON_SIZE_CLASS;
+
+/**
+ * Canonical radial meter geometry. Consumed by UiRadialMeter so the SVG
+ * radius, stroke width, and default size stay SSOT rather than baking
+ * numeric literals into the primitive defaults.
+ */
+export const RADIAL_METER_GEOMETRY = {
+  radius: 42,
+  strokeWidth: 8,
+  viewBoxSize: 100,
+  defaultSizeClass: "h-24 w-24",
+} as const;
+
+/**
+ * Canonical stroke width for inline decorative SVG icons (24x24 viewBox).
+ */
+export const ICON_DECORATIVE_STROKE_WIDTH = 2;
+
+/**
+ * Sidebar width contract at the lg breakpoint (matches the documented
+ * `lg:w-64 shrink-0` contract in constants/ui-layout.ts sidebar token).
+ */
+export const SIDEBAR_WIDTH_LG_CLASS = "lg:w-64";
+
+/** Sidebar item surface inside the floating drawer. */
+export const SHELL_SIDEBAR_ITEM_CLASS =
+  "flex min-h-10 items-center gap-2 rounded-box px-2 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right";
+
+/** Navbar dropdown menu surface (daisyUI dropdown-content with shell tokens). */
+export const SHELL_NAVBAR_DROPDOWN_CLASS =
+  "menu menu-sm dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg";
+
+/** Stat card icon badge surface (accent container on glass-subtle). */
+export const STAT_CARD_ICON_BADGE_CLASS = "rounded-box glass-subtle p-3";
+
+/** Stat card body spacing (comfortable responsive padding). */
+export const CARD_BODY_COMFORTABLE_CLASS = "card-body flex flex-col justify-between p-5 md:p-6";
+
+/** Achievement badge icon container (circular accent surface). */
+export const ACHIEVEMENT_ICON_BADGE_CLASS =
+  "flex h-12 w-12 items-center justify-center rounded-full";
+
+/** Quick-action FAB position + action minimum width. */
+export const FAB_POSITION_CLASS = "left-6 bottom-24";
+export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
+
+/** Inline CTA chevron icon size (small directional arrow). */
+export const ICON_SIZE_CHEVRON_CLASS = "h-3 w-3";
+
+/** Stat card title row spacing (label + value column above icon badge). */
+export const STAT_CARD_TITLE_BLOCK_CLASS = "mb-1 text-sm font-medium text-muted";
+export const STAT_CARD_VALUE_CLASS = "text-3xl font-bold";
+export const STAT_CARD_HEADER_ROW_CLASS = "mb-4 flex items-start justify-between";
+export const STAT_CARD_CTA_ROW_CLASS = "mt-auto flex items-center gap-1 text-xs font-semibold";
+
+/** Jobs page search input icon size. */
+export const ICON_SIZE_XS_ALT_CLASS = "h-4 w-4";
+
+/** Common spacing tokens used across page layouts. */
+export const SECTION_GAP_BOTTOM_CLASS = "mb-6";
+export const ROW_GAP_SM_CLASS = "gap-3";
+export const ROW_GAP_XS_CLASS = "gap-2";
+export const STACK_SPACING_SM_CLASS = "mt-2";
+export const TRUNCATE_BLOCK_CLASS = "min-w-0";
+
+/** Typography scale tokens for card titles and supporting copy. */
+export const CARD_TITLE_LG_CLASS = "card-title text-lg";
+export const BODY_TEXT_SM_CLASS = "text-sm text-muted";
+export const BODY_TEXT_XS_CLASS = "text-xs text-muted";
+
+/**
+ * Canonical shadow tokens. These map to the .glass-* surface system in
+ * main.css. Inline `shadow-*` Tailwind utilities are forbidden outside
+ * SSOT; consume these constants instead.
+ */
+export const SHADOW_TOKEN_CLASS = {
+  none: "shadow-none",
+  sm: "shadow-sm",
+  md: "shadow-md",
+  lg: "shadow-lg",
+  xl: "shadow-xl",
+  inner: "shadow-inner",
+} as const;
+
+export type ShadowToken = keyof typeof SHADOW_TOKEN_CLASS;
+
+/**
+ * Canonical radius tokens. Inline `rounded-*` Tailwind utilities are
+ * forbidden outside SSOT; consume these constants instead.
+ */
+export const RADIUS_TOKEN_CLASS = {
+  sm: "rounded-sm",
+  md: "rounded-md",
+  lg: "rounded-lg",
+  xl: "rounded-xl",
+  "2xl": "rounded-2xl",
+  "3xl": "rounded-3xl",
+  full: "rounded-full",
+} as const;
+
+export type RadiusToken = keyof typeof RADIUS_TOKEN_CLASS;
+
+/** Common avatars / icon badges that need a circular surface. */
+export const CIRCULAR_BADGE_CLASS = RADIUS_TOKEN_CLASS.full;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeData } from "@bao/shared/types/resume";
 
 defineProps<{
@@ -11,7 +12,7 @@ defineProps<{
 
 <template>
   <div
-    class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content shadow-lg print:rounded-none print:border-0 print:p-0 print:shadow-none"
+    class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content print:rounded-none print:border-0 print:p-0 print:" :class="[SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.none]"
   >
     <div class="mb-8 border-b-2 border-base-content/30 pb-4 text-center">
       <h2 class="mb-2 text-4xl font-bold">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>

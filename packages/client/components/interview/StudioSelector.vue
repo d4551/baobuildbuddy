@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
@@ -215,7 +216,7 @@ function studioLocationLabel(location: string): string {
 
     <div
       v-if="isOpen"
-      class="dropdown-content z-10 mt-2 max-h-96 w-full overflow-auto rounded-box bg-base-100 p-2 shadow-lg"
+      class="dropdown-content z-10 mt-2 max-h-96 w-full overflow-auto rounded-box bg-base-100 p-2" :class="[SHADOW_TOKEN_CLASS.lg]"
     >
       <div class="p-2 sticky top-0 bg-base-100 z-10">
         <input

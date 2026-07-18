@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
@@ -67,7 +68,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         </template>
       </PageHeaderBlock>
 
-      <div class="stats stats-vertical w-full bg-base-200 shadow-sm lg:stats-horizontal">
+      <div class="stats stats-vertical w-full bg-base-200 lg:stats-horizontal" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("interviewSession.timeLabel") }}</div>
           <div class="stat-value text-2xl">

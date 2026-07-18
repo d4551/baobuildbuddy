@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 defineProps<{
   chatPanelId: string;
   isOpen: boolean;
@@ -22,7 +23,7 @@ const emit = defineEmits<{
     </span>
     <button
       type="button"
-      class="btn btn-primary btn-circle shadow-lg"
+      class="btn btn-primary btn-circle" :class="[SHADOW_TOKEN_CLASS.lg]"
       :aria-label="isOpen ? t('floatingChat.hideAria') : t('floatingChat.showAria')"
       :aria-expanded="isOpen"
       :aria-controls="chatPanelId"

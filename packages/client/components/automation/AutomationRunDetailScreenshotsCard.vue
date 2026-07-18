@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -13,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.screenshotsTitle')">
+  <section class="card bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]" :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
       <div v-if="screenshotPaths.length === 0" class="text-sm text-muted">
@@ -29,13 +30,13 @@ const { t } = useI18n();
             <img
               v-if="!screenshotHasError(index)"
               :src="screenshotEndpoint(index)"
-              class="rounded-lg"
+              :class="[RADIUS_TOKEN_CLASS.lg]"
               :alt="t('automation.runDetail.screenshotAlt', { index: index + 1 })"
               @error="markScreenshotError(index)"
             />
             <div
               v-else
-              class="w-full rounded-lg border border-dashed border-base-content/30 p-4 text-sm text-secondary"
+              class="w-full border border-dashed border-base-content/30 p-4 text-sm text-secondary" :class="[RADIUS_TOKEN_CLASS.lg]"
               role="status"
             >
               {{ t("automation.runDetail.screenshotLoadError", { index: index + 1 }) }}

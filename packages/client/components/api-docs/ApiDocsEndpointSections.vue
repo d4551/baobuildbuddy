@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -25,7 +26,7 @@ const { t } = useI18n();
     <section
       v-for="group in endpointGroups"
       :key="group.id"
-      class="card border border-base-200 bg-base-100 shadow-sm"
+      class="card border border-base-200 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
     >
       <div class="card-body space-y-5">
         <h2 class="card-title">{{ group.label }}</h2>
@@ -35,7 +36,7 @@ const { t } = useI18n();
           :id="endpoint.id"
           :key="endpoint.id"
           :ref="registerEndpointSectionRef(endpoint.id)"
-          class="space-y-4 rounded-lg border border-base-200 bg-base-100 p-4 scroll-mt-24"
+          class="space-y-4 border border-base-200 bg-base-100 p-4 scroll-mt-24" :class="[RADIUS_TOKEN_CLASS.lg]"
         >
           <header class="flex min-w-0 flex-wrap items-start justify-between gap-3">
             <div class="min-w-0 flex-1 space-y-2">
@@ -68,13 +69,13 @@ const { t } = useI18n();
           </header>
 
           <SectionGrid grid-token="twoColumn">
-            <div class="rounded-lg border border-base-200 p-3">
+            <div class="border border-base-200 p-3" :class="[RADIUS_TOKEN_CLASS.lg]">
               <p class="text-xs font-semibold uppercase text-muted">
                 {{ t("apiDocs.endpoint.methodLabel") }}
               </p>
               <p class="mt-1 font-mono text-sm">{{ methodLabel(endpoint.method) }}</p>
             </div>
-            <div class="rounded-lg border border-base-200 p-3">
+            <div class="border border-base-200 p-3" :class="[RADIUS_TOKEN_CLASS.lg]">
               <p class="text-xs font-semibold uppercase text-muted">
                 {{ t("apiDocs.endpoint.operationIdLabel") }}
               </p>

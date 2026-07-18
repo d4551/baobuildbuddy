@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
@@ -110,7 +111,7 @@ function normalizedConfidence(confidence: number): number {
       <article
         v-for="mapping in filteredMappings"
         :key="mapping.id"
-        class="card card-border bg-base-100 shadow-sm"
+        class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
         :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
       >
         <div class="card-body gap-3">

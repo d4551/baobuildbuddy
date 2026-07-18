@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { RADIAL_METER_GEOMETRY } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -12,13 +13,14 @@ const props = withDefaults(
   }>(),
   {
     max: 100,
-    sizeClass: "h-24 w-24",
+    sizeClass: RADIAL_METER_GEOMETRY.defaultSizeClass,
     trackClass: "stroke-base-300",
     fillClass: "stroke-primary",
   },
 );
 
-const RADIUS = 42;
+const RADIUS = RADIAL_METER_GEOMETRY.radius;
+const STROKE_WIDTH = RADIAL_METER_GEOMETRY.strokeWidth;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const clampedValue = computed(() => {
@@ -51,15 +53,15 @@ const dashOffset = computed(() => {
         cx="50"
         cy="50"
         :r="RADIUS"
-        stroke-width="8"
+        :stroke-width="STROKE_WIDTH"
       />
       <circle
-        class="fill-none transition-[stroke-dashoffset] duration-300"
+        class="fill-none transition-[stroke-dashoffset] duration-[var(--motion-slow)] ease-[var(--ease-response)]"
         :class="fillClass"
         cx="50"
         cy="50"
         :r="RADIUS"
-        stroke-width="8"
+        :stroke-width="STROKE_WIDTH"
         stroke-linecap="round"
         :stroke-dasharray="CIRCUMFERENCE"
         :stroke-dashoffset="dashOffset"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { Achievement } from "@bao/shared/types/gamification";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
@@ -21,7 +22,7 @@ defineProps<{
             v-for="achievement in unlockedAchievements"
             :key="achievement.id"
             :achievement="achievement"
-            class="card border-2 border-success bg-base-100 shadow-lg"
+            class="card border-2 border-success bg-base-100" :class="[SHADOW_TOKEN_CLASS.lg]"
           />
         </SectionGrid>
       </div>

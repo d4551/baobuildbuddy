@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,
   ProviderHealth,
 } from "~/types/ai-dashboard";
-import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
   providers: readonly ProviderConfig[];
@@ -51,14 +52,14 @@ function resolveProviderStatus(provider: ProviderConfig): {
     <div
       v-for="provider in providers"
       :key="provider.id"
-      class="card card-border card-glass card-glass-interactive"
+      :class="SURFACE_GLASS_CARD_CLASS"
     >
       <div class="card-body gap-4">
         <div class="flex items-start justify-between gap-3">
           <div class="flex min-w-0 items-center gap-3">
             <AIProviderIcon
               :provider-id="provider.iconId"
-              class="h-8 w-8 shrink-0 text-primary"
+              :class="[ICON_SIZE_CLASS.lg, 'shrink-0 text-primary']"
             />
             <div class="min-w-0">
               <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
@@ -95,7 +96,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
             @click="onTestProvider(provider.id)"
           >
-            <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
+            <LoadingSpinner v-if="testingProvider === provider.id" size="xs" :label="t('aiDashboard.providerCard.testingLabel')" />
             <span>{{
               testingProvider === provider.id
                 ? t("aiDashboard.providerCard.testingLabel")

@@ -5,7 +5,7 @@ import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { resolveLocaleLabel } from "~/constants/i18n";
-import { APP_DRAWER_ID, SHELL_NAVBAR_CLASS } from "~/constants/layout";
+import { APP_DRAWER_ID, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_NAVBAR_CLASS, SHELL_NAVBAR_DROPDOWN_CLASS } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
@@ -16,7 +16,12 @@ const { t, locale, availableLocales } = useI18n();
 const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
 const userMenuRef = useTemplateRef<HTMLDetailsElement>("userMenu");
 const isUserMenuOpen = ref(false);
+const isScrolled = ref(false);
 const isDarkTheme = computed(() => theme.value === THEME_NAMES.dark);
+const mobileSectionLabel = computed(() => {
+  const crumbs = navbarBreadcrumbs.value;
+  return crumbs.length > 1 ? (crumbs[crumbs.length - 1]?.label ?? "") : "";
+});
 const userMenuId = `app-navbar-user-menu-${useId()}`;
 const getLocaleLabel = (localeCode: string): string => resolveLocaleLabel(t, localeCode);
 let themePersistRequestId = 0;
@@ -26,6 +31,10 @@ function closeUserMenu(): void {
     userMenuRef.value.open = false;
     isUserMenuOpen.value = false;
   }
+}
+
+function onWindowScroll(): void {
+  isScrolled.value = window.scrollY > 8;
 }
 
 function selectLocale(nextLocale: string): void {
@@ -58,10 +67,24 @@ async function onThemeControllerChange(event: Event): Promise<void> {
   }
   setTheme(nextTheme, { persist: true });
 }
+
+onMounted(() => {
+  onWindowScroll();
+  window.addEventListener("scroll", onWindowScroll, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", onWindowScroll);
+});
 </script>
 
 <template>
-  <nav class="navbar" :class="SHELL_NAVBAR_CLASS" :aria-label="t('a11y.appHeader')">
+  <nav
+    class="navbar"
+    :class="SHELL_NAVBAR_CLASS"
+    :data-scrolled="isScrolled || undefined"
+    :aria-label="t('a11y.appHeader')"
+  >
     <div class="navbar-start flex min-w-0 flex-1 items-center gap-2 lg:gap-4">
       <label
         :for="APP_DRAWER_ID"
@@ -74,7 +97,7 @@ async function onThemeControllerChange(event: Event): Promise<void> {
         @keydown.enter.prevent="setDrawerToggleState(!isDrawerOpen)"
         @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" :class="ICON_SIZE_CLASS.sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
@@ -82,14 +105,15 @@ async function onThemeControllerChange(event: Event): Promise<void> {
         :to="APP_ROUTES.dashboard"
         class="btn btn-ghost shrink-0 gap-2 text-xl font-bold text-primary lg:hidden"
       >
-        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
+        <span v-if="mobileSectionLabel" class="text-sm font-medium text-secondary before:content-['/'] before:mx-1 before:text-muted">{{ mobileSectionLabel }}</span>
       </NuxtLink>
       <div class="hidden min-w-0 flex-1 lg:block">
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
       </div>
     </div>
-    <div class="navbar-center hidden lg:flex">
+    <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
       <span class="text-sm text-muted">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end gap-1">
@@ -121,18 +145,18 @@ async function onThemeControllerChange(event: Event): Promise<void> {
           :aria-controls="userMenuId"
           :aria-expanded="isUserMenuOpen"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" :class="ICON_SIZE_CLASS.sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </summary>
         <ul
           :id="userMenuId"
-          class="menu menu-sm dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg"
+          :class="SHELL_NAVBAR_DROPDOWN_CLASS"
           :aria-label="t('a11y.userMenu')"
         >
           <li>
             <NuxtLink :to="APP_ROUTES.settings" class="flex items-center gap-2" @click="closeUserMenu">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
@@ -24,7 +25,7 @@ const { t } = useI18n();
           <div class="flex items-center gap-2">
             <span class="tooltip tooltip-bottom" :data-tip="t(card.titleKey)">
               <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"
+                class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
               >
                 <component
                   :is="resolveAppIconComponent(card.iconName)"

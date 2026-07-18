@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 
@@ -69,7 +70,7 @@ const updateInput = (event: Event): void => {
 </script>
 
 <template>
-  <section class="card min-h-0 border border-base-300 bg-base-100 shadow-sm">
+  <section class="card min-h-0 border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="flex min-h-0 flex-1 flex-col">
       <header class="border-b border-base-300 px-5 py-5 sm:px-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -114,7 +115,7 @@ const updateInput = (event: Event): void => {
         @scroll="emit('scroll')"
       >
         <div v-if="!hasConversation" class="flex min-h-full items-center justify-center py-8">
-          <div class="card w-full max-w-2xl border border-base-300 bg-base-100 shadow-sm">
+          <div class="card w-full max-w-2xl border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body gap-4">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="badge badge-soft badge-info">

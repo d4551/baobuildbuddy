@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -141,11 +142,11 @@ function studioDetailLocation(location: string | undefined): string {
           </a>
         </template>
         <template #aside>
-          <div class="card card-border bg-base-100 shadow-sm">
+          <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body">
               <div class="flex items-start gap-4">
                 <div class="avatar placeholder">
-                  <div class="bg-base-300 text-base-content w-20 rounded-full">
+                  <div class="bg-base-300 text-base-content w-20" :class="[RADIUS_TOKEN_CLASS.full]">
                     <span class="text-3xl">{{ studioInitial }}</span>
                   </div>
                 </div>
@@ -212,7 +213,7 @@ function studioDetailLocation(location: string | undefined): string {
 
     <SectionGrid v-else grid-token="threeColumnLg">
       <div class="space-y-6 lg:col-span-2">
-        <div class="card card-border bg-base-100 shadow-sm">
+        <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
             <div class="space-y-3">
@@ -239,14 +240,14 @@ function studioDetailLocation(location: string | undefined): string {
           </div>
         </div>
 
-        <div v-if="studio.interviewStyle" class="card card-border bg-base-100 shadow-sm">
+        <div v-if="studio.interviewStyle" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.interviewProcess") }}</h2>
             <p>{{ studio.interviewStyle }}</p>
           </div>
         </div>
 
-        <div v-if="studio.technologies?.length" class="card card-border bg-base-100 shadow-sm">
+        <div v-if="studio.technologies?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
             <div class="flex flex-wrap gap-2">
@@ -259,7 +260,7 @@ function studioDetailLocation(location: string | undefined): string {
       </div>
 
       <div class="space-y-6">
-        <div v-if="studio.games?.length" class="card card-border bg-base-100 shadow-sm">
+        <div v-if="studio.games?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title text-lg">{{ t("studioDetail.sections.notableGames") }}</h2>
             <ul class="space-y-2">

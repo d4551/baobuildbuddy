@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 interface StatItem {
@@ -20,8 +21,7 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="stats stats-vertical w-full shadow-sm sm:stats-horizontal"
-    :class="backgroundClass ?? 'border border-base-300 bg-base-100'"
+    class="stats stats-vertical w-full sm:stats-horizontal" :class="[SHADOW_TOKEN_CLASS.sm, backgroundClass ?? 'border border-base-300 bg-base-100']"
   >
     <div v-for="(stat, index) in stats" :key="index" class="stat">
       <div v-if="stat.figure" class="stat-figure text-4xl" aria-hidden="true">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -60,7 +61,7 @@ useSeoMeta({
       @retry="() => refreshEmailSettings()"
     />
 
-    <div v-else class="card card-border bg-base-100 shadow-sm">
+    <div v-else class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body">
         <div class="space-y-4">
           <fieldset class="fieldset">
@@ -208,7 +209,7 @@ useSeoMeta({
       :message="submitError"
     />
 
-    <div v-if="scheduledRun" class="card card-border bg-base-100 shadow-sm">
+    <div v-if="scheduledRun" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <div>
@@ -239,7 +240,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <div v-if="lastResult" class="card card-border bg-base-100 shadow-sm">
+    <div v-if="lastResult" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
