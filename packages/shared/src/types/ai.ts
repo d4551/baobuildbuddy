@@ -114,6 +114,12 @@ export interface ChatMessage {
   content: string;
   timestamp?: string;
   sessionId?: string;
+  /** AI provider that produced the assistant message (provenance). */
+  provider?: string;
+  /** AI model that produced the assistant message (provenance). */
+  model?: string;
+  /** Confidence score (0-100) for score-bearing assessments. */
+  confidence?: number;
 }
 
 export interface AIProviderStatus {

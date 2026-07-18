@@ -21,7 +21,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <SectionGrid grid-token="fourColumnLg">
         <fieldset class="fieldset lg:col-span-2">

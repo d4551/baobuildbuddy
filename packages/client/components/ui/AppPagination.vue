@@ -141,7 +141,7 @@ watch(
 </script>
 
 <template>
-  <div v-if="hasPages && hasNormalizedPages" class="card card-border bg-base-100">
+  <div v-if="hasPages && hasNormalizedPages" :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body md:flex-row md:items-center md:justify-between" :class="[PADDING_TOKEN_CLASS.py4, FLEX_GAP_TOKEN_CLASS.gap3]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ summary }}</p>
 

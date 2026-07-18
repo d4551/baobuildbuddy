@@ -159,7 +159,7 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
+  <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body gap-0 p-0">
       <div class="border-b border-base-300 px-6 py-5">
         <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">

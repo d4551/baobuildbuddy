@@ -25,7 +25,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
         <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

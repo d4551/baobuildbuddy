@@ -9,6 +9,8 @@ type AIChatResponse = {
   id?: string;
   sessionId?: string;
   timestamp?: string;
+  provider?: string;
+  model?: string;
 };
 
 interface SendMessageOptions {
@@ -47,6 +49,12 @@ function parseAIChatResponse(data: unknown): AIChatResponse {
   if ("timestamp" in data && typeof data.timestamp === "string") {
     response.timestamp = data.timestamp;
   }
+  if ("provider" in data && typeof data.provider === "string") {
+    response.provider = data.provider;
+  }
+  if ("model" in data && typeof data.model === "string") {
+    response.model = data.model;
+  }
 
   return response;
 }
@@ -82,6 +90,8 @@ async function requestAIChatResponse(
     id: response.id,
     sessionId: response.sessionId ?? input.sessionId.value,
     timestamp: response.timestamp ?? new Date().toISOString(),
+    provider: response.provider,
+    model: response.model,
   });
   input.messages.value.push(assistantMessage);
 

@@ -50,7 +50,7 @@ function requestDelete(resumeId?: string): void {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section v-if="resumes.length > 0" class="card card-border bg-base-100">
+    <section v-if="resumes.length > 0" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("resumePage.filters.searchLegend") }}</legend>

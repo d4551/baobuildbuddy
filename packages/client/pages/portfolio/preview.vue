@@ -107,7 +107,7 @@ async function handleExport(format: "pdf" | "docx") {
     />
 
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
             <h2 :class="[TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS, 'font-bold']">
@@ -151,7 +151,7 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in featuredProjects"
             :key="project.id"
-            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+            :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
           >
             <figure v-if="project.image" :class="CONTENT_H_64_CLASS">
               <NuxtImg
@@ -200,7 +200,7 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in regularProjects"
             :key="project.id"
-            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+            :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
           >
             <figure v-if="project.image" :class="HEIGHT_48_CLASS">
               <NuxtImg

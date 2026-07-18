@@ -26,7 +26,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">

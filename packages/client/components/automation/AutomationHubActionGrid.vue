@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
@@ -17,7 +23,7 @@ const { t } = useI18n();
     <div
       v-for="card in orderedCards"
       :key="card.id"
-      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
+      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover', FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
     >
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

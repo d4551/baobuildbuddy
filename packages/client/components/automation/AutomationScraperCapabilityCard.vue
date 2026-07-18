@@ -69,7 +69,7 @@ function handleScheduleInput(event: Event): void {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

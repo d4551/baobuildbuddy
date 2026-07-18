@@ -48,7 +48,7 @@ function studioLocation(location: string): string {
       <article
         v-for="studio in studios"
         :key="studio.id"
-        class="card card-border bg-base-100 transition-shadow hover:" :class="[SHADOW_TOKEN_CLASS.md]"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">

@@ -93,7 +93,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.stream.subtitle") }}</p>

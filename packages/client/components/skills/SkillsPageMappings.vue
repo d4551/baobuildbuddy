@@ -111,7 +111,7 @@ function normalizedConfidence(confidence: number): number {
       <article
         v-for="mapping in filteredMappings"
         :key="mapping.id"
-        class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
         :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">

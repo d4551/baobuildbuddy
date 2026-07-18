@@ -17,7 +17,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <div class="overflow-x-auto">
         <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">

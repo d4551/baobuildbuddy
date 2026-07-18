@@ -30,7 +30,7 @@ const { t } = useI18n();
       ]"
     />
 
-    <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body">
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
@@ -39,7 +39,7 @@ const { t } = useI18n();
     </div>
 
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
-      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
@@ -78,7 +78,7 @@ const { t } = useI18n();
         </div>
       </article>
 
-      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>

@@ -98,7 +98,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
@@ -114,7 +114,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
@@ -138,7 +138,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
           <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -166,7 +166,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 

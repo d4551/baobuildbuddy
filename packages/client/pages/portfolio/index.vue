@@ -134,7 +134,7 @@ function updateProjectForm(value: typeof projectForm): void {
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <section v-if="isPortfolioEmpty" class="card card-border bg-base-100">
+      <section v-if="isPortfolioEmpty" :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <EmptyState
             title-key="portfolioPage.emptyState.title"
@@ -151,7 +151,7 @@ function updateProjectForm(value: typeof projectForm): void {
         </div>
       </section>
 
-      <section class="card card-border bg-base-100">
+      <section :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">

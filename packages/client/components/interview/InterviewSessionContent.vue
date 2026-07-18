@@ -105,7 +105,7 @@ const { t } = useI18n();
       >
         <div
           v-if="canUseVoice"
-          class="card card-border bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
           :aria-label="t('interviewSession.voice.idle')"
         >
           <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">

@@ -14,7 +14,7 @@ const { t } = useI18n();
 <template>
   <section
     v-if="currentQuestion?.feedback"
-    class="card card-border bg-base-100"
+    :class="SURFACE_GLASS_CARD_CLASS"
     aria-labelledby="interview-session-feedback-title"
   >
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">

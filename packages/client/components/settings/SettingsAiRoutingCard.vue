@@ -35,7 +35,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-200" :class="[MARGIN_TOKEN_CLASS.mb4]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS.mb4]">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">

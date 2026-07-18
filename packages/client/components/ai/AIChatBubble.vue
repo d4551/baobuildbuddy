@@ -166,5 +166,12 @@ const ariaLabel = computed(() => {
     >
       {{ statusText }}
     </div>
+    <div
+      v-if="isAssistant && (props.message.provider || props.message.model)"
+      class="chat-footer mt-0.5 flex flex-wrap gap-1"
+    >
+      <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
+      <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>
+    </div>
   </article>
 </template>

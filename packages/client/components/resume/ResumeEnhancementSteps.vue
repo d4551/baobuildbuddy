@@ -18,7 +18,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.py4]">
       <h3 class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.aiEnhancementTitle") }}</h3>
       <ul class="steps steps-horizontal" :class="[FLUID_WIDTH_CLASS]">

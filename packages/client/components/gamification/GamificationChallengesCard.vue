@@ -26,7 +26,7 @@ const emit = defineEmits<{
         <article
           v-for="challenge in challenges"
           :key="challenge.id"
-          class="card card-border bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
           <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <div class="mb-2 flex items-center justify-between">

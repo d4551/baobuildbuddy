@@ -53,7 +53,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" aria-labelledby="interview-session-briefing-title">
+  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-briefing-title">
     <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
       <PageHeaderBlock
         title-id="interview-session-briefing-title"

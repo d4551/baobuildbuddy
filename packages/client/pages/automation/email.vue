@@ -69,7 +69,7 @@ useSeoMeta({
       @retry="() => refreshEmailSettings()"
     />
 
-    <div v-else class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-else :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
@@ -211,7 +211,7 @@ useSeoMeta({
       :message="submitError"
     />
 
-    <div v-if="scheduledRun" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-if="scheduledRun" :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <div>
@@ -242,7 +242,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <div v-if="lastResult" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-if="lastResult" :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>

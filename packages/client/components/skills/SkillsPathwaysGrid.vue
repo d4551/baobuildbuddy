@@ -24,7 +24,7 @@ const { t } = useI18n();
         <article
           v-for="pathway in pathways"
           :key="pathway.id"
-          class="card card-border bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
