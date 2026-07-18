@@ -51,7 +51,7 @@ const hasRetry = computed(
       <h3 v-if="title" class="font-semibold">
         {{ title }}
       </h3>
-      <p :class="title ? '' : undefined" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+      <p :class="[title ? '' : undefined, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ message }}
       </p>
     </div>

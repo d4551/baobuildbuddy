@@ -36,7 +36,7 @@ const { t } = useI18n();
           :id="endpoint.id"
           :key="endpoint.id"
           :ref="registerEndpointSectionRef(endpoint.id)"
-          class="border border-base-200 bg-base-100 scroll-mt-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4]" :class="[RADIUS_TOKEN_CLASS.lg]"
+          class="border border-base-200 bg-base-100 scroll-mt-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4, RADIUS_TOKEN_CLASS.lg]"
         >
           <header class="flex flex-wrap items-start justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2]">

@@ -51,7 +51,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           {{ score }}%
         </span>
       </div>
-      <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]" :class="scoreTextClass">{{ score }}%</p>
+      <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
       <progress
         class="progress" :class="[FLUID_WIDTH_CLASS, scoreProgressClass]"
         :value="score"

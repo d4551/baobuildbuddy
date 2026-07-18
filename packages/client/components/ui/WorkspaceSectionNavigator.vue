@@ -92,8 +92,7 @@ const activeDescription = computed<string>(() => {
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
-                :class="activeSection === section.id ? 'tab-active' : ''"
+                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0" :class="[FLEX_GAP_TOKEN_CLASS.gap3, activeSection === section.id ? 'tab-active' : '']"
                 :aria-current="activeSection === section.id ? 'page' : undefined"
               >
                 <span

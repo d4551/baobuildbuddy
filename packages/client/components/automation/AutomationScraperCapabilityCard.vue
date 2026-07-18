@@ -110,8 +110,7 @@ function handleScheduleInput(event: Event): void {
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
           <div
-            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]"
-            :class="capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error'"
+            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error']"
           >
             {{ capabilityAvailabilityLabel(capability) }}
           </div>
@@ -121,7 +120,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.issuesTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" :class="issueCount === 0 ? 'text-success' : 'text-warning'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, issueCount === 0 ? 'text-success' : 'text-warning']">
             {{ issueCount }}
           </div>
           <div class="stat-desc">
@@ -134,7 +133,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" :class="runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content']">
             {{ runStateLabel(runState) }}
           </div>
           <div class="stat-desc">
