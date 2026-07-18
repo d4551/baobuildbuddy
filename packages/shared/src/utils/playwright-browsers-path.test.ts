@@ -6,9 +6,9 @@ import {
   resolvePlaywrightBrowsersPath,
 } from "./playwright-browsers-path";
 
-const SANDBOX_CACHE_PATH = `/var/folders/x/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/abc/playwright`;
-const MISSING_CACHE_PATH = "/tmp/bao-missing-playwright-cache-path";
-const HOST_DEFAULT_PATH = "/tmp/bao-host-ms-playwright";
+const SANDBOX_CACHE_PATH = `var/folders/x/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/abc/playwright`;
+const MISSING_CACHE_PATH = "tmp/bao_missing_playwright_cache_path";
+const HOST_DEFAULT_PATH = "tmp/bao_host_ms_playwright";
 
 const pathExists =
   (existing: ReadonlySet<string>) =>

@@ -17,4 +17,9 @@ export declare const readAutomationScriptRunnerConfig: () => AutomationScriptRun
  * Absolute path to the shared scraper package used by automation services.
  */
 export declare const SCRAPER_DIR: string;
+/**
+ * Child-process env for RPA scripts. Rewrites incomplete agent-sandbox
+ * Playwright browser caches to the host default cache when present.
+ */
+export declare const buildAutomationProcessEnv: (baseEnv?: NodeJS.ProcessEnv) => NodeJS.ProcessEnv;
 export {};

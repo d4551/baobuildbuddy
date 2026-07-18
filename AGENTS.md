@@ -59,13 +59,15 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 9. **Speech model defaults are derived from provider.** `DEFAULT_SPEECH_SETTINGS` reads from `SPEECH_MODEL_OPTIONS[provider][0]`. Switching provider auto-updates the model.
 
-10. **Bun/TS RPA uses Playwright.** Run `bun run automation:browsers:install` after `bun install` to install Chromium.
+10. **Bun/TS RPA uses Playwright.** Run `bun run automation:browsers:install` after `bun install` to install Chromium. Polluted `PLAYWRIGHT_BROWSERS_PATH` (Cursor sandbox marker or missing dir) is resolved by pure helpers in `@bao/shared/utils/playwright-browsers-path`; server `config/paths.ts` and scraper `runtime/config.ts` are the only `process.env` adapters.
 
-11. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Set to `2000` in `.env` for large scraper outputs.
+11. **`BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS=true`** is the sole SSRF private-host opt-in for job-apply URL validation (default deny). Do not set in production. Integration fixtures set it explicitly; `BAO_ENABLE_AUTOMATION_VERIFY` no longer gates private hosts.
 
-12. **Job provider settings must be configured** via `PUT /api/settings` with `automationSettings.jobProviders` before `POST /api/jobs/refresh` returns results. See README.md.
+12. **`AUTOMATION_STDIO_BUFFER_LIMIT`** defaults to 200 lines. Set to `2000` in `.env` for large scraper outputs.
 
-13. **RPA scrapers** use Playwright DOM selectors. Current status (Feb 2026):
+13. **Job provider settings must be configured** via `PUT /api/settings` with `automationSettings.jobProviders` before `POST /api/jobs/refresh` returns results. See README.md.
+
+14. **RPA scrapers** use Playwright DOM selectors. Current status (Feb 2026):
     - **GrackleHQ**: Working (30+ jobs)
     - **WorkWithIndies**: Working (60+ jobs)
     - **RemoteGameJobs**: Working (41+ jobs)
@@ -75,10 +77,10 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
     - **Greenhouse API**: Working (168+ jobs with full descriptions via `content=true`)
     - **Lever API**: Working
 
-14. **Gamification is wired into all routes.** XP awards: resume (30), cover letter (30), portfolio (35), interview (75), job save (10), job apply (40), skill mapping (15). Achievement checking triggers automatically.
+15. **Gamification is wired into all routes.** XP awards: resume (30), cover letter (30), portfolio (35), interview (75), job save (10), job apply (40), skill mapping (15). Achievement checking triggers automatically.
 
-15. **Tauri desktop** requires Rust toolchain (`rustc` + `cargo`).
+16. **Tauri desktop** requires Rust toolchain (`rustc` + `cargo`).
 
-16. **Desktop release verify:** `bun run verify:desktop-releases -- --release` on macOS enforces **`xcrun stapler validate`** (stapled/notarized DMG). Checkouts with an unstapled DMG under `packages/desktop/releases` should run **`bun run verify:desktop-releases`** without `--release` for full payload + checksum checks. CI keeps `--release` after a proper notarized build.
+17. **Desktop release verify:** `bun run verify:desktop-releases -- --release` on macOS enforces **`xcrun stapler validate`** (stapled/notarized DMG). Checkouts with an unstapled DMG under `packages/desktop/releases` should run **`bun run verify:desktop-releases`** without `--release` for full payload + checksum checks. CI keeps `--release` after a proper notarized build.
 
-17. **External “full-stack audit” prompts** often assume **Prisma + htmx**. This repo does **not** use those. Treat [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) as binding; map playbook items to **Drizzle + Nuxt/Vue** (see the htmx→Nuxt table there). Do not start a framework migration unless the product owner explicitly requests it.
+18. **External “full-stack audit” prompts** often assume **Prisma + htmx**. This repo does **not** use those. Treat [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) as binding; map playbook items to **Drizzle + Nuxt/Vue** (see the htmx→Nuxt table there). Do not start a framework migration unless the product owner explicitly requests it.

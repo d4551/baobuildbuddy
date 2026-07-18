@@ -183,25 +183,21 @@ const spawnAutomationProcess = (
     killSignal: killSignal ?? DEFAULT_KILL_SIGNAL,
   });
 
-interface ProcessWritableStdin {
-  write(payload: string): Promise<number | undefined> | number | undefined;
-  end(): Promise<undefined> | undefined;
-}
-
-const isWritableStdin = (stream: unknown): stream is ProcessWritableStdin => {
-  if (typeof stream !== "object" || stream === null) {
-    return false;
-  }
-  if (!("write" in stream && "end" in stream)) {
-    return false;
-  }
-  return typeof stream.write === "function" && typeof stream.end === "function";
-};
+type AutomationSpawnStdin = ReturnType<typeof Bun.spawn>["stdin"];
 
 const writeProcessPayload = async (
-  stream: ProcessWritableStdin,
+  stream: AutomationSpawnStdin,
   payload: string,
 ): Promise<void> => {
+  if (typeof stream !== "object" || stream === null) {
+    return;
+  }
+  if (!("write" in stream && "end" in stream)) {
+    return;
+  }
+  if (typeof stream.write !== "function" || typeof stream.end !== "function") {
+    return;
+  }
   await stream.write(payload);
   await stream.end();
 };
@@ -248,9 +244,7 @@ export async function runAutomationScript(
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   const signal = createProcessSignal(timeoutSignal, options.signal, abortState);
   const proc = spawnAutomationProcess(scriptPath, signal, options.killSignal);
-  if (isWritableStdin(proc.stdin)) {
-    await writeProcessPayload(proc.stdin, buildScriptPayload(options));
-  }
+  await writeProcessPayload(proc.stdin, buildScriptPayload(options));
 
   const stdoutTask = readNdjsonLines(resolveReadableBinaryStream(proc.stdout), (line) => {
     pushBoundedLine(stdoutLines, line, stdoutLimit);
