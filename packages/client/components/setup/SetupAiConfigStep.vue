@@ -70,7 +70,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
         <h3 class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1]">
           {{ t("settings.aiProviders.ollamaTipTitle") }}
         </h3>
-        <p :class="MARGIN_TOKEN_CLASS.mb3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p :class="[MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("settings.aiProviders.ollamaTipDescription") }}
           <NuxtLink
             :to="ollamaWebsiteUrl"
@@ -99,7 +99,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
         <div class="group relative overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
           <div class="overflow-x-auto whitespace-nowrap pr-14 font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm]">
-            <span :class="MARGIN_TOKEN_CLASS.mr2" text-muted">$</span>{{ ollamaCommand }}
+            <span class="text-muted" :class="MARGIN_TOKEN_CLASS.mr2">$</span>{{ ollamaCommand }}
           </div>
           <button
             class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"

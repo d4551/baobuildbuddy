@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { collectTypographyViolationsForContent } from "./validate-ui-typography";
 
-const CONSUMER_PATH = "packages/client/components/dashboard/ExampleWidget.vue";
+const CONSUMER_PATH = "packages/client/pages/index.vue";
 const SSOT_LAYOUT_PATH = "packages/client/constants/layout.ts";
 
 describe("collectTypographyViolationsForContent", () => {

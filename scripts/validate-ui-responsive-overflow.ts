@@ -106,9 +106,7 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
       // Fixed height with an overflow guard (overflow-hidden/y-auto/y-scroll)
       // is the canonical bounded scroll region pattern (chat panels, timelines,
       // modal content). This is correct — not a violation.
-      const hasOverflowGuard = /\boverflow-(?:hidden|y-auto|y-scroll|auto)\b/u.test(
-        classValue,
-      );
+      const hasOverflowGuard = /\boverflow-(?:hidden|y-auto|y-scroll|auto)\b/u.test(classValue);
       // Skeleton rows legitimately use fixed heights.
       const isSkeletonRow = /\bskeleton\b/u.test(classValue);
       // Aspect-ratio / ratio surfaces (swatches, thumbnails) use fixed h- with
@@ -138,7 +136,7 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     }
   }
 
-  // The overflow-x-auto wrapper check was a false positive: overflow-x-auto
+  // The overflow-x-auto scroll container check was a false positive:
   // ON a scroll container is the canonical Bao pattern for tables/timelines.
   // The real overflow risk is flex parents with fixed-width children and no
   // min-w-0/max-w-* guard, which the fixedWidthPattern check above already

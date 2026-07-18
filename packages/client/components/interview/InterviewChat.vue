@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { computed, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -168,7 +174,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        :class="MIN_H_80_CLASS" flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
+        class="flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[MIN_H_80_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack4]"
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"

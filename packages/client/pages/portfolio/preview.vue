@@ -108,9 +108,9 @@ async function handleExport(format: "pdf" | "docx") {
 
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
       <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-        <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]"
+        <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-            <h2 :class="[TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS, 'font-bold']"
+            <h2 :class="[TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS, 'font-bold']">
               {{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}
             </h2>
             <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
@@ -214,7 +214,7 @@ async function handleExport(format: "pdf" | "docx") {
             <div class="card-body">
               <h3 class="card-title text-base">{{ project.title }}</h3>
               <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1" :class="[MARGIN_TOKEN_CLASS.mt2]">
+              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1, MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"

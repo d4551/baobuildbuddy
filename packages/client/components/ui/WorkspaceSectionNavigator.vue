@@ -79,13 +79,13 @@ const activeDescription = computed<string>(() => {
               </span>
             </span>
 
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
               <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
               <p
                 v-if="activeDescription"
-                :class="MAX_W_3XL_CLASS" leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+                class="leading-6 text-secondary" :class="[MAX_W_3XL_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
               >
                 {{ activeDescription }}
               </p>

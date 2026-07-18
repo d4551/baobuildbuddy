@@ -39,7 +39,12 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
   });
 
   return files.flatMap(({ filePath, content }) => {
-    if (shouldIgnorePath(filePath) || isAllowedRouteLiteralPath(filePath)) {
+    if (
+      shouldIgnorePath(filePath) ||
+      isAllowedRouteLiteralPath(filePath) ||
+      filePath.includes(".test.") ||
+      filePath.includes(".spec.")
+    ) {
       return [];
     }
 

@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="card card-border card-glass relative overflow-hidden"
+    :class="[SURFACE_GLASS_CARD_CLASS, 'relative overflow-hidden']"
     :class="[challenge.completed ? 'glass-disabled' : 'hover: transition-shadow', SHADOW_TOKEN_CLASS.lg]"
   >
     <div

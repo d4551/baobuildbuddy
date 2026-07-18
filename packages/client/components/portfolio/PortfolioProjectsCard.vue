@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
@@ -80,7 +86,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
             <p class="line-clamp-3 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
 
-            <div v-if="hasTechnologies(project)" class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1" :class="[MARGIN_TOKEN_CLASS.mt2]">
+            <div v-if="hasTechnologies(project)" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1, MARGIN_TOKEN_CLASS.mt2]">
               <span
                 v-for="tech in project.technologies.slice(0, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT)"
                 :key="tech"

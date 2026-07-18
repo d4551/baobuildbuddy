@@ -57,16 +57,17 @@ export function scanFile(absPath: string): SSOTViolation[] {
 
 export function collectSourceFiles(dir: string, pattern = /\.(vue|ts)$/): string[] {
   const results: string[] = [];
+  let entries;
   try {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const full = join(dir, entry.name);
-      if (entry.name === "node_modules" || entry.name === "dist" || entry.name === ".nuxt")
-        continue;
-      if (entry.isDirectory()) results.push(...collectSourceFiles(full, pattern));
-      else if (pattern.test(entry.name)) results.push(full);
-    }
+    entries = readdirSync(dir, { withFileTypes: true });
   } catch {
-    /* skip */
+    /* skip unreadable */ return results;
+  }
+  for (const entry of entries) {
+    const full = join(dir, entry.name);
+    if (entry.name === "node_modules" || entry.name === "dist" || entry.name === ".nuxt") continue;
+    if (entry.isDirectory()) results.push(...collectSourceFiles(full, pattern));
+    else if (pattern.test(entry.name)) results.push(full);
   }
   return results;
 }

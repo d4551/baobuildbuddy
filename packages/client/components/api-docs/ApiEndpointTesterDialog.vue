@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type {
@@ -173,7 +179,7 @@ function updateRequestBodyValue(event: Event): void {
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
         <textarea
           :value="requestBodyValue"
-          class="textarea font-mono" :class="[MIN_HEIGHT_SCROLL_CLASS, FLUID_WIDTH_CLASS]" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
+          class="textarea font-mono" :class="[MIN_HEIGHT_SCROLL_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
           :placeholder="t('apiDocs.tester.bodyPlaceholder')"
           :aria-label="t('apiDocs.tester.requestBodyAria')"
           @input="updateRequestBodyValue"

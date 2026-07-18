@@ -1,16 +1,30 @@
-import type { GamingPortalId } from "../types/settings";
-// Re-export type-only contracts from the cycle-safe types module.
+import {
+  type AutomationJobScrapeTarget,
+  type AutomationScrapePortalId,
+  type AutomationScrapeTarget,
+  AUTOMATION_SCRAPE_JOB_TARGETS as _ASJT,
+  AUTOMATION_SCRAPE_PORTAL_IDS as _ASPI,
+  AUTOMATION_SCRAPE_TARGET_DETAILS as _ASTD,
+  AUTOMATION_SCRAPE_TARGETS as _AST,
+  automationScrapeTargetToPortalId as _asttpi,
+  isAutomationJobScrapeTarget as _iajst,
+  isAutomationScrapePortalId as _iaspi,
+} from "./automation-types";
+
 export {
   type AutomationJobScrapeTarget,
   type AutomationScrapePortalId,
   type AutomationScrapeTarget,
-  AUTOMATION_SCRAPE_JOB_TARGETS,
-  AUTOMATION_SCRAPE_PORTAL_IDS,
-  AUTOMATION_SCRAPE_TARGETS,
-  AUTOMATION_SCRAPE_TARGET_DETAILS,
-  automationScrapeTargetToPortalId,
-  isAutomationJobScrapeTarget,
-} from "./automation-types";
+};
+
+export const AUTOMATION_SCRAPE_JOB_TARGETS = _ASJT;
+export const AUTOMATION_SCRAPE_PORTAL_IDS = _ASPI;
+export const AUTOMATION_SCRAPE_TARGETS = _AST;
+export const AUTOMATION_SCRAPE_TARGET_DETAILS = _ASTD;
+
+export const automationScrapeTargetToPortalId = _asttpi;
+export const isAutomationJobScrapeTarget = _iajst;
+export const isAutomationScrapePortalId = _iaspi;
 
 /**
  * Supported automation run types across API and client surfaces.
@@ -23,13 +37,6 @@ export const AUTOMATION_RUN_TYPES = ["scrape", "job_apply", "email"] as const;
 export type AutomationRunType = (typeof AUTOMATION_RUN_TYPES)[number];
 
 // ── Remaining exports (non-cycle) ─────────────────────────────────────
-
-/**
- * Whether a portal id is a supported scraper-backed gaming portal.
- */
-export function isAutomationScrapePortalId(portalId: string): portalId is AutomationScrapePortalId {
-  return AUTOMATION_SCRAPE_PORTAL_IDS.some((candidatePortalId) => candidatePortalId === portalId);
-}
 
 /**
  * Stable audit/report categories for RPA capabilities.

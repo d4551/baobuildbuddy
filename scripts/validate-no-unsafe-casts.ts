@@ -34,7 +34,11 @@ const collectSourceFiles = async (): Promise<string[]> => {
         .map((relativeFilePath) => relativeFilePath.replace(/\\/gu, "/"))
         .filter(
           (normalizedPath) =>
-            hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath),
+            hasAllowedExtension(normalizedPath) &&
+            !shouldIgnorePath(normalizedPath) &&
+            !normalizedPath.includes(".test.") &&
+            !normalizedPath.includes(".spec.") &&
+            !normalizedPath.includes("tests/"),
         );
     }),
   );

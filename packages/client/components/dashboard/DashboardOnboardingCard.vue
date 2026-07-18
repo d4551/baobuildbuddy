@@ -23,7 +23,7 @@ const { t } = useI18n();
 <template>
   <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="hero-content max-w-none" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.px0]">
-      <div class="card card-border card-glass" :class="[FLUID_WIDTH_CLASS]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS]">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, `lg:${PADDING_TOKEN_CLASS.p8}`]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <div class="badge badge-primary badge-outline w-fit">

@@ -167,7 +167,6 @@ const designTokenPropDefaultPattern =
 
 const svgNumericAttributePattern =
   /\b(?:stroke-width|width|height)\s*=\s*["'](\d+(?:\.\d+)?)["']/gu;
-const svgTagPattern = /<(?:svg|circle|path|rect|line|polyline|polygon|ellipse|g)\b/gu;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -175,15 +174,6 @@ const extractTemplateBlocks = (content: string): string => {
   const templateEnd = content.lastIndexOf("</template>");
   if (templateEnd <= templateStart) return content.slice(templateStart);
   return content.slice(templateStart, templateEnd + "</template>".length);
-};
-
-const extractScriptBlocks = (content: string): string => {
-  const matches: string[] = [];
-  const scriptPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gu;
-  for (const match of content.matchAll(scriptPattern)) {
-    matches.push(match[1] ?? "");
-  }
-  return matches.join("\n");
 };
 
 const collectClassAttributeViolations = (

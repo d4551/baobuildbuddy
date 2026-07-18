@@ -4,7 +4,7 @@ import { collectRawDesignTokenViolationsForContent } from "./validate-no-raw-des
 const SSOT_PATH = "packages/client/constants/layout.ts";
 const MAIN_CSS_PATH = "packages/client/assets/css/main.css";
 const LOADING_SKELETON_PATH = "packages/client/components/ui/LoadingSkeleton.vue";
-const CONSUMER_PATH = "packages/client/components/dashboard/DashboardStatCardsGrid.vue";
+const CONSUMER_PATH = "packages/client/pages/index.vue";
 
 describe("collectRawDesignTokenViolationsForContent", () => {
   test("flags inline Tailwind spacing utility tokens in vue templates", () => {
@@ -47,7 +47,7 @@ describe("collectRawDesignTokenViolationsForContent", () => {
         '<script setup lang="ts">',
         'withDefaults(defineProps<{ sizeClass?: string }>(), { sizeClass: "h-24 w-24" });',
         "</script>",
-        "<template><div :class=\"sizeClass\" /></template>",
+        '<template><div :class="sizeClass" /></template>',
       ].join("\n"),
     );
     expect(violations.some((v) => v.message.includes("h-24 w-24"))).toBe(true);

@@ -86,7 +86,7 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                :class="ICON_SIZE_CLASS['10']" w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[SHADOW_TOKEN_CLASS.sm]"
+                class="rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[ICON_SIZE_CLASS['10'], SHADOW_TOKEN_CLASS.sm]"
               />
               <div
                 v-else
@@ -118,7 +118,7 @@ const brandPreviewThemes = computed<
             </p>
           </div>
 
-          <div :class="MARGIN_TOKEN_CLASS.mt5" flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt5, FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>

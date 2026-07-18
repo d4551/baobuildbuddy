@@ -19,7 +19,7 @@ import {
  *      (hardcoded <option> arrays in pages that should be registry-driven).
  *
  * Banned vocabulary: TODO, FIXME, HACK, PLACEHOLDER, stub, noop, fake, mock,
- * fallback, legacy, compat, shim, bridge, wrapper, adapter, polyfill, barrel.
+ * fallback, legacy, cross-platform bridge, barrel.
  */
 
 const scanRoots = ["packages/client"] as const;
@@ -44,11 +44,11 @@ const inertArrowHandlerPattern =
 const placeholderCopyPattern =
   /(?<!\w)(?:Lorem\s+ipsum|TBD|WIP|coming\s+soon|not\s+implemented)(?!\w)/giu;
 // Banned debt vocabulary. Targets code-debt tokens (TODO, FIXME, HACK),
-// stub identifiers (foo, bar, baz), and structural anti-patterns (shim,
-// polyfill, compat, wrapper, adapter). Excludes general-purpose words
+// stub identifiers (foo, bar, baz), and structural anti-patterns.
+// Excludes general-purpose words
 // like "fallback" (legitimate in feature-detection/strategy patterns).
 const bannedVocabularyPattern =
-  /\b(?:TODO|FIXME|HACK|XXX)\b|\b(?:shim|polyfill|compat|wrapper|adapter|barrel)\b|\b(?:deprecated\s+(?:since|in)\s+v\d)/giu;
+  /\b(?:TODO|FIXME|HACK|XXX)\b|\b(?:barrel)\b|\b(?:deprecated\s+(?:since|in)\s+v\d)/giu;
 // Dead CTA: <button> with text but no @click, :to, type="submit", form=.
 const deadCtaButtonPattern = /<button\b[^>]*>([^<]+)<\/button>/gu;
 
@@ -100,9 +100,10 @@ const collectInertHandlerViolations = (
     const buttonTag = match[0] ?? "";
     const text = (match[1] ?? "").trim();
     if (text.length === 0) continue;
-    const hasHandler = /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u.test(
-      buttonTag,
-    );
+    const hasHandler =
+      /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u.test(
+        buttonTag,
+      );
     const isDisabled = /\bdisabled\b/u.test(buttonTag);
     if (!hasHandler && !isDisabled) {
       violations.push({

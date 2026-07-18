@@ -159,7 +159,8 @@ export const collectUiLayoutTokenViolationsForContent = (
 
 const collectViolations = async (): Promise<Violation[]> => {
   const [files, pageFiles] = await Promise.all([collectVueFiles(), collectPageFiles()]);
-  const pageFileSet = new Set(pageFiles);
+  // pageFiles available for future cross-file validation.
+  void pageFiles;
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();

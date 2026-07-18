@@ -106,3 +106,8 @@ export function automationScrapeTargetToPortalId(
 ): AutomationScrapePortalId {
   return AUTOMATION_SCRAPE_TARGET_DETAILS[target].portalId;
 }
+
+/** Whether a portal id is a supported scraper-backed gaming portal. */
+export function isAutomationScrapePortalId(portalId: string): portalId is AutomationScrapePortalId {
+  return AUTOMATION_SCRAPE_PORTAL_IDS.some((candidatePortalId) => candidatePortalId === portalId);
+}

@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -143,7 +151,7 @@ useSeoMeta({
               :key="tech.name"
               class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
             >
-              <span :class="FORM_WIDTH_32_CLASS" font-medium">{{ tech.name }}</span>
+              <span class="font-medium" :class="FORM_WIDTH_32_CLASS">{{ tech.name }}</span>
               <div class="flex-1">
                 <progress
                   class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"

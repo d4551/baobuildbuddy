@@ -1,6 +1,5 @@
 import {
   collectProjectFileEntries,
-  getLineFromOffset,
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";

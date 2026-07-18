@@ -18,7 +18,7 @@ import {
  * This catches the bespoke-pagination / raw-table smell that the existing
  * `validate-ui-canonical-primitives.ts` partially covers but misses:
  *   - hand-rolled `v-for` pagination buttons
- *   - tables without horizontal scroll wrappers
+ *   - tables without horizontal scroll containers
  *   - list/grid surfaces that model emptiness without EmptyState
  */
 
@@ -44,10 +44,10 @@ const handRolledPaginationPattern =
 const pageButtonPattern =
   /<button[^>]*\b(?:aria-label|title)\s*=\s*["'][^"']*(?:page|previous|next)[^"']*["']/gu;
 // <table> without a class="table" (already in canonical-primitives, but also
-// enforce overflow-x-auto wrapper presence).
+// enforce overflow-x-auto scroll container presence).
 const rawTablePattern = /<table\b[^>]*>/gu;
-// A table element with class="table" but no ancestor overflow-x-auto wrapper.
-const tableWithoutOverflowWrapperPattern =
+// A table element with class="table" but no ancestor overflow-x-auto scroll container.
+const tableWithoutOverflowScrollPattern =
   /<table\b[^>]*class\s*=\s*["'][^"']*\btable\b[^"']*["'][^>]*>/u;
 
 const extractTemplateBlocks = (content: string): string => {
@@ -106,12 +106,12 @@ const collectTableViolations = (filePath: string, content: string): ValidationVi
     }
   }
 
-  if (tableWithoutOverflowWrapperPattern.test(template)) {
+  if (tableWithoutOverflowScrollPattern.test(template)) {
     if (!/\boverflow-x-(?:auto|scroll)\b/u.test(template)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
-        message: `<table class="table"> without an overflow-x-auto wrapper ancestor. Tables overflow on mobile without horizontal scroll containment.`,
+        message: `<table class="table"> without an overflow-x-auto scroll container ancestor. Tables overflow on mobile without horizontal scroll containment.`,
       });
     }
   }
