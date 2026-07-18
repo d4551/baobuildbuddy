@@ -28,7 +28,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section class="card card-glass glass-interactive">
     <div class="card-body">
       <div class="flex items-center justify-between gap-6">
         <div class="flex-1" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

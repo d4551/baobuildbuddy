@@ -27,7 +27,7 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div v-if="dailyChallenge" class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
+    <div v-if="dailyChallenge" class="card card-glass glass-interactive" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
         <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
         <div :class="SURFACE_GLASS_CARD_CLASS">
@@ -58,10 +58,10 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
+    <div class="card card-glass glass-interactive" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
         <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
-        <ul class="list rounded-box bg-base-100">
+        <ul class="list rounded-box border border-base-300 bg-base-100">
           <li
             v-for="(activity, index) in recentActivity"
             :key="`${activity.timestamp.toISOString()}-${index}`"

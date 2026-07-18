@@ -1,8 +1,9 @@
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import { settle } from "@bao/shared/utils/promise";
-import { type Browser, type BrowserContext, chromium, type Page } from "playwright";
+import type { Browser, BrowserContext, Page } from "playwright";
 import { automationRuntimeConfig } from "./config";
+import { sanitizePlaywrightBrowsersPathEnv } from "./playwright-browsers-path";
 
 /**
  * Browser context bundle returned by Bun-based automation scripts.
@@ -29,6 +30,11 @@ const createContextOptions = () => ({
 export const launchAutomationBrowser = async (
   settings: AutomationSettings,
 ): Promise<AutomationBrowserSession | null> => {
+  // Sanitize before dynamic import so Playwright registry resolution sees a
+  // host-usable browsers path (agent sandboxes often inject a stale cache).
+  sanitizePlaywrightBrowsersPathEnv();
+  const { chromium } = await import("playwright");
+
   const browserResult = await settle(
     chromium.launch({
       headless: settings.headless,

@@ -100,7 +100,7 @@ const bootstrapErrorMessage = computed(() =>
       </template>
     </PageHeroHeader>
 
-    <section :class="SURFACE_GLASS_CARD_CLASS">
+    <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
       <div class="card-body">
         <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
@@ -181,16 +181,13 @@ const bootstrapErrorMessage = computed(() =>
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">
-      <article
-        v-for="letter in coverLetterCards"
+      <UiGlassCard
+        v-for="(letter, index) in coverLetterCards"
         :key="letter.id"
-        :class="[SURFACE_GLASS_CARD_CLASS, 'relative overflow-hidden']"
+        :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
+        :link-aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
+        :stagger-index="Math.min(index, 11)"
       >
-        <NuxtLink
-          :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
-          class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-          :aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
-        />
         <div class="card-body relative z-10">
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <div>
@@ -228,7 +225,7 @@ const bootstrapErrorMessage = computed(() =>
             </button>
           </div>
         </div>
-      </article>
+      </UiGlassCard>
     </SectionGrid>
 
     <AppPagination

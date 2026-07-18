@@ -159,7 +159,7 @@ function studioDetailLocation(location: string | undefined): string {
             <div class="card-body">
               <div class="flex items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div class="avatar placeholder">
-                  <div class="bg-base-300 text-base-content" :class="[FORM_WIDTH_20_CLASS]" :class="[RADIUS_TOKEN_CLASS.full]">
+                  <div class="bg-base-300 text-base-content" :class="[FORM_WIDTH_20_CLASS, RADIUS_TOKEN_CLASS.full]">
                     <span :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ studioInitial }}</span>
                   </div>
                 </div>

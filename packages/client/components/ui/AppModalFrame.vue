@@ -74,7 +74,7 @@ function handleClose(): void {
     :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
     @close="handleClose"
   >
-    <div class="modal-box" :class="modalBoxClass">
+    <div class="modal-box glass-modal" :class="modalBoxClass">
       <slot />
     </div>
     <form method="dialog" class="modal-backdrop">

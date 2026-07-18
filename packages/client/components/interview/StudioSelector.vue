@@ -258,13 +258,19 @@ function studioLocationLabel(location: string): string {
             type="button"
             role="option"
             class="flex cursor-pointer flex-col items-start rounded-box text-left"
-            :class="[FLEX_GAP_TOKEN_CLASS.gap1, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2, TRUNCATE_FLEX_CHILD_CLASS]"
+            :class="[
+              FLEX_GAP_TOKEN_CLASS.gap1,
+              PADDING_TOKEN_CLASS.px3,
+              PADDING_TOKEN_CLASS.py2,
+              TRUNCATE_FLEX_CHILD_CLASS,
+              FLUID_WIDTH_CLASS,
+              {
+                'bg-base-200': index === activeOptionIndex,
+                'ring-1 ring-primary': studio.id === modelValue,
+              },
+            ]"
             :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
             :aria-selected="studio.id === modelValue"
-            :class="[FLUID_WIDTH_CLASS, {
-              'bg-base-200': index === activeOptionIndex,
-              'ring-1 ring-primary': studio.id === modelValue,
-            }]"
             @mouseenter="activeOptionIndex = index"
             @focus="activeOptionIndex = index"
             @click="selectStudio(studio.id)"

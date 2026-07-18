@@ -20,7 +20,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <section class="hero overflow-hidden rounded-box border border-base-300 card-glass" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="hero-content max-w-none px-0" :class="[FLUID_WIDTH_CLASS]">
       <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS]">
         <div class="card-body gap-5 p-6 lg:p-8">

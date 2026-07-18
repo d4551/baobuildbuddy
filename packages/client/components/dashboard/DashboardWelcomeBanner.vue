@@ -22,7 +22,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-interactive overflow-hidden']">
+  <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-interactive overflow-hidden', 'glass-card-enter glass-card-enter-0']">
     <div class="card-body relative" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="relative" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div class="badge badge-primary badge-soft w-fit">

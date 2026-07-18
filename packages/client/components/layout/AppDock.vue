@@ -24,7 +24,7 @@ function isDockItemActive(item: NavigationItem): boolean {
 </script>
 
 <template>
-  <nav class="dock lg:hidden" :aria-label="t('a11y.mobilePrimaryNavigation')">
+  <nav class="dock glass-clear border-t border-base-300 lg:hidden" :aria-label="t('a11y.mobilePrimaryNavigation')">
     <NuxtLink
       v-for="item in dockItems"
       :key="item.id"

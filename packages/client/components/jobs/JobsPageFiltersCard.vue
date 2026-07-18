@@ -39,7 +39,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card sticky top-6 bg-base-200">
+  <div class="card sticky top-6 card-glass">
     <div class="card-body">
       <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobsPage.filtersTitle") }}</h2>

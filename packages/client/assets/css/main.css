@@ -709,6 +709,58 @@ textarea {
   animation-delay: 180ms;
 }
 
+/* Glass card entrance — staggered fade-up for list grids. */
+@keyframes glass-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.glass-card-enter {
+  animation: glass-card-enter var(--motion-slow) var(--ease-enter) both;
+}
+/* Indexed stagger delays used by UiGlassCard staggerIndex prop. */
+.glass-card-enter-0 {
+  animation-delay: 0ms;
+}
+.glass-card-enter-1 {
+  animation-delay: 50ms;
+}
+.glass-card-enter-2 {
+  animation-delay: 100ms;
+}
+.glass-card-enter-3 {
+  animation-delay: 150ms;
+}
+.glass-card-enter-4 {
+  animation-delay: 200ms;
+}
+.glass-card-enter-5 {
+  animation-delay: 250ms;
+}
+.glass-card-enter-6 {
+  animation-delay: 300ms;
+}
+.glass-card-enter-7 {
+  animation-delay: 350ms;
+}
+.glass-card-enter-8 {
+  animation-delay: 400ms;
+}
+.glass-card-enter-9 {
+  animation-delay: 450ms;
+}
+.glass-card-enter-10 {
+  animation-delay: 500ms;
+}
+.glass-card-enter-11 {
+  animation-delay: 550ms;
+}
+
 /* Chat bubble entrance — slide in from below. */
 @keyframes chat-bubble-enter {
   from {

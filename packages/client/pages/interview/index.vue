@@ -135,7 +135,7 @@ const {
         ]"
       />
 
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
         <div class="card-body">
           <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div>
@@ -155,7 +155,13 @@ const {
           ></progress>
 
           <SectionGrid grid-token="threeColumnWide">
-            <article v-for="item in prepChecklist" :key="item.id" class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+            <UiGlassCard
+              v-for="(item, index) in prepChecklist"
+              :key="item.id"
+              :stagger-index="Math.min(index + 1, 11)"
+              variant="subtle"
+            >
+              <div :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                 <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <h3 class="font-semibold">{{ item.title }}</h3>
                   <span class="badge badge-sm" :class="prepStatusBadgeClass(item.ready)">
@@ -172,13 +178,14 @@ const {
                     {{ item.ctaLabel }}
                   </NuxtLink>
                 </div>
-            </article>
+              </div>
+            </UiGlassCard>
           </SectionGrid>
         </div>
       </div>
 
       <SectionGrid grid-token="twoColumnWide">
-        <div :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard variant="standard" :stagger-index="1">
           <div class="card-body">
             <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
@@ -210,9 +217,9 @@ const {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
 
-        <div :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard variant="standard" :stagger-index="2">
           <div class="card-body">
             <h2 class="card-title">{{ t("interviewHub.cards.studioDrillTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -231,7 +238,7 @@ const {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </SectionGrid>
 
       <InterviewRecentSessionsCard

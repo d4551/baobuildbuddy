@@ -158,7 +158,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </div>
       </div>
 
-      <section :class="SURFACE_GLASS_CARD_CLASS">
+      <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">

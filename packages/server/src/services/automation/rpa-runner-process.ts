@@ -1,4 +1,6 @@
-import { isAbsolute, resolve, sep } from "node:path";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { isAbsolute, join, resolve, sep } from "node:path";
 import {
   automationScriptEntryById,
   automationScriptIdSchema,
@@ -13,6 +15,7 @@ import type {
 
 const DEFAULT_KILL_SIGNAL = "SIGKILL";
 const NDJSON_LINE_SPLIT_PATTERN = /\r?\n/gu;
+const CURSOR_SANDBOX_BROWSER_CACHE_MARKER = "cursor-sandbox-cache";
 
 type ExecutionAbortState = {
   timedOut: boolean;
@@ -164,6 +167,26 @@ const resolveAutomationCommand = (scriptPath: string): string[] => {
   return [process.execPath, scriptPath];
 };
 
+const buildAutomationProcessEnv = (): NodeJS.ProcessEnv => {
+  const env = { ...process.env };
+  const configured = env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!configured || !configured.includes(CURSOR_SANDBOX_BROWSER_CACHE_MARKER)) {
+    return env;
+  }
+
+  const hostDefault =
+    process.platform === "darwin"
+      ? join(homedir(), "Library/Caches/ms-playwright")
+      : join(homedir(), ".cache/ms-playwright");
+  if (existsSync(hostDefault)) {
+    env.PLAYWRIGHT_BROWSERS_PATH = hostDefault;
+    return env;
+  }
+
+  delete env.PLAYWRIGHT_BROWSERS_PATH;
+  return env;
+};
+
 const spawnAutomationProcess = (
   scriptPath: string,
   signal: AbortSignal,
@@ -174,6 +197,7 @@ const spawnAutomationProcess = (
     stdin: "pipe",
     stdout: "pipe",
     stderr: "pipe",
+    env: buildAutomationProcessEnv(),
     signal,
     killSignal: killSignal ?? DEFAULT_KILL_SIGNAL,
   });

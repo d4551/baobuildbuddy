@@ -45,7 +45,8 @@ export const SHELL_DRAWER_CONTENT_CLASS = "flex min-h-screen min-w-0 flex-col ov
 export const SHELL_DRAWER_SIDE_CLASS = "z-20 is-drawer-close:overflow-visible";
 
 /** Shared navbar classes for authenticated shell pages. Persistent control layer (§5.1). */
-export const SHELL_NAVBAR_CLASS = "glass-subtle sticky top-0 z-10 border-b border-base-300";
+export const SHELL_NAVBAR_CLASS =
+  "glass-subtle sticky top-0 z-10 border-b border-base-300 transition-shadow duration-[var(--motion-standard)] ease-[var(--ease-response)]";
 
 /**
  * Glass surface for elevated cards/panels (fluid depth without palette literals).
@@ -56,6 +57,18 @@ export const SURFACE_GLASS_CARD_CLASS = "card card-border card-glass glass-inter
 export const SURFACE_GLASS_CARD_STRONG_CLASS =
   "card card-border card-glass-strong glass-interactive";
 export const SURFACE_GLASS_CARD_MODAL_CLASS = "card card-border card-glass-modal glass-interactive";
+
+/**
+ * Glass card hover animation (lift + shadow elevation). Applied automatically
+ * by UiGlassCard; never compose manually outside .bao canonical primitives.
+ */
+export const GLASS_CARD_HOVER_CLASS = "glass-card-hover";
+
+/**
+ * Glass card staggered entrance animation base class.
+ * Paired with `glass-card-enter-N` delay classes (0–11) in main.css.
+ */
+export const GLASS_CARD_ENTER_CLASS = "glass-card-enter";
 
 /**
  * Glass-clear surface for media controls, decorative indicators, and floating
@@ -87,7 +100,7 @@ export const SURFACE_GLASS_CARD_ERROR_CLASS = "glass-error";
 /** Shared sidebar surface classes. Floating drawer = glass candidate (§5.2).
  * Width transitions consume the motion token system (§7.2/§7.3). */
 export const SHELL_SIDEBAR_ASIDE_CLASS =
-  "glass-subtle flex min-h-full flex-col items-start transition-[width] duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:w-14 is-drawer-open:w-64";
+  "glass-subtle flex min-h-full flex-col items-start transition-[width,box-shadow,border-color] duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-close:w-14 is-drawer-open:w-64 border-r border-base-300";
 
 /** Shared sidebar menu layout classes. */
 export const SHELL_SIDEBAR_MENU_CLASS =

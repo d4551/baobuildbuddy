@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   CARD_BODY_COMFORTABLE_CLASS,
-  FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_CLASS,
@@ -10,7 +9,6 @@ import {
   STAT_CARD_ICON_BADGE_CLASS,
   STAT_CARD_TITLE_BLOCK_CLASS,
   STAT_CARD_VALUE_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 import type { DashboardStatCardViewModel } from "./dashboard-page-contracts";
 
@@ -21,12 +19,12 @@ defineProps<{
 
 <template>
   <SectionGrid grid-token="bento">
-    <NuxtLink
-      v-for="statCard in statCards"
+    <UiGlassCard
+      v-for="(statCard, index) in statCards"
       :key="statCard.id"
       :to="statCard.to"
-      :class="[SURFACE_GLASS_CARD_CLASS, '', FLUID_HEIGHT_CLASS]"
-      :aria-label="statCard.ariaLabel"
+      :link-aria-label="statCard.ariaLabel"
+      :stagger-index="index"
     >
       <div :class="CARD_BODY_COMFORTABLE_CLASS">
         <div :class="STAT_CARD_HEADER_ROW_CLASS">
@@ -57,6 +55,6 @@ defineProps<{
           </svg>
         </div>
       </div>
-    </NuxtLink>
+    </UiGlassCard>
   </SectionGrid>
 </template>
