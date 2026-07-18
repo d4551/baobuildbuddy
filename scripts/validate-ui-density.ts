@@ -41,8 +41,10 @@ const isSsotPrimitive = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(
 // Cramped row: gap-1 or gap-2 with multiple flex children and no wrap guard.
 const crampedRowPattern =
   /\bclass\s*=\s*["'][^"']*\b(?:flex|inline-flex)\b[^"']*\bgap-1\b[^"']*["']/gu;
-// Button with both an icon and a long text label (> 24 chars).
-const verboseButtonPattern = /<button\b[^>]*>([^<]{24,})<\/button>/gu;
+// Button tag pair — we extract both tag and inner content separately so we
+// can detect icon + long-text combos where `[^<]{24,}` would fail because
+// the icon SVG sits between the opening tag and the text node.
+const buttonTagPattern = /<button\b[^>]*>([\s\S]*?)<\/button>/gu;
 // Long paragraph in a card/control surface.
 const longParagraphInControlPattern =
   /\bclass\s*=\s*["'][^"']*\b(?:card-body|btn|stat|badge|chip|tooltip)[^"']*["'][^>]*>[^<]{280,}/gu;
@@ -77,16 +79,17 @@ const collectDensityViolations = (filePath: string, content: string): Validation
     }
   }
 
-  verboseButtonPattern.lastIndex = 0;
-  for (const match of template.matchAll(verboseButtonPattern)) {
-    const label = (match[1] ?? "").trim();
-    const buttonTag = match[0] ?? "";
-    const hasIcon = /<(?:svg|Icon|icon)\b/iu.test(buttonTag);
-    if (hasIcon && label.length > 24) {
+  buttonTagPattern.lastIndex = 0;
+  for (const match of template.matchAll(buttonTagPattern)) {
+    const inner = match[1] ?? "";
+    const hasIcon = /<(?:svg|Icon|icon)\b/iu.test(inner);
+    // Strip all nested tags to get visible text length.
+    const visibleText = inner.replace(/<[^>]+>/gu, "").trim();
+    if (hasIcon && visibleText.length > 24) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
-        message: `Button with icon + verbose label ("${label.slice(0, 30)}…", ${label.length} chars). Icon already communicates the action; shorten the label or use aria-label + icon-only on tight surfaces.`,
+        message: `Button with icon + verbose label ("${visibleText.slice(0, 30)}…", ${visibleText.length} chars). Icon already communicates the action; shorten the label or use aria-label + icon-only on tight surfaces.`,
       });
     }
   }

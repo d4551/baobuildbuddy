@@ -35,7 +35,8 @@ const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has
 // Raw numeric duration utilities: duration-100, duration-200, duration-1000, etc.
 const rawDurationPattern = /\bduration-\d+\b/gu;
 // Raw easing utilities (not the SSOT CSS variable form).
-const rawEasePattern = /\bease-(?:in|out|in-out|linear)\b/gu;
+// `in-out` must come before `in`/`out` to avoid matching `ease-in` from `ease-in-out`.
+const rawEasePattern = /\bease-(?:in-out|linear|in|out)\b/gu;
 // transition-all / transition opacity/transform/color are too broad — demand
 // explicit property transitions to keep will-change and compositing honest.
 const overlyBroadTransitionPattern = /\btransition-all\b/gu;
