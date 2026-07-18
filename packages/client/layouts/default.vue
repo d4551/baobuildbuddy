@@ -1,17 +1,7 @@
 <script setup lang="ts">
 import { AI_CHAT_PAGE_PATH } from "@bao/shared/constants/ai-chat";
 import { useI18n } from "vue-i18n";
-import {
-  APP_DRAWER_ID,
-  APP_MAIN_CONTENT_ID,
-  LAYOUT_DESKTOP_MEDIA_QUERY,
-  SHELL_DRAWER_CLASS,
-  SHELL_DRAWER_CONTENT_CLASS,
-  SHELL_DRAWER_SIDE_CLASS,
-  SHELL_MAIN_INNER_CLASS,
-  SHELL_SIDEBAR_ASIDE_CLASS,
-  SHELL_SKIP_LINK_CLASS,
-} from "~/constants/layout";
+import { APP_DRAWER_ID, APP_MAIN_CONTENT_ID, LAYOUT_DESKTOP_MEDIA_QUERY, SHELL_DRAWER_CLASS, SHELL_DRAWER_CONTENT_CLASS, SHELL_DRAWER_SIDE_CLASS, SHELL_MAIN_INNER_CLASS, SHELL_SIDEBAR_ASIDE_CLASS, SHELL_SKIP_LINK_CLASS } from "~/constants/layout";
 
 const { initTheme, theme, setTheme } = useTheme();
 const { settings } = useSettings();

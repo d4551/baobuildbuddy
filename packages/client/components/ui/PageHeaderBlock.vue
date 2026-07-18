@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  PAGE_HEADER_DESCRIPTION_CLASS,
-  PAGE_HEADER_OUTER_CLASS,
-  PAGE_HEADER_TITLE_CLASS,
-} from "~/constants/layout";
+import { PAGE_HEADER_DESCRIPTION_CLASS, PAGE_HEADER_OUTER_CLASS, PAGE_HEADER_TITLE_CLASS } from "~/constants/layout";
 
 type HeadingTag = "h1" | "h2";
 

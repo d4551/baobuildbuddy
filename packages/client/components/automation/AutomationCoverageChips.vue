@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import { AUTOMATION_COVERAGE_ITEMS, type AutomationCoverageItem } from "./automation-visuals";
@@ -29,7 +29,7 @@ function resolveCoverageClass(item: AutomationCoverageItem): string {
 
 <template>
   <div
-    class="flex flex-wrap items-center gap-2"
+    class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
     :aria-label="t('automation.hub.audit.coverageAria')"
   >
     <span

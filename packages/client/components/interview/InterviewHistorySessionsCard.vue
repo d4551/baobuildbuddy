@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
@@ -46,9 +47,9 @@ const viewSession = (id: string): void => {
 <template>
   <div class="card bg-base-200">
     <div class="card-body">
-      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="join">
             <button
               class="join-item btn btn-sm btn-ghost"
@@ -125,10 +126,10 @@ const viewSession = (id: string): void => {
       </div>
 
       <div v-else class="overflow-x-auto py-2">
-        <ul class="timeline timeline-vertical timeline-compact w-full">
+        <ul class="timeline timeline-vertical timeline-compact" :class="[FLUID_WIDTH_CLASS]">
           <li v-for="(session, index) in filteredSessions" :key="session.id">
             <hr v-if="index !== 0" :class="props.getTimelineLineClass(session.score)" />
-            <div class="timeline-start text-sm text-secondary">
+            <div class="timeline-start text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ props.formatDate(session.createdAt) }}
             </div>
             <div class="timeline-middle">
@@ -138,15 +139,15 @@ const viewSession = (id: string): void => {
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
               >
-                <span class="text-xs font-semibold">{{ props.formatScore(session.score) }}</span>
+                <span class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatScore(session.score) }}</span>
               </UiRadialMeter>
             </div>
             <div class="timeline-end timeline-box">
               <p class="font-semibold">{{ session.studioName }}</p>
-              <p class="text-sm text-secondary">{{ session.role }}</p>
-              <p class="text-xs text-muted">{{ props.formatDuration(session.duration ?? 0) }}</p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatDuration(session.duration ?? 0) }}</p>
               <button
-                class="btn btn-ghost btn-xs mt-2"
+                class="btn btn-ghost btn-xs" :class="[MARGIN_TOKEN_CLASS.mt2]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
               >

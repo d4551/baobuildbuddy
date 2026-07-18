@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 
@@ -16,12 +17,12 @@ const { t } = useI18n();
     class="card card-border bg-base-100"
     aria-labelledby="interview-session-feedback-title"
   >
-    <div class="card-body gap-4">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="space-y-1">
-        <h2 id="interview-session-feedback-title" class="card-title text-lg">
+        <h2 id="interview-session-feedback-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.feedbackTitle") }}
         </h2>
-        <p class="text-sm text-muted">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.feedbackDescription") }}
         </p>
       </div>
@@ -31,11 +32,11 @@ const { t } = useI18n();
         :class="currentQuestion.score !== undefined ? getAlertClass(currentQuestion.score) : 'alert-info'"
         aria-live="polite"
       >
-        <div class="space-y-2">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <p v-if="currentQuestion.score !== undefined" class="font-semibold">
             {{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}
           </p>
-          <p class="text-sm leading-6">
+          <p class="leading-6" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ currentQuestion.feedback }}
           </p>
         </div>

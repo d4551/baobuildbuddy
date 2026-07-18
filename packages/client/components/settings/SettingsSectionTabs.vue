@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { TRUNCATE_FLEX_CHILD_CLASS } from "~/constants/layout";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import WorkspaceSectionNavigator from "~/components/ui/WorkspaceSectionNavigator.vue";
 import { SETTINGS_SECTION_ITEMS, type SettingsSectionId } from "./settings-sections";
@@ -16,7 +17,7 @@ const activeSection = defineModel<SettingsSectionId>("activeSection", {
     fallback-description-key="settings.subtitle"
     :build-route="APP_ROUTE_BUILDERS.settingsSection"
   >
-    <div class="min-w-0">
+    <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
       <section
         v-for="section in SETTINGS_SECTION_ITEMS"
         :id="`settings-section-panel-${section.id}`"

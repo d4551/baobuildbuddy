@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
@@ -68,10 +68,10 @@ const roundedProgress = computed(() => Math.round(props.progress));
         </template>
       </PageHeaderBlock>
 
-      <div class="stats stats-vertical w-full bg-base-200 lg:stats-horizontal" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("interviewSession.timeLabel") }}</div>
-          <div class="stat-value text-2xl">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
             <time
               class="font-mono tabular-nums"
               :datetime="elapsedTimeDuration"
@@ -86,7 +86,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
 
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("interviewSession.progressStatTitle") }}</div>
-          <div class="stat-value text-2xl text-primary">{{ roundedProgress }}%</div>
+          <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ roundedProgress }}%</div>
           <div class="stat-desc">
             {{ t("interviewSession.progressStatDescription", { percent: roundedProgress }) }}
           </div>
@@ -94,19 +94,19 @@ const roundedProgress = computed(() => Math.round(props.progress));
 
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("interviewSession.modeTitle") }}</div>
-          <div class="stat-value text-2xl">{{ modeLabel }}</div>
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ modeLabel }}</div>
           <div class="stat-desc">{{ conversationStyleLabel }}</div>
         </div>
 
         <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("interviewSession.voiceTitle") }}</div>
-          <div class="stat-value text-2xl">{{ voiceValue }}</div>
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ voiceValue }}</div>
           <div class="stat-desc">{{ voiceDescription }}</div>
         </div>
       </div>
 
       <progress
-        class="progress progress-primary w-full"
+        class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
         :value="progress"
         max="100"
         :aria-label="t('interviewSession.progressAria')"

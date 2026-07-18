@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import {
   COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_POSITION_MIN_LENGTH,
@@ -31,7 +32,7 @@ const formData = defineModel<{
             v-model="formData.company"
             type="text"
             :minlength="COVER_LETTER_COMPANY_MIN_LENGTH"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('coverLetterDetailPage.details.companyPlaceholder')"
             :aria-label="t('coverLetterDetailPage.details.companyAria')"
           />
@@ -46,7 +47,7 @@ const formData = defineModel<{
             v-model="formData.position"
             type="text"
             :minlength="COVER_LETTER_POSITION_MIN_LENGTH"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('coverLetterDetailPage.details.positionPlaceholder')"
             :aria-label="t('coverLetterDetailPage.details.positionAria')"
           />
@@ -59,7 +60,7 @@ const formData = defineModel<{
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.templateLegend") }}</legend>
           <select
             v-model="formData.template"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('coverLetterDetailPage.details.templateAria')"
           >
             <option v-for="template in COVER_LETTER_TEMPLATE_OPTIONS" :key="template" :value="template">

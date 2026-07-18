@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 interface ResumeEditorToolbarProps {
@@ -20,13 +21,13 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
     <button class="btn btn-ghost btn-sm" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
       <IconArrowLeft class="h-4 w-4" />
       {{ t("resumePage.backButton") }}
     </button>
 
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button
         class="btn btn-sm btn-outline"
         :disabled="enhancing"

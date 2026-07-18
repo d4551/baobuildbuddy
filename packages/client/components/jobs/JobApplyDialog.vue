@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 defineProps<{
   open: boolean;
   titleId: string;
@@ -24,7 +25,7 @@ const emit = defineEmits<{
     :close-backdrop-label="t('jobDetail.closeButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="mb-4 text-lg font-bold">
+    <h3 :id="titleId" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("jobDetail.applyDialogTitle", { title: jobTitle }) }}
     </h3>
 
@@ -32,7 +33,7 @@ const emit = defineEmits<{
       <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
       <textarea
         v-model="applicationNotes"
-        class="textarea w-full"
+        class="textarea" :class="[FLUID_WIDTH_CLASS]"
         rows="5"
         :placeholder="t('jobDetail.applicationNotesPlaceholder')"
         :aria-label="t('jobDetail.applicationNotesAria')"

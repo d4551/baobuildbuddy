@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -22,7 +22,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="min-w-0 flex-1 space-y-6">
+  <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <section
       v-for="group in endpointGroups"
       :key="group.id"
@@ -36,20 +36,20 @@ const { t } = useI18n();
           :id="endpoint.id"
           :key="endpoint.id"
           :ref="registerEndpointSectionRef(endpoint.id)"
-          class="space-y-4 border border-base-200 bg-base-100 p-4 scroll-mt-24" :class="[RADIUS_TOKEN_CLASS.lg]"
+          class="border border-base-200 bg-base-100 scroll-mt-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4]" :class="[RADIUS_TOKEN_CLASS.lg]"
         >
-          <header class="flex min-w-0 flex-wrap items-start justify-between gap-3">
-            <div class="min-w-0 flex-1 space-y-2">
-              <p class="flex min-w-0 flex-wrap items-center gap-2">
+          <header class="flex flex-wrap items-start justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
+            <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+              <p class="flex flex-wrap items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span :class="methodBadgeClass(endpoint.method)">
                   {{ methodLabel(endpoint.method) }}
                 </span>
-                <span class="min-w-0 break-all font-mono text-sm">{{ endpoint.path }}</span>
+                <span class="break-all font-mono" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]">{{ endpoint.path }}</span>
               </p>
-              <h3 class="text-lg font-semibold break-words">
+              <h3 class="font-semibold break-words" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                 {{ endpoint.operation.summary || endpoint.operation.operationId || endpoint.path }}
               </h3>
-              <p class="text-sm text-secondary break-words">
+              <p class="text-secondary break-words" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ endpoint.operation.description || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>
@@ -69,17 +69,17 @@ const { t } = useI18n();
           </header>
 
           <SectionGrid grid-token="twoColumn">
-            <div class="border border-base-200 p-3" :class="[RADIUS_TOKEN_CLASS.lg]">
-              <p class="text-xs font-semibold uppercase text-muted">
+            <div class="border border-base-200" :class="[PADDING_TOKEN_CLASS.p3, RADIUS_TOKEN_CLASS.lg]">
+              <p class="font-semibold uppercase text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                 {{ t("apiDocs.endpoint.methodLabel") }}
               </p>
-              <p class="mt-1 font-mono text-sm">{{ methodLabel(endpoint.method) }}</p>
+              <p class="font-mono" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">{{ methodLabel(endpoint.method) }}</p>
             </div>
-            <div class="border border-base-200 p-3" :class="[RADIUS_TOKEN_CLASS.lg]">
-              <p class="text-xs font-semibold uppercase text-muted">
+            <div class="border border-base-200" :class="[PADDING_TOKEN_CLASS.p3, RADIUS_TOKEN_CLASS.lg]">
+              <p class="font-semibold uppercase text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                 {{ t("apiDocs.endpoint.operationIdLabel") }}
               </p>
-              <p class="mt-1 text-sm">
+              <p :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ endpoint.operation.operationId || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>

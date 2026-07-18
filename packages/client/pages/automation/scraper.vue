@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -150,7 +151,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
             <StatsRow :stats="summaryStats" />
 
             <template v-if="activeSection === 'providers'">
-              <div class="space-y-6">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
                 <AutomationScraperOverviewCard :runs-route="APP_ROUTES.automationRuns" />
 
                 <AutomationScraperCapabilityGrid

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 
@@ -19,18 +20,18 @@ const emit = defineEmits<{
 <template>
   <section class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title mb-4">{{ t("gamificationPage.dailyChallengesTitle") }}</h2>
+      <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4]">{{ t("gamificationPage.dailyChallengesTitle") }}</h2>
 
-      <div v-if="challenges.length > 0" class="space-y-3">
+      <div v-if="challenges.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <article
           v-for="challenge in challenges"
           :key="challenge.id"
           class="card card-border bg-base-100"
         >
-          <div class="card-body p-4">
+          <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <div class="mb-2 flex items-center justify-between">
               <h3 class="font-semibold">{{ challenge.name }}</h3>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span class="badge badge-primary">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
                 <span v-if="challenge.completed" class="badge badge-success">
                   {{ t("gamificationPage.challengeDoneLabel") }}
@@ -38,8 +39,8 @@ const emit = defineEmits<{
               </div>
             </div>
 
-            <div class="flex items-center gap-3">
-              <span class="w-8 text-lg" aria-hidden="true">{{ challenge.icon }}</span>
+            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+              <span class="w-8" :class="[TYPOGRAPHY_SCALE_CLASS.lg]" aria-hidden="true">{{ challenge.icon }}</span>
               <progress
                 class="progress flex-1"
                 :class="challenge.completed ? 'progress-success' : 'progress-primary'"
@@ -50,12 +51,12 @@ const emit = defineEmits<{
                 :aria-valuemax="getChallengeGoal(challenge)"
                 :aria-label="t('gamificationPage.a11y.challengeProgress')"
               ></progress>
-              <span class="text-sm font-medium">
+              <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ getChallengeProgress(challenge) }} / {{ getChallengeGoal(challenge) }}
               </span>
             </div>
 
-            <div v-if="canClaimChallenge(challenge)" class="card-actions mt-2 justify-end">
+            <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <button
                 type="button"
                 class="btn btn-success btn-sm"
@@ -75,7 +76,7 @@ const emit = defineEmits<{
         </article>
       </div>
 
-      <p v-else class="text-sm text-muted">{{ t("gamificationPage.noChallengesLabel") }}</p>
+      <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("gamificationPage.noChallengesLabel") }}</p>
     </div>
   </section>
 </template>

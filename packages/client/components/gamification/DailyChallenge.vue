@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -21,7 +21,7 @@ const { t } = useI18n();
 <template>
   <div
     class="card card-border card-glass relative overflow-hidden"
-    :class="challenge.completed ? 'glass-disabled' : 'hover: transition-shadow'" :class="[SHADOW_TOKEN_CLASS.lg]"
+    :class="[challenge.completed ? 'glass-disabled' : 'hover: transition-shadow', SHADOW_TOKEN_CLASS.lg]"
   >
     <div
       v-if="challenge.completed"
@@ -29,9 +29,9 @@ const { t } = useI18n();
       role="status"
       :aria-label="t('dailyChallengeCard.completedBanner')"
     >
-      <div class="flex items-center gap-2 text-success font-bold">
+      <div class="flex items-center text-success font-bold" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <IconCheckCircle class="h-12 w-12" />
-        <span class="text-2xl">{{ t("dailyChallengeCard.completedBanner") }}</span>
+        <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("dailyChallengeCard.completedBanner") }}</span>
       </div>
     </div>
 
@@ -44,9 +44,9 @@ const { t } = useI18n();
         </div>
       </div>
 
-      <p class="text-sm text-secondary">{{ challenge.description }}</p>
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ challenge.description }}</p>
 
-      <div class="card-actions justify-end mt-4">
+      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
         <button
           class="btn btn-primary"
           :disabled="challenge.completed"

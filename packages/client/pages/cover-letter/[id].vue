@@ -8,7 +8,7 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
+import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
@@ -259,7 +259,7 @@ async function handleExport(format: "pdf" | "docx") {
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <CoverLetterDetailStats
         :content-character-count="contentCharacterCount"
         :content-section-count="contentSectionCount"

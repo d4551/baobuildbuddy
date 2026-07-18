@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { JobProviderForm } from "./job-intelligence";
 
@@ -20,11 +21,11 @@ function providerBadgeLabel(isConfigured: boolean): string {
 <template>
   <SectionGrid grid-token="threeColumn">
     <article class="card card-border card-glass">
-      <div class="card-body gap-4 p-4">
-        <div class="flex items-start justify-between gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.hitmarkerTitle") }}</h3>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.hitmarkerDescription") }}
             </p>
           </div>
@@ -47,7 +48,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
             v-model="jobProviderForm.hitmarkerApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.hitmarkerApiLabel')"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
 
@@ -57,7 +58,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
             v-model="jobProviderForm.hitmarkerDefaultQuery"
             :aria-label="t('settings.jobIntelligence.hitmarkerQueryLabel')"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
 
@@ -67,18 +68,18 @@ function providerBadgeLabel(isConfigured: boolean): string {
             v-model="jobProviderForm.hitmarkerDefaultLocation"
             :aria-label="t('settings.jobIntelligence.hitmarkerLocationLabel')"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
       </div>
     </article>
 
     <article class="card card-border card-glass">
-      <div class="card-body gap-4 p-4">
-        <div class="flex items-start justify-between gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.greenhouseTitle") }}</h3>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.greenhouseDescription") }}
             </p>
           </div>
@@ -96,7 +97,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
             v-model="jobProviderForm.greenhouseApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.greenhouseApiLabel')"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
 
@@ -108,18 +109,18 @@ function providerBadgeLabel(isConfigured: boolean): string {
             type="number"
             min="1"
             max="20"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
       </div>
     </article>
 
     <article class="card card-border card-glass">
-      <div class="card-body gap-4 p-4">
-        <div class="flex items-start justify-between gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.leverTitle") }}</h3>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.leverDescription") }}
             </p>
           </div>
@@ -137,7 +138,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
             v-model="jobProviderForm.leverApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.leverApiLabel')"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
 
@@ -149,7 +150,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
             type="number"
             min="1"
             max="20"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
           />
         </fieldset>
       </div>

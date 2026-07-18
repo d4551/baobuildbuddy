@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -17,7 +17,7 @@ const { t } = useI18n();
   <section class="card bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]" :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
-      <div v-if="screenshotPaths.length === 0" class="text-sm text-muted">
+      <div v-if="screenshotPaths.length === 0" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("automation.runDetail.noScreenshots") }}
       </div>
       <SectionGrid v-else grid-token="threeColumn">
@@ -36,7 +36,7 @@ const { t } = useI18n();
             />
             <div
               v-else
-              class="w-full border border-dashed border-base-content/30 p-4 text-sm text-secondary" :class="[RADIUS_TOKEN_CLASS.lg]"
+              class="border border-dashed border-base-content/30 text-secondary" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm, RADIUS_TOKEN_CLASS.lg]"
               role="status"
             >
               {{ t("automation.runDetail.screenshotLoadError", { index: index + 1 }) }}
@@ -44,7 +44,7 @@ const { t } = useI18n();
           </figure>
           <div class="card-body px-4 py-3">
             <a
-              class="link link-primary text-sm"
+              class="link link-primary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
               :href="screenshotEndpoint(index)"
               target="_blank"
               rel="noopener noreferrer"

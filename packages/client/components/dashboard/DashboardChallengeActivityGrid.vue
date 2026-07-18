@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -20,18 +21,18 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div v-if="dailyChallenge" class="card h-full bg-base-200">
+    <div v-if="dailyChallenge" class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
-        <h2 class="card-title mb-3 text-lg">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
+        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
         <div class="card bg-base-100">
-          <div class="card-body gap-3 p-4">
-            <div class="flex items-center justify-between gap-3">
+          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
+            <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
               <span class="badge badge-primary">
                 {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dailyChallenge.xpReward }) }}
               </span>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <progress
                 class="progress flex-1"
                 :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
@@ -42,7 +43,7 @@ const { t } = useI18n();
                 :aria-valuemax="dailyChallenge.goal"
                 :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
               ></progress>
-              <span class="text-sm font-medium">
+              <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ dailyChallenge.progress }} / {{ dailyChallenge.goal }}
               </span>
             </div>
@@ -51,9 +52,9 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div class="card h-full bg-base-200">
+    <div class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
-        <h2 class="card-title mb-3 text-lg">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
+        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul class="list rounded-box bg-base-100">
           <li
             v-for="(activity, index) in recentActivity"
@@ -77,14 +78,14 @@ const { t } = useI18n();
               </svg>
             </div>
             <div class="list-col-grow">
-              <p class="text-sm font-medium">{{ activity.description }}</p>
-              <p class="text-xs text-muted">{{ formatTimeAgo(activity.timestamp) }}</p>
+              <p class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ activity.description }}</p>
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ formatTimeAgo(activity.timestamp) }}</p>
             </div>
           </li>
 
           <li
             v-if="recentActivity.length === 0"
-            class="list-row text-center text-sm text-muted"
+            class="list-row text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
           >
             {{ t(DASHBOARD_COPY_KEYS.recentActivityEmptyLabel) }}
           </li>

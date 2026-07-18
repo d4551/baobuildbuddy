@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { EmailTransportSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -49,14 +50,14 @@ const { t } = useI18n();
         </template>
       </SettingsPanelHeader>
 
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">
             {{ t("settings.emailDelivery.hostLegend") }}
           </legend>
           <input
             v-model="emailTransportForm.host"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             type="text"
             :placeholder="t('settings.emailDelivery.hostPlaceholder')"
             :aria-label="t('settings.emailDelivery.hostAria')"
@@ -70,7 +71,7 @@ const { t } = useI18n();
             </legend>
             <input
               v-model.number="emailTransportForm.port"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="number"
               min="1"
               max="65535"
@@ -84,7 +85,7 @@ const { t } = useI18n();
             </legend>
             <input
               v-model.number="emailTransportForm.connectionTimeoutSeconds"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="number"
               min="1"
               max="120"
@@ -100,7 +101,7 @@ const { t } = useI18n();
             </legend>
             <select
               v-model="emailTransportForm.security"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.emailDelivery.securityAria')"
             >
               <option
@@ -119,7 +120,7 @@ const { t } = useI18n();
             </legend>
             <select
               v-model="emailTransportForm.authMethod"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.emailDelivery.authAria')"
             >
               <option
@@ -140,7 +141,7 @@ const { t } = useI18n();
             </legend>
             <input
               v-model="emailTransportForm.username"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
               :placeholder="
                 t('settings.emailDelivery.usernamePlaceholder')
@@ -155,7 +156,7 @@ const { t } = useI18n();
             </legend>
             <input
               v-model="emailTransportForm.fromName"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
               :placeholder="
                 t('settings.emailDelivery.fromNamePlaceholder', {
@@ -173,7 +174,7 @@ const { t } = useI18n();
           </legend>
           <input
             v-model="emailTransportForm.fromEmail"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             type="email"
             :placeholder="
               t('settings.emailDelivery.fromEmailPlaceholder')
@@ -191,7 +192,7 @@ const { t } = useI18n();
           </legend>
           <input
             v-model="emailTransportPasswordDraft"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             type="password"
             :placeholder="t('settings.emailDelivery.passwordPlaceholder')"
             :aria-label="t('settings.emailDelivery.passwordAria')"
@@ -206,7 +207,7 @@ const { t } = useI18n();
         </fieldset>
       </div>
 
-      <div class="card-actions justify-end gap-2 mt-2">
+      <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
         <button
           class="btn btn-outline"
           :disabled="!hasStoredPassword"

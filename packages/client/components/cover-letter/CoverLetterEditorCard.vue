@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 defineProps<{
   contentCharacterCount: number;
   t: (key: string, values?: Record<string, unknown>) => string;
@@ -24,17 +25,17 @@ const emit = defineEmits<{
 
       <textarea
         v-model="contentText"
-        class="textarea w-full font-mono text-sm"
+        class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
         rows="20"
         :placeholder="t('coverLetterDetailPage.editor.placeholder')"
         :aria-label="t('coverLetterDetailPage.editor.aria')"
       ></textarea>
 
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <span class="text-sm text-muted">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
+        <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
-        <div class="flex gap-2">
+        <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>

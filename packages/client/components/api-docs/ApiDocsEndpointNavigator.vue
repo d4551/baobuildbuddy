@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
@@ -19,20 +19,19 @@ const { t } = useI18n();
 
 <template>
   <aside class="card bg-base-100 lg:sticky lg:top-6 lg:w-80 lg:shrink-0" :class="[SHADOW_TOKEN_CLASS.sm]">
-    <div class="card-body gap-4">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
-        <ul class="space-y-4">
-          <li v-for="group in endpointGroups" :key="group.id" class="space-y-2">
-            <p class="text-sm font-semibold uppercase tracking-wide text-muted">
+        <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <li v-for="group in endpointGroups" :key="group.id" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-semibold uppercase tracking-wide text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ group.label }}
             </p>
-            <ul class="space-y-2">
+            <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
               <li v-for="endpoint in group.endpoints" :key="endpoint.id">
                 <button
                   type="button"
-                  class="btn btn-sm btn-ghost h-auto w-full justify-start whitespace-normal py-2 text-left"
-                  :class="{ 'btn-primary': activeEndpointId === endpoint.id }"
+                  class="btn btn-sm btn-ghost h-auto justify-start whitespace-normal py-2 text-left" :class="[FLUID_WIDTH_CLASS, { 'btn-primary': activeEndpointId === endpoint.id }]"
                   :aria-label="
                     t('apiDocs.endpoint.navigateAria', {
                       method: methodLabel(endpoint.method),
@@ -45,7 +44,7 @@ const { t } = useI18n();
                   <span :class="methodBadgeClass(endpoint.method)" class="mr-2">
                     {{ methodLabel(endpoint.method) }}
                   </span>
-                  <span class="min-w-0 break-all font-mono text-xs">{{ endpoint.path }}</span>
+                  <span class="break-all font-mono" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">{{ endpoint.path }}</span>
                 </button>
               </li>
             </ul>

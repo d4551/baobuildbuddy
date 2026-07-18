@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -108,7 +108,7 @@ function studioDetailLocation(location: string | undefined): string {
     spacing-token="comfortable"
     labelled-by="studio-detail-title"
   >
-    <div class="space-y-3">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
       <AppBreadcrumbs :crumbs="breadcrumbs" />
       <PageHeroHeader
         title-id="studio-detail-title"
@@ -144,24 +144,24 @@ function studioDetailLocation(location: string | undefined): string {
         <template #aside>
           <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body">
-              <div class="flex items-start gap-4">
+              <div class="flex items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div class="avatar placeholder">
                   <div class="bg-base-300 text-base-content w-20" :class="[RADIUS_TOKEN_CLASS.full]">
-                    <span class="text-3xl">{{ studioInitial }}</span>
+                    <span :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ studioInitial }}</span>
                   </div>
                 </div>
-                <div class="min-w-0 flex-1 space-y-3">
+                <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                   <div>
-                    <h2 class="card-title text-lg">{{ studioSummaryTitle }}</h2>
+                    <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ studioSummaryTitle }}</h2>
                   </div>
-                  <div class="flex flex-wrap gap-2">
+                  <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                     <span class="badge badge-primary">{{ studioTypeLabel(t, studio?.type) }}</span>
                     <span class="badge">{{ studioSizeLabel(t, studio?.size) }}</span>
                     <span v-if="studio?.remoteWork" class="badge badge-success">
                       {{ t("studioDetail.remoteFriendlyBadge") }}
                     </span>
                   </div>
-                  <div class="stats stats-vertical w-full bg-base-200 sm:stats-horizontal">
+                  <div class="stats stats-vertical bg-base-200 sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
                     <div class="stat">
                       <div class="stat-title">{{ t("studioDetail.info.locationLabel") }}</div>
                       <div class="stat-value text-base">
@@ -212,28 +212,28 @@ function studioDetailLocation(location: string | undefined): string {
     />
 
     <SectionGrid v-else grid-token="threeColumnLg">
-      <div class="space-y-6 lg:col-span-2">
+      <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
-            <div class="space-y-3">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
               <div>
-                <p class="text-xs text-muted">{{ t("studioDetail.culture.workStyleLabel") }}</p>
+                <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioDetail.culture.workStyleLabel") }}</p>
                 <p>{{ cultureWorkStyle }}</p>
               </div>
               <div v-if="cultureEnvironment">
-                <p class="text-xs text-muted">{{ t("studioDetail.culture.environmentLabel") }}</p>
+                <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioDetail.culture.environmentLabel") }}</p>
                 <p>{{ cultureEnvironment }}</p>
               </div>
               <div v-if="cultureValues.length > 0">
-                <p class="text-xs text-muted">{{ t("studioDetail.culture.valuesLabel") }}</p>
-                <div class="mt-1 flex flex-wrap gap-2">
+                <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioDetail.culture.valuesLabel") }}</p>
+                <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
                   <span v-for="value in cultureValues" :key="value" class="badge badge-outline badge-sm">
                     {{ value }}
                   </span>
                 </div>
               </div>
-              <p v-else class="text-sm text-secondary">
+              <p v-else class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("studioDetail.culture.noValues") }}
               </p>
             </div>
@@ -250,7 +250,7 @@ function studioDetailLocation(location: string | undefined): string {
         <div v-if="studio.technologies?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span v-for="tech in studio.technologies" :key="tech" class="badge badge-primary badge-lg">
                 {{ tech }}
               </span>
@@ -259,12 +259,12 @@ function studioDetailLocation(location: string | undefined): string {
         </div>
       </div>
 
-      <div class="space-y-6">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <div v-if="studio.games?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
-            <h2 class="card-title text-lg">{{ t("studioDetail.sections.notableGames") }}</h2>
-            <ul class="space-y-2">
-              <li v-for="game in studio.games" :key="game" class="flex items-center gap-2">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("studioDetail.sections.notableGames") }}</h2>
+            <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+              <li v-for="game in studio.games" :key="game" class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>

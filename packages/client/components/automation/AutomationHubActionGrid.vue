@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
@@ -17,12 +17,11 @@ const { t } = useI18n();
     <div
       v-for="card in orderedCards"
       :key="card.id"
-      class="card card-border h-full bg-base-100 transition-colors hover:bg-base-200"
-      :class="primaryCardId === card.id ? 'ring-2 ring-primary/40' : ''"
+      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
     >
       <div class="card-body">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="t(card.titleKey)">
               <span
                 class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
@@ -41,8 +40,8 @@ const { t } = useI18n();
             {{ t("automation.hub.pipelineTitle") }}
           </span>
         </div>
-        <p class="text-sm text-secondary">{{ t(card.descriptionKey) }}</p>
-        <div class="card-actions mt-4 justify-end">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t(card.descriptionKey) }}</p>
+        <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
           <NuxtLink
             :to="card.to"
             class="btn btn-outline"

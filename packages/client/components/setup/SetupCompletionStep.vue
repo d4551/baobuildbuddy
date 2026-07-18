@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -33,8 +34,8 @@ function updateTextValue(
 </script>
 
 <template>
-  <div class="space-y-4 text-center">
-    <div class="mb-4 flex justify-center">
+  <div class="text-center" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+    <div class="flex justify-center" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -51,7 +52,7 @@ function updateTextValue(
       </svg>
       <span class="sr-only">{{ t("setup.successStatusAria") }}</span>
     </div>
-    <h2 class="text-lg font-semibold">{{ t("setup.doneTitle") }}</h2>
+    <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.doneTitle") }}</h2>
     <p class="text-secondary">
       {{ t("setup.doneDescription", { assistant: assistantName }) }}
     </p>
@@ -63,7 +64,7 @@ function updateTextValue(
     >
       <div>
         <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
-        <div class="text-sm">{{ t("setup.auth.setupTokenDescription") }}</div>
+        <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.setupTokenDescription") }}</div>
       </div>
     </div>
 
@@ -74,35 +75,35 @@ function updateTextValue(
     >
       <div>
         <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
-        <div class="text-sm">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
+        <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
       </div>
     </div>
 
-    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label w-full text-left">
+    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.setupTokenLegend") }}</span>
       <input
         :value="authSetupToken"
         type="password"
         :placeholder="t('setup.auth.setupTokenPlaceholder')"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.auth.setupTokenAria')"
         @input="updateTextValue($event, 'update:auth-setup-token')"
       />
     </label>
 
-    <label v-if="needsStoredApiKey" class="floating-label w-full text-left">
+    <label v-if="needsStoredApiKey" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.apiKeyLegend") }}</span>
       <input
         :value="existingApiKey"
         type="password"
         :placeholder="t('setup.auth.apiKeyPlaceholder')"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.auth.apiKeyAria')"
         @input="updateTextValue($event, 'update:existing-api-key')"
       />
     </label>
 
-    <div class="flex justify-center gap-2">
+    <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="emit('back')">
         {{ t("setup.backButton") }}
       </button>

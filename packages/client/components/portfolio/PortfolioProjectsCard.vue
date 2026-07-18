@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
@@ -35,7 +36,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 <template>
   <section class="card bg-base-200">
     <div class="card-body">
-      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("portfolioPage.projects.title") }}</h2>
         <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
           <IconPlus class="h-4 w-4" />
@@ -63,23 +64,23 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             <NuxtImg
               :src="project.image"
               :alt="project.title"
-              class="h-full w-full object-cover"
+              class="object-cover" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]"
               sizes="sm:100vw md:50vw lg:33vw"
               format="webp"
             />
           </figure>
 
           <div class="card-body">
-            <div class="flex items-start justify-between gap-2">
+            <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <h3 class="card-title text-base">{{ project.title }}</h3>
               <svg class="h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
               </svg>
             </div>
 
-            <p class="line-clamp-3 text-sm text-secondary">{{ project.description }}</p>
+            <p class="line-clamp-3 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
 
-            <div v-if="hasTechnologies(project)" class="mt-2 flex flex-wrap gap-1">
+            <div v-if="hasTechnologies(project)" class="flex flex-wrap gap-1" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <span
                 v-for="tech in project.technologies.slice(0, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT)"
                 :key="tech"
@@ -95,7 +96,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
               </span>
             </div>
 
-            <div class="mt-2 flex items-center gap-2">
+            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
               <span v-if="project.featured" class="badge badge-primary badge-xs">
                 {{ t("portfolioPage.projects.featuredBadge") }}
               </span>
@@ -104,14 +105,14 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 :href="project.liveUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="link link-primary text-xs"
+                class="link link-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"
                 :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
               >
                 {{ t("portfolioPage.projects.openProjectButton") }}
               </a>
             </div>
 
-            <div class="card-actions mt-4 justify-between">
+            <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
               <div class="join">
                 <button
                   class="btn join-item btn-xs btn-ghost"
@@ -131,7 +132,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 </button>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <button
                   class="btn btn-xs btn-outline"
                   :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"

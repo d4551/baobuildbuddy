@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
@@ -35,21 +36,21 @@ const { t } = useI18n();
 <template>
   <div class="card sticky top-6 bg-base-200">
     <div class="card-body">
-      <div class="mb-4 flex items-center justify-between">
-        <h2 class="card-title text-lg">{{ t("jobsPage.filtersTitle") }}</h2>
+      <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobsPage.filtersTitle") }}</h2>
         <button class="btn btn-ghost btn-xs" :aria-label="t('jobsPage.clearFiltersAria')" @click="$emit('clear')">
           {{ t("jobsPage.clearFiltersButton") }}
         </button>
       </div>
 
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.locationLegend") }}</legend>
           <input
             v-model="location"
             type="text"
             :placeholder="t('jobsPage.locationPlaceholder')"
-            class="input input-sm w-full"
+            class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('jobsPage.locationAria')"
           />
         </fieldset>
@@ -68,7 +69,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.experienceLegend") }}</legend>
-          <select v-model="experienceLevel" class="select select-sm w-full" :aria-label="t('jobsPage.experienceAria')">
+          <select v-model="experienceLevel" class="select select-sm" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('jobsPage.experienceAria')">
             <option :value="JOB_FILTER_ALL_VALUE">{{ experienceOptionLabel(JOB_FILTER_ALL_VALUE) }}</option>
             <option v-for="level in experienceOptions" :key="level" :value="level">
               {{ experienceOptionLabel(level) }}
@@ -78,7 +79,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.studioTypeLegend") }}</legend>
-          <select v-model="studioType" class="select select-sm w-full" :aria-label="t('jobsPage.studioTypeAria')">
+          <select v-model="studioType" class="select select-sm" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('jobsPage.studioTypeAria')">
             <option :value="JOB_FILTER_ALL_VALUE">{{ studioTypeOptionLabel(JOB_FILTER_ALL_VALUE) }}</option>
             <option v-for="studioTypeValue in studioTypeOptions" :key="studioTypeValue" :value="studioTypeValue">
               {{ studioTypeOptionLabel(studioTypeValue) }}
@@ -88,7 +89,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.platformLegend") }}</legend>
-          <select v-model="platform" class="select select-sm w-full" :aria-label="t('jobsPage.platformAria')">
+          <select v-model="platform" class="select select-sm" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('jobsPage.platformAria')">
             <option :value="JOB_FILTER_ALL_VALUE">{{ platformOptionLabel(JOB_FILTER_ALL_VALUE) }}</option>
             <option v-for="platformValue in platformOptions" :key="platformValue" :value="platformValue">
               {{ platformOptionLabel(platformValue) }}
@@ -98,7 +99,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.genreLegend") }}</legend>
-          <select v-model="genre" class="select select-sm w-full" :aria-label="t('jobsPage.genreAria')">
+          <select v-model="genre" class="select select-sm" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('jobsPage.genreAria')">
             <option :value="JOB_FILTER_ALL_VALUE">{{ genreOptionLabel(JOB_FILTER_ALL_VALUE) }}</option>
             <option v-for="genreValue in genreOptions" :key="genreValue" :value="genreValue">
               {{ genreOptionLabel(genreValue) }}

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
 import type {
@@ -26,13 +27,13 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
 
 <template>
   <section class="card bg-base-200">
-    <div class="card-body gap-4">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div>
-        <h2 class="card-title text-lg">{{ props.title }}</h2>
-        <p class="text-sm text-secondary">{{ props.description }}</p>
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ props.title }}</h2>
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ props.description }}</p>
       </div>
 
-      <ul class="steps steps-vertical xl:steps-horizontal w-full" :aria-label="props.ariaLabel">
+      <ul class="steps steps-vertical xl:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="props.ariaLabel">
         <li
           v-for="step in props.steps"
           :key="step.id"
@@ -44,7 +45,7 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
         >
           <NuxtLink
             :to="step.to"
-            class="inline-flex items-center gap-2 link link-hover"
+            class="inline-flex items-center link link-hover" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-current="step.status === 'inProgress' ? 'step' : undefined"
           >
             <span>{{ t(step.labelKey) }}</span>

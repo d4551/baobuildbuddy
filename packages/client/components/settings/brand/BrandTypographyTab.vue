@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
@@ -22,19 +22,19 @@ const brandForm = defineModel<{
 
 <template>
   <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-    <div class="card-body gap-4 p-4 md:p-6">
-      <p class="text-sm text-secondary">
+    <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.typographyDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+      <SectionGrid grid-token="twoColumn" extra-:class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.fontStylesheetLegend") }}
           </legend>
           <input
             v-model="brandForm.fontStylesheetUrl"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
             :placeholder="t('settings.brand.fontStylesheetPlaceholder')"
             :aria-label="t('settings.brand.fontStylesheetAria')"
@@ -45,34 +45,34 @@ const brandForm = defineModel<{
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.displayFontLegend") }}
           </legend>
           <input
             v-model="brandForm.displayFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.displayFontAria')"
           />
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.bodyFontLegend") }}
           </legend>
           <input
             v-model="brandForm.bodyFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.bodyFontAria')"
           />
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.monoFontLegend") }}
           </legend>
           <input
             v-model="brandForm.monoFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.monoFontAria')"
           />
         </fieldset>

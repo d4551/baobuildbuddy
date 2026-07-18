@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { RecentInterviewSession } from "~/types/interview";
 
@@ -26,7 +27,7 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100">
     <div class="card-body">
-      <div class="mb-4 flex items-center justify-between gap-3">
+      <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHub.recent.title") }}</h2>
         <NuxtLink :to="viewAllTo" class="btn btn-ghost btn-sm">
           {{ t("interviewHub.recent.viewAllButton") }}
@@ -39,7 +40,7 @@ const { t } = useI18n();
         description-key="interviewHub.recent.emptyState"
       />
 
-      <div v-else class="space-y-4">
+      <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="overflow-x-auto">
           <table class="table table-zebra table-sm" :aria-label="t('interviewHub.recent.tableAria')">
             <thead>

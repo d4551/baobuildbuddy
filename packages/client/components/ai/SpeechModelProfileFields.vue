@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -67,15 +68,15 @@ function handleTtsModelChange(event: Event): void {
 </script>
 
 <template>
-  <fieldset class="fieldset rounded-box border border-base-300 bg-base-100 p-3">
-    <legend class="fieldset-legend text-xs">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
+  <fieldset class="fieldset rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p3]">
+    <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
     <SectionGrid grid-token="twoColumnSmGap2">
-      <label class="label py-0 text-xs" for="speech-profile-stt-provider">
+      <label class="label py-0" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" for="speech-profile-stt-provider">
         {{ t("aiChatPage.voiceSettings.sttProviderLabel") }}
       </label>
       <select
         id="speech-profile-stt-provider"
-        class="select select-sm w-full"
+        class="select select-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.sttProvider"
         :disabled="props.saving"
         :aria-label="t('aiChatPage.voiceSettings.sttProviderAria')"
@@ -90,12 +91,12 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
-      <label class="label py-0 text-xs" for="speech-profile-tts-provider">
+      <label class="label py-0" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" for="speech-profile-tts-provider">
         {{ t("aiChatPage.voiceSettings.ttsProviderLabel") }}
       </label>
       <select
         id="speech-profile-tts-provider"
-        class="select select-sm w-full"
+        class="select select-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.ttsProvider"
         :disabled="props.saving"
         :aria-label="t('aiChatPage.voiceSettings.ttsProviderAria')"
@@ -110,12 +111,12 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
-      <label class="label py-0 text-xs" for="speech-profile-stt-model">
+      <label class="label py-0" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" for="speech-profile-stt-model">
         {{ t("aiChatPage.voiceSettings.sttModelLabel") }}
       </label>
       <input
         id="speech-profile-stt-model"
-        class="input input-sm w-full"
+        class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.sttModel"
         :disabled="props.saving"
         list="speech-profile-stt-model-options"
@@ -130,12 +131,12 @@ function handleTtsModelChange(event: Event): void {
         />
       </datalist>
 
-      <label class="label py-0 text-xs" for="speech-profile-tts-model">
+      <label class="label py-0" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" for="speech-profile-tts-model">
         {{ t("aiChatPage.voiceSettings.ttsModelLabel") }}
       </label>
       <input
         id="speech-profile-tts-model"
-        class="input input-sm w-full"
+        class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.ttsModel"
         :disabled="props.saving"
         list="speech-profile-tts-model-options"
@@ -150,8 +151,8 @@ function handleTtsModelChange(event: Event): void {
         />
       </datalist>
     </SectionGrid>
-    <div class="mt-2 flex items-center justify-between gap-2">
-      <p class="text-xs text-secondary">
+    <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.hint") }}
       </p>
       <button

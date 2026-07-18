@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -113,7 +113,7 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
       <template #aside>
         <StatsRow
-          class="mt-4"
+          :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
             { titleKey: 'portfolioPage.stats.projectsTitle', value: projects.length, valueClass: 'text-primary', descKey: 'portfolioPage.stats.projectsDesc' },
             { titleKey: 'portfolioPage.stats.featuredTitle', value: featuredProjectCount, valueClass: 'text-secondary', descKey: 'portfolioPage.stats.featuredDesc' },
@@ -133,14 +133,14 @@ function updateProjectForm(value: typeof projectForm): void {
       @retry="refreshPortfolio"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <section v-if="isPortfolioEmpty" class="card card-border bg-base-100">
         <div class="card-body">
           <EmptyState
             title-key="portfolioPage.emptyState.title"
             description-key="portfolioPage.emptyState.description"
           />
-          <div class="flex flex-wrap justify-center gap-3">
+          <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <a href="#portfolio-profile-card" class="btn btn-outline">
               {{ t("portfolioPage.emptyState.profileButton") }}
             </a>
@@ -159,7 +159,7 @@ function updateProjectForm(value: typeof projectForm): void {
               <input
                 v-model="searchQuery"
                 type="search"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
                 :placeholder="t('portfolioPage.filters.searchPlaceholder')"
                 :aria-label="t('portfolioPage.filters.searchAria')"
               />

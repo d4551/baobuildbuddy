@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SkillsPageFilters from "~/components/skills/SkillsPageFilters.vue";
@@ -78,13 +79,13 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.gamification"
-          class="btn btn-ghost gap-2"
+          class="btn btn-ghost" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
           :aria-label="t('skillsPage.gamification.openProgressAria')"
         >
           <span class="badge badge-primary badge-sm">
             {{ t("skillsPage.gamification.levelLabel", { level: gamificationLevel }) }}
           </span>
-          <span class="text-xs">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
+          <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
         <button
           class="btn btn-outline"
@@ -118,7 +119,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       @retry="refreshSkillsPage"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <SkillsPageInsights :mapping-metrics="mappingMetrics" :top-mappings="topMappings" />
 
       <SkillsPageFilters
@@ -143,11 +144,11 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       :close-aria-label="t('skillsPage.createModal.closeBackdropAria')"
       :close-backdrop-label="t('skillsPage.createModal.closeBackdropButton')"
     >
-      <h3 :id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID" class="mb-4 text-lg font-bold">
+      <h3 :id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
         {{ t("skillsPage.createModal.title") }}
       </h3>
 
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("skillsPage.createModal.gameExpressionLegend") }}</legend>
           <input
@@ -156,7 +157,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
             required
             :minlength="SKILLS_MIN_GAME_EXPRESSION_LENGTH"
             :placeholder="t('skillsPage.createModal.gameExpressionPlaceholder')"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('skillsPage.createModal.gameExpressionAria')"
           />
           <p class="validator-hint">{{ t("skillsPage.createModal.gameExpressionHint") }}</p>
@@ -170,7 +171,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
             required
             :minlength="SKILLS_MIN_TRANSFERABLE_SKILL_LENGTH"
             :placeholder="t('skillsPage.createModal.transferableSkillPlaceholder')"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('skillsPage.createModal.transferableSkillAria')"
           />
           <p class="validator-hint">{{ t("skillsPage.createModal.transferableSkillHint") }}</p>
@@ -180,7 +181,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           <legend class="fieldset-legend">{{ t("skillsPage.createModal.categoryLegend") }}</legend>
           <select
             v-model="newMapping.category"
-            class="select validator w-full"
+            class="select validator" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('skillsPage.createModal.categoryAria')"
           >
             <option v-for="categoryOption in categoryOptions" :key="categoryOption.value" :value="categoryOption.value">
@@ -191,11 +192,11 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("skillsPage.createModal.applicationsLegend") }}</legend>
-          <div class="join w-full">
+          <div class="join" :class="[FLUID_WIDTH_CLASS]">
             <input
               v-model="newApplication"
               type="text"
-              class="input input-sm join-item w-full"
+              class="input input-sm join-item" :class="[FLUID_WIDTH_CLASS]"
               :placeholder="t('skillsPage.createModal.applicationPlaceholder')"
               :aria-label="t('skillsPage.createModal.applicationAria')"
               @keyup.enter="addApplication"
@@ -209,11 +210,11 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
               {{ t("skillsPage.createModal.addApplicationButton") }}
             </button>
           </div>
-          <div class="mt-2 flex flex-wrap gap-2">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
             <div
               v-for="(application, index) in newMapping.industryApplications"
               :key="`${application}-${index}`"
-              class="badge gap-2"
+              class="badge" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             >
               {{ application }}
               <button

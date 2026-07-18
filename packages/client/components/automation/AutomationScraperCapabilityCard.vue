@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
@@ -61,11 +61,11 @@ function handleScheduleInput(event: Event): void {
 </script>
 
 <template>
-  <div class="card card-border h-full bg-base-100">
-    <div class="card-body gap-4">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2">
+  <div class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+          <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="capability.name">
               <span
                 class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
@@ -86,7 +86,7 @@ function handleScheduleInput(event: Event): void {
               {{ runStateLabel(runState) }}
             </span>
           </div>
-          <p class="text-sm text-secondary">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ cardDescription(capability.target) }}
           </p>
           <AutomationCoverageChips
@@ -106,11 +106,11 @@ function handleScheduleInput(event: Event): void {
         </NuxtLink>
       </div>
 
-      <div class="stats stats-vertical w-full border border-base-300 bg-base-200 xl:stats-horizontal">
+      <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
           <div
-            class="stat-value text-2xl"
+            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]"
             :class="capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error'"
           >
             {{ capabilityAvailabilityLabel(capability) }}
@@ -121,7 +121,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.issuesTitle") }}</div>
-          <div class="stat-value text-2xl" :class="issueCount === 0 ? 'text-success' : 'text-warning'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" :class="issueCount === 0 ? 'text-success' : 'text-warning'">
             {{ issueCount }}
           </div>
           <div class="stat-desc">
@@ -134,7 +134,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value text-2xl" :class="runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" :class="runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content'">
             {{ runStateLabel(runState) }}
           </div>
           <div class="stat-desc">
@@ -147,7 +147,7 @@ function handleScheduleInput(event: Event): void {
         </div>
       </div>
 
-      <div v-if="showOperations" class="card-actions justify-end gap-3">
+      <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <button
           class="btn btn-primary"
           :aria-label="cardRunAria(capability.target)"
@@ -159,7 +159,7 @@ function handleScheduleInput(event: Event): void {
         </button>
       </div>
 
-      <div v-if="showOperations && runState !== 'idle'" class="space-y-3">
+      <div v-if="showOperations && runState !== 'idle'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div
           v-if="runState === 'running'"
           aria-live="polite"
@@ -186,13 +186,13 @@ function handleScheduleInput(event: Event): void {
 
       <div
         v-if="issueCount > 0 && compactMode"
-        class="rounded-box border border-base-300 bg-base-200 p-4 text-sm text-secondary"
+        class="rounded-box border border-base-300 bg-base-200 text-secondary" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
-        <div class="space-y-4">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <p class="font-semibold text-base-content">
             {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
           </p>
-          <ul class="space-y-2">
+          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
               {{ issue }}
             </li>
@@ -212,8 +212,8 @@ function handleScheduleInput(event: Event): void {
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
         </summary>
-        <div class="collapse-content space-y-4 text-sm text-secondary">
-          <ul class="space-y-2">
+        <div class="collapse-content text-secondary" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, TYPOGRAPHY_SCALE_CLASS.sm]">
+          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
               {{ issue }}
             </li>
@@ -233,12 +233,12 @@ function handleScheduleInput(event: Event): void {
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.schedule.disclosureTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
             <input
               :value="scheduledRunAt"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="datetime-local"
               :aria-label="t('automation.scraper.schedule.aria')"
               @input="handleScheduleInput"
@@ -269,8 +269,8 @@ function handleScheduleInput(event: Event): void {
         <summary class="collapse-title text-base font-semibold">
           {{ latestRunNoticeText(capability.target) }}
         </summary>
-        <div class="collapse-content space-y-4">
-          <p class="text-sm text-secondary">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ latestRunStatusText(capability.target) }}
           </p>
           <div class="card-actions justify-end">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -147,12 +147,12 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </svg>
         <div>
           <h3 class="font-semibold">{{ t("settings.brand.infoTitle") }}</h3>
-          <p class="text-sm">{{ t("settings.brand.infoDescription") }}</p>
+          <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.brand.infoDescription") }}</p>
         </div>
       </div>
 
       <SectionGrid grid-token="twoColumnWide" extra-class="items-start gap-6">
-        <div class="space-y-4 xl:sticky xl:top-24">
+        <div class="xl:sticky xl:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard
             :brand-draft="brandDraft"
@@ -162,10 +162,10 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
           <BrandThemeSwatches :brand-draft="brandDraft" :theme-names="themeNames" />
         </div>
 
-        <div class="space-y-4">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <div
             role="tablist"
-            class="tabs tabs-border tabs-sm gap-2 overflow-x-auto whitespace-nowrap md:tabs-md"
+            class="tabs tabs-border tabs-sm overflow-x-auto whitespace-nowrap md:tabs-md" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-label="t('settings.brand.editorTabsAria')"
           >
             <button

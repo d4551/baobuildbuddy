@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
 import type {
   InterviewQuestion,
@@ -53,7 +54,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <InterviewSessionOverviewCard
       :active-session="activeSession"
       :can-use-voice="canUseVoice"
@@ -86,7 +87,7 @@ const { t } = useI18n();
     </div>
 
     <SectionGrid grid-token="twoColumnWide" extra-class="items-start">
-      <div class="space-y-6">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <InterviewSessionPromptCard :current-question="currentQuestion" />
         <InterviewSessionContextCard
           :active-session="activeSession"
@@ -100,19 +101,19 @@ const { t } = useI18n();
 
       <div
         v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
-        class="space-y-4 lg:sticky lg:top-24"
+        class="lg:sticky lg:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
       >
         <div
           v-if="canUseVoice"
           class="card card-border bg-base-100"
           :aria-label="t('interviewSession.voice.idle')"
         >
-          <div class="card-body flex-row items-center justify-between gap-4">
+          <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
             <div class="space-y-1">
-              <p class="text-sm font-medium text-secondary">
+              <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("interviewSession.voiceTitle") }}
               </p>
-              <p class="text-sm text-muted">
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
               </p>
             </div>

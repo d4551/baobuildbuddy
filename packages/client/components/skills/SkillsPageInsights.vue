@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
@@ -19,7 +19,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <StatsRow
       background-class="bg-base-200"
       :stats="[
@@ -32,7 +32,7 @@ const { t } = useI18n();
 
     <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body">
-        <p class="text-sm text-secondary">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
         </p>
       </div>
@@ -40,10 +40,10 @@ const { t } = useI18n();
 
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
       <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-        <div class="card-body gap-4">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
-            <p class="text-sm text-secondary">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.pathwaysDescription") }}
             </p>
           </div>
@@ -79,10 +79,10 @@ const { t } = useI18n();
       </article>
 
       <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-        <div class="card-body gap-4">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
-            <p class="text-sm text-secondary">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.topMappingsDescription") }}
             </p>
           </div>
@@ -99,7 +99,7 @@ const { t } = useI18n();
             >
               <div class="list-col-grow">
                 <p class="font-medium">{{ mapping.transferableSkill }}</p>
-                <p class="text-xs text-secondary">{{ mapping.gameExpression }}</p>
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ mapping.gameExpression }}</p>
               </div>
               <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
             </li>

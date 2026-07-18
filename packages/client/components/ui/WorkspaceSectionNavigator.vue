@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
@@ -47,14 +47,14 @@ const activeDescription = computed<string>(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <section class="card card-border card-glass min-w-0 max-w-full overflow-x-clip" :aria-label="t(ariaLabelKey)">
-      <div class="card-body min-w-0 max-w-full gap-4 overflow-x-clip p-4 lg:p-5">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+    <section class="card card-border card-glass max- overflow-x-clip" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
+      <div class="card-body max- overflow-x-clip lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div
           v-if="activeSectionEntry"
-          class="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+          class="flex flex-col xl:flex-row xl:items-center xl:justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
         >
-          <div class="flex min-w-0 items-start gap-3">
+          <div class="flex items-start" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <span
               class="tooltip tooltip-right shrink-0"
               :data-tip="activeDescription || t(activeSectionEntry.labelKey)"
@@ -70,13 +70,13 @@ const activeDescription = computed<string>(() => {
               </span>
             </span>
 
-            <div class="min-w-0 space-y-1">
-              <h2 class="text-lg font-semibold text-base-content">
+            <div class="space-y-1" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+              <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
               <p
                 v-if="activeDescription"
-                class="max-w-3xl text-sm leading-6 text-secondary"
+                class="max-w-3xl leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
               >
                 {{ activeDescription }}
               </p>
@@ -84,15 +84,15 @@ const activeDescription = computed<string>(() => {
           </div>
 
           <nav
-            class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain xl:max-w-4xl"
+            class="max- overflow-x-auto overscroll-x-contain xl:max-w-4xl" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max min-w-full gap-2 glass-subtle p-2 xl:min-w-0">
+            <div class="tabs tabs-box w-max min- glass-subtle p-2 xl:" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto min-h-0 grow justify-start gap-3 rounded-box px-3 py-2 text-left xl:grow-0"
+                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
                 :class="activeSection === section.id ? 'tab-active' : ''"
                 :aria-current="activeSection === section.id ? 'page' : undefined"
               >
@@ -102,8 +102,8 @@ const activeDescription = computed<string>(() => {
                 >
                   <span
                     class="inline-flex h-8 w-8 items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, activeSection === section.id
-                        ? 'border-primary/30 bg-primary/10 text-primary'
-                        : 'border-base-300 bg-base-100 text-muted']"
+                      ? 'border-primary/30 bg-primary/10 text-primary'
+                      : 'border-base-300 bg-base-100 text-muted']"
                   >
                     <component
                       :is="resolveAppIconComponent(section.iconName)"
@@ -113,7 +113,7 @@ const activeDescription = computed<string>(() => {
                   </span>
                 </span>
 
-                <span class="min-w-0 font-medium">{{ t(section.labelKey) }}</span>
+                <span class="font-medium" :class="[TRUNCATE_FLEX_CHILD_CLASS]">{{ t(section.labelKey) }}</span>
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
@@ -129,7 +129,7 @@ const activeDescription = computed<string>(() => {
       </div>
     </section>
 
-    <div class="min-w-0">
+    <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
       <slot />
     </div>
   </div>

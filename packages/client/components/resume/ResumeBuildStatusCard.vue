@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MARGIN_TOKEN_CLASS } from "~/constants/layout";
 defineProps<{
   loadingLabel: string;
 }>();
@@ -8,7 +9,7 @@ defineProps<{
   <div class="card bg-base-200">
     <div class="card-body min-h-48 items-center justify-center">
       <span class="loading loading-spinner loading-lg text-primary"></span>
-      <p class="mt-4 text-secondary">{{ loadingLabel }}</p>
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt4]">{{ loadingLabel }}</p>
     </div>
   </div>
 </template>

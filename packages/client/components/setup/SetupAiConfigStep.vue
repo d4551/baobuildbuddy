@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -47,7 +48,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
 <template>
   <div class="space-y-5">
-    <h2 class="text-lg font-semibold">{{ t("setup.aiConfigTitle") }}</h2>
+    <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.aiConfigTitle") }}</h2>
     <div role="alert" class="alert alert-info alert-soft">
       <span>{{ t("setup.localFirstInfo", { brand: brandName }) }}</span>
     </div>
@@ -56,12 +57,12 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       role="alert"
       class="alert alert-info alert-soft alert-vertical items-start sm:alert-horizontal"
     >
-      <IconInfoCircle class="mt-1 h-6 w-6 shrink-0 stroke-current text-info" />
-      <div class="w-full flex-1 overflow-hidden">
-        <h3 class="mb-1 font-semibold">
+      <IconInfoCircle class="h-6 w-6 shrink-0 stroke-current text-info" :class="[MARGIN_TOKEN_CLASS.mt1]" />
+      <div class="flex-1 overflow-hidden" :class="[FLUID_WIDTH_CLASS]">
+        <h3 class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1]">
           {{ t("settings.aiProviders.ollamaTipTitle") }}
         </h3>
-        <p class="mb-3 text-sm">
+        <p class="mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("settings.aiProviders.ollamaTipDescription") }}
           <NuxtLink
             :to="ollamaWebsiteUrl"
@@ -88,8 +89,8 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
           </NuxtLink>
         </p>
 
-        <div class="group relative mt-2 w-full overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content">
-          <div class="overflow-x-auto whitespace-nowrap p-3 pr-14 text-sm font-mono">
+        <div class="group relative overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
+          <div class="overflow-x-auto whitespace-nowrap pr-14 font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm]">
             <span class="mr-2 text-muted">$</span>{{ ollamaCommand }}
           </div>
           <button
@@ -118,24 +119,24 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       </div>
     </div>
 
-    <label class="floating-label w-full">
+    <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.localEndpointLegend") }}</span>
       <input
         :value="localModelEndpoint"
         type="text"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.localEndpointAria')"
         @input="updateInputValue($event, 'update:local-model-endpoint')"
       />
     </label>
     <div class="label">{{ t("setup.localEndpointExamples") }}</div>
 
-    <label class="floating-label w-full">
+    <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.localModelLegend") }}</span>
       <input
         :value="localModelName"
         type="text"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.localModelAria')"
         @input="updateInputValue($event, 'update:local-model-name')"
       />
@@ -158,7 +159,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       <summary class="collapse-title font-medium">
         {{ t("setup.cloudOptionalTitle") }}
       </summary>
-      <div class="collapse-content space-y-4">
+      <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset
           v-for="provider in cloudProviderIds"
           :key="provider"
@@ -167,12 +168,12 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
           <legend class="fieldset-legend">
             {{ t("setup.cloudProviderLegend", { provider: providerLabels[provider] }) }}
           </legend>
-          <div class="join w-full">
+          <div class="join" :class="[FLUID_WIDTH_CLASS]">
             <input
               :value="providerCredentials[provider]"
               type="password"
               :placeholder="t('setup.cloudProviderPlaceholder', { provider: providerLabels[provider] })"
-              class="input join-item w-full"
+              class="input join-item" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('setup.cloudProviderAria', { provider: providerLabels[provider] })"
               @input="updateProviderCredential($event, provider)"
             />

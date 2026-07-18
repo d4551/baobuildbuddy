@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 
@@ -42,7 +43,7 @@ function requestDelete(resumeId?: string): void {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <section v-if="resumes.length > 0" class="card card-border bg-base-100">
       <div class="card-body">
         <fieldset class="fieldset">
@@ -50,7 +51,7 @@ function requestDelete(resumeId?: string): void {
           <input
             v-model="searchQuery"
             type="search"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('resumePage.filters.searchPlaceholder')"
             :aria-label="t('resumePage.filters.searchAria')"
           />
@@ -77,7 +78,7 @@ function requestDelete(resumeId?: string): void {
       v-else-if="filteredResumes.length === 0"
       message-key="resumePage.filteredEmptyState"
     />
-    <div v-else class="space-y-4">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">
         <div
           v-for="resume in paginatedResumes"
@@ -97,13 +98,13 @@ function requestDelete(resumeId?: string): void {
           />
           <div class="relative z-10 card-body">
             <h3 class="card-title">{{ resume.name }}</h3>
-            <div class="mt-2 flex gap-2">
+            <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
               <span class="badge badge-sm">{{ templateLabel(resume.template) }}</span>
               <span v-if="resume.isDefault" class="badge badge-primary badge-sm">
                 {{ t("resumePage.defaultBadge") }}
               </span>
             </div>
-            <div class="card-actions mt-4 justify-end">
+            <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
               <button
                 class="relative z-20 btn btn-sm btn-outline"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"

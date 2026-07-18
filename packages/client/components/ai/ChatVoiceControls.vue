@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared/constants/ai-voice";
 import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
@@ -155,11 +156,11 @@ function handleAutoSpeakChange(event: Event): void {
     </svg>
   </button>
 
-  <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset mt-2">
-    <legend class="fieldset-legend text-xs">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
+  <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt2]">
+    <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
     <select
       :value="props.selectedVoiceId"
-      class="select select-xs w-full"
+      class="select select-xs" :class="[FLUID_WIDTH_CLASS]"
       :aria-label="t('aiChatCommon.voice.voiceAria')"
       @change="handleVoiceSelectionChange"
     >
@@ -170,9 +171,9 @@ function handleAutoSpeakChange(event: Event): void {
     </select>
   </fieldset>
 
-  <div v-if="!props.compact && props.supportsSynthesis" class="mt-2 flex items-center justify-between gap-2">
-    <label class="label cursor-pointer gap-2 py-0">
-      <span class="text-xs">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
+  <div v-if="!props.compact && props.supportsSynthesis" class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
+    <label class="label cursor-pointer py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
       <input
         :checked="props.autoSpeakReplies"
         type="checkbox"
@@ -181,7 +182,7 @@ function handleAutoSpeakChange(event: Event): void {
         @change="handleAutoSpeakChange"
       />
     </label>
-    <p class="text-xs text-secondary" aria-live="polite">
+    <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" aria-live="polite">
       {{
         props.isListening
           ? t("aiChatCommon.voice.listeningStatus")
@@ -194,7 +195,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <p
     v-if="!props.compact && props.supportHintKey"
-    class="mt-2 text-xs text-secondary"
+    class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
     aria-live="polite"
   >
@@ -203,7 +204,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <p
     v-if="!props.compact && props.errorLabel"
-    class="mt-1 text-xs text-error"
+    class="text-error" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
     aria-live="assertive"
   >

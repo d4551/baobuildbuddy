@@ -5,22 +5,7 @@ definePageMeta({
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import {
-  BODY_TEXT_SM_CLASS,
-  BODY_TEXT_XS_CLASS,
-  CARD_TITLE_LG_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CLASS,
-  ICON_SIZE_CHEVRON_CLASS,
-  ICON_SIZE_XS_ALT_CLASS,
-  ROW_GAP_SM_CLASS,
-  ROW_GAP_XS_CLASS,
-  SECTION_GAP_BOTTOM_CLASS,
-  SIDEBAR_WIDTH_LG_CLASS,
-  STACK_SPACING_SM_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TRUNCATE_BLOCK_CLASS,
-} from "~/constants/layout";
+import { BODY_TEXT_SM_CLASS, BODY_TEXT_XS_CLASS, CARD_TITLE_LG_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CHEVRON_CLASS, ICON_SIZE_CLASS, ICON_SIZE_XS_ALT_CLASS, ROW_GAP_SM_CLASS, ROW_GAP_XS_CLASS, SECTION_GAP_BOTTOM_CLASS, SIDEBAR_WIDTH_LG_CLASS, STACK_SPACING_SM_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_BLOCK_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
@@ -83,7 +68,7 @@ const page = useJobsIndexPage();
     </div>
 
     <SectionGrid grid-token="sidebar">
-      <div :class="['w-full shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }]">
+      <div :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]">
         <JobsPageFiltersCard
           v-model:location="page.localFilters.location"
           v-model:remote="page.localFilters.remote"
@@ -152,7 +137,7 @@ const page = useJobsIndexPage();
             <article
               v-for="job in page.paginatedJobs.value"
               :key="job.id"
-              :class="[SURFACE_GLASS_CARD_CLASS, 'relative h-full overflow-hidden']"
+              :class="[SURFACE_GLASS_CARD_CLASS, 'relative overflow-hidden', FLUID_HEIGHT_CLASS]"
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"

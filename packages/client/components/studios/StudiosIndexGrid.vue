@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
@@ -35,31 +35,31 @@ function studioLocation(location: string): string {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <SectionGrid grid-token="threeColumn">
       <article
         v-for="studio in studios"
         :key="studio.id"
         class="card card-border bg-base-100 transition-shadow hover:" :class="[SHADOW_TOKEN_CLASS.md]"
       >
-        <div class="card-body gap-3">
-          <div class="flex items-center gap-3">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="avatar placeholder">
               <div class="bg-primary text-primary-content w-12" :class="[RADIUS_TOKEN_CLASS.full]">
                 <span class="text-xl">{{ studioInitial(studio.name) }}</span>
               </div>
             </div>
-            <div class="min-w-0">
-              <h2 class="card-title text-lg truncate">{{ studio.name }}</h2>
-              <p class="text-xs text-muted truncate">{{ studioLocation(studio.location) }}</p>
+            <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+              <h2 class="card-title truncate" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ studio.name }}</h2>
+              <p class="text-muted truncate" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ studioLocation(studio.location) }}</p>
             </div>
           </div>
 
-          <p class="text-sm text-secondary min-h-14">
+          <p class="text-secondary min-h-14" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ studioDescription(studio.description) }}
           </p>
 
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-primary badge-sm">{{ studioTypeLabel(t, studio.type) }}</span>
             <span class="badge badge-outline badge-sm">{{ studioSizeLabel(t, studio.size) }}</span>
             <span v-if="studio.remoteWork" class="badge badge-success badge-sm">
@@ -67,7 +67,7 @@ function studioLocation(location: string): string {
             </span>
           </div>
 
-          <div class="card-actions justify-end mt-1">
+          <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt1]">
             <button
               class="btn btn-ghost btn-sm"
               :aria-label="t('studiosIndex.card.previewAria', { studio: studio.name })"

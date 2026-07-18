@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
@@ -25,11 +26,11 @@ const { t } = useI18n();
   <section class="card bg-base-200">
     <div class="card-body">
       <div class="flex items-center justify-between gap-6">
-        <div class="flex-1 space-y-2">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
+        <div class="flex-1" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
             <div>
-              <p class="text-sm text-muted">
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("dashboard.levelLabel") }} {{ gamification.level }}
               </p>
               <p class="font-bold">
@@ -43,7 +44,7 @@ const { t } = useI18n();
             </div>
           </div>
           <progress
-            class="progress progress-primary w-full"
+            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
             :aria-valuenow="levelProgress"
@@ -61,13 +62,13 @@ const { t } = useI18n();
             fill-class="stroke-primary"
             :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
           >
-            <span class="text-sm font-bold">{{ levelProgress }}%</span>
+            <span class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ levelProgress }}%</span>
           </UiRadialMeter>
 
           <div v-if="gamification.currentStreak" class="text-center">
-            <div class="text-3xl" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
-            <p class="text-2xl font-bold">{{ gamification.currentStreak }}</p>
-            <p class="text-xs text-muted">{{ t("dashboard.streakLabel") }}</p>
+            <div :class="[TYPOGRAPHY_SCALE_CLASS.xl3]" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
+            <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ gamification.currentStreak }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("dashboard.streakLabel") }}</p>
           </div>
         </div>
       </div>

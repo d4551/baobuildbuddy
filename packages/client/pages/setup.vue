@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -49,9 +50,9 @@ useSeoMeta({
     width-token="shell"
     spacing-token="compact"
     labelled-by="setup-title"
-    extra-class="w-full"
+    extra-:class="[FLUID_WIDTH_CLASS]"
   >
-    <h1 id="setup-title" class="mb-4 text-2xl font-bold text-primary">
+    <h1 id="setup-title" class="font-bold text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2]">
       {{ t("setup.title", { brand: resolvedBrand.name }) }}
     </h1>
 

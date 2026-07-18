@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 defineProps<{
   job: {
     title: string;
@@ -27,7 +28,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="space-y-6 lg:col-span-2">
+  <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <div class="card bg-base-200">
       <div class="card-body">
         <PageHeroHeader
@@ -65,15 +66,15 @@ const emit = defineEmits<{
 
           <template v-if="typeof job.matchScore === 'number'" #aside>
             <div class="flex items-center justify-start lg:justify-end">
-              <div class="rounded-box bg-base-100 p-4">
+              <div class="rounded-box bg-base-100" :class="[PADDING_TOKEN_CLASS.p4]">
                 <JobMatchScore :score="job.matchScore" />
-                <p class="mt-2 text-center text-xs text-muted">{{ t("jobDetail.matchScoreLabel") }}</p>
+                <p class="text-center text-muted" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.matchScoreLabel") }}</p>
               </div>
             </div>
           </template>
         </PageHeroHeader>
 
-        <div class="mt-4 flex flex-wrap gap-2">
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
           <span class="badge">
             <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -114,7 +115,7 @@ const emit = defineEmits<{
     <div v-if="job.technologies?.length" class="card bg-base-200">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.technologiesTitle") }}</h2>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <span v-for="tech in job.technologies" :key="tech" class="badge badge-lg badge-primary">
             {{ tech }}
           </span>

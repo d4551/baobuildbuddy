@@ -2,7 +2,7 @@
 import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
-import { APP_DRAWER_ID, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_SIDEBAR_ITEM_CLASS, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
+import { APP_DRAWER_ID, FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, ICON_SIZE_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHELL_SIDEBAR_ITEM_CLASS, SHELL_SIDEBAR_MENU_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
@@ -50,14 +50,14 @@ function sidebarLinkClass(item: NavigationItem): string[] {
 </script>
 
 <template>
-  <div class="flex min-h-full w-full flex-col">
-    <div class="border-b border-base-300 p-4 is-drawer-close:hidden">
-      <span class="flex items-center gap-2 text-lg font-bold text-primary">
+  <div class="flex min- flex-col" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]">
+    <div class="border-b border-base-300 is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4]">
+      <span class="flex items-center font-bold text-primary" :class="[FLEX_GAP_TOKEN_CLASS.gap2, TYPOGRAPHY_SCALE_CLASS.lg]">
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
       </span>
     </div>
-    <nav :aria-label="t('a11y.primaryNavigation')" class="flex min-h-0 min-w-0 flex-1 flex-col">
+    <nav :aria-label="t('a11y.primaryNavigation')" class="flex min-h-0 flex-1 flex-col" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
       <ul :class="SHELL_SIDEBAR_MENU_CLASS">
         <li v-for="item in sidebarItems" :key="item.id">
           <NuxtLink
@@ -89,7 +89,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         <li class="mt-auto pt-4">
           <button
             type="button"
-            class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
+            class="btn btn-ghost btn-sm justify-start is-drawer-close:btn-square" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('a11y.toggleSidebarNavigation')"
             :aria-controls="APP_DRAWER_ID"
             :aria-expanded="isDrawerOpen"
@@ -104,7 +104,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
       </ul>
     </nav>
     <footer
-      class="border-t border-base-300 p-4 text-xs text-muted is-drawer-close:hidden"
+      class="border-t border-base-300 text-muted is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.xs]"
       :aria-label="t('layout.shell.versionFooterAria')"
     >
       {{ t("layout.shell.appVersion", { version: APP_SEMVER }) }}

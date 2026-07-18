@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -49,11 +50,11 @@ function studioLocation(location: string): string {
       <h3 :id="titleId" class="text-xl font-bold">
         {{ studio.name }}
       </h3>
-      <p class="mt-2 text-sm text-secondary">
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ studioDescription(studio.description) }}
       </p>
 
-      <div class="mt-4 flex flex-wrap gap-2">
+      <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
         <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
         <span class="badge badge-outline">{{ studioSizeLabel(t, studio.size) }}</span>
         <span class="badge badge-ghost">{{ studioLocation(studio.location) }}</span>
@@ -65,19 +66,19 @@ function studioLocation(location: string): string {
       <SectionGrid grid-token="threeColumnMd" extra-class="mt-5">
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
-          <div class="stat-value text-primary text-2xl">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
+          <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
         </div>
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
-          <div class="stat-value text-secondary text-lg">
+          <div class="stat-value text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studioLocation(studio.location) }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
         </div>
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
-          <div class="stat-value text-accent text-lg">
+          <div class="stat-value text-accent" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.remoteDesc") }}</div>
@@ -116,7 +117,7 @@ function studioLocation(location: string): string {
       <h3 :id="titleId" class="text-xl font-bold">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
-      <p class="mt-2 text-sm text-secondary">
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("studiosIndex.preview.missingDescription") }}
       </p>
       <div class="modal-action">

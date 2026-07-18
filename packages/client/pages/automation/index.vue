@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -155,20 +156,20 @@ useSeoMeta({
 
           <SectionGrid grid-token="twoColumnWide">
             <section class="card card-border bg-base-100" aria-labelledby="automation-next-action-title">
-              <div class="card-body gap-4">
-                <div class="space-y-2">
+              <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                   <h2 id="automation-next-action-title" class="card-title">
                     {{ t("automation.hub.nextAction.title") }}
                   </h2>
-                  <p class="text-sm text-secondary">
+                  <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     {{ t("automation.hub.nextAction.description") }}
                   </p>
                 </div>
-                <div class="space-y-3 rounded-box border border-base-300 bg-base-200 p-4">
-                  <p class="text-sm font-medium text-secondary">
+                <div class="rounded-box border border-base-300 bg-base-200" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p4]">
+                  <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     {{ nextPipelineStepLabel }}
                   </p>
-                  <p class="text-sm text-secondary">
+                  <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     {{ t(primaryCard?.descriptionKey ?? "automation.hub.cards.scraper.description") }}
                   </p>
                   <div class="card-actions justify-end">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { definePageMeta, useSeoMeta } from "#imports";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
@@ -36,7 +37,7 @@ useSeoMeta({
           <span class="badge badge-primary badge-sm">
             {{ t("skillsPathwaysPage.gamification.levelLabel", { level: page.gamificationLevel.value }) }}
           </span>
-          <span class="text-xs">{{
+          <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{
             t("skillsPathwaysPage.gamification.xpLabel", { xp: page.gamificationXP.value })
           }}</span>
         </NuxtLink>

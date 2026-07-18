@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeFormEducation } from "@bao/shared/utils/resume-transform";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -55,7 +56,7 @@ function removeEducation(index: number): void {
 
 <template>
   <div class="card-body">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
       <button
         class="btn btn-sm btn-primary"
@@ -65,14 +66,14 @@ function removeEducation(index: number): void {
         {{ t("resumePage.education.addButton") }}
       </button>
     </div>
-    <div class="space-y-6">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <div
         v-for="(education, index) in localValue"
         :key="`${education.school}-${education.degree}-${index}`"
         class="card bg-base-100"
       >
         <div class="card-body">
-          <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
               {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
             </h3>
@@ -92,7 +93,7 @@ function removeEducation(index: number): void {
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.degreeAria')"
                 @input="emitValue"
               />
@@ -105,7 +106,7 @@ function removeEducation(index: number): void {
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.schoolAria')"
                 @input="emitValue"
               />
@@ -116,7 +117,7 @@ function removeEducation(index: number): void {
               <input
                 v-model="education.location"
                 type="text"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.locationAria')"
                 @input="emitValue"
               />
@@ -126,7 +127,7 @@ function removeEducation(index: number): void {
               <input
                 v-model="education.graduationDate"
                 type="month"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.graduationDateAria')"
                 @input="emitValue"
               />
@@ -136,7 +137,7 @@ function removeEducation(index: number): void {
               <input
                 v-model="education.gpa"
                 type="text"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.gpaAria')"
                 @input="emitValue"
               />

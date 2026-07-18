@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -49,16 +49,16 @@ const brandPreviewThemes = computed<
 
 <template>
   <div class="card card-border card-glass">
-    <div class="card-body gap-4">
-      <div class="flex items-start justify-between gap-3">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-muted">
+          <p class="font-semibold uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
             {{ t("settings.brand.previewEyebrow") }}
           </p>
-          <h3 class="card-title mt-2">
+          <h3 class="card-title" :class="[MARGIN_TOKEN_CLASS.mt2]">
             {{ t("settings.brand.previewTitle") }}
           </h3>
-          <p class="text-sm text-secondary">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.previewSubtitle") }}
           </p>
         </div>
@@ -72,8 +72,8 @@ const brandPreviewThemes = computed<
           class="rounded-box border p-5" :class="[SHADOW_TOKEN_CLASS.sm, themeSurface.surfaceClass]"
           :aria-label="t('settings.brand.previewTitle')"
         >
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
+          <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <img
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
@@ -82,15 +82,15 @@ const brandPreviewThemes = computed<
               />
               <div
                 v-else
-                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-sm font-semibold" :class="[SHADOW_TOKEN_CLASS.sm]"
+                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm]"
               >
                 {{ brandPreviewInitial }}
               </div>
-              <div class="min-w-0">
-                <p class="text-xs uppercase tracking-widest text-muted">
+              <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+                <p class="uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ t("settings.brand.previewEyebrow") }}
                 </p>
-                <p class="truncate text-sm font-medium text-secondary">
+                <p class="truncate font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ brandDraft.apiName }}
                 </p>
               </div>
@@ -100,17 +100,17 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-5 space-y-2">
-            <h4 class="brand-display text-2xl font-semibold text-base-content">
+          <div class="mt-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <h4 class="brand-display font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
               {{ brandDraft.name }}
             </h4>
-            <p class="max-w-md text-sm text-secondary">{{ brandDraft.content.tagline }}</p>
-            <p class="max-w-md text-xs text-muted">
+            <p class="max-w-md text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ brandDraft.content.tagline }}</p>
+            <p class="max-w-md text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
               {{ brandDraft.content.defaultDescription }}
             </p>
           </div>
 
-          <div class="mt-5 flex flex-wrap gap-2">
+          <div class="mt-5 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
@@ -119,7 +119,7 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-6 flex flex-wrap gap-3">
+          <div class="mt-6 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <span class="btn btn-accent border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>

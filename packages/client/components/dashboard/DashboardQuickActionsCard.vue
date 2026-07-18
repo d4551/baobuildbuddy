@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { DashboardQuickAction } from "~/constants/dashboard-contracts";
 
@@ -12,7 +13,7 @@ const { t } = useI18n();
 <template>
   <section class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title mb-4 text-lg">{{ t("dashboard.quickActionsTitle") }}</h2>
+      <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("dashboard.quickActionsTitle") }}</h2>
       <SectionGrid grid-token="bento">
         <NuxtLink
           v-for="action in actions"

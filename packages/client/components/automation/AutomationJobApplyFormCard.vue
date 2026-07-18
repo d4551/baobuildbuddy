@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
@@ -28,13 +28,13 @@ const { t } = useI18n();
 <template>
   <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body">
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.jobUrlLegend") }}</legend>
           <input
             v-model="jobUrl"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('automation.jobApply.jobUrlPlaceholder')"
             :aria-label="t('automation.jobApply.jobUrlAria')"
           />
@@ -44,7 +44,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">{{ t("automation.jobApply.resumeLegend") }}</legend>
           <select
             v-model="resumeId"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('automation.jobApply.resumeAria')"
           >
             <option value="" disabled>{{ t("automation.jobApply.selectResumeOption") }}</option>
@@ -58,7 +58,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">{{ t("automation.jobApply.coverLetterLegend") }}</legend>
           <select
             v-model="coverLetterId"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('automation.jobApply.coverLetterAria')"
           >
             <option value="">{{ t("automation.jobApply.noCoverLetterOption") }}</option>
@@ -77,7 +77,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">{{ t("automation.jobApply.jobIdLegend") }}</legend>
           <input
             v-model="jobId"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('automation.jobApply.jobIdPlaceholder')"
             :aria-label="t('automation.jobApply.jobIdAria')"
           />
@@ -88,7 +88,7 @@ const { t } = useI18n();
           <input
             v-model="runAt"
             type="datetime-local"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('automation.jobApply.schedule.aria')"
           />
           <p class="validator-hint">{{ t("automation.jobApply.schedule.hint") }}</p>

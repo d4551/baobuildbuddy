@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -10,19 +11,19 @@ const { t } = useI18n();
 
 <template>
   <div class="card card-border bg-base-100">
-    <div class="card-body gap-4">
-      <div class="space-y-2">
-        <p class="text-xs font-semibold uppercase tracking-widest text-primary">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+        <p class="font-semibold uppercase tracking-widest text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
           {{ t("automation.scraper.overview.eyebrow") }}
         </p>
         <h2 class="card-title">{{ t("automation.scraper.overview.title") }}</h2>
-        <p class="text-sm text-secondary">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.overview.description") }}
         </p>
       </div>
 
       <ul
-        class="steps steps-vertical w-full"
+        class="steps steps-vertical" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('automation.scraper.stepsAria')"
       >
         <li class="step step-primary">{{ t("automation.scraper.steps.run") }}</li>
@@ -30,11 +31,11 @@ const { t } = useI18n();
         <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
       </ul>
 
-      <div class="rounded-box border border-base-300 bg-base-200 p-4">
-        <p class="text-sm font-medium text-base-content">
+      <div class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]">
+        <p class="font-medium text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.overview.workflowTitle") }}
         </p>
-        <p class="mt-1 text-sm text-secondary">
+        <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.overview.workflowDescription") }}
         </p>
       </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
@@ -27,12 +28,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="card mb-4 card-border bg-base-200">
-    <div class="card-body gap-4 p-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+  <div class="card card-border bg-base-200" :class="[MARGIN_TOKEN_CLASS.mb4]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div class="space-y-1">
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
-          <p class="text-sm text-muted">{{ t("settings.aiProviders.routingSubtitle") }}</p>
+          <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
         <button class="btn btn-primary btn-sm" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
@@ -53,13 +54,13 @@ const emit = defineEmits<{
               <th scope="row" class="align-top">
                 <div class="space-y-1">
                   <p class="font-medium">{{ section.label }}</p>
-                  <p class="text-xs leading-5 text-muted">{{ section.description }}</p>
+                  <p class="leading-5 text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
                 </div>
               </th>
               <td class="align-top">
                 <select
                   v-model="aiRoutingDraft[section.id].provider"
-                  class="select select-sm w-full min-w-40"
+                  class="select select-sm min-w-40" :class="[FLUID_WIDTH_CLASS]"
                   :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
                 >
                   <option
@@ -72,12 +73,12 @@ const emit = defineEmits<{
                 </select>
               </td>
               <td class="align-top">
-                <div class="space-y-2">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                   <input
                     v-model="aiRoutingDraft[section.id].model"
                     :list="`routing-model-options-${section.id}`"
                     type="text"
-                    class="input input-sm w-full min-w-52"
+                    class="input input-sm min-w-52" :class="[FLUID_WIDTH_CLASS]"
                     :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
                     :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
                   />
@@ -90,7 +91,7 @@ const emit = defineEmits<{
                       {{ model }}
                     </option>
                   </datalist>
-                  <p class="text-xs text-muted">
+                  <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                     {{ t("settings.aiProviders.purposeModelHint") }}
                   </p>
                 </div>

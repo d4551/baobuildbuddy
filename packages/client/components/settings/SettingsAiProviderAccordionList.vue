@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 
@@ -36,16 +37,16 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <div
       v-if="showOllamaHotTip"
       role="alert"
-      class="alert alert-info alert-soft alert-vertical mb-4 sm:alert-horizontal"
+      class="alert alert-info alert-soft alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mb4]"
     >
       <IconInfoCircle class="h-6 w-6 shrink-0 stroke-current" />
       <div>
         <h3 class="font-semibold">{{ t("settings.aiProviders.ollamaTipTitle") }}</h3>
-        <p class="text-sm">
+        <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("settings.aiProviders.ollamaTipDescription") }}
           <NuxtLink :to="OLLAMA_WEBSITE_URL" target="_blank" class="link link-primary" :aria-label="t('settings.aiProviders.ollamaTipLinkAria')">
             {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
@@ -59,23 +60,23 @@ const emit = defineEmits<{
       :key="provider.id"
       class="collapse collapse-arrow border border-base-300 bg-base-100"
     >
-      <summary class="collapse-title flex items-center gap-2 font-medium">
+      <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <AIProviderIcon :provider-id="provider.id" class="h-5 w-5 text-primary" />
         {{ provider.label }}
         <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
           {{ t("settings.aiProviders.configuredBadge") }}
         </span>
       </summary>
-      <div class="collapse-content space-y-3">
-        <p class="text-sm text-muted">{{ provider.description }}</p>
+      <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ provider.description }}</p>
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ providerKeyLabel(provider.id) }}</legend>
-          <div class="join w-full">
+          <div class="join" :class="[FLUID_WIDTH_CLASS]">
             <input
               v-model="apiKeys[provider.field]"
               :type="provider.id === 'local' ? 'text' : 'password'"
               :placeholder="providerPlaceholder(provider.id, provider.label)"
-              class="input join-item w-full"
+              class="input join-item" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="providerKeyLabel(provider.id)"
             />
             <button
@@ -98,7 +99,7 @@ const emit = defineEmits<{
           <input
             v-model="apiKeys.localModelName"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('settings.aiProviders.localModelPlaceholder')"
             :aria-label="t('settings.aiProviders.localModelAria')"
           />
@@ -117,17 +118,17 @@ const emit = defineEmits<{
         </span>
         <p
           v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message"
-          class="text-sm text-muted"
+          class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
         >
           {{ providerDiagnostics[provider.id]?.message }}
         </p>
-        <p v-else-if="testResults[provider.id]?.message" class="text-sm text-muted">
+        <p v-else-if="testResults[provider.id]?.message" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ testResults[provider.id]?.message }}
         </p>
       </div>
     </details>
 
-    <div class="mt-4 flex justify-end">
+    <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
       <button class="btn btn-primary" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
         {{ t("settings.aiProviders.saveButton") }}
       </button>

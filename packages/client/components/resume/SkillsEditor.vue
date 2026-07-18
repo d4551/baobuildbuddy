@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
@@ -44,9 +45,9 @@ function removeSkill(index: number): void {
 </script>
 
 <template>
-  <div class="space-y-4 p-6">
-    <h2 class="text-lg font-semibold">{{ t("resumePage.skills.title") }}</h2>
-    <div class="mb-4 flex gap-2">
+  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+    <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.skills.title") }}</h2>
+    <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mb4]">
       <input
         v-model="newSkill"
         type="text"
@@ -63,11 +64,11 @@ function removeSkill(index: number): void {
         {{ t("resumePage.skills.addButton") }}
       </button>
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <div
         v-for="(skill, index) in localValue"
         :key="`${skill}-${index}`"
-        class="badge badge-lg gap-2"
+        class="badge badge-lg" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         {{ skill }}
         <button

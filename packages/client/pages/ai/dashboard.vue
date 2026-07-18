@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -48,7 +49,7 @@ const page = reactive(useAIDashboardPage());
       @retry="page.fetchProviderStats"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <StatsRow v-if="page.providerStats" :stats="page.statsItems" />
 
       <ClientOnly>
@@ -78,7 +79,7 @@ const page = reactive(useAIDashboardPage());
         </svg>
         <div>
           <h3 class="font-bold">{{ t("aiDashboard.alerts.noProvidersTitle") }}</h3>
-          <p class="text-xs">{{ t("aiDashboard.alerts.noProvidersDescription") }}</p>
+          <p :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiDashboard.alerts.noProvidersDescription") }}</p>
         </div>
       </div>
 

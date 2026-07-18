@@ -6,7 +6,7 @@ definePageMeta({
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { PROSE_MEASURE_CENTER_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PROSE_MEASURE_CENTER_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -100,13 +100,13 @@ async function handleExport(format: "pdf" | "docx") {
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
       <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body items-center gap-6 py-12 text-center">
-          <div class="space-y-4">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
             <h2 class="text-4xl font-bold sm:text-5xl">
               {{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}
             </h2>
             <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
           </div>
-          <div class="flex flex-wrap justify-center gap-4">
+          <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"
@@ -133,7 +133,7 @@ async function handleExport(format: "pdf" | "docx") {
         </div>
       </div>
 
-      <div v-if="featuredProjects.length" class="space-y-6">
+      <div v-if="featuredProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
           title-id="portfolio-featured-projects-title"
           :title="t('portfolioPage.preview.featuredProjectsTitle')"
@@ -148,7 +148,7 @@ async function handleExport(format: "pdf" | "docx") {
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
-                class="h-full w-full object-cover"
+                class="object-cover" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]"
                 sizes="sm:100vw md:50vw"
                 format="webp"
               />
@@ -156,7 +156,7 @@ async function handleExport(format: "pdf" | "docx") {
             <div class="card-body">
               <h3 class="card-title">{{ project.title }}</h3>
               <p>{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="mt-2 flex flex-wrap gap-2">
+              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
@@ -165,7 +165,7 @@ async function handleExport(format: "pdf" | "docx") {
                   {{ tech }}
                 </span>
               </div>
-              <div v-if="project.liveUrl" class="card-actions mt-4">
+              <div v-if="project.liveUrl" class="card-actions" :class="[MARGIN_TOKEN_CLASS.mt4]">
                 <a
                   :href="project.liveUrl"
                   target="_blank"
@@ -182,7 +182,7 @@ async function handleExport(format: "pdf" | "docx") {
         </SectionGrid>
       </div>
 
-      <div v-if="regularProjects.length" class="space-y-6">
+      <div v-if="regularProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
           title-id="portfolio-all-projects-title"
           :title="featuredProjects.length ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
@@ -197,15 +197,15 @@ async function handleExport(format: "pdf" | "docx") {
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
-                class="h-full w-full object-cover"
+                class="object-cover" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]"
                 sizes="sm:100vw md:33vw"
                 format="webp"
               />
             </figure>
             <div class="card-body">
               <h3 class="card-title text-base">{{ project.title }}</h3>
-              <p class="text-sm">{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="mt-2 flex flex-wrap gap-1">
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
+              <div v-if="project.technologies?.length" class="flex flex-wrap gap-1" :class="[MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
@@ -214,7 +214,7 @@ async function handleExport(format: "pdf" | "docx") {
                   {{ tech }}
                 </span>
               </div>
-              <div v-if="project.liveUrl" class="card-actions mt-4">
+              <div v-if="project.liveUrl" class="card-actions" :class="[MARGIN_TOKEN_CLASS.mt4]">
                 <a
                   :href="project.liveUrl"
                   target="_blank"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewConversationStyle, InterviewMode } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
@@ -68,14 +69,14 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     :close-backdrop-label="t('interviewHub.config.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="text-lg font-bold">
+    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("interviewHub.config.title") }}
     </h3>
-    <p :id="descriptionId" class="mt-1 text-sm text-secondary">
+    <p :id="descriptionId" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ t("interviewHub.config.subtitle") }}
     </p>
 
-    <div class="join mt-4">
+    <div class="join" :class="[MARGIN_TOKEN_CLASS.mt4]">
       <button
         type="button"
         class="btn join-item btn-outline"
@@ -97,13 +98,13 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     </div>
 
     <SectionGrid grid-token="twoColumnWide" extra-class="mt-6">
-      <div v-if="selectedMode === 'job'" class="space-y-4">
+      <div v-if="selectedMode === 'job'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
           <input
             :value="jobSearchTerm"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('interviewHub.config.searchJobsPlaceholder')"
             :aria-label="t('interviewHub.config.searchJobsAria')"
             @input="updateTextValue($event, 'update:job-search-term')"
@@ -115,7 +116,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           message-key="interviewHub.config.noJobsState"
         />
 
-        <div v-else class="space-y-4">
+        <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <div class="max-h-72 overflow-x-auto rounded-box border border-base-300">
             <table class="table table-sm table-zebra" :aria-label="t('interviewHub.config.jobsTableAria')">
               <thead>
@@ -165,12 +166,12 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         </div>
 
         <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
-          <div class="card-body p-4">
+          <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <h4 class="font-semibold">{{ selectedJob.title }}</h4>
-            <p class="text-sm text-secondary">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ selectedJob.company }} · {{ selectedJob.location }}
             </p>
-            <div class="mt-2 flex flex-wrap gap-2">
+            <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
               <span
                 v-for="tech in selectedJob.technologies?.slice(0, 6)"
                 :key="tech"
@@ -183,7 +184,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         </div>
       </div>
 
-      <div v-else class="space-y-4">
+      <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.studioLegend") }}</legend>
           <StudioSelector
@@ -191,7 +192,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
             :studios="[...studiosForSelector]"
             @update:model-value="emit('update:studio-id', $event)"
           />
-          <p v-if="studiosForSelector.length === 0" class="mt-2 text-xs text-muted">
+          <p v-if="studiosForSelector.length === 0" class="text-muted" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]">
             {{ t("interviewHub.config.noStudiosHint") }}
           </p>
         </fieldset>

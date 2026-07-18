@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { computed, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -152,14 +153,14 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <section class="card card-border bg-base-100 h-full" aria-labelledby="interview-chat-workspace-title">
+  <section class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body gap-0 p-0">
       <div class="border-b border-base-300 px-6 py-5">
         <div class="space-y-1">
-          <h2 id="interview-chat-workspace-title" class="text-lg font-semibold">
+          <h2 id="interview-chat-workspace-title" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
-          <p class="text-sm text-muted">
+          <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.responseWorkspaceDescription") }}
           </p>
         </div>
@@ -167,7 +168,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        class="min-h-80 flex-1 space-y-4 overflow-y-auto glass-subtle px-6 py-5"
+        class="min-h-80 flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"
@@ -185,7 +186,7 @@ watch(renderedMessages, async () => {
       </div>
 
       <div v-if="currentQuestion" class="border-t border-base-300 px-6 py-5">
-        <form class="space-y-4" @submit.prevent="submitResponse">
+        <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="submitResponse">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">
               {{ t(props.responseLabelKey) }}
@@ -193,7 +194,7 @@ watch(renderedMessages, async () => {
             <textarea
               :id="responseTextareaId"
               v-model="currentResponse"
-              class="textarea min-h-40 w-full"
+              class="textarea min-h-40" :class="[FLUID_WIDTH_CLASS]"
               :placeholder="t(props.responsePlaceholderKey)"
               :aria-label="t(props.responseAriaKey)"
               :aria-describedby="responseHintId"
@@ -204,13 +205,13 @@ watch(renderedMessages, async () => {
               @keyup.ctrl.enter.prevent="submitResponse"
               @keyup.meta.enter.prevent="submitResponse"
             ></textarea>
-            <p :id="responseHintId" class="validator-hint text-sm text-muted">
+            <p :id="responseHintId" class="validator-hint text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ responseHintText }}
             </p>
           </fieldset>
 
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="text-sm text-muted">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ currentQuestionProgressLabel }}
             </p>
             <button

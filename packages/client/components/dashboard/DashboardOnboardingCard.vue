@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -15,26 +15,26 @@ const { t } = useI18n();
 
 <template>
   <section class="hero overflow-hidden rounded-box border border-base-300 bg-base-200" :class="[SHADOW_TOKEN_CLASS.sm]">
-    <div class="hero-content w-full max-w-none px-0">
-      <div class="card card-border card-glass w-full">
+    <div class="hero-content max-w-none px-0" :class="[FLUID_WIDTH_CLASS]">
+      <div class="card card-border card-glass" :class="[FLUID_WIDTH_CLASS]">
         <div class="card-body gap-5 p-6 lg:p-8">
-          <div class="space-y-2">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <div class="badge badge-primary badge-outline w-fit">
               {{ t(DASHBOARD_COPY_KEYS.pageTitle) }}
             </div>
-            <h2 class="card-title text-2xl">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}
             </h2>
-            <p class="text-sm text-secondary">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}
             </p>
           </div>
 
-          <div class="space-y-3">
-            <h3 class="text-sm font-semibold">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+            <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t(DASHBOARD_COPY_KEYS.onboardingChecklistTitle) }}
             </h3>
-            <ul class="steps steps-vertical w-full lg:steps-horizontal">
+            <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]">
               <li
                 v-for="step in DASHBOARD_ONBOARDING_STEPS"
                 :key="step.id"

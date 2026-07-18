@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ProviderConfig } from "~/types/ai-dashboard";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -19,16 +20,16 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 
 <template>
   <div class="card card-border card-glass">
-    <div class="card-body gap-4">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
-      <p class="text-sm text-secondary">{{ t("aiDashboard.preference.description") }}</p>
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("aiDashboard.preference.description") }}</p>
 
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
           <select
             v-model="selectedProviderModel"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.providerAria')"
           >
             <option disabled value="">{{ t("aiDashboard.preference.selectProviderOption") }}</option>
@@ -47,7 +48,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.modelLegend") }}</legend>
           <select
             v-model="selectedModelValue"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.modelAria')"
             :disabled="selectedProviderModels.length === 0"
           >

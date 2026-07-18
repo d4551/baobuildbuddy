@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -37,7 +38,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
           <input
             :value="props.portfolioForm.title"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.titlePlaceholder')"
             :aria-label="t('portfolioPage.profile.titleAria')"
             @input="updatePortfolioField('title', $event)"
@@ -49,7 +50,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
           <input
             :value="props.portfolioForm.email"
             type="email"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.emailPlaceholder')"
             :aria-label="t('portfolioPage.profile.emailAria')"
             @input="updatePortfolioField('email', $event)"
@@ -61,7 +62,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
           <input
             :value="props.portfolioForm.website"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.websitePlaceholder')"
             :aria-label="t('portfolioPage.profile.websiteAria')"
             @input="updatePortfolioField('website', $event)"
@@ -72,7 +73,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.bioLegend") }}</legend>
           <textarea
             :value="props.portfolioForm.bio"
-            class="textarea w-full"
+            class="textarea" :class="[FLUID_WIDTH_CLASS]"
             rows="4"
             :placeholder="t('portfolioPage.profile.bioPlaceholder')"
             :aria-label="t('portfolioPage.profile.bioAria')"

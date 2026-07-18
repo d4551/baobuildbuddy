@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -23,26 +24,26 @@ function updateTextValue(event: Event, emitEvent: "update:name" | "update:curren
 </script>
 
 <template>
-  <div class="space-y-4">
-    <h2 class="text-lg font-semibold">{{ t("setup.profileTitle") }}</h2>
-    <label class="floating-label w-full">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+    <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.profileTitle") }}</h2>
+    <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.nameLegend") }}</span>
       <input
         :value="name"
         type="text"
         :placeholder="t('setup.namePlaceholder')"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.nameAria')"
         @input="updateTextValue($event, 'update:name')"
       />
     </label>
-    <label class="floating-label w-full">
+    <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.currentRoleLegend") }}</span>
       <input
         :value="currentRole"
         type="text"
         :placeholder="t('setup.currentRolePlaceholder')"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('setup.currentRoleAria')"
         @input="updateTextValue($event, 'update:current-role')"
       />

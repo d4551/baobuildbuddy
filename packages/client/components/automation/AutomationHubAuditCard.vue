@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type {
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
@@ -61,11 +61,11 @@ const readyEntries = computed(() =>
 
 <template>
   <section class="card card-border bg-base-100" :aria-label="t('automation.hub.audit.aria')">
-    <div class="card-body gap-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div>
           <h2 class="card-title">{{ t("automation.hub.audit.title") }}</h2>
-          <p class="text-sm text-secondary">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("automation.hub.audit.description") }}
           </p>
         </div>
@@ -105,12 +105,12 @@ const readyEntries = computed(() =>
 
         <SectionGrid grid-token="twoColumnWide">
           <section class="card card-border bg-base-100" aria-labelledby="automation-capability-attention-title">
-            <div class="card-body gap-4">
+            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
-                <h3 id="automation-capability-attention-title" class="card-title text-lg">
+                <h3 id="automation-capability-attention-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                   {{ t("automation.hub.audit.groups.attentionTitle") }}
                 </h3>
-                <p class="text-sm text-secondary">
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("automation.hub.audit.groups.attentionDescription") }}
                 </p>
               </div>
@@ -121,15 +121,15 @@ const readyEntries = computed(() =>
                 description-key="automation.hub.audit.groups.attentionEmptyDescription"
               />
 
-              <div v-else class="space-y-3">
+              <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                 <div
                   v-for="capability in needsAttentionEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200 p-4"
+                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
                 >
-                  <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div class="space-y-2">
-                      <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+                      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
                             class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
@@ -159,7 +159,7 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="space-y-1 text-sm text-secondary">
+                      <ul class="space-y-1 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -183,25 +183,25 @@ const readyEntries = computed(() =>
           </section>
 
           <section class="card card-border bg-base-100" aria-labelledby="automation-capability-ready-title">
-            <div class="card-body gap-4">
+            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
-                <h3 id="automation-capability-ready-title" class="card-title text-lg">
+                <h3 id="automation-capability-ready-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                   {{ t("automation.hub.audit.groups.readyTitle") }}
                 </h3>
-                <p class="text-sm text-secondary">
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("automation.hub.audit.groups.readyDescription") }}
                 </p>
               </div>
 
-              <div class="space-y-3">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                 <div
                   v-for="capability in readyEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200 p-4"
+                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
                 >
-                  <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div class="space-y-2">
-                      <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+                      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
                             class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"

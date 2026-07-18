@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -26,13 +27,13 @@ const { t } = useI18n();
         :description="t('settings.automation.subtitle')"
       />
 
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="flex items-center justify-between">
           <div>
             <span class="font-medium">{{
               t("settings.automation.headlessTitle")
             }}</span>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.headlessDescription") }}
             </p>
           </div>
@@ -49,7 +50,7 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.smartSelectorsTitle")
             }}</span>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.smartSelectorsDescription") }}
             </p>
           </div>
@@ -66,7 +67,7 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.autoScreenshotsTitle")
             }}</span>
-            <p class="text-sm text-muted">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.autoScreenshotsDescription") }}
             </p>
           </div>
@@ -88,7 +89,7 @@ const { t } = useI18n();
               type="number"
               min="1"
               max="120"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.timeoutAria')"
             />
           </fieldset>
@@ -102,7 +103,7 @@ const { t } = useI18n();
               type="number"
               min="1"
               max="30"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.retentionAria')"
             />
           </fieldset>
@@ -116,7 +117,7 @@ const { t } = useI18n();
               type="number"
               min="1"
               max="5"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.concurrentRunsAria')"
             />
           </fieldset>
@@ -127,7 +128,7 @@ const { t } = useI18n();
             </legend>
             <select
               v-model="automationForm.defaultBrowser"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.defaultBrowserAria')"
             >
               <option
@@ -142,7 +143,7 @@ const { t } = useI18n();
         </SectionGrid>
       </div>
 
-      <div class="card-actions justify-end mt-2">
+      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
         <button
           class="btn btn-primary"
           :aria-label="t('settings.automation.saveAria')"

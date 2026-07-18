@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 
 defineProps<{
@@ -18,14 +18,14 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="flex min-h-0 flex-col gap-4">
+  <aside class="flex min-h-0 flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
     <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-      <div class="card-body gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
-        <p class="text-sm leading-6 text-secondary">
+        <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.contextPanelDescription") }}
         </p>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <span class="badge badge-soft badge-info">
             {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
           </span>
@@ -40,12 +40,12 @@ const { t } = useI18n();
     </section>
 
     <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-      <div class="card-body gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
-        <p class="text-sm leading-6 text-secondary">
+        <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.promptsDescription") }}
         </p>
-        <ul class="flex flex-wrap gap-2" :aria-label="t('floatingChat.suggestionsAria')">
+        <ul class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" :aria-label="t('floatingChat.suggestionsAria')">
           <li v-for="prompt in contextualPrompts" :key="`sidebar-${prompt}`">
             <button
               type="button"

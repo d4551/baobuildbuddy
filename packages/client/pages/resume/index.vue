@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { getErrorMessage } from "~/utils/errors";
@@ -123,7 +124,7 @@ const {
     />
 
     <!-- Resume Editor -->
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <ResumeEditorToolbar
         :enhancing="enhancing"
         :scoring="scoring"
@@ -179,7 +180,7 @@ const {
       :close-aria-label="t('resumePage.createModal.closeBackdropAria')"
       :close-backdrop-label="t('resumePage.createModal.closeBackdropButton')"
     >
-      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
+      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
         {{ t("resumePage.createModal.title") }}
       </h3>
 
@@ -189,14 +190,14 @@ const {
           v-model="newResumeName"
           type="text"
           :placeholder="t('resumePage.createModal.namePlaceholder')"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.createModal.nameAria')"
         />
       </fieldset>
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.createModal.templateLegend") }}</legend>
-        <select v-model="newResumeTemplate" class="select w-full" :aria-label="t('resumePage.createModal.templateAria')">
+        <select v-model="newResumeTemplate" class="select" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('resumePage.createModal.templateAria')">
           <option
             v-for="templateOption in createResumeTemplateOptions"
             :key="templateOption.value"

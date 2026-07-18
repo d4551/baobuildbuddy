@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";
 
@@ -33,7 +33,7 @@ const { t } = useI18n();
               <td>{{ entry.message }}</td>
             </tr>
             <tr v-if="timelineEntries.length === 0">
-              <td colspan="4" class="text-center text-sm text-muted">
+              <td colspan="4" class="text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("automation.runDetail.timeline.empty") }}
               </td>
             </tr>

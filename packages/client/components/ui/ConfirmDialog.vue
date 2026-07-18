@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
@@ -128,7 +129,7 @@ function handleClose(): void {
     @update:open="handleUpdateOpen"
     @close="handleClose"
   >
-    <h3 :id="titleId" class="text-lg font-bold">{{ title }}</h3>
+    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ title }}</h3>
     <p :id="descriptionId" class="py-4">{{ message }}</p>
     <div class="modal-action">
       <button

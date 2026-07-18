@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 
@@ -36,7 +37,7 @@ defineProps<{
               <th>{{ run.id }}</th>
               <td>{{ formatRunType(run.type) }}</td>
               <td>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <span>{{ formatRunStatus(run.status) }}</span>
                   <span
                     v-if="isLiveRun(run)"

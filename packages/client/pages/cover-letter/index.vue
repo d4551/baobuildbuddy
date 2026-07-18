@@ -2,7 +2,7 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
-import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -82,7 +82,7 @@ const bootstrapErrorMessage = computed(() =>
       </template>
       <template #aside>
         <StatsRow
-          class="mt-4"
+          :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
             { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
             { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
@@ -100,7 +100,7 @@ const bootstrapErrorMessage = computed(() =>
             <input
               v-model="searchQuery"
               type="search"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :placeholder="t('coverLetterPage.filters.searchPlaceholder')"
               :aria-label="t('coverLetterPage.filters.searchAria')"
             />
@@ -110,7 +110,7 @@ const bootstrapErrorMessage = computed(() =>
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.templateLegend") }}</legend>
             <select
               v-model="templateFilter"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('coverLetterPage.filters.templateAria')"
             >
               <option
@@ -127,7 +127,7 @@ const bootstrapErrorMessage = computed(() =>
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.sortLegend") }}</legend>
             <select
               v-model="sortOrder"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('coverLetterPage.filters.sortAria')"
             >
               <option
@@ -184,21 +184,21 @@ const bootstrapErrorMessage = computed(() =>
           :aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
         />
         <div class="card-body relative z-10">
-          <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <div>
-              <h2 class="card-title text-lg">{{ letter.position }}</h2>
-              <p class="text-sm text-secondary">{{ letter.company }}</p>
+              <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ letter.position }}</h2>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ letter.company }}</p>
             </div>
             <span class="badge badge-outline badge-sm">
               {{ letter.templateLabel }}
             </span>
           </div>
 
-          <p class="line-clamp-4 text-sm text-secondary">
+          <p class="line-clamp-4 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ letter.previewText }}
           </p>
 
-          <div class="flex items-center justify-between text-xs text-muted">
+          <div class="flex items-center justify-between text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
             <span>{{ t("coverLetterPage.cards.updatedAtLabel") }}</span>
             <time>{{ letter.updatedAtLabel }}</time>
           </div>

@@ -5,7 +5,7 @@ import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { resolveLocaleLabel } from "~/constants/i18n";
-import { APP_DRAWER_ID, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_NAVBAR_CLASS, SHELL_NAVBAR_DROPDOWN_CLASS } from "~/constants/layout";
+import { APP_DRAWER_ID, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_NAVBAR_CLASS, SHELL_NAVBAR_DROPDOWN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
@@ -85,7 +85,7 @@ onUnmounted(() => {
     :data-scrolled="isScrolled || undefined"
     :aria-label="t('a11y.appHeader')"
   >
-    <div class="navbar-start flex min-w-0 flex-1 items-center gap-2 lg:gap-4">
+    <div class="navbar-start flex flex-1 items-center lg:" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2, FLEX_GAP_TOKEN_CLASS.gap4]">
       <label
         :for="APP_DRAWER_ID"
         role="button"
@@ -103,18 +103,18 @@ onUnmounted(() => {
       </label>
       <NuxtLink
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink-0 gap-2 text-xl font-bold text-primary lg:hidden"
+        class="btn btn-ghost shrink-0 text-xl font-bold text-primary lg:hidden" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
-        <span v-if="mobileSectionLabel" class="text-sm font-medium text-secondary before:content-['/'] before:mx-1 before:text-muted">{{ mobileSectionLabel }}</span>
+        <span v-if="mobileSectionLabel" class="font-medium text-secondary before:content-['/'] before:mx-1 before:text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mobileSectionLabel }}</span>
       </NuxtLink>
-      <div class="hidden min-w-0 flex-1 lg:block">
+      <div class="hidden flex-1 lg:block" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
       </div>
     </div>
     <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
-      <span class="text-sm text-muted">{{ resolvedBrand.content.tagline }}</span>
+      <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end gap-1">
       <label class="swap swap-rotate btn btn-ghost btn-circle">
@@ -155,7 +155,7 @@ onUnmounted(() => {
           :aria-label="t('a11y.userMenu')"
         >
           <li>
-            <NuxtLink :to="APP_ROUTES.settings" class="flex items-center gap-2" @click="closeUserMenu">
+            <NuxtLink :to="APP_ROUTES.settings" class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" @click="closeUserMenu">
               <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -167,8 +167,7 @@ onUnmounted(() => {
           <li v-for="loc in availableLocales" :key="loc">
             <button
               type="button"
-              class="w-full text-left"
-              :class="{ active: locale === loc }"
+              class="text-left" :class="[FLUID_WIDTH_CLASS, { active: locale === loc }]"
               :aria-label="t('a11y.localeOptionAria', { locale: getLocaleLabel(loc) })"
               :disabled="locale === loc"
               @click="selectLocale(loc)"

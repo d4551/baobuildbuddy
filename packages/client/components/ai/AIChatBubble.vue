@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
@@ -88,8 +88,7 @@ const ariaLabel = computed(() => {
 
 <template>
   <article
-    class="chat w-full"
-    :class="chatClass"
+    class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
     role="listitem"
     :aria-label="ariaLabel"
     :aria-busy="isStreaming"
@@ -117,14 +116,14 @@ const ariaLabel = computed(() => {
       <div
         class="flex items-center justify-center bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
-        <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
+        <span class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ userAvatarInitial }}</span>
       </div>
     </div>
-    <div class="chat-header mb-1" :class="messageWidthClass">
+    <div class="chat-header" :class="[MARGIN_TOKEN_CLASS.mb1, messageWidthClass]">
       {{ messageTitle }}
       <time
         v-if="formattedTime"
-        class="text-xs text-muted ml-1"
+        class="text-muted ml-1" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"
         :datetime="props.message.timestamp ?? undefined"
       >
         {{ formattedTime }}

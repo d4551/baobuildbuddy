@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
 import type {
@@ -58,12 +59,12 @@ function handleScheduledRunAtUpdate(payload: {
 
 <template>
   <div class="space-y-8">
-    <section v-if="readyCapabilities.length > 0" class="space-y-4">
+    <section v-if="readyCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <div class="space-y-1">
-        <h2 class="text-lg font-semibold text-base-content">
+        <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.sections.providers.label") }}
         </h2>
-        <p class="text-sm text-secondary">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.sections.providers.description") }}
         </p>
       </div>
@@ -97,12 +98,12 @@ function handleScheduledRunAtUpdate(payload: {
       </SectionGrid>
     </section>
 
-    <section v-if="attentionCapabilities.length > 0" class="space-y-4">
+    <section v-if="attentionCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <div class="space-y-1">
-        <h2 class="text-lg font-semibold text-base-content">
+        <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.providerCard.issuesTitle") }}
         </h2>
-        <p class="text-sm text-secondary">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.providerCard.issuesNeedsAttention") }}
         </p>
       </div>

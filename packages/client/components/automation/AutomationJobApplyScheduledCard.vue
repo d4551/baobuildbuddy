@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
 
@@ -19,15 +19,15 @@ const { t } = useI18n();
       <div role="alert" class="alert alert-info">
         <h3 class="font-semibold">{{ t("automation.jobApply.schedule.createdTitle") }}</h3>
         <div>
-          <p class="mb-1">{{ t("automation.jobApply.runIdLabel", { id: run.id }) }}</p>
-          <p class="mb-1 text-sm">
+          <p :class="[MARGIN_TOKEN_CLASS.mb1]">{{ t("automation.jobApply.runIdLabel", { id: run.id }) }}</p>
+          <p :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{
               t("automation.jobApply.schedule.scheduledForLabel", {
                 date: toLocalizedDateTime(resolveScheduledRunAt(run)),
               })
             }}
           </p>
-          <p class="text-sm">{{ t("automation.jobApply.statusLabel", { status: run.status }) }}</p>
+          <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.statusLabel", { status: run.status }) }}</p>
           <NuxtLink
             :to="runDetailRoute(run.id)"
             class="link link-primary link-hover"

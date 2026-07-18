@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
@@ -20,10 +21,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <section class="card card-border card-glass-strong glass-interactive text-on-glass">
       <div class="card-body">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
             <h2 class="text-4xl font-bold">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
             <p class="text-secondary">
@@ -34,7 +35,7 @@ defineProps<{
         </div>
 
         <progress
-          class="progress progress-primary h-4 w-full"
+          class="progress progress-primary h-4" :class="[FLUID_WIDTH_CLASS]"
           :value="levelProgress"
           :max="GAMIFICATION_PROGRESS_MAX"
           :aria-valuenow="levelProgress"
@@ -43,7 +44,7 @@ defineProps<{
           :aria-label="t('gamificationPage.a11y.levelProgress')"
         ></progress>
 
-        <p class="mt-2 text-sm text-secondary">
+        <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
         </p>
       </div>

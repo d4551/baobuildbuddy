@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { computed, ref, watch } from "vue";
 
 type PageAriaResolver = (page: number) => string;
@@ -141,8 +142,8 @@ watch(
 
 <template>
   <div v-if="hasPages && hasNormalizedPages" class="card card-border bg-base-100">
-    <div class="card-body gap-3 py-4 md:flex-row md:items-center md:justify-between">
-      <p class="text-xs text-secondary">{{ summary }}</p>
+    <div class="card-body py-4 md:flex-row md:items-center md:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ summary }}</p>
 
       <nav class="join" :aria-label="navigationAria">
         <button

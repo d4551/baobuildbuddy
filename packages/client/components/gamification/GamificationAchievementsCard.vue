@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { Achievement } from "@bao/shared/types/gamification";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
@@ -13,7 +13,7 @@ defineProps<{
 <template>
   <section class="card bg-base-200">
     <div class="card-body">
-      <h2 class="card-title mb-4">{{ t("gamificationPage.achievementsTitle") }}</h2>
+      <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4]">{{ t("gamificationPage.achievementsTitle") }}</h2>
 
       <div v-if="unlockedAchievements.length" class="mb-6">
         <h3 class="mb-3 font-semibold text-success">{{ t("gamificationPage.achievementsUnlockedLabel") }}</h3>

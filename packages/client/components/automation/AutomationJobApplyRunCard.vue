@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
@@ -96,16 +96,16 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
   <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
-      <p class="text-sm text-secondary">{{ t("automation.jobApply.stream.subtitle") }}</p>
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.stream.subtitle") }}</p>
 
-      <ul class="steps steps-vertical mt-2 w-full lg:steps-horizontal">
+      <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
         <li :class="lifecycleStepClasses[0]">{{ t("automation.jobApply.stream.steps.queued") }}</li>
         <li :class="lifecycleStepClasses[1]">{{ t("automation.jobApply.stream.steps.running") }}</li>
         <li :class="lifecycleStepClasses[2]">{{ t("automation.jobApply.stream.steps.completed") }}</li>
       </ul>
 
       <div
-        class="stats stats-vertical bg-base-200 mt-4 lg:stats-horizontal"
+        class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[MARGIN_TOKEN_CLASS.mt4]"
         :aria-label="t('automation.jobApply.stream.aria')"
       >
         <div class="stat">
@@ -130,7 +130,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
             }}
           </div>
           <progress
-            class="progress progress-primary mt-2"
+            class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mt2]"
             :value="streamProgressValue"
             max="100"
             :aria-label="t('automation.jobApply.stream.progressAria')"
@@ -138,7 +138,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </div>
       </div>
 
-      <div class="mt-4 flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
         <NuxtLink
           :to="runDetailRoute(activeRunId)"
           class="btn btn-sm btn-outline"
@@ -167,7 +167,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 
       <BootstrapErrorAlert
         v-if="streamErrorMessage"
-        class="mt-4"
+        :class="[MARGIN_TOKEN_CLASS.mt4]"
         :title="t('automation.jobApply.stream.errorTitle')"
         :message="streamErrorMessage"
         :retry-label="t('automation.jobApply.stream.retryButton')"
@@ -175,9 +175,9 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         @retry="emit('retry')"
       />
 
-      <section class="mt-4" :aria-label="t('automation.jobApply.stream.eventsAria')">
+      <section :class="[MARGIN_TOKEN_CLASS.mt4]" :aria-label="t('automation.jobApply.stream.eventsAria')">
         <h3 class="font-semibold">{{ t("automation.jobApply.stream.eventsTitle") }}</h3>
-        <div class="overflow-x-auto mt-2">
+        <div class="overflow-x-auto" :class="[MARGIN_TOKEN_CLASS.mt2]">
           <table class="table table-zebra table-sm" :aria-label="t('automation.jobApply.stream.eventsAria')">
             <thead>
               <tr>
@@ -195,7 +195,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
                 <td>{{ resolveStreamEventMessage(event) }}</td>
               </tr>
               <tr v-if="eventRows.length === 0">
-                <td colspan="4" class="text-center text-sm text-muted">
+                <td colspan="4" class="text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("automation.jobApply.stream.events.empty") }}
                 </td>
               </tr>

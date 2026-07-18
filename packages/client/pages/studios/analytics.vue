@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -67,8 +67,8 @@ useSeoMeta({
       :cta-to="APP_ROUTES.studios"
     />
 
-    <div v-else class="space-y-6">
-      <div class="stats stats-vertical lg:stats-horizontal w-full bg-base-200">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+      <div class="stats stats-vertical lg:stats-horizontal bg-base-200" :class="[FLUID_WIDTH_CLASS]">
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.totalStudiosTitle") }}</div>
           <div class="stat-value text-primary">{{ totalStudios }}</div>
@@ -96,8 +96,8 @@ useSeoMeta({
 
           <SectionGrid grid-token="twoToFourLg">
             <div v-for="[type, count] in byTypeEntries" :key="type" class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
-              <div class="stat-title text-xs">{{ type }}</div>
-              <div class="stat-value text-2xl">{{ count }}</div>
+              <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ type }}</div>
+              <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ count }}</div>
               <div class="stat-desc">
                 {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((count / totalStudios) * 100) : 0 }) }}
               </div>
@@ -110,7 +110,7 @@ useSeoMeta({
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
-          <div class="space-y-4">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
             <div
               v-for="[size, count] in bySizeEntries"
               :key="size"
@@ -120,7 +120,7 @@ useSeoMeta({
                 <span class="badge badge-lg">{{ count }}</span>
               </div>
               <progress
-                class="progress progress-primary w-full"
+                class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
                 :value="count"
                 :max="Math.max(1, totalStudios)"
                 :aria-label="t('studioAnalytics.progressAria', { label: size })"
@@ -133,20 +133,20 @@ useSeoMeta({
       <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
-          <p class="mb-4 text-sm text-secondary">
+          <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("studioAnalytics.sections.topTechnologiesDescription") }}
           </p>
 
-          <div class="space-y-3">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <div
               v-for="tech in topTechnologies"
               :key="tech.name"
-              class="flex items-center gap-3"
+              class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
             >
               <span class="w-32 font-medium">{{ tech.name }}</span>
               <div class="flex-1">
                 <progress
-                  class="progress progress-primary w-full"
+                  class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
                   :value="tech.count"
                   :max="getMaxCount(topTechnologies)"
                   :aria-label="t('studioAnalytics.progressAria', { label: tech.name })"
@@ -162,7 +162,7 @@ useSeoMeta({
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
-          <div class="stats stats-vertical w-full bg-base-200 sm:stats-horizontal">
+          <div class="stats stats-vertical bg-base-200 sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
             <div class="stat">
               <div class="stat-title">
                 {{ t("studioAnalytics.sections.offerRemoteLabel") }}
@@ -183,24 +183,24 @@ useSeoMeta({
             </div>
           </div>
 
-          <div class="mt-4">
+          <div :class="[MARGIN_TOKEN_CLASS.mt4]">
             <progress
-              class="progress progress-primary w-full"
+              class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
               :value="remoteWorkStudios"
               :max="Math.max(1, totalStudios)"
               :aria-label="t('studioAnalytics.remoteWorkProgressAria', { value: remoteWorkPercentage })"
             ></progress>
           </div>
 
-          <SectionGrid grid-token="twoColumnSm" extra-class="mt-4">
+          <SectionGrid grid-token="twoColumnSm" extra-:class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
-              <div class="stat-title text-xs">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
-              <div class="stat-value text-success text-2xl">{{ remoteWorkStudios }}</div>
+              <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
+              <div class="stat-value text-success" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ remoteWorkStudios }}</div>
             </div>
 
             <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
-              <div class="stat-title text-xs">{{ t("studioAnalytics.sections.onSiteOnlyTitle") }}</div>
-              <div class="stat-value text-warning text-2xl">{{ onSiteOnlyCount }}</div>
+              <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioAnalytics.sections.onSiteOnlyTitle") }}</div>
+              <div class="stat-value text-warning" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ onSiteOnlyCount }}</div>
             </div>
           </SectionGrid>
         </div>

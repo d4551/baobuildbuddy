@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -212,7 +213,7 @@ async function requestData<T>(
       :cta-to="APP_ROUTES.dashboard"
     />
 
-    <div v-else-if="hubData" class="space-y-6">
+    <div v-else-if="hubData" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <GamificationSummaryCard
         :progress="hubData.progress"
         :level-progress="levelProgress"

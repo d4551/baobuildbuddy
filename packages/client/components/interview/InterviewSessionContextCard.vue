@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 
@@ -23,12 +24,12 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
 
 <template>
   <section class="card card-border bg-base-100" aria-labelledby="interview-session-context-title">
-    <div class="card-body gap-4">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="space-y-1">
-        <h2 id="interview-session-context-title" class="card-title text-lg">
+        <h2 id="interview-session-context-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.overviewTitle") }}
         </h2>
-        <p class="text-sm text-muted">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.overviewDescription") }}
         </p>
       </div>
@@ -37,22 +38,22 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.targetTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <div class="space-y-1">
             <p class="text-base font-semibold text-base-content">
               {{ targetJob?.title ?? activeSession.role }}
             </p>
-            <p class="text-sm text-secondary">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ targetJob?.company ?? activeSession.studioName }}
               <span v-if="targetJob?.location"> · {{ targetJob.location }}</span>
             </p>
           </div>
 
-          <div class="space-y-2">
-            <p class="text-sm font-medium text-secondary">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.focusAreasTitle") }}
             </p>
-            <div v-if="focusAreas.length > 0" class="flex flex-wrap gap-2">
+            <div v-if="focusAreas.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span
                 v-for="focusArea in focusAreas"
                 :key="focusArea"
@@ -61,16 +62,16 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
                 {{ focusArea }}
               </span>
             </div>
-            <p v-else class="text-sm text-muted">
+            <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.focusAreasEmpty") }}
             </p>
           </div>
 
-          <div v-if="targetSignals.length > 0" class="space-y-2">
-            <p class="text-sm font-medium text-secondary">
+          <div v-if="targetSignals.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.promptTagsLabel") }}
             </p>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span
                 v-for="signal in targetSignals"
                 :key="signal"
@@ -87,38 +88,38 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.interviewerTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <template v-if="interviewerPersona">
             <div class="space-y-1">
               <p class="text-base font-semibold text-base-content">{{ interviewerPersona.name }}</p>
-              <p class="text-sm text-secondary">
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ interviewerPersona.role }} · {{ interviewerPersona.studioName }}
               </p>
             </div>
 
-            <dl class="space-y-3">
+            <dl :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-secondary">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerRoleLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.role }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.role }}</dd>
               </div>
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-secondary">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerStyleLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.style }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.style }}</dd>
               </div>
               <div class="space-y-1">
-                <dt class="text-sm font-medium text-secondary">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerBackgroundLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.background }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.background }}</dd>
               </div>
             </dl>
           </template>
 
-          <p v-else class="text-sm text-muted">
+          <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.interviewerFallback") }}
           </p>
         </div>

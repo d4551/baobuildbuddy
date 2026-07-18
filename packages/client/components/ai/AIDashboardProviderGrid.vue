@@ -2,7 +2,7 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,
@@ -54,16 +54,16 @@ function resolveProviderStatus(provider: ProviderConfig): {
       :key="provider.id"
       :class="SURFACE_GLASS_CARD_CLASS"
     >
-      <div class="card-body gap-4">
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <AIProviderIcon
               :provider-id="provider.iconId"
               :class="[ICON_SIZE_CLASS.lg, 'shrink-0 text-primary']"
             />
-            <div class="min-w-0">
-              <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
-              <p class="text-xs text-secondary">{{ providerDescription(provider.id) }}</p>
+            <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+              <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ providerLabel(provider.id) }}</h3>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
           <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">
@@ -85,7 +85,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
                   : t("aiDashboard.alerts.testErrorTitle")
               }}
             </h4>
-            <p class="text-xs">{{ testResults[provider.id]?.message }}</p>
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ testResults[provider.id]?.message }}</p>
           </div>
         </div>
 

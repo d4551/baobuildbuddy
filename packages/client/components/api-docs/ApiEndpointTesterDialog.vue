@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RADIUS_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type {
@@ -70,15 +70,15 @@ function updateRequestBodyValue(event: Event): void {
     @update:open="emit('update:open', $event)"
     @close="emit('close')"
   >
-    <div class="space-y-4">
-      <header class="space-y-2">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+      <header :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
         <h2 :id="dialogTitleId" class="text-xl font-semibold">
           {{ t("apiDocs.tester.title") }}
         </h2>
         <p
           v-if="selectedEndpoint"
           :id="dialogDescriptionId"
-          class="font-mono text-sm text-secondary"
+          class="font-mono text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
         >
           <span :class="methodBadgeClass(selectedEndpoint.method)">
             {{ methodLabel(selectedEndpoint.method) }}
@@ -87,9 +87,9 @@ function updateRequestBodyValue(event: Event): void {
         </p>
       </header>
 
-      <section :aria-label="t('apiDocs.tester.lifecycleTitle')" class="space-y-3">
+      <section :aria-label="t('apiDocs.tester.lifecycleTitle')" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h3 class="font-medium">{{ t("apiDocs.tester.lifecycleTitle") }}</h3>
-        <ul class="steps steps-vertical w-full lg:steps-horizontal">
+        <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]">
           <li class="step" :class="{ 'step-primary': testerState !== 'idle' }">
             {{ t("apiDocs.tester.steps.configure") }}
           </li>
@@ -114,7 +114,7 @@ function updateRequestBodyValue(event: Event): void {
       <section
         v-if="selectedEndpoint && selectedEndpoint.pathParameters.length > 0"
         :aria-label="t('apiDocs.tester.pathParametersIntro')"
-        class="space-y-2"
+        :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.pathParametersIntro") }}</h3>
         <SectionGrid grid-token="twoColumnMdGap3">
@@ -141,7 +141,7 @@ function updateRequestBodyValue(event: Event): void {
       <section
         v-if="selectedEndpoint && selectedEndpoint.queryParameters.length > 0"
         :aria-label="t('apiDocs.tester.queryParametersIntro')"
-        class="space-y-2"
+        :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.queryParametersIntro") }}</h3>
         <SectionGrid grid-token="twoColumnMdGap3">
@@ -168,19 +168,19 @@ function updateRequestBodyValue(event: Event): void {
       <section
         v-if="selectedEndpoint"
         :aria-label="t('apiDocs.tester.requestBodyIntro')"
-        class="space-y-2"
+        :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
         <textarea
           :value="requestBodyValue"
-          class="textarea min-h-40 w-full font-mono text-sm"
+          class="textarea min-h-40 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
           :placeholder="t('apiDocs.tester.bodyPlaceholder')"
           :aria-label="t('apiDocs.tester.requestBodyAria')"
           @input="updateRequestBodyValue"
         />
         <p
           v-if="!selectedEndpoint.requestBodyTemplate && !selectedEndpoint.requestBodyRequired"
-          class="text-xs text-muted"
+          class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"
         >
           {{ t("apiDocs.tester.noRequestBodyTemplate") }}
         </p>
@@ -207,9 +207,9 @@ function updateRequestBodyValue(event: Event): void {
         </button>
       </div>
 
-      <section class="space-y-3" :aria-label="t('apiDocs.tester.responseTitle')">
+      <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]" :aria-label="t('apiDocs.tester.responseTitle')">
         <h3 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h3>
-        <p class="text-sm text-secondary">{{ testerStateLabel }}</p>
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ testerStateLabel }}</p>
 
         <div
           v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
@@ -223,7 +223,7 @@ function updateRequestBodyValue(event: Event): void {
           <span>{{ t("apiDocs.tester.emptyResponse") }}</span>
         </div>
 
-        <div v-if="testerResponse" class="space-y-3">
+        <div v-if="testerResponse" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm">
               <caption class="sr-only">{{ t("apiDocs.tester.metadataTitle") }}</caption>
@@ -265,7 +265,7 @@ function updateRequestBodyValue(event: Event): void {
 
           <div class="space-y-1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseHeadersLabel") }}</h4>
-            <pre class="bg-base-200 p-3 text-xs whitespace-pre-wrap" :class="[RADIUS_TOKEN_CLASS.lg]">{{
+            <pre class="bg-base-200 whitespace-pre-wrap" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.xs, RADIUS_TOKEN_CLASS.lg]">{{
               Object.keys(testerResponse.headers).length > 0
                 ? JSON.stringify(testerResponse.headers, null, 2)
                 : t("apiDocs.tester.noResponseHeaders")
@@ -274,7 +274,7 @@ function updateRequestBodyValue(event: Event): void {
 
           <div class="space-y-1">
             <h4 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h4>
-            <pre class="bg-base-200 p-3 text-xs whitespace-pre-wrap" :class="[RADIUS_TOKEN_CLASS.lg]">{{
+            <pre class="bg-base-200 whitespace-pre-wrap" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.xs, RADIUS_TOKEN_CLASS.lg]">{{
               formattedResponseBody || t("apiDocs.tester.emptyResponse")
             }}</pre>
           </div>

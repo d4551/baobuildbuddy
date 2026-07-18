@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -16,12 +17,12 @@ const { t } = useI18n();
 
 <template>
   <section class="card card-border card-glass glass-interactive overflow-hidden">
-    <div class="card-body relative gap-4">
-      <div class="relative space-y-3">
+    <div class="card-body relative" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="relative" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div class="badge badge-primary badge-soft w-fit">
           {{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}
         </div>
-        <h2 class="card-title text-2xl md:text-3xl">
+        <h2 class="card-title md:" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, TYPOGRAPHY_SCALE_CLASS.xl3]">
           {{ welcomeHeading }}
         </h2>
         <p class="text-base text-secondary">
@@ -33,7 +34,7 @@ const { t } = useI18n();
           </Transition>
         </div>
       </div>
-      <div v-if="showSetupAction" class="card-actions relative mt-1 flex-wrap">
+      <div v-if="showSetupAction" class="card-actions relative flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1]">
         <NuxtLink :to="primaryRoute" class="btn btn-primary">
           {{ primaryLabel }}
         </NuxtLink>

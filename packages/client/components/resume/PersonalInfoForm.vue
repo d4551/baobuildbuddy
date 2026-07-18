@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { ResumePersonalFields } from "./resume-page-contracts";
 
@@ -29,8 +30,8 @@ function emitValue(): void {
 </script>
 
 <template>
-  <div class="space-y-4 p-6">
-    <h2 class="text-lg font-semibold">{{ t("resumePage.personal.title") }}</h2>
+  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+    <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.personal.title") }}</h2>
     <SectionGrid grid-token="twoColumn">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.fullNameLegend") }}</legend>
@@ -39,7 +40,7 @@ function emitValue(): void {
           type="text"
           required
           minlength="2"
-          class="input validator w-full"
+          class="input validator" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.fullNameAria')"
           @input="emitValue"
         />
@@ -51,7 +52,7 @@ function emitValue(): void {
           v-model="localValue.email"
           type="email"
           required
-          class="input validator w-full"
+          class="input validator" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.emailAria')"
           @input="emitValue"
         />
@@ -63,7 +64,7 @@ function emitValue(): void {
           v-model="localValue.phone"
           type="tel"
           pattern="^[+0-9()\\-\\s]{7,20}$"
-          class="input validator w-full"
+          class="input validator" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.phoneAria')"
           @input="emitValue"
         />
@@ -74,7 +75,7 @@ function emitValue(): void {
         <input
           v-model="localValue.location"
           type="text"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.locationAria')"
           @input="emitValue"
         />
@@ -84,7 +85,7 @@ function emitValue(): void {
         <input
           v-model="localValue.linkedIn"
           type="url"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.linkedInAria')"
           @input="emitValue"
         />
@@ -94,7 +95,7 @@ function emitValue(): void {
         <input
           v-model="localValue.portfolio"
           type="url"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.personal.portfolioAria')"
           @input="emitValue"
         />
@@ -106,7 +107,7 @@ function emitValue(): void {
         v-model="localValue.summary"
         required
         minlength="50"
-        class="textarea validator w-full"
+        class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
         rows="4"
         :aria-label="t('resumePage.personal.summaryAria')"
         @input="emitValue"

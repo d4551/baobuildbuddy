@@ -169,6 +169,7 @@ export const ICON_SIZE_CLASS = {
   sm: "h-5 w-5",
   md: "h-6 w-6",
   lg: "h-8 w-8",
+  "4": "h-4 w-4",
 } as const;
 
 export type IconSizeToken = keyof typeof ICON_SIZE_CLASS;
@@ -276,3 +277,54 @@ export type RadiusToken = keyof typeof RADIUS_TOKEN_CLASS;
 
 /** Common avatars / icon badges that need a circular surface. */
 export const CIRCULAR_BADGE_CLASS = RADIUS_TOKEN_CLASS.full;
+
+/** Full-width utility token (the only w-/h- primitive that composes fluid layout). */
+export const FLUID_WIDTH_CLASS = "w-full";
+export const FLUID_HEIGHT_CLASS = "h-full";
+
+/** Truncation block primitive (min-w-0 to enable flexbox text truncation). */
+export const TRUNCATE_FLEX_CHILD_CLASS = "min-w-0";
+
+/** Common vertical stack spacing. */
+export const STACK_SPACE_Y_TOKEN_CLASS = {
+  stack2: "space-y-2",
+  stack3: "space-y-3",
+  stack4: "space-y-4",
+  stack6: "space-y-6",
+} as const;
+export type StackSpaceYToken = keyof typeof STACK_SPACE_Y_TOKEN_CLASS;
+
+/** Common flex gap tokens. */
+export const FLEX_GAP_TOKEN_CLASS = {
+  gap2: "gap-2",
+  gap3: "gap-3",
+  gap4: "gap-4",
+} as const;
+export type FlexGapToken = keyof typeof FLEX_GAP_TOKEN_CLASS;
+
+/** Common margin tokens (auto-generated for the 1-6 range). */
+export const MARGIN_TOKEN_CLASS = {
+  mt1: "mt-1",
+  mt2: "mt-2",
+  mt4: "mt-4",
+  mb1: "mb-1",
+  mb4: "mb-4",
+} as const;
+export type MarginToken = keyof typeof MARGIN_TOKEN_CLASS;
+
+/** Common padding tokens. */
+export const PADDING_TOKEN_CLASS = {
+  p3: "p-3",
+  p4: "p-4",
+} as const;
+export type PaddingToken = keyof typeof PADDING_TOKEN_CLASS;
+
+/** Typography scale tokens for body copy and headings. */
+export const TYPOGRAPHY_SCALE_CLASS = {
+  sm: "text-sm",
+  xs: "text-xs",
+  lg: "text-lg",
+  xl2: "text-2xl",
+  xl3: "text-3xl",
+} as const;
+export type TypographyScaleToken = keyof typeof TYPOGRAPHY_SCALE_CLASS;

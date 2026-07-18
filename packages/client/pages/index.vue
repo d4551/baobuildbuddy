@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -39,7 +40,7 @@ useSeoMeta({
       title-id="dashboard-title"
       :title="t(DASHBOARD_COPY_KEYS.pageTitle)"
       :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: resolvedBrand.name })"
-      description-class="text-sm text-muted"
+      description-class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
     />
 
     <LoadingSkeleton
@@ -63,7 +64,7 @@ useSeoMeta({
       :primary-label="primaryFlowLabel"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <DashboardWelcomeBanner
         :welcome-heading="welcomeHeading"
         :active-hero-phrase="activeHeroPhrase"
