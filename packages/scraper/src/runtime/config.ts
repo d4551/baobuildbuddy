@@ -1,5 +1,43 @@
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import {
+  buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
+  defaultPlaywrightBrowsersPathForPlatform,
+  resolvePlaywrightBrowsersPath,
+  type PlaywrightBrowsersPathDeps,
+} from "@bao/shared/utils/playwright-browsers-path";
+
+const playwrightBrowsersPathDeps = (): PlaywrightBrowsersPathDeps => ({
+  pathExists: existsSync,
+  hostDefaultPath: defaultPlaywrightBrowsersPathForPlatform(process.platform, homedir()),
+});
+
+/**
+ * Sanitizes process.env.PLAYWRIGHT_BROWSERS_PATH before Playwright resolves
+ * its registry. Prefer a host-usable cache over an incomplete agent cache.
+ */
+export const sanitizePlaywrightBrowsersPathEnv = (): void => {
+  const resolution = resolvePlaywrightBrowsersPath(
+    process.env.PLAYWRIGHT_BROWSERS_PATH,
+    playwrightBrowsersPathDeps(),
+  );
+  if (resolution.action === "set") {
+    process.env.PLAYWRIGHT_BROWSERS_PATH = resolution.value;
+    return;
+  }
+  if (resolution.action === "unset") {
+    delete process.env.PLAYWRIGHT_BROWSERS_PATH;
+  }
+};
+
+/**
+ * Builds a child-process env with a non-polluted Playwright browsers path.
+ */
+export const buildAutomationProcessEnv = (
+  baseEnv: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv => buildAutomationProcessEnvFromShared(baseEnv, playwrightBrowsersPathDeps());
 
 const parsePositiveInt = (rawValue: string | undefined, defaultValue: number): number => {
   if (!rawValue) {

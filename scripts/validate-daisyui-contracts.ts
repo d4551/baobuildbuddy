@@ -40,6 +40,7 @@ const SCAN_ROOTS = [
 
 const STATIC_CLASS_ATTRIBUTE_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/gu;
 const SINGLE_CLASS_ATTRIBUTE_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/u;
+const UI_GLASS_CARD_TAG_PATTERN = /<UiGlassCard\b/u;
 const TABLE_TAG_PATTERN = /<table\b[^>]*>/gu;
 const PROGRESS_TAG_PATTERN = /<progress\b[^>]*>/gu;
 const RADIAL_PROGRESS_TAG_PATTERN =
@@ -191,7 +192,7 @@ const collectRequiredClassViolations = (filePath: string, fileContent: string): 
     classTokens.add("card");
   }
   // UiGlassCard component usage implicitly carries the `card` class
-  if (/<UiGlassCard\b/u.test(fileContent)) {
+  if (UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) {
     classTokens.add("card");
   }
 
@@ -255,10 +256,10 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
     }
   }
   // UiGlassCard component usage implicitly carries the `card` class
-  if (/<UiGlassCard\b/u.test(fileContent)) {
+  if (UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) {
     classTokens.add("card");
     if (!firstLineByClass.has("card")) {
-      const match = /<UiGlassCard\b/u.exec(fileContent);
+      const match = UI_GLASS_CARD_TAG_PATTERN.exec(fileContent);
       if (match) {
         firstLineByClass.set("card", getLineFromOffset(fileContent, match.index));
       }

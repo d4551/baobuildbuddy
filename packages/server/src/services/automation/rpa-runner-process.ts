@@ -1,13 +1,15 @@
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import { isAbsolute, join, resolve, sep } from "node:path";
+import { isAbsolute, resolve, sep } from "node:path";
 import {
   automationScriptEntryById,
   automationScriptIdSchema,
 } from "@bao/shared/schemas/automation-scripts.schema";
 import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { config } from "../../config/env";
-import { readAutomationScriptRunnerConfig, SCRAPER_DIR } from "../../config/paths";
+import {
+  buildAutomationProcessEnv,
+  readAutomationScriptRunnerConfig,
+  SCRAPER_DIR,
+} from "../../config/paths";
 import type {
   AutomationScriptExecutionResult,
   RunAutomationScriptOptions,
@@ -15,7 +17,6 @@ import type {
 
 const DEFAULT_KILL_SIGNAL = "SIGKILL";
 const NDJSON_LINE_SPLIT_PATTERN = /\r?\n/gu;
-const CURSOR_SANDBOX_BROWSER_CACHE_MARKER = "cursor-sandbox-cache";
 
 type ExecutionAbortState = {
   timedOut: boolean;
@@ -165,24 +166,6 @@ const resolveAutomationCommand = (scriptPath: string): string[] => {
   }
 
   return [process.execPath, scriptPath];
-};
-
-const buildAutomationProcessEnv = (): NodeJS.ProcessEnv => {
-  const env = { ...process.env };
-  const configured = env.PLAYWRIGHT_BROWSERS_PATH;
-  if (configured?.includes(CURSOR_SANDBOX_BROWSER_CACHE_MARKER)) {
-    const hostDefault =
-      process.platform === "darwin"
-        ? join(homedir(), "Library/Caches/ms-playwright")
-        : join(homedir(), ".cache/ms-playwright");
-    if (existsSync(hostDefault)) {
-      env.PLAYWRIGHT_BROWSERS_PATH = hostDefault;
-    } else {
-      delete env.PLAYWRIGHT_BROWSERS_PATH;
-    }
-  }
-
-  return env;
 };
 
 const spawnAutomationProcess = (

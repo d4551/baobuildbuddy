@@ -2,8 +2,7 @@ import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import { settle } from "@bao/shared/utils/promise";
 import type { Browser, BrowserContext, Page } from "playwright";
-import { automationRuntimeConfig } from "./config";
-import { sanitizePlaywrightBrowsersPathEnv } from "./playwright-browsers-path";
+import { automationRuntimeConfig, sanitizePlaywrightBrowsersPathEnv } from "./config";
 
 /**
  * Browser context bundle returned by Bun-based automation scripts.

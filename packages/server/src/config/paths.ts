@@ -2,6 +2,10 @@ import { existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared/constants/paths";
+import {
+  buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
+  defaultPlaywrightBrowsersPathForPlatform,
+} from "@bao/shared/utils/playwright-browsers-path";
 
 type AutomationScriptRunnerConfig = {
   executablePath: string | null;
@@ -87,3 +91,15 @@ export const readAutomationScriptRunnerConfig = (): AutomationScriptRunnerConfig
  * Absolute path to the shared scraper package used by automation services.
  */
 export const SCRAPER_DIR = resolveScraperDir();
+
+/**
+ * Child-process env for RPA scripts. Rewrites incomplete agent-sandbox
+ * Playwright browser caches to the host default cache when present.
+ */
+export const buildAutomationProcessEnv = (
+  baseEnv: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv =>
+  buildAutomationProcessEnvFromShared(baseEnv, {
+    pathExists: existsSync,
+    hostDefaultPath: defaultPlaywrightBrowsersPathForPlatform(process.platform, homedir()),
+  });

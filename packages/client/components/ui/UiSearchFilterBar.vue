@@ -12,7 +12,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     /** Search query v-model */
     modelValue: string;
