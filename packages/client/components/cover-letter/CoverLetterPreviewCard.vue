@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 defineProps<{
   contentText: string;
   t: (key: string, values?: Record<string, unknown>) => string;

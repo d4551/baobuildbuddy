@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
 
 defineProps<{
   resolvedBrand: { assistantName: string; name: string };

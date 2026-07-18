@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
+import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
@@ -9,9 +9,9 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
-import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
 
 interface WorkspaceSectionItem {
   readonly id: string;

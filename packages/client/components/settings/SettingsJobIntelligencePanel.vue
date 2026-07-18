@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLUID_WIDTH_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";

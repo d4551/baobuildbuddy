@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-import { getErrorMessage } from "~/utils/errors";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],

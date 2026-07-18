@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 
 defineProps<{

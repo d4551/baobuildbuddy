@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
   studio: GameStudio | null;

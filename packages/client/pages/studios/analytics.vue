@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -12,8 +12,8 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-import { APP_ROUTES } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const {

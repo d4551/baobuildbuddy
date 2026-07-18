@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -9,9 +9,9 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
-import { computed } from "vue";
-import { useI18n } from "vue-i18n";
-import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, AUTH_CARD_MAX_WIDTH_CLASS, computed } from "vue";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, AUTH_CARD_MAX_WIDTH_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, AUTH_CARD_MAX_WIDTH_CLASS, useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type BrandPreviewTheme = "light" | "dark";

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
 defineProps<{

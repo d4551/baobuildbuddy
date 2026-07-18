@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { THEME_NAMES } from "@bao/shared/constants/branding";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
-import { computed, useTemplateRef } from "vue";
-import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
-import { resolveLocaleLabel } from "~/constants/i18n";
-import {
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, THEME_NAMES } from "@bao/shared/constants/branding";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, computed, useTemplateRef } from "vue";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, settlePromise } from "~/composables/async-flow";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveLocaleLabel } from "~/constants/i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   APP_DRAWER_ID,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   RADIUS_TOKEN_CLASS,
   SHELL_NAVBAR_CLASS,
@@ -16,7 +17,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { setDrawerToggleState } from "~/utils/drawer-controls";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
 const { updateSettings } = useSettings();

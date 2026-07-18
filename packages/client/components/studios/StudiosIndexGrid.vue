@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
@@ -9,8 +9,8 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
-import { useI18n } from "vue-i18n";
-import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
   hasAdditionalStudios: boolean;

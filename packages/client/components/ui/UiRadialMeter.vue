@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { RADIAL_METER_GEOMETRY } from "~/constants/layout";
+import { FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, RADIAL_METER_GEOMETRY } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{

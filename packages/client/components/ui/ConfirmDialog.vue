@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { computed, nextTick, useTemplateRef, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import {  PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  PADDING_TOKEN_CLASS, computed, nextTick, useTemplateRef, watch } from "vue";
+import {  PADDING_TOKEN_CLASS, useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
 
 type ConfirmDialogVariant = "default" | "danger";

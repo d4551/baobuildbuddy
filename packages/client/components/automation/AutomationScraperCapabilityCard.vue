@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -9,17 +9,17 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
-import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
   ScrapeCapabilityCard,
   ScrapePendingAction,
 } from "~/types/automation-scraper";
-import { resolveAutomationCapabilityIssues } from "~/utils/automation-capabilities";
-import { SCRAPE_TARGET_ICON_NAMES } from "./automation-visuals";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveAutomationCapabilityIssues } from "~/utils/automation-capabilities";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, SCRAPE_TARGET_ICON_NAMES } from "./automation-visuals";
 
 const props = defineProps<{
   capability: ScrapeCapabilityCard;

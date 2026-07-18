@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
+import {  MARGIN_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
-import { getErrorMessage } from "~/utils/errors";
+import {  MARGIN_TOKEN_CLASS, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import {  MARGIN_TOKEN_CLASS, useI18n } from "vue-i18n";
+import {  MARGIN_TOKEN_CLASS, settlePromise } from "~/composables/async-flow";
+import {  MARGIN_TOKEN_CLASS, getErrorMessage } from "~/utils/errors";
 
 /**
  * AI-Driven CV Builder - wizard flow:

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS,
   COVER_LETTER_DEFAULT_TEMPLATE,
   isCoverLetterTemplate,
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
+import {  ICON_SIZE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
-import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
-import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-import {
+import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, settlePromise } from "~/composables/async-flow";
+import {  ICON_SIZE_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS,
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
-import { getErrorMessage } from "~/utils/errors";
+import {  ICON_SIZE_CLASS, getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],

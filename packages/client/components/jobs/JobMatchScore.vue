@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
-import { useScoreColor } from "~/composables/useScoreColor";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useScoreColor } from "~/composables/useScoreColor";
 
 interface MatchBreakdown {
   skills: number;

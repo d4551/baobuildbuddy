@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -7,7 +7,7 @@ import {
 } from "~/constants/layout";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewSession } from "@bao/shared/types/interview";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 defineProps<{

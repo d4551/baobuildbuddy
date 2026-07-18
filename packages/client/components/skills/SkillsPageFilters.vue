@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
-import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
-import { useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
+import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 
 defineProps<{
   categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;

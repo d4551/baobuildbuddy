@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type {
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
-import { resolveAppIconComponent } from "~/components/icons/icon-registry";
-import {
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS,
   resolveAutomationCapabilityAction,
   resolveAutomationCapabilityDisplayName,
   resolveAutomationCapabilityIssues,
 } from "~/utils/automation-capabilities";
-import { getErrorMessage } from "~/utils/errors";
-import { resolveAutomationCapabilityIconName } from "./automation-visuals";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, getErrorMessage } from "~/utils/errors";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, resolveAutomationCapabilityIconName } from "./automation-visuals";
 
 const props = defineProps<{
   capabilityAuditStatus: "idle" | "pending" | "success" | "error";

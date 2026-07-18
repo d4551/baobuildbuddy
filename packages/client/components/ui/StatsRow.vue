@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  TYPOGRAPHY_SCALE_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {  TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 
 interface StatItem {
   titleKey: string;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -7,7 +7,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, useI18n } from "vue-i18n";
 
 interface ResumeLibraryPanelProps {
   readonly resumes: readonly ResumeData[];

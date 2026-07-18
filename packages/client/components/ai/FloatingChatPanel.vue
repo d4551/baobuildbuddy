@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
+import {  ICON_SIZE_CLASS, FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
 
 defineProps<{
   aiChatPagePath: string;

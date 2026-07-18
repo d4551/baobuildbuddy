@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
-import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
   studioSizeOptions: string[];

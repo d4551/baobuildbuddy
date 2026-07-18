@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 
 type ProviderField =

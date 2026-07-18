@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -7,7 +7,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{

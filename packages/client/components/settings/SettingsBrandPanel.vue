@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
-import { useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
 import BrandPreviewCard from "./brand/BrandPreviewCard.vue";

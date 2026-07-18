@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-import { EMPTY_STATE_STACK_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, EMPTY_STATE_STACK_CLASS } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{

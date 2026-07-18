@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
 import type {
   InterviewQuestion,
   InterviewSession,
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
-import { useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type InterviewCompletionState =

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
-import { getErrorMessage } from "~/utils/errors";
+import {  FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  FLUID_WIDTH_CLASS, useI18n } from "vue-i18n";
+import {  FLUID_WIDTH_CLASS, getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   layout: "auth-shell",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -7,7 +7,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
-import { useI18n } from "vue-i18n";
+import {  FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 
 type ResumeGamingFields = ResumeFormData["gaming"];
 

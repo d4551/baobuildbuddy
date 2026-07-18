@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import {  SURFACE_GLASS_CARD_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 const props = defineProps<{

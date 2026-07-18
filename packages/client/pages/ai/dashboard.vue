@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
 
-import { reactive } from "vue";
-import { useI18n } from "vue-i18n";
-import { useAIDashboardPage } from "~/composables/useAIDashboardPage";
-import { getErrorMessage } from "~/utils/errors";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, reactive } from "vue";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, useAIDashboardPage } from "~/composables/useAIDashboardPage";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 

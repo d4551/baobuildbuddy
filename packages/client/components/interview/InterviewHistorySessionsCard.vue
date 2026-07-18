@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession } from "@bao/shared/types/interview";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 

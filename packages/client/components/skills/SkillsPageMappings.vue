@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {
+import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS,
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
 } from "~/constants/skills";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 
 defineProps<{
   hasMappings: boolean;

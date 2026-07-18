@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
+import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
   AUTOMATION_RUN_STATUSES;

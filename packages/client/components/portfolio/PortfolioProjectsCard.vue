@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
-import { useI18n } from "vue-i18n";
+import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 

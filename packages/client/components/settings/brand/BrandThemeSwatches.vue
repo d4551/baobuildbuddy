@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
+import {  ICON_SIZE_CLASS, useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 
 const props = defineProps<{
   brandDraft: BrandSettings;

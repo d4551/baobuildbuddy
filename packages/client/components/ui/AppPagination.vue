@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { computed, ref, watch } from "vue";
+import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, computed, ref, watch } from "vue";
 
 type PageAriaResolver = (page: number) => string;
 

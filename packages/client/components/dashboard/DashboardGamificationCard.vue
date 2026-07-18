@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -7,14 +7,14 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
-import { useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
-import { DASHBOARD_A11Y_KEYS } from "~/constants/dashboard-copy";
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, DASHBOARD_A11Y_KEYS } from "~/constants/dashboard-copy";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   DASHBOARD_GAMIFICATION_PROGRESS_MAX,
   DASHBOARD_GAMIFICATION_PROGRESS_MIN,
 } from "~/constants/dashboard-core";
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_LEVEL_ICON,
 } from "~/constants/gamification";

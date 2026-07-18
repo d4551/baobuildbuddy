@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {  SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import { useI18n } from "vue-i18n";
+import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
 
 defineProps<{
   resolveScheduledRunAt: (run: RpaRunExecutionEnvelope) => string;

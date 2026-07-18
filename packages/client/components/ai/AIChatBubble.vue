@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
-import { useI18n } from "vue-i18n";
-import {
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
   CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,
   CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
   CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
   type ChatDensity,
 } from "~/constants/chat";
-import { formatChatTimestamp } from "~/utils/chat";
+import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
   defineProps<{
