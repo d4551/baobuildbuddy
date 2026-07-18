@@ -4,7 +4,6 @@
  * Extracted from bao-ssot-compliance.spec.ts to keep files small and focused.
  */
 
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const CLIENT_ROOT = join(import.meta.dirname, "..");
@@ -20,6 +19,5 @@ export interface SSOTViolation {
 }
 
 export function relativePath(abs: string): string {
-  const rel = join("packages/client");
   return abs.replace(CLIENT_ROOT, "").replace(/^\//, "");
 }

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
@@ -39,7 +44,7 @@ const { t } = useI18n();
           <UiRadialMeter
             :value="readinessAssessment.overallScore"
             :max="readinessMax"
-            size-:class="CONTENT_H_28_CLASS" w-28"
+            :size-class="CONTENT_H_28_CLASS"
             track-class="stroke-primary-content/30"
             fill-class="stroke-primary-content"
             :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"

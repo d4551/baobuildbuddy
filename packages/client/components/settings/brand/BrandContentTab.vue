@@ -28,7 +28,7 @@ const brandForm = defineModel<{
         {{ t("settings.brand.tabs.contentDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" extra-:class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <SectionGrid grid-token="twoColumn" :extra-class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultTitleLegend") }}

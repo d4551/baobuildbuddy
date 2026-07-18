@@ -200,7 +200,7 @@ useSeoMeta({
             ></progress>
           </div>
 
-          <SectionGrid grid-token="twoColumnSm" extra-:class="[MARGIN_TOKEN_CLASS.mt4]">
+          <SectionGrid grid-token="twoColumnSm" :extra-class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
               <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
               <div class="stat-value text-success" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ remoteWorkStudios }}</div>

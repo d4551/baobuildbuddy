@@ -18,7 +18,7 @@ const brandDarkSwatchLabel = t("settings.brand.darkThemeLegend");
 </script>
 
 <template>
-  <SectionGrid grid-token="twoColumn" extra-:class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+  <SectionGrid grid-token="twoColumn" :extra-class="[FLEX_GAP_TOKEN_CLASS.gap3]">
     <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, SHADOW_TOKEN_CLASS.sm]">
       <div class="mb-3 flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h4 class="font-medium">{{ brandLightSwatchLabel }}</h4>

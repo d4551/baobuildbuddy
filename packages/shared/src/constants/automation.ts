@@ -208,11 +208,6 @@ export interface RpaCapabilityAuditReport {
 export const AUTOMATION_RUN_STATUSES = ["pending", "running", "success", "error"] as const;
 
 /**
- * Union type for an automation run type.
- */
-export type AutomationRunType = (typeof AUTOMATION_RUN_TYPES)[number];
-
-/**
  * Union type for an automation run status.
  */
 export type AutomationRunStatus = (typeof AUTOMATION_RUN_STATUSES)[number];

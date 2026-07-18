@@ -32,7 +32,7 @@ const ALL_CHECKS = [
   checkArbitraryValue,
 ];
 
-export function scanFile(absPath: string): SSOTViolation[] {
+function scanFile(absPath: string): SSOTViolation[] {
   const content = readFileSync(absPath, "utf8");
   const lines = content.split("\n");
   const rel = absPath.replace(join(import.meta.dirname, ".."), "").replace(/^\//, "");
@@ -55,7 +55,7 @@ export function scanFile(absPath: string): SSOTViolation[] {
   return violations;
 }
 
-export function collectSourceFiles(dir: string, pattern = /\.(vue|ts)$/): string[] {
+function collectSourceFiles(dir: string, pattern = /\.(vue|ts)$/): string[] {
   const results: string[] = [];
   let entries;
   try {

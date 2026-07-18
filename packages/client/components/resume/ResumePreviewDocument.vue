@@ -55,12 +55,12 @@ defineProps<{
     </div>
 
     <div v-if="resume.summary" :class="MARGIN_TOKEN_CLASS.mb6">
-      <PageHeaderBlock title-id="resume-preview-summary-title" :title="t('resumePage.personal.summaryLegend')" extra-:class="MARGIN_TOKEN_CLASS.mb3" />
+      <PageHeaderBlock title-id="resume-preview-summary-title" :title="t('resumePage.personal.summaryLegend')" :extra-class="MARGIN_TOKEN_CLASS.mb3" />
       <p class="leading-relaxed" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
     </div>
 
     <div v-if="resume.experience?.length" :class="MARGIN_TOKEN_CLASS.mb6">
-      <PageHeaderBlock title-id="resume-preview-experience-title" :title="t('resumePage.experience.title')" extra-:class="MARGIN_TOKEN_CLASS.mb3" />
+      <PageHeaderBlock title-id="resume-preview-experience-title" :title="t('resumePage.experience.title')" :extra-class="MARGIN_TOKEN_CLASS.mb3" />
       <div
         v-for="(experience, index) in resume.experience"
         :key="`${experience.company}-${experience.title}-${index}`"
@@ -83,7 +83,7 @@ defineProps<{
     </div>
 
     <div v-if="resume.education?.length" :class="MARGIN_TOKEN_CLASS.mb6">
-      <PageHeaderBlock title-id="resume-preview-education-title" :title="t('resumePage.education.title')" extra-:class="MARGIN_TOKEN_CLASS.mb3" />
+      <PageHeaderBlock title-id="resume-preview-education-title" :title="t('resumePage.education.title')" :extra-class="MARGIN_TOKEN_CLASS.mb3" />
       <div
         v-for="(education, index) in resume.education"
         :key="`${education.school}-${education.degree}-${index}`"
