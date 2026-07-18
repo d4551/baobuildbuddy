@@ -194,7 +194,7 @@ function updateRequestBodyValue(event: Event): void {
           :aria-label="t('apiDocs.tester.send')"
           @click="emit('execute')"
         >
-          <span v-if="testerState === 'loading'" class="loading loading-spinner loading-sm"></span>
+          <LoadingSpinner size="sm" label="Loading" v-if="testerState === 'loading'" />
           <span v-else>{{ t("apiDocs.tester.send") }}</span>
         </button>
         <button

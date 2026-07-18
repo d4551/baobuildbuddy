@@ -34,7 +34,7 @@ const page = reactive(useAIDashboardPage());
           :aria-label="t('aiDashboard.preference.refreshAria')"
           @click="page.fetchProviderStats"
         >
-          <span v-if="page.loading" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="page.loading" />
           <span>{{ t("aiDashboard.preference.refreshButton") }}</span>
         </button>
       </template>

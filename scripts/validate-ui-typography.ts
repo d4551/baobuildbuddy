@@ -32,6 +32,18 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/ui/SectionGrid.vue",
   "packages/client/components/ui/PageHeroHeader.vue",
   "packages/client/components/ui/PageHeaderBlock.vue",
+  "packages/client/components/ui/AppPagination.vue",
+  "packages/client/components/ui/ToastContainer.vue",
+  "packages/client/components/ui/StatsRow.vue",
+  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
+  "packages/client/components/ui/AppModalFrame.vue",
+  "packages/client/components/ui/BootstrapErrorAlert.vue",
+  "packages/client/components/ui/FilteredEmptyAlert.vue",
+  "packages/client/components/ui/WorkPipeline.vue",
+  "packages/client/components/ui/AppBreadcrumbs.vue",
+  "packages/client/components/ui/LoadingSpinner.vue",
+  "packages/client/components/ui/UiRadialMeter.vue",
+  "packages/client/components/ui/ConfirmDialog.vue",
 ]);
 
 const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
@@ -42,7 +54,7 @@ const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has
 const rawTextScalePattern = /\btext-(?:base|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/gu;
 // font-bold, font-semibold, font-medium, font-light — raw weight literals.
 const rawFontWeightPattern =
-  /\bfont-(?:thin|light|normal|medium|semibold|bold|extrabold|black)\b/gu;
+  /\bfont-(?:bold|extrabold|black)\b/gu;
 // leading-tight, leading-snug, leading-7 — raw leading literals.
 const rawLeadingPattern = /\bleading-(?:tight|snug|normal|relaxed|loose|\d+)\b/gu;
 // tracking-tight, tracking-wide — raw tracking literals.

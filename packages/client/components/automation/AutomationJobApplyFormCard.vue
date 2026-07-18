@@ -102,7 +102,7 @@ const { t } = useI18n();
           :aria-label="t('automation.jobApply.runButtonAria')"
           @click="$emit('submit')"
         >
-          <span v-if="pending" class="loading loading-spinner loading-sm"></span>
+          <LoadingSpinner size="sm" label="Loading" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.runButton") }}</span>
         </button>
         <button
@@ -111,7 +111,7 @@ const { t } = useI18n();
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"
         >
-          <span v-if="pending" class="loading loading-spinner loading-sm"></span>
+          <LoadingSpinner size="sm" label="Loading" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.schedule.button") }}</span>
         </button>
       </div>

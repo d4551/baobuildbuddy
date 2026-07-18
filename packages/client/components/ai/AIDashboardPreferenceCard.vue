@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ProviderConfig } from "~/types/ai-dashboard";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -19,7 +19,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 </script>
 
 <template>
-  <div class="card card-border card-glass">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("aiDashboard.preference.description") }}</p>
@@ -67,7 +67,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
           :aria-label="t('aiDashboard.preference.saveAria')"
           @click="onSave"
         >
-          <span v-if="loading" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="loading" />
           <span>{{ t("aiDashboard.preference.saveButton") }}</span>
         </button>
       </div>

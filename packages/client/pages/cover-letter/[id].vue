@@ -233,7 +233,7 @@ async function handleExport(format: "pdf" | "docx") {
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
           @click="requestRegenerate"
         >
-          <span v-if="regenerating" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
           <IconRefresh v-else class="h-4 w-4" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>

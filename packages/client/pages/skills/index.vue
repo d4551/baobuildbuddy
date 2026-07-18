@@ -93,7 +93,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"
         >
-          <span v-if="analyzing" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="analyzing" />
           <IconBolt v-else class="h-4 w-4" />
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>

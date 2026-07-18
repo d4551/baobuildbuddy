@@ -4,7 +4,7 @@ import { collectStubNoopViolationsForContent } from "./validate-ui-stubs-noops";
 const CONSUMER_PATH = "packages/client/pages/jobs/index.vue";
 
 describe("collectStubNoopViolationsForContent", () => {
-  test("flags inert @click="" handler", () => {
+  test("flags inert @click empty-string handler", () => {
     const violations = collectStubNoopViolationsForContent(
       CONSUMER_PATH,
       "<template><button @click=\"\">x</button></template>",

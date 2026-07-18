@@ -159,7 +159,7 @@ const { t } = useI18n();
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"
           >
-            <span v-if="completing" class="loading loading-spinner loading-xs"></span>
+            <LoadingSpinner size="xs" label="Loading" v-if="completing" />
             {{ t("interviewSession.endButton") }}
           </button>
         </div>

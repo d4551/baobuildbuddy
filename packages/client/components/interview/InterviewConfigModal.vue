@@ -232,7 +232,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           :disabled="isStartDisabled"
           @click="emit('start')"
         >
-          <span v-if="starting" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="starting" />
           {{ t("interviewHub.config.startButton") }}
         </button>
       </div>

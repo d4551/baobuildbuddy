@@ -34,7 +34,7 @@ const { t } = useI18n();
         :aria-label="t('resumePage.aiEnhanceButtonAria')"
         @click="emit('enhance')"
       >
-        <span v-if="enhancing" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner size="xs" label="Loading" v-if="enhancing" />
         <IconBolt v-else class="h-4 w-4" />
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
@@ -44,7 +44,7 @@ const { t } = useI18n();
         :aria-label="t('resumePage.aiScoreButtonAria')"
         @click="emit('score')"
       >
-        <span v-if="scoring" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner size="xs" label="Loading" v-if="scoring" />
         {{ t("resumePage.aiScoreButton") }}
       </button>
       <AppExportMenu

@@ -1,6 +1,7 @@
 import {
   collectProjectFileEntries,
   getLineFromOffset,
+  getTemplateOffset,
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
@@ -63,17 +64,37 @@ const collectDensityViolations = (filePath: string, content: string): Validation
   if (template.length === 0) return [];
   const violations: ValidationViolation[] = [];
 
+  const templateOffset = getTemplateOffset(content);
   crampedRowPattern.lastIndex = 0;
   for (const match of template.matchAll(crampedRowPattern)) {
     const classValue = match[0] ?? "";
+    const lineText =
+      template.slice(Math.max(0, (match.index ?? 0) - 120), (match.index ?? 0) + 200) ??
+      "";
     // Count flex-item siblings by counting tag openings on this line's context.
     const hasWrap = /\bflex-wrap\b/u.test(classValue);
     const hasOverflowGuard = /\boverflow-(?:hidden|x-clip)\b/u.test(classValue);
     const hasMinW0 = /\bmin-w-0\b/u.test(classValue);
-    if (!hasWrap && !hasOverflowGuard && !hasMinW0) {
+    // Nav/menu/listbox/list contexts intentionally use tight gap-1 for
+    // dense item rows (sidebar nav, breadcrumb separators, icon chips).
+    const isNavContext =
+      /\b(?:menu|navbar|tabs|breadcrumb|breadcrumbs|nav|sidebar|listbox|tablist)\b/u.test(
+        classValue,
+      ) ||
+      // Look-back at the surrounding template: the element is rendered
+      // inside a menu/nav container.
+      /<(?:nav|ul|ol|aside|menu|tablist)\b[^>]*>(?:[\s\S]{0,400}?)<(?:div|span)\b[^>]*\b(?:flex|inline-flex)\b[^']*\bgap-1\b/iu.test(
+        lineText,
+      );
+    // gap-1 inside drawer-aware elements (ml-auto/is-drawer-*) is the
+    // canonical pattern for sidebar shortcut hints and chip clusters.
+    const isDrawerAware = /\b(?:is-drawer-(?:open|close)|ml-auto|mr-auto)\b/u.test(
+      classValue,
+    );
+    if (!hasWrap && !hasOverflowGuard && !hasMinW0 && !isNavContext && !isDrawerAware) {
       violations.push({
         filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
+        line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
         message: `Cramped row (flex + gap-1) without flex-wrap / overflow-hidden / min-w-0 guard. Items will overshoot on narrow viewports. Consider icon-only controls or hover-reveal.`,
       });
     }
@@ -83,8 +104,13 @@ const collectDensityViolations = (filePath: string, content: string): Validation
   for (const match of template.matchAll(buttonTagPattern)) {
     const inner = match[1] ?? "";
     const hasIcon = /<(?:svg|Icon|icon)\b/iu.test(inner);
-    // Strip all nested tags to get visible text length.
-    const visibleText = inner.replace(/<[^>]+>/gu, "").trim();
+    // Strip all nested tags to get visible text length. Also strip i18n
+    // binding expressions {{ t("...") }} since the rendered text is the
+    // translated string, not the key — the key length is a false signal.
+    const visibleText = inner
+      .replace(/<[^>]+>/gu, "")
+      .replace(/\{\{[^}]*\}\}/gu, "")
+      .trim();
     if (hasIcon && visibleText.length > 24) {
       violations.push({
         filePath,

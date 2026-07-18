@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -16,7 +16,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card card-border card-glass glass-interactive overflow-hidden">
+  <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-interactive overflow-hidden']">
     <div class="card-body relative" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="relative" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div class="badge badge-primary badge-soft w-fit">

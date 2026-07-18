@@ -64,11 +64,12 @@ const emit = defineEmits<{
                 :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                 @click="emit('claim', challenge.id)"
               >
-                <span
+                <LoadingSpinner
                   v-if="completingChallenge === challenge.id"
-                  class="loading loading-spinner loading-xs"
+                  size="xs"
+                  label="Loading"
                   aria-hidden="true"
-                ></span>
+                />
                 {{ t("gamificationPage.challengeClaimLabel") }}
               </button>
             </div>

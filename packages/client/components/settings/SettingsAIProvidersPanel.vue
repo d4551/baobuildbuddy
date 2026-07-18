@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
@@ -159,7 +159,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       </div>
 
       <SectionGrid grid-token="providersSplit">
-        <section class="card card-border card-glass" :aria-label="t('settings.aiProviders.title')">
+        <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.title')">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div class="space-y-1">
@@ -209,7 +209,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </section>
 
         <section
-          class="card card-border card-glass"
+          :class="SURFACE_GLASS_CARD_CLASS"
           :aria-label="t('settings.aiProviders.preferredProviderLegend')"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
@@ -267,7 +267,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         @save="emit('saveRouting')"
       />
 
-      <section class="card card-border card-glass" :aria-label="t('settings.aiProviders.saveAria')">
+      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.saveAria')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
           <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.aiProviders.saveButton") }}</h3>

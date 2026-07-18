@@ -138,10 +138,11 @@ const { t } = useI18n();
           :disabled="preferencesSaveState === 'saving'"
           @click="emit('save')"
         >
-          <span
+          <LoadingSpinner
             v-if="preferencesSaveState === 'saving'"
-            class="loading loading-spinner loading-xs"
-          ></span>
+            size="xs"
+            :label="t('settings.preferences.saveButton')"
+          />
           {{ t("settings.preferences.saveButton") }}
         </button>
       </div>

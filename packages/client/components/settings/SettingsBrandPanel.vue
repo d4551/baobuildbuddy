@@ -240,10 +240,11 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
               :disabled="brandSaveState === 'saving'"
               @click="emit('save')"
             >
-              <span
+              <LoadingSpinner
                 v-if="brandSaveState === 'saving'"
-                class="loading loading-spinner loading-xs"
-              ></span>
+                size="xs"
+                :label="t('settings.brand.saveButton')"
+              />
               {{ t("settings.brand.saveButton") }}
             </button>
           </div>

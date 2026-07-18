@@ -188,10 +188,11 @@ const profileSaveStateLabel = computed(() => {
           :disabled="profileSaveState === 'saving'"
           @click="emit('save')"
         >
-          <span
+          <LoadingSpinner
             v-if="profileSaveState === 'saving'"
-            class="loading loading-spinner loading-xs"
-          ></span>
+            size="xs"
+            label="Saving"
+          />
           {{ t("settings.profile.saveButton") }}
         </button>
       </div>

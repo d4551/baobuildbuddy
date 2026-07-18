@@ -162,7 +162,7 @@ function handleTtsModelChange(event: Event): void {
         :aria-label="t('aiChatPage.voiceSettings.saveAria')"
         @click="emit('save')"
       >
-        <span v-if="props.saving" class="loading loading-spinner loading-xs" />
+        <LoadingSpinner v-if="props.saving" size="xs" :label="t('common.save')" />
         <span v-else>{{ t("aiChatPage.voiceSettings.saveButton") }}</span>
       </button>
     </div>

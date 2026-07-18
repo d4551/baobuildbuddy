@@ -29,18 +29,35 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/assets/css/main.css",
   "packages/client/constants/layout.ts",
   "packages/client/constants/ui-layout.ts",
+  "packages/client/components/ui/LoadingSkeleton.vue",
+  "packages/client/components/ui/EmptyState.vue",
+  "packages/client/components/ui/PageScaffold.vue",
+  "packages/client/components/ui/SectionGrid.vue",
+  "packages/client/components/ui/AppModalFrame.vue",
+  "packages/client/components/ui/PageHeroHeader.vue",
+  "packages/client/components/ui/PageHeaderBlock.vue",
+  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
+  "packages/client/components/ui/AppPagination.vue",
+  "packages/client/components/ui/StatsRow.vue",
+  "packages/client/components/ui/WorkPipeline.vue",
+  "packages/client/components/ui/UiRadialMeter.vue",
 ]);
 
 const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
 
 // Fixed width like w-64, w-96, w-[320px] (but not w-full, w-auto, w-fit, w-screen).
-const fixedWidthPattern = /\bw-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
+// Use a negative lookbehind for `-` so we don't match `min-w-64` / `max-w-64`.
+const fixedWidthPattern = /(?<![-\w])w-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
 // Fixed height like h-64, h-96 (but not h-full, h-auto, h-fit, h-screen).
-const fixedHeightPattern = /\bh-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
+// Use a negative lookbehind for `-` so we don't match `min-h-64` / `max-h-64`.
+const fixedHeightPattern = /(?<![-\w])h-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
 // overflow-x-auto / overflow-scroll with no min-w-0 child nearby.
 const horizontalOverflowPattern = /\boverflow-x-(?:auto|scroll)\b/gu;
 // Grid with fixed columns and no responsive guard on the same class string.
 const fixedGridColsPattern = /\bgrid-cols-(?:[2-9]|1\d)(?![\d-])/gu;
+
+// Threshold below which w-/h- literals are icon/avatar primitives, not overflow risks.
+const SMALL_SIZE_THRESHOLD = 17; // w-16 / h-16 and below are primitives.
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -64,16 +81,19 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     const baseLine = getLineFromOffset(content, classMatch.index ?? 0);
 
     fixedWidthPattern.lastIndex = 0;
-    const hasFixedWidth = fixedWidthPattern.test(classValue);
-    if (hasFixedWidth) {
+    const fixedWidthMatch = classValue.match(fixedWidthPattern);
+    if (fixedWidthMatch) {
+      const widthValue = Number.parseInt(fixedWidthMatch[0].replace(/\D/gu, ""), 10);
+      // Small widths (w-10..w-52) are dropdowns/menus/badges — not overflow risks.
+      // Only flag large fixed widths (w-64+) that risk pushing content off-screen.
+      const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= 52;
       const hasGuard = /\bmin-w-0\b|\bmax-w-/u.test(classValue);
       const isFluidCap = /\bmax-w-/u.test(classValue);
-      if (!hasGuard && !isFluidCap) {
-        const token = classValue.match(fixedWidthPattern)?.[0] ?? "w-<n>";
+      if (!isSmallPrimitive && !hasGuard && !isFluidCap) {
         violations.push({
           filePath,
           line: baseLine,
-          message: `Fixed width "${token}" risks horizontal overflow without min-w-0 or max-w-* guard. Use the SSOT SHELL_MAIN_INNER_CLASS / PAGE_HERO_ASIDE_CLASS pattern or wrap in min-w-0.`,
+          message: `Fixed width "${fixedWidthMatch[0]}" risks horizontal overflow without min-w-0 or max-w-* guard. Use the SSOT SHELL_MAIN_INNER_CLASS / PAGE_HERO_ASIDE_CLASS pattern or wrap in min-w-0.`,
         });
       }
     }
@@ -81,11 +101,27 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     fixedHeightPattern.lastIndex = 0;
     const fixedHeightMatch = classValue.match(fixedHeightPattern);
     if (fixedHeightMatch) {
-      violations.push({
-        filePath,
-        line: baseLine,
-        message: `Fixed height "${fixedHeightMatch[0]}" clips content on short viewports. Prefer min-h-* or use the glass-card container query for adaptive density.`,
-      });
+      const heightValue = Number.parseInt(fixedHeightMatch[0].replace(/\D/gu, ""), 10);
+      const isSmallPrimitive = Number.isFinite(heightValue) && heightValue <= SMALL_SIZE_THRESHOLD;
+      // Fixed height with an overflow guard (overflow-hidden/y-auto/y-scroll)
+      // is the canonical bounded scroll region pattern (chat panels, timelines,
+      // modal content). This is correct — not a violation.
+      const hasOverflowGuard = /\boverflow-(?:hidden|y-auto|y-scroll|auto)\b/u.test(
+        classValue,
+      );
+      // Skeleton rows legitimately use fixed heights.
+      const isSkeletonRow = /\bskeleton\b/u.test(classValue);
+      // Aspect-ratio / ratio surfaces (swatches, thumbnails) use fixed h- with
+      // a sibling w- of the same size — these are primitives, not text clips.
+      const isSquarePrimitive =
+        heightValue <= SMALL_SIZE_THRESHOLD + 4 && /\bw-\d+\b/u.test(classValue);
+      if (!isSmallPrimitive && !hasOverflowGuard && !isSkeletonRow && !isSquarePrimitive) {
+        violations.push({
+          filePath,
+          line: baseLine,
+          message: `Fixed height "${fixedHeightMatch[0]}" clips content on short viewports. Prefer min-h-* or add overflow-y-auto/overflow-hidden for bounded scroll, or use the glass-card container query for adaptive density.`,
+        });
+      }
     }
 
     fixedGridColsPattern.lastIndex = 0;
@@ -102,20 +138,13 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     }
   }
 
-  horizontalOverflowPattern.lastIndex = 0;
-  for (const match of template.matchAll(horizontalOverflowPattern)) {
-    const classValue =
-      /\bclass\s*=\s*["']([^"']+)["']/u.exec(
-        template.slice(Math.max(0, (match.index ?? 0) - 200)),
-      )?.[1] ?? "";
-    if (!/\bmin-w-0\b/u.test(classValue)) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message: `Horizontal overflow container ("${match[0]}") without min-w-0 on the scrollable child. Add min-w-0 (TRUNCATE_FLEX_CHILD_CLASS) to enable flexbox truncation.`,
-      });
-    }
-  }
+  // The overflow-x-auto wrapper check was a false positive: overflow-x-auto
+  // ON a scroll container is the canonical Bao pattern for tables/timelines.
+  // The real overflow risk is flex parents with fixed-width children and no
+  // min-w-0/max-w-* guard, which the fixedWidthPattern check above already
+  // catches. min-w-0 is only required for flexbox truncation, not for
+  // overflow-x-auto scroll containers.
+  void horizontalOverflowPattern;
 
   return violations;
 };

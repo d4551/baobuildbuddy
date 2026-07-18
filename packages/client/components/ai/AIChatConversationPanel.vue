@@ -218,7 +218,7 @@ const updateInput = (event: Event): void => {
                   :disabled="!input.trim() || loading"
                   :aria-label="t('aiChatPage.sendAria')"
                 >
-                  <span v-if="loading" class="loading loading-spinner loading-sm" />
+                  <LoadingSpinner v-if="loading" size="sm" :label="t('aiChatPage.sendAria')" />
                   <IconSend v-else class="h-5 w-5" />
                   <span>{{ t("aiChatPage.sendButton") }}</span>
                 </button>

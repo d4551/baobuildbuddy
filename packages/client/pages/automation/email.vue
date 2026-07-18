@@ -181,10 +181,7 @@ useSeoMeta({
             :aria-label="t('automation.email.generateAria')"
             @click="submitEmailResponse"
           >
-            <span
-              v-if="pendingAction === 'generate'"
-              class="loading loading-spinner loading-sm"
-            ></span>
+            <LoadingSpinner size="sm" label="Loading" v-if="pendingAction === 'generate'" />
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
@@ -193,10 +190,7 @@ useSeoMeta({
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"
           >
-            <span
-              v-if="pendingAction === 'schedule'"
-              class="loading loading-spinner loading-sm"
-            ></span>
+            <LoadingSpinner size="sm" label="Loading" v-if="pendingAction === 'schedule'" />
             <span v-else>{{ t("automation.email.schedule.button") }}</span>
           </button>
         </div>

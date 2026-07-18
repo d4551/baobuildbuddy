@@ -148,10 +148,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"
     >
-      <span
-        v-if="testing && testingProvider === 'local'"
-        class="loading loading-spinner loading-xs"
-      ></span>
+      <LoadingSpinner size="xs" label="Loading" v-if="testing && testingProvider === 'local'" />
       {{ t("setup.testLocalButton") }}
     </button>
 

@@ -204,7 +204,7 @@ const draft = defineModel<string>("draft", { required: true });
                 />
               </ClientOnly>
               <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
-                <span v-if="loading" class="loading loading-spinner loading-xs" />
+                <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
                 <IconSend v-else class="h-4 w-4" />
               </button>
             </div>

@@ -56,7 +56,7 @@ const emit = defineEmits<{
         :disabled="applying"
         @click="emit('submit')"
       >
-        <span v-if="applying" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner size="xs" label="Loading" v-if="applying" />
         {{ t("jobDetail.submitButton") }}
       </button>
     </div>

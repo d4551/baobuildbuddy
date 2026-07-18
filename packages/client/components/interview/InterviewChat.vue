@@ -220,7 +220,7 @@ watch(renderedMessages, async () => {
               :aria-label="t(props.submitButtonAriaLabelKey)"
               :disabled="!canSubmit"
             >
-              <span v-if="props.isSubmitting" class="loading loading-spinner loading-sm"></span>
+              <LoadingSpinner size="sm" label="Loading" v-if="props.isSubmitting" />
               {{ t(props.submitButtonLabelKey) }}
             </button>
           </div>

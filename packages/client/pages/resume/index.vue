@@ -222,7 +222,7 @@ const {
           :aria-label="t('resumePage.createModal.createAria')"
           @click="handleCreate"
         >
-          <span v-if="creating" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="creating" />
           {{ t("resumePage.createModal.createButton") }}
         </button>
       </div>

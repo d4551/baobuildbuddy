@@ -140,7 +140,7 @@ defineEmits<{
         :aria-label="$t('coverLetterPage.generate.submitAria')"
         @click="$emit('generate')"
       >
-        <span v-if="generating" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner v-if="generating" size="xs" :label="$t('coverLetterPage.generate.submitButton')" />
         <IconBolt v-else class="h-4 w-4" />
         {{ $t("coverLetterPage.generate.submitButton") }}
       </button>

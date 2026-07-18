@@ -85,10 +85,11 @@ const emit = defineEmits<{
               :aria-label="t('settings.aiProviders.testAria')"
               @click="emit('testProvider', provider.id)"
             >
-              <span
+              <LoadingSpinner
                 v-if="testingProvider === provider.id"
-                class="loading loading-spinner loading-xs"
-              ></span>
+                size="xs"
+                :label="t('settings.aiProviders.testButton')"
+              />
               {{ t("settings.aiProviders.testButton") }}
             </button>
           </div>

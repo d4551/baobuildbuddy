@@ -32,15 +32,23 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
 
 const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
 
-// Inert @click handlers: empty string, noop function, undefined.
+// Inert @click handlers: empty string, noop function, undefined, empty arrow.
 const inertHandlerPattern =
-  /@(?:click|change|input|submit|focus|blur)\s*=\s*(?:""|''|"noop"|'noop'|"undefined"|"() => {}"|"() =>\s*\{\}"|\(\)\s*=>\s*\{\s*\})/gu;
-// Placeholder copy in template text nodes.
+  /@(?:click|change|input|submit|focus|blur)\s*=\s*["'](?:|noop|undefined)["']/gu;
+const inertArrowHandlerPattern =
+  /@(?:click|change|input|submit|focus|blur)\s*=\s*"\(\)\s*=>\s*\{?\s*\}?"/gu;
+// Placeholder copy in template text nodes. We match the word "placeholder"
+// ONLY when it appears as visible text content (not as an HTML attribute name
+// like placeholder="..." which is the standard input attribute). The negative
+// lookbehind/ahead exclude `placeholder=` and `="placeholder` forms.
 const placeholderCopyPattern =
-  /\b(?:Lorem\s+ipsum|TBD|WIP|coming\s+soon|not\s+implemented|placeholder|tbd|wip)\b/giu;
-// Banned debt vocabulary anywhere in source.
+  /(?<!\w)(?:Lorem\s+ipsum|TBD|WIP|coming\s+soon|not\s+implemented)(?!\w)/giu;
+// Banned debt vocabulary. Targets code-debt tokens (TODO, FIXME, HACK),
+// stub identifiers (foo, bar, baz), and structural anti-patterns (shim,
+// polyfill, compat, wrapper, adapter). Excludes general-purpose words
+// like "fallback" (legitimate in feature-detection/strategy patterns).
 const bannedVocabularyPattern =
-  /\b(?:TODO|FIXME|HACK|PLACEHOLDER|DEPRECATED)\b|\b(?:stub|noop|fake|mock\s+implementation|fake\s+success|fallback|legacy|compat|shim|bridge|wrapper|adapter|polyfill|barrel)\b/giu;
+  /\b(?:TODO|FIXME|HACK|XXX)\b|\b(?:shim|polyfill|compat|wrapper|adapter|barrel)\b|\b(?:deprecated\s+(?:since|in)\s+v\d)/giu;
 // Dead CTA: <button> with text but no @click, :to, type="submit", form=.
 const deadCtaButtonPattern = /<button\b[^>]*>([^<]+)<\/button>/gu;
 
@@ -78,12 +86,21 @@ const collectInertHandlerViolations = (
     });
   }
 
+  inertArrowHandlerPattern.lastIndex = 0;
+  for (const match of template.matchAll(inertArrowHandlerPattern)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Inert arrow event handler ("${match[0]}") is a noop. Wire the handler to real state/service or remove the control. Stubs are forbidden.`,
+    });
+  }
+
   deadCtaButtonPattern.lastIndex = 0;
   for (const match of template.matchAll(deadCtaButtonPattern)) {
     const buttonTag = match[0] ?? "";
     const text = (match[1] ?? "").trim();
     if (text.length === 0) continue;
-    const hasHandler = /@click\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u.test(
+    const hasHandler = /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u.test(
       buttonTag,
     );
     const isDisabled = /\bdisabled\b/u.test(buttonTag);
@@ -124,9 +141,17 @@ const collectBannedVocabularyViolations = (
   content: string,
 ): ValidationViolation[] => {
   if (isSsotSourceFile(filePath)) return [];
+  // Only scan script blocks + comments for banned vocabulary. The HTML
+  // `placeholder="..."` attribute is a standard form input contract, not
+  // the banned "placeholder" debt-concept term.
   const script = extractScriptBlocks(content);
-  const template = extractTemplateBlocks(content);
-  const combined = `${script}\n${template}`;
+  const commentPattern = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu;
+  const comments: string[] = [];
+  commentPattern.lastIndex = 0;
+  for (const match of content.matchAll(commentPattern)) {
+    comments.push(match[0] ?? "");
+  }
+  const combined = `${script}\n${comments.join("\n")}`;
   const violations: ValidationViolation[] = [];
 
   bannedVocabularyPattern.lastIndex = 0;

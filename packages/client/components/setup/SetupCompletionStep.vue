@@ -113,7 +113,7 @@ function updateTextValue(
         :aria-label="t('setup.launchAria')"
         @click="emit('complete')"
       >
-        <span v-if="saving" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner size="xs" label="Loading" v-if="saving" />
         {{ t("setup.launchButton", { brand: brandName }) }}
       </button>
     </div>
