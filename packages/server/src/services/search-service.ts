@@ -1,8 +1,8 @@
 import { JOB_QUERY_DEFAULT_LIMIT } from "@bao/shared/constants/jobs";
 import {
+  isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_TEMPLATE_DEFAULT,
-  isResumeTemplate,
 } from "@bao/shared/constants/resume";
 import { like, or } from "drizzle-orm";
 import { db } from "../db/client";

@@ -5,8 +5,8 @@ import type {
   InterviewResponse,
   InterviewSession,
 } from "@bao/shared/types/interview";
-import type { DBInterviewSession } from "./interview-service-contracts";
 import { normalizeConfig } from "./interview-service-config-normalizers";
+import type { DBInterviewSession } from "./interview-service-contracts";
 import { isRecord, parseNumber, parseStringArray } from "./interview-service-value-parsers";
 
 const questionTypePattern = new Set<string>([

@@ -1,9 +1,9 @@
+import { LOCAL_AI_DEFAULT_ENDPOINT } from "../constants/ai-provider";
 import type {
   AutomationSettings,
   GamingPortalConfig,
   JobProviderSettings,
 } from "./settings-contracts";
-import { LOCAL_AI_DEFAULT_ENDPOINT } from "../constants/ai-provider";
 import { DEFAULT_AUTOMATION_SETTINGS, DEFAULT_JOB_PROVIDER_SETTINGS } from "./settings-defaults";
 
 const PLACEHOLDER_HOST_SNIPPETS = [".test", "example.com"] as const;

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
-import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
+import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 
 defineProps<{
   categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
@@ -25,7 +29,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
         <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

@@ -1,19 +1,28 @@
-import {
-  COVER_LETTER_DEFAULT_CLOSING,
-  COVER_LETTER_DEFAULT_OPENING,
-} from "@bao/shared/constants/cover-letter";
+import { API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT } from "@bao/shared/constants/api-errors";
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema/resumes";
-import type { GenerateCoverLetterBody } from "./cover-letter-route-contracts";
 
 export type GeneratedCoverLetterContent = {
   introduction: string;
   body: string;
   conclusion: string;
 };
+
+export type CoverLetterSectionName = keyof GeneratedCoverLetterContent;
+
+export type CoverLetterContentError = {
+  code: "COVER_LETTER_INCOMPLETE_CONTENT";
+  message: typeof API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT;
+  missingSections: CoverLetterSectionName[];
+  reasons: string[];
+};
+
+export type CoverLetterContentResult =
+  | { success: true; data: GeneratedCoverLetterContent }
+  | { success: false; error: CoverLetterContentError };
 
 export type ResumePromptContext = {
   promptContext: string;
@@ -41,10 +50,6 @@ const SECTION_TRAILING_EDITORIAL_PATTERN =
 const COMPLETE_SENTENCE_PATTERN = /[.!?]["')\]]?$/u;
 const COVER_LETTER_PLANNING_ARTIFACT_PATTERN =
   /(?:~\d+\s+words|total:\s*~?\d+|word limit|under the \d+-word|concise and engaging|draft outline|bullet points?)/iu;
-const TRAILING_SENTENCE_PUNCTUATION_PATTERN = /[.!?]+$/u;
-
-const trimTrailingSentencePunctuation = (value: string): string =>
-  value.replace(TRAILING_SENTENCE_PUNCTUATION_PATTERN, "");
 
 const stripMarkdownCodeFence = (content: string): string => {
   const trimmed = content.trim();
@@ -179,10 +184,26 @@ const parseGeneratedCoverLetterContent = (content: string): Record<string, unkno
   }
 
   const lines = normalizedContent.split("\n").filter((line) => line.trim());
+  if (lines.length === 0) {
+    return {
+      introduction: "",
+      body: "",
+      conclusion: "",
+    };
+  }
+
+  if (lines.length === 1) {
+    return {
+      introduction: "",
+      body: lines[0],
+      conclusion: "",
+    };
+  }
+
   return {
-    introduction: lines[0] || COVER_LETTER_DEFAULT_OPENING,
-    body: lines.slice(1, -1).join("\n\n") || normalizedContent,
-    conclusion: lines[lines.length - 1] || COVER_LETTER_DEFAULT_CLOSING,
+    introduction: lines[0],
+    body: lines.slice(1, -1).join("\n\n"),
+    conclusion: lines[lines.length - 1],
   };
 };
 
@@ -272,62 +293,59 @@ Skills: ${JSON.stringify(resume.skills, null, 2)}
   };
 };
 
-const buildFallbackCoverLetterContent = (
-  body: GenerateCoverLetterBody,
-  resumeContext: ResumePromptContext,
-): GeneratedCoverLetterContent => {
-  const company = body.company.trim() || DEFAULT_UNSPECIFIED_LABEL;
-  const position = body.position.trim() || DEFAULT_UNSPECIFIED_LABEL;
-  const skillsLabel = resumeContext.skills.slice(0, 3).join(", ");
-  const normalizedExperienceHighlight = trimTrailingSentencePunctuation(
-    resumeContext.experienceHighlight,
-  );
-  const backgroundSentence =
-    resumeContext.summary ||
-    `I build player-facing gameplay systems and collaborate closely with design and engineering teams.`;
-  const experienceSentence =
-    normalizedExperienceHighlight.length > 0
-      ? `Most recently, I worked as ${normalizedExperienceHighlight}.`
-      : "";
-  const skillsSentence =
-    skillsLabel.length > 0
-      ? `I would bring practical experience with ${skillsLabel} to ${company}'s ${position} work.`
-      : `I would bring a strong focus on reliable gameplay systems and collaborative iteration to ${company}.`;
-
-  return {
-    introduction: `Dear ${company} Team, I am excited to apply for the ${position} role at ${company}.`,
-    body: [backgroundSentence, experienceSentence, skillsSentence]
-      .filter((entry) => entry.length > 0)
-      .join(" "),
-    conclusion: `Thank you for your consideration. I would welcome the chance to discuss how my background aligns with the ${position} role at ${company}.`,
-  };
+const describeUnusableSection = (section: CoverLetterSectionName, value: string): string | null => {
+  if (value.length === 0) {
+    return `${section} is empty`;
+  }
+  if (!COMPLETE_SENTENCE_PATTERN.test(value)) {
+    return `${section} is not a complete sentence`;
+  }
+  if (COVER_LETTER_PLANNING_ARTIFACT_PATTERN.test(value)) {
+    return `${section} contains planning artifacts instead of letter copy`;
+  }
+  return null;
 };
 
-export const ensureCompleteCoverLetterContent = (
+export const validateGeneratedCoverLetterContent = (
   content: GeneratedCoverLetterContent,
-  body: GenerateCoverLetterBody,
-  resumeContext: ResumePromptContext,
-): GeneratedCoverLetterContent => {
-  const fallbackContent = buildFallbackCoverLetterContent(body, resumeContext);
+): CoverLetterContentResult => {
   const introduction = content.introduction.trim();
-  const generatedBody = content.body.trim();
-  const generatedConclusion = content.conclusion.trim();
-  const bodyContent =
-    generatedBody.length > 0 &&
-    COMPLETE_SENTENCE_PATTERN.test(generatedBody) &&
-    !COVER_LETTER_PLANNING_ARTIFACT_PATTERN.test(generatedBody)
-      ? generatedBody
-      : fallbackContent.body;
-  const conclusionContent =
-    generatedConclusion.length > 0 &&
-    COMPLETE_SENTENCE_PATTERN.test(generatedConclusion) &&
-    !COVER_LETTER_PLANNING_ARTIFACT_PATTERN.test(generatedConclusion)
-      ? generatedConclusion
-      : fallbackContent.conclusion;
+  const body = content.body.trim();
+  const conclusion = content.conclusion.trim();
+  const missingSections: CoverLetterSectionName[] = [];
+  const reasons: string[] = [];
+
+  for (const [section, value] of [
+    ["introduction", introduction],
+    ["body", body],
+    ["conclusion", conclusion],
+  ] as const) {
+    const reason = describeUnusableSection(section, value);
+    if (reason) {
+      missingSections.push(section);
+      reasons.push(reason);
+    }
+  }
+
+  if (missingSections.length > 0) {
+    return {
+      success: false,
+      error: {
+        code: "COVER_LETTER_INCOMPLETE_CONTENT",
+        message: API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT,
+        missingSections,
+        reasons,
+      },
+    };
+  }
+
   return {
-    introduction: introduction || fallbackContent.introduction,
-    body: bodyContent,
-    conclusion: conclusionContent,
+    success: true,
+    data: {
+      introduction,
+      body,
+      conclusion,
+    },
   };
 };
 

@@ -3,14 +3,14 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import { requireApiResponsePayload } from "~/utils/api-response";
+import { toJob } from "./api-normalizer-jobs";
 import {
+  type ClientApiRequestRuntime,
   requestApi,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "./api-request";
-import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
-import { requireApiResponsePayload } from "~/utils/api-response";
 
 const toJobList = (value: unknown): Job[] =>
   Array.isArray(value)

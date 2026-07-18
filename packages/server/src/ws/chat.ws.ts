@@ -1,22 +1,22 @@
-import { Elysia } from "elysia";
 import {
   AI_DEFAULT_TEMPERATURE_CREATIVE,
   AI_MAX_TOKENS_WS,
 } from "@bao/shared/constants/ai-generation";
 import { API_ERROR_GENERATE_RESPONSE } from "@bao/shared/constants/api-errors";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
-import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { toApiScopedPath, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
+import { authenticateApiKey } from "../middleware/auth";
 import type { AIService } from "../services/ai/ai-service";
 import { contextManager } from "../services/ai/context-manager";
-import { authenticateApiKey } from "../middleware/auth";
-import { chatWebSocketBodySchema, type ChatWebSocketBody } from "./chat-ws-contracts";
+import { type ChatWebSocketBody, chatWebSocketBodySchema } from "./chat-ws-contracts";
 
 type AIServiceInstance = AIService;
 type SettingsRow = typeof settings.$inferSelect;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { DashboardQuickAction } from "~/constants/dashboard-contracts";
+import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   actions: readonly DashboardQuickAction[];

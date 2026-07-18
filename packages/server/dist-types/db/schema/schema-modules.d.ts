@@ -12,4 +12,4 @@ import { settings } from "./settings";
 import { skillMappings } from "./skill-mappings";
 import { studios } from "./studios";
 import { userProfile } from "./user";
-export { applications, auth, automationRuns, chatHistory, coverLetters, gamification, interviewSessions, jobTaxonomyKeywords, jobs, portfolioProjects, portfolios, resumes, savedJobs, settings, skillMappings, studios, studioClassificationRules, userProfile, };
+export { applications, auth, automationRuns, chatHistory, coverLetters, gamification, interviewSessions, jobs, jobTaxonomyKeywords, portfolioProjects, portfolios, resumes, savedJobs, settings, skillMappings, studioClassificationRules, studios, userProfile, };

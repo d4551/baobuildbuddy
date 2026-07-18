@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { chromium } from "playwright";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "../packages/shared/src/constants/routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type JsonRecord = Record<string, unknown>;

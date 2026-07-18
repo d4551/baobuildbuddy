@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import {
   COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_POSITION_MIN_LENGTH,
@@ -7,6 +6,7 @@ import {
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 
 defineProps<{
   templateLabel: (template: CoverLetterTemplate) => string;

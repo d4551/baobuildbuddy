@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
 
 interface ResumeEditorToolbarProps {
   readonly enhancing: boolean;

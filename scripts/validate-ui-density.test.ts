@@ -31,7 +31,7 @@ describe("collectDensityViolationsForContent", () => {
   test("flags verbose button label alongside icon", () => {
     const violations = collectDensityViolationsForContent(
       CONSUMER_PATH,
-      '<template><button><svg></svg>Refresh AI Provider Dashboard Analytics Now</button></template>',
+      "<template><button><svg></svg>Refresh AI Provider Dashboard Analytics Now</button></template>",
     );
     expect(violations.some((v) => v.message.includes("verbose label"))).toBe(true);
   });
@@ -39,7 +39,7 @@ describe("collectDensityViolationsForContent", () => {
   test("allows short button label with icon", () => {
     const violations = collectDensityViolationsForContent(
       CONSUMER_PATH,
-      '<template><button><svg></svg>Refresh</button></template>',
+      "<template><button><svg></svg>Refresh</button></template>",
     );
     expect(violations).toHaveLength(0);
   });

@@ -6,8 +6,23 @@ definePageMeta({
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PROSE_MEASURE_CENTER_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
+import {
+  CONTENT_H_48_CLASS,
+  CONTENT_H_64_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  PROSE_MEASURE_CENTER_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const router = useRouter();
@@ -64,7 +79,7 @@ async function handleExport(format: "pdf" | "docx") {
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
         >
-          <IconArrowLeft class="h-4 w-4" />
+          <IconArrowLeft :class="ICON_SIZE_CLASS['4']" />
           {{ t("portfolioPage.preview.backButton") }}
         </button>
 
@@ -98,10 +113,10 @@ async function handleExport(format: "pdf" | "docx") {
     />
 
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-        <div class="card-body items-center gap-6 py-12 text-center">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
+        <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-            <h2 class="text-4xl font-bold sm:text-5xl">
+            <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS]">
               {{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}
             </h2>
             <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
@@ -113,8 +128,8 @@ async function handleExport(format: "pdf" | "docx") {
               class="btn btn-outline"
               :aria-label="t('portfolioPage.preview.contactAria')"
             >
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               {{ t("portfolioPage.preview.contactButton") }}
             </a>
@@ -126,7 +141,7 @@ async function handleExport(format: "pdf" | "docx") {
               class="btn btn-outline"
               :aria-label="t('portfolioPage.preview.websiteAria')"
             >
-              <IconGlobe class="h-5 w-5" />
+              <IconGlobe :class="ICON_SIZE_CLASS.sm" />
               {{ t("portfolioPage.preview.websiteButton") }}
             </a>
           </div>
@@ -142,9 +157,9 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in featuredProjects"
             :key="project.id"
-            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+            :class="SURFACE_GLASS_CARD_CLASS"
           >
-            <figure v-if="project.image" class="h-64">
+            <figure v-if="project.image" :class="[CONTENT_H_64_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
@@ -174,7 +189,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
-                  <IconExternalLink class="h-4 w-4" />
+                  <IconExternalLink :class="ICON_SIZE_CLASS['4']" />
                 </a>
               </div>
             </div>
@@ -191,9 +206,9 @@ async function handleExport(format: "pdf" | "docx") {
           <div
             v-for="project in regularProjects"
             :key="project.id"
-            class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+            :class="SURFACE_GLASS_CARD_CLASS"
           >
-            <figure v-if="project.image" class="h-48">
+            <figure v-if="project.image" :class="[CONTENT_H_48_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
@@ -205,7 +220,7 @@ async function handleExport(format: "pdf" | "docx") {
             <div class="card-body">
               <h3 class="card-title text-base">{{ project.title }}</h3>
               <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="flex flex-wrap gap-1" :class="[MARGIN_TOKEN_CLASS.mt2]">
+              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1, MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
@@ -223,7 +238,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}
-                  <IconExternalLink class="h-3 w-3" />
+                  <IconExternalLink :class="ICON_SIZE_CLASS.xs" />
                 </a>
               </div>
             </div>

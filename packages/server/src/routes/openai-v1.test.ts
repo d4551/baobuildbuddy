@@ -1,10 +1,83 @@
-import { describe, expect, test } from "bun:test";
-import { Elysia } from "elysia";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import {
+  API_ERROR_INVALID_API_KEY,
+  API_ERROR_MISSING_AUTH_HEADER,
+} from "@bao/shared/constants/api-errors";
 import { OPENAI_V1_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_UNAUTHORIZED,
+} from "@bao/shared/constants/http";
+import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import { eq } from "drizzle-orm";
+import { Elysia } from "elysia";
+import { db, sqlite } from "../db/client";
+import { initializeDatabase } from "../db/init";
+import { auth } from "../db/schema/auth";
 import { openaiV1Routes } from "./openai-v1.routes";
 
 const createCompatApp = () => new Elysia().use(openaiV1Routes);
+const originalDisableAuth = Bun.env.BAO_DISABLE_AUTH;
+
+describe("openai v1 auth default-deny", () => {
+  beforeAll(() => {
+    initializeDatabase(sqlite);
+  });
+
+  afterEach(async () => {
+    if (originalDisableAuth === undefined) {
+      Bun.env.BAO_DISABLE_AUTH = undefined;
+    } else {
+      Bun.env.BAO_DISABLE_AUTH = originalDisableAuth;
+    }
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+  });
+
+  test("rejects unauthenticated models list when auth is enabled", async () => {
+    Bun.env.BAO_DISABLE_AUTH = "false";
+    await db
+      .insert(auth)
+      .values({ id: DEFAULT_PROFILE_ID, apiKey: "bao_openai_v1_test_key" })
+      .onConflictDoUpdate({
+        target: auth.id,
+        set: { apiKey: "bao_openai_v1_test_key" },
+      });
+
+    const app = createCompatApp();
+    const response = await app.handle(new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`));
+    expect(response.status).toBe(HTTP_STATUS_UNAUTHORIZED);
+    const body = (await response.json()) as {
+      error: { message: string; type: string; code?: string | null };
+    };
+    expect(body.error.message).toBe(API_ERROR_MISSING_AUTH_HEADER);
+    expect(body.error.type).toBe("invalid_request_error");
+  });
+
+  test("rejects invalid bearer token when auth is enabled", async () => {
+    Bun.env.BAO_DISABLE_AUTH = "false";
+    await db
+      .insert(auth)
+      .values({ id: DEFAULT_PROFILE_ID, apiKey: "bao_openai_v1_test_key" })
+      .onConflictDoUpdate({
+        target: auth.id,
+        set: { apiKey: "bao_openai_v1_test_key" },
+      });
+
+    const app = createCompatApp();
+    const response = await app.handle(
+      new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`, {
+        headers: { authorization: "Bearer wrong-key" },
+      }),
+    );
+    expect(response.status).toBe(HTTP_STATUS_UNAUTHORIZED);
+    const body = (await response.json()) as {
+      error: { message: string; type: string; code?: string | null };
+    };
+    expect(body.error.message).toBe(API_ERROR_INVALID_API_KEY);
+    expect(body.error.code).toBe("invalid_api_key");
+  });
+});
 
 describe("openai v1 routes", () => {
   test("GET /v1/models returns OpenAI list envelope", async () => {

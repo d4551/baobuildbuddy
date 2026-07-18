@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   mappingMetrics: {
@@ -30,7 +35,7 @@ const { t } = useI18n();
       ]"
     />
 
-    <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
@@ -39,7 +44,7 @@ const { t } = useI18n();
     </div>
 
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
-      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <article :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div class="space-y-1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
@@ -78,7 +83,7 @@ const { t } = useI18n();
         </div>
       </article>
 
-      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <article :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div class="space-y-1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>

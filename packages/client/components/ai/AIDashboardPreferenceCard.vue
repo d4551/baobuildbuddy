@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AIProviderType } from "@bao/shared/types/ai";
-import type { ProviderConfig } from "~/types/ai-dashboard";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+import type { ProviderConfig } from "~/types/ai-dashboard";
 
 defineProps<{
   loading: boolean;

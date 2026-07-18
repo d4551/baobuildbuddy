@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  SURFACE_GLASS_CARD_DISABLED_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   challenge: {
@@ -20,8 +26,8 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="card card-border card-glass relative overflow-hidden"
-    :class="[challenge.completed ? 'glass-disabled' : 'hover: transition-shadow', SHADOW_TOKEN_CLASS.lg]"
+    class="relative overflow-hidden"
+    :class="[SURFACE_GLASS_CARD_CLASS, challenge.completed ? SURFACE_GLASS_CARD_DISABLED_CLASS : '']"
   >
     <div
       v-if="challenge.completed"

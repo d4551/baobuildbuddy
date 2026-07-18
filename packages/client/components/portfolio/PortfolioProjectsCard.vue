@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT } from "@bao/shared/constants/portfolio";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
-import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import type { ProjectDirection } from "~/composables/usePortfolioPage";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   currentPage: number;
@@ -34,10 +42,9 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 </script>
 
 <template>
-  <section class="card bg-base-200">
-    <div class="card-body">
-      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
-        <h2 class="card-title">{{ t("portfolioPage.projects.title") }}</h2>
+  <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <h2 id="portfolio-projects-title" class="text-xl font-bold">{{ t("portfolioPage.projects.title") }}</h2>
         <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
           <IconPlus class="h-4 w-4" />
           {{ t("portfolioPage.projects.addButton") }}
@@ -58,9 +65,9 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
         <div
           v-for="(project, idx) in props.paginatedProjects"
           :key="project.id || `${project.title}-${idx}`"
-          class="card bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
-          <figure v-if="project.image" class="h-48">
+          <figure v-if="project.image" class="h-48 overflow-hidden">
             <NuxtImg
               :src="project.image"
               :alt="project.title"
@@ -164,6 +171,5 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
         :page-aria="props.projectPageAria"
         @update:current-page="emit('update:currentPage', $event)"
       />
-    </div>
   </section>
 </template>

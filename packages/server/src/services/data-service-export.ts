@@ -10,8 +10,8 @@ import { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
-import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import type { BaoExportData } from "./data-service-contracts";
+import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import { resolveProfileId } from "./data-service-parsers";
 
 const REDACTED_SETTING_KEYS = [

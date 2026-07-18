@@ -4,11 +4,11 @@ import {
 } from "@bao/shared/constants/portfolio";
 import { useI18n } from "vue-i18n";
 import { usePortfolioPageActions } from "~/composables/portfolio-page-actions";
+import { usePortfolioPageDerived } from "~/composables/portfolio-page-derived";
 import {
   PORTFOLIO_PROJECT_DIALOG_TITLE_ID,
   usePortfolioPageState,
 } from "~/composables/portfolio-page-state";
-import { usePortfolioPageDerived } from "~/composables/portfolio-page-derived";
 
 function usePortfolioPageDependencies() {
   return {

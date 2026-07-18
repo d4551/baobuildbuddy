@@ -11,22 +11,22 @@ import {
   isEmailResponseTone,
 } from "./automation-email-response-payload";
 import { AutomationConcurrencyLimitError } from "./automation-errors";
+import { normalizeJobApplyPayload } from "./automation-job-apply-preparation";
 import {
   buildScheduledJobApplyInput,
+  type JobApplyPayload,
   parseScheduledEmailResponsePayload,
   parseScheduledJobApplyPayload,
   parseScheduledScrapePayload,
-  type JobApplyPayload,
 } from "./automation-run-inputs";
-import { normalizeJobApplyPayload } from "./automation-job-apply-preparation";
 import { markRunFailed } from "./automation-run-persistence";
 import { executeScrapeRun } from "./automation-scrape-run";
+import type { AutomationRunRow, CreateProgressEvent } from "./automation-service-contracts";
 import {
   loadAutomationSettings,
   loadEmailTransportConfig,
   tryLoadAIService,
 } from "./automation-settings-support";
-import type { AutomationRunRow, CreateProgressEvent } from "./automation-service-contracts";
 
 const SCHEDULED_ACTION_JOB_APPLY = "job_apply";
 

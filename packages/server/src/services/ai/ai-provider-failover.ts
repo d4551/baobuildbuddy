@@ -1,20 +1,23 @@
+import { AI_CHAT_CONTEXT_MESSAGE_LIMIT } from "@bao/shared/constants/ai-chat";
 import {
   HUGGING_FACE_SUPPORTED_MODELS,
   LOCAL_AI_AUTO_DETECT_MODEL,
 } from "@bao/shared/constants/ai-provider";
-import { AI_CHAT_CONTEXT_MESSAGE_LIMIT } from "@bao/shared/constants/ai-chat";
-import { API_ERROR_ALL_PROVIDERS_STREAM_FAILED } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_ALL_PROVIDERS_GENERATE_FAILED,
+  API_ERROR_ALL_PROVIDERS_STREAM_FAILED,
+} from "@bao/shared/constants/api-errors";
 import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../../utils/logger";
 import type { AIProvider } from "./provider-interface";
 
-const aiFallbackLogger = createServerLogger("ai-provider-fallback");
+const aiFailoverLogger = createServerLogger("ai-provider-failover");
 
 export type ProviderFailure = { provider: AIProviderType; error: string };
 
-interface FallbackRequest {
+interface FailoverRequest {
   providers: Map<AIProviderType, AIProvider>;
   providerOrder: AIProviderType[];
   routingTarget: {
@@ -32,7 +35,7 @@ const describeProviderError = (
   error: unknown,
 ): string => {
   const errorMessage = toErrorMessage(error);
-  aiFallbackLogger.error("AI provider operation failed", {
+  aiFailoverLogger.error("AI provider operation failed", {
     providerName,
     operation,
     error: errorMessage,
@@ -74,7 +77,7 @@ const isSupportedHuggingFaceModel = (
 const resolveProviderModel = (
   provider: AIProvider,
   providerName: AIProviderType,
-  routingTarget: FallbackRequest["routingTarget"],
+  routingTarget: FailoverRequest["routingTarget"],
   providerOptions?: Omit<GenerateOptions, "messages">,
 ): string | undefined => {
   const providerModel = isNonEmptyString(provider.model) ? provider.model.trim() : undefined;
@@ -91,7 +94,7 @@ const resolveProviderModel = (
 };
 
 const buildProviderOptionsForProvider = (
-  request: FallbackRequest,
+  request: FailoverRequest,
   providerName: AIProviderType,
   provider: AIProvider,
 ): Omit<GenerateOptions, "messages"> | undefined => {
@@ -129,9 +132,6 @@ const buildProviderOptionsForProvider = (
     systemPrompt,
   };
 };
-
-export const buildFailureMessage = (errors: ProviderFailure[]): string =>
-  errors.map((entry) => `${entry.provider}: ${entry.error}`).join("; ");
 
 export const mergePromptWithContext = (prompt: string, options?: GenerateOptions): string => {
   const messageHistory = options?.messages;
@@ -215,7 +215,7 @@ const resolveAvailableProvider = async (
 };
 
 const generateFromProvider = async (
-  request: FallbackRequest,
+  request: FailoverRequest,
   providerName: AIProviderType,
   errors: ProviderFailure[],
 ): Promise<AIResponse | null> => {
@@ -247,16 +247,39 @@ const generateFromProvider = async (
   return generationResult.value;
 };
 
-export const generateWithFallback = async (
-  request: FallbackRequest,
-): Promise<{ response: AIResponse | null; errors: ProviderFailure[] }> => {
+export type GenerateFailoverResult =
+  | { success: true; data: AIResponse; errors: ProviderFailure[] }
+  | {
+      success: false;
+      error: { code: "ALL_PROVIDERS_GENERATE_FAILED"; message: string };
+      errors: ProviderFailure[];
+    };
+
+export const generateWithProviderFailover = async (
+  request: FailoverRequest,
+): Promise<GenerateFailoverResult> => {
   const errors: ProviderFailure[] = [];
-  const response = await generateWithFallbackAtIndex(request, errors, 0);
-  return { response, errors };
+  const response = await generateWithFailoverAtIndex(request, errors, 0);
+  if (response) {
+    return { success: true, data: response, errors };
+  }
+
+  aiFailoverLogger.error("All providers failed to generate", {
+    failures: errors,
+  });
+
+  return {
+    success: false,
+    error: {
+      code: "ALL_PROVIDERS_GENERATE_FAILED",
+      message: API_ERROR_ALL_PROVIDERS_GENERATE_FAILED,
+    },
+    errors,
+  };
 };
 
-const generateWithFallbackAtIndex = async (
-  request: FallbackRequest,
+const generateWithFailoverAtIndex = async (
+  request: FailoverRequest,
   errors: ProviderFailure[],
   index: number,
 ): Promise<AIResponse | null> => {
@@ -270,37 +293,24 @@ const generateWithFallbackAtIndex = async (
     return response;
   }
 
-  return generateWithFallbackAtIndex(request, errors, index + 1);
+  return generateWithFailoverAtIndex(request, errors, index + 1);
 };
 
-export const buildGenerateFailureResponse = (
-  errors: ProviderFailure[],
-  fallbackProvider: AIProviderType,
-): AIResponse => {
-  const now = Date.now();
-  const errorMessage = buildFailureMessage(errors);
-  return {
-    id: `failed-${now}`,
-    provider: fallbackProvider,
-    model: "none",
-    content: "",
-    error: `All providers failed: ${errorMessage}`,
-    timing: {
-      startedAt: now,
-      completedAt: now,
-      totalTime: 0,
-    },
-  };
+export const buildGenerateFailure = (errors: ProviderFailure[]): Error => {
+  aiFailoverLogger.error("All providers failed to generate", {
+    failures: errors,
+  });
+  return new Error(API_ERROR_ALL_PROVIDERS_GENERATE_FAILED);
 };
 
-export const streamWithFallback = async function* (
-  request: FallbackRequest,
+export const streamWithProviderFailover = async function* (
+  request: FailoverRequest,
 ): AsyncGenerator<
   { chunk: string; provider: AIProviderType },
   { streamed: boolean; errors: ProviderFailure[] }
 > {
   const errors: ProviderFailure[] = [];
-  return yield* streamWithFallbackAtIndex(request, errors, 0);
+  return yield* streamWithFailoverAtIndex(request, errors, 0);
 };
 
 const streamProviderIterator = async function* (
@@ -328,8 +338,8 @@ const streamProviderIterator = async function* (
   return yield* streamProviderIterator(providerName, iterator, errors, true);
 };
 
-const streamWithFallbackAtIndex = async function* (
-  request: FallbackRequest,
+const streamWithFailoverAtIndex = async function* (
+  request: FailoverRequest,
   errors: ProviderFailure[],
   index: number,
 ): AsyncGenerator<
@@ -343,7 +353,7 @@ const streamWithFallbackAtIndex = async function* (
 
   const provider = await resolveAvailableProvider(request.providers, providerName, errors);
   if (!provider) {
-    return yield* streamWithFallbackAtIndex(request, errors, index + 1);
+    return yield* streamWithFailoverAtIndex(request, errors, index + 1);
   }
 
   const providerStream = provider.stream(
@@ -356,8 +366,12 @@ const streamWithFallbackAtIndex = async function* (
     return { streamed: true, errors };
   }
 
-  return yield* streamWithFallbackAtIndex(request, errors, index + 1);
+  return yield* streamWithFailoverAtIndex(request, errors, index + 1);
 };
 
-export const buildStreamFailure = (errors: ProviderFailure[]): Error =>
-  new Error(`${API_ERROR_ALL_PROVIDERS_STREAM_FAILED}: ${buildFailureMessage(errors)}`);
+export const buildStreamFailure = (errors: ProviderFailure[]): Error => {
+  aiFailoverLogger.error("All providers failed to stream", {
+    failures: errors,
+  });
+  return new Error(API_ERROR_ALL_PROVIDERS_STREAM_FAILED);
+};

@@ -8,6 +8,7 @@ import {
   DEFAULT_APP_AI_ROUTING,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
 } from "@bao/shared/types/settings-defaults";
+import { normalizeLocalModelEndpoint } from "@bao/shared/types/settings-normalization";
 import {
   asBoolean,
   asNumber,
@@ -16,18 +17,17 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
-import { normalizeLocalModelEndpoint } from "@bao/shared/types/settings-normalization";
+import { normalizeAutomationSettings } from "~/composables/api-normalizer-settings-automation";
+import {
+  JOB_TAXONOMY_CATEGORIES,
+  JOB_TAXONOMY_STUDIO_TYPES,
+} from "~/composables/api-normalizer-settings-constants";
 import {
   asEnum,
   isProviderId,
   normalizeAIProvider,
   normalizeProviderDiagnosticCode,
 } from "~/composables/api-normalizer-shared";
-import {
-  JOB_TAXONOMY_CATEGORIES,
-  JOB_TAXONOMY_STUDIO_TYPES,
-} from "~/composables/api-normalizer-settings-constants";
-import { normalizeAutomationSettings } from "~/composables/api-normalizer-settings-automation";
 
 const normalizeAIRoutingValue = (
   value: unknown,

@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   currentQuestion: InterviewQuestion | undefined;
@@ -14,7 +19,7 @@ const { t } = useI18n();
 <template>
   <section
     v-if="currentQuestion?.feedback"
-    class="card card-border bg-base-100"
+    :class="SURFACE_GLASS_CARD_CLASS"
     aria-labelledby="interview-session-feedback-title"
   >
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">

@@ -5,8 +5,8 @@ import {
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewMode } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
-import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
 import { cloneJob, type InterviewJobView } from "~/composables/interview-hub-bootstrap";
 import { useInterviewRoleOptions } from "~/composables/interview-hub-role-options";
 

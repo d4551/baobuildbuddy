@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
+import {
+  FLUID_WIDTH_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -53,7 +58,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" aria-labelledby="interview-session-briefing-title">
+  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-briefing-title">
     <div class="card-body gap-6">
       <PageHeaderBlock
         title-id="interview-session-briefing-title"

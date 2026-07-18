@@ -1,15 +1,15 @@
 /**
- * .bao SSOT UI/UX Compliance Test Suite
+ * Layout/CSS SSOT UI/UX compliance suite (not `.bao` archive compile).
  *
- * Authority: .bao glassmorphic material system in packages/client/assets/css/main.css
- * SSOT Tokens: packages/client/constants/layout.ts + layout-tokens.ts + ui-layout.ts
+ * Authority: glassmorphic material system in packages/client/assets/css/main.css
+ * SSOT tokens: packages/client/constants/layout.ts + layout-tokens.ts + ui-layout.ts
  *
  * These tests verify the SSOT infrastructure exists and is correct.
  * Violation scanning is done by the validate:* scripts in the lint pipeline,
  * not by runtime tests (Vue SFCs require Vite plugin config for import).
  */
 
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -17,7 +17,7 @@ const CLIENT_ROOT = join(import.meta.dirname, "..");
 
 // ── Glass surface consistency ────────────────────────────────────────
 
-describe(".bao SSOT — Glass surface tokens", () => {
+describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
     const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
     expect(content).toContain(
@@ -86,7 +86,7 @@ describe(".bao SSOT — Glass surface tokens", () => {
 
 // ── Token coverage ────────────────────────────────────────────────────
 
-describe(".bao SSOT — Layout token declarations", () => {
+describe("Layout SSOT — Layout token declarations", () => {
   it("layout.ts declares shell and page tokens", () => {
     const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
     const tokens = [
@@ -164,7 +164,7 @@ describe(".bao SSOT — Layout token declarations", () => {
 // ── Icon registry ─────────────────────────────────────────────────────
 // We verify via filesystem since importing Vue SFCs in vitest needs plugin config.
 
-describe(".bao SSOT — Icon registry filesystem integrity", () => {
+describe("Layout SSOT — Icon registry filesystem integrity", () => {
   it("icon-registry.ts exports expected icons", () => {
     const content = readFileSync(join(CLIENT_ROOT, "components/icons/icon-registry.ts"), "utf8");
     const icons = [
@@ -204,14 +204,15 @@ describe(".bao SSOT — Icon registry filesystem integrity", () => {
 
 // ── daisyUI contract validator recognized SSOT surface constants ──────
 
-describe(".bao SSOT — Validator recognizes surface constants", () => {
-  it("daisyui-contracts validator recognizes SURFACE_GLASS_CARD_CLASS", () => {
+describe("Layout SSOT — Validator recognizes surface constants", () => {
+  it("daisyui-contracts validator recognizes SURFACE_GLASS_CARD_CLASS and AUTH_CARD_SHELL_CLASS", () => {
     const validator = readFileSync(
       join(CLIENT_ROOT, "../../scripts/validate-daisyui-contracts.ts"),
       "utf8",
     );
     expect(validator).toContain("SSOT_SURFACE_CONSTANTS_WITH_CARD");
     expect(validator).toContain("SURFACE_GLASS_CARD_CLASS");
+    expect(validator).toContain("AUTH_CARD_SHELL_CLASS");
     expect(validator).toContain("SSOT_SURFACE_CONSTANT_USAGE_PATTERN");
   });
 

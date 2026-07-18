@@ -5,6 +5,7 @@ import {
 import {
   API_ERROR_AI_SETTINGS_NOT_CONFIGURED,
   API_ERROR_COVER_LETTER_GENERATION_FAILED,
+  API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT,
   API_ERROR_COVER_LETTER_NOT_FOUND,
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_UNKNOWN,
@@ -32,14 +33,17 @@ import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import type { RouteSetState } from "../types/route-state";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
+import { createServerLogger } from "../utils/logger";
 import type { GenerateCoverLetterBody } from "./cover-letter-route-contracts";
 import {
-  ensureCompleteCoverLetterContent,
   type GeneratedCoverLetterContent,
   resolveResumeContext,
   toGeneratedCoverLetterContent,
+  validateGeneratedCoverLetterContent,
 } from "./cover-letter-route-generation-support";
 import { getCoverLetterById, normalizeTemplate } from "./cover-letter-route-support";
+
+const coverLetterGenerationLogger = createServerLogger("cover-letter-generation");
 
 type CoverLetterSender = {
   name: string;
@@ -90,10 +94,14 @@ const toJsonRecord = (value: unknown): Record<string, unknown> => {
   return record;
 };
 
-const createCoverLetterExportError = (reason: unknown) => ({
-  error: API_ERROR_EXPORT_COVER_LETTER,
-  details: reason instanceof Error ? reason.message : API_ERROR_UNKNOWN,
-});
+const createCoverLetterExportError = (reason: unknown) => {
+  coverLetterGenerationLogger.error("Cover letter export failed", {
+    reason: reason instanceof Error ? reason.message : API_ERROR_UNKNOWN,
+  });
+  return {
+    error: API_ERROR_EXPORT_COVER_LETTER,
+  };
+};
 
 export const handleGenerateCoverLetter = async (
   body: GenerateCoverLetterBody,
@@ -121,24 +129,36 @@ export const handleGenerateCoverLetter = async (
     ),
   );
   if (aiResult.status === "rejected") {
+    coverLetterGenerationLogger.error("Cover letter AI generation rejected", {
+      reason: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
       error: API_ERROR_COVER_LETTER_GENERATION_FAILED,
-      details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
     };
   }
 
   const response = aiResult.value;
   if (response.error) {
+    coverLetterGenerationLogger.error("Cover letter AI generation returned provider error", {
+      reason: response.error,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: API_ERROR_COVER_LETTER_GENERATION_FAILED, details: response.error };
+    return { error: API_ERROR_COVER_LETTER_GENERATION_FAILED };
   }
 
-  const content = ensureCompleteCoverLetterContent(
+  const contentResult = validateGeneratedCoverLetterContent(
     toGeneratedCoverLetterContent(response.content),
-    body,
-    resumeContext,
   );
+  if (!contentResult.success) {
+    set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+    return {
+      error: API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT,
+      details: contentResult.error,
+    };
+  }
+
+  const content = contentResult.data;
   if (!body.save) {
     return {
       message: API_MESSAGE_COVER_LETTER_GENERATED_ONLY,

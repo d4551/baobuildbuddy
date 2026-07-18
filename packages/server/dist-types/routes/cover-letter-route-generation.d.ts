@@ -9,7 +9,7 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
     coverLetter?: undefined;
 } | {
     error: string;
-    details: string;
+    details: import("./cover-letter-route-generation-support").CoverLetterContentError;
     content?: undefined;
     message?: undefined;
     coverLetter?: undefined;
@@ -34,8 +34,5 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
     };
 }>;
 export declare const exportCoverLetterAttachment: (id: string, format: string | undefined, set: RouteSetState) => Promise<Response | {
-    error: string;
-    details: string;
-} | {
     error: string;
 }>;

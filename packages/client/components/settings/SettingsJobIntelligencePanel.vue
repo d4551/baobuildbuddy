@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
+import {
+  FLUID_WIDTH_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -47,7 +53,7 @@ const taxonomyAssetCount = computed(
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div class="card card-border bg-base-100">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body gap-6">
         <SettingsPanelHeader
           :title="t('settings.jobIntelligence.title')"

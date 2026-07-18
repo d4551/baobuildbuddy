@@ -1,154 +1,22 @@
-import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
-import { isRecord } from "@bao/shared/utils/type-guards";
-import { useI18n } from "vue-i18n";
-import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
+import type { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import {
+  buildJobApplyBody,
+  type ScheduledJobApplyRequestBody,
+  useAutomationJobApplyBootstrap,
+  useAutomationJobApplyDependencies,
+  useAutomationJobApplyForm,
+} from "~/composables/automation-job-apply-page-form";
 import {
   DATE_FORMAT_OPTIONS,
   resolveScheduledRunAt,
   toIsoTimestamp,
 } from "~/composables/automation-scraper-bootstrap";
-import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
-import { settlePromise } from "~/composables/async-flow";
-import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
+import type { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
-
-interface JobApplyRequestBody {
-  jobUrl: string;
-  resumeId: string;
-  coverLetterId?: string;
-  jobId?: string;
-}
-
-interface ScheduledJobApplyRequestBody extends JobApplyRequestBody {
-  runAt: string;
-}
-
-function buildJobApplyBody(input: {
-  jobUrl: Ref<string>;
-  resumeId: Ref<string>;
-  coverLetterId: Ref<string>;
-  jobId: Ref<string>;
-}): JobApplyRequestBody {
-  const coverLetterId = input.coverLetterId.value.trim();
-  const jobId = input.jobId.value.trim();
-
-  return {
-    jobUrl: input.jobUrl.value.trim(),
-    resumeId: input.resumeId.value,
-    ...(coverLetterId ? { coverLetterId } : {}),
-    ...(jobId ? { jobId } : {}),
-  };
-}
-
-function useAutomationJobApplyForm() {
-  return {
-    coverLetterId: ref(""),
-    jobId: ref(""),
-    jobUrl: ref(""),
-    resumeId: ref(""),
-    runAt: ref(""),
-  };
-}
-
-function useAutomationJobApplyDependencies() {
-  const { t, locale, fallbackLocale } = useI18n();
-  const api = useApi();
-  const runtime = useClientApiRequestRuntime();
-  const { triggerJobApply, scheduleJobApply } = useAutomation();
-  const runStream = useAutomationRunStream({
-    fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
-  });
-
-  return {
-    api,
-    fallbackLocale,
-    locale,
-    runStream,
-    runtime,
-    scheduleJobApply,
-    t,
-    triggerJobApply,
-  };
-}
-
-const readApiData = async (request: Promise<unknown>): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    return [];
-  }
-  if (isRecord(response) && "error" in response && response.error) {
-    return [];
-  }
-  if (isRecord(response) && "data" in response) {
-    return response.data;
-  }
-  return response;
-};
-
-const toResumeSelectOptions = (value: unknown): ResumeSelectOption[] =>
-  Array.isArray(value)
-    ? value.flatMap((entry) =>
-        isRecord(entry) && typeof entry.id === "string"
-          ? [
-              {
-                id: entry.id,
-                ...(typeof entry.name === "string" ? { name: entry.name } : {}),
-              } satisfies ResumeSelectOption,
-            ]
-          : [],
-      )
-    : [];
-
-const toCoverLetterSelectOptions = (value: unknown): CoverLetterSelectOption[] =>
-  Array.isArray(value)
-    ? value.flatMap((entry) =>
-        isRecord(entry) && typeof entry.id === "string"
-          ? [
-              {
-                id: entry.id,
-                ...(typeof entry.company === "string" ? { company: entry.company } : {}),
-                ...(typeof entry.position === "string" ? { position: entry.position } : {}),
-              } satisfies CoverLetterSelectOption,
-            ]
-          : [],
-      )
-    : [];
-
-function useAutomationJobApplyBootstrap(input: {
-  api: ReturnType<typeof useApi>;
-  runtime: ReturnType<typeof useClientApiRequestRuntime>;
-}) {
-  const { data: resumesData } = useAsyncData<ResumeSelectOption[]>(
-    "automation-job-apply-resumes",
-    async () => toResumeSelectOptions(await readApiData(input.api.resumes.get())),
-    {
-      default: () => [],
-    },
-  );
-
-  const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
-    "automation-job-apply-cover-letters",
-    async () =>
-      toCoverLetterSelectOptions(
-        await readApiData(
-          requestApi<unknown>(input.runtime, API_ENDPOINTS.coverLetters, {
-            method: "GET",
-          }),
-        ),
-      ),
-    {
-      default: () => [],
-    },
-  );
-
-  return {
-    coverLettersData,
-    resumesData,
-  };
-}
 
 function createAutomationJobApplyState(runStream: ReturnType<typeof useAutomationRunStream>) {
   const pending = ref(false);

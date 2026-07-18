@@ -1,9 +1,8 @@
-import { flattenJsonStrings } from "./runtime-artifacts";
-import type { JobApplyStrategy } from "./strategy-registry";
 import {
-  collectResumeCandidateFields,
   addStep,
   captureScreenshot,
+  collectResumeCandidateFields,
+  flattenJsonStrings,
   uploadResumeArtifact,
 } from "./runtime-artifacts";
 import type {
@@ -17,8 +16,9 @@ import {
   fillFirstMatchingField,
   getCustomFieldSelectorList,
 } from "./runtime-locators";
-import { JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
 import { getStrategySelectorList } from "./runtime-selector-map";
+import type { JobApplyStrategy } from "./strategy-registry";
+import { JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
 
 const emitProgress = (state: JobApplyExecutionState, action: string, step: number): void => {
   state.emitter.emitProgress({

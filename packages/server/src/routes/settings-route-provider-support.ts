@@ -1,17 +1,19 @@
 import { AI_PROVIDER_TEST_STRATEGY_BY_ID } from "@bao/shared/constants/ai-provider";
-import { API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
+import { API_ERROR_UNKNOWN, API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
 import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
   normalizeAutomationSettings,
   normalizeLocalModelEndpoint,
 } from "@bao/shared/types/settings-normalization";
-import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { buildAIControlPlaneState } from "../services/ai/control-plane";
 import { LocalProvider } from "../services/ai/local-provider";
 import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
+import { createServerLogger } from "../utils/logger";
+
+const settingsProviderLogger = createServerLogger("settings-provider-test");
 
 const KEY_MASK_VISIBLE_CHARS = 4;
 type SettingsRow = typeof settingsTable.$inferSelect;
@@ -97,11 +99,16 @@ export const testProviderConnection = async (body: {
     fetch(strategy.buildUrl(body.key), strategy.buildInit(body.key)),
   );
   if (responseResult.status === "rejected") {
+    settingsProviderLogger.error("Provider connection test failed", {
+      provider: body.provider,
+      reason:
+        responseResult.reason instanceof Error ? responseResult.reason.message : API_ERROR_UNKNOWN,
+    });
     return {
       valid: false,
       provider: body.provider,
       diagnosticCode: "error" as const,
-      message: toErrorMessage(responseResult.reason),
+      message: API_ERROR_UNKNOWN,
     };
   }
 

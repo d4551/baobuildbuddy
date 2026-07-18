@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeFormProject } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormProject[];
@@ -69,7 +74,7 @@ function removeProject(index: number): void {
       <div
         v-for="(project, index) in localValue"
         :key="`${project.name}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
           <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">

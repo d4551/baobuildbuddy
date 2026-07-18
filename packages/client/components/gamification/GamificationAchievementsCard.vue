@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { Achievement } from "@bao/shared/types/gamification";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 
 defineProps<{
   unlockedAchievements: readonly Achievement[];

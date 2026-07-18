@@ -3,15 +3,15 @@ import type {
   RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import type { DashboardStats } from "@bao/shared/types/search";
-import { computed } from "vue";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { Ref } from "vue";
+import { computed } from "vue";
 import type {
   AutomationHubTranslate,
   AutomationHubUiState,
 } from "~/composables/automation-hub-page-contracts";
 import { useAutomation } from "~/composables/useAutomation";
 import { getErrorMessage } from "~/utils/errors";
-import { isRecord } from "@bao/shared/utils/type-guards";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
 const AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY = "automation-hub-capabilities";

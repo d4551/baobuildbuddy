@@ -7,7 +7,7 @@ describe("collectStubNoopViolationsForContent", () => {
   test("flags inert @click empty-string handler", () => {
     const violations = collectStubNoopViolationsForContent(
       CONSUMER_PATH,
-      "<template><button @click=\"\">x</button></template>",
+      '<template><button @click="">x</button></template>',
     );
     expect(violations.some((v) => v.message.includes("Inert event handler"))).toBe(true);
   });
@@ -31,7 +31,12 @@ describe("collectStubNoopViolationsForContent", () => {
   test("flags TODO comment in script", () => {
     const violations = collectStubNoopViolationsForContent(
       CONSUMER_PATH,
-      ['<script setup lang="ts">', "// TODO: wire this up", "</script>", "<template><div /></template>"].join("\n"),
+      [
+        '<script setup lang="ts">',
+        "// TODO: wire this up",
+        "</script>",
+        "<template><div /></template>",
+      ].join("\n"),
     );
     expect(violations.some((v) => v.message.includes("TODO"))).toBe(true);
   });

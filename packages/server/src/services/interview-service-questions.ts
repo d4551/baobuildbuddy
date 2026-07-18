@@ -17,19 +17,19 @@ import type {
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
-import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
+import { withAiOperationTimeout } from "./interview-service-ai";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
+import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 import {
   buildFallbackNaturalQuestion,
   buildFallbackQuestions,
 } from "./interview-service-fallback-questions";
+import { normalizeQuestions } from "./interview-service-normalizers";
 import {
   buildNaturalNextQuestionPrompt,
   buildQuestionGenerationPrompt,
   buildSimpleQuestionPrompt,
 } from "./interview-service-question-prompts";
-import { withAiOperationTimeout } from "./interview-service-ai";
-import { normalizeQuestions } from "./interview-service-normalizers";
 import { safeParseJSON } from "./interview-service-value-parsers";
 
 const interviewServiceQuestionsLogger = createServerLogger("interview-service-questions");

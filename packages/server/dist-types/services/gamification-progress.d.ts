@@ -1,5 +1,5 @@
 import type { Achievement, DailyChallenge, GamificationStats } from "@bao/shared/types/gamification";
-import { type NumericGamificationStats, type ActionHistoryEntry, type WeeklyDaySummary, type WeeklyProgressResult } from "./gamification-definitions";
+import { type ActionHistoryEntry, type NumericGamificationStats, type WeeklyDaySummary, type WeeklyProgressResult } from "./gamification-definitions";
 export declare function typeSafeStats(stats: Partial<GamificationStats> | null | undefined): Partial<GamificationStats> & {
     actionHistory: ActionHistoryEntry[];
 };

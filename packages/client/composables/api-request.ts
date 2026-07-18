@@ -1,5 +1,5 @@
-import { useRequestURL, useRuntimeConfig } from "#imports";
 import { $fetch } from "ofetch";
+import { useRequestURL, useRuntimeConfig } from "#imports";
 import { getStoredApiKey } from "~/plugins/eden";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 

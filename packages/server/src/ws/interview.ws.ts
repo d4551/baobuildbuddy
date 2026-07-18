@@ -1,15 +1,15 @@
-import { Elysia } from "elysia";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
-import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { toApiScopedPath, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { eq } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { authenticateApiKey } from "../middleware/auth";
-import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
 import {
-  interviewWebSocketBodySchema,
   type InterviewWebSocketBody,
+  interviewWebSocketBodySchema,
 } from "./interview-ws-contracts";
+import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
 
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: interviewWebSocketBodySchema,

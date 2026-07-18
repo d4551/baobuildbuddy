@@ -1,9 +1,9 @@
-import type { Static } from "typebox";
 import {
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_MESSAGE,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const chatWebSocketBodySchema = t.Object({
   content: t.String({ maxLength: SCHEMA_MAX_LENGTH_MESSAGE }),

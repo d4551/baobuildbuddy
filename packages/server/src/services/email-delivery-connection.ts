@@ -1,6 +1,9 @@
-import type { EmailTransportRuntimeConfig, SmtpResponse } from "./email-delivery-contracts";
 import { settle } from "@bao/shared/utils/promise";
-import { dotStuffMessage, encodeBase64Utf8, SMTP_LINE_BREAK } from "./email-delivery-message";
+import {
+  connectSmtpSocket,
+  upgradeSmtpSocket,
+  writeBytes,
+} from "./email-delivery-connection-socket";
 import {
   assertExpectedCode,
   assertSocket,
@@ -8,11 +11,8 @@ import {
   readResponse,
   type SmtpConnectionState,
 } from "./email-delivery-connection-state";
-import {
-  connectSmtpSocket,
-  upgradeSmtpSocket,
-  writeBytes,
-} from "./email-delivery-connection-socket";
+import type { EmailTransportRuntimeConfig, SmtpResponse } from "./email-delivery-contracts";
+import { dotStuffMessage, encodeBase64Utf8, SMTP_LINE_BREAK } from "./email-delivery-message";
 
 const SMTP_DATA_ENDING = `${SMTP_LINE_BREAK}.${SMTP_LINE_BREAK}`;
 const SMTP_QUIT_COMMAND = "QUIT";

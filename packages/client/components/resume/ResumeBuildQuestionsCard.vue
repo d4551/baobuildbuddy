@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
   currentQuestionIndex: number;

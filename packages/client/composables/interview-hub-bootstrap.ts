@@ -10,11 +10,11 @@ import {
 import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import type { InterviewMode, VoiceSettings } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
-import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
 import type { LocationQueryValue, RouteLocationNormalizedLoaded } from "vue-router";
-import type { InterviewHubSessionConfig } from "~/types/interview";
 import { settlePromise } from "~/composables/async-flow";
+import type { InterviewHubSessionConfig } from "~/types/interview";
 import { getErrorMessage } from "~/utils/errors";
 
 export const INTERVIEW_CONFIG_DIALOG_TITLE_ID = "interview-hub-config-dialog-title";

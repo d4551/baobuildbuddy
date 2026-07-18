@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
-import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 type ProviderField =
   | "localModelEndpoint"
@@ -111,7 +120,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.aiProviders.title')"

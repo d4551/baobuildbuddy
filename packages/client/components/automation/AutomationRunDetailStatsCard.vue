@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
 
 defineProps<{
   inputSummary: string;

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { computed, ref, watch } from "vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 type PageAriaResolver = (page: number) => string;
 
@@ -141,8 +146,8 @@ watch(
 </script>
 
 <template>
-  <div v-if="hasPages && hasNormalizedPages" class="card card-border bg-base-100">
-    <div class="card-body py-4 md:flex-row md:items-center md:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+  <div v-if="hasPages && hasNormalizedPages" :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body md:flex-row md:items-center md:justify-between" :class="[PADDING_TOKEN_CLASS.py4, FLEX_GAP_TOKEN_CLASS.gap3]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ summary }}</p>
 
       <nav class="join" :aria-label="navigationAria">

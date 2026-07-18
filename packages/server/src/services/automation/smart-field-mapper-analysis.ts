@@ -7,10 +7,10 @@ import { config } from "../../config/env";
 import { formFieldAnalysisPrompt } from "../ai/prompts-automation";
 import {
   EMPTY_FIELD_ANALYSIS_RESULT,
-  fieldAnalysisSchema,
-  selectorMapSchema,
   type FieldMapperAIClient,
+  fieldAnalysisSchema,
   type SmartFieldAnalysisResult,
+  selectorMapSchema,
 } from "./smart-field-mapper-contracts";
 import { wait } from "./smart-field-mapper-fetch";
 

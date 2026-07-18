@@ -1,15 +1,15 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
-import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
+import { readFileSync } from "node:fs";
 import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
-import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
+import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
 import { collectDaisyUiContractViolationsForContent } from "./validate-daisyui-contracts";
+import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
 import { collectDirectEnvAccessViolationsForContent } from "./validate-no-direct-env-access";
 import { collectFallbackShimViolationsForContent } from "./validate-no-fallback-shims";
 import { collectHardcodedUserStringViolationsForContent } from "./validate-no-hardcoded-user-strings";
 import { collectNoHtmxViolationsForContent } from "./validate-no-htmx";
-import { collectPageStateViolationsForContent } from "./validate-page-state-contracts";
 import { collectNoTryCatchViolationsForContent } from "./validate-no-try-catch";
+import { collectPageStateViolationsForContent } from "./validate-page-state-contracts";
 import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-source-of-truth";
 
 const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";

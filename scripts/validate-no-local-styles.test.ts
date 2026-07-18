@@ -7,7 +7,7 @@ describe("collectLocalStyleViolationsForContent", () => {
   test("flags local <style> blocks in vue files", () => {
     const violations = collectLocalStyleViolationsForContent(
       CONSUMER_PATH,
-      '<template><div /></template>\n<style scoped>\n.box { color: red; }\n</style>',
+      "<template><div /></template>\n<style scoped>\n.box { color: red; }\n</style>",
     );
     expect(violations.some((v) => v.message.includes("<style>"))).toBe(true);
   });
@@ -15,7 +15,7 @@ describe("collectLocalStyleViolationsForContent", () => {
   test("passes vue files with only templates", () => {
     const violations = collectLocalStyleViolationsForContent(
       CONSUMER_PATH,
-      '<template><div /></template>',
+      "<template><div /></template>",
     );
     expect(violations).toHaveLength(0);
   });
@@ -23,7 +23,7 @@ describe("collectLocalStyleViolationsForContent", () => {
   test("softening regression: flags <style> even without scoped attribute", () => {
     const violations = collectLocalStyleViolationsForContent(
       CONSUMER_PATH,
-      '<template><div /></template>\n<style>\n.box { color: red; }\n</style>',
+      "<template><div /></template>\n<style>\n.box { color: red; }\n</style>",
     );
     expect(violations.length).toBeGreaterThan(0);
   });

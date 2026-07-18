@@ -6,7 +6,7 @@ const TS_PATH = "packages/server/src/routes/example.ts";
 
 describe("collectMonolithViolationsForContent", () => {
   test("flags a vue file exceeding 350 lines", () => {
-    const content = "<template>\n" + "  <div />\n".repeat(400) + "</template>";
+    const content = `<template>\n${"  <div />\n".repeat(400)}</template>`;
     const violations = collectMonolithViolationsForContent(COMPONENT_PATH, content);
     expect(violations.some((v) => v.message.includes("File exceeds"))).toBe(true);
   });
@@ -18,7 +18,11 @@ describe("collectMonolithViolationsForContent", () => {
   });
 
   test("flags a function body exceeding 80 lines", () => {
-    const lines = ["function long() {", ...Array.from({ length: 90 }, (_, i) => `  const v${i} = ${i};`), "}"];
+    const lines = [
+      "function long() {",
+      ...Array.from({ length: 90 }, (_, i) => `  const v${i} = ${i};`),
+      "}",
+    ];
     const violations = collectMonolithViolationsForContent(TS_PATH, lines.join("\n"));
     expect(violations.some((v) => v.message.includes("Function body"))).toBe(true);
   });
@@ -30,7 +34,7 @@ describe("collectMonolithViolationsForContent", () => {
   });
 
   test("softening regression: does not skip vue monoliths", () => {
-    const content = "<template>\n" + "  <div />\n".repeat(500) + "</template>";
+    const content = `<template>\n${"  <div />\n".repeat(500)}</template>`;
     const violations = collectMonolithViolationsForContent(COMPONENT_PATH, content);
     expect(violations.length).toBeGreaterThan(0);
   });

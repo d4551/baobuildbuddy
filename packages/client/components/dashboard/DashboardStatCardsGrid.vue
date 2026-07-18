@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { DashboardStatCardViewModel } from "./dashboard-page-contracts";
 import {
   CARD_BODY_COMFORTABLE_CLASS,
   FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CLASS,
   ICON_SIZE_CHEVRON_CLASS,
+  ICON_SIZE_CLASS,
   STAT_CARD_CTA_ROW_CLASS,
   STAT_CARD_HEADER_ROW_CLASS,
   STAT_CARD_ICON_BADGE_CLASS,
@@ -13,6 +12,7 @@ import {
   STAT_CARD_VALUE_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
+import type { DashboardStatCardViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
   statCards: readonly DashboardStatCardViewModel[];

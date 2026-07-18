@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
+import type { Static } from "typebox";
 export type JobListQuery = {
     q?: string;
     location?: string;

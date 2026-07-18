@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const open = defineModel<boolean>("open", { default: false });
 const form = defineModel<CoverLetterGenerateForm>("form", { required: true });

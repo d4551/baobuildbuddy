@@ -37,8 +37,7 @@ const collectSourceFiles = async (): Promise<string[]> => {
             hasAllowedExtension(normalizedPath) &&
             !shouldIgnorePath(normalizedPath) &&
             !normalizedPath.includes(".test.") &&
-            !normalizedPath.includes(".spec.") &&
-            !normalizedPath.includes("tests/"),
+            !normalizedPath.includes(".spec."),
         );
     }),
   );

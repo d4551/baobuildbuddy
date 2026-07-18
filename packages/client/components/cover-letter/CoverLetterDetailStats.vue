@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+
 defineProps<{
   contentCharacterCount: number;
   contentSectionCount: number;

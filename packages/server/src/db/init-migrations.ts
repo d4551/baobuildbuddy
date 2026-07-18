@@ -1,5 +1,4 @@
 import type { Database } from "bun:sqlite";
-import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
 import {
   AUTOMATION_RUNS_REQUIRED_COLUMNS,
   AUTOMATION_RUNS_TABLE_NAME,
@@ -10,6 +9,7 @@ import {
   STUDIOS_REQUIRED_COLUMNS,
   STUDIOS_TABLE_NAME,
 } from "./init-constants";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);

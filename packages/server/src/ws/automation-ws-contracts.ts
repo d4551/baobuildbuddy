@@ -1,6 +1,6 @@
-import type { Static } from "typebox";
 import { SCHEMA_MAX_LENGTH_RUN_ID } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const automationWebSocketBodySchema = t.Object({
   type: t.Union([t.Literal("subscribe"), t.Literal("unsubscribe")]),

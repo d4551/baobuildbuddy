@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -186,7 +187,7 @@ function backToTarget() {
     />
 
     <progress
-      class="progress progress-primary mb-8" :class="[FLUID_WIDTH_CLASS]"
+      class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mb8]"
       :value="progressValue"
       max="100"
       :aria-label="t('resumeBuildPage.progressAria')"

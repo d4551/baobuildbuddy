@@ -7,6 +7,7 @@ const catalog = {
     tagline: "ゲーム開発向けAIキャリアアシスタント",
   },
   common: {
+    loading: "読み込み中",
     localeNames: {
       enUS: "英語",
       esES: "スペイン語",

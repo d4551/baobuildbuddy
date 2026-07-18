@@ -1,9 +1,12 @@
 import type { ResumeData } from "@bao/shared/types/resume";
 import { PDFDocument } from "pdf-lib";
-import { createResumeContext, resolveResumePdfTemplate } from "./export-service-resume-layout";
-import { renderResumeEducation, renderResumeSkills } from "./export-service-resume-profile";
 import { renderResumeHeader, renderResumeSummary } from "./export-service-resume-header";
-import { renderResumeGamingExperience } from "./export-service-resume-profile";
+import { createResumeContext, resolveResumePdfTemplate } from "./export-service-resume-layout";
+import {
+  renderResumeEducation,
+  renderResumeGamingExperience,
+  renderResumeSkills,
+} from "./export-service-resume-profile";
 import { renderResumeExperience, renderResumeProjects } from "./export-service-resume-work";
 
 export async function exportResumePdf(

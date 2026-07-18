@@ -10,37 +10,18 @@ export declare const exportResumeAsset: (resumeId: string, body: ResumeExportBod
     details: string;
 }>;
 export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhanceBody, set: ResumeRouteSetState) => Promise<{
-    details?: undefined;
     error: string;
-    resume?: undefined;
-    suggestions?: undefined;
-    section?: undefined;
-} | {
-    error: string;
-    details: string;
     resume?: undefined;
     suggestions?: undefined;
     section?: undefined;
 } | {
     error?: undefined;
-    details?: undefined;
     resume: ResumeData;
     suggestions: import("@bao/shared/utils/json").JsonArray;
     section: string;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{
-    details?: undefined;
     error: string;
-    resumeId?: undefined;
-    jobId?: undefined;
-    score?: undefined;
-    strengths?: undefined;
-    improvements?: undefined;
-    keywords?: undefined;
-    analysis?: undefined;
-} | {
-    error: string;
-    details: string;
     resumeId?: undefined;
     jobId?: undefined;
     score?: undefined;
@@ -50,7 +31,6 @@ export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBo
     analysis?: undefined;
 } | {
     error?: undefined;
-    details?: undefined;
     resumeId: string;
     jobId: string;
     score: number;

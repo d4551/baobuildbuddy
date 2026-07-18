@@ -1,6 +1,6 @@
 import type { AIProviderType, AIResponse } from "@bao/shared/types/ai";
-import type { AIProvider } from "./provider-interface";
 import { buildDeterministicContent } from "./ai-deterministic-provider-content";
+import type { AIProvider } from "./provider-interface";
 
 export const TEST_AI_PROVIDER_NAME: AIProviderType = "local";
 export const TEST_AI_MODEL_NAME = "deterministic-test-model";

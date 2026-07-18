@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -23,7 +28,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" aria-labelledby="interview-session-context-title">
+  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-context-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="space-y-1">
         <h2 id="interview-session-context-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">

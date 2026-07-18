@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -8,6 +7,13 @@ import {
 } from "~/constants/dashboard-copy";
 import { DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
 import { getDashboardActivityPresentation } from "~/constants/dashboard-pipeline";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
@@ -24,7 +30,7 @@ const { t } = useI18n();
     <div v-if="dailyChallenge" class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
         <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
-        <div class="card bg-base-100">
+        <div :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>

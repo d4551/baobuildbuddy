@@ -52,6 +52,14 @@ const bannedVocabularyPattern =
 // Dead CTA: <button> with text but no @click, :to, type="submit", form=.
 const deadCtaButtonPattern = /<button\b[^>]*>([^<]+)<\/button>/gu;
 
+// Hoisted: any actionable handler on a button tag (click / modifier-suffixed / link / submit / form).
+const BUTTON_HANDLER_PATTERN =
+  /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u;
+// Hoisted: button `disabled` attribute detection.
+const BUTTON_DISABLED_PATTERN = /\bdisabled\b/u;
+// Hoisted: comment-line and block-comment scanner for banned vocabulary passes.
+const COMMENT_SCAN_PATTERN = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu;
+
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
   if (templateStart < 0) return "";
@@ -100,11 +108,8 @@ const collectInertHandlerViolations = (
     const buttonTag = match[0] ?? "";
     const text = (match[1] ?? "").trim();
     if (text.length === 0) continue;
-    const hasHandler =
-      /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u.test(
-        buttonTag,
-      );
-    const isDisabled = /\bdisabled\b/u.test(buttonTag);
+    const hasHandler = BUTTON_HANDLER_PATTERN.test(buttonTag);
+    const isDisabled = BUTTON_DISABLED_PATTERN.test(buttonTag);
     if (!hasHandler && !isDisabled) {
       violations.push({
         filePath,
@@ -146,10 +151,9 @@ const collectBannedVocabularyViolations = (
   // `placeholder="..."` attribute is a standard form input contract, not
   // the banned "placeholder" debt-concept term.
   const script = extractScriptBlocks(content);
-  const commentPattern = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu;
   const comments: string[] = [];
-  commentPattern.lastIndex = 0;
-  for (const match of content.matchAll(commentPattern)) {
+  COMMENT_SCAN_PATTERN.lastIndex = 0;
+  for (const match of content.matchAll(COMMENT_SCAN_PATTERN)) {
     comments.push(match[0] ?? "");
   }
   const combined = `${script}\n${comments.join("\n")}`;

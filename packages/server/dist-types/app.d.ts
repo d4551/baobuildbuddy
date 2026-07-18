@@ -18,7 +18,18 @@ export declare const app: Elysia<"/api", "local", {
         }>;
     };
     error: [];
-}, import("elysia/types").DefaultMetadata, {
+}, import("elysia/types").DefaultMetadata & {
+    schema: {};
+    schemas: {};
+    macro: {};
+    macroFn: {};
+    parser: {};
+    response: {
+        401: {
+            readonly error: string;
+        };
+    };
+}, {
     api: {};
 } & {
     api: {

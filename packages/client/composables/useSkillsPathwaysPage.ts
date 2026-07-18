@@ -2,16 +2,17 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { computed, type Ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { createSkillsPathwaysPresentation } from "~/composables/skills-pathways-page-presentation";
 import {
   readApiData,
-  toGamificationProgress,
-  toSkillsPathwaysBootstrapData,
   type SkillsPathwaysBootstrapData,
   type SkillsPathwaysGamificationProgress,
+  toGamificationProgress,
+  toSkillsPathwaysBootstrapData,
 } from "~/composables/skills-pathways-page-data";
+import { createSkillsPathwaysPresentation } from "~/composables/skills-pathways-page-presentation";
 import { SKILLS_READINESS_MAX, SKILLS_READINESS_MIN } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
+
 const useSkillsPathwaysBootstrap = (
   api: ReturnType<typeof useApi>,
   t: ReturnType<typeof useI18n>["t"],

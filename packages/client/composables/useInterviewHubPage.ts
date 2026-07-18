@@ -1,6 +1,6 @@
-import { useI18n } from "vue-i18n";
 import { INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared/constants/interview";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
 import { useInterviewHubActions } from "~/composables/interview-hub-actions";
 import {
   INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID,

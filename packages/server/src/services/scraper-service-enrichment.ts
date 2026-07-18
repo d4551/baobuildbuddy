@@ -3,8 +3,7 @@ import {
   AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
 } from "@bao/shared/constants/ai-generation";
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
-import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
-import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
+import type { ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { safeParseJson } from "@bao/shared/utils/json";

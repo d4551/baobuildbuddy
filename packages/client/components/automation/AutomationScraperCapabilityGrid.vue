@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
+import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,

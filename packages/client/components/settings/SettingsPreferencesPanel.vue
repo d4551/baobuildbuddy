@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
-import type { SaveState } from "./save-state";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+import type { SaveState } from "./save-state";
 
 defineProps<{
   theme: string;
@@ -26,7 +33,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <SettingsPanelHeader :title="t('settings.preferences.title')" />
 

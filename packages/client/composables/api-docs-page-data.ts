@@ -1,15 +1,15 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { computed } from "vue";
-import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
 import {
   API_DOCS_ASYNC_DATA_KEY,
   type ApiDocsTranslate,
   UNKNOWN_TAG_LABEL_KEY,
 } from "~/composables/api-docs-page-contracts";
-import { resolveApiEndpoint } from "~/utils/endpoints";
+import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
 import { buildApiEndpointGroups } from "~/utils/api-docs-endpoints";
 import { readOpenApiSpec } from "~/utils/api-docs-openapi";
 import { toApiDocsUiStateFromStatusCode, toErrorStatusCode } from "~/utils/api-docs-status";
+import { resolveApiEndpoint } from "~/utils/endpoints";
 
 interface ApiDocsPageDataOptions {
   readonly t: ApiDocsTranslate;

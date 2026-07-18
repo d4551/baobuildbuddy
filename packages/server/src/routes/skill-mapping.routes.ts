@@ -1,4 +1,3 @@
-import { Elysia, type status } from "elysia";
 import {
   API_ERROR_SKILL_MAPPING_ALREADY_DELETED,
   API_ERROR_SKILL_MAPPING_NOT_FOUND,
@@ -12,6 +11,7 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
+import { Elysia, type status } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
@@ -24,12 +24,12 @@ import {
   skillMappingCreateResponses,
   skillMappingDeleteResponses,
   skillMappingIdParamsSchema,
-  skillMappingUpdateResponses,
-  skillMappingsQuerySchema,
   skillMappingsListResponses,
+  skillMappingsQuerySchema,
   skillMappingUpdateBodySchema,
-  skillReadinessQuerySchema,
+  skillMappingUpdateResponses,
   skillPathwaysResponses,
+  skillReadinessQuerySchema,
   skillReadinessResponses,
 } from "./skill-mapping-route-contracts";
 import {

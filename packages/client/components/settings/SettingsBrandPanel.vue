@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
 import BrandPreviewCard from "./brand/BrandPreviewCard.vue";
@@ -12,6 +16,7 @@ import BrandThemeSwatches from "./brand/BrandThemeSwatches.vue";
 import BrandThemesTab from "./brand/BrandThemesTab.vue";
 import BrandTypographyTab from "./brand/BrandTypographyTab.vue";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
 
@@ -112,7 +117,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"

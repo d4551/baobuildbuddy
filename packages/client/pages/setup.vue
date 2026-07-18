@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -50,9 +55,9 @@ useSeoMeta({
     width-token="shell"
     spacing-token="compact"
     labelled-by="setup-title"
-    extra-class="w-full"
+    :extra-class="FLUID_WIDTH_CLASS"
   >
-    <h1 id="setup-title" class="font-bold text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2]">
+    <h1 id="setup-title" class="text-primary" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2]">
       {{ t("setup.title", { brand: resolvedBrand.name }) }}
     </h1>
 

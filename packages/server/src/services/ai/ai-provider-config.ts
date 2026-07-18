@@ -126,7 +126,7 @@ export const createProvider = (config: AIProviderConfig): AIProvider | null => {
 };
 
 export const createDeterministicServiceState = () => ({
-  fallbackOrder: [TEST_AI_PROVIDER_NAME] as const satisfies AIProviderType[],
+  providerFailoverOrder: [TEST_AI_PROVIDER_NAME] as const satisfies AIProviderType[],
   preferredProvider: TEST_AI_PROVIDER_NAME,
   providers: new Map<AIProviderType, AIProvider>([
     [TEST_AI_PROVIDER_NAME, new DeterministicTestProvider()],

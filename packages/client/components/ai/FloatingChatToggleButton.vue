@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+
 defineProps<{
   chatPanelId: string;
   isOpen: boolean;

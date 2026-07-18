@@ -1,6 +1,6 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AutomationVisualIconName } from "~/components/automation/automation-visuals";
-import type { FlowActionId } from "~/constants/flow-engine";
+import type { FlowActionId } from "~/constants/flow-engine-types";
 
 export type AutomationHubUiState = "idle" | "loading" | "error" | "success";
 export type AutomationHubCardId = "scraper" | "jobApply" | "emailResponse" | "runHistory";

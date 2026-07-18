@@ -2,10 +2,10 @@ import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
 import type { AppLanguageCode } from "@bao/shared/constants/settings";
 import type { AIProviderType, AIRouting, AIRoutingPurpose } from "@bao/shared/types/ai";
 import type { useI18n } from "vue-i18n";
-import { resolveLocaleLabel } from "~/constants/i18n";
 import type { SaveState } from "~/components/settings/save-state";
-import { getErrorMessage } from "~/utils/errors";
+import { resolveLocaleLabel } from "~/constants/i18n";
 import { resolveProviderModelOptions } from "~/utils/ai-control-plane";
+import { getErrorMessage } from "~/utils/errors";
 import { settlePromise } from "../async-flow";
 
 export type TranslateFn = ReturnType<typeof useI18n>["t"];

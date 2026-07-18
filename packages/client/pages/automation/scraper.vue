@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -9,6 +8,7 @@ import {
   type AutomationScraperSectionId,
   isAutomationScraperSectionId,
 } from "~/components/automation/scraper-sections";
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 definePageMeta({

@@ -1,6 +1,6 @@
+import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ref } from "vue";
-import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 
 const nuxtStateStore = new Map<string, ReturnType<typeof ref>>();
 const mockApi = {

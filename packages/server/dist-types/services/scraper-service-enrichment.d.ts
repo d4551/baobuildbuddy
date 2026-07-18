@@ -1,6 +1,5 @@
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
-import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
-import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
+import type { ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { AIService } from "./ai/ai-service";
 import type { ScrapeEnrichmentAccumulator, ScrapeEnrichmentAttempt } from "./scraper-service-contracts";

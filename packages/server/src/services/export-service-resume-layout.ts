@@ -12,9 +12,9 @@ import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import {
   addA4Page,
-  toPdfColor,
   type ResumeRenderContext,
   type ResumeTemplateDefinition,
+  toPdfColor,
   type WrappedTextOptions,
 } from "./export-service-contracts";
 

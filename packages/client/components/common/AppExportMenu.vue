@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 
 type ExportFormat = "pdf" | "docx";
 

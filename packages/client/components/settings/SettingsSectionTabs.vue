@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { TRUNCATE_FLEX_CHILD_CLASS } from "~/constants/layout";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import WorkspaceSectionNavigator from "~/components/ui/WorkspaceSectionNavigator.vue";
+import { TRUNCATE_FLEX_CHILD_CLASS } from "~/constants/layout";
 import { SETTINGS_SECTION_ITEMS, type SettingsSectionId } from "./settings-sections";
 
 const activeSection = defineModel<SettingsSectionId>("activeSection", {

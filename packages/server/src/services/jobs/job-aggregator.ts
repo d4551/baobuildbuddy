@@ -11,8 +11,8 @@ import {
 import type { Job, JobFilters, JobSearchResult } from "@bao/shared/types/jobs";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
-import { jobs, savedJobs } from "../../db/schema/jobs";
 import type { applications } from "../../db/schema/jobs";
+import { jobs, savedJobs } from "../../db/schema/jobs";
 import { createServerLogger } from "../../utils/logger";
 import { deduplicateJobs } from "./deduplication";
 import {

@@ -1,10 +1,10 @@
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import {
+  type CareerPathway,
+  type ReadinessAssessment,
   SKILL_READINESS_FEEDBACK_IDS,
   SKILL_READINESS_IMPROVEMENT_IDS,
   SKILL_READINESS_NEXT_STEP_IDS,
-  type CareerPathway,
-  type ReadinessAssessment,
   type SkillMapping,
   type SkillReadinessFeedbackId,
   type SkillReadinessImprovementId,

@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 type BrandPreviewTheme = "light" | "dark";
 

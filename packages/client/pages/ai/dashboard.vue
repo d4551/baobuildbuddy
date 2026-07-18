@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -74,11 +81,11 @@ const page = reactive(useAIDashboardPage());
         role="alert"
         class="alert alert-warning alert-vertical sm:alert-horizontal"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+        <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.md, 'shrink-0', 'stroke-current']" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M12 9v2m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
         </svg>
         <div>
-          <h3 class="font-bold">{{ t("aiDashboard.alerts.noProvidersTitle") }}</h3>
+          <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("aiDashboard.alerts.noProvidersTitle") }}</h3>
           <p :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiDashboard.alerts.noProvidersDescription") }}</p>
         </div>
       </div>

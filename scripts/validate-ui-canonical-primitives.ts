@@ -49,6 +49,17 @@ const EMPTY_STATE_REFERENCE_PATTERN = /<EmptyState\b/u;
 const LOADING_SKELETON_REFERENCE_PATTERN = /<LoadingSkeleton\b/u;
 const BOOTSTRAP_ERROR_ALERT_REFERENCE_PATTERN = /<BootstrapErrorAlert\b/u;
 
+// Hoisted: UI state contract detection — used inside collectStatePrimitiveGapViolations.
+const UI_STATE_NAME_PATTERN = /\buiState\b/u;
+const LOADING_SKELETON_TAG_PATTERN = /<LoadingSkeleton\b/u;
+const BOOTSTRAP_ERROR_ALERT_TAG_PATTERN = /<BootstrapErrorAlert\b/u;
+// Hoisted: literal emptiness / loading / error signals in pages.
+const IS_EMPTY_LITERAL_PATTERN = /\bisEmpty\b/u;
+const LOADING_LITERAL_PATTERN = /['"]loading['"]/u;
+const ERROR_LITERAL_PATTERN = /['"]error['"]/u;
+// Hoisted: ARIA progressbar role detection on radial-progress tags.
+const PROGRESSBAR_ROLE_PATTERN = /\brole\s*=\s*["']progressbar["']/u;
+
 const collectCardGlassLiteralViolations = (
   filePath: string,
   content: string,
@@ -113,7 +124,7 @@ const collectTablePrimitiveViolations = (
   }
   RADIAL_PROGRESS_LITERAL_PATTERN.lastIndex = 0;
   for (const match of content.matchAll(RADIAL_PROGRESS_LITERAL_PATTERN)) {
-    if (!/\brole\s*=\s*["']progressbar["']/u.test(match[0])) {
+    if (!PROGRESSBAR_ROLE_PATTERN.test(match[0])) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
@@ -131,26 +142,29 @@ const collectStatePrimitiveGapViolations = (
   if (isSsotPrimitive(filePath)) return [];
   if (!filePath.startsWith("packages/client/pages/")) return [];
   const hasUiStateContract =
-    /\buiState\b/u.test(content) ||
-    /<LoadingSkeleton\b/u.test(content) ||
-    /<BootstrapErrorAlert\b/u.test(content);
+    UI_STATE_NAME_PATTERN.test(content) ||
+    LOADING_SKELETON_TAG_PATTERN.test(content) ||
+    BOOTSTRAP_ERROR_ALERT_TAG_PATTERN.test(content);
   if (!hasUiStateContract) return [];
   const violations: ValidationViolation[] = [];
-  if (!EMPTY_STATE_REFERENCE_PATTERN.test(content) && /\bisEmpty\b/u.test(content)) {
+  if (!EMPTY_STATE_REFERENCE_PATTERN.test(content) && IS_EMPTY_LITERAL_PATTERN.test(content)) {
     violations.push({
       filePath,
       line: 1,
       message: `Page models emptiness (isEmpty) but does not consume the EmptyState primitive. Pages must not hand-roll empty states.`,
     });
   }
-  if (!LOADING_SKELETON_REFERENCE_PATTERN.test(content) && /['"]loading['"]/u.test(content)) {
+  if (!LOADING_SKELETON_REFERENCE_PATTERN.test(content) && LOADING_LITERAL_PATTERN.test(content)) {
     violations.push({
       filePath,
       line: 1,
       message: `Page models a loading state but does not consume the LoadingSkeleton primitive. Pages must not hand-roll loading states.`,
     });
   }
-  if (!BOOTSTRAP_ERROR_ALERT_REFERENCE_PATTERN.test(content) && /['"]error['"]/u.test(content)) {
+  if (
+    !BOOTSTRAP_ERROR_ALERT_REFERENCE_PATTERN.test(content) &&
+    ERROR_LITERAL_PATTERN.test(content)
+  ) {
     violations.push({
       filePath,
       line: 1,

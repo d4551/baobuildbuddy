@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -7,6 +6,7 @@ import {
 } from "@bao/shared/constants/http";
 import { RESUME_TEMPLATE_OPTIONS } from "@bao/shared/constants/resume";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 const resumeTemplateBodySchema = t.Union(
   RESUME_TEMPLATE_OPTIONS.map((template) => t.Literal(template)),

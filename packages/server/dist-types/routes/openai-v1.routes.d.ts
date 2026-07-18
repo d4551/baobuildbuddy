@@ -65,6 +65,13 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
                                 code: string | null;
                             };
                         };
+                        401: {
+                            readonly error: {
+                                readonly message: string;
+                                readonly type: "invalid_request_error";
+                                readonly code: string;
+                            };
+                        };
                         404: {
                             id: string;
                             object: "model";
@@ -87,7 +94,15 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
     derive: {};
     schema: {};
     schemas: {};
-    response: {};
+    response: {
+        401: {
+            readonly error: {
+                readonly message: string;
+                readonly type: "invalid_request_error";
+                readonly code: string;
+            };
+        };
+    };
     error: [];
 }, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {

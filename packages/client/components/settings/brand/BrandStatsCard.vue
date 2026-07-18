@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import { SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   brandDraft: BrandSettings;

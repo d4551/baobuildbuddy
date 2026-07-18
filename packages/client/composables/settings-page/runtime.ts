@@ -5,7 +5,7 @@ import {
 } from "@bao/shared/constants/ai-provider";
 import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
 import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
-import { DEFAULT_APP_LANGUAGE, type AppLanguageCode } from "@bao/shared/constants/settings";
+import { type AppLanguageCode, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import { brandSettingsSchema } from "@bao/shared/schemas/settings.schema";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
@@ -30,10 +30,10 @@ import { useSettings } from "../useSettings";
 import { useTheme } from "../useTheme";
 import { useUser } from "../useUser";
 import {
-  assignAiRoutingDraft,
-  createDefaultAiRoutingDraft,
   type AIRoutingDraft,
+  assignAiRoutingDraft,
   type BrandEditorPanel,
+  createDefaultAiRoutingDraft,
   type ProviderTestState,
 } from "./shared";
 

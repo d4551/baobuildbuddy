@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
@@ -6,6 +5,7 @@ import {
 } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const awardXpBodySchema = t.Object({

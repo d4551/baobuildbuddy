@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });

@@ -1,4 +1,5 @@
 import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
+import { Elysia } from "elysia";
 type AuthFailure = {
     error: string;
     status: typeof HTTP_STATUS_UNAUTHORIZED;
@@ -6,9 +7,9 @@ type AuthFailure = {
 /**
  * Validates Bearer API key against the persisted profile key.
  *
- * Returns a failure envelope when validation fails; returns `null`
- * when the request is authenticated, auth is disabled, or no profile
- * key has been configured yet.
+ * Default deny: missing/empty/mismatched key and missing configured
+ * profile key all return unauthorized. Returns `null` only when the
+ * request is authenticated or auth is explicitly disabled.
  *
  * @param request Incoming Elysia request (HTTP or WebSocket upgrade).
  * @returns Unauthorized envelope or null on success.
@@ -16,14 +17,28 @@ type AuthFailure = {
 export declare function authenticateApiKey(request: Request): Promise<AuthFailure | null>;
 /**
  * Elysia plugin that validates Bearer API key for protected HTTP routes.
- * Skipped only when auth is explicitly disabled via the config module.
+ * `.as("global")` lifts the hook so sibling route plugins registered after
+ * this guard inherit default-deny auth. Routes mounted before the guard
+ * (auth bootstrap) remain public. Skipped only when auth is explicitly
+ * disabled via config.
  */
-export declare const authGuard: import("elysia/types").LocalHookReturn<"", "local", import("elysia/types").DefaultSingleton, {
+export declare const authGuard: Elysia<"", "local", {
+    decorator: {};
+    store: {};
+    derive: {};
+}, {
     typebox: {};
     error: [];
-}, import("elysia/types").DefaultMetadata, {}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, {
-    401: {
-        readonly error: string;
+}, {
+    schema: {};
+    schemas: {};
+    macro: {};
+    macroFn: {};
+    parser: {};
+    response: {
+        401: {
+            readonly error: string;
+        };
     };
-}>;
+}, {}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral>;
 export {};

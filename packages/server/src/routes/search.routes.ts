@@ -4,9 +4,9 @@ import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
 import {
   type SearchType,
+  searchAllResponses,
   searchAutocompleteQuery,
   searchAutocompleteResponses,
-  searchAllResponses,
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";

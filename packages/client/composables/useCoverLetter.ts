@@ -9,8 +9,8 @@ import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
-  downloadApiFile,
   type ClientApiRequestRuntime,
+  downloadApiFile,
   requestApi,
   useClientApiRequestRuntime,
 } from "./api-request";

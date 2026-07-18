@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
@@ -12,6 +11,12 @@ import {
   GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_LEVEL_ICON,
 } from "~/constants/gamification";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   gamification: UserGamificationData;

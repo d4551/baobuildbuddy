@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeFormEducation } from "@bao/shared/utils/resume-transform";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormEducation[];
@@ -70,7 +75,7 @@ function removeEducation(index: number): void {
       <div
         v-for="(education, index) in localValue"
         :key="`${education.school}-${education.degree}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
           <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">

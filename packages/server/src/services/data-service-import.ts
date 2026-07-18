@@ -1,11 +1,11 @@
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { sqlite } from "../db/client";
-import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import type { BaoExportData, ImportResult } from "./data-service-contracts";
+import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import {
-  importCoverLettersSection,
   importChatHistorySection,
+  importCoverLettersSection,
   importInterviewSessionsSection,
   importPortfolioProjectsSection,
   importResumesSection,

@@ -134,7 +134,6 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/automation/AutomationScraperOverviewCard.vue",
   "packages/client/components/automation/AutomationScraperJobsCard.vue",
   "packages/client/components/common/AppExportMenu.vue",
-  "packages/client/layouts/auth-shell.vue",
   "packages/client/layouts/default.vue",
   "packages/client/error.vue",
 ]);

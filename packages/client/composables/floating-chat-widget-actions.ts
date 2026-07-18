@@ -1,8 +1,8 @@
 import type { Ref } from "vue";
 import type { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 import { settlePromise } from "./async-flow";
 import type { useSpeechModelProfiles } from "./useSpeechModelProfiles";
-import { getErrorMessage } from "~/utils/errors";
 
 type FocusableInputRef = {
   value: { focus: () => void } | null;

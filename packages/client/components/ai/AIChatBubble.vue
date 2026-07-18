@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import {
-  FLUID_WIDTH_CLASS,
-  ICON_SIZE_CLASS,
-  MARGIN_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
 import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
@@ -15,6 +8,13 @@ import {
   CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
   type ChatDensity,
 } from "~/constants/chat";
+import {
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(

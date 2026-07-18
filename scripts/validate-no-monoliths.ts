@@ -29,7 +29,7 @@ const isIgnoredFile = (filePath: string): boolean =>
 const functionPattern =
   /(?:^|\n)(?:export\s+)?(?:async\s+)?function\s+[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;
 const methodPattern =
-  /(?:^|\n)\s*(?:private|protected|public)?\s*(?:static\s+)?(?:async\s+)?[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;
+  /(?:^|\n)\s*(?:private|protected|public)?\s*(?:static\s+)?(?:async\s+)?(?!(?:for|while|if|switch|catch|do|return|class|interface|type|enum|namespace)\b)[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;
 const arrowPattern =
   /(?:^|\n)(?:const|let|var)\s+[A-Za-z0-9_]+\s*=\s*(?:async\s*)?\(([^)]*)\)\s*(?::[^{=\n]+)?=>\s*\{/gu;
 

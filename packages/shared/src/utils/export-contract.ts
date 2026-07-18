@@ -1,6 +1,6 @@
 import { EXPORT_DATE_LOCALE } from "../constants/export-layout";
-import { isResumeTemplate, RESUME_TEMPLATE_DEFAULT } from "../constants/resume";
 import type { ResumeTemplate } from "../constants/resume";
+import { isResumeTemplate, RESUME_TEMPLATE_DEFAULT } from "../constants/resume";
 import { isRecord } from "./type-guards";
 
 const EXPORT_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {

@@ -8,7 +8,7 @@ import {
 /**
  * Glass material system enforcement (design.md §3, §5).
  *
- * The .bao SSOT defines canonical glass surfaces in main.css:
+ * The layout/CSS SSOT defines canonical glass surfaces in main.css:
  *   .glass / .card.card-glass       — standard material
  *   .glass-subtle                   — subtle (sidebar, navbar)
  *   .glass-strong / .card.card-glass-strong — elevated (popovers)
@@ -68,6 +68,12 @@ const bespokePanelSurfacePattern =
 const interactiveCardWithoutMixinPattern =
   /<(?:div|button|article|li)[^>]*\bclass\s*=\s*["'][^"']*\bcard\b[^"']*(?:glass|card-glass)[^"']*["'][^>]*(?:@click|role\s*=\s*["']button["'])[^>]*>/gu;
 
+// Hoisted: glass token presence on a matched tag (word-boundary check covers
+// glass / glass-... compound class names).
+const GLASS_TOKEN_TAIL_PATTERN = /glass(?:\s|$|-)/u;
+// Hoisted: glass-interactive mixin presence on a matched tag.
+const GLASS_INTERACTIVE_MIXIN_PATTERN = /\bglass-interactive\b/u;
+
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
   if (templateStart < 0) return "";
@@ -87,7 +93,7 @@ export const collectGlassMaterialViolationsForContent = (
 
   cardSurfaceWithoutGlassPattern.lastIndex = 0;
   for (const match of template.matchAll(cardSurfaceWithoutGlassPattern)) {
-    if (/glass(?:\s|$|-)/u.test(match[0])) continue;
+    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
@@ -97,7 +103,7 @@ export const collectGlassMaterialViolationsForContent = (
 
   bespokePanelSurfacePattern.lastIndex = 0;
   for (const match of template.matchAll(bespokePanelSurfacePattern)) {
-    if (/glass(?:\s|$|-)/u.test(match[0])) continue;
+    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
@@ -107,7 +113,7 @@ export const collectGlassMaterialViolationsForContent = (
 
   interactiveCardWithoutMixinPattern.lastIndex = 0;
   for (const match of template.matchAll(interactiveCardWithoutMixinPattern)) {
-    if (/\bglass-interactive\b/u.test(match[0])) continue;
+    if (GLASS_INTERACTIVE_MIXIN_PATTERN.test(match[0])) continue;
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),

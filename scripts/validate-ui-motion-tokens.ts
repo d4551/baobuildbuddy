@@ -6,7 +6,7 @@ import {
 } from "./utils/validation-helpers";
 
 /**
- * Motion must come from the .bao SSOT token system in main.css:
+ * Motion must come from the SSOT token system in main.css:
  *   --motion-fast / --motion-standard / --motion-slow
  *   --ease-response / --ease-enter / --ease-exit
  *

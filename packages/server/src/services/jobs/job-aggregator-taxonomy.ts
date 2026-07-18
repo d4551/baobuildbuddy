@@ -16,8 +16,8 @@ import type {
   JobTaxonomyKeywordCategory,
   JobTaxonomyKeywordEntry,
 } from "@bao/shared/types/jobs-taxonomy";
-import type { RawJob } from "./providers/provider-interface";
 import { getJobTaxonomy } from "./job-taxonomy-service";
+import type { RawJob } from "./providers/provider-interface";
 
 const isOneOf = <T extends string>(values: readonly T[], value: unknown): value is T => {
   if (typeof value !== "string") {

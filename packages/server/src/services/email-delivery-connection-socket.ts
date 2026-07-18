@@ -1,8 +1,4 @@
 import { settle } from "@bao/shared/utils/promise";
-import {
-  type EmailTransportRuntimeConfig,
-  SmtpConnectionClosedError,
-} from "./email-delivery-contracts";
 import type { PendingDrainReader, SmtpConnectionState } from "./email-delivery-connection-state";
 import {
   assertExpectedCode,
@@ -13,6 +9,10 @@ import {
   rejectAllPending,
   resolvePendingDrain,
 } from "./email-delivery-connection-state";
+import {
+  type EmailTransportRuntimeConfig,
+  SmtpConnectionClosedError,
+} from "./email-delivery-contracts";
 
 const createSocketLifecycle = (state: SmtpConnectionState) => ({
   binaryType: "uint8array" as const,

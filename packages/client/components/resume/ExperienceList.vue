@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormExperience[];
@@ -71,7 +77,7 @@ function removeExperience(index: number): void {
       <div
         v-for="(experience, index) in localValue"
         :key="`${experience.company}-${experience.title}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
           <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">

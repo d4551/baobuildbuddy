@@ -3,10 +3,10 @@ import {
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
 } from "@bao/shared/constants/resume";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
-import type { Composer, ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
+import type { Composer, ComposerTranslation } from "vue-i18n";
 import {
   RESUME_TABS,
   type ResumeCompletionQuickAction,
@@ -14,8 +14,8 @@ import {
 } from "~/components/resume/resume-page-contracts";
 import {
   cloneDashboardStats,
-  hasNonEmptyGamingValue,
   type DashboardStatsView,
+  hasNonEmptyGamingValue,
 } from "~/composables/resume-page-bootstrap";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 

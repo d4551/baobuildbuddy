@@ -44,12 +44,6 @@ export const COVER_LETTER_CONTENT_PREVIEW_LENGTH = 150;
  */
 export const COVER_LETTER_LIST_PAGE_SIZE = 6;
 
-/** Default opening line when AI does not provide one. */
-export const COVER_LETTER_DEFAULT_OPENING = "Dear Hiring Manager,";
-
-/** Default closing line when AI does not provide one. */
-export const COVER_LETTER_DEFAULT_CLOSING = "Thank you for your consideration.";
-
 /** Default signature line for cover letter exports. */
 export const COVER_LETTER_DEFAULT_SIGNATURE = "Sincerely,";
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+
 const props = withDefaults(
   defineProps<{
     title?: string;

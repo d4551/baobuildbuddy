@@ -1,15 +1,15 @@
 import { DEFAULT_SPEECH_SETTINGS, SPEECH_PROVIDER_OPTIONS } from "@bao/shared/constants/settings";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
-import { asBoolean, asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { normalizeJobProviderSettings as normalizeSharedJobProviderSettings } from "@bao/shared/types/settings-normalization";
-import { asEnum } from "~/composables/api-normalizer-shared";
+import { asBoolean, asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import {
   COMPANY_BOARD_ATS_TYPES,
   COMPANY_BOARD_TEMPLATE_KEYS,
   GAMING_PORTAL_IDS,
   SPEECH_AUDIO_FORMATS,
 } from "~/composables/api-normalizer-settings-constants";
+import { asEnum } from "~/composables/api-normalizer-shared";
 
 const normalizeGreenhouseBoards = (
   value: unknown,

@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import type { ResumeData } from "@bao/shared/types/resume";
+import type { Static } from "typebox";
 export type ResumeRouteSetState = {
     status?: number | string;
 };

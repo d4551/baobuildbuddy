@@ -1,5 +1,6 @@
 import type { AppDataTheme } from "@bao/shared/constants/branding";
 import type { AppLanguageCode } from "@bao/shared/constants/settings";
+import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
 import type {
   Achievement,
   DailyChallenge,
@@ -9,14 +10,13 @@ import type { InterviewConfig } from "@bao/shared/types/interview";
 import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared/types/search";
-import type { UserProfile } from "@bao/shared/types/user";
-import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
 import type {
   AutomationSettings,
   BrandSettingsPatch,
   EmailTransportSettings,
   NotificationPreferences,
 } from "@bao/shared/types/settings-contracts";
+import type { UserProfile } from "@bao/shared/types/user";
 import type { ClientProviderTestResult } from "~/utils/ai-control-plane";
 
 type ApiError = unknown;

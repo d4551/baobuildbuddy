@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   pathways: readonly CareerPathway[];
@@ -24,7 +30,7 @@ const { t } = useI18n();
         <article
           v-for="pathway in pathways"
           :key="pathway.id"
-          class="card card-border bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

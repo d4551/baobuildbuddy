@@ -6,8 +6,6 @@ import type { Page } from "playwright";
 import { closeAutomationBrowser, launchAutomationBrowser } from "../runtime/browser";
 import { automationRuntimeConfig } from "../runtime/config";
 import type { ProtocolEmitter } from "../runtime/protocol";
-import type { JobApplyStrategy } from "./strategy-registry";
-import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import {
   addStep,
   buildOutputDirectory,
@@ -15,11 +13,13 @@ import {
   createArtifacts,
 } from "./runtime-artifacts";
 import {
-  type JobApplyExecutionState,
   JOB_APPLY_STEP_INDEX,
+  type JobApplyExecutionState,
   type StepRecord,
 } from "./runtime-contracts";
-import { resolveJobApplyStrategy, JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
+import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
+import type { JobApplyStrategy } from "./strategy-registry";
+import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
 
 const buildResult = (
   success: boolean,

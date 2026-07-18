@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import { RESUME_TEMPLATE_OPTIONS } from "@bao/shared/constants/resume";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
@@ -18,6 +17,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export type ResumeRouteSetState = {
   status?: number | string;

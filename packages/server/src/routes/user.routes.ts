@@ -1,9 +1,9 @@
-import { Elysia } from "elysia";
 import { API_ERROR_USER_PROFILE_NOT_FOUND } from "@bao/shared/constants/api-errors";
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 import { simpleRouteErrorResponses } from "./route-error-envelope";

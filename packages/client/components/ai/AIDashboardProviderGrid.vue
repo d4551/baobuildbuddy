@@ -2,7 +2,13 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { FLEX_GAP_TOKEN_CLASS, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,

@@ -3,8 +3,8 @@ import {
   API_ERROR_SCRAPE_STUDIOS_FAILED,
 } from "@bao/shared/constants/api-errors";
 import {
-  isAutomationJobScrapeTarget,
   type AutomationScrapeTarget,
+  isAutomationJobScrapeTarget,
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation-limits";
@@ -15,15 +15,15 @@ import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { scraperService } from "../scraper-service";
-import { markRunFailed } from "./automation-run-persistence";
-import { createRpaCapabilityAuditReport } from "./automation-scrape-audit";
-import { loadAutomationSettings } from "./automation-settings-support";
-import type { CreateProgressEvent } from "./automation-service-contracts";
 import {
   buildScrapeInput,
   normalizeScrapeTarget,
   resolveScrapeAction,
 } from "./automation-run-inputs";
+import { markRunFailed } from "./automation-run-persistence";
+import { createRpaCapabilityAuditReport } from "./automation-scrape-audit";
+import type { CreateProgressEvent } from "./automation-service-contracts";
+import { loadAutomationSettings } from "./automation-settings-support";
 
 const DEFAULT_PROGRESS = 0;
 

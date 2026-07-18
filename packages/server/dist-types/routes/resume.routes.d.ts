@@ -355,7 +355,6 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
     status: RouteStatus;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     error?: undefined;
-    details?: undefined;
     resumeId: string;
     jobId: string;
     score: number;

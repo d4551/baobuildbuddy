@@ -1,9 +1,9 @@
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import { AlignmentType, Paragraph, TextRun } from "docx";
 import {
-  type DocxTemplateConfig,
   DOCX_RESUME_FONT_ACCENT_PT,
   DOCX_RESUME_FONT_NAME_PT,
+  type DocxTemplateConfig,
   type ResumePersonalInfo,
 } from "./docx-export-contracts";
 

@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -96,9 +105,9 @@ function updateProjectForm(value: typeof projectForm): void {
           class="btn btn-outline"
           :aria-label="t('portfolioPage.actions.previewAria')"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <svg :class="ICON_SIZE_CLASS['4']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
           {{ t("portfolioPage.actions.previewButton") }}
         </NuxtLink>
@@ -134,8 +143,7 @@ function updateProjectForm(value: typeof projectForm): void {
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <section v-if="isPortfolioEmpty" class="card card-border bg-base-100">
-        <div class="card-body">
+      <div v-if="isPortfolioEmpty" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <EmptyState
             title-key="portfolioPage.emptyState.title"
             description-key="portfolioPage.emptyState.description"
@@ -148,10 +156,9 @@ function updateProjectForm(value: typeof projectForm): void {
               {{ t("portfolioPage.projects.addButton") }}
             </button>
           </div>
-        </div>
-      </section>
+      </div>
 
-      <section class="card card-border bg-base-100">
+      <section :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">

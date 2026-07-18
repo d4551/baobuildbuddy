@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { computed, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
 interface Question {
@@ -153,7 +160,7 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
+  <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body gap-0 p-0">
       <div class="border-b border-base-300 px-6 py-5">
         <div class="space-y-1">

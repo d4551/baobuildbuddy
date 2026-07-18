@@ -1,4 +1,3 @@
-import { Elysia, type status } from "elysia";
 import {
   API_ERROR_AUTOMATION_RUN_ID_REQUIRED,
   API_ERROR_EMAIL_RESPONSE_FIELDS_REQUIRED,
@@ -14,6 +13,7 @@ import {
   HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
+import { Elysia, type status } from "elysia";
 import { toRouteError } from "../utils/automation-route-error";
 import { automationRateLimit } from "../utils/rate-limit";
 import {

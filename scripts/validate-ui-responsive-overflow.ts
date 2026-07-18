@@ -51,13 +51,28 @@ const fixedWidthPattern = /(?<![-\w])w-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
 // Fixed height like h-64, h-96 (but not h-full, h-auto, h-fit, h-screen).
 // Use a negative lookbehind for `-` so we don't match `min-h-64` / `max-h-64`.
 const fixedHeightPattern = /(?<![-\w])h-(?:\d{2,4}|\[[^\]]+\])(?!\s*\/)/gu;
-// overflow-x-auto / overflow-scroll with no min-w-0 child nearby.
-const horizontalOverflowPattern = /\boverflow-x-(?:auto|scroll)\b/gu;
 // Grid with fixed columns and no responsive guard on the same class string.
 const fixedGridColsPattern = /\bgrid-cols-(?:[2-9]|1\d)(?![\d-])/gu;
 
 // Threshold below which w-/h- literals are icon/avatar primitives, not overflow risks.
 const SMALL_SIZE_THRESHOLD = 17; // w-16 / h-16 and below are primitives.
+
+// Hoisted: class-attribute extraction (captures the inner class string in group 1).
+const CLASS_ATTR_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/gu;
+// Hoisted: digit extraction from a w-/h- literal like `w-64` or `w-[320px]`.
+const DIGITS_ONLY_PATTERN = /\D/gu;
+// Hoisted: min-w-0 OR max-w-* guard detection.
+const WIDTH_GUARD_PATTERN = /\bmin-w-0\b|\bmax-w-/u;
+// Hoisted: max-w-* (any width cap) detection — used as a separate isFluidCap signal.
+const MAX_W_CAP_PATTERN = /\bmax-w-/u;
+// Hoisted: vertical overflow guard detection (hidden / y-auto / y-scroll / auto).
+const VERTICAL_OVERFLOW_GUARD_PATTERN = /\boverflow-(?:hidden|y-auto|y-scroll|auto)\b/u;
+// Hoisted: skeleton-row class detection.
+const SKELETON_CLASS_PATTERN = /\bskeleton\b/u;
+// Hoisted: arbitrary w-N class detection (sibling w- matching aspect-ratio primitives).
+const W_ARBITRARY_PATTERN = /\bw-\d+\b/u;
+// Hoisted: responsive sm:/md:/lg:/xl: grid-cols- guard detection.
+const RESPONSIVE_GRID_COLS_PATTERN = /\b(?:sm|md|lg|xl):grid-cols-/u;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -74,21 +89,20 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
   const violations: ValidationViolation[] = [];
 
   // For each class attribute, check for fixed width without min-w-0 / max-w guard.
-  const classAttrPattern = /\bclass\s*=\s*["']([^"']+)["']/gu;
-  classAttrPattern.lastIndex = 0;
-  for (const classMatch of template.matchAll(classAttrPattern)) {
+  CLASS_ATTR_PATTERN.lastIndex = 0;
+  for (const classMatch of template.matchAll(CLASS_ATTR_PATTERN)) {
     const classValue = classMatch[1] ?? "";
     const baseLine = getLineFromOffset(content, classMatch.index ?? 0);
 
     fixedWidthPattern.lastIndex = 0;
     const fixedWidthMatch = classValue.match(fixedWidthPattern);
     if (fixedWidthMatch) {
-      const widthValue = Number.parseInt(fixedWidthMatch[0].replace(/\D/gu, ""), 10);
+      const widthValue = Number.parseInt(fixedWidthMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
       // Small widths (w-10..w-52) are dropdowns/menus/badges — not overflow risks.
       // Only flag large fixed widths (w-64+) that risk pushing content off-screen.
       const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= 52;
-      const hasGuard = /\bmin-w-0\b|\bmax-w-/u.test(classValue);
-      const isFluidCap = /\bmax-w-/u.test(classValue);
+      const hasGuard = WIDTH_GUARD_PATTERN.test(classValue);
+      const isFluidCap = MAX_W_CAP_PATTERN.test(classValue);
       if (!isSmallPrimitive && !hasGuard && !isFluidCap) {
         violations.push({
           filePath,
@@ -101,18 +115,18 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     fixedHeightPattern.lastIndex = 0;
     const fixedHeightMatch = classValue.match(fixedHeightPattern);
     if (fixedHeightMatch) {
-      const heightValue = Number.parseInt(fixedHeightMatch[0].replace(/\D/gu, ""), 10);
+      const heightValue = Number.parseInt(fixedHeightMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
       const isSmallPrimitive = Number.isFinite(heightValue) && heightValue <= SMALL_SIZE_THRESHOLD;
       // Fixed height with an overflow guard (overflow-hidden/y-auto/y-scroll)
       // is the canonical bounded scroll region pattern (chat panels, timelines,
       // modal content). This is correct — not a violation.
-      const hasOverflowGuard = /\boverflow-(?:hidden|y-auto|y-scroll|auto)\b/u.test(classValue);
+      const hasOverflowGuard = VERTICAL_OVERFLOW_GUARD_PATTERN.test(classValue);
       // Skeleton rows legitimately use fixed heights.
-      const isSkeletonRow = /\bskeleton\b/u.test(classValue);
+      const isSkeletonRow = SKELETON_CLASS_PATTERN.test(classValue);
       // Aspect-ratio / ratio surfaces (swatches, thumbnails) use fixed h- with
       // a sibling w- of the same size — these are primitives, not text clips.
       const isSquarePrimitive =
-        heightValue <= SMALL_SIZE_THRESHOLD + 4 && /\bw-\d+\b/u.test(classValue);
+        heightValue <= SMALL_SIZE_THRESHOLD + 4 && W_ARBITRARY_PATTERN.test(classValue);
       if (!isSmallPrimitive && !hasOverflowGuard && !isSkeletonRow && !isSquarePrimitive) {
         violations.push({
           filePath,
@@ -125,7 +139,7 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
     fixedGridColsPattern.lastIndex = 0;
     const fixedGridMatch = classValue.match(fixedGridColsPattern);
     if (fixedGridMatch) {
-      const hasResponsiveGuard = /\b(?:sm|md|lg|xl):grid-cols-/u.test(classValue);
+      const hasResponsiveGuard = RESPONSIVE_GRID_COLS_PATTERN.test(classValue);
       if (!hasResponsiveGuard) {
         violations.push({
           filePath,
@@ -142,7 +156,6 @@ const collectOverflowViolations = (filePath: string, content: string): Validatio
   // min-w-0/max-w-* guard, which the fixedWidthPattern check above already
   // catches. min-w-0 is only required for flexbox truncation, not for
   // overflow-x-auto scroll containers.
-  void horizontalOverflowPattern;
 
   return violations;
 };

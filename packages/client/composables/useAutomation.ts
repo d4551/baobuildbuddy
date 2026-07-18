@@ -6,17 +6,17 @@ import type {
 } from "@bao/shared/constants/automation";
 import {
   API_ENDPOINTS,
-  WS_ENDPOINTS,
   buildAutomationRunEndpoint,
+  WS_ENDPOINTS,
 } from "@bao/shared/constants/endpoints";
 import type {
   EmailResponseRequest,
   EmailResponseResult,
 } from "@bao/shared/schemas/automation-email.schema";
 import {
-  rpaRunEventSchema,
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
+  rpaRunEventSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
 import { safeParseJson } from "@bao/shared/utils/json";
 import type { AsyncData } from "nuxt/app";
@@ -25,9 +25,9 @@ import type { MaybeRef } from "vue";
 import { useFetch, useRuntimeConfig } from "#imports";
 import {
   buildClientApiHeaders,
+  type ClientApiRequestRuntime,
   requestApi,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "~/composables/api-request";
 import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
 

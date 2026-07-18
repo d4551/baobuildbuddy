@@ -7,6 +7,7 @@ const catalog = {
     tagline: "Assistant de Carrière IA pour le Développement de Jeux",
   },
   common: {
+    loading: "Chargement",
     localeNames: {
       enUS: "Anglais",
       esES: "Espagnol",

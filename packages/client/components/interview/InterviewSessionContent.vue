@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
 import type {
   InterviewQuestion,
@@ -8,6 +7,12 @@ import type {
 } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 type InterviewCompletionState =
   | "idle"
@@ -105,7 +110,7 @@ const { t } = useI18n();
       >
         <div
           v-if="canUseVoice"
-          class="card card-border bg-base-100"
+          :class="SURFACE_GLASS_CARD_CLASS"
           :aria-label="t('interviewSession.voice.idle')"
         >
           <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">

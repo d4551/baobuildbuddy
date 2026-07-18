@@ -1,5 +1,4 @@
 import { APP_BRAND } from "@bao/shared/constants/branding";
-import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import {
   APP_BRAND_TAGLINE,
   DECIMAL_RADIX,
@@ -7,9 +6,9 @@ import {
   DEFAULT_I18N_LOCALE_COOKIE_KEY,
   DEFAULT_QUERY_RETRY_COUNT,
   DEFAULT_QUERY_STALE_TIME_MS,
-  LOCALES_DIRECTORY_SEGMENT,
   LOCALE_CHUNK_NAME_PREFIX,
   LOCALE_FILE_EXTENSION,
+  LOCALES_DIRECTORY_SEGMENT,
   MODULE_PATH_SEPARATOR,
   NODE_MODULES_PATH_SEGMENT,
   NUXT_COMPATIBILITY_DATE,
@@ -18,6 +17,7 @@ import {
   VITE_BUILD_TARGET,
   WINDOWS_PATH_SEPARATOR,
 } from "@bao/shared/constants/client-config";
+import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { DEFAULT_CLIENT_DEV_PORT, DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
 import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import { defineNuxtConfig } from "nuxt/config";

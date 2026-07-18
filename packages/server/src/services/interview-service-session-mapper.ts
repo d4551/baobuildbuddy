@@ -1,7 +1,6 @@
 import type { InterviewSession } from "@bao/shared/types/interview";
-import type { DBInterviewSession } from "./interview-service-contracts";
-import { buildInterviewerPersona } from "./interview-service-prompt-context";
 import { resolveStudioContext } from "./interview-service-context";
+import type { DBInterviewSession } from "./interview-service-contracts";
 import {
   normalizeFinalAnalysis,
   normalizeInterviewSessionStatus,
@@ -9,6 +8,7 @@ import {
   normalizeResponses,
   normalizeSessionConfig,
 } from "./interview-service-normalizers";
+import { buildInterviewerPersona } from "./interview-service-prompt-context";
 
 export async function toInterviewSession(row: DBInterviewSession): Promise<InterviewSession> {
   const config = normalizeSessionConfig(row);

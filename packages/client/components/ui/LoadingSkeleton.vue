@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 import { UI_GRID_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 type LoadingSkeletonVariant = "text" | "cards" | "stats";
@@ -21,7 +22,7 @@ const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
 
 <template>
   <div v-if="variant === 'cards'" :class="cardsGridClass" role="status" aria-live="polite">
-    <div v-for="index in 6" :key="index" class="card card-border h-full bg-base-100">
+    <div v-for="index in 6" :key="index" :class="[SURFACE_GLASS_CARD_CLASS, 'h-full']">
       <div class="card-body gap-3">
         <div class="skeleton h-5 w-2/3"></div>
         <div class="skeleton h-4 w-1/2"></div>

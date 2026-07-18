@@ -7,7 +7,7 @@ import {
 
 /**
  * Inline `style="..."` attributes are forbidden in Vue templates.
- * They bypass the .bao SSOT token system, defeat theming, and create
+ * They bypass the layout/CSS SSOT token system, defeat theming, and create
  * per-component bespoke styling (design.md §8 / AGENTS.md UI/UX standards).
  *
  * This gate catches real `style="..."` attributes on element tags. It excludes
@@ -47,7 +47,7 @@ export const collectInlineStyleViolationsForContent = (
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
-      message: `Inline style attribute "style=..." is forbidden. Use .bao SSOT tokens, constants/layout.ts class constants, or assets/css/main.css glass-* primitives.`,
+      message: `Inline style attribute "style=..." is forbidden. Use SSOT tokens from constants/layout.ts or assets/css/main.css glass-* primitives.`,
     });
   }
 

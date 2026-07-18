@@ -1,7 +1,7 @@
-import type { Static } from "typebox";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const searchTypes: readonly ["jobs", "studios", "skills", "resumes"] = [
   "jobs",

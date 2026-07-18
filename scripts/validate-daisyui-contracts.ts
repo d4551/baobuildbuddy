@@ -104,7 +104,7 @@ const BTN_SEMANTIC_MODIFIERS = [
 const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
 
 /**
- * .bao SSOT surface class constants that carry the `card` base class.
+ * Layout SSOT surface class constants that carry the `card` base class.
  * When a Vue file uses a `:class` binding to one of these constants, the
  * validator recognizes that the file satisfies the card → card-body/title/actions
  * contract even though the raw string `card` does not appear in a static
@@ -114,6 +114,7 @@ const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
   "SURFACE_GLASS_CARD_CLASS",
   "SURFACE_GLASS_CARD_STRONG_CLASS",
   "SURFACE_GLASS_CARD_MODAL_CLASS",
+  "AUTH_CARD_SHELL_CLASS",
 ] as const;
 
 const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(

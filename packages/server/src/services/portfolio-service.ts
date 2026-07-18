@@ -3,6 +3,12 @@ import {
   API_ERROR_INVALID_PROJECT_ID_REORDER,
 } from "@bao/shared/constants/api-errors";
 import type { PortfolioData, PortfolioProject } from "@bao/shared/types/portfolio";
+import type {
+  CreatePortfolioProjectPayload,
+  PortfolioUpdatePayload,
+  UpdatePortfolioProjectPayload,
+} from "./portfolio-service-contracts";
+import { toPortfolioData } from "./portfolio-service-normalizers";
 import {
   createProject,
   deleteProjectById,
@@ -15,12 +21,6 @@ import {
   updatePortfolioMetadata,
   updateProjectById,
 } from "./portfolio-service-storage";
-import { toPortfolioData } from "./portfolio-service-normalizers";
-import type {
-  CreatePortfolioProjectPayload,
-  PortfolioUpdatePayload,
-  UpdatePortfolioProjectPayload,
-} from "./portfolio-service-contracts";
 
 export class PortfolioService {
   /**

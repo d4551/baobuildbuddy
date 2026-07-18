@@ -50,6 +50,27 @@ const buttonTagPattern = /<button\b[^>]*>([\s\S]*?)<\/button>/gu;
 const longParagraphInControlPattern =
   /\bclass\s*=\s*["'][^"']*\b(?:card-body|btn|stat|badge|chip|tooltip)[^"']*["'][^>]*>[^<]{280,}/gu;
 
+// Hoisted: flex-wrap guard detection inside cramped row class strings.
+const FLEX_WRAP_PATTERN = /\bflex-wrap\b/u;
+// Hoisted: overflow-hidden / overflow-x-clip guard detection inside cramped row class strings.
+const OVERFLOW_GUARD_PATTERN = /\boverflow-(?:hidden|x-clip)\b/u;
+// Hoisted: min-w-0 guard detection inside cramped row class strings.
+const MIN_W_ZERO_PATTERN = /\bmin-w-0\b/u;
+// Hoisted: nav/menu/list context detection inside cramped row class strings.
+const NAV_CONTEXT_CLASS_PATTERN =
+  /\b(?:menu|navbar|tabs|breadcrumb|breadcrumbs|nav|sidebar|listbox|tablist)\b/u;
+// Hoisted: drawer-aware pattern (ml-auto/is-drawer-*) for cramped row allowance.
+const DRAWER_AWARE_CLASS_PATTERN = /\b(?:is-drawer-(?:open|close)|ml-auto|mr-auto)\b/u;
+// Hoisted: surrounding-template nav/menu container detection for cramped row allowance.
+const NAV_CONTAINER_LOOKBACK_PATTERN =
+  /<(?:nav|ul|ol|aside|menu|tablist)\b[^>]*>(?:[\s\S]{0,400}?)<(?:div|span)\b[^>]*\b(?:flex|inline-flex)\b[^']*\bgap-1\b/iu;
+// Hoisted: SVG/Icon tag presence inside a button's inner content.
+const ICON_TAG_PATTERN = /<(?:svg|Icon|icon)\b/iu;
+// Hoisted: strip nested HTML tags from button inner content for visible-text length.
+const NESTED_TAG_STRIP_PATTERN = /<[^>]+>/gu;
+// Hoisted: strip i18n binding expressions from button inner content for visible-text length.
+const I18N_BINDING_STRIP_PATTERN = /\{\{[^}]*\}\}/gu;
+
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
   if (templateStart < 0) return "";
@@ -69,28 +90,21 @@ const collectDensityViolations = (filePath: string, content: string): Validation
   for (const match of template.matchAll(crampedRowPattern)) {
     const classValue = match[0] ?? "";
     const lineText =
-      template.slice(Math.max(0, (match.index ?? 0) - 120), (match.index ?? 0) + 200) ??
-      "";
+      template.slice(Math.max(0, (match.index ?? 0) - 120), (match.index ?? 0) + 200) ?? "";
     // Count flex-item siblings by counting tag openings on this line's context.
-    const hasWrap = /\bflex-wrap\b/u.test(classValue);
-    const hasOverflowGuard = /\boverflow-(?:hidden|x-clip)\b/u.test(classValue);
-    const hasMinW0 = /\bmin-w-0\b/u.test(classValue);
+    const hasWrap = FLEX_WRAP_PATTERN.test(classValue);
+    const hasOverflowGuard = OVERFLOW_GUARD_PATTERN.test(classValue);
+    const hasMinW0 = MIN_W_ZERO_PATTERN.test(classValue);
     // Nav/menu/listbox/list contexts intentionally use tight gap-1 for
     // dense item rows (sidebar nav, breadcrumb separators, icon chips).
     const isNavContext =
-      /\b(?:menu|navbar|tabs|breadcrumb|breadcrumbs|nav|sidebar|listbox|tablist)\b/u.test(
-        classValue,
-      ) ||
+      NAV_CONTEXT_CLASS_PATTERN.test(classValue) ||
       // Look-back at the surrounding template: the element is rendered
       // inside a menu/nav container.
-      /<(?:nav|ul|ol|aside|menu|tablist)\b[^>]*>(?:[\s\S]{0,400}?)<(?:div|span)\b[^>]*\b(?:flex|inline-flex)\b[^']*\bgap-1\b/iu.test(
-        lineText,
-      );
+      NAV_CONTAINER_LOOKBACK_PATTERN.test(lineText);
     // gap-1 inside drawer-aware elements (ml-auto/is-drawer-*) is the
     // canonical pattern for sidebar shortcut hints and chip clusters.
-    const isDrawerAware = /\b(?:is-drawer-(?:open|close)|ml-auto|mr-auto)\b/u.test(
-      classValue,
-    );
+    const isDrawerAware = DRAWER_AWARE_CLASS_PATTERN.test(classValue);
     if (!hasWrap && !hasOverflowGuard && !hasMinW0 && !isNavContext && !isDrawerAware) {
       violations.push({
         filePath,
@@ -103,13 +117,13 @@ const collectDensityViolations = (filePath: string, content: string): Validation
   buttonTagPattern.lastIndex = 0;
   for (const match of template.matchAll(buttonTagPattern)) {
     const inner = match[1] ?? "";
-    const hasIcon = /<(?:svg|Icon|icon)\b/iu.test(inner);
+    const hasIcon = ICON_TAG_PATTERN.test(inner);
     // Strip all nested tags to get visible text length. Also strip i18n
     // binding expressions {{ t("...") }} since the rendered text is the
     // translated string, not the key — the key length is a false signal.
     const visibleText = inner
-      .replace(/<[^>]+>/gu, "")
-      .replace(/\{\{[^}]*\}\}/gu, "")
+      .replace(NESTED_TAG_STRIP_PATTERN, "")
+      .replace(I18N_BINDING_STRIP_PATTERN, "")
       .trim();
     if (hasIcon && visibleText.length > 24) {
       violations.push({

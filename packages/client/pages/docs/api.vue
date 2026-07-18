@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { definePageMeta, useSeoMeta } from "#imports";
 import { useI18n } from "vue-i18n";
+import { definePageMeta, useSeoMeta } from "#imports";
 
 definePageMeta({
   middleware: ["auth"],

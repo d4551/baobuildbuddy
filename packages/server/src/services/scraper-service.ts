@@ -1,6 +1,6 @@
 import {
-  automationScrapeTargetToPortalId,
   type AutomationJobScrapeTarget,
+  automationScrapeTargetToPortalId,
 } from "@bao/shared/constants/automation";
 import type { AutomationScriptId, ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import type { ScraperOperationResult } from "@bao/shared/types/jobs";
@@ -16,19 +16,20 @@ import {
   toScrapeEnrichmentSummary,
 } from "./scraper-service-enrichment";
 import {
-  parseJobRows,
-  parseStudioRows,
-  resolveScriptReference,
-  runScraperScript,
-  toJobSearchResult,
-} from "./scraper-service-script";
-import {
   persistScrapedJobRow,
   persistScrapedStudioRow,
   resolvePortalScriptId,
   resolvePortalSourceUrl,
   runWithErrorCollection,
 } from "./scraper-service-persistence";
+import {
+  parseJobRows,
+  parseStudioRows,
+  resolveScriptReference,
+  runScraperScript,
+  toJobSearchResult,
+} from "./scraper-service-script";
+
 export type { ScrapedJob } from "./scraper-service-contracts";
 
 /**

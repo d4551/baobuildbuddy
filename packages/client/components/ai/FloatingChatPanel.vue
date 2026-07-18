@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   aiChatPagePath: string;
@@ -91,7 +101,7 @@ const draft = defineModel<string>("draft", { required: true });
             </li>
           </ul>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap1, TRUNCATE_FLEX_CHILD_CLASS]">
           <NuxtLink :to="aiChatPagePath" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.expandAria')">
             {{ t("floatingChat.expandButton") }}
           </NuxtLink>

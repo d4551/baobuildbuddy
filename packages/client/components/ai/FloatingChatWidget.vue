@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
 import { useFloatingChatWidget } from "~/composables/useFloatingChatWidget";
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+
 const {
   AI_CHAT_PAGE_PATH: aiChatPagePath,
   availableVoices,

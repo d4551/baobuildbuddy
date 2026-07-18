@@ -1,11 +1,11 @@
 import { computed, type MaybeRefOrGetter, toValue } from "vue";
-import {
-  type FlowEngineInput,
-  type FlowRecommendation,
-  type FlowResolution,
-  type FlowStage,
-  resolveFlowRecommendations,
-} from "~/constants/flow-engine";
+import { resolveFlowRecommendations } from "~/constants/flow-engine";
+import type {
+  FlowEngineInput,
+  FlowRecommendation,
+  FlowResolution,
+  FlowStage,
+} from "~/constants/flow-engine-types";
 
 /**
  * Reactive interface around the global flow recommendation engine.

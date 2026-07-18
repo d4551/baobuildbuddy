@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import { inferAIChatDomainFromRoutePath } from "@bao/shared/constants/ai-chat";
 import {
   SCHEMA_MAX_LENGTH_DEVICE,
@@ -15,6 +14,7 @@ import {
   type AIChatContext,
 } from "@bao/shared/types/ai";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const chatContextSchema = t.Object(
   {

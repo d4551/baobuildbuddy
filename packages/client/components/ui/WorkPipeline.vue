@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
-import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
 import type {
   DashboardPipelineStatus,
   DashboardPipelineStepViewModel,
 } from "~/constants/dashboard-contracts";
+import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 interface WorkPipelineProps {
   readonly title: string;

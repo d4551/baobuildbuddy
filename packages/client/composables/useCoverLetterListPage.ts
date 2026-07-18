@@ -6,8 +6,8 @@ import {
   COVER_LETTER_LIST_PAGE_SIZE,
   COVER_LETTER_POSITION_MIN_LENGTH,
   COVER_LETTER_TEMPLATE_OPTIONS,
-  isCoverLetterTemplate,
   type CoverLetterTemplate,
+  isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { computed, reactive, ref } from "vue";

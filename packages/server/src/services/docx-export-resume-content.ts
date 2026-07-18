@@ -1,9 +1,9 @@
 import type { ResumeData } from "@bao/shared/types/resume";
 import { Paragraph, TextRun } from "docx";
 import {
-  type DocxTemplateConfig,
   DOCX_RESUME_FONT_ACCENT_PT,
   DOCX_RESUME_FONT_BODY_PT,
+  type DocxTemplateConfig,
   type ResumeEducationItem,
   type ResumeExperienceItem,
   type ResumeProjectItem,

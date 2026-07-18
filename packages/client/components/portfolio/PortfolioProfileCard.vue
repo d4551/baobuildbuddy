@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 const props = defineProps<{
   portfolioForm: PortfolioMetadata;
@@ -29,9 +29,13 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 </script>
 
 <template>
-  <section id="portfolio-profile-card" class="card bg-base-200">
+  <section
+    id="portfolio-profile-card"
+    :class="SURFACE_GLASS_CARD_CLASS"
+    aria-labelledby="portfolio-profile-title"
+  >
     <div class="card-body">
-      <h2 class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
+      <h2 id="portfolio-profile-title" class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.titleLegend") }}</legend>

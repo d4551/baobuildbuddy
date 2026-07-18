@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  FORM_WIDTH_32_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -90,7 +100,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
@@ -106,7 +116,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
@@ -115,7 +125,7 @@ useSeoMeta({
               v-for="[size, count] in bySizeEntries"
               :key="size"
             >
-              <div class="flex justify-between items-center mb-2">
+              <div class="flex justify-between items-center" :class="[MARGIN_TOKEN_CLASS.mb2]">
                 <span class="font-medium">{{ size }}</span>
                 <span class="badge badge-lg">{{ count }}</span>
               </div>
@@ -130,7 +140,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
           <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -143,7 +153,7 @@ useSeoMeta({
               :key="tech.name"
               class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
             >
-              <span class="w-32 font-medium">{{ tech.name }}</span>
+              <span class="font-medium" :class="[FORM_WIDTH_32_CLASS]">{{ tech.name }}</span>
               <div class="flex-1">
                 <progress
                   class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
@@ -158,7 +168,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
@@ -192,7 +202,7 @@ useSeoMeta({
             ></progress>
           </div>
 
-          <SectionGrid grid-token="twoColumnSm" extra-:class="[MARGIN_TOKEN_CLASS.mt4]">
+          <SectionGrid grid-token="twoColumnSm" :extra-class="MARGIN_TOKEN_CLASS.mt4">
             <div class="stat bg-base-200" :class="[RADIUS_TOKEN_CLASS.lg]">
               <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioAnalytics.sections.remoteFriendlyTitle") }}</div>
               <div class="stat-value text-success" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ remoteWorkStudios }}</div>

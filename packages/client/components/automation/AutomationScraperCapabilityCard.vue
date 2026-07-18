@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -61,7 +70,7 @@ function handleScheduleInput(event: Event): void {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
@@ -153,7 +162,7 @@ function handleScheduleInput(event: Event): void {
           :disabled="pendingAction !== null || !capability.configured"
           @click="emit('run', capability.target)"
         >
-          <span v-if="isPendingAction(capability.target, 'run')" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner v-if="isPendingAction(capability.target, 'run')" size="xs" :label="t('common.loading')" />
           <span>{{ cardRunButtonLabel(capability.target) }}</span>
         </button>
       </div>
@@ -164,7 +173,7 @@ function handleScheduleInput(event: Event): void {
           aria-live="polite"
           class="alert alert-info alert-vertical sm:alert-horizontal"
         >
-          <span class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" :label="t('common.loading')" />
           <span>{{ runStateLabel(runState) }}</span>
         </div>
         <div
@@ -251,10 +260,7 @@ function handleScheduleInput(event: Event): void {
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
               @click="emit('schedule', capability.target)"
             >
-              <span
-                v-if="isPendingAction(capability.target, 'schedule')"
-                class="loading loading-spinner loading-xs"
-              ></span>
+              <LoadingSpinner v-if="isPendingAction(capability.target, 'schedule')" size="xs" :label="t('common.loading')" />
               <span>{{ t("automation.scraper.schedule.button") }}</span>
             </button>
           </div>

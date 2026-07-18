@@ -10,9 +10,9 @@ import {
   INTERVIEW_UNKNOWN_STUDIO_NAME,
 } from "@bao/shared/constants/interview";
 import { settle } from "@bao/shared/utils/promise";
-import { interviewService } from "../services/interview-service";
-import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
 import { sessionConfigFromUi } from "../routes/interview-route-config";
+import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
+import { interviewService } from "../services/interview-service";
 
 type InterviewSocket = { send: (data: string) => void };
 

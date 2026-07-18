@@ -1,5 +1,16 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MIN_H_36_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -61,7 +72,7 @@ useSeoMeta({
       @retry="() => refreshEmailSettings()"
     />
 
-    <div v-else class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-else :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
@@ -122,7 +133,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
             <textarea
               v-model="form.message"
-              class="textarea min-h-36" :class="[FLUID_WIDTH_CLASS]"
+              class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_H_36_CLASS]"
               required
               minlength="10"
               maxlength="12000"
@@ -155,7 +166,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTES.settings"
-              class="btn btn-link btn-sm px-0"
+              class="btn btn-link btn-sm" :class="[PADDING_TOKEN_CLASS.px0]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -174,14 +185,14 @@ useSeoMeta({
           </fieldset>
         </div>
 
-        <div class="mt-6 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
           <button
             class="btn btn-primary"
             :disabled="pending || !canSubmit"
             :aria-label="t('automation.email.generateAria')"
             @click="submitEmailResponse"
           >
-            <LoadingSpinner size="sm" label="Loading" v-if="pendingAction === 'generate'" />
+            <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'generate'" />
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
@@ -190,7 +201,7 @@ useSeoMeta({
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"
           >
-            <LoadingSpinner size="sm" label="Loading" v-if="pendingAction === 'schedule'" />
+            <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'schedule'" />
             <span v-else>{{ t("automation.email.schedule.button") }}</span>
           </button>
         </div>
@@ -203,7 +214,7 @@ useSeoMeta({
       :message="submitError"
     />
 
-    <div v-if="scheduledRun" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-if="scheduledRun" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <div>
@@ -234,7 +245,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <div v-if="lastResult" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div v-if="lastResult" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
@@ -259,7 +270,7 @@ useSeoMeta({
         <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
           <legend class="fieldset-legend">{{ t("automation.email.replyLegend") }}</legend>
           <textarea
-            class="textarea min-h-40" :class="[FLUID_WIDTH_CLASS]"
+            class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_HEIGHT_SCROLL_CLASS]"
             readonly
             :value="lastResult.reply"
             :aria-label="t('automation.email.replyAria')"

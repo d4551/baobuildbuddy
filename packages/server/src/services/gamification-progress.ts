@@ -6,10 +6,10 @@ import type {
 } from "@bao/shared/types/gamification";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import {
+  type ActionHistoryEntry,
   DAILY_CHALLENGE_DEFINITIONS,
   GAMIFICATION_STAT_KEYS,
   type NumericGamificationStats,
-  type ActionHistoryEntry,
   WEEK_DAYS,
   type WeeklyDaySummary,
   type WeeklyProgressResult,

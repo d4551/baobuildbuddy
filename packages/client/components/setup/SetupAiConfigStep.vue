@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
 defineProps<{
@@ -67,7 +75,8 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
           <NuxtLink
             :to="ollamaWebsiteUrl"
             target="_blank"
-            class="link link-primary inline-flex items-center gap-1"
+            class="link link-primary inline-flex items-center"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap1, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
           >
             {{ t("settings.aiProviders.ollamaTipLinkLabel") }}

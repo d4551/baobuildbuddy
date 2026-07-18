@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 
 const props = defineProps<{
   profileSaveState: SaveState;
@@ -37,7 +37,7 @@ const profileSaveStateLabel = computed(() => {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <SettingsPanelHeader :title="t('settings.profile.title')">
         <template #meta>

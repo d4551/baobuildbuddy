@@ -9,7 +9,7 @@ This matrix is the current route-to-service/UI/test traceability reference for t
 | Kind | Location | Role |
 |------|----------|------|
 | Authenticated shell | `packages/client/layouts/default.vue` | daisyUI `drawer`, navbar, main landmark, sidebar host, toasts |
-| Auth / onboarding shell | `packages/client/layouts/auth-shell.vue` | Centered `card` on `bg-base-200` (`AUTH_SHELL_OUTER_CLASS` + shared `card` markup; main rail uses `SHELL_MAIN_INNER_CLASS` in `default.vue`) |
+| Auth / onboarding shell | `packages/client/layouts/auth-shell.vue` | Centered auth card on `bg-base-200` (`AUTH_SHELL_OUTER_CLASS` + `:class="AUTH_CARD_SHELL_CLASS"`; main rail uses `SHELL_MAIN_INNER_CLASS` in `default.vue`) |
 | Page width / spacing | `packages/client/components/ui/PageScaffold.vue` + `packages/client/constants/ui-layout.ts` | Canonical `UiWidthToken` / `UiSpacingToken` (validators forbid ad-hoc widths on core pages) |
 | Section grids | `packages/client/components/ui/SectionGrid.vue` | `UiGridToken` including `bento` (gap-6 dashboard grids) |
 | Headers / empty / loading | `PageHeaderBlock`, `EmptyState`, `LoadingSkeleton`, `AppPagination`, `ConfirmDialog`, `ToastContainer` | DRY patterns for list and form pages |
@@ -61,6 +61,7 @@ The server and tests use `node:fs`, `node:path`, and related modules where Bun p
 | `/api/gamification` (`gamification.routes.ts`) | `gamificationService` | gamification tables/state | `packages/client/pages/gamification.vue` | `packages/server/src/routes/core-routes.test.ts` |
 | `/api/settings` (`settings.routes.ts`) | settings + JSON export service hooks | `settings` | `packages/client/pages/settings.vue` | `packages/server/src/routes/settings.test.ts` |
 | `/api/stats` (`stats.routes.ts`) | `statisticsService` | aggregated reads across jobs, resumes, interviews, gamification | profile and dashboard surfaces that show aggregate progress | `packages/server/src/routes/core-routes.test.ts` |
+| `/v1/*` OpenAI Chat Completions (`openai-v1.routes.ts`, prefix `OPENAI_V1_ENDPOINT_PREFIX`) | `listOpenAIV1Models` / `getOpenAIV1Model` / `createOpenAIV1ChatCompletion` (+ stream) via AI routing; mounted beside `/api` in `packages/server/src/index.ts` | `settings` (AI routing / provider readiness); no dedicated feature table | External SDK clients (`baseURL` → `http://host:3000/v1`); not a Nuxt page — Settings AI providers configure upstream models | `packages/server/src/routes/openai-v1.test.ts` |
 | `/api/search` + `/api/automation` + `/api/ai` composition points | cross-domain orchestration from shared route handlers | multiple tables used by composed services | validated by route-level translation in `packages/client/` surfaces above | core-route + dedicated route tests |
 
 ## AI routing notes

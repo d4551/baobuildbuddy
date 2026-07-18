@@ -104,8 +104,9 @@ export const AUTH_SHELL_OUTER_CLASS =
   "flex min-h-screen items-center justify-center bg-base-200 px-4";
 
 /**
- * Auth card surface — **must match** the static `class` on `layouts/auth-shell.vue`
- * (`validate:daisyui-contracts` only scans static attributes).
+ * Auth card surface — solid content-plane (not glass). Consumed by
+ * `layouts/auth-shell.vue` via `:class="AUTH_CARD_SHELL_CLASS"`.
+ * Recognized by `validate:daisyui-contracts` as a card-bearing SSOT constant.
  */
 export const AUTH_CARD_SHELL_CLASS = "card w-full max-w-md bg-base-100 shadow-lg";
 
@@ -191,7 +192,11 @@ export const RADIAL_METER_GEOMETRY = {
   strokeWidth: 8,
   viewBoxSize: 100,
   defaultSizeClass: "h-24 w-24",
+  readinessSizeClass: "h-28 w-28",
 } as const;
+
+/** Brand theme swatch preview strip (min-height + clip; not fixed h-). */
+export const BRAND_SWATCH_SURFACE_CLASS = "min-h-20 overflow-hidden";
 
 /**
  * Canonical stroke width for inline decorative SVG icons (24x24 viewBox).
@@ -336,11 +341,14 @@ export const SIDEBAR_WIDE_WIDTH_CLASS = "w-80";
 /** Form/panel helper widths. */
 export const FORM_WIDTH_10_CLASS = "w-10";
 export const FORM_WIDTH_16_CLASS = "w-16";
+export const FORM_WIDTH_20_CLASS = "w-20";
 export const FORM_WIDTH_28_CLASS = "w-28";
 export const FORM_WIDTH_32_CLASS = "w-32";
 
 /** Content height tokens. */
 export const CONTENT_H_28_CLASS = "h-28";
+export const CONTENT_H_40_CLASS = "h-40";
+export const CONTENT_H_48_CLASS = "h-48";
 export const CONTENT_H_64_CLASS = "h-64";
 export const CONTENT_H_72_CLASS = "h-72";
 
@@ -365,14 +373,16 @@ export const ERROR_PAGE_MAX_WIDTH_CLASS = "max-w-lg";
 // All consumers still import from ~/constants/layout — we re-export from
 // layout-tokens.ts so the public API is unchanged.
 export {
-  STACK_SPACE_Y_TOKEN_CLASS,
-  type StackSpaceYToken,
   FLEX_GAP_TOKEN_CLASS,
   type FlexGapToken,
+  FONT_WEIGHT_TOKEN_CLASS,
+  type FontWeightToken,
   MARGIN_TOKEN_CLASS,
   type MarginToken,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  type StackSpaceYToken,
   TYPOGRAPHY_SCALE_CLASS,
   type TypographyScaleToken,
 } from "./layout-tokens";

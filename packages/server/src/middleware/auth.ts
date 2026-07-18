@@ -40,19 +40,26 @@ function readBearerHeader(
   if (raw === null) {
     return { kind: "missing" };
   }
-  if (!raw.startsWith("Bearer ")) {
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("Bearer")) {
     return { kind: "wrong-scheme" };
   }
-  const token = raw.slice(7).trim();
+  if (trimmed === "Bearer") {
+    return { kind: "empty" };
+  }
+  if (!trimmed.startsWith("Bearer ")) {
+    return { kind: "wrong-scheme" };
+  }
+  const token = trimmed.slice("Bearer ".length).trim();
   return token.length > 0 ? { kind: "ok", token } : { kind: "empty" };
 }
 
 /**
  * Validates Bearer API key against the persisted profile key.
  *
- * Returns a failure envelope when validation fails; returns `null`
- * when the request is authenticated, auth is disabled, or no profile
- * key has been configured yet.
+ * Default deny: missing/empty/mismatched key and missing configured
+ * profile key all return unauthorized. Returns `null` only when the
+ * request is authenticated or auth is explicitly disabled.
  *
  * @param request Incoming Elysia request (HTTP or WebSocket upgrade).
  * @returns Unauthorized envelope or null on success.
@@ -84,13 +91,16 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
 
 /**
  * Elysia plugin that validates Bearer API key for protected HTTP routes.
- * Skipped only when auth is explicitly disabled via the config module.
+ * `.as("global")` lifts the hook so sibling route plugins registered after
+ * this guard inherit default-deny auth. Routes mounted before the guard
+ * (auth bootstrap) remain public. Skipped only when auth is explicitly
+ * disabled via config.
  */
-export const authGuard = new Elysia({ name: "auth-guard" }).beforeHandle(
-  async ({ request, status }) => {
+export const authGuard = new Elysia({ name: "auth-guard" })
+  .beforeHandle(async ({ request, status }) => {
     const failure = await authenticateApiKey(request);
     if (failure) {
       return status(failure.status, { error: failure.error });
     }
-  },
-);
+  })
+  .as("global");

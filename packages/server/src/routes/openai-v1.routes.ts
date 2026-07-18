@@ -1,8 +1,12 @@
+import {
+  API_ERROR_INVALID_API_KEY,
+  API_ERROR_MISSING_AUTH_HEADER,
+} from "@bao/shared/constants/api-errors";
 import { OPENAI_V1_ENDPOINT_PREFIX, OPENAI_V1_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { Elysia } from "elysia";
-import { authGuard } from "../middleware/auth";
+import { authenticateApiKey } from "../middleware/auth";
 import { corsPlugin } from "../middleware/cors";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
@@ -16,6 +20,16 @@ import {
   getOpenAIV1Model,
   listOpenAIV1Models,
 } from "./openai-v1-route-support";
+
+const resolveOpenAIV1AuthErrorCode = (error: string): string => {
+  if (error === API_ERROR_INVALID_API_KEY) {
+    return "invalid_api_key";
+  }
+  if (error === API_ERROR_MISSING_AUTH_HEADER) {
+    return "missing_authorization";
+  }
+  return "invalid_request_error";
+};
 
 function toOpenAIV1ChildPath(endpointPath: string): string {
   if (endpointPath === OPENAI_V1_ENDPOINT_PREFIX) {
@@ -36,7 +50,19 @@ export const openaiV1Routes = new Elysia({
   prefix: OPENAI_V1_ENDPOINT_PREFIX,
 })
   .use(corsPlugin)
-  .use(authGuard)
+  .beforeHandle(async ({ request, status }) => {
+    const failure = await authenticateApiKey(request);
+    if (!failure) {
+      return;
+    }
+    return status(failure.status, {
+      error: {
+        message: failure.error,
+        type: "invalid_request_error",
+        code: resolveOpenAIV1AuthErrorCode(failure.error),
+      },
+    });
+  })
   .use(
     rateLimit({
       duration: MS_PER_MINUTE,

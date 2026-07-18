@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { RADIAL_METER_GEOMETRY } from "~/constants/layout";
+import { FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, RADIAL_METER_GEOMETRY } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -46,7 +46,7 @@ const dashOffset = computed(() => {
     :aria-valuemax="max"
     :aria-valuenow="clampedValue"
   >
-    <svg class="h-full w-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
+    <svg class="-rotate-90" :class="[FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS]" viewBox="0 0 100 100" aria-hidden="true">
       <circle
         class="fill-none"
         :class="trackClass"

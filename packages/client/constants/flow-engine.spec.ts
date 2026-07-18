@@ -2,9 +2,9 @@ import type { DashboardStats } from "@bao/shared/types/search";
 import { describe, expect, it } from "vitest";
 import {
   createFlowEngineInput,
-  FLOW_PROFILE_COMPLETENESS_THRESHOLD,
   resolveFlowRecommendations,
 } from "./flow-engine";
+import { FLOW_PROFILE_COMPLETENESS_THRESHOLD } from "./flow-engine-types";
 
 interface FlowStatsOverrides {
   profileCompleteness?: number;

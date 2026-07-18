@@ -1,21 +1,17 @@
 import {
-  type AutomationJobScrapeTarget,
-  type AutomationScrapePortalId,
-  type AutomationScrapeTarget,
   AUTOMATION_SCRAPE_JOB_TARGETS as _ASJT,
   AUTOMATION_SCRAPE_PORTAL_IDS as _ASPI,
-  AUTOMATION_SCRAPE_TARGET_DETAILS as _ASTD,
   AUTOMATION_SCRAPE_TARGETS as _AST,
+  AUTOMATION_SCRAPE_TARGET_DETAILS as _ASTD,
   automationScrapeTargetToPortalId as _asttpi,
   isAutomationJobScrapeTarget as _iajst,
   isAutomationScrapePortalId as _iaspi,
-} from "./automation-types";
-
-export {
   type AutomationJobScrapeTarget,
   type AutomationScrapePortalId,
   type AutomationScrapeTarget,
-};
+} from "./automation-types";
+
+export type { AutomationJobScrapeTarget, AutomationScrapePortalId, AutomationScrapeTarget };
 
 export const AUTOMATION_SCRAPE_JOB_TARGETS = _ASJT;
 export const AUTOMATION_SCRAPE_PORTAL_IDS = _ASPI;

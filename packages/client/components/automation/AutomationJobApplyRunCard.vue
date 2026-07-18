@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
   AUTOMATION_RUN_STATUSES;
@@ -93,7 +99,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 </script>
 
 <template>
-  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.stream.subtitle") }}</p>

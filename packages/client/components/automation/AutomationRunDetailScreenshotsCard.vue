@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   screenshotPaths: readonly string[];
@@ -14,7 +20,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]" :aria-label="t('automation.runDetail.screenshotsTitle')">
+  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
       <div v-if="screenshotPaths.length === 0" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

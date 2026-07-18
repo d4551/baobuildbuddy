@@ -1,6 +1,6 @@
 import {
-  gamingPortalScraperScriptIdByPortalId,
   type AutomationScriptId,
+  gamingPortalScraperScriptIdByPortalId,
   type ScrapedJob,
   type ScrapedStudio,
 } from "@bao/shared/schemas/automation-scripts.schema";

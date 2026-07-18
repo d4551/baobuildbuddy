@@ -37,6 +37,10 @@ import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
 import { resumeService } from "../services/resume-service";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
+import { createServerLogger } from "../utils/logger";
+
+const resumeRouteLogger = createServerLogger("resume-route");
+
 import type {
   ResumeEnhanceBody,
   ResumeExportBody,
@@ -206,17 +210,22 @@ export const enhanceResumeWithAi = async (
     }),
   );
   if (aiResult.status === "rejected") {
+    resumeRouteLogger.error("Resume AI enhancement rejected", {
+      reason: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
       error: API_ERROR_AI_ENHANCEMENT_FAILED,
-      details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
     };
   }
 
   const response = aiResult.value;
   if (response.error) {
+    resumeRouteLogger.error("Resume AI enhancement returned provider error", {
+      reason: response.error,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: API_ERROR_AI_ENHANCEMENT_FAILED, details: response.error };
+    return { error: API_ERROR_AI_ENHANCEMENT_FAILED };
   }
 
   const parsed = safeParseJson(response.content);
@@ -266,17 +275,22 @@ export const handleResumeAiScore = async (
     ),
   );
   if (aiResult.status === "rejected") {
+    resumeRouteLogger.error("Resume AI scoring rejected", {
+      reason: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
       error: API_ERROR_AI_SCORING_FAILED,
-      details: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
     };
   }
 
   const response = aiResult.value;
   if (response.error) {
+    resumeRouteLogger.error("Resume AI scoring returned provider error", {
+      reason: response.error,
+    });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-    return { error: API_ERROR_AI_SCORING_FAILED, details: response.error };
+    return { error: API_ERROR_AI_SCORING_FAILED };
   }
 
   const details = parseResumeScoreDetails(response.content);

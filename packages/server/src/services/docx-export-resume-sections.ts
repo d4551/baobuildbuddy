@@ -3,14 +3,14 @@ import { Paragraph, TextRun } from "docx";
 import {
   createDivider,
   createSectionHeading,
-  type DocxTemplateConfig,
   DOCX_RESUME_FONT_BODY_PT,
   DOCX_RESUME_FONT_HEADER_PT,
+  type DocxTemplateConfig,
 } from "./docx-export-contracts";
 import {
-  buildGamingExperienceSection,
   buildEducationItem,
   buildExperienceItem,
+  buildGamingExperienceSection,
   buildProjectItem,
   buildSkillsSection,
 } from "./docx-export-resume-content";

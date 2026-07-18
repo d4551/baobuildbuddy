@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{
@@ -18,7 +25,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="card bg-base-100 lg:sticky lg:top-6 lg:w-80 lg:shrink-0" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <aside :class="[SURFACE_GLASS_CARD_CLASS, 'lg:sticky', 'lg:top-6', 'lg:w-80', 'lg:shrink-0']">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">

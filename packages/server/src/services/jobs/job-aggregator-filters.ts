@@ -2,7 +2,7 @@ import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { JOB_SALARY_PARSE_MULTIPLIER } from "@bao/shared/constants/jobs";
 import { MS_PER_DAY } from "@bao/shared/constants/time";
 import type { GameGenre, Job, JobFilters, Platform } from "@bao/shared/types/jobs";
-import { eq, gte, inArray, like, sql, type SQLWrapper } from "drizzle-orm";
+import { eq, gte, inArray, like, type SQLWrapper, sql } from "drizzle-orm";
 import { jobs } from "../../db/schema/jobs";
 
 const SALARY_NUMBER_PATTERN = /\d+/g;

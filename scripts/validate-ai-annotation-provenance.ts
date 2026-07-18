@@ -39,6 +39,13 @@ const providerProvenancePattern = /\bprovider\b/giu;
 const modelProvenancePattern = /\bmodel\b/giu;
 // Confidence reference (optional but required where contract exposes it).
 const confidencePattern = /\bconfidence\b/giu;
+// Hoisted: AI surface detection (pathname) — avoids per-call regex compilation.
+const AI_SURFACE_PATH_PATTERN =
+  /\b(?:ai|interview|resume|cover-letter|coverLetter|skills|jobs|match)/iu;
+// Hoisted: score surface detection (pathname).
+const SCORE_SURFACE_PATH_PATTERN = /\b(?:interview|skill|confidence|score|match)\b/iu;
+// Hoisted: confidence/score term detection in combined template+script.
+const SCORE_SURFACE_CONTENT_PATTERN = /\b(?:confidence|score|interviewScore|skillConfidence)\b/iu;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -63,8 +70,7 @@ export const collectAiProvenanceViolationsForContent = (
 ): ValidationViolation[] => {
   // Only scan pages/composables/components that touch AI.
   const isAiSurface =
-    /\b(?:ai|interview|resume|cover-letter|coverLetter|skills|jobs|match)/iu.test(filePath) ||
-    aiResponseConsumerPattern.test(content);
+    AI_SURFACE_PATH_PATTERN.test(filePath) || aiResponseConsumerPattern.test(content);
   if (!isAiSurface) return [];
 
   const template = extractTemplateBlocks(content);
@@ -112,8 +118,7 @@ export const collectAiProvenanceViolationsForContent = (
 
   // Confidence is required on score-bearing surfaces (interview, skill-mapping).
   const isScoreSurface =
-    /\b(?:interview|skill|confidence|score|match)\b/iu.test(filePath) ||
-    /\b(?:confidence|score|interviewScore|skillConfidence)\b/iu.test(combined);
+    SCORE_SURFACE_PATH_PATTERN.test(filePath) || SCORE_SURFACE_CONTENT_PATTERN.test(combined);
   const isComposable = filePath.includes("/composables/");
   if (isScoreSurface && !isComposable && !confidencePattern.test(combined)) {
     const isMockOrSimulationComponent =

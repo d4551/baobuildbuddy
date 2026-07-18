@@ -2,8 +2,15 @@
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { FAB_ACTION_MIN_WIDTH_CLASS, FAB_POSITION_CLASS, FLEX_GAP_TOKEN_CLASS, ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, QUICK_ACTION_MENU_ID } from "~/constants/layout";
 import { FAB_QUICK_ACTIONS } from "~/constants/dashboard-pipeline";
+import {
+  FAB_ACTION_MIN_WIDTH_CLASS,
+  FAB_POSITION_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  QUICK_ACTION_MENU_ID,
+} from "~/constants/layout";
 
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();

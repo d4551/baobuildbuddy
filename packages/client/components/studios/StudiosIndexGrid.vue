@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
@@ -40,7 +48,7 @@ function studioLocation(location: string): string {
       <article
         v-for="studio in studios"
         :key="studio.id"
-        class="card card-border bg-base-100 transition-shadow hover:" :class="[SHADOW_TOKEN_CLASS.md]"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'transition-shadow']"
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">

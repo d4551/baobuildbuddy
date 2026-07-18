@@ -1,5 +1,5 @@
-import type { NuxtApp } from "#app";
 import type { ComposerTranslation } from "vue-i18n";
+import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import { getErrorMessage } from "~/utils/errors";

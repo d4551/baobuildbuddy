@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import type { SetupStep } from "./setup-page-contracts";
 
 defineProps<{

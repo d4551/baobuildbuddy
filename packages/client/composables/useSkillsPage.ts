@@ -1,15 +1,15 @@
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import {
-  SKILLS_DEFAULT_CATEGORY,
-  SKILLS_DEFAULT_CONFIDENCE,
-  SKILLS_FILTER_ALL_VALUE,
-} from "~/constants/skills";
-import {
   createSkillsPageActions,
   type NewSkillMappingFormState,
 } from "~/composables/skills-page-actions";
 import { createSkillsPageDerived } from "~/composables/skills-page-derived";
+import {
+  SKILLS_DEFAULT_CATEGORY,
+  SKILLS_DEFAULT_CONFIDENCE,
+  SKILLS_FILTER_ALL_VALUE,
+} from "~/constants/skills";
 
 type SkillsFilterValue = typeof SKILLS_FILTER_ALL_VALUE | NewSkillMappingFormState["category"];
 

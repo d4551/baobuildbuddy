@@ -1,8 +1,8 @@
 import { JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { settlePromise } from "~/composables/async-flow";
-import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import type { JobsFilterState, JobsTranslate } from "~/composables/jobs-index-page-contracts";
+import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 
 const createJobsSearchCriteria = (input: {
   searchQuery: Ref<string>;

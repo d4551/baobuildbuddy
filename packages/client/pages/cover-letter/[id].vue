@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
-  isCoverLetterTemplate,
   type CoverLetterTemplate,
+  isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
-import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
+  ICON_SIZE_CLASS,
+  PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+} from "~/constants/layout";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
@@ -234,7 +238,7 @@ async function handleExport(format: "pdf" | "docx") {
           @click="requestRegenerate"
         >
           <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
-          <IconRefresh v-else class="h-4 w-4" />
+          <IconRefresh v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 

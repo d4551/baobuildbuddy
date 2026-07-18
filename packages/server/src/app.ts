@@ -1,4 +1,3 @@
-import { t, Elysia, setupTypebox } from "elysia";
 import { APP_BRAND } from "@bao/shared/constants/branding";
 import {
   API_ENDPOINT_PREFIX,
@@ -9,6 +8,7 @@ import {
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
+import { Elysia, setupTypebox, t } from "elysia";
 import { isProductionRuntime } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
@@ -103,12 +103,20 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   )
   .use(logger)
   .use(errorHandler)
-  .afterHandle(({ set }) => {
+  .afterHandle(({ request, set }) => {
     set.headers["x-content-type-options"] = "nosniff";
     set.headers["x-frame-options"] = "DENY";
     set.headers["referrer-policy"] = "strict-origin-when-cross-origin";
     set.headers["permissions-policy"] =
       "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
+
+    const pathname = new URL(request.url).pathname;
+    if (
+      pathname !== API_ENDPOINTS.apiDocsUi &&
+      !pathname.startsWith(`${API_ENDPOINTS.apiDocsUi}/`)
+    ) {
+      set.headers["content-security-policy"] = "default-src 'none'; frame-ancestors 'none'";
+    }
 
     if (isProductionRuntime()) {
       set.headers["strict-transport-security"] = "max-age=63072000; includeSubDomains; preload";

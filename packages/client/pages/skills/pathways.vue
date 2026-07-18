@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import { definePageMeta, useSeoMeta } from "#imports";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { definePageMeta, useSeoMeta } from "#imports";
 import { useSkillsPathwaysPage } from "~/composables/useSkillsPathwaysPage";
+import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({

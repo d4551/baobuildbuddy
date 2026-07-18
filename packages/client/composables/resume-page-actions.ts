@@ -1,8 +1,9 @@
-import type { NuxtApp } from "#app";
 import type { ResumeTemplate } from "@bao/shared/constants/resume";
-import type { ComposerTranslation } from "vue-i18n";
-import type { Ref } from "vue";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
+import type { Ref } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
+import type { NuxtApp } from "#app";
+import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import {
   useAiEnhancementProgress,
@@ -12,7 +13,6 @@ import {
 } from "~/composables/resume-page-editor-actions";
 import { useResumeMutationActions } from "~/composables/resume-page-mutation-actions";
 import { useResumeViewActions } from "~/composables/resume-page-view-actions";
-import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 function createResumeActionModules(

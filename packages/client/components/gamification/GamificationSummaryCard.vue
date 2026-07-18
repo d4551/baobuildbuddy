@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
@@ -9,6 +8,13 @@ import {
   GAMIFICATION_PROGRESS_MAX,
   GAMIFICATION_PROGRESS_MIN,
 } from "~/constants/gamification";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   progress: UserGamificationData;

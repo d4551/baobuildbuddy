@@ -1,5 +1,5 @@
-import type { Ref } from "vue";
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
+import type { Ref } from "vue";
 import {
   RESUME_TABS,
   type ResumePersonalFields,

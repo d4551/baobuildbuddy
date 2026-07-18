@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -127,7 +135,7 @@ const {
         ]"
       />
 
-      <div class="card card-border bg-base-100">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body">
           <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div>
@@ -147,8 +155,7 @@ const {
           ></progress>
 
           <SectionGrid grid-token="threeColumnWide">
-            <article v-for="item in prepChecklist" :key="item.id" class="card bg-base-200">
-              <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
+            <article v-for="item in prepChecklist" :key="item.id" class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                 <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <h3 class="font-semibold">{{ item.title }}</h3>
                   <span class="badge badge-sm" :class="prepStatusBadgeClass(item.ready)">
@@ -156,7 +163,7 @@ const {
                   </span>
                 </div>
                 <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ item.description }}</p>
-                <div class="card-actions justify-end">
+                <div class="flex justify-end">
                   <NuxtLink
                     :to="item.route"
                     class="btn btn-xs btn-outline"
@@ -165,14 +172,13 @@ const {
                     {{ item.ctaLabel }}
                   </NuxtLink>
                 </div>
-              </div>
             </article>
           </SectionGrid>
         </div>
       </div>
 
       <SectionGrid grid-token="twoColumnWide">
-        <div class="card card-border bg-base-100">
+        <div :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body">
             <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
@@ -206,7 +212,7 @@ const {
           </div>
         </div>
 
-        <div class="card card-border bg-base-100">
+        <div :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body">
             <h2 class="card-title">{{ t("interviewHub.cards.studioDrillTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

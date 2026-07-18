@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SkillsPageFilters from "~/components/skills/SkillsPageFilters.vue";
@@ -7,6 +6,15 @@ import SkillsPageInsights from "~/components/skills/SkillsPageInsights.vue";
 import SkillsPageMappings from "~/components/skills/SkillsPageMappings.vue";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { useSkillsPage } from "~/composables/useSkillsPage";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import {
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
@@ -94,7 +102,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           @click="handleAIAnalyze"
         >
           <LoadingSpinner size="xs" label="Loading" v-if="analyzing" />
-          <IconBolt v-else class="h-4 w-4" />
+          <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>
         <button
@@ -102,7 +110,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           :aria-label="t('skillsPage.actions.addMappingAria')"
           @click="showAddModal = true"
         >
-          <IconPlus class="h-4 w-4" />
+          <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("skillsPage.actions.addMappingButton") }}
         </button>
       </template>
@@ -144,7 +152,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       :close-aria-label="t('skillsPage.createModal.closeBackdropAria')"
       :close-backdrop-label="t('skillsPage.createModal.closeBackdropButton')"
     >
-      <h3 :id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
+      <h3 :id="SKILLS_ADD_MAPPING_DIALOG_TITLE_ID" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
         {{ t("skillsPage.createModal.title") }}
       </h3>
 
@@ -223,7 +231,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
                 :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                 @click="removeApplication(index)"
               >
-                <CloseIcon class="h-3 w-3" />
+                <CloseIcon :class="ICON_SIZE_CLASS.xs" />
               </button>
             </div>
           </div>

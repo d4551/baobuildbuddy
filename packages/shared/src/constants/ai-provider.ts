@@ -1,4 +1,4 @@
-import type { AIRouting, AIRoutingPurpose, AIRoutingTarget, AIProviderType } from "../types/ai";
+import type { AIProviderType, AIRouting, AIRoutingPurpose, AIRoutingTarget } from "../types/ai";
 import { AI_PROVIDER_IDS, AI_ROUTING_PURPOSE_IDS } from "../types/ai";
 
 const CLAUDE_TEST_MAX_TOKENS = 1;

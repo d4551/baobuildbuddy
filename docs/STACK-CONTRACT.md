@@ -2,6 +2,26 @@
 
 This document overrides generic “full-stack audit” prompts that assume **Prisma**, **htmx**, or other stacks not used here.
 
+## BINDING: product SSOT (no dual source)
+
+**Decision (architecture, Cycle 1):** BaoBuildBuddy SSOT is **TypeScript constants + CSS design tokens + lint validators** — **not** `.bao` archive compile.
+
+| Concern | Canonical source | Enforced by |
+|---------|------------------|-------------|
+| Layout / shell / surface classes | `packages/client/constants/layout.ts` (+ `layout-tokens.ts` re-exports) | `validate:daisyui-contracts`, `validate:ui-*` |
+| Grid / width / modal tokens | `packages/client/constants/ui-layout.ts` | `validate:ui-layout-tokens`, page-state validators |
+| Theme / glass / motion CSS vars | `packages/client/assets/css/main.css` | `validate:ui-glass-materials`, `validate:ui-motion-tokens` |
+| API paths / shared constants | `packages/shared/src/constants/*` | `validate:no-direct-route-literals`, alignment gates |
+| DB schema | `packages/server/src/db/schema/schema-modules.ts` (Drizzle) | `validate:no-schema-duplication` |
+
+**Not SSOT for this product:**
+
+- **`.bao` archive compile / generated UI primitives** — parent-workspace Bao fabric AGENTS may mandate archives; **this repo has zero `*.bao` archives** and no compile pipeline. Do not invent a mid-cycle `.bao` migration unless product owner explicitly starts cutover.
+- **`~/.bao/bao.db`** — runtime SQLite **data directory** only (`DEFAULT_DB_PATH_RELATIVE`), not a design/capability archive.
+- **Prisma** — not used; ignore ambient `@prisma/client` stubs in `packages/server/types/upstream-optional-modules.d.ts` (Drizzle optional-driver typing under `skipLibCheck: false`).
+
+If parent AGENTS and this file conflict on SSOT shape: **this document wins for BaoBuildBuddy**. Report conflict; do not dual-track.
+
 ## Authoritative runtime
 
 | Layer | Technology | Notes |
@@ -34,9 +54,11 @@ When an external checklist mentions htmx, use the **equivalent Nuxt/Vue behavior
 
 ## Design tokens (single source)
 
+Binding detail: see **BINDING: product SSOT** above. Consumers import constants; validators fail ad-hoc literals.
+
 - **Layout / shell:** `packages/client/constants/layout.ts` (`SHELL_MAIN_INNER_CLASS`, drawer IDs, auth shell, page header classes, empty-state stack, toast id).
 - **Grids / modal widths:** `packages/client/constants/ui-layout.ts`.
-- **Auth card:** static `class` on `layouts/auth-shell.vue` must stay identical to `AUTH_CARD_SHELL_CLASS` (see `validate:daisyui-contracts`).
+- **Auth card:** `layouts/auth-shell.vue` binds `:class="AUTH_CARD_SHELL_CLASS"` (recognized by `validate:daisyui-contracts` as a card-bearing SSOT constant).
 
 ## Shell components (DRY partials)
 

@@ -50,6 +50,13 @@ const rawTablePattern = /<table\b[^>]*>/gu;
 const tableWithoutOverflowScrollPattern =
   /<table\b[^>]*class\s*=\s*["'][^"']*\btable\b[^"']*["'][^>]*>/u;
 
+// Hoisted: AppPagination primitive reference detection.
+const APP_PAGINATION_TAG_PATTERN = /<AppPagination\b/u;
+// Hoisted: daisyUI table class detection inside a raw <table> tag.
+const TABLE_BASE_CLASS_PATTERN = /\bclass\s*=\s*["'][^"']*\btable\b[^"']*["']/u;
+// Hoisted: overflow-x-auto / overflow-x-scroll containment detection.
+const OVERFLOW_X_SCROLL_PATTERN = /\boverflow-x-(?:auto|scroll)\b/u;
+
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
   if (templateStart < 0) return "";
@@ -64,7 +71,7 @@ const collectPaginationViolations = (filePath: string, content: string): Validat
   if (template.length === 0) return [];
   const violations: ValidationViolation[] = [];
 
-  const usesAppPagination = /<AppPagination\b/u.test(template);
+  const usesAppPagination = APP_PAGINATION_TAG_PATTERN.test(template);
 
   handRolledPaginationPattern.lastIndex = 0;
   for (const match of template.matchAll(handRolledPaginationPattern)) {
@@ -97,7 +104,7 @@ const collectTableViolations = (filePath: string, content: string): ValidationVi
 
   rawTablePattern.lastIndex = 0;
   for (const match of template.matchAll(rawTablePattern)) {
-    if (!/\bclass\s*=\s*["'][^"']*\btable\b[^"']*["']/u.test(match[0])) {
+    if (!TABLE_BASE_CLASS_PATTERN.test(match[0])) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
@@ -107,7 +114,7 @@ const collectTableViolations = (filePath: string, content: string): ValidationVi
   }
 
   if (tableWithoutOverflowScrollPattern.test(template)) {
-    if (!/\boverflow-x-(?:auto|scroll)\b/u.test(template)) {
+    if (!OVERFLOW_X_SCROLL_PATTERN.test(template)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, template.indexOf("<table") ?? 0),

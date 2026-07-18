@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 

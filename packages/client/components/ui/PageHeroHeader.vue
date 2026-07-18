@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { PAGE_HERO_ASIDE_CLASS, PAGE_HERO_CONTENT_COMFORTABLE_CLASS, PAGE_HERO_CONTENT_COMPACT_CLASS, PAGE_HERO_SECTION_CLASS } from "~/constants/layout";
+import {
+  PAGE_HERO_ASIDE_CLASS,
+  PAGE_HERO_CONTENT_COMFORTABLE_CLASS,
+  PAGE_HERO_CONTENT_COMPACT_CLASS,
+  PAGE_HERO_SECTION_CLASS,
+} from "~/constants/layout";
 
 type PageHeroDensity = "compact" | "comfortable";
 type PageHeroHeadingTag = "h1" | "h2";

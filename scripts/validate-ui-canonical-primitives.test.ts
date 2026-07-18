@@ -25,7 +25,7 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
         'import { SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";',
         "</script>",
         "<template>",
-        '<div :class="[SURFACE_GLASS_CARD_CLASS, \'h-full\']"></div>',
+        "<div :class=\"[SURFACE_GLASS_CARD_CLASS, 'h-full']\"></div>",
         "</template>",
       ].join("\n"),
     );
@@ -58,7 +58,7 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
   test("flags raw HTML table without daisyUI table primitive", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
-      '<template><table><thead><tr><th>X</th></tr></thead></table></template>',
+      "<template><table><thead><tr><th>X</th></tr></thead></table></template>",
     );
     expect(violations.some((v) => v.message.includes("daisyUI table"))).toBe(true);
   });
@@ -87,7 +87,7 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
         'const isEmpty = true; const uiState = "empty";',
         "</script>",
         "<template>",
-        '<LoadingSkeleton v-if="uiState === \'loading\'" />',
+        "<LoadingSkeleton v-if=\"uiState === 'loading'\" />",
         "</template>",
       ].join("\n"),
     );

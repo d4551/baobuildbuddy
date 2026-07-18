@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
+import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
 } from "~/constants/skills";
-import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import { useI18n } from "vue-i18n";
 
 defineProps<{
   hasMappings: boolean;
@@ -111,7 +117,7 @@ function normalizedConfidence(confidence: number): number {
       <article
         v-for="mapping in filteredMappings"
         :key="mapping.id"
-        class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+        :class="SURFACE_GLASS_CARD_CLASS"
         :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">

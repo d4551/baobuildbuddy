@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared/constants/gamification-icons";
 import { useI18n } from "vue-i18n";
-import { ACHIEVEMENT_ICON_BADGE_CLASS, FLEX_GAP_TOKEN_CLASS, ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  ACHIEVEMENT_ICON_BADGE_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   achievement: {

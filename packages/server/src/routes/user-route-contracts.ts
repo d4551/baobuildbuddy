@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   SCHEMA_MAX_ITEMS_LARGE,
   SCHEMA_MAX_ITEMS_XXLARGE,
@@ -10,6 +9,7 @@ import {
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const userProfileUpdateBodySchema = t.Object({
   name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),

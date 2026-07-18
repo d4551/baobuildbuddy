@@ -1,7 +1,7 @@
 import { PORTFOLIO_PROJECT_LIST_PAGE_SIZE } from "@bao/shared/constants/portfolio";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
-import type { ComposerTranslation } from "vue-i18n";
 import type { ComputedRef, Ref } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
 import {
   normalizePortfolioProject,
   type PortfolioProjectView,

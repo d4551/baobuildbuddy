@@ -7,6 +7,7 @@ const catalog = {
     tagline: "Asistente de Carrera con IA para Desarrollo de Juegos",
   },
   common: {
+    loading: "Cargando",
     localeNames: {
       enUS: "Inglés",
       esES: "Español",

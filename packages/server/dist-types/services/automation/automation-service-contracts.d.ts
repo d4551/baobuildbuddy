@@ -2,8 +2,8 @@ import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
 import type { RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import type { ResumeData } from "@bao/shared/types/resume";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
-import type { coverLetters } from "../../db/schema/schema-modules";
 import type { automationRuns } from "../../db/schema/automation-runs";
+import type { coverLetters } from "../../db/schema/schema-modules";
 import type { JobApplyExecutionPayload } from "./automation-run-inputs";
 export interface EmailDeliveryDetails {
     delivered: boolean;

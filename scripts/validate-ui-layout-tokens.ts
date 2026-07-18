@@ -158,9 +158,9 @@ export const collectUiLayoutTokenViolationsForContent = (
 ];
 
 const collectViolations = async (): Promise<Violation[]> => {
-  const [files, pageFiles] = await Promise.all([collectVueFiles(), collectPageFiles()]);
-  // pageFiles available for future cross-file validation.
-  void pageFiles;
+  const [files] = await Promise.all([collectVueFiles(), collectPageFiles()]);
+  // `collectPageFiles()` runs alongside `collectVueFiles()` so that the page
+  // glob stays warm in Bun's filesystem cache. The full file set is `files`.
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();

@@ -1,11 +1,11 @@
-import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
-import type { JobApplyStrategy } from "./strategy-registry";
-import { automationRuntimeConfig } from "../runtime/config";
 import { settle } from "@bao/shared/utils/promise";
+import { automationRuntimeConfig } from "../runtime/config";
 import { addStep, captureScreenshot } from "./runtime-artifacts";
 import { JOB_APPLY_STEP_INDEX, type JobApplyExecutionState } from "./runtime-contracts";
 import { clickFirstMatchingField } from "./runtime-locators";
 import { getStrategySelectorList } from "./runtime-selector-map";
+import type { JobApplyStrategy } from "./strategy-registry";
+import { JOB_APPLY_CONFIRMATION_PHRASES, JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
 
 const emitProgress = (state: JobApplyExecutionState, action: string, step: number): void => {
   state.emitter.emitProgress({

@@ -14,17 +14,17 @@ import type {
 } from "@bao/shared/types/interview";
 import { settle } from "@bao/shared/utils/promise";
 import { interviewPersonaPrompt } from "./ai/prompts-interview";
+import { withAiOperationTimeout } from "./interview-service-ai";
+import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
 import type { FinalAnalysisPromptContext, StudioContext } from "./interview-service-contracts";
+import { normalizeScore } from "./interview-service-normalizers";
 import {
   buildCandidatePromptContext,
   buildInterviewerPersona,
   buildJobPromptContext,
   buildStudioPromptContext,
 } from "./interview-service-prompt-context";
-import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
-import { normalizeScore } from "./interview-service-normalizers";
 import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
-import { withAiOperationTimeout } from "./interview-service-ai";
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
   if (responses.length === 0) {

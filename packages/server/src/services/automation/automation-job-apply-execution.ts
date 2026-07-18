@@ -11,9 +11,9 @@ import { eq } from "drizzle-orm";
 import { config } from "../../config/env";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
+import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { gamificationService } from "../gamification-service";
-import { createServerLogger } from "../../utils/logger";
 import {
   markRunCompleted,
   markRunFailed,

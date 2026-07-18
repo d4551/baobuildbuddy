@@ -1,8 +1,22 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { API_ERROR_COVER_LETTER_GENERATION_FAILED } from "@bao/shared/constants/api-errors";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+import { db, sqlite } from "../db/client";
+import { initializeDatabase } from "../db/init";
+import { seedDatabase } from "../db/seed";
+import { AIService } from "../services/ai/ai-service";
+import type { RouteSetState } from "../types/route-state";
+import { handleGenerateCoverLetter } from "./cover-letter-route-generation";
 import {
-  ensureCompleteCoverLetterContent,
   toGeneratedCoverLetterContent,
+  validateGeneratedCoverLetterContent,
 } from "./cover-letter-route-generation-support";
+
+const activeSpies: Array<{ mockRestore: () => void }> = [];
+const trackSpy = <T extends { mockRestore: () => void }>(spy: T): T => {
+  activeSpies.push(spy);
+  return spy;
+};
 
 const testParsesFencedJsonResponses = () => {
   test("parses fenced JSON responses into clean letter segments", () => {
@@ -26,8 +40,8 @@ const testParsesFencedJsonResponses = () => {
   });
 };
 
-const testFallsBackToLineParsing = () => {
-  test("falls back to line parsing for non-JSON content", () => {
+const testParsesPlainLineSegments = () => {
+  test("parses plain multi-line content into introduction, body, and conclusion", () => {
     const result = toGeneratedCoverLetterContent(
       "Intro paragraph.\nBody paragraph one.\nClosing paragraph.",
     );
@@ -148,7 +162,7 @@ const testStripsEditorialCleanupArtifacts = () => {
 
 describe("toGeneratedCoverLetterContent", () => {
   testParsesFencedJsonResponses();
-  testFallsBackToLineParsing();
+  testParsesPlainLineSegments();
   testParsesJsonLikeQuotedSegments();
   testParsesReasoningStyleDraftSections();
   testStripsReasoningTails();
@@ -156,53 +170,85 @@ describe("toGeneratedCoverLetterContent", () => {
   testStripsEditorialCleanupArtifacts();
 });
 
-describe("ensureCompleteCoverLetterContent", () => {
-  test("replaces planning artifacts with fallback copy", () => {
-    const result = ensureCompleteCoverLetterContent(
-      {
-        introduction: "Dear Hiring Team,",
-        body: "Gameplay systems paragraph.",
-        conclusion: "~50 words. Total: ~190 words. Well under the 400-word limit.",
-      },
-      {
-        company: "Studio Hash",
-        position: "AI Gameplay Engineer",
-      },
-      {
-        promptContext: "",
-        summary: "I build combat systems for online action games.",
-        experienceHighlight: "Gameplay Programmer at Test Studio",
-        skills: ["TypeScript", "Bun"],
-      },
-    );
-
-    expect(result.conclusion).toBe(
-      "Thank you for your consideration. I would welcome the chance to discuss how my background aligns with the AI Gameplay Engineer role at Studio Hash.",
-    );
+describe("handleGenerateCoverLetter secret hygiene", () => {
+  beforeAll(() => {
+    initializeDatabase(sqlite);
+    seedDatabase(db);
   });
 
-  test("avoids duplicate punctuation in fallback experience copy", () => {
-    const result = ensureCompleteCoverLetterContent(
-      {
-        introduction: "",
-        body: "",
-        conclusion: "",
-      },
-      {
-        company: "Studio Hash",
-        position: "AI Gameplay Engineer",
-      },
-      {
-        promptContext: "",
-        summary: "I build combat systems for online action games.",
-        experienceHighlight: "Gameplay Programmer at Test Studio, shipped combat systems.",
-        skills: ["TypeScript", "Bun"],
-      },
+  afterEach(() => {
+    while (activeSpies.length > 0) {
+      activeSpies.pop()?.mockRestore();
+    }
+  });
+
+  test("AI generation failures omit provider secrets from the client response", async () => {
+    const leakedSecret = "sk-proj-LEAKED_PROVIDER_SECRET_VALUE";
+    const service = AIService.fromSettings(undefined);
+    trackSpy(spyOn(service, "generate")).mockRejectedValue(
+      new Error(`All providers failed to generate: openai: Invalid API key ${leakedSecret}`),
+    );
+    trackSpy(spyOn(AIService, "fromSettings")).mockReturnValue(service);
+
+    const set: RouteSetState = { status: 200 };
+    const result = await handleGenerateCoverLetter(
+      { company: "Studio Hash", position: "Gameplay Engineer" },
+      set,
     );
 
-    expect(result.body).toContain(
-      "Most recently, I worked as Gameplay Programmer at Test Studio, shipped combat systems.",
-    );
-    expect(result.body).not.toContain("systems..");
+    expect(set.status).toBe(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+    expect(result).toEqual({ error: API_ERROR_COVER_LETTER_GENERATION_FAILED });
+    expect(JSON.stringify(result)).not.toContain(leakedSecret);
+    expect(JSON.stringify(result)).not.toContain("Invalid API key");
+  });
+});
+
+describe("validateGeneratedCoverLetterContent", () => {
+  test("fails loud when conclusion contains planning artifacts", () => {
+    const result = validateGeneratedCoverLetterContent({
+      introduction: "Dear Hiring Team, I am excited to apply for the AI Gameplay Engineer role.",
+      body: "I build gameplay systems for live service titles.",
+      conclusion: "~50 words. Total: ~190 words. Well under the 400-word limit.",
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) {
+      throw new Error("Expected incomplete cover letter content to fail validation");
+    }
+    expect(result.error.code).toBe("COVER_LETTER_INCOMPLETE_CONTENT");
+    expect(result.error.missingSections).toContain("conclusion");
+    expect(result.error.reasons.some((reason) => reason.includes("planning artifacts"))).toBe(true);
+  });
+
+  test("fails loud when generated sections are empty", () => {
+    const result = validateGeneratedCoverLetterContent({
+      introduction: "",
+      body: "",
+      conclusion: "",
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) {
+      throw new Error("Expected empty cover letter content to fail validation");
+    }
+    expect(result.error.missingSections).toEqual(["introduction", "body", "conclusion"]);
+  });
+
+  test("accepts complete generated letter sections", () => {
+    const result = validateGeneratedCoverLetterContent({
+      introduction:
+        "Dear Studio Hash Team, I am excited to apply for the AI Gameplay Engineer role.",
+      body: "I build combat systems for online action games. Most recently, I worked as Gameplay Programmer at Test Studio.",
+      conclusion:
+        "Thank you for your consideration. I would welcome the chance to discuss the role further.",
+    });
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      throw new Error("Expected complete cover letter content to pass validation");
+    }
+    expect(result.data.introduction.length).toBeGreaterThan(0);
+    expect(result.data.body.length).toBeGreaterThan(0);
+    expect(result.data.conclusion.length).toBeGreaterThan(0);
   });
 });

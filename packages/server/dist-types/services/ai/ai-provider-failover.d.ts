@@ -4,7 +4,7 @@ export type ProviderFailure = {
     provider: AIProviderType;
     error: string;
 };
-interface FallbackRequest {
+interface FailoverRequest {
     providers: Map<AIProviderType, AIProvider>;
     providerOrder: AIProviderType[];
     routingTarget: {
@@ -15,19 +15,27 @@ interface FallbackRequest {
     contextualPrompt: string;
     providerOptions: Omit<GenerateOptions, "messages"> | undefined;
 }
-export declare const buildFailureMessage: (errors: ProviderFailure[]) => string;
 export declare const mergePromptWithContext: (prompt: string, options?: GenerateOptions) => string;
 export declare const toProviderOptions: (routingTarget: {
     purpose: GenerateOptions["purpose"] extends infer P ? P : string;
     provider: AIProviderType;
     model?: string;
 }, options?: GenerateOptions) => Omit<GenerateOptions, "messages"> | undefined;
-export declare const generateWithFallback: (request: FallbackRequest) => Promise<{
-    response: AIResponse | null;
+export type GenerateFailoverResult = {
+    success: true;
+    data: AIResponse;
     errors: ProviderFailure[];
-}>;
-export declare const buildGenerateFailureResponse: (errors: ProviderFailure[], fallbackProvider: AIProviderType) => AIResponse;
-export declare const streamWithFallback: (request: FallbackRequest) => AsyncGenerator<{
+} | {
+    success: false;
+    error: {
+        code: "ALL_PROVIDERS_GENERATE_FAILED";
+        message: string;
+    };
+    errors: ProviderFailure[];
+};
+export declare const generateWithProviderFailover: (request: FailoverRequest) => Promise<GenerateFailoverResult>;
+export declare const buildGenerateFailure: (errors: ProviderFailure[]) => Error;
+export declare const streamWithProviderFailover: (request: FailoverRequest) => AsyncGenerator<{
     chunk: string;
     provider: AIProviderType;
 }, {

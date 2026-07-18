@@ -1,5 +1,5 @@
 /**
- * Extended .bao SSOT design tokens.
+ * Extended layout SSOT design tokens (constants + validators; not `.bao` archives).
  *
  * Automatically re-exported by `~/constants/layout` — consume from that file
  * (do not import this module directly).
@@ -96,6 +96,17 @@ export const TYPOGRAPHY_SCALE_CLASS = {
   xl2: "text-2xl",
   xl3: "text-3xl",
   xl4: "text-4xl",
+  xl5: "text-5xl",
   xl6: "text-6xl",
 } as const;
 export type TypographyScaleToken = keyof typeof TYPOGRAPHY_SCALE_CLASS;
+
+/** Semantic font-weight tokens (single source for bold/medium/etc.). */
+export const FONT_WEIGHT_TOKEN_CLASS = {
+  medium: "font-medium",
+  semibold: "font-semibold",
+  bold: "font-bold",
+  extrabold: "font-extrabold",
+  normal: "font-normal",
+} as const;
+export type FontWeightToken = keyof typeof FONT_WEIGHT_TOKEN_CLASS;

@@ -1,10 +1,10 @@
-import type { Static } from "typebox";
 import {
   SCHEMA_MAX_LENGTH_ID,
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_MESSAGE,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { sessionConfigSchema } from "../routes/interview-route-contracts";
 
 export const interviewWebSocketBodySchema = t.Object({

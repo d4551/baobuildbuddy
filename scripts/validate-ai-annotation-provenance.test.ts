@@ -13,7 +13,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
         '<script setup lang="ts">',
         "const aiMessage = ref('hello');",
         "</script>",
-        '<template><div>{{ aiMessage }}</div></template>',
+        "<template><div>{{ aiMessage }}</div></template>",
       ].join("\n"),
     );
     expect(violations.some((v) => v.message.includes("provider"))).toBe(true);
@@ -27,7 +27,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
         "const aiMessage = ref('hello');",
         'const provider = ref("openai");',
         "</script>",
-        '<template><div>{{ aiMessage }} {{ provider }}</div></template>',
+        "<template><div>{{ aiMessage }} {{ provider }}</div></template>",
       ].join("\n"),
     );
     expect(violations.some((v) => v.message.includes("model"))).toBe(true);
@@ -42,7 +42,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
         'const provider = ref("openai");',
         'const model = ref("gpt-4");',
         "</script>",
-        '<template><div>{{ aiMessage }} <span>{{ provider }} / {{ model }}</span></div></template>',
+        "<template><div>{{ aiMessage }} <span>{{ provider }} / {{ model }}</span></div></template>",
       ].join("\n"),
     );
     expect(violations).toHaveLength(0);
@@ -58,7 +58,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
         'const model = ref("gpt-4");',
         "const interviewScore = ref(85);",
         "</script>",
-        '<template><div>{{ aiMessage }} {{ provider }} {{ model }} {{ interviewScore }}</div></template>',
+        "<template><div>{{ aiMessage }} {{ provider }} {{ model }} {{ interviewScore }}</div></template>",
       ].join("\n"),
     );
     expect(violations.some((v) => v.message.includes("confidence"))).toBe(true);
@@ -74,7 +74,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
         'const model = ref("gpt-4");',
         "const confidence = ref(0.9);",
         "</script>",
-        '<template><div>{{ aiMessage }} {{ provider }} {{ model }} {{ confidence }}</div></template>',
+        "<template><div>{{ aiMessage }} {{ provider }} {{ model }} {{ confidence }}</div></template>",
       ].join("\n"),
     );
     expect(violations).toHaveLength(0);
@@ -83,7 +83,7 @@ describe("collectAiProvenanceViolationsForContent", () => {
   test("does not flag non-AI pages", () => {
     const violations = collectAiProvenanceViolationsForContent(
       NON_AI_PAGE,
-      '<template><div>settings</div></template>',
+      "<template><div>settings</div></template>",
     );
     expect(violations).toHaveLength(0);
   });

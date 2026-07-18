@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
 interface Studio {
@@ -249,7 +257,8 @@ function studioLocationLabel(location: string): string {
             :id="optionId(studio.id)"
             type="button"
             role="option"
-            class="flex cursor-pointer flex-col items-start gap-1 rounded-box px-3 py-2 text-left"
+            class="flex cursor-pointer flex-col items-start rounded-box text-left"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap1, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
             :aria-selected="studio.id === modelValue"
             :class="[FLUID_WIDTH_CLASS, {

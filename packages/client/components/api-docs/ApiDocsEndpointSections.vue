@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ApiEndpoint, ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{
@@ -26,7 +35,7 @@ const { t } = useI18n();
     <section
       v-for="group in endpointGroups"
       :key="group.id"
-      class="card border border-base-200 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
+      :class="SURFACE_GLASS_CARD_CLASS"
     >
       <div class="card-body space-y-5">
         <h2 class="card-title">{{ group.label }}</h2>

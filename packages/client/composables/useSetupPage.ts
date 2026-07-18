@@ -4,7 +4,6 @@ import {
 } from "@bao/shared/constants/ai-provider";
 import type { DashboardStats } from "@bao/shared/types/search";
 import { useI18n } from "vue-i18n";
-import { createFlowEngineInput } from "~/constants/flow-engine";
 import {
   CLOUD_PROVIDER_IDS,
   type CloudProvider,
@@ -15,6 +14,7 @@ import {
 } from "~/components/setup/setup-page-contracts";
 import { createSetupPageActions } from "~/composables/setup-page-actions";
 import { useSetupPageBootstrap } from "~/composables/setup-page-bootstrap";
+import { createFlowEngineInput } from "~/constants/flow-engine";
 import { resolveLocalProviderState, resolveProviderMetadata } from "~/utils/ai-control-plane";
 
 type ProviderCredentialState = Record<CloudProvider, string>;

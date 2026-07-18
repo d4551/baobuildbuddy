@@ -1,10 +1,10 @@
 import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewMode, InterviewTargetJob } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
-import type { NuxtApp } from "#app";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Router } from "vue-router";
+import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
 import { createInterviewHubPresentation } from "~/composables/interview-hub-presentation";
 import { getErrorMessage } from "~/utils/errors";

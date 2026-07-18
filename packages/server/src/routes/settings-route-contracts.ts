@@ -1,9 +1,8 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
   HTTP_STATUS_OK,
   HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import { MAX_PORT, MIN_PORT } from "@bao/shared/constants/ports";
 import {
@@ -15,7 +14,9 @@ import {
   SCHEMA_MAX_LENGTH_SETTINGS_URL,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { DATA_EXPORT_VERSION } from "../services/data-service-contracts";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 import {
   aiRoutingBodySchema,
   brandSettingsBodySchema,
@@ -34,7 +35,6 @@ import {
   nullableJsonValueBodySchema,
   speechSettingsBodySchema,
 } from "./settings-route-schema-automation";
-import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const preferredProviderBodySchema = preferredProviderSchema;
 export const resolveKnownProvider = resolveKnownProviderValue;
