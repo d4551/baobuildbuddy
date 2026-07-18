@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
+import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
 import type {
   InterviewQuestion,
   InterviewSession,
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 type InterviewCompletionState =
@@ -72,8 +72,8 @@ const { t } = useI18n();
       role="status"
       aria-live="polite"
     >
-      <svg :class="ICON_SIZE_CLASS.md" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="m5 13 4 4L19 7" />
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button
@@ -105,11 +105,11 @@ const { t } = useI18n();
       >
         <div
           v-if="canUseVoice"
-          :class="SURFACE_GLASS_CARD_CLASS"
+          class="card card-border bg-base-100"
           :aria-label="t('interviewSession.voice.idle')"
         >
           <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+            <div class="space-y-1">
               <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("interviewSession.voiceTitle") }}
               </p>

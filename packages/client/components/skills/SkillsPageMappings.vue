@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS,
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
 } from "~/constants/skills";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 
 defineProps<{
   hasMappings: boolean;
@@ -59,7 +59,7 @@ function normalizedConfidence(confidence: number): number {
             <td class="font-medium">{{ mapping.gameExpression }}</td>
             <td>{{ mapping.transferableSkill }}</td>
             <td>
-              <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
+              <div class="flex flex-wrap gap-1">
                 <span
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
@@ -73,7 +73,7 @@ function normalizedConfidence(confidence: number): number {
               </div>
             </td>
             <td class="w-40">
-              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+              <div class="space-y-1">
                 <div class="flex items-center justify-between font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <span>{{ mapping.confidence }}%</span>
                   <span class="text-muted">
@@ -111,7 +111,7 @@ function normalizedConfidence(confidence: number): number {
       <article
         v-for="mapping in filteredMappings"
         :key="mapping.id"
-        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']"
+        class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]"
         :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
@@ -130,7 +130,7 @@ function normalizedConfidence(confidence: number): number {
             :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
           ></progress>
 
-          <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
+          <div class="flex flex-wrap gap-1">
             <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
             <span
               v-for="application in mapping.industryApplications.slice(0, 3)"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
@@ -20,7 +20,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div class="card card-border bg-base-100">
     <div class="card-body">
       <SettingsPanelHeader
         :title="t('settings.automation.title')"

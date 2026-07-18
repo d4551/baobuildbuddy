@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession } from "@bao/shared/types/interview";
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 
@@ -135,7 +135,7 @@ const viewSession = (id: string): void => {
             <div class="timeline-middle">
               <UiRadialMeter
                 :value="session.score ?? 0"
-                :size-class="ICON_SIZE_CLASS['12']"
+                size-class="h-12 w-12"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
               >

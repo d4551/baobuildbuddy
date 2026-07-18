@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
+import {
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
+import { useI18n } from "vue-i18n";
+import {
   CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,
   CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
   CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
   type ChatDensity,
 } from "~/constants/chat";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, formatChatTimestamp } from "~/utils/chat";
+import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
   defineProps<{
@@ -135,7 +136,7 @@ const ariaLabel = computed(() => {
       </time>
     </div>
     <div
-      class="chat-bubble chat-bubble-enter whitespace-pre-wrap break-words"
+      class="chat-bubble whitespace-pre-wrap break-words"
       :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
       <ul
@@ -172,6 +173,9 @@ const ariaLabel = computed(() => {
     >
       <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
       <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>
+      <span v-if="props.message.confidence !== undefined" class="badge badge-outline badge-xs">
+        {{ props.message.confidence }}%
+      </span>
     </div>
   </article>
 </template>

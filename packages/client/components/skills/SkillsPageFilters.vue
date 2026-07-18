@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
-import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
-import {  ICON_DECORATIVE_STROKE_WIDTH, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
+import { useI18n } from "vue-i18n";
 
 defineProps<{
   categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
@@ -25,11 +25,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
         <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
           v-model="searchFilter"

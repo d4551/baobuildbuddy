@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewQuestion } from "@bao/shared/types/interview";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const props = defineProps<{
@@ -46,9 +46,9 @@ const promptExpectedMinutes = computed(() => {
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-prompt-title">
+  <section class="card card-border bg-base-100" aria-labelledby="interview-session-prompt-title">
     <div class="card-body gap-5">
-      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+      <div class="space-y-1">
         <h2 id="interview-session-prompt-title" class="card-title text-xl">
           {{ t("interviewSession.promptTitle") }}
         </h2>

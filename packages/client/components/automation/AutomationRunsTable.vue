@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 
 defineProps<{
@@ -17,7 +17,7 @@ defineProps<{
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <div class="card card-border bg-base-100">
     <div class="card-body">
       <div class="overflow-x-auto">
         <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">

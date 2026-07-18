@@ -77,7 +77,7 @@ const emit = defineEmits<{
 
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
-      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
+      <div class="card-actions mt-6 justify-end">
         <button
           class="btn btn-primary"
           :disabled="!canProceedTarget"

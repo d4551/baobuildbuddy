@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  ICON_SIZE_CLASS,
-  MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import type { ResumeData } from "@bao/shared/types/resume";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 
 interface ResumeLibraryPanelProps {
   readonly resumes: readonly ResumeData[];
@@ -50,7 +44,7 @@ function requestDelete(resumeId?: string): void {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section v-if="resumes.length > 0" :class="SURFACE_GLASS_CARD_CLASS">
+    <section v-if="resumes.length > 0" class="card card-border bg-base-100">
       <div class="card-body">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("resumePage.filters.searchLegend") }}</legend>
@@ -76,7 +70,7 @@ function requestDelete(resumeId?: string): void {
     </section>
 
     <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
-      <IconInfoCircle :class="ICON_SIZE_CLASS.md" />
+      <IconInfoCircle class="h-6 w-6" />
       <span>{{ t("resumePage.emptyState") }}</span>
     </div>
 

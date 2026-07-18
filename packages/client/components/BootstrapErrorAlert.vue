@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 const props = withDefaults(
   defineProps<{
     title?: string;
@@ -43,7 +43,7 @@ const hasRetry = computed(
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
-        :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
+        stroke-width="2"
         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>

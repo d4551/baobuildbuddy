@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_HEIGHT_CLASS,
-  MARGIN_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
 
 defineProps<{
@@ -23,7 +17,7 @@ const { t } = useI18n();
     <div
       v-for="card in orderedCards"
       :key="card.id"
-      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover', FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
+      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
     >
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -34,7 +28,7 @@ const { t } = useI18n();
               >
                 <component
                   :is="resolveAppIconComponent(card.iconName)"
-                  :class="ICON_SIZE_CLASS['4']"
+                  class="h-4 w-4"
                   aria-hidden="true"
                 />
                 <span class="sr-only">{{ t(card.titleKey) }}</span>

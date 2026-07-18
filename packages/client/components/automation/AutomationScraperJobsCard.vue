@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, STACK_SPACE_Y_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { Job } from "@bao/shared/types/jobs";
-import {  SURFACE_GLASS_CARD_CLASS, STACK_SPACE_Y_TOKEN_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 
 defineProps<{
   jobsLoading: boolean;
@@ -20,7 +20,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <div class="card card-border bg-base-100">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title">{{ t("automation.scraper.table.title") }}</h2>
@@ -57,7 +57,7 @@ const { t } = useI18n();
           <tbody>
             <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
               <td>
-                <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+                <div class="space-y-1">
                   <div class="font-medium">{{ job.title }}</div>
                   <p v-if="hasJobEnrichment(job)" class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
@@ -81,7 +81,7 @@ const { t } = useI18n();
                 </div>
               </td>
               <td>
-                <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+                <div class="space-y-1">
                   <div class="font-medium">{{ job.company }}</div>
                   <div v-if="job.source" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                     {{ job.source }}

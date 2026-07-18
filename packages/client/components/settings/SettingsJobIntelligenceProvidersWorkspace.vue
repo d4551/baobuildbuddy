@@ -1,17 +1,10 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  PADDING_TOKEN_CLASS,
-  SHADOW_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
 
 const props = defineProps<{
   providerSaveState: SaveState;
@@ -47,8 +40,8 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
-    <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
+  <div class="card card-border bg-base-100">
+    <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
         :description="t('settings.jobIntelligence.providersDescription')"
@@ -81,28 +74,28 @@ const sourceCollectionCount = computed(
       </SettingsPanelHeader>
 
       <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+        <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summarySourcesDescription") }}</div>
         </div>
 
-        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+        <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("settings.jobIntelligence.summaryCollectionsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ sourceCollectionCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summaryCollectionsDescription") }}</div>
         </div>
 
-        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+        <div class="stat px-4 py-3">
           <div class="stat-title">{{ t("settings.jobIntelligence.defaultsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ jobProviderForm.providerTimeoutMs }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.defaultsDescription") }}</div>
         </div>
       </div>
 
-      <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
+      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+          <div class="space-y-1">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.defaultsTitle") }}</h3>
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.defaultsDescription") }}
@@ -168,7 +161,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3, FLEX_GAP_TOKEN_CLASS.gap4]">
+              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100 px-4 py-3" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>

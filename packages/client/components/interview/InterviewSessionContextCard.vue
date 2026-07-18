@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -23,9 +23,9 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-context-title">
+  <section class="card card-border bg-base-100" aria-labelledby="interview-session-context-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-      <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+      <div class="space-y-1">
         <h2 id="interview-session-context-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.overviewTitle") }}
         </h2>
@@ -39,7 +39,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
           {{ t("interviewSession.targetTitle") }}
         </summary>
         <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+          <div class="space-y-1">
             <p class="text-base font-semibold text-base-content">
               {{ targetJob?.title ?? activeSession.role }}
             </p>
@@ -90,7 +90,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </summary>
         <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <template v-if="interviewerPersona">
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+            <div class="space-y-1">
               <p class="text-base font-semibold text-base-content">{{ interviewerPersona.name }}</p>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ interviewerPersona.role }} · {{ interviewerPersona.studioName }}
@@ -98,19 +98,19 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
             </div>
 
             <dl :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+              <div class="space-y-1">
                 <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerRoleLabel") }}
                 </dt>
                 <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.role }}</dd>
               </div>
-              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+              <div class="space-y-1">
                 <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerStyleLabel") }}
                 </dt>
                 <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.style }}</dd>
               </div>
-              <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+              <div class="space-y-1">
                 <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerBackgroundLabel") }}
                 </dt>

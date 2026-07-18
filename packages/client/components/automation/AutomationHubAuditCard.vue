@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type {
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS,
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
+import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {
   resolveAutomationCapabilityAction,
   resolveAutomationCapabilityDisplayName,
   resolveAutomationCapabilityIssues,
 } from "~/utils/automation-capabilities";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, getErrorMessage } from "~/utils/errors";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, resolveAutomationCapabilityIconName } from "./automation-visuals";
+import { getErrorMessage } from "~/utils/errors";
+import { resolveAutomationCapabilityIconName } from "./automation-visuals";
 
 const props = defineProps<{
   capabilityAuditStatus: "idle" | "pending" | "success" | "error";
@@ -60,7 +60,7 @@ const readyEntries = computed(() =>
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.hub.audit.aria')">
+  <section class="card card-border bg-base-100" :aria-label="t('automation.hub.audit.aria')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div>
@@ -104,7 +104,7 @@ const readyEntries = computed(() =>
         />
 
         <SectionGrid grid-token="twoColumnWide">
-          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-attention-title">
+          <section class="card card-border bg-base-100" aria-labelledby="automation-capability-attention-title">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
                 <h3 id="automation-capability-attention-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -136,7 +136,7 @@ const readyEntries = computed(() =>
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              :class="ICON_SIZE_CLASS['4']"
+                              class="h-4 w-4"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
@@ -182,7 +182,7 @@ const readyEntries = computed(() =>
             </div>
           </section>
 
-          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-ready-title">
+          <section class="card card-border bg-base-100" aria-labelledby="automation-capability-ready-title">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
                 <h3 id="automation-capability-ready-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -208,7 +208,7 @@ const readyEntries = computed(() =>
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              :class="ICON_SIZE_CLASS['4']"
+                              class="h-4 w-4"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>

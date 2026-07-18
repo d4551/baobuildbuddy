@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLUID_WIDTH_CLASS,
-  MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
@@ -36,7 +31,7 @@ defineEmits<{
     :close-aria-label="$t('coverLetterPage.generate.closeBackdropAria')"
     :close-backdrop-label="$t('coverLetterPage.generate.closeBackdropButton')"
   >
-    <h2 :id="titleId" :class="[TYPOGRAPHY_SCALE_CLASS.lg, 'font-bold']">
+    <h2 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ $t("coverLetterPage.generate.title") }}
     </h2>
     <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -146,7 +141,7 @@ defineEmits<{
         @click="$emit('generate')"
       >
         <LoadingSpinner v-if="generating" size="xs" :label="$t('coverLetterPage.generate.submitButton')" />
-        <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
+        <IconBolt v-else class="h-4 w-4" />
         {{ $t("coverLetterPage.generate.submitButton") }}
       </button>
     </div>

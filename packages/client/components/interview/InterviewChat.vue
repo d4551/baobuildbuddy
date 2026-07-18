@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_HEIGHT_CLASS,
-  FLUID_WIDTH_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, computed, nextTick, watch } from "vue";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
+import { computed, nextTick, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
 interface Question {
   id: string;
@@ -159,10 +153,10 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
+  <section class="card card-border bg-base-100" :class="[FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body gap-0 p-0">
       <div class="border-b border-base-300 px-6 py-5">
-        <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+        <div class="space-y-1">
           <h2 id="interview-chat-workspace-title" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
@@ -174,7 +168,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        class="flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[MIN_H_80_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack4]"
+        class="min-h-80 flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"

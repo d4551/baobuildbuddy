@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 
 interface ResumeEditorToolbarProps {
   readonly enhancing: boolean;
@@ -23,7 +23,7 @@ const { t } = useI18n();
 <template>
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
     <button class="btn btn-ghost btn-sm" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
-      <IconArrowLeft :class="ICON_SIZE_CLASS['4']" />
+      <IconArrowLeft class="h-4 w-4" />
       {{ t("resumePage.backButton") }}
     </button>
 
@@ -35,7 +35,7 @@ const { t } = useI18n();
         @click="emit('enhance')"
       >
         <LoadingSpinner size="xs" label="Loading" v-if="enhancing" />
-        <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
+        <IconBolt v-else class="h-4 w-4" />
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
       <button

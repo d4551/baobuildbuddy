@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
 defineProps<{
@@ -26,7 +26,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">

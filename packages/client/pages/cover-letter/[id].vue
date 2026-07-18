@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS,
+import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   isCoverLetterTemplate,
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
-import {  ICON_SIZE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, settlePromise } from "~/composables/async-flow";
-import {  ICON_SIZE_CLASS, PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-import {  ICON_SIZE_CLASS,
+import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { PAGE_HEADER_DESCRIPTION_MEASURE_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
-import {  ICON_SIZE_CLASS, getErrorMessage } from "~/utils/errors";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],
@@ -234,7 +234,7 @@ async function handleExport(format: "pdf" | "docx") {
           @click="requestRegenerate"
         >
           <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
-          <IconRefresh v-else :class="ICON_SIZE_CLASS['4']" />
+          <IconRefresh v-else class="h-4 w-4" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 

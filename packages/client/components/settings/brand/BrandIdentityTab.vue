@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 const BRAND_HINT_IDS = {
@@ -24,13 +24,13 @@ const brandForm = defineModel<{
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
     <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.identityDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" :extra-class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <SectionGrid grid-token="twoColumn" extra-:class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <fieldset :class="brandFieldsetClass">
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.nameLegend") }}

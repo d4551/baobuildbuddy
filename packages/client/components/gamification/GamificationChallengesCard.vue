@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { DailyChallenge } from "@bao/shared/types/gamification";
-import {  SURFACE_GLASS_CARD_CLASS, GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
+import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 
 defineProps<{
   challenges: readonly DailyChallenge[];
@@ -26,7 +26,7 @@ const emit = defineEmits<{
         <article
           v-for="challenge in challenges"
           :key="challenge.id"
-          :class="SURFACE_GLASS_CARD_CLASS"
+          class="card card-border bg-base-100"
         >
           <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <div class="mb-2 flex items-center justify-between">

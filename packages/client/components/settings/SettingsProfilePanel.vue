@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import {  SURFACE_GLASS_CARD_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 const props = defineProps<{
@@ -37,7 +37,7 @@ const profileSaveStateLabel = computed(() => {
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div class="card card-border bg-base-100">
     <div class="card-body">
       <SettingsPanelHeader :title="t('settings.profile.title')">
         <template #meta>

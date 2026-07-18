@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
+import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import {  SURFACE_GLASS_CARD_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
@@ -30,7 +30,7 @@ const { t } = useI18n();
       ]"
     />
 
-    <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+    <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body">
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
@@ -39,9 +39,9 @@ const { t } = useI18n();
     </div>
 
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
-      <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+          <div class="space-y-1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.pathwaysDescription") }}
@@ -78,9 +78,9 @@ const { t } = useI18n();
         </div>
       </article>
 
-      <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+      <article class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-          <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+          <div class="space-y-1">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.topMappingsDescription") }}

@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  MARGIN_TOKEN_CLASS,
-  PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
@@ -35,10 +28,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS.mb4]">
+  <div class="card card-border bg-base-200" :class="[MARGIN_TOKEN_CLASS.mb4]">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+        <div class="space-y-1">
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
@@ -59,15 +52,15 @@ const emit = defineEmits<{
           <tbody>
             <tr v-for="section in aiRoutingSections" :key="section.id">
               <th scope="row" class="align-top">
-                <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+                <div class="space-y-1">
                   <p class="font-medium">{{ section.label }}</p>
-                  <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, 'leading-5']">{{ section.description }}</p>
+                  <p class="leading-5 text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
                 </div>
               </th>
               <td class="align-top">
                 <select
                   v-model="aiRoutingDraft[section.id].provider"
-                  class="select select-sm" :class="[MIN_WIDTH_FORM_COL_CLASS, FLUID_WIDTH_CLASS]"
+                  class="select select-sm min-w-40" :class="[FLUID_WIDTH_CLASS]"
                   :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
                 >
                   <option
@@ -85,7 +78,7 @@ const emit = defineEmits<{
                     v-model="aiRoutingDraft[section.id].model"
                     :list="`routing-model-options-${section.id}`"
                     type="text"
-                    class="input input-sm" :class="[MIN_WIDTH_SELECT_CLASS, FLUID_WIDTH_CLASS]"
+                    class="input input-sm min-w-52" :class="[FLUID_WIDTH_CLASS]"
                     :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
                     :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
                   />

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  PADDING_TOKEN_CLASS, computed, nextTick, useTemplateRef, watch } from "vue";
-import {  PADDING_TOKEN_CLASS, useI18n } from "vue-i18n";
+import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { computed, nextTick, useTemplateRef, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
 
 type ConfirmDialogVariant = "default" | "danger";
@@ -130,7 +130,7 @@ function handleClose(): void {
     @close="handleClose"
   >
     <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ title }}</h3>
-    <p :id="descriptionId" :class="PADDING_TOKEN_CLASS.py4">{{ message }}</p>
+    <p :id="descriptionId" class="py-4">{{ message }}</p>
     <div class="modal-action">
       <button
         ref="cancelButton"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  FLUID_WIDTH_CLASS, useI18n } from "vue-i18n";
-import {  FLUID_WIDTH_CLASS, getErrorMessage } from "~/utils/errors";
+import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   layout: "auth-shell",
@@ -50,9 +50,9 @@ useSeoMeta({
     width-token="shell"
     spacing-token="compact"
     labelled-by="setup-title"
-    :extra-class="FLUID_WIDTH_CLASS"
+    extra-class="w-full"
   >
-    <h1 id="setup-title" class="text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2, 'font-bold']">
+    <h1 id="setup-title" class="font-bold text-primary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.xl2]">
       {{ t("setup.title", { brand: resolvedBrand.name }) }}
     </h1>
 

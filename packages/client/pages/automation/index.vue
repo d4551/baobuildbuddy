@@ -1,26 +1,20 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, PADDING_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
 
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, computed, ref, watch } from "vue";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useSeoMeta } from "#imports";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
+import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
+import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useSeoMeta } from "#imports";
+import {
   AUTOMATION_HUB_DEFAULT_SECTION_ID,
   AUTOMATION_HUB_SECTION_ITEMS,
   type AutomationHubSectionId,
   isAutomationHubSectionId,
 } from "~/components/automation/hub-sections";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getErrorMessage } from "~/utils/errors";
+import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -161,7 +155,7 @@ useSeoMeta({
           />
 
           <SectionGrid grid-token="twoColumnWide">
-            <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-next-action-title">
+            <section class="card card-border bg-base-100" aria-labelledby="automation-next-action-title">
               <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                   <h2 id="automation-next-action-title" class="card-title">

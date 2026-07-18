@@ -1,24 +1,15 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  MARGIN_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TRUNCATE_FLEX_CHILD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
 
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, settlePromise } from "~/composables/async-flow";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getErrorMessage } from "~/utils/errors";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, buildInterviewStudioNavigation } from "~/utils/interview-navigation";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
+import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 const { $toast } = useNuxtApp();
 const route = useRoute();
@@ -132,9 +123,9 @@ function studioDetailLocation(location: string | undefined): string {
             :aria-label="t('studioDetail.practiceInterviewAria')"
             @click="startPracticeInterview"
           >
-            <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {{ t("studioDetail.practiceInterviewButton") }}
           </button>
@@ -146,16 +137,16 @@ function studioDetailLocation(location: string | undefined): string {
             class="btn btn-outline"
             :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
           >
-            <IconGlobe :class="ICON_SIZE_CLASS.sm" />
+            <IconGlobe class="h-5 w-5" />
             {{ t("studioDetail.visitWebsiteButton") }}
           </a>
         </template>
         <template #aside>
-          <div :class="SURFACE_GLASS_CARD_CLASS">
+          <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body">
               <div class="flex items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div class="avatar placeholder">
-                  <div class="bg-base-300 text-base-content" :class="[ICON_SIZE_CLASS['20'], RADIUS_TOKEN_CLASS.full]">
+                  <div class="bg-base-300 text-base-content w-20" :class="[RADIUS_TOKEN_CLASS.full]">
                     <span :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ studioInitial }}</span>
                   </div>
                 </div>
@@ -222,7 +213,7 @@ function studioDetailLocation(location: string | undefined): string {
 
     <SectionGrid v-else grid-token="threeColumnLg">
       <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-        <div :class="SURFACE_GLASS_CARD_CLASS">
+        <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -249,14 +240,14 @@ function studioDetailLocation(location: string | undefined): string {
           </div>
         </div>
 
-        <div v-if="studio.interviewStyle" :class="SURFACE_GLASS_CARD_CLASS">
+        <div v-if="studio.interviewStyle" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.interviewProcess") }}</h2>
             <p>{{ studio.interviewStyle }}</p>
           </div>
         </div>
 
-        <div v-if="studio.technologies?.length" :class="SURFACE_GLASS_CARD_CLASS">
+        <div v-if="studio.technologies?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -269,12 +260,14 @@ function studioDetailLocation(location: string | undefined): string {
       </div>
 
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-        <div v-if="studio.games?.length" :class="SURFACE_GLASS_CARD_CLASS">
+        <div v-if="studio.games?.length" class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
           <div class="card-body">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("studioDetail.sections.notableGames") }}</h2>
             <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
               <li v-for="game in studio.games" :key="game" class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <IconCheckCircle class="text-primary" :class="ICON_SIZE_CLASS['4']" />
+                <svg class="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
                 {{ game }}
               </li>
             </ul>

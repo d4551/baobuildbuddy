@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
-import {  ICON_SIZE_CLASS,
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
   PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
   PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
 } from "@bao/shared/constants/portfolio";
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 
 type PortfolioProjectForm = {
   title: string;
@@ -175,7 +175,7 @@ function updateFeaturedFlag(event: Event): void {
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
-              <CloseIcon :class="ICON_SIZE_CLASS.xs" />
+              <CloseIcon class="h-3 w-3" />
             </button>
           </div>
         </div>

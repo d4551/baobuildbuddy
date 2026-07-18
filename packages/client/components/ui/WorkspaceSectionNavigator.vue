@@ -1,17 +1,8 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  PADDING_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
-  SHADOW_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TRUNCATE_FLEX_CHILD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
-import {  ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
+import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 
 interface WorkspaceSectionItem {
   readonly id: string;
@@ -73,19 +64,19 @@ const activeDescription = computed<string>(() => {
               >
                 <component
                   :is="resolveAppIconComponent(activeSectionEntry.iconName)"
-                  :class="ICON_SIZE_CLASS.sm"
+                  class="h-5 w-5"
                   aria-hidden="true"
                 />
               </span>
             </span>
 
-            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
+            <div class="space-y-1" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
               <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
               <p
                 v-if="activeDescription"
-                class="leading-6 text-secondary" :class="[MAX_W_3XL_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
+                class="max-w-3xl leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
               >
                 {{ activeDescription }}
               </p>
@@ -93,7 +84,7 @@ const activeDescription = computed<string>(() => {
           </div>
 
           <nav
-            class="max- overflow-x-auto overscroll-x-contain" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, WORKSPACE_NAV_MAX_WIDTH_XL_CLASS]"
+            class="max- overflow-x-auto overscroll-x-contain xl:max-w-4xl" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t(ariaLabelKey)"
           >
             <div class="tabs tabs-box w-max min- glass-subtle p-2 xl:" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -115,7 +106,7 @@ const activeDescription = computed<string>(() => {
                   >
                     <component
                       :is="resolveAppIconComponent(section.iconName)"
-                      :class="ICON_SIZE_CLASS['4']"
+                      class="h-4 w-4"
                       aria-hidden="true"
                     />
                   </span>

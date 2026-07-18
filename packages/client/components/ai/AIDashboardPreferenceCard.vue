@@ -19,7 +19,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("aiDashboard.preference.description") }}</p>

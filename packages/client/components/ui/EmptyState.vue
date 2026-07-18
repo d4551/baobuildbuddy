@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, EMPTY_STATE_STACK_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import { EMPTY_STATE_STACK_CLASS } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -44,7 +44,7 @@ const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").tri
     </div>
     <IconDocumentText
       v-else
-      :class="ICON_SIZE_CLASS['16']" class="shrink-0 text-muted"
+      class="h-16 w-16 shrink-0 text-muted"
     />
     <h3 class="text-lg font-semibold">
       {{ t(titleKey) }}

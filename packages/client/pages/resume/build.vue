@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {  MARGIN_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
 
-import {  MARGIN_TOKEN_CLASS, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
-import {  MARGIN_TOKEN_CLASS, useI18n } from "vue-i18n";
-import {  MARGIN_TOKEN_CLASS, settlePromise } from "~/composables/async-flow";
-import {  MARGIN_TOKEN_CLASS, getErrorMessage } from "~/utils/errors";
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
 
 /**
  * AI-Driven CV Builder - wizard flow:
@@ -186,7 +186,7 @@ function backToTarget() {
     />
 
     <progress
-      class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mb8, FLUID_WIDTH_CLASS]"
+      class="progress progress-primary mb-8" :class="[FLUID_WIDTH_CLASS]"
       :value="progressValue"
       max="100"
       :aria-label="t('resumeBuildPage.progressAria')"

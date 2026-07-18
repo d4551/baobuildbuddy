@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewSession } from "@bao/shared/types/interview";
-import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 
 defineProps<{
@@ -53,7 +48,7 @@ const { t } = useI18n();
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >
-            <CloseIcon :class="ICON_SIZE_CLASS['4']" />
+            <CloseIcon class="h-4 w-4" />
           </button>
         </div>
 
@@ -73,7 +68,7 @@ const { t } = useI18n();
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <UiRadialMeter
                 :value="selectedSession.score ?? 0"
-                :size-class="ICON_SIZE_CLASS['16']"
+                size-class="h-16 w-16"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
               >

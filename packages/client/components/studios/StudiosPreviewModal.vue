@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  MARGIN_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { GameStudio } from "@bao/shared/types/interview";
-import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import {  ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
   studio: GameStudio | null;
@@ -47,11 +43,11 @@ function studioLocation(location: string): string {
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
-      <CloseIcon :class="ICON_SIZE_CLASS['4']" />
+      <CloseIcon class="h-4 w-4" />
     </button>
 
     <template v-if="studio">
-      <h3 :id="titleId" class="font-bold" :class="TYPOGRAPHY_SCALE_CLASS.xl">
+      <h3 :id="titleId" class="text-xl font-bold">
         {{ studio.name }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -67,7 +63,7 @@ function studioLocation(location: string): string {
         </span>
       </div>
 
-      <SectionGrid grid-token="threeColumnMd" :extra-class="MARGIN_TOKEN_CLASS.mt5">
+      <SectionGrid grid-token="threeColumnMd" extra-class="mt-5">
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
@@ -118,7 +114,7 @@ function studioLocation(location: string): string {
     </template>
 
     <template v-else>
-      <h3 :id="titleId" class="font-bold" :class="TYPOGRAPHY_SCALE_CLASS.xl">
+      <h3 :id="titleId" class="text-xl font-bold">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">

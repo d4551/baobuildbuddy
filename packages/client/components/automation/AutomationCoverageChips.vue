@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, FLEX_GAP_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
-import {  ICON_SIZE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_SIZE_CLASS, resolveAppIconComponent } from "~/components/icons/icon-registry";
-import {  ICON_SIZE_CLASS, AUTOMATION_COVERAGE_ITEMS, type AutomationCoverageItem } from "./automation-visuals";
+import { FLEX_GAP_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import { AUTOMATION_COVERAGE_ITEMS, type AutomationCoverageItem } from "./automation-visuals";
 
 const props = defineProps<{
   manualRunAvailable: boolean;
@@ -41,7 +41,7 @@ function resolveCoverageClass(item: AutomationCoverageItem): string {
       <span
         class="inline-flex h-8 w-8 items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, resolveCoverageClass(item)]"
       >
-        <component :is="resolveAppIconComponent(item.iconName)" :class="ICON_SIZE_CLASS['4']" aria-hidden="true" />
+        <component :is="resolveAppIconComponent(item.iconName)" class="h-4 w-4" aria-hidden="true" />
         <span class="sr-only">{{ t(item.labelKey) }}</span>
       </span>
     </span>

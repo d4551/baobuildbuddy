@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, useI18n } from "vue-i18n";
-import {  SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
   studioSizeOptions: string[];
@@ -21,7 +21,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <div class="card card-border bg-base-100">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <SectionGrid grid-token="fourColumnLg">
         <fieldset class="fieldset lg:col-span-2">
@@ -65,7 +65,7 @@ const { t } = useI18n();
       </SectionGrid>
 
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <label class="label cursor-pointer justify-start" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
+        <label class="label cursor-pointer justify-start py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <input
             v-model="remoteWork"
             type="checkbox"

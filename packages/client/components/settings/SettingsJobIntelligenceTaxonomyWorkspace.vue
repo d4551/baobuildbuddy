@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  PADDING_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import type { JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
-import {  SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
 
 const props = defineProps<{
   taxonomySaveState: SaveState;
@@ -34,8 +28,8 @@ const populatedTaxonomyCount = computed(
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
-    <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
+  <div class="card card-border bg-base-100">
+    <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
         :description="t('settings.jobIntelligence.taxonomyDescription')"
@@ -68,9 +62,9 @@ const populatedTaxonomyCount = computed(
       </SettingsPanelHeader>
 
       <SectionGrid grid-token="twoColumnWide">
-        <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+        <article :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+            <div class="space-y-1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</h3>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyKeywordsDescription") }}
@@ -82,15 +76,15 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.keywordsJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
-                class="textarea font-mono" :class="[MIN_HEIGHT_EDITOR_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
               />
             </fieldset>
           </div>
         </article>
 
-        <article :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">
+        <article :class="SURFACE_GLASS_CARD_CLASS">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+            <div class="space-y-1">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</h3>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyStudiosDescription") }}
@@ -102,7 +96,7 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.studioRulesJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
-                class="textarea font-mono" :class="[MIN_HEIGHT_EDITOR_CLASS, FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
               />
             </fieldset>
           </div>

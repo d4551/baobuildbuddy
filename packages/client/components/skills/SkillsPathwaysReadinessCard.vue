@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import {  FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
-import {  FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
@@ -44,7 +39,7 @@ const { t } = useI18n();
           <UiRadialMeter
             :value="readinessAssessment.overallScore"
             :max="readinessMax"
-            :size-class="CONTENT_H_28_CLASS"
+            size-class="h-28 w-28"
             track-class="stroke-primary-content/30"
             fill-class="stroke-primary-content"
             :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
@@ -58,7 +53,7 @@ const { t } = useI18n();
           <div
             v-for="category in readinessCategories"
             :key="category.key"
-            :class="STACK_SPACE_Y_TOKEN_CLASS.stack1"
+            class="space-y-1"
           >
             <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ getCategoryLabel(category.key) }}: {{ category.score }}%

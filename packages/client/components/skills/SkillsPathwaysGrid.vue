@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {  SURFACE_GLASS_CARD_CLASS, STACK_SPACE_Y_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { CareerPathway } from "@bao/shared/types/skill-mapping";
-import {  SURFACE_GLASS_CARD_CLASS, STACK_SPACE_Y_TOKEN_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 
 defineProps<{
@@ -24,7 +24,7 @@ const { t } = useI18n();
         <article
           v-for="pathway in pathways"
           :key="pathway.id"
-          :class="SURFACE_GLASS_CARD_CLASS"
+          class="card card-border bg-base-100"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -44,14 +44,14 @@ const { t } = useI18n();
 
             <div>
               <p class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPathwaysPage.pathways.requiredSkillsTitle") }}</p>
-              <div class="flex flex-wrap" :class="FLEX_GAP_TOKEN_CLASS.gap1">
+              <div class="flex flex-wrap gap-1">
                 <span v-for="skill in pathway.requiredSkills" :key="skill" class="badge badge-xs">
                   {{ skill }}
                 </span>
               </div>
             </div>
 
-            <div :class="STACK_SPACE_Y_TOKEN_CLASS.stack1">
+            <div class="space-y-1">
               <div class="flex items-center justify-between" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                 <span>{{ t("skillsPathwaysPage.pathways.matchScoreLabel") }}</span>
                 <span class="font-semibold">{{ pathway.matchScore }}%</span>

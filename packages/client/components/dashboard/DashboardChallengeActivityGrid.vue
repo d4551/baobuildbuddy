@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_HEIGHT_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  MARGIN_TOKEN_CLASS,
-  PADDING_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  ICON_DECORATIVE_STROKE_WIDTH, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_DECORATIVE_STROKE_WIDTH, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
+import { FLEX_GAP_TOKEN_CLASS, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
+import {
   DASHBOARD_A11Y_KEYS,
   DASHBOARD_COPY_KEYS,
   DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY,
 } from "~/constants/dashboard-copy";
-import {  ICON_DECORATIVE_STROKE_WIDTH, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
-import {  ICON_DECORATIVE_STROKE_WIDTH, FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS, MARGIN_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getDashboardActivityPresentation } from "~/constants/dashboard-pipeline";
+import { DASHBOARD_GAMIFICATION_PROGRESS_MIN } from "~/constants/dashboard-core";
+import { getDashboardActivityPresentation } from "~/constants/dashboard-pipeline";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
@@ -30,7 +23,7 @@ const { t } = useI18n();
   <SectionGrid grid-token="twoColumnWide">
     <div v-if="dailyChallenge" class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
-        <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
+        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
         <div class="card bg-base-100">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
@@ -61,7 +54,7 @@ const { t } = useI18n();
 
     <div class="card bg-base-200" :class="[FLUID_HEIGHT_CLASS]">
       <div class="card-body">
-        <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
+        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul class="list rounded-box bg-base-100">
           <li
             v-for="(activity, index) in recentActivity"
@@ -74,7 +67,7 @@ const { t } = useI18n();
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
+                stroke-width="1.75"
                 :class="getDashboardActivityPresentation(activity.type).iconClass"
               >
                 <path

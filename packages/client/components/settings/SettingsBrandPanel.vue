@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  SHADOW_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, SHADOW_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, PADDING_TOKEN_CLASS, FLEX_GAP_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
 import BrandPreviewCard from "./brand/BrandPreviewCard.vue";
@@ -117,8 +112,8 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover']">>
-    <div class="card-body" :class="FLEX_GAP_TOKEN_CLASS.gap6">
+  <div class="card card-border bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div class="card-body gap-6">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"
         :description="t('settings.brand.subtitle')"
@@ -138,7 +133,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
       <div role="alert" class="alert alert-info alert-soft">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="shrink-0 stroke-current" :class="ICON_SIZE_CLASS.md"
+          class="h-6 w-6 shrink-0 stroke-current"
           fill="none"
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -146,7 +141,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
+            stroke-width="2"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
@@ -238,7 +233,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
             />
           </div>
 
-          <div class="card-actions justify-end" :class="PADDING_TOKEN_CLASS.pt2">
+          <div class="card-actions justify-end pt-2">
             <button
               class="btn btn-primary"
               :aria-label="t('settings.brand.saveAria')"

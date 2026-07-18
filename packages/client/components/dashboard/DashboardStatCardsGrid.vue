@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DashboardStatCardViewModel } from "./dashboard-page-contracts";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, ICON_SIZE_CHEVRON_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS,
+import {
   CARD_BODY_COMFORTABLE_CLASS,
   FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
@@ -25,7 +25,7 @@ defineProps<{
       v-for="statCard in statCards"
       :key="statCard.id"
       :to="statCard.to"
-      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-hover', FLUID_HEIGHT_CLASS, 'stat-card-enter']"
+      :class="[SURFACE_GLASS_CARD_CLASS, '', FLUID_HEIGHT_CLASS]"
       :aria-label="statCard.ariaLabel"
     >
       <div :class="CARD_BODY_COMFORTABLE_CLASS">

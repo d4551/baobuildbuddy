@@ -1,11 +1,11 @@
 <template>
   <svg
-    :class="ICON_SIZE_CLASS['4']"
+    class="h-4 w-4"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
-    :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
+    stroke-width="2"
     aria-hidden="true"
     v-bind="$attrs"
   >

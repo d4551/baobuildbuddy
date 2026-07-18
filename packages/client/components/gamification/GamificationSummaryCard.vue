@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  FLUID_WIDTH_CLASS,
-  MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 import type { UserGamificationData } from "@bao/shared/types/gamification";
-import {  ICON_SIZE_CLASS, SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
+import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_CURRENT_STREAK_ICON,
   GAMIFICATION_LEVEL_ICON,
@@ -32,16 +26,16 @@ defineProps<{
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
-            <h2 class="font-bold" :class="TYPOGRAPHY_SCALE_CLASS.xl4">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
+            <h2 class="text-4xl font-bold">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
             <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
           </div>
-          <div aria-hidden="true" :class="TYPOGRAPHY_SCALE_CLASS.xl6">{{ GAMIFICATION_LEVEL_ICON }}</div>
+          <div class="text-6xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
         </div>
 
         <progress
-          class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, ICON_SIZE_CLASS['4']]"
+          class="progress progress-primary h-4" :class="[FLUID_WIDTH_CLASS]"
           :value="levelProgress"
           :max="GAMIFICATION_PROGRESS_MAX"
           :aria-valuenow="levelProgress"

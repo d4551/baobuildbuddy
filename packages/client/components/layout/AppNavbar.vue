@@ -1,23 +1,12 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, THEME_NAMES } from "@bao/shared/constants/branding";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, APP_ROUTES } from "@bao/shared/constants/routes";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, computed, useTemplateRef } from "vue";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, settlePromise } from "~/composables/async-flow";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, resolveLocaleLabel } from "~/constants/i18n";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  APP_DRAWER_ID,
-  FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CLASS,
-  RADIUS_TOKEN_CLASS,
-  SHELL_NAVBAR_CLASS,
-  SHELL_NAVBAR_DROPDOWN_CLASS,
-  TRUNCATE_FLEX_CHILD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, setDrawerToggleState } from "~/utils/drawer-controls";
+import { THEME_NAMES } from "@bao/shared/constants/branding";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { computed, useTemplateRef } from "vue";
+import { useI18n } from "vue-i18n";
+import { settlePromise } from "~/composables/async-flow";
+import { resolveLocaleLabel } from "~/constants/i18n";
+import { APP_DRAWER_ID, FLEX_GAP_TOKEN_CLASS, FLUID_WIDTH_CLASS, ICON_SIZE_CLASS, RADIUS_TOKEN_CLASS, SHELL_NAVBAR_CLASS, SHELL_NAVBAR_DROPDOWN_CLASS, TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();
 const { updateSettings } = useSettings();
@@ -109,12 +98,12 @@ onUnmounted(() => {
         @keydown.space.prevent="setDrawerToggleState(!isDrawerOpen)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" :class="ICON_SIZE_CLASS.sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
       <NuxtLink
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink-0 font-bold text-primary lg:hidden" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, FLEX_GAP_TOKEN_CLASS.gap2]"
+        class="btn btn-ghost shrink-0 text-xl font-bold text-primary lg:hidden" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
@@ -124,12 +113,10 @@ onUnmounted(() => {
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
       </div>
     </div>
-    <div class="navbar-center hidden lg:flex" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
-      <Transition name="navbar-tagline" mode="out-in">
-        <span v-if="!isScrolled" key="tagline" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
-      </Transition>
+    <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
+      <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
     </div>
-    <div class="navbar-end" :class="FLEX_GAP_TOKEN_CLASS.gap1">
+    <div class="navbar-end gap-1">
       <label class="swap swap-rotate btn btn-ghost btn-circle">
         <input
           type="checkbox"
@@ -141,12 +128,12 @@ onUnmounted(() => {
           @change="onThemeControllerChange"
         />
         <span class="swap-off" aria-hidden="true">
-          <svg class="fill-current" :class="ICON_SIZE_CLASS['5']" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
           </svg>
         </span>
         <span class="swap-on" aria-hidden="true">
-          <svg class="fill-current" :class="ICON_SIZE_CLASS['5']" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <svg class="h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
           </svg>
         </span>
@@ -159,7 +146,7 @@ onUnmounted(() => {
           :aria-expanded="isUserMenuOpen"
         >
           <svg xmlns="http://www.w3.org/2000/svg" :class="ICON_SIZE_CLASS.sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </summary>
         <ul
@@ -170,8 +157,8 @@ onUnmounted(() => {
           <li>
             <NuxtLink :to="APP_ROUTES.settings" class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" @click="closeUserMenu">
               <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               {{ t("nav.settings") }}
             </NuxtLink>

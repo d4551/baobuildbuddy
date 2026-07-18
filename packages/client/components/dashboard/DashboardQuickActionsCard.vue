@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CLASS,
-  MARGIN_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
-import {  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS, useI18n } from "vue-i18n";
+import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { useI18n } from "vue-i18n";
 import type { DashboardQuickAction } from "~/constants/dashboard-contracts";
 
 defineProps<{
@@ -27,8 +22,8 @@ const { t } = useI18n();
           class="btn btn-primary btn-soft justify-start border-primary/20 bg-primary/5 text-primary hover:border-primary sm:justify-center"
           :aria-label="t(action.labelKey)"
         >
-          <svg :class="ICON_SIZE_CLASS['5']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="action.iconPath" />
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
           </svg>
           {{ t(action.labelKey) }}
         </NuxtLink>
