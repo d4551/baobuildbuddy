@@ -359,6 +359,8 @@ export {
   type ShadowToken,
   STACK_SPACE_Y_TOKEN_CLASS,
   type StackSpaceYToken,
+  POINTER_EVENTS_TOKEN_CLASS,
+  type PointerEventsToken,
   SVG_STROKE_WIDTH_DEFAULT,
   TRACKING_TOKEN_CLASS,
   type TrackingToken,

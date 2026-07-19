@@ -98,6 +98,7 @@
     "validate:no-abs-path-symlinks": "bun run scripts/validate-no-abs-path-symlinks.ts",
     "validate:layout-token-imports": "bun run scripts/validate-layout-token-imports.ts",
     "proof:browser-smoke": "bun run scripts/browser-visual-smoke.ts",
+    "proof:browser-burndown": "bun run scripts/browser-interaction-burndown.ts",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
     "validate:page-seo": "bun run scripts/validate-page-seo-metadata.ts",
     "validate:i18n-ui": "bun run scripts/validate-ui-i18n.ts",

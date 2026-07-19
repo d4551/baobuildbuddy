@@ -20,6 +20,17 @@ export const STACK_SPACE_Y_TOKEN_CLASS = {
 } as const;
 export type StackSpaceYToken = keyof typeof STACK_SPACE_Y_TOKEN_CLASS;
 
+/**
+ * Pointer-events tokens for clickable-card overlays.
+ * Overlay stays clickable; content shell passes events through; interactive
+ * controls (buttons/links/inputs) re-enable hit testing.
+ */
+export const POINTER_EVENTS_TOKEN_CLASS = {
+  none: "pointer-events-none",
+  auto: "pointer-events-auto",
+} as const;
+export type PointerEventsToken = keyof typeof POINTER_EVENTS_TOKEN_CLASS;
+
 /** Common flex gap tokens. */
 export const FLEX_GAP_TOKEN_CLASS = {
   gap0: "gap-0",

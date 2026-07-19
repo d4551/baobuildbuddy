@@ -13,6 +13,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_XS_ALT_CLASS,
+  POINTER_EVENTS_TOKEN_CLASS,
   ROW_GAP_XS_CLASS,
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
@@ -170,20 +171,27 @@ const page = useJobsIndexPage();
                   {{ job.description }}
                 </p>
 
-                <div :class="['card-actions', STACK_SPACING_SM_CLASS, 'items-center justify-between']">
+                <div
+                  :class="[
+                    'card-actions',
+                    STACK_SPACING_SM_CLASS,
+                    'items-center justify-between',
+                    POINTER_EVENTS_TOKEN_CLASS.auto,
+                  ]"
+                >
                   <span :class="BODY_TEXT_XS_CLASS">
                     {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
-                      class="btn btn-outline btn-sm relative z-20"
+                      class="btn btn-outline btn-sm"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
-                      class="btn btn-primary btn-sm relative z-20"
+                      class="btn btn-primary btn-sm"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"
                     >

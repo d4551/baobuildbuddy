@@ -5,6 +5,7 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -201,13 +202,14 @@ const {
               </div>
               <button
                 class="btn btn-sm btn-ghost"
+                :class="[POINTER_EVENTS_TOKEN_CLASS.auto]"
                 :aria-label="t('interviewHub.cards.changeJobAria')"
                 @click="openConfig('job')"
               >
                 {{ t("interviewHub.cards.changeButton") }}
               </button>
             </div>
-            <div class="card-actions justify-end">
+            <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
               <button
                 class="btn btn-primary"
                 :aria-label="t('interviewHub.cards.configureJobAria')"
@@ -228,7 +230,7 @@ const {
             <div v-if="selectedStudioName" class="alert alert-soft" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <span>{{ t("interviewHub.cards.currentStudio", { studio: selectedStudioName }) }}</span>
             </div>
-            <div class="card-actions justify-end">
+            <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
               <button
                 class="btn btn-outline"
                 :aria-label="t('interviewHub.cards.configureStudioAria')"
