@@ -24,6 +24,8 @@ import {
 defineProps<{
   gamification: UserGamificationData;
   levelProgress: number;
+  /** XP progress inside the current level (matches radial %). */
+  xpIntoLevel: number;
   xpTarget: number;
 }>();
 
@@ -44,7 +46,7 @@ const { t } = useI18n();
               <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">
                 {{
                   t("xpBar.progressLabel", {
-                    xp: gamification.xp,
+                    xp: xpIntoLevel,
                     xpForNextLevel: xpTarget,
                   })
                 }}
