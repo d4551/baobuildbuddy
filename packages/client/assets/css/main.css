@@ -526,6 +526,20 @@ textarea {
   }
 }
 
+/*
+ * Semantic split-grid utilities (SSOT for two-column asymmetric layouts).
+ * Consumed by SectionGrid via the `chatSplit` and `providersSplit` UiGridToken
+ * entries in constants/ui-layout.ts. Replaces arbitrary `grid-cols-[...]`
+ * literals so the grid-template contract lives in CSS, not inline TS strings.
+ */
+@utility grid-split-chat {
+  grid-template-columns: minmax(0, 1fr) 22rem;
+}
+
+@utility grid-split-providers {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+
 /* Reduced transparency — make glass fully opaque (§9.2). */
 @media (prefers-reduced-transparency: reduce) {
   .glass,

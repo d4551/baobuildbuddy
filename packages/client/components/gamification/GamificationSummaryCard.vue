@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UserGamificationData } from "@bao/shared/types/gamification";
+import { useI18n } from "vue-i18n";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_CURRENT_STREAK_ICON,
@@ -12,7 +13,7 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  SURFACE_GLASS_CARD_STRONG_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -22,22 +23,23 @@ defineProps<{
   xpTarget: number;
   xpUntilNextLevel: number;
   unlockedAchievementsCount: number;
-  t: (key: string, values?: Record<string, unknown>) => string;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section :class="[SURFACE_GLASS_CARD_CLASS, '-strong glass-interactive text-on-glass']">
+    <section :class="[SURFACE_GLASS_CARD_STRONG_CLASS, 'text-on-glass']">
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
-            <h2 class="text-4xl font-bold">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
+            <h2 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
             <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
           </div>
-          <div class="text-6xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
+          <div :class="[TYPOGRAPHY_SCALE_CLASS.xl6]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
         </div>
 
         <progress

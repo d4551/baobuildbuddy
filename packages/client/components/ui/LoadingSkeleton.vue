@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
+import { SHADOW_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 import { UI_GRID_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 type LoadingSkeletonVariant = "text" | "cards" | "stats";
@@ -38,7 +38,7 @@ const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
 
   <div
     v-else-if="variant === 'stats'"
-    class="stats stats-vertical w-full border border-base-300 bg-base-200 shadow-sm sm:stats-horizontal"
+    :class="['stats stats-vertical w-full border border-base-300 bg-base-200 sm:stats-horizontal', SHADOW_TOKEN_CLASS.sm]"
     role="status"
     aria-live="polite"
     aria-busy="true"

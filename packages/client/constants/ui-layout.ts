@@ -96,8 +96,8 @@ export const UI_GRID_CLASS_BY_TOKEN: Record<UiGridToken, string> = {
   /** Sidebar + content: first column should use `lg:w-64 shrink-0`, second `min-w-0 flex-1`. */
   sidebar: "flex flex-col gap-6 lg:flex-row lg:items-start",
   split: "grid grid-cols-1 gap-6 lg:grid-cols-2",
-  chatSplit: "grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]",
-  providersSplit: "grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]",
+  chatSplit: "grid min-h-0 flex-1 gap-4 xl:grid-split-chat",
+  providersSplit: "grid gap-4 xl:grid-split-providers",
 };
 /**
  * Modal size tokens used by the shared modal frame component.

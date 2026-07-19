@@ -9,10 +9,12 @@ import {
   type ChatDensity,
 } from "~/constants/chat";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { formatChatTimestamp } from "~/utils/chat";
@@ -58,8 +60,8 @@ const avatarLabel = computed(() =>
 );
 const chatBubbleClass = computed(() =>
   isAssistant.value
-    ? "border border-base-300 bg-base-200 text-base-content shadow-sm"
-    : "chat-bubble-primary shadow-sm",
+    ? `border border-base-300 bg-base-200 text-base-content ${SHADOW_TOKEN_CLASS.sm}`
+    : `chat-bubble-primary ${SHADOW_TOKEN_CLASS.sm}`,
 );
 const messageWidthClass = computed(() => CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY[props.density]);
 const bubbleSizeClass = computed(() => CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY[props.density]);
@@ -129,7 +131,7 @@ const ariaLabel = computed(() => {
       {{ messageTitle }}
       <time
         v-if="formattedTime"
-        class="text-muted ml-1" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"
+        class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.ml1]"
         :datetime="props.message.timestamp ?? undefined"
       >
         {{ formattedTime }}
@@ -141,7 +143,7 @@ const ariaLabel = computed(() => {
     >
       <ul
         v-if="props.contextChips.length > 0"
-        class="mb-2 flex flex-wrap gap-1"
+        class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mb2, FLEX_GAP_TOKEN_CLASS.gap1]"
         :aria-label="props.contextChipsAria || undefined"
       >
         <li v-for="chip in props.contextChips" :key="chip">
@@ -169,7 +171,7 @@ const ariaLabel = computed(() => {
     </div>
     <div
       v-if="isAssistant && (props.message.provider || props.message.model)"
-      class="chat-footer mt-0.5 flex flex-wrap gap-1"
+      class="chat-footer flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap1]"
     >
       <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
       <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>

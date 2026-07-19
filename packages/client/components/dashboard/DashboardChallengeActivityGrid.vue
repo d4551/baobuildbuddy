@@ -10,7 +10,10 @@ import { getDashboardActivityPresentation } from "~/constants/dashboard-pipeline
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -27,40 +30,38 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div v-if="dailyChallenge" class="card card-glass glass-interactive" :class="[FLUID_HEIGHT_CLASS]">
-      <div class="card-body">
-        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
-        <div :class="SURFACE_GLASS_CARD_CLASS">
-          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
-            <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-              <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
-              <span class="badge badge-primary">
-                {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dailyChallenge.xpReward }) }}
-              </span>
-            </div>
-            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-              <progress
-                class="progress flex-1"
-                :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
-                :value="dailyChallenge.progress"
-                :max="dailyChallenge.goal"
-                :aria-valuenow="dailyChallenge.progress"
-                :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
-                :aria-valuemax="dailyChallenge.goal"
-                :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
-              ></progress>
-              <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                {{ dailyChallenge.progress }} / {{ dailyChallenge.goal }}
-              </span>
-            </div>
+    <div v-if="dailyChallenge" :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+      <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
+        <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4]">
+          <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
+            <span class="badge badge-primary">
+              {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dailyChallenge.xpReward }) }}
+            </span>
+          </div>
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <progress
+              class="progress flex-1"
+              :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+              :value="dailyChallenge.progress"
+              :max="dailyChallenge.goal"
+              :aria-valuenow="dailyChallenge.progress"
+              :aria-valuemin="DASHBOARD_GAMIFICATION_PROGRESS_MIN"
+              :aria-valuemax="dailyChallenge.goal"
+              :aria-label="t(DASHBOARD_A11Y_KEYS.challengeProgressAria)"
+            ></progress>
+            <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+              {{ dailyChallenge.progress }} / {{ dailyChallenge.goal }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card card-glass glass-interactive" :class="[FLUID_HEIGHT_CLASS]">
-      <div class="card-body">
-        <h2 class="card-title mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
+    <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+      <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul class="list rounded-box border border-base-300 bg-base-100">
           <li
             v-for="(activity, index) in recentActivity"
@@ -73,7 +74,7 @@ const { t } = useI18n();
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.75"
+                :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
                 :class="getDashboardActivityPresentation(activity.type).iconClass"
               >
                 <path

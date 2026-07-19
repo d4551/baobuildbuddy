@@ -21,6 +21,7 @@ import {
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
+import type { ApiEnvelope } from "~/types/client-api-contracts";
 
 interface GamificationHubData {
   readonly progress: UserGamificationData;
@@ -168,14 +169,14 @@ async function fetchGamificationHubData(): Promise<GamificationHubData> {
 }
 
 async function requestData<T>(
-  request: Promise<{ readonly data: T; readonly error?: unknown }>,
+  request: Promise<ApiEnvelope<T>>,
   fallbackMessage: string,
 ): Promise<T> {
   const response = await request;
   if (response.error) {
     throw new Error(getErrorMessage(response.error, fallbackMessage));
   }
-  return response.data;
+  return response.data as T;
 }
 </script>
 
@@ -221,7 +222,6 @@ async function requestData<T>(
         :xp-target="xpTarget"
         :xp-until-next-level="xpUntilNextLevel"
         :unlocked-achievements-count="unlockedAchievements.length"
-        :t="t"
       />
 
       <GamificationChallengesCard
