@@ -56,6 +56,14 @@ const settingsjobIntelligence = {
       companyBoardsLabel: "Company boards JSON",
       companyTemplatesLabel: "Company board templates JSON",
       gamingPortalsLabel: "Gaming portals JSON",
+      gamingPortalsTogglesTitle: "Gaming job portals",
+      gamingPortalsTogglesDescription:
+        "Enable each RPA-backed job board with a toggle. Advanced JSON stays available below for power edits.",
+      gamingPortalsConfiguredCount: "{count} ready to scrape",
+      gamingPortalsParseError:
+        "Gaming portals JSON is invalid. Fix the Advanced JSON editor below, then return here.",
+      gamingPortalsMissingUrl: "Missing fallback URL — set it in Advanced JSON before enabling.",
+      gamingPortalToggleAria: "Enable {name} job portal scraper",
       taxonomyKeywordsLabel: "Taxonomy keywords JSON",
       taxonomyKeywordsDescription:
         "Persist keyword clusters used for autocomplete, matching, and role enrichment.",

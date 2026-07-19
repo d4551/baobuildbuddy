@@ -10,6 +10,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { countConfiguredGamingPortals, parseGamingPortalsJson } from "~/utils/gaming-portals-form";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
@@ -32,7 +33,8 @@ const configuredSourceCount = computed(
   () =>
     Number(jobProviderForm.value.hitmarkerEnabled) +
     Number(jobProviderForm.value.greenhouseApiBaseUrl.trim().length > 0) +
-    Number(jobProviderForm.value.leverApiBaseUrl.trim().length > 0),
+    Number(jobProviderForm.value.leverApiBaseUrl.trim().length > 0) +
+    countConfiguredGamingPortals(parseGamingPortalsJson(jobProviderForm.value.gamingPortalsJson)),
 );
 
 const sourceCollectionCount = computed(
@@ -186,6 +188,8 @@ const sourceCollectionCount = computed(
       </section>
 
       <SettingsJobIntelligenceSourcesGrid v-model:job-provider-form="jobProviderForm" />
+
+      <SettingsJobIntelligenceGamingPortalsCard v-model:job-provider-form="jobProviderForm" />
 
       <SettingsJobIntelligenceCollectionsCard v-model:job-provider-form="jobProviderForm" />
     </div>
