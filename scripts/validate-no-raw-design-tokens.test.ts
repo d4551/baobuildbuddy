@@ -25,7 +25,7 @@ describe("collectRawDesignTokenViolationsForContent", () => {
 
   test("flags inline shadow tokens", () => {
     const violations = collectRawDesignTokenViolationsForContent(
-      "packages/client/components/ui/QuickActionFab.vue",
+      CONSUMER_PATH,
       '<template><button class="btn btn-primary shadow-lg">+</button></template>',
     );
     expect(violations.some((v) => v.message.includes("shadow-lg"))).toBe(true);

@@ -20,7 +20,7 @@
     "prepare:nuxt": "bun --bun run nuxt prepare",
     "prepare:workspace-types": "bun run --cwd ../server build:types && bun run prepare:nuxt",
     "typecheck": "bun run prepare:workspace-types && bun --bun ../../node_modules/@typescript/native/bin/tsc --noEmit",
-    "test": "bun --bun run vitest run",
+    "test": "bun run prepare:workspace-types && bun --bun run vitest run",
     "test:watch": "bun --bun run vitest",
     "lint": "bun run prepare:workspace-types && bun --bun run eslint ."
   },
