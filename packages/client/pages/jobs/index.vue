@@ -13,6 +13,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_XS_ALT_CLASS,
+  LABEL_HIDE_BELOW_SM_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   ROW_GAP_XS_CLASS,
   SECTION_GAP_BOTTOM_CLASS,
@@ -47,7 +48,7 @@ const page = useJobsIndexPage();
         >
           <LoadingSpinner v-if="page.refreshing.value" size="sm" :label="t('jobsPage.refreshButton')" />
           <IconRefresh v-else :class="ICON_SIZE_XS_ALT_CLASS" />
-          {{ t("jobsPage.refreshButton") }}
+          <span :class="LABEL_HIDE_BELOW_SM_CLASS">{{ t("jobsPage.refreshButton") }}</span>
         </button>
       </template>
     </PageHeroHeader>

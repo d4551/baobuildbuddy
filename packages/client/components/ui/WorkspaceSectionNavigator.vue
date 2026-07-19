@@ -7,6 +7,11 @@ import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
+  SCROLL_PADDING_INLINE_3_CLASS,
+  SCROLL_SMOOTH_CLASS,
+  SCROLL_SNAP_ALIGN_START_CLASS,
+  SCROLL_SNAP_X_MANDATORY_CLASS,
+  SCROLL_TOUCH_PAN_X_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -37,10 +42,34 @@ const props = withDefaults(
 
 const { t } = useI18n();
 
+const sectionRailRef = ref<HTMLElement | null>(null);
+
 const activeSectionEntry = computed<WorkspaceSectionItem | null>(() => {
   const matchedSection = props.sections.find((section) => section.id === props.activeSection);
   return matchedSection ?? props.sections[0] ?? null;
 });
+
+const scrollActiveSectionIntoView = (): void => {
+  const activeLink = sectionRailRef.value?.querySelector<HTMLElement>('[aria-current="page"]');
+  activeLink?.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest",
+    inline: "center",
+  });
+};
+
+onMounted(() => {
+  scrollActiveSectionIntoView();
+});
+
+watch(
+  () => props.activeSection,
+  () => {
+    nextTick(() => {
+      scrollActiveSectionIntoView();
+    });
+  },
+);
 
 const activeDescription = computed<string>(() => {
   if (activeSectionEntry.value?.descriptionKey) {
@@ -93,7 +122,16 @@ const activeDescription = computed<string>(() => {
           </div>
 
           <nav
-            class="overflow-x-auto overscroll-x-contain xl:max-w-4xl" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
+            ref="sectionRailRef"
+            class="overflow-x-auto overscroll-x-contain xl:max-w-4xl"
+            :class="[
+              FLUID_WIDTH_CLASS,
+              TRUNCATE_FLEX_CHILD_CLASS,
+              SCROLL_SNAP_X_MANDATORY_CLASS,
+              SCROLL_TOUCH_PAN_X_CLASS,
+              SCROLL_SMOOTH_CLASS,
+              SCROLL_PADDING_INLINE_3_CLASS,
+            ]"
             :aria-label="t(ariaLabelKey)"
           >
             <div class="tabs tabs-box w-max min-w-0 glass-subtle p-2" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -101,7 +139,12 @@ const activeDescription = computed<string>(() => {
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0" :class="[FLEX_GAP_TOKEN_CLASS.gap3, activeSection === section.id ? 'tab-active' : '']"
+                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0"
+                :class="[
+                  FLEX_GAP_TOKEN_CLASS.gap3,
+                  SCROLL_SNAP_ALIGN_START_CLASS,
+                  activeSection === section.id ? 'tab-active' : '',
+                ]"
                 :aria-current="activeSection === section.id ? 'page' : undefined"
               >
                 <span

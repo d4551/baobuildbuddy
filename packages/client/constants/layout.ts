@@ -287,6 +287,18 @@ export const FLUID_HEIGHT_CLASS = "h-full";
 /** Truncation block primitive (min-w-0 to enable flexbox text truncation). */
 export const TRUNCATE_FLEX_CHILD_CLASS = "min-w-0";
 
+/**
+ * Horizontal section-rail scroll tokens (settings / workspace navigators).
+ * Keep snap + touch pan on the SSOT rail so mobile tabs feel Apple-HIG native.
+ */
+export const SCROLL_SNAP_X_MANDATORY_CLASS = "snap-x snap-mandatory";
+export const SCROLL_SNAP_ALIGN_START_CLASS = "snap-start";
+export const SCROLL_TOUCH_PAN_X_CLASS = "touch-pan-x";
+export const SCROLL_SMOOTH_CLASS = "scroll-smooth";
+export const SCROLL_PADDING_INLINE_3_CLASS = "scroll-px-3";
+/** Hide dense labels on the smallest viewport; keep aria-label on the control. */
+export const LABEL_HIDE_BELOW_SM_CLASS = "max-sm:sr-only";
+
 /** Flex min-height zero (enables flex children to shrink to content). */
 export const MIN_HEIGHT_ZERO_CLASS = "min-h-0";
 
@@ -335,12 +347,12 @@ export {
   FLEX_GAP_TOKEN_CLASS,
   type FlexGapToken,
   FONT_WEIGHT_TOKEN_CLASS,
-  type FontWeightToken,
   FORM_WIDTH_10_CLASS,
   FORM_WIDTH_16_CLASS,
   FORM_WIDTH_20_CLASS,
   FORM_WIDTH_28_CLASS,
   FORM_WIDTH_32_CLASS,
+  type FontWeightToken,
   GLASS_CARD_ENTER_CLASS,
   GLASS_CARD_HOVER_CLASS,
   HEIGHT_TOKEN_CLASS,
@@ -348,32 +360,32 @@ export {
   LEADING_TOKEN_CLASS,
   type LeadingToken,
   MARGIN_TOKEN_CLASS,
-  type MarginToken,
   MAX_HEIGHT_72_CLASS,
   MAX_HEIGHT_96_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
-  type MaxHeightToken,
   MAX_W_2XL_CLASS,
   MAX_W_3XL_CLASS,
   MAX_W_64_CLASS,
   MAX_W_XS_CLASS,
+  type MarginToken,
+  type MaxHeightToken,
   MIN_H_36_CLASS,
   MIN_H_60_CLASS,
   MIN_H_80_CLASS,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
+  POINTER_EVENTS_TOKEN_CLASS,
+  type PointerEventsToken,
   PRINT_PADDING_RESET_CLASS,
   RADIUS_TOKEN_CLASS,
   type RadiusToken,
   SCROLL_MARGIN_TOKEN_CLASS,
-  type ScrollMarginToken,
   SCROLL_MARGIN_TOP_24_CLASS,
+  type ScrollMarginToken,
   SHADOW_TOKEN_CLASS,
   type ShadowToken,
   STACK_SPACE_Y_TOKEN_CLASS,
   type StackSpaceYToken,
-  POINTER_EVENTS_TOKEN_CLASS,
-  type PointerEventsToken,
   SVG_STROKE_WIDTH_DEFAULT,
   TRACKING_TOKEN_CLASS,
   type TrackingToken,
