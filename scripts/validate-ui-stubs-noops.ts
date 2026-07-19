@@ -42,6 +42,13 @@ const COMMENT_SCAN_PATTERN = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu;
 const NESTED_TAG_STRIP_PATTERN = /<[^>]+>/gu;
 const I18N_BINDING_STRIP_PATTERN = /\{\{[\s\S]*?\}\}/gu;
 const WHITESPACE_COLLAPSE_PATTERN = /\s+/gu;
+const VUE_COMPONENT_TAG_PATTERN = /^[A-Z]/u;
+const NATIVE_CONTROL_INNER_PATTERN = /<(?:input|select|textarea)\b/iu;
+const LINK_TO_ATTR_PATTERN = /(?:^|\s)(?:to|:to)\s*=/u;
+const CLOSE_TAG_START_PATTERN = /<\//u;
+const ARIA_HIDDEN_TRUE_PATTERN = /\baria-hidden\s*=\s*["']true["']/u;
+const SWAP_CLASS_PATTERN = /\bswap\b/u;
+const SCRIPT_BLOCK_PATTERN = /<script\b[^>]*>([\s\S]*?)<\/script>/gu;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -53,14 +60,14 @@ const extractTemplateBlocks = (content: string): string => {
 
 const extractScriptBlocks = (content: string): string => {
   const matches: string[] = [];
-  const scriptPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gu;
-  for (const match of content.matchAll(scriptPattern)) {
+  SCRIPT_BLOCK_PATTERN.lastIndex = 0;
+  for (const match of content.matchAll(SCRIPT_BLOCK_PATTERN)) {
     matches.push(match[1] ?? "");
   }
   return matches.join("\n");
 };
 
-const isVueComponentTag = (tagName: string): boolean => /^[A-Z]/u.test(tagName);
+const isVueComponentTag = (tagName: string): boolean => VUE_COMPONENT_TAG_PATTERN.test(tagName);
 
 const isActionableControlTag = (tagName: string, attrs: string): boolean => {
   // PascalCase Vue SFCs encapsulate their own wiring (e.g. AppExportMenu).
@@ -78,7 +85,7 @@ const hasNestedNativeControl = (template: string, openTagEnd: number, tagName: s
   const closeIdx = after.toLowerCase().indexOf(closeNeedle.toLowerCase());
   if (closeIdx < 0) return false;
   const inner = after.slice(0, closeIdx);
-  return /<(?:input|select|textarea)\b/iu.test(inner);
+  return NATIVE_CONTROL_INNER_PATTERN.test(inner);
 };
 
 const isLinkComponent = (tagName: string): boolean => {
@@ -89,13 +96,13 @@ const isLinkComponent = (tagName: string): boolean => {
 const hasControlWiring = (tagName: string, attrs: string): boolean => {
   if (CONTROL_HANDLER_PATTERN.test(attrs)) return true;
   // NuxtLink / RouterLink without explicit attrs still needs :to — do not auto-pass.
-  if (isLinkComponent(tagName) && /(?:^|\s)(?:to|:to)\s*=/u.test(attrs)) return true;
+  if (isLinkComponent(tagName) && LINK_TO_ATTR_PATTERN.test(attrs)) return true;
   return false;
 };
 
 const extractControlInnerPreview = (template: string, openTagEnd: number): string => {
   const after = template.slice(openTagEnd);
-  const closeIdx = after.search(/<\//u);
+  const closeIdx = after.search(CLOSE_TAG_START_PATTERN);
   const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, 80);
   return inner
     .replace(NESTED_TAG_STRIP_PATTERN, " ")
@@ -147,7 +154,7 @@ const collectDeadControlViolations = (filePath: string, content: string): Valida
     const attrs = match[2] ?? "";
     if (!isActionableControlTag(tagName, attrs)) continue;
     if (CONTROL_DISABLED_PATTERN.test(attrs)) continue;
-    if (/\baria-hidden\s*=\s*["']true["']/u.test(attrs)) continue;
+    if (ARIA_HIDDEN_TRUE_PATTERN.test(attrs)) continue;
     if (hasControlWiring(tagName, attrs)) continue;
 
     const normalized = tagName.toLowerCase();
@@ -156,7 +163,7 @@ const collectDeadControlViolations = (filePath: string, content: string): Valida
     if (normalized === "summary") continue;
     if (
       normalized === "label" &&
-      (/\bswap\b/u.test(attrs) || hasNestedNativeControl(template, openTagEnd, tagName))
+      (SWAP_CLASS_PATTERN.test(attrs) || hasNestedNativeControl(template, openTagEnd, tagName))
     ) {
       continue;
     }

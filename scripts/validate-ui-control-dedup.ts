@@ -31,6 +31,9 @@ const BTN_SIZE_TOKEN_PATTERN =
 const PAGE_COMPONENT_TAG_PATTERN = /<([A-Z][A-Za-z0-9]+)\b/gu;
 const SCRIPT_COMPONENT_IMPORT_PATTERN =
   /import\s+(\w+)\s+from\s+["'](~\/components\/[^"']+\.vue)["']/gu;
+const NEIGHBORHOOD_BTN_PATTERN = /\bbtn\b/u;
+const CONTROL_I18N_KEY_SHAPE_PATTERN =
+  /(?:button|aria|suggestion|prompt|action|submit|clear|send|toggle)/iu;
 
 /** Known co-mounted AI chat surfaces (widgets not always page-imported). */
 export const AI_CHAT_CO_MOUNT_GROUP = [
@@ -77,7 +80,7 @@ export const extractControlFingerprints = (
     const tagEnd = template.indexOf(">", matchIndex);
     if (tagStart < 0 || tagEnd < tagStart) continue;
     const openingTag = template.slice(tagStart, tagEnd + 1);
-    if (!/\bbtn\b/u.test(openingTag)) continue;
+    if (!NEIGHBORHOOD_BTN_PATTERN.test(openingTag)) continue;
     BTN_CLASS_LIST_PATTERN.lastIndex = 0;
     const btnMatch = openingTag.matchAll(BTN_CLASS_LIST_PATTERN).next().value;
     const btnClasses = normalizeBtnClasses(btnMatch?.[1] ?? "btn");
@@ -104,7 +107,7 @@ export const extractControlFingerprints = (
       continue;
     }
     // Skip non-control copy keys that are not suggestion/button shaped.
-    if (!/(?:button|aria|suggestion|prompt|action|submit|clear|send|toggle)/iu.test(i18nKey)) {
+    if (!CONTROL_I18N_KEY_SHAPE_PATTERN.test(i18nKey)) {
       continue;
     }
     fingerprints.push({

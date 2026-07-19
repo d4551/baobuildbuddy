@@ -30,6 +30,7 @@ const WHITESPACE_PATTERN = /\s+/u;
  */
 const TRUNCATED_TOKEN_PATTERN =
   /^(?:max|min|w|h|p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|print)-$|^(?:sm|md|lg|xl|2xl|print):$/u;
+const TRUNCATED_SEGMENT_PATTERN = /^(?:max|min|w|h|p|m|gap|print)-$/u;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -44,7 +45,7 @@ export const isTruncatedClassToken = (token: string): boolean => {
   if (TRUNCATED_TOKEN_PATTERN.test(token)) return true;
   const segments = token.split(":");
   const last = segments[segments.length - 1] ?? "";
-  if (last.length > 0 && /^(?:max|min|w|h|p|m|gap|print)-$/u.test(last)) return true;
+  if (last.length > 0 && TRUNCATED_SEGMENT_PATTERN.test(last)) return true;
   if (segments.length > 1 && last.length === 0) return true;
   return false;
 };
