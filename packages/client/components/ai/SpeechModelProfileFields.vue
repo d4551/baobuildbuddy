@@ -77,10 +77,10 @@ function handleTtsModelChange(event: Event): void {
   <fieldset class="fieldset rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p3]">
     <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
     <SectionGrid grid-token="twoColumnSmGap2">
-      <label class="label" :class="[TYPOGRAPHY_SCALE_CLASS.xs, PADDING_TOKEN_CLASS.py0]" for="speech-profile-stt-provider">
+ <label class="label" for="speech-profile-stt-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.sttProviderLabel") }}
       </label>
-      <select 
+      <select
         id="speech-profile-stt-provider"
         class="select select-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.sttProvider"
@@ -97,10 +97,10 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
-      <label class="label" :class="[TYPOGRAPHY_SCALE_CLASS.xs, PADDING_TOKEN_CLASS.py0]" for="speech-profile-tts-provider">
+ <label class="label" for="speech-profile-tts-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.ttsProviderLabel") }}
       </label>
-      <select 
+      <select
         id="speech-profile-tts-provider"
         class="select select-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.ttsProvider"
@@ -117,10 +117,10 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
-      <label class="label" :class="[TYPOGRAPHY_SCALE_CLASS.xs, PADDING_TOKEN_CLASS.py0]" for="speech-profile-stt-model">
+ <label class="label" for="speech-profile-stt-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.sttModelLabel") }}
       </label>
-      <input 
+      <input
         id="speech-profile-stt-model"
         class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.sttModel"
@@ -137,10 +137,10 @@ function handleTtsModelChange(event: Event): void {
         />
       </datalist>
 
-      <label class="label" :class="[TYPOGRAPHY_SCALE_CLASS.xs, PADDING_TOKEN_CLASS.py0]" for="speech-profile-tts-model">
+ <label class="label" for="speech-profile-tts-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.ttsModelLabel") }}
       </label>
-      <input 
+      <input
         id="speech-profile-tts-model"
         class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
         :value="props.ttsModel"
@@ -161,7 +161,7 @@ function handleTtsModelChange(event: Event): void {
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.hint") }}
       </p>
-      <button 
+      <button
         type="button"
         class="btn btn-primary btn-xs"
         :disabled="props.saving"

@@ -1,6 +1,6 @@
 import { safeParseJson } from "@bao/shared/utils/json";
-import { $fetch } from "ofetch";
 import type { ApiDocsTranslate } from "~/composables/api-docs-page-contracts";
+import { requestResolvedApiRaw, toClientApiHttpMethod } from "~/composables/api-request";
 import type { ApiEndpoint, FetchEndpointResult, FetchEndpointResultOk } from "~/types/api-docs";
 import {
   buildApiDocsQueryString,
@@ -102,44 +102,47 @@ export async function fetchApiDocsEndpointResponse(input: {
   readonly requestBody: string | null;
   readonly t: ApiDocsTranslate;
 }): Promise<FetchEndpointResult> {
+  const method = toClientApiHttpMethod(input.requestMethod);
+  if (!method) {
+    return {
+      ok: false,
+      errorMessage: input.t("apiDocs.tester.requestFailure"),
+    };
+  }
+
   const startedAt = Date.now();
-  return $fetch
-    .raw(input.endpointUrl, {
-      method: input.requestMethod,
-      headers: {
-        Accept: "application/json",
-        ...(input.requestBody ? { "Content-Type": "application/json" } : {}),
-      },
-      ...(input.requestBody ? { body: input.requestBody } : {}),
-      credentials: "include",
-      responseType: "text",
-    })
-    .then(
-      (response) => {
-        const headers: Record<string, string> = {};
-        response.headers.forEach((value, key) => {
-          headers[key] = value;
-        });
-        const body =
-          typeof response._data === "string"
-            ? response._data
-            : JSON.stringify(response._data ?? "");
-        return {
-          ok: true,
-          payload: {
-            statusCode: response.status,
-            statusText: response.statusText,
-            headers,
-            body,
-            durationMs: Date.now() - startedAt,
-            url: input.endpointUrl,
-            method: input.requestMethod,
-          } satisfies FetchEndpointResultOk,
-        };
-      },
-      () => ({
-        ok: false,
-        errorMessage: input.t("apiDocs.tester.requestFailure"),
-      }),
-    );
+  return requestResolvedApiRaw(input.endpointUrl, {
+    method,
+    headers: {
+      Accept: "application/json",
+      ...(input.requestBody ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(input.requestBody ? { body: input.requestBody } : {}),
+    responseType: "text",
+  }).then(
+    (response) => {
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      const body =
+        typeof response._data === "string" ? response._data : JSON.stringify(response._data ?? "");
+      return {
+        ok: true,
+        payload: {
+          statusCode: response.status,
+          statusText: response.statusText,
+          headers,
+          body,
+          durationMs: Date.now() - startedAt,
+          url: input.endpointUrl,
+          method: input.requestMethod,
+        } satisfies FetchEndpointResultOk,
+      };
+    },
+    () => ({
+      ok: false,
+      errorMessage: input.t("apiDocs.tester.requestFailure"),
+    }),
+  );
 }

@@ -13,11 +13,24 @@ import { createServerLogger } from "./utils/logger";
 
 const logger = createServerLogger("server-lifecycle");
 
-const runBackgroundTask = (task: Promise<unknown>, onError?: (error: unknown) => void): void => {
+process.on("uncaughtException", (error) => {
+  logger.error("uncaughtException", error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error("unhandledRejection", reason instanceof Error ? reason.message : String(reason));
+  process.exit(1);
+});
+
+const runBackgroundTask = (
+  task: Promise<void>,
+  onError?: (error: Error | string) => void,
+): void => {
   task.then(
     () => undefined,
     (error) => {
-      onError?.(error);
+      onError?.(error instanceof Error ? error.message : String(error));
     },
   );
 };
@@ -30,7 +43,7 @@ runBackgroundTask(
     if (seedResult.status === "rejected") {
       logger.error(
         "Seed failed",
-        seedResult.reason instanceof Error ? seedResult.reason.message : seedResult.reason,
+        seedResult.reason instanceof Error ? seedResult.reason.message : String(seedResult.reason),
       );
     }
   })(),
@@ -47,7 +60,7 @@ const runJobRefresh = (): void => {
           "JobRefresh failed",
           refreshResult.reason instanceof Error
             ? refreshResult.reason.message
-            : refreshResult.reason,
+            : String(refreshResult.reason),
         );
         return;
       }

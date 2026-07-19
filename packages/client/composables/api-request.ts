@@ -12,12 +12,33 @@ export interface ClientApiRequestRuntime {
   requestUrl: URL;
 }
 
+export type ClientApiHttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
+
 interface ClientApiRequestOptions {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: ClientApiHttpMethod;
   body?: BodyInit | object | null;
   query?: Record<string, string | number | boolean | undefined>;
   headers?: Record<string, string>;
 }
+
+export const toClientApiHttpMethod = (method: string): ClientApiHttpMethod | null => {
+  switch (method.trim().toUpperCase()) {
+    case "GET":
+      return "GET";
+    case "POST":
+      return "POST";
+    case "PUT":
+      return "PUT";
+    case "DELETE":
+      return "DELETE";
+    case "PATCH":
+      return "PATCH";
+    case "HEAD":
+      return "HEAD";
+    default:
+      return null;
+  }
+};
 
 /**
  * Resolves the canonical client request runtime for direct API endpoint calls.
@@ -143,5 +164,20 @@ export function requestApi<TResponse>(
   return $fetch<TResponse>(resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint), {
     ...options,
     headers: buildClientApiHeaders(options.headers),
+  });
+}
+
+/**
+ * Executes a raw request against an already-resolved absolute API URL with canonical auth.
+ */
+export function requestResolvedApiRaw(
+  absoluteUrl: string,
+  options: ClientApiRequestOptions & { responseType?: "text" } = {},
+) {
+  return $fetch.raw(absoluteUrl, {
+    ...options,
+    headers: buildClientApiHeaders(options.headers),
+    credentials: "include",
+    responseType: options.responseType ?? "text",
   });
 }

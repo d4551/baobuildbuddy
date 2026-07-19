@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   ACHIEVEMENT_ICON_BADGE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -42,7 +43,7 @@ const { t } = useI18n();
         </div>
 
         <div class="flex-1">
-          <h3 class="font-bold">{{ achievement.name }}</h3>
+          <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ achievement.name }}</h3>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ achievement.description }}</p>
           <span class="badge badge-soft badge-sm" :class="[MARGIN_TOKEN_CLASS.mt2]">
             +{{ achievement.xpReward }} {{ t("gamificationPage.xpSuffix") }}

@@ -1,11 +1,12 @@
 import { type SkillCategory, type SkillEvidence, type SkillMapping } from "@bao/shared/types/skill-mapping";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 type DemandLevel = SkillMapping["demandLevel"];
-export declare const normalizeCategory: (value: unknown) => SkillCategory;
-export declare const normalizeDemandLevel: (value: unknown) => DemandLevel;
-export declare const normalizeStringArray: (value: unknown) => string[];
-export declare const normalizeSkillEvidence: (value: unknown) => SkillEvidence[];
+export declare const normalizeCategory: (value: JsonValue | undefined) => SkillCategory;
+export declare const normalizeDemandLevel: (value: JsonValue | undefined) => DemandLevel;
+export declare const normalizeStringArray: (value: JsonValue | undefined) => string[];
+export declare const normalizeSkillEvidence: (value: JsonValue | undefined) => SkillEvidence[];
 export declare const clampConfidence: (value: number | undefined) => number;
-export declare const mapSuggestedMappingToCreateInput: (suggestedMapping: Record<string, unknown>) => {
+export declare const mapSuggestedMappingToCreateInput: (suggestedMapping: JsonObject) => {
     gameExpression: string;
     transferableSkill: string;
     industryApplications: string[];

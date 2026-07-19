@@ -10,6 +10,7 @@ import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../../db/schema/settings";
+import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { AIService } from "./ai-service";
 
 type SettingsRow = typeof settingsTable.$inferSelect;
@@ -241,7 +242,9 @@ const buildProviderRows = (
 /**
  * Builds the canonical AI control-plane state from one persisted settings row.
  */
-export async function buildAIControlPlaneState(row: SettingsRow): Promise<AIControlPlaneState> {
+export async function buildAIControlPlaneState(settingsRow: SettingsRow): Promise<AIControlPlaneState> {
+  const decryptedKeys = decryptProviderKeys(settingsRow);
+  const row = { ...settingsRow, ...decryptedKeys };
   const aiRouting = normalizeAIRouting(
     row.aiRouting,
     resolveKnownProvider(row.preferredProvider),

@@ -1,3 +1,4 @@
+import { auditLog } from "./audit-log";
 import { auth } from "./auth";
 import { automationRuns } from "./automation-runs";
 import { chatHistory } from "./chat-history";
@@ -11,10 +12,11 @@ import { resumes } from "./resumes";
 import { settings } from "./settings";
 import { skillMappings } from "./skill-mappings";
 import { studios } from "./studios";
-import { userProfile } from "./user";
+import { userProfile, userRole } from "./user";
 
 export {
   applications,
+  auditLog,
   auth,
   automationRuns,
   chatHistory,
@@ -32,4 +34,5 @@ export {
   studioClassificationRules,
   studios,
   userProfile,
+  userRole,
 };

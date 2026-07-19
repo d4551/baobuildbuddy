@@ -1,9 +1,17 @@
 import { buildAutomationScreenshotEndpoint } from "@bao/shared/constants/endpoints";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
-import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { type ComputedRef, computed, onBeforeUnmount, type Ref, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";
+import {
+  type OutputStep,
+  projectOutputSteps,
+  projectRunDetail,
+  projectStreamEvents,
+  type RunDetailFields,
+  type StreamEventFields,
+  toLocaleCode,
+} from "~/composables/automation-run-detail-projectors";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { formatDateWithLocale } from "~/utils/locale-format";
@@ -13,23 +21,8 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isResultOutput = (value: unknown): value is RpaRunResult => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  return (
-    typeof value.success === "boolean" &&
-    Array.isArray(value.steps) &&
-    Array.isArray(value.screenshots) &&
-    Array.isArray(value.artifacts)
-  );
-};
-
 const createAutomationRunDetailDateFormatter =
-  (locale: Readonly<{ value: unknown }>, fallbackLocale: Readonly<{ value: unknown }>) =>
+  (locale: Readonly<{ value: string }>, fallbackLocale: Readonly<{ value: string }>) =>
   (value: string): string => {
     const formattedDate = formatDateWithLocale(
       value,
@@ -51,8 +44,8 @@ const createAutomationRunDetailStreamState = (
   t: ReturnType<typeof useI18n>["t"],
 ) => {
   const streamState = computed(() => runStream.state.value);
-  const run = computed(() => runStream.run.value);
-  const streamEvents = computed(() => runStream.events.value);
+  const run = computed(() => projectRunDetail(runStream.run.value));
+  const streamEvents = computed(() => projectStreamEvents(runStream.events.value));
   const streamError = computed(() => runStream.streamError.value);
   const streamStateMessageKey = computed<string>(
     () => `automation.runDetail.states.${streamState.value}`,
@@ -88,14 +81,15 @@ const createAutomationRunDetailStreamState = (
 };
 
 const createAutomationRunDetailSummaries = (
-  run: Readonly<ComputedRef<ReturnType<typeof useAutomationRunStream>["run"]["value"]>>,
+  run: Readonly<ComputedRef<RunDetailFields | null>>,
   t: ReturnType<typeof useI18n>["t"],
 ) => {
   const inputSummary = computed(() => {
-    if (!run.value?.input || typeof run.value.input !== "object") {
+    const input = run.value?.input;
+    if (!input) {
       return t("automation.runDetail.inputSummaryEmpty");
     }
-    return t("automation.runDetail.inputSummary", { count: Object.keys(run.value.input).length });
+    return t("automation.runDetail.inputSummary", { count: Reflect.ownKeys(input).length });
   });
   const outputSummary = computed(() => {
     if (!run.value?.output) {
@@ -103,7 +97,6 @@ const createAutomationRunDetailSummaries = (
     }
     return t("automation.runDetail.outputSummaryPresent");
   });
-
   const formattedInput = computed(() =>
     run.value?.input
       ? JSON.stringify(run.value.input, null, 2)
@@ -114,12 +107,7 @@ const createAutomationRunDetailSummaries = (
       ? JSON.stringify(run.value.output, null, 2)
       : t("automation.runDetail.noOutputPayload"),
   );
-  const outputSteps = computed(() => {
-    if (!(run.value?.output && isResultOutput(run.value.output))) {
-      return [];
-    }
-    return run.value.output.steps;
-  });
+  const outputSteps = computed(() => projectOutputSteps(run.value?.output ?? null));
   return {
     inputSummary,
     outputSummary,
@@ -130,7 +118,7 @@ const createAutomationRunDetailSummaries = (
 };
 
 const mapAutomationRunStreamEvent = (
-  event: ReturnType<typeof useAutomationRunStream>["events"]["value"][number],
+  event: StreamEventFields,
   t: ReturnType<typeof useI18n>["t"],
 ): TimelineEntry => {
   if (event.eventType === "progress") {
@@ -138,19 +126,20 @@ const mapAutomationRunStreamEvent = (
       id: `${event.runId}-${event.sequence}`,
       timestamp: event.timestamp,
       stage: t("automation.runDetail.timeline.stageProgress"),
-      status: event.status,
-      message: event.message?.trim() || event.action,
+      status: event.status ?? "running",
+      message: event.message?.trim() || event.action || "",
     };
   }
   if (event.eventType === "result") {
+    const success = event.resultSuccess === true;
     return {
       id: `${event.runId}-${event.sequence}`,
       timestamp: event.timestamp,
       stage: t("automation.runDetail.timeline.stageResult"),
-      status: event.result.success ? "success" : "error",
-      message: event.result.success
+      status: success ? "success" : "error",
+      message: success
         ? t("automation.runDetail.timeline.resultSuccess")
-        : event.result.error || t("automation.runDetail.timeline.resultError"),
+        : event.resultError || t("automation.runDetail.timeline.resultError"),
     };
   }
   return {
@@ -158,14 +147,14 @@ const mapAutomationRunStreamEvent = (
     timestamp: event.timestamp,
     stage: t("automation.runDetail.timeline.stageError"),
     status: "error",
-    message: event.error.message || t("automation.runDetail.timeline.resultError"),
+    message: event.errorMessage || t("automation.runDetail.timeline.resultError"),
   };
 };
 
 const createAutomationRunFallbackTimelineEntries = (options: {
-  readonly run: Readonly<ComputedRef<ReturnType<typeof useAutomationRunStream>["run"]["value"]>>;
+  readonly run: Readonly<ComputedRef<RunDetailFields | null>>;
   readonly runId: Readonly<ComputedRef<string>>;
-  readonly outputSteps: Readonly<ComputedRef<RpaRunResult["steps"]>>;
+  readonly outputSteps: Readonly<ComputedRef<OutputStep[]>>;
   readonly statusText: Readonly<ComputedRef<string>>;
   readonly t: ReturnType<typeof useI18n>["t"];
 }): readonly TimelineEntry[] => {
@@ -193,12 +182,10 @@ const createAutomationRunFallbackTimelineEntries = (options: {
 };
 
 const createAutomationRunDetailTimeline = (options: {
-  readonly streamEvents: Readonly<
-    ComputedRef<ReturnType<typeof useAutomationRunStream>["events"]["value"]>
-  >;
-  readonly run: Readonly<ComputedRef<ReturnType<typeof useAutomationRunStream>["run"]["value"]>>;
+  readonly streamEvents: Readonly<ComputedRef<readonly StreamEventFields[]>>;
+  readonly run: Readonly<ComputedRef<RunDetailFields | null>>;
   readonly runId: Readonly<ComputedRef<string>>;
-  readonly outputSteps: Readonly<ComputedRef<RpaRunResult["steps"]>>;
+  readonly outputSteps: Readonly<ComputedRef<OutputStep[]>>;
   readonly statusText: Readonly<ComputedRef<string>>;
   readonly t: ReturnType<typeof useI18n>["t"];
 }) =>
@@ -214,23 +201,18 @@ const createAutomationRunDetailTimeline = (options: {
 const createAutomationRunDetailScreenshots = (options: {
   readonly apiBase: string;
   readonly requestUrl: URL;
-  readonly run: Readonly<ComputedRef<ReturnType<typeof useAutomationRunStream>["run"]["value"]>>;
+  readonly run: Readonly<ComputedRef<RunDetailFields | null>>;
   readonly runId: Readonly<ComputedRef<string>>;
   readonly failedScreenshotIndexes: Ref<Record<number, boolean>>;
   readonly t: ReturnType<typeof useI18n>["t"];
 }) => {
-  const screenshotPaths = computed<readonly string[]>(() =>
-    (options.run.value?.screenshots || []).filter(
-      (value) => typeof value === "string" && value.length > 0,
-    ),
-  );
+  const screenshotPaths = computed<readonly string[]>(() => options.run.value?.screenshots || []);
   const screenshotEndpoint = (index: number): string =>
     resolveApiEndpoint(
       options.apiBase,
       options.requestUrl,
       buildAutomationScreenshotEndpoint(options.run.value?.id || options.runId.value, index),
     );
-
   const screenshotLinkLabel = (index: number): string =>
     options.t("automation.runDetail.screenshotLinkLabel", { index: index + 1 });
   const markScreenshotError = (index: number): void => {
@@ -251,7 +233,7 @@ const createAutomationRunDetailScreenshots = (options: {
 };
 
 const createAutomationRunDetailBreadcrumbs = (
-  run: Readonly<ComputedRef<ReturnType<typeof useAutomationRunStream>["run"]["value"]>>,
+  run: Readonly<ComputedRef<RunDetailFields | null>>,
   runId: Readonly<ComputedRef<string>>,
   t: ReturnType<typeof useI18n>["t"],
 ) =>
@@ -263,8 +245,8 @@ const createAutomationRunDetailBreadcrumbs = (
 
 const createAutomationRunDetailState = (options: {
   readonly t: ReturnType<typeof useI18n>["t"];
-  readonly locale: Readonly<{ value: unknown }>;
-  readonly fallbackLocale: Readonly<{ value: unknown }>;
+  readonly locale: Readonly<{ value: string }>;
+  readonly fallbackLocale: Readonly<{ value: string }>;
   readonly apiBase: string;
   readonly requestUrl: URL;
   readonly runStream: ReturnType<typeof useAutomationRunStream>;
@@ -318,7 +300,6 @@ const registerAutomationRunDetailLifecycle = (
     },
     { immediate: true },
   );
-
   onBeforeUnmount(() => {
     runStream.cancel();
   });
@@ -334,8 +315,8 @@ export const useAutomationRunDetailPage = () => {
   const failedScreenshotIndexes = ref<Record<number, boolean>>({});
   const detailState = createAutomationRunDetailState({
     t,
-    locale,
-    fallbackLocale,
+    locale: { value: toLocaleCode(locale.value) },
+    fallbackLocale: { value: toLocaleCode(fallbackLocale.value) },
     apiBase,
     requestUrl,
     runStream,

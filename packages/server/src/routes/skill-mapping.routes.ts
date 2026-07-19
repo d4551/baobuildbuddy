@@ -11,12 +11,11 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 import {
-  type SkillMappingIdParams,
   type SkillMappingRouteSetState,
   skillAnalysisBodySchema,
   skillAnalysisResponses,
@@ -39,8 +38,6 @@ import {
   listSkillMappings,
   updateSkillMappingFromBody,
 } from "./skill-mapping-route-support";
-
-type RouteStatus = typeof status;
 
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
@@ -91,7 +88,7 @@ export const skillMappingRoutes = new Elysia({
       params: skillMappingIdParamsSchema,
       response: skillMappingDeleteResponses,
     },
-    async ({ params, status }: { params: SkillMappingIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const state: SkillMappingRouteSetState = {};
       const result = await deleteSkillMappingById(params.id, state);
       if (result.kind === "not-found") {

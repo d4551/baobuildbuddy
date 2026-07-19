@@ -1,0 +1,25 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/server/src/services/automation/job-apply-script.test.ts:
+103 |   test("uploads a real resume artifact and fills select, radio, and checkbox answers", async () => {
+104 |     const tempDirectory = createTempDirectory();
+105 |     await Promise.resolve()
+106 |       .then(async () => {
+107 |         const { execution, submittedPayload } = await runJobApplyScriptFixture(tempDirectory);
+108 |         expect(execution.error).toBeNull();
+                                      ^
+error: expect(received).toBeNull()
+
+Received: {
+  code: "AUTOMATION_RUNTIME_ERROR",
+  message: "Unable to launch automation browser.",
+  source: "@bao/scraper",
+}
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/services/automation/job-apply-script.test.ts:108:33)
+(fail) job-apply script > uploads a real resume artifact and fills select, radio, and checkbox answers [1734.45ms]
+
+ 0 pass
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [1.80s]

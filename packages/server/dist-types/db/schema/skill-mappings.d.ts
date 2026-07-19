@@ -1,3 +1,4 @@
+import type { SkillEvidence } from "@bao/shared/types/skill-mapping";
 export declare const skillMappings: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "skill_mappings";
     schema: undefined;
@@ -83,7 +84,7 @@ export declare const skillMappings: import("drizzle-orm/sqlite-core").SQLiteTabl
             tableName: "skill_mappings";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: unknown[];
+            data: SkillEvidence[];
             driverParam: string;
             notNull: false;
             hasDefault: true;
@@ -95,7 +96,7 @@ export declare const skillMappings: import("drizzle-orm/sqlite-core").SQLiteTabl
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: unknown[];
+            $type: SkillEvidence[];
         }>;
         confidence: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "confidence";

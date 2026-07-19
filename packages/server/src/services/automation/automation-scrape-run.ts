@@ -8,8 +8,12 @@ import {
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation-limits";
+import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
 import type { ScraperOperationResult } from "@bao/shared/types/jobs";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import type { JsonObject } from "@bao/shared/utils/json";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -26,6 +30,12 @@ import type { CreateProgressEvent } from "./automation-service-contracts";
 import { loadAutomationSettings } from "./automation-settings-support";
 
 const DEFAULT_PROGRESS = 0;
+
+const toJsonRecord = (value: object): JsonObject => {
+  const parsed = safeParseJson(JSON.stringify(value));
+  const objectResult = jsonObjectSchema.safeParse(parsed);
+  return objectResult.success ? objectResult.data : {};
+};
 
 const executeScrapeTarget = (target: AutomationScrapeTarget): Promise<ScraperOperationResult> => {
   if (!isAutomationJobScrapeTarget(target)) {
@@ -74,7 +84,7 @@ const markScrapeRunStarted = async (
 const failScrapeRun = async (params: {
   runId: string;
   target: AutomationScrapeTarget;
-  reason: unknown;
+  reason: Error;
   executionMs: number;
   createProgressEvent: CreateProgressEvent;
 }): Promise<void> => {
@@ -110,13 +120,13 @@ const completeScrapeRun = async (params: {
   createProgressEvent: CreateProgressEvent;
 }): Promise<void> => {
   const completedAt = new Date().toISOString();
-  const output = {
+  const output = toJsonRecord({
     target: params.target,
     scraped: params.result.scraped,
     upserted: params.result.upserted,
     errors: params.result.errors,
     enrichment: params.result.enrichment,
-  } satisfies Record<string, unknown>;
+  });
 
   await db
     .update(automationRuns)
@@ -160,12 +170,9 @@ export const executeScrapeRun = async (
   const normalizedTarget = normalizeScrapeTarget(target);
   const startedAt = Date.now();
   await markScrapeRunStarted(runId, normalizedTarget, createProgressEvent);
-  const scrapeResult = await executeScrapeTarget(normalizedTarget).then(
-    (value) => ({ ok: true as const, value }),
-    (reason: unknown) => ({ ok: false as const, reason }),
-  );
+  const scrapeResult = await settle(executeScrapeTarget(normalizedTarget));
 
-  if (!scrapeResult.ok) {
+  if (scrapeResult.status === "rejected") {
     await failScrapeRun({
       runId,
       target: normalizedTarget,

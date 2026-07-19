@@ -1,0 +1,31 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/shared/src/utils/playwright-browsers-path.test.ts:
+(pass) playwright browsers path sanitization > detects cursor-sandbox browser caches as polluted [0.03ms]
+(pass) playwright browsers path sanitization > detects missing browser cache paths as polluted [0.01ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path when host cache exists [0.06ms]
+(pass) playwright browsers path sanitization > unsets polluted browsers path when host cache is missing [0.02ms]
+46 |     });
+47 |     expect(resolution).toEqual({ action: "unset" });
+48 |   });
+49 | 
+50 |   test("derives mac arm64 host platform without reading os.cpus", () => {
+51 |     expect(resolvePlaywrightHostPlatformOverride("darwin", "arm64", "25.4.0")).toBe("mac15-arm64");
+                                                                                    ^
+error: expect(received).toBe(expected)
+
+Expected: "mac15-arm64"
+Received: "mac15"
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/shared/src/utils/playwright-browsers-path.test.ts:51:80)
+(fail) playwright browsers path sanitization > derives mac arm64 host platform without reading os.cpus [0.25ms]
+(pass) playwright browsers path sanitization > leaves non-mac platforms without a host override [0.02ms]
+(pass) playwright browsers path sanitization > injects host platform override into automation child env [0.03ms]
+(pass) playwright browsers path sanitization > preserves an existing host platform override [0.02ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path and injects host override together [0.03ms]
+(pass) playwright browsers path sanitization > skips host override injection when resolver returns null [0.01ms]
+
+ 9 pass
+ 1 fail
+ 11 expect() calls
+Ran 10 tests across 1 file. [18.00ms]

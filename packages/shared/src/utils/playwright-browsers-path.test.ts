@@ -4,6 +4,7 @@ import {
   buildAutomationProcessEnv,
   isPollutedPlaywrightBrowsersPath,
   resolvePlaywrightBrowsersPath,
+  resolvePlaywrightHostPlatformOverride,
 } from "./playwright-browsers-path";
 
 const SANDBOX_CACHE_PATH = `var/folders/x/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/abc/playwright`;
@@ -44,5 +45,66 @@ describe("playwright browsers path sanitization", () => {
       hostDefaultPath: HOST_DEFAULT_PATH,
     });
     expect(resolution).toEqual({ action: "unset" });
+  });
+
+  test("derives mac arm64 host platform without reading os.cpus", () => {
+    expect(resolvePlaywrightHostPlatformOverride("darwin", "arm64", "25.4.0")).toBe("mac15-arm64");
+  });
+
+  test("leaves non-mac platforms without a host override", () => {
+    expect(resolvePlaywrightHostPlatformOverride("linux", "x64", "6.8.0")).toBeNull();
+  });
+
+  test("injects host platform override into automation child env", () => {
+    const env = buildAutomationProcessEnv(
+      {},
+      {
+        pathExists: () => true,
+        hostDefaultPath: HOST_DEFAULT_PATH,
+      },
+      "mac15-arm64",
+    );
+    expect(env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE).toBe("mac15-arm64");
+  });
+
+  test("preserves an existing host platform override", () => {
+    const env = buildAutomationProcessEnv(
+      {
+        PLAYWRIGHT_HOST_PLATFORM_OVERRIDE: "mac14-arm64",
+      },
+      {
+        pathExists: () => true,
+        hostDefaultPath: HOST_DEFAULT_PATH,
+      },
+      "mac15-arm64",
+    );
+    expect(env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE).toBe("mac14-arm64");
+  });
+
+  test("rewrites polluted browsers path and injects host override together", () => {
+    const env = buildAutomationProcessEnv(
+      {
+        PLAYWRIGHT_BROWSERS_PATH: SANDBOX_CACHE_PATH,
+      },
+      {
+        pathExists: pathExists(new Set([HOST_DEFAULT_PATH])),
+        hostDefaultPath: HOST_DEFAULT_PATH,
+      },
+      "mac15-arm64",
+    );
+    expect(env.PLAYWRIGHT_BROWSERS_PATH).toBe(HOST_DEFAULT_PATH);
+    expect(env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE).toBe("mac15-arm64");
+  });
+
+  test("skips host override injection when resolver returns null", () => {
+    const env = buildAutomationProcessEnv(
+      {},
+      {
+        pathExists: () => true,
+        hostDefaultPath: HOST_DEFAULT_PATH,
+      },
+      null,
+    );
+    expect(env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE).toBeUndefined();
   });
 });

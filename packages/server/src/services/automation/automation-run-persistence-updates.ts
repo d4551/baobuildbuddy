@@ -7,7 +7,10 @@ import {
 } from "@bao/shared/constants/automation-limits";
 import { MS_PER_DAY } from "@bao/shared/constants/time";
 import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
+import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
 import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { and, inArray, sql } from "drizzle-orm";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
 import { db } from "../../db/client";
@@ -19,15 +22,13 @@ const DECIMAL_RADIX = 10;
 const MIN_SCREENSHOT_RETENTION_DAYS = 1;
 type ProgressRunEvent = Extract<RpaRunEvent, { eventType: "progress" }>;
 
-const toJsonRecord = (value: object): Record<string, unknown> => {
-  const record: Record<string, unknown> = {};
-  for (const [key, entry] of Object.entries(value)) {
-    record[key] = entry;
-  }
-  return record;
+const toJsonRecord = (value: object): JsonObject => {
+  const parsed = safeParseJson(JSON.stringify(value));
+  const objectResult = jsonObjectSchema.safeParse(parsed);
+  return objectResult.success ? objectResult.data : {};
 };
 
-export const toFiniteNumber = (value: unknown): number => {
+export const toFiniteNumber = <T>(value: T): number => {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : Number.NaN;
   }

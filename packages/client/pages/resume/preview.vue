@@ -155,7 +155,6 @@ function handlePrint() {
       :resume="resume"
       :display-skills="displaySkills"
       :has-gaming-experience="hasGamingExperience"
-      :t="t"
     />
   </PageScaffold>
 </template>

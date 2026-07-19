@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  LEADING_TOKEN_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   SHADOW_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -24,11 +25,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="flex flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4, MIN_HEIGHT_ZERO_CLASS]">
+ <aside class="flex flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
     <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
-        <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+ <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.contextPanelDescription") }}
         </p>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -48,22 +49,14 @@ const { t } = useI18n();
     <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
-        <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+ <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.promptsDescription") }}
         </p>
-        <ul class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" :aria-label="t('floatingChat.suggestionsAria')">
-          <li v-for="prompt in contextualPrompts" :key="`sidebar-${prompt}`">
-            <button 
-              type="button"
-              class="btn btn-sm btn-soft"
-              :aria-label="t('floatingChat.suggestionAria', { prompt })"
-              :disabled="loading"
-              @click="emit('prompt', prompt)"
-            >
-              {{ prompt }}
-            </button>
-          </li>
-        </ul>
+        <ChatPromptChips
+          :prompts="contextualPrompts"
+          :loading="loading"
+          @prompt="emit('prompt', $event)"
+        />
       </div>
     </section>
   </aside>

@@ -1,3 +1,4 @@
+import type { JsonObject } from "@bao/shared/utils/json";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -10,8 +11,8 @@ export const automationRuns = sqliteTable("automation_runs", {
   status: text("status").notNull().default("pending"), // "pending" | "running" | "success" | "error"
   jobId: text("job_id"),
   userId: text("user_id"),
-  input: text("input", { mode: "json" }).$type<Record<string, unknown>>(),
-  output: text("output", { mode: "json" }).$type<Record<string, unknown>>(),
+  input: text("input", { mode: "json" }).$type<JsonObject>(),
+  output: text("output", { mode: "json" }).$type<JsonObject>(),
   screenshots: text("screenshots", { mode: "json" }).$type<string[]>(),
   error: text("error"),
   // Progress tracking fields for WebSocket streaming

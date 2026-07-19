@@ -61,8 +61,11 @@ export class ApplicationAutomationService {
     });
     this.scheduler.restorePendingRuns(AutomationRunCreator.maxRecoverableScheduledRuns).then(
       () => undefined,
-      (error: unknown) => {
-        automationServiceLogger.error("[automation] scheduler recovery failed", error);
+      (error) => {
+        automationServiceLogger.error(
+          "[automation] scheduler recovery failed",
+          error instanceof Error ? error.message : String(error),
+        );
       },
     );
   }

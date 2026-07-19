@@ -15,6 +15,7 @@ import { Elysia } from "elysia";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
 import { auth } from "../db/schema/auth";
+import { hashApiKey } from "../utils/crypto";
 import { openaiV1Routes } from "./openai-v1.routes";
 
 const createCompatApp = () => new Elysia().use(openaiV1Routes);
@@ -38,10 +39,10 @@ describe("openai v1 auth default-deny", () => {
     Bun.env.BAO_DISABLE_AUTH = "false";
     await db
       .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKey: "bao_openai_v1_test_key" })
+      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
       .onConflictDoUpdate({
         target: auth.id,
-        set: { apiKey: "bao_openai_v1_test_key" },
+        set: { apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null },
       });
 
     const app = createCompatApp();
@@ -58,10 +59,10 @@ describe("openai v1 auth default-deny", () => {
     Bun.env.BAO_DISABLE_AUTH = "false";
     await db
       .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKey: "bao_openai_v1_test_key" })
+      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
       .onConflictDoUpdate({
         target: auth.id,
-        set: { apiKey: "bao_openai_v1_test_key" },
+        set: { apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null },
       });
 
     const app = createCompatApp();

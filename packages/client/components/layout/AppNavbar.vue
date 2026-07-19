@@ -9,6 +9,7 @@ import {
   APP_DRAWER_ID,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
@@ -115,7 +116,7 @@ onUnmounted(() => {
       </label>
       <NuxtLink 
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink-0 font-bold text-primary lg:hidden" :class="[TYPOGRAPHY_SCALE_CLASS.xl, FLEX_GAP_TOKEN_CLASS.gap2]"
+ class="btn btn-ghost shrink-0 text-primary lg:hidden" 
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>

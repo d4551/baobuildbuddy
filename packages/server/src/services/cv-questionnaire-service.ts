@@ -10,6 +10,7 @@ import { safeParseJson } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
 import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts-cv";
@@ -38,7 +39,7 @@ const isCvQuestion = (value: unknown): value is CvQuestion =>
 
 async function getAIService(): Promise<AIService> {
   const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-  return AIService.fromSettings(rows[0]);
+  return AIService.fromSettings({ ...rows[0], ...decryptProviderKeys(rows[0]) });
 }
 
 function extractJson(text: string): string {

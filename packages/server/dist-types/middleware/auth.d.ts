@@ -5,23 +5,15 @@ type AuthFailure = {
     status: typeof HTTP_STATUS_UNAUTHORIZED;
 };
 /**
- * Validates Bearer API key against the persisted profile key.
+ * Validates a bearer API key against the persisted SHA-256 hash.
  *
- * Default deny: missing/empty/mismatched key and missing configured
- * profile key all return unauthorized. Returns `null` only when the
- * request is authenticated or auth is explicitly disabled.
+ * The API key is hashed at creation and only the hash is stored in the
+ * database. Verification re-hashes the provided bearer token and
+ * compares it against the stored hash using `timingSafeEqual`.
  *
- * @param request Incoming Elysia request (HTTP or WebSocket upgrade).
- * @returns Unauthorized envelope or null on success.
+ * Keys are checked for revocation and expiry before hash comparison.
  */
 export declare function authenticateApiKey(request: Request): Promise<AuthFailure | null>;
-/**
- * Elysia plugin that validates Bearer API key for protected HTTP routes.
- * `.as("global")` lifts the hook so sibling route plugins registered after
- * this guard inherit default-deny auth. Routes mounted before the guard
- * (auth bootstrap) remain public. Skipped only when auth is explicitly
- * disabled via config.
- */
 export declare const authGuard: Elysia<"", "local", {
     decorator: {};
     store: {};

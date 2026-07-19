@@ -1,3 +1,5 @@
+import { isControlPrimitiveOwner } from "./ui-control-primitive-owners";
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import {
   collectProjectFileEntries,
   getLineFromOffset,
@@ -8,45 +10,8 @@ import {
 const sourceExtensions = new Set([".vue", ".ts", ".css"]);
 const scanRoots = ["packages/client"] as const;
 
-// Files that legitimately define or consume design tokens at the SSOT level.
-// Feature components must use token constants, not define raw utilities.
-const SSOT_ALLOWLIST_PATHS = new Set<string>([
-  "packages/client/constants/layout.ts",
-  "packages/client/constants/layout-tokens.ts",
-  "packages/client/constants/chat.ts",
-  "packages/client/constants/ui-layout.ts",
-  "packages/client/assets/css/main.css",
-  // Shared UI primitives that define their own layout contracts
-  "packages/client/components/ui/LoadingSkeleton.vue",
-  "packages/client/components/ui/EmptyState.vue",
-  "packages/client/components/ui/PageScaffold.vue",
-  "packages/client/components/ui/SectionGrid.vue",
-  "packages/client/components/ui/AppModalFrame.vue",
-  "packages/client/components/ui/PageHeroHeader.vue",
-  "packages/client/components/ui/PageHeaderBlock.vue",
-  "packages/client/components/ui/BootstrapErrorAlert.vue",
-  "packages/client/components/BootstrapErrorAlert.vue",
-  "packages/client/components/ui/FilteredEmptyAlert.vue",
-  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
-  "packages/client/components/ui/AIProviderIcon.vue",
-  "packages/client/components/ui/StatsRow.vue",
-  "packages/client/components/ui/WorkPipeline.vue",
-  "packages/client/components/ui/AppBreadcrumbs.vue",
-  "packages/client/components/ui/LoadingSpinner.vue",
-  "packages/client/components/ui/UiRadialMeter.vue",
-  "packages/client/components/ui/ToastContainer.vue",
-  "packages/client/components/ui/AppPagination.vue",
-  // Shell layouts
-  "packages/client/layouts/default.vue",
-  "packages/client/layouts/auth-shell.vue",
-  "packages/client/error.vue",
-  // Print/document preview (legitimate use of raw utilities for print media)
-  "packages/client/components/resume/ResumePreviewDocument.vue",
-  "packages/client/components/cover-letter/CoverLetterPreviewCard.vue",
-  "packages/client/components/portfolio/PortfolioPreviewDocument.vue",
-]);
-
-const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotSourceFile = (filePath: string): boolean =>
+  isUiSsotAuthority(filePath) || isControlPrimitiveOwner(filePath);
 const isIconPrimitive = (filePath: string): boolean =>
   filePath.startsWith("packages/client/components/icons/");
 

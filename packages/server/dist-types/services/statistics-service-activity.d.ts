@@ -4,7 +4,7 @@ type ActionHistoryEntry = {
     xpGained: number;
     timestamp: string;
 };
-export declare const parseActionHistory: (value: unknown) => ActionHistoryEntry[];
+export declare const parseActionHistory: <T>(value: T) => ActionHistoryEntry[];
 export declare const buildWeeklyActivity: (actionHistory: ActionHistoryEntry[]) => WeeklyActivity;
 export declare const buildCareerProgress: (mappedSkills: number, applicationStatuses: string[]) => CareerProgress;
 export {};

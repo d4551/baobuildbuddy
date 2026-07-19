@@ -216,12 +216,24 @@ describe("Layout SSOT — Validator recognizes surface constants", () => {
     expect(validator).toContain("SSOT_SURFACE_CONSTANT_USAGE_PATTERN");
   });
 
-  it("no-raw-design-tokens validator has expanded SSOT allowlist", () => {
-    const validator = readFileSync(
+  it("UI SSOT validators forbid consumer allowlists", () => {
+    const noRaw = readFileSync(
       join(CLIENT_ROOT, "../../scripts/validate-no-raw-design-tokens.ts"),
       "utf8",
     );
-    expect(validator).toContain("layout-tokens.ts");
-    expect(validator).toContain("chat.ts");
+    const typography = readFileSync(
+      join(CLIENT_ROOT, "../../scripts/validate-ui-typography.ts"),
+      "utf8",
+    );
+    const authority = readFileSync(
+      join(CLIENT_ROOT, "../../scripts/ui-ssot-authority.ts"),
+      "utf8",
+    );
+    expect(authority).toContain("UI_SSOT_AUTHORITY_PATHS");
+    expect(noRaw).toContain("isUiSsotAuthority");
+    expect(noRaw).toContain("isControlPrimitiveOwner");
+    expect(noRaw).not.toContain("SSOT_ALLOWLIST_PATHS");
+    expect(typography).not.toContain("startsWith(\"packages/client/components/ai/");
+    expect(typography).toContain("isControlPrimitiveOwner");
   });
 });

@@ -1,3 +1,5 @@
+import { isControlPrimitiveOwner } from "./ui-control-primitive-owners";
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import {
   collectProjectFileEntries,
   getLineFromOffset,
@@ -25,34 +27,15 @@ import {
  * It also enforces that `.card.card-glass` literals reference the SSOT
  * constants (SURFACE_GLASS_CARD_CLASS etc.) when used in pages/composites,
  * and that interactive cards use the `glass-interactive` mixin.
+ *
+ * Zero consumer exemptions — authority + ui/icon primitive owners only.
  */
 
 const scanRoots = ["packages/client"] as const;
 const sourceExtensions = new Set([".vue"]);
 
-const SSOT_ALLOWLIST_PATHS = new Set<string>([
-  "packages/client/components/ui/LoadingSkeleton.vue",
-  "packages/client/components/ui/EmptyState.vue",
-  "packages/client/components/ui/PageScaffold.vue",
-  "packages/client/components/ui/SectionGrid.vue",
-  "packages/client/components/ui/AppModalFrame.vue",
-  "packages/client/components/ui/PageHeroHeader.vue",
-  "packages/client/components/ui/PageHeaderBlock.vue",
-  "packages/client/components/ui/BootstrapErrorAlert.vue",
-  "packages/client/components/ui/FilteredEmptyAlert.vue",
-  "packages/client/components/ui/AppPagination.vue",
-  "packages/client/components/ui/ToastContainer.vue",
-  "packages/client/components/ui/StatsRow.vue",
-  "packages/client/components/ui/WorkPipeline.vue",
-  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
-  "packages/client/components/ui/AppBreadcrumbs.vue",
-  "packages/client/components/ui/LoadingSpinner.vue",
-  "packages/client/components/ui/UiRadialMeter.vue",
-  "packages/client/assets/css/main.css",
-  "packages/client/constants/layout.ts",
-]);
-
-const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotSourceFile = (filePath: string): boolean =>
+  isUiSsotAuthority(filePath) || isControlPrimitiveOwner(filePath);
 
 // A surface that uses card + shadow + bg-base-* but no glass class is bespoke.
 const cardSurfaceWithoutGlassPattern =

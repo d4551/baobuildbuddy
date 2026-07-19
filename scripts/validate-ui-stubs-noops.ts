@@ -1,3 +1,4 @@
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import {
   collectProjectFileEntries,
   getLineFromOffset,
@@ -11,54 +12,43 @@ import {
  * Catches:
  *   1. Inert event handlers: `@click=""`, `@click="noop"`, `@click="() => {}"`,
  *      `@click="undefined"`.
- *   2. Placeholder copy: "Lorem ipsum", "TBD", "coming soon", "placeholder",
- *      "WIP", "not implemented", "TODO" in template text.
- *   3. Dead CTAs: buttons with text but no @click / :to / type="submit" /
- *      form association.
- *   4. Static option lists where the user should be able to choose/select
- *      (hardcoded <option> arrays in pages that should be registry-driven).
- *
- * Banned vocabulary: TODO, FIXME, HACK, PLACEHOLDER, stub, noop, fake, mock,
- * fallback, legacy, cross-platform bridge, barrel.
+ *   2. Placeholder copy: "Lorem ipsum", "TBD", "coming soon", "not implemented".
+ *   3. Dead CTAs: actionable controls (`<button`, `.btn`, `role="button"`) with
+ *      no wiring — including icon-only / nested-content controls.
+ *   4. Banned debt vocabulary in script/comments (authority paths exempt).
  */
 
 const scanRoots = ["packages/client"] as const;
 const sourceExtensions = new Set([".vue", ".ts"]);
 
-const SSOT_ALLOWLIST_PATHS = new Set<string>([
-  "packages/client/assets/css/main.css",
-  "packages/client/constants/layout.ts",
-]);
-
-const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
-
-// Inert @click handlers: empty string, noop function, undefined, empty arrow.
 const inertHandlerPattern =
-  /@(?:click|change|input|submit|focus|blur)\s*=\s*["'](?:|noop|undefined)["']/gu;
+  /@(?:click|change|input|submit|focus|blur)(?:\.[\w-]+)*\s*=\s*["'](?:|noop|undefined)["']/gu;
 const inertArrowHandlerPattern =
-  /@(?:click|change|input|submit|focus|blur)\s*=\s*"\(\)\s*=>\s*\{?\s*\}?"/gu;
-// Placeholder copy in template text nodes. We match the word "placeholder"
-// ONLY when it appears as visible text content (not as an HTML attribute name
-// like placeholder="..." which is the standard input attribute). The negative
-// lookbehind/ahead exclude `placeholder=` and `="placeholder` forms.
+  /@(?:click|change|input|submit|focus|blur)(?:\.[\w-]+)*\s*=\s*"\(\)\s*=>\s*\{?\s*\}?"/gu;
 const placeholderCopyPattern =
   /(?<!\w)(?:Lorem\s+ipsum|TBD|WIP|coming\s+soon|not\s+implemented)(?!\w)/giu;
-// Banned debt vocabulary. Targets code-debt tokens (TODO, FIXME, HACK),
-// stub identifiers (foo, bar, baz), and structural anti-patterns.
-// Excludes general-purpose words
-// like "fallback" (legitimate in feature-detection/strategy patterns).
 const bannedVocabularyPattern =
   /\b(?:TODO|FIXME|HACK|XXX)\b|\b(?:barrel)\b|\b(?:deprecated\s+(?:since|in)\s+v\d)/giu;
-// Dead CTA: <button> with text but no @click, :to, type="submit", form=.
-const deadCtaButtonPattern = /<button\b[^>]*>([^<]+)<\/button>/gu;
 
-// Hoisted: any actionable handler on a button tag (click / modifier-suffixed / link / submit / form).
-const BUTTON_HANDLER_PATTERN =
-  /@click(?:\.[\w-]+)?\s*=|:to\s*=|type\s*=\s*["']submit["']|form\s*=|\bhref\s*=/u;
-// Hoisted: button `disabled` attribute detection.
-const BUTTON_DISABLED_PATTERN = /\bdisabled\b/u;
-// Hoisted: comment-line and block-comment scanner for banned vocabulary passes.
+/** Opening tag matcher — attributes may span lines; stops at unquoted `>`. */
+const OPENING_TAG_PATTERN = /<([A-Za-z][\w-]*)\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gu;
+
+const CONTROL_HANDLER_PATTERN =
+  /@click(?:\.[\w-]+)*\s*=|:(?:to|href)\s*=|\bto\s*=\s*["']|\bhref\s*=\s*["']|type\s*=\s*["']submit["']|\bform\s*=|\bfor\s*=/u;
+const CONTROL_DISABLED_PATTERN = /\bdisabled\b|:disabled\s*=/u;
+const BTN_CLASS_PATTERN = /\bbtn\b/u;
+const ROLE_BUTTON_PATTERN = /\brole\s*=\s*["']button["']/u;
 const COMMENT_SCAN_PATTERN = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|\/\/[^\n]*/gu;
+const NESTED_TAG_STRIP_PATTERN = /<[^>]+>/gu;
+const I18N_BINDING_STRIP_PATTERN = /\{\{[\s\S]*?\}\}/gu;
+const WHITESPACE_COLLAPSE_PATTERN = /\s+/gu;
+const VUE_COMPONENT_TAG_PATTERN = /^[A-Z]/u;
+const NATIVE_CONTROL_INNER_PATTERN = /<(?:input|select|textarea)\b/iu;
+const LINK_TO_ATTR_PATTERN = /(?:^|\s)(?:to|:to)\s*=/u;
+const CLOSE_TAG_START_PATTERN = /<\//u;
+const ARIA_HIDDEN_TRUE_PATTERN = /\baria-hidden\s*=\s*["']true["']/u;
+const SWAP_CLASS_PATTERN = /\bswap\b/u;
+const SCRIPT_BLOCK_PATTERN = /<script\b[^>]*>([\s\S]*?)<\/script>/gu;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -70,11 +60,56 @@ const extractTemplateBlocks = (content: string): string => {
 
 const extractScriptBlocks = (content: string): string => {
   const matches: string[] = [];
-  const scriptPattern = /<script\b[^>]*>([\s\S]*?)<\/script>/gu;
-  for (const match of content.matchAll(scriptPattern)) {
+  SCRIPT_BLOCK_PATTERN.lastIndex = 0;
+  for (const match of content.matchAll(SCRIPT_BLOCK_PATTERN)) {
     matches.push(match[1] ?? "");
   }
   return matches.join("\n");
+};
+
+const isVueComponentTag = (tagName: string): boolean => VUE_COMPONENT_TAG_PATTERN.test(tagName);
+
+const isActionableControlTag = (tagName: string, attrs: string): boolean => {
+  // PascalCase Vue SFCs encapsulate their own wiring (e.g. AppExportMenu).
+  if (isVueComponentTag(tagName)) return false;
+  const normalized = tagName.toLowerCase();
+  if (normalized === "button") return true;
+  if (ROLE_BUTTON_PATTERN.test(attrs)) return true;
+  if (BTN_CLASS_PATTERN.test(attrs)) return true;
+  return false;
+};
+
+const hasNestedNativeControl = (template: string, openTagEnd: number, tagName: string): boolean => {
+  const closeNeedle = `</${tagName}>`;
+  const after = template.slice(openTagEnd);
+  const closeIdx = after.toLowerCase().indexOf(closeNeedle.toLowerCase());
+  if (closeIdx < 0) return false;
+  const inner = after.slice(0, closeIdx);
+  return NATIVE_CONTROL_INNER_PATTERN.test(inner);
+};
+
+const isLinkComponent = (tagName: string): boolean => {
+  const normalized = tagName.toLowerCase();
+  return normalized === "nuxtlink" || normalized === "nuxt-link" || normalized === "router-link";
+};
+
+const hasControlWiring = (tagName: string, attrs: string): boolean => {
+  if (CONTROL_HANDLER_PATTERN.test(attrs)) return true;
+  // NuxtLink / RouterLink without explicit attrs still needs :to — do not auto-pass.
+  if (isLinkComponent(tagName) && LINK_TO_ATTR_PATTERN.test(attrs)) return true;
+  return false;
+};
+
+const extractControlInnerPreview = (template: string, openTagEnd: number): string => {
+  const after = template.slice(openTagEnd);
+  const closeIdx = after.search(CLOSE_TAG_START_PATTERN);
+  const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, 80);
+  return inner
+    .replace(NESTED_TAG_STRIP_PATTERN, " ")
+    .replace(I18N_BINDING_STRIP_PATTERN, " ")
+    .replace(WHITESPACE_COLLAPSE_PATTERN, " ")
+    .trim()
+    .slice(0, 40);
 };
 
 const collectInertHandlerViolations = (
@@ -84,12 +119,13 @@ const collectInertHandlerViolations = (
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
   const violations: ValidationViolation[] = [];
+  const templateOffset = content.indexOf("<template>");
 
   inertHandlerPattern.lastIndex = 0;
   for (const match of template.matchAll(inertHandlerPattern)) {
     violations.push({
       filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
+      line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
       message: `Inert event handler ("${match[0]}") is a noop. Wire the handler to real state/service or remove the control. Stubs are forbidden.`,
     });
   }
@@ -98,25 +134,47 @@ const collectInertHandlerViolations = (
   for (const match of template.matchAll(inertArrowHandlerPattern)) {
     violations.push({
       filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
+      line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
       message: `Inert arrow event handler ("${match[0]}") is a noop. Wire the handler to real state/service or remove the control. Stubs are forbidden.`,
     });
   }
 
-  deadCtaButtonPattern.lastIndex = 0;
-  for (const match of template.matchAll(deadCtaButtonPattern)) {
-    const buttonTag = match[0] ?? "";
-    const text = (match[1] ?? "").trim();
-    if (text.length === 0) continue;
-    const hasHandler = BUTTON_HANDLER_PATTERN.test(buttonTag);
-    const isDisabled = BUTTON_DISABLED_PATTERN.test(buttonTag);
-    if (!hasHandler && !isDisabled) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message: `Button "${text}" has no @click / :to / type="submit" / href / form association. Dead CTA. Wire it or remove it.`,
-      });
+  return violations;
+};
+
+const collectDeadControlViolations = (filePath: string, content: string): ValidationViolation[] => {
+  const template = extractTemplateBlocks(content);
+  if (template.length === 0) return [];
+  const violations: ValidationViolation[] = [];
+  const templateOffset = content.indexOf("<template>");
+
+  OPENING_TAG_PATTERN.lastIndex = 0;
+  for (const match of template.matchAll(OPENING_TAG_PATTERN)) {
+    const tagName = match[1] ?? "";
+    const attrs = match[2] ?? "";
+    if (!isActionableControlTag(tagName, attrs)) continue;
+    if (CONTROL_DISABLED_PATTERN.test(attrs)) continue;
+    if (ARIA_HIDDEN_TRUE_PATTERN.test(attrs)) continue;
+    if (hasControlWiring(tagName, attrs)) continue;
+
+    const normalized = tagName.toLowerCase();
+    const openTagEnd = (match.index ?? 0) + match[0].length;
+    // Native disclosure / labelled control chrome (daisyUI swap, details).
+    if (normalized === "summary") continue;
+    if (
+      normalized === "label" &&
+      (SWAP_CLASS_PATTERN.test(attrs) || hasNestedNativeControl(template, openTagEnd, tagName))
+    ) {
+      continue;
     }
+
+    const preview = extractControlInnerPreview(template, openTagEnd);
+    const label = preview.length > 0 ? preview : `(icon-only ${tagName})`;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
+      message: `Dead CTA control "${label}" (<${tagName}> / .btn / role=button) has no @click / :to / to / type="submit" / href / for / form association. Wire it or remove it.`,
+    });
   }
 
   return violations;
@@ -129,12 +187,13 @@ const collectPlaceholderCopyViolations = (
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
   const violations: ValidationViolation[] = [];
+  const templateOffset = content.indexOf("<template>");
 
   placeholderCopyPattern.lastIndex = 0;
   for (const match of template.matchAll(placeholderCopyPattern)) {
     violations.push({
       filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
+      line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
       message: `Placeholder copy "${match[0]}" found in template. Replace with real content or remove the surface. Stubs are forbidden.`,
     });
   }
@@ -146,23 +205,24 @@ const collectBannedVocabularyViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isSsotSourceFile(filePath)) return [];
-  // Only scan script blocks + comments for banned vocabulary. The HTML
-  // `placeholder="..."` attribute is a standard form input contract, not
-  // the banned "placeholder" debt-concept term.
+  if (isUiSsotAuthority(filePath)) return [];
+  if (filePath.endsWith(".test.ts") || filePath.endsWith(".spec.ts")) return [];
+  // Locale catalogs carry natural-language copy (e.g. Spanish "todo" = "all").
+  if (filePath.includes("/locales/")) return [];
+
   const script = extractScriptBlocks(content);
   const comments: string[] = [];
   COMMENT_SCAN_PATTERN.lastIndex = 0;
   for (const match of content.matchAll(COMMENT_SCAN_PATTERN)) {
     comments.push(match[0] ?? "");
   }
-  const combined = `${script}\n${comments.join("\n")}`;
+  // Non-Vue TS modules: scan full content as script surface.
+  const combined =
+    script.length > 0 ? `${script}\n${comments.join("\n")}` : `${content}\n${comments.join("\n")}`;
   const violations: ValidationViolation[] = [];
 
   bannedVocabularyPattern.lastIndex = 0;
   for (const match of combined.matchAll(bannedVocabularyPattern)) {
-    // Allow legitimate typed-test-double usage inside test files only.
-    if (filePath.endsWith(".test.ts")) continue;
     violations.push({
       filePath,
       line: getLineFromOffset(combined, match.index ?? 0),
@@ -178,6 +238,7 @@ export const collectStubNoopViolationsForContent = (
   content: string,
 ): ValidationViolation[] => [
   ...collectInertHandlerViolations(filePath, content),
+  ...collectDeadControlViolations(filePath, content),
   ...collectPlaceholderCopyViolations(filePath, content),
   ...collectBannedVocabularyViolations(filePath, content),
 ];

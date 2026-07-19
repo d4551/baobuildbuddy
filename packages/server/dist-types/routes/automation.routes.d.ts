@@ -570,8 +570,8 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
     status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
-    input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-    output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+    input: import("@bao/shared/utils/json").JsonObject | null;
+    output: import("@bao/shared/utils/json").JsonObject | {
         success: boolean;
         error: string | null;
         screenshots: string[];
@@ -592,7 +592,7 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
     error: string | {
         code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        details?: import("@bao/shared/utils/json").JsonObject | undefined;
         source: string;
     } | null;
     progress: number | null;

@@ -12,22 +12,29 @@ import { isAuthDisabled } from "../config/env";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
 import { auth } from "../db/schema/auth";
+import { hashApiKey } from "../utils/crypto";
 import { authenticateApiKey, authGuard } from "./auth";
 
 const originalDisableAuth = Bun.env.BAO_DISABLE_AUTH;
 let originalApiKey: string | null = null;
 
-const seedAuthKey = async (apiKey: string) => {
+const seedAuthKey = async (rawKey: string) => {
+  const keyHash = hashApiKey(rawKey);
   await db
     .insert(auth)
-    .values({ id: DEFAULT_PROFILE_ID, apiKey })
-    .onConflictDoUpdate({ target: auth.id, set: { apiKey } });
+    .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: keyHash, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
+    .onConflictDoUpdate({ target: auth.id, set: { apiKeyHash: keyHash, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null } });
 };
 
 beforeAll(async () => {
   initializeDatabase(sqlite);
-  originalApiKey =
-    (await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID)))[0]?.apiKey ?? null;
+  originalApiKey = null;
+  const saved = (await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID)))[0];
+  if (saved?.apiKeyHash) {
+    originalApiKey = saved.apiKeyHash;
+  } else {
+    originalApiKey = null;
+  }
 });
 
 beforeEach(() => {
@@ -46,8 +53,8 @@ afterEach(async () => {
   } else {
     await db
       .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKey: originalApiKey })
-      .onConflictDoUpdate({ target: auth.id, set: { apiKey: originalApiKey } });
+      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: originalApiKey, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
+      .onConflictDoUpdate({ target: auth.id, set: { apiKeyHash: originalApiKey, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null } });
   }
 });
 

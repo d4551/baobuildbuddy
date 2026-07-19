@@ -1,5 +1,6 @@
 import { scraperScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scripts.schema";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { formatAutomationBrowserLaunchFailureMessage } from "@bao/shared/utils/automation-browser-launch-failure";
 import { settle } from "@bao/shared/utils/promise";
 import type { PortalJobExtractor } from "../providers/provider-types";
 import { closeAutomationBrowser, launchAutomationBrowser } from "./browser";
@@ -19,12 +20,15 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
     return 1;
   }
 
-  const session = await launchAutomationBrowser(DEFAULT_AUTOMATION_SETTINGS);
-  if (!session) {
-    process.stderr.write("Unable to launch automation browser.\n");
+  const launchResult = await launchAutomationBrowser(DEFAULT_AUTOMATION_SETTINGS);
+  if (!launchResult.ok) {
+    process.stderr.write(
+      `${formatAutomationBrowserLaunchFailureMessage(launchResult.failure)} ${launchResult.failure.causeMessage}\n`,
+    );
     return 1;
   }
 
+  const session = launchResult.session;
   const navigationResult = await settle(
     session.page.goto(inputResult.value.sourceUrl, {
       waitUntil: "networkidle",

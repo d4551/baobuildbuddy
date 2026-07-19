@@ -1,3 +1,5 @@
+import { isControlPrimitiveOwner } from "./ui-control-primitive-owners";
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import {
   collectProjectFileEntries,
   getLineFromOffset,
@@ -25,25 +27,8 @@ import {
 const scanRoots = ["packages/client"] as const;
 const sourceExtensions = new Set([".vue", ".ts", ".css"]);
 
-const SSOT_ALLOWLIST_PATHS = new Set<string>([
-  "packages/client/assets/css/main.css",
-  "packages/client/constants/layout.ts",
-  "packages/client/constants/ui-layout.ts",
-  "packages/client/components/ui/LoadingSkeleton.vue",
-  "packages/client/components/ui/EmptyState.vue",
-  "packages/client/components/ui/PageScaffold.vue",
-  "packages/client/components/ui/SectionGrid.vue",
-  "packages/client/components/ui/AppModalFrame.vue",
-  "packages/client/components/ui/PageHeroHeader.vue",
-  "packages/client/components/ui/PageHeaderBlock.vue",
-  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
-  "packages/client/components/ui/AppPagination.vue",
-  "packages/client/components/ui/StatsRow.vue",
-  "packages/client/components/ui/WorkPipeline.vue",
-  "packages/client/components/ui/UiRadialMeter.vue",
-]);
-
-const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotSourceFile = (filePath: string): boolean =>
+  isUiSsotAuthority(filePath) || isControlPrimitiveOwner(filePath);
 
 // Fixed width like w-64, w-96, w-[320px] (but not w-full, w-auto, w-fit, w-screen).
 // Use a negative lookbehind for `-` so we don't match `min-w-64` / `max-w-64`.

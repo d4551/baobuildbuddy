@@ -20,9 +20,7 @@ const isAllowedFile = (filePath: string): boolean =>
   filePath.endsWith(".spec.ts") ||
   filePath.includes("/locales/") ||
   filePath === "packages/client/composables/api-request.ts" ||
-  filePath === "packages/client/composables/useAutomation.ts" ||
-  filePath === "packages/client/composables/api-docs-page-data.ts" ||
-  filePath === "packages/client/composables/api-docs-page-tester-request.ts";
+  filePath === "packages/client/composables/useAutomation.ts";
 
 export const collectClientFetchDriftViolationsForContent = (
   filePath: string,

@@ -1,4 +1,5 @@
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "../constants/ai-provider";
+import { validateLocalAiEndpoint } from "../utils/local-ai-endpoint";
 import type {
   AutomationSettings,
   GamingPortalConfig,
@@ -65,7 +66,10 @@ export const normalizeLocalModelEndpoint = (value: string | null | undefined): s
     return null;
   }
 
-  return LEGACY_LOCAL_AI_ENDPOINTS.some((endpoint) => endpoint === trimmedValue)
+  const legacyNormalized = LEGACY_LOCAL_AI_ENDPOINTS.some((endpoint) => endpoint === trimmedValue)
     ? LOCAL_AI_DEFAULT_ENDPOINT
     : trimmedValue;
+
+  const validated = validateLocalAiEndpoint(legacyNormalized);
+  return validated.ok ? validated.endpoint.replace(TRAILING_SLASHES_PATTERN, "") : null;
 };

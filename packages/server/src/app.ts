@@ -6,6 +6,7 @@ import {
   toApiScopedPath,
 } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { TRACE_ID_HEADER, TRACE_ID_BYTE_LENGTH } from "@bao/shared/constants/runtime";
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia, setupTypebox, t } from "elysia";
@@ -40,6 +41,12 @@ import { interviewWebSocket } from "./ws/interview.ws";
 
 setupTypebox();
 
+const createTraceId = (): string => {
+  const bytes = new Uint8Array(TRACE_ID_BYTE_LENGTH);
+  crypto.getRandomValues(bytes);
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+};
+
 const OPENAPI_TAGS = [
   { name: "Health", description: "Service health and readiness endpoints." },
   { name: "Auth", description: "Authentication bootstrap and API key lifecycle endpoints." },
@@ -62,20 +69,6 @@ const OPENAPI_TAGS = [
 
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   .use(corsPlugin)
-  .use(
-    openapi({
-      path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
-      specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
-      documentation: {
-        info: {
-          title: APP_BRAND.apiName,
-          version: OPENAPI_VERSION,
-          description: "AI-powered career assistant for the video game industry",
-        },
-        tags: [...OPENAPI_TAGS],
-      },
-    }),
-  )
   .model({
     HealthResponse: t.Object(
       {
@@ -102,21 +95,21 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
     }),
   )
   .use(logger)
+  .request(({ set }) => {
+    set.headers[TRACE_ID_HEADER] = createTraceId();
+  })
   .use(errorHandler)
-  .afterHandle(({ request, set }) => {
+  .afterHandle(({ set }) => {
     set.headers["x-content-type-options"] = "nosniff";
     set.headers["x-frame-options"] = "DENY";
     set.headers["referrer-policy"] = "strict-origin-when-cross-origin";
+    if (!set.headers[TRACE_ID_HEADER]) {
+      set.headers[TRACE_ID_HEADER] = createTraceId();
+    }
     set.headers["permissions-policy"] =
       "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
 
-    const pathname = new URL(request.url).pathname;
-    if (
-      pathname !== API_ENDPOINTS.apiDocsUi &&
-      !pathname.startsWith(`${API_ENDPOINTS.apiDocsUi}/`)
-    ) {
-      set.headers["content-security-policy"] = "default-src 'none'; frame-ancestors 'none'";
-    }
+    set.headers["content-security-policy"] = "default-src 'none'; frame-ancestors 'none'";
 
     if (isProductionRuntime()) {
       set.headers["strict-transport-security"] = "max-age=63072000; includeSubDomains; preload";
@@ -150,6 +143,20 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   )
   .use(authRoutes)
   .use(authGuard)
+  .use(
+    openapi({
+      path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
+      specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
+      documentation: {
+        info: {
+          title: APP_BRAND.apiName,
+          version: OPENAPI_VERSION,
+          description: "AI-powered career assistant for the video game industry",
+        },
+        tags: [...OPENAPI_TAGS],
+      },
+    }),
+  )
   .use(userRoutes)
   .use(settingsRoutes)
   .use(jobsRoutes)

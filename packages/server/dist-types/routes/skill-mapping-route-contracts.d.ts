@@ -1,3 +1,4 @@
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import type { Static } from "typebox";
 export type SkillMappingsQuery = {
     category?: string;
@@ -6,8 +7,8 @@ export type SkillMappingsQuery = {
 export type SkillMappingMutationBody = {
     gameExpression: string;
     transferableSkill: string;
-    industryApplications?: unknown;
-    evidence?: unknown;
+    industryApplications?: string[];
+    evidence?: JsonValue;
     confidence?: number;
     category?: string;
     demandLevel?: string;
@@ -15,8 +16,8 @@ export type SkillMappingMutationBody = {
 };
 export type SkillMappingUpdateBody = Partial<SkillMappingMutationBody>;
 export type SkillAnalyzeBody = {
-    gameExperience?: Record<string, unknown>;
-    resume?: Record<string, unknown>;
+    gameExperience?: JsonObject;
+    resume?: JsonObject;
     autoCreateMappings?: boolean;
 };
 export type SkillMappingRouteSetState = {
@@ -35,7 +36,14 @@ export declare const skillMappingCreateBodySchema: import("typebox").TObject<{
     gameExpression: import("typebox").TString;
     transferableSkill: import("typebox").TString;
     industryApplications: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    evidence: import("typebox").TOptional<import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>>;
+    evidence: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TOptional<import("typebox").TString>;
+        type: import("typebox").TOptional<import("typebox").TString>;
+        title: import("typebox").TString;
+        description: import("typebox").TString;
+        url: import("typebox").TOptional<import("typebox").TString>;
+        verificationStatus: import("typebox").TOptional<import("typebox").TString>;
+    }>>>;
     confidence: import("typebox").TOptional<import("typebox").TNumber>;
     category: import("typebox").TOptional<import("typebox").TString>;
     demandLevel: import("typebox").TOptional<import("typebox").TString>;
@@ -46,7 +54,14 @@ export declare const skillMappingUpdateBodySchema: import("typebox").TObject<{
     gameExpression: import("typebox").TOptional<import("typebox").TString>;
     transferableSkill: import("typebox").TOptional<import("typebox").TString>;
     industryApplications: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-    evidence: import("typebox").TOptional<import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>>;
+    evidence: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TOptional<import("typebox").TString>;
+        type: import("typebox").TOptional<import("typebox").TString>;
+        title: import("typebox").TString;
+        description: import("typebox").TString;
+        url: import("typebox").TOptional<import("typebox").TString>;
+        verificationStatus: import("typebox").TOptional<import("typebox").TString>;
+    }>>>;
     confidence: import("typebox").TOptional<import("typebox").TNumber>;
     category: import("typebox").TOptional<import("typebox").TString>;
     demandLevel: import("typebox").TOptional<import("typebox").TString>;
@@ -54,8 +69,8 @@ export declare const skillMappingUpdateBodySchema: import("typebox").TObject<{
 }>;
 export type SkillMappingUpdateRouteBody = Static<typeof skillMappingUpdateBodySchema>;
 export declare const skillAnalysisBodySchema: import("typebox").TObject<{
-    gameExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-    resume: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    gameExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
+    resume: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
     autoCreateMappings: import("typebox").TOptional<import("typebox").TBoolean>;
 }>;
 export type SkillAnalysisRouteBody = Static<typeof skillAnalysisBodySchema>;
@@ -63,19 +78,6 @@ export declare const skillReadinessQuerySchema: import("typebox").TObject<{
     jobId: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export type SkillReadinessRouteQuery = Static<typeof skillReadinessQuerySchema>;
-export declare const skillMappingRowResponseSchema: import("typebox").TObject<{
-    id: import("typebox").TString;
-    gameExpression: import("typebox").TString;
-    transferableSkill: import("typebox").TString;
-    industryApplications: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
-    evidence: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>;
-    confidence: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
-    category: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-    demandLevel: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
-    aiGenerated: import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>;
-    createdAt: import("typebox").TString;
-    updatedAt: import("typebox").TString;
-}>;
 export declare const skillEvidenceResponseSchema: import("typebox").TObject<{
     id: import("typebox").TString;
     type: import("typebox").TString;
@@ -83,6 +85,26 @@ export declare const skillEvidenceResponseSchema: import("typebox").TObject<{
     description: import("typebox").TString;
     url: import("typebox").TOptional<import("typebox").TString>;
     verificationStatus: import("typebox").TString;
+}>;
+export declare const skillMappingRowResponseSchema: import("typebox").TObject<{
+    id: import("typebox").TString;
+    gameExpression: import("typebox").TString;
+    transferableSkill: import("typebox").TString;
+    industryApplications: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
+    evidence: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        type: import("typebox").TString;
+        title: import("typebox").TString;
+        description: import("typebox").TString;
+        url: import("typebox").TOptional<import("typebox").TString>;
+        verificationStatus: import("typebox").TString;
+    }>>, import("typebox").TNull]>;
+    confidence: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    category: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    demandLevel: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+    aiGenerated: import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>;
+    createdAt: import("typebox").TString;
+    updatedAt: import("typebox").TString;
 }>;
 export declare const skillMappingResponseSchema: import("typebox").TObject<{
     id: import("typebox").TString;
@@ -173,7 +195,7 @@ export declare const skillReadinessResponseSchema: import("typebox").TObject<{
 export declare const skillAnalysisResponseSchema: import("typebox").TObject<{
     message: import("typebox").TString;
     detectedSkills: import("typebox").TArray<import("typebox").TString>;
-    suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+    suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
     recommendations: import("typebox").TArray<import("typebox").TString>;
     provider: import("typebox").TOptional<import("typebox").TString>;
 }>;
@@ -187,7 +209,14 @@ export declare const skillMappingsListResponses: {
         gameExpression: import("typebox").TString;
         transferableSkill: import("typebox").TString;
         industryApplications: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
-        evidence: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>;
+        evidence: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            type: import("typebox").TString;
+            title: import("typebox").TString;
+            description: import("typebox").TString;
+            url: import("typebox").TOptional<import("typebox").TString>;
+            verificationStatus: import("typebox").TString;
+        }>>, import("typebox").TNull]>;
         confidence: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
         category: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         demandLevel: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
@@ -248,9 +277,18 @@ export declare const skillMappingUpdateResponses: {
     }>;
 };
 export declare const skillMappingDeleteResponses: {
-    200: import("typebox").TUnknown;
-    410: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
+    200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        id: import("typebox").TString;
+    }>;
+    410: import("typebox").TObject<{
+        error: import("typebox").TString;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const skillPathwaysResponses: {
     200: import("typebox").TArray<import("typebox").TObject<{
@@ -326,14 +364,14 @@ export declare const skillAnalysisResponses: {
     200: import("typebox").TObject<{
         message: import("typebox").TString;
         detectedSkills: import("typebox").TArray<import("typebox").TString>;
-        suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
         recommendations: import("typebox").TArray<import("typebox").TString>;
         provider: import("typebox").TOptional<import("typebox").TString>;
     }>;
     500: import("typebox").TObject<{
         message: import("typebox").TString;
         detectedSkills: import("typebox").TArray<import("typebox").TString>;
-        suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        suggestedMappings: import("typebox").TArray<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
         recommendations: import("typebox").TArray<import("typebox").TString>;
         provider: import("typebox").TOptional<import("typebox").TString>;
     }>;

@@ -74,6 +74,9 @@ const REQUIRED_ROOT_LINT_VALIDATORS = [
   "validate:aria",
   "validate:ui-ssot",
   "validate:ui-canonical-primitives",
+  "validate:ui-truncated-class-tokens",
+  "validate:ui-control-dedup",
+  "validate:ui-ssot-authority",
 ] as const;
 
 const collectExamplePageStateViolations = (content: string) =>

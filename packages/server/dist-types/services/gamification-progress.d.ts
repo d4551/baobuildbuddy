@@ -4,7 +4,7 @@ export declare function typeSafeStats(stats: Partial<GamificationStats> | null |
     actionHistory: ActionHistoryEntry[];
 };
 export declare function toNumericStats(stats: Partial<GamificationStats> | null | undefined): NumericGamificationStats;
-export declare function toActionHistory(stats: unknown): ActionHistoryEntry[];
+export declare function toActionHistory<T>(stats: T): ActionHistoryEntry[];
 export declare function getNumericStat(stats: NumericGamificationStats, key: string): number;
 export declare function getStreakMultiplier(currentStreak: number): number;
 export declare function areAchievementRequirementsMet(achievement: Achievement, pendingStats: NumericGamificationStats, existingStats: NumericGamificationStats): boolean;

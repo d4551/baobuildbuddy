@@ -29,6 +29,7 @@ import {
 } from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { resolveKnownProvider } from "./settings-route-contracts";
+import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
 const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
@@ -240,18 +241,32 @@ export const buildApiKeysUpdate = (body: {
   localModelName?: string;
   emailTransportPassword?: string;
 }): Partial<SettingsInsert> => {
+  const secretWrites = [
+    body.geminiApiKey,
+    body.openaiApiKey,
+    body.claudeApiKey,
+    body.huggingfaceToken,
+    body.emailTransportPassword,
+  ].some((value) => typeof value === "string" && value.length > 0);
+
+  if (secretWrites && !isEncryptionAvailable()) {
+    throw new Error("BAO_ENCRYPTION_KEY must be set to encrypt provider keys");
+  }
+
   const update: Partial<SettingsInsert> = {};
   if (body.geminiApiKey !== undefined) {
-    update.geminiApiKey = body.geminiApiKey;
+    update.geminiApiKey = body.geminiApiKey ? encryptProviderKey(body.geminiApiKey) : null;
   }
   if (body.openaiApiKey !== undefined) {
-    update.openaiApiKey = body.openaiApiKey;
+    update.openaiApiKey = body.openaiApiKey ? encryptProviderKey(body.openaiApiKey) : null;
   }
   if (body.claudeApiKey !== undefined) {
-    update.claudeApiKey = body.claudeApiKey;
+    update.claudeApiKey = body.claudeApiKey ? encryptProviderKey(body.claudeApiKey) : null;
   }
   if (body.huggingfaceToken !== undefined) {
-    update.huggingfaceToken = body.huggingfaceToken;
+    update.huggingfaceToken = body.huggingfaceToken
+      ? encryptProviderKey(body.huggingfaceToken)
+      : null;
   }
   if (body.localModelEndpoint !== undefined) {
     update.localModelEndpoint = normalizeLocalModelEndpoint(body.localModelEndpoint);
@@ -261,7 +276,9 @@ export const buildApiKeysUpdate = (body: {
   }
   if (body.emailTransportPassword !== undefined) {
     update.emailTransportPassword =
-      body.emailTransportPassword.length > 0 ? body.emailTransportPassword : null;
+      body.emailTransportPassword.length > 0
+        ? encryptProviderKey(body.emailTransportPassword)
+        : null;
   }
   update.updatedAt = new Date().toISOString();
   return update;

@@ -4,7 +4,7 @@ export declare const listSkillMappings: (query: SkillMappingsQuery) => Promise<{
     gameExpression: string;
     transferableSkill: string;
     industryApplications: string[] | null;
-    evidence: unknown[] | null;
+    evidence: import("@bao/shared/types/skill-mapping").SkillEvidence[] | null;
     confidence: number | null;
     category: string | null;
     demandLevel: string | null;
@@ -20,13 +20,13 @@ export declare const updateSkillMappingFromBody: (id: string, body: SkillMapping
     error: string;
 }>;
 export declare const deleteSkillMappingById: (id: string, set: SkillMappingRouteSetState) => Promise<{
-    statusCode?: undefined;
     kind: "not-found";
     payload: {
         message?: undefined;
-        id?: undefined;
         error: string;
+        id?: undefined;
     };
+    statusCode?: undefined;
 } | {
     kind: "gone";
     payload: {

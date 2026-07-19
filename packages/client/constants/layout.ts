@@ -267,41 +267,6 @@ export const CARD_TITLE_LG_CLASS = "card-title text-lg";
 export const BODY_TEXT_SM_CLASS = "text-sm text-muted";
 export const BODY_TEXT_XS_CLASS = "text-xs text-muted";
 
-/**
- * Canonical shadow tokens. These map to the .glass-* surface system in
- * main.css. Inline `shadow-*` Tailwind utilities are forbidden outside
- * SSOT; consume these constants instead.
- */
-export const SHADOW_TOKEN_CLASS = {
-  none: "shadow-none",
-  sm: "shadow-sm",
-  md: "shadow-md",
-  lg: "shadow-lg",
-  xl: "shadow-xl",
-  inner: "shadow-inner",
-} as const;
-
-export type ShadowToken = keyof typeof SHADOW_TOKEN_CLASS;
-
-/**
- * Canonical radius tokens. Inline `rounded-*` Tailwind utilities are
- * forbidden outside SSOT; consume these constants instead.
- */
-export const RADIUS_TOKEN_CLASS = {
-  sm: "rounded-sm",
-  md: "rounded-md",
-  lg: "rounded-lg",
-  xl: "rounded-xl",
-  "2xl": "rounded-2xl",
-  "3xl": "rounded-3xl",
-  full: "rounded-full",
-} as const;
-
-export type RadiusToken = keyof typeof RADIUS_TOKEN_CLASS;
-
-/** Common avatars / icon badges that need a circular surface. */
-export const CIRCULAR_BADGE_CLASS = RADIUS_TOKEN_CLASS.full;
-
 /** Full-width utility token (the only w-/h- primitive that composes fluid layout). */
 export const FLUID_WIDTH_CLASS = "w-full";
 export const FLUID_HEIGHT_CLASS = "h-full";
@@ -340,31 +305,6 @@ export const HEIGHT_96_CLASS = "h-96";
 /** Expanded sidebar width. */
 export const SIDEBAR_WIDE_WIDTH_CLASS = "w-80";
 
-/** Form/panel helper widths. */
-export const FORM_WIDTH_10_CLASS = "w-10";
-export const FORM_WIDTH_16_CLASS = "w-16";
-export const FORM_WIDTH_20_CLASS = "w-20";
-export const FORM_WIDTH_28_CLASS = "w-28";
-export const FORM_WIDTH_32_CLASS = "w-32";
-
-/** Content height tokens. */
-export const CONTENT_H_28_CLASS = "h-28";
-export const CONTENT_H_40_CLASS = "h-40";
-export const CONTENT_H_48_CLASS = "h-48";
-export const CONTENT_H_64_CLASS = "h-64";
-export const CONTENT_H_72_CLASS = "h-72";
-
-/** Min-height extended tokens. */
-export const MIN_H_36_CLASS = "min-h-36";
-export const MIN_H_60_CLASS = "min-h-60";
-export const MIN_H_80_CLASS = "min-h-80";
-
-/** Max-width extended tokens. */
-export const MAX_W_2XL_CLASS = "max-w-2xl";
-export const MAX_W_3XL_CLASS = "max-w-3xl";
-export const MAX_W_64_CLASS = "max-w-64";
-export const MAX_W_XS_CLASS = "max-w-xs";
-
 /** Auth card max-width (matches AUTH_CARD_SHELL_CLASS). */
 export const AUTH_CARD_MAX_WIDTH_CLASS = "max-w-md";
 
@@ -373,25 +313,55 @@ export const ERROR_PAGE_MAX_WIDTH_CLASS = "max-w-lg";
 
 /** Re-export extended tokens from layout-tokens (public API stays ~/constants/layout). */
 export {
+  CIRCULAR_BADGE_CLASS,
+  CONTENT_H_28_CLASS,
+  CONTENT_H_40_CLASS,
+  CONTENT_H_48_CLASS,
+  CONTENT_H_64_CLASS,
+  CONTENT_H_72_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   type FlexGapToken,
   FONT_WEIGHT_TOKEN_CLASS,
   type FontWeightToken,
-  GLASS_CARD_HOVER_CLASS,
+  FORM_WIDTH_10_CLASS,
+  FORM_WIDTH_16_CLASS,
+  FORM_WIDTH_20_CLASS,
+  FORM_WIDTH_28_CLASS,
+  FORM_WIDTH_32_CLASS,
   GLASS_CARD_ENTER_CLASS,
+  GLASS_CARD_HOVER_CLASS,
   HEIGHT_TOKEN_CLASS,
   type HeightToken,
+  LEADING_TOKEN_CLASS,
+  type LeadingToken,
   MARGIN_TOKEN_CLASS,
   type MarginToken,
+  MAX_HEIGHT_72_CLASS,
+  MAX_HEIGHT_96_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
   type MaxHeightToken,
+  MAX_W_2XL_CLASS,
+  MAX_W_3XL_CLASS,
+  MAX_W_64_CLASS,
+  MAX_W_XS_CLASS,
+  MIN_H_36_CLASS,
+  MIN_H_60_CLASS,
+  MIN_H_80_CLASS,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
+  PRINT_PADDING_RESET_CLASS,
+  RADIUS_TOKEN_CLASS,
+  type RadiusToken,
   SCROLL_MARGIN_TOKEN_CLASS,
   type ScrollMarginToken,
+  SCROLL_MARGIN_TOP_24_CLASS,
+  SHADOW_TOKEN_CLASS,
+  type ShadowToken,
   STACK_SPACE_Y_TOKEN_CLASS,
   type StackSpaceYToken,
   SVG_STROKE_WIDTH_DEFAULT,
+  TRACKING_TOKEN_CLASS,
+  type TrackingToken,
   TYPOGRAPHY_SCALE_CLASS,
   type TypographyScaleToken,
   WIDTH_TOKEN_CLASS,

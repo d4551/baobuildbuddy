@@ -36,6 +36,14 @@ export declare const testProviderConnection: (body: {
 }) => Promise<{
     valid: boolean;
     provider: "local";
+    diagnosticCode: "error";
+    message: string;
+    availableModels?: undefined;
+    selectedModel?: undefined;
+    error?: undefined;
+} | {
+    valid: boolean;
+    provider: "local";
     diagnosticCode: "empty-model-list" | "error" | "healthy" | "invalid-model" | "timeout" | "unconfigured" | "unreachable";
     message: string | undefined;
     availableModels: readonly string[] | undefined;

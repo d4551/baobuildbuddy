@@ -61,3 +61,4 @@ docs/assets/docs.generated.css
 
 # Desktop release staging (CI produces artifacts; do not commit local builds)
 .desktop-release-artifacts/
+/docs/ssot-ledger

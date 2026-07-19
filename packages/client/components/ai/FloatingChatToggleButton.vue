@@ -25,7 +25,7 @@ const emit = defineEmits<{
     >
       {{ unreadCount }}
     </span>
-    <button 
+    <button
       type="button"
       class="btn btn-primary btn-circle" :class="[SHADOW_TOKEN_CLASS.lg]"
       :aria-label="isOpen ? t('floatingChat.hideAria') : t('floatingChat.showAria')"
@@ -33,7 +33,7 @@ const emit = defineEmits<{
       :aria-controls="chatPanelId"
       @click="emit('toggle')"
     >
-      <svg :class="[ICON_SIZE_CLASS[5]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg :class="[ICON_SIZE_CLASS['5']]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"

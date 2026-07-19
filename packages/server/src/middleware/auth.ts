@@ -1,4 +1,3 @@
-import { timingSafeEqual } from "node:crypto";
 import {
   API_ERROR_EMPTY_API_KEY,
   API_ERROR_INVALID_API_KEY,
@@ -11,24 +10,10 @@ import { Elysia } from "elysia";
 import { isAuthDisabled } from "../config/env";
 import { db } from "../db/client";
 import { auth } from "../db/schema/auth";
-
-function safeTimingEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-  const aBuf = Buffer.from(a, "utf8");
-  const bBuf = Buffer.from(b, "utf8");
-  return timingSafeEqual(aBuf, bBuf);
-}
+import { verifyApiKey } from "../utils/crypto";
 
 type AuthFailure = { error: string; status: typeof HTTP_STATUS_UNAUTHORIZED };
 
-/**
- * Reads the `Authorization` header from a Request and reports the bearer
- * parse status without raising exceptions. Distinguishes "no header"
- * from "wrong scheme" from "empty bearer token" so the failure envelope
- * can carry the right error code.
- */
 function readBearerHeader(
   request: Request,
 ):
@@ -55,14 +40,13 @@ function readBearerHeader(
 }
 
 /**
- * Validates Bearer API key against the persisted profile key.
+ * Validates a bearer API key against the persisted SHA-256 hash.
  *
- * Default deny: missing/empty/mismatched key and missing configured
- * profile key all return unauthorized. Returns `null` only when the
- * request is authenticated or auth is explicitly disabled.
+ * The API key is hashed at creation and only the hash is stored in the
+ * database. Verification re-hashes the provided bearer token and
+ * compares it against the stored hash using `timingSafeEqual`.
  *
- * @param request Incoming Elysia request (HTTP or WebSocket upgrade).
- * @returns Unauthorized envelope or null on success.
+ * Keys are checked for revocation and expiry before hash comparison.
  */
 export async function authenticateApiKey(request: Request): Promise<AuthFailure | null> {
   if (isAuthDisabled()) {
@@ -81,21 +65,30 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
   }
 
   const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-  const storedKey = rows[0]?.apiKey;
-  if (!(storedKey && safeTimingEqual(storedKey, parsed.token))) {
+  const row = rows[0];
+  const storedHash = row?.apiKeyHash;
+  if (!storedHash) {
+    return { error: API_ERROR_INVALID_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };
+  }
+
+  if (row.apiKeyRevokedAt !== null) {
+    return { error: API_ERROR_INVALID_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };
+  }
+
+  if (row.apiKeyExpiresAt !== null) {
+    const expiresAt = Date.parse(row.apiKeyExpiresAt);
+    if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) {
+      return { error: API_ERROR_INVALID_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };
+    }
+  }
+
+  if (!verifyApiKey(parsed.token, storedHash)) {
     return { error: API_ERROR_INVALID_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };
   }
 
   return null;
 }
 
-/**
- * Elysia plugin that validates Bearer API key for protected HTTP routes.
- * `.as("global")` lifts the hook so sibling route plugins registered after
- * this guard inherit default-deny auth. Routes mounted before the guard
- * (auth bootstrap) remain public. Skipped only when auth is explicitly
- * disabled via config.
- */
 export const authGuard = new Elysia({ name: "auth-guard" })
   .beforeHandle(async ({ request, status }) => {
     const failure = await authenticateApiKey(request);

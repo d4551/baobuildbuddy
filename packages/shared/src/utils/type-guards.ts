@@ -1,25 +1,41 @@
 /**
- * Shared type guards for runtime validation of unknown values.
+ * Shared type guards for runtime validation of boundary values.
  * Single source of truth — do not duplicate in composables or services.
  */
+import type { JsonObject, JsonValue } from "./json";
+import { safeParseJson } from "./json";
 
-export const isRecord = (v: unknown): v is Record<string, unknown> =>
+export const isRecord = <T>(v: T): v is T & JsonObject =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
-export const asString = (v: unknown): string | undefined =>
+export const asString = <T>(v: T): string | undefined =>
   typeof v === "string" && v.trim().length > 0 ? v : undefined;
 
-export const asStringArray = (v: unknown): string[] =>
+export const asStringArray = <T>(v: T): string[] =>
   Array.isArray(v) ? v.filter((e): e is string => typeof e === "string") : [];
 
-export const asNumber = (v: unknown): number | undefined =>
+export const asNumber = <T>(v: T): number | undefined =>
   typeof v === "number" && !Number.isNaN(v) ? v : undefined;
 
-export const asBoolean = (v: unknown): boolean | undefined =>
-  typeof v === "boolean" ? v : undefined;
+export const asBoolean = <T>(v: T): boolean | undefined => (typeof v === "boolean" ? v : undefined);
 
-export const asRecord = (v: unknown): Record<string, unknown> | undefined =>
-  isRecord(v) ? v : undefined;
+export const asRecord = <T>(v: T): JsonObject | undefined => {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
+    return undefined;
+  }
+  const parsed = safeParseJson(JSON.stringify(v));
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return undefined;
+  }
+  return parsed;
+};
 
-export const asUnknownArray = (v: unknown): unknown[] | undefined =>
-  Array.isArray(v) ? v : undefined;
+export const asJsonArray = <T>(v: T): JsonValue[] | undefined => {
+  if (!Array.isArray(v)) {
+    return undefined;
+  }
+  const parsed = safeParseJson(JSON.stringify(v));
+  return Array.isArray(parsed) ? parsed : undefined;
+};
+
+export const asUnknownArray = asJsonArray;

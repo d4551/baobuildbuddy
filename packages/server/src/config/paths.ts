@@ -1,11 +1,14 @@
 import { existsSync, mkdirSync } from "node:fs";
-import { homedir } from "node:os";
+import { arch, homedir, platform, release } from "node:os";
 import { dirname, resolve } from "node:path";
 import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared/constants/paths";
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
+  resolvePlaywrightHostPlatformOverride,
 } from "@bao/shared/utils/playwright-browsers-path";
+import { config } from "./env";
+import { resolveScraperDirectory } from "./scraper-dir-resolve";
 
 type AutomationScriptRunnerConfig = {
   executablePath: string | null;
@@ -39,7 +42,11 @@ export function resolveDatabasePath(rawPath?: string): string {
   return resolvedPath;
 }
 
-export const defaultDatabasePath = resolveDatabasePath();
+/**
+ * Resolved DB path for this process (honors `DB_PATH` via env config).
+ * Screenshot artifacts share the same parent directory as the active DB file.
+ */
+export const defaultDatabasePath = resolveDatabasePath(config.dbPath);
 
 /**
  * Absolute path for browser automation screenshot assets.
@@ -49,43 +56,44 @@ export const AUTOMATION_SCREENSHOT_DIR = resolve(DATABASE_DIR, "automation", "sc
 mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
 
 /**
+ * Read optional non-empty path from Bun.env first, then process.env.
+ * Lives here (not env.ts) so desktop/runtime overrides stay outside the MAS hardban path.
+ */
+const readOptionalEnvPath = (
+  bunValue: string | undefined,
+  processValue: string | undefined,
+): string | null => {
+  const candidate = bunValue ?? processValue;
+  const trimmed = candidate?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : null;
+};
+
+const readScraperDirOverride = (): string | null =>
+  readOptionalEnvPath(Bun.env.BAO_SCRAPER_DIR, process.env.BAO_SCRAPER_DIR);
+
+/**
  * Path to packages/scraper (Bun/TypeScript automation runtime).
  * Resolved from current working directory with fallback candidates so tooling runs
  * reliably even when drizzle-kit executes the config in CJS mode.
+ *
+ * Optional BAO_SCRAPER_DIR override is read via Bun.env/process.env above.
  */
-const resolveScraperDir = (): string => {
-  const configuredScraperDir = process.env.BAO_SCRAPER_DIR?.trim();
-  if (configuredScraperDir && configuredScraperDir.length > 0) {
-    return resolve(configuredScraperDir);
-  }
+const resolveScraperDir = (): string =>
+  resolveScraperDirectory(process.cwd(), readScraperDirOverride());
 
-  const cwd = process.cwd();
-  const candidates = [
-    resolve(cwd, "scraper"),
-    resolve(cwd, "packages", "scraper"),
-    resolve(cwd, "..", "packages", "scraper"),
-    resolve(cwd, "..", "..", "packages", "scraper"),
-    resolve(cwd, "..", "..", "..", "packages", "scraper"),
-  ];
-
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return candidates[0];
-};
-
-export const readAutomationScriptRunnerConfig = (): AutomationScriptRunnerConfig => {
-  const executablePath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
-  const entrypointPath = process.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH?.trim();
-
-  return {
-    executablePath: executablePath && executablePath.length > 0 ? executablePath : null,
-    entrypointPath: entrypointPath && entrypointPath.length > 0 ? entrypointPath : null,
-  };
-};
+/**
+ * Optional external script-runner override for packaged desktop runtimes.
+ */
+export const readAutomationScriptRunnerConfig = (): AutomationScriptRunnerConfig => ({
+  executablePath: readOptionalEnvPath(
+    Bun.env.BAO_SCRIPT_RUNNER_PATH,
+    process.env.BAO_SCRIPT_RUNNER_PATH,
+  ),
+  entrypointPath: readOptionalEnvPath(
+    Bun.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH,
+    process.env.BAO_SCRIPT_RUNNER_ENTRYPOINT_PATH,
+  ),
+});
 
 /**
  * Absolute path to the shared scraper package used by automation services.
@@ -94,12 +102,16 @@ export const SCRAPER_DIR = resolveScraperDir();
 
 /**
  * Child-process env for RPA scripts. Rewrites incomplete agent-sandbox
- * Playwright browser caches to the host default cache when present.
+ * Playwright browser caches and injects PLAYWRIGHT_HOST_PLATFORM_OVERRIDE.
  */
 export const buildAutomationProcessEnv = (
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv =>
-  buildAutomationProcessEnvFromShared(baseEnv, {
-    pathExists: existsSync,
-    hostDefaultPath: defaultPlaywrightBrowsersPathForPlatform(process.platform, homedir()),
-  });
+  buildAutomationProcessEnvFromShared(
+    baseEnv,
+    {
+      pathExists: existsSync,
+      hostDefaultPath: defaultPlaywrightBrowsersPathForPlatform(process.platform, HOME_DIRECTORY),
+    },
+    resolvePlaywrightHostPlatformOverride(platform(), arch(), release()),
+  );

@@ -38,6 +38,8 @@ export const API_ENDPOINTS = {
   authStatus: `${API_ENDPOINT_PREFIX}/auth/status`,
   authInit: `${API_ENDPOINT_PREFIX}/auth/init`,
   authConfigured: `${API_ENDPOINT_PREFIX}/auth/configured`,
+  authRotate: `${API_ENDPOINT_PREFIX}/auth/rotate`,
+  authRevoke: `${API_ENDPOINT_PREFIX}/auth/revoke`,
   userBase: `${API_ENDPOINT_PREFIX}/user`,
   userProfile: `${API_ENDPOINT_PREFIX}/user/profile`,
   searchBase: `${API_ENDPOINT_PREFIX}/search`,

@@ -4,16 +4,18 @@ import type {
   DailyChallenge,
   UserGamificationData,
 } from "@bao/shared/types/gamification";
-import { isRecord } from "@bao/shared/utils/type-guards";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { withLoadingState } from "./async-flow";
+import { parseAchievementList, parseDailyChallengeList } from "./gamification-entity-normalizers";
 
 interface GamificationState {
   progress: ReturnType<typeof useState<UserGamificationData | null>>;
   achievements: ReturnType<typeof useState<Achievement[]>>;
   challenges: ReturnType<typeof useState<DailyChallenge[]>>;
-  weeklyProgress: ReturnType<typeof useState<Record<string, unknown> | null>>;
-  monthlyStats: ReturnType<typeof useState<Record<string, unknown> | null>>;
+  weeklyProgress: ReturnType<typeof useState<JsonObject | null>>;
+  monthlyStats: ReturnType<typeof useState<JsonObject | null>>;
   loading: ReturnType<typeof useState<boolean>>;
 }
 
@@ -45,33 +47,35 @@ const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
   "studiosExplored",
 ];
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
+const readApiData = async <T>(request: Promise<T>, fallbackMessage: string): Promise<JsonValue> => {
   const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
+  if (!isRecord(response) || !("data" in response)) {
     throw new Error(fallbackMessage);
   }
   if ("error" in response && response.error) {
     throw new Error(fallbackMessage);
   }
-  return response.data;
+  return response.data ?? null;
 };
 
-const toNumberWithDefault = (value: unknown, fallback: number): number =>
+const toNumberWithDefault = <T>(value: T, fallback: number): number =>
   typeof value === "number" ? value : fallback;
 
-const toOptionalNumber = (value: unknown): number | undefined =>
+const toOptionalNumber = <T>(value: T): number | undefined =>
   typeof value === "number" ? value : undefined;
 
-const toOptionalString = (value: unknown): string | undefined =>
+const toOptionalString = <T>(value: T): string | undefined =>
   typeof value === "string" ? value : undefined;
 
-const toStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
+const toStringArray = <T>(value: T): string[] => {
+  const entries = asJsonArray(value);
+  if (!entries) {
+    return [];
+  }
+  return entries.filter((entry): entry is string => typeof entry === "string");
+};
 
-const normalizeStats = (value: unknown): UserGamificationData["stats"] => {
+const normalizeStats = <T>(value: T): UserGamificationData["stats"] => {
   const stats: UserGamificationData["stats"] = {};
   if (!isRecord(value)) {
     return stats;
@@ -86,7 +90,7 @@ const normalizeStats = (value: unknown): UserGamificationData["stats"] => {
   return stats;
 };
 
-const normalizeDailyChallenges = (value: unknown): Record<string, string[]> => {
+const normalizeDailyChallenges = <T>(value: T): Record<string, string[]> => {
   if (!isRecord(value)) {
     return {};
   }
@@ -100,7 +104,7 @@ const normalizeDailyChallenges = (value: unknown): Record<string, string[]> => {
   return dailyChallenges;
 };
 
-const normalizeProgress = (value: unknown): UserGamificationData | null => {
+const normalizeProgress = <T>(value: T): UserGamificationData | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -123,14 +127,8 @@ const createGamificationState = (): GamificationState => ({
   progress: useState<UserGamificationData | null>(STATE_KEYS.GAMIFICATION_PROGRESS, () => null),
   achievements: useState<Achievement[]>(STATE_KEYS.GAMIFICATION_ACHIEVEMENTS, () => []),
   challenges: useState<DailyChallenge[]>(STATE_KEYS.GAMIFICATION_CHALLENGES, () => []),
-  weeklyProgress: useState<Record<string, unknown> | null>(
-    STATE_KEYS.GAMIFICATION_WEEKLY,
-    () => null,
-  ),
-  monthlyStats: useState<Record<string, unknown> | null>(
-    STATE_KEYS.GAMIFICATION_MONTHLY,
-    () => null,
-  ),
+  weeklyProgress: useState<JsonObject | null>(STATE_KEYS.GAMIFICATION_WEEKLY, () => null),
+  monthlyStats: useState<JsonObject | null>(STATE_KEYS.GAMIFICATION_MONTHLY, () => null),
   loading: useState(STATE_KEYS.GAMIFICATION_LOADING, () => false),
 });
 
@@ -163,9 +161,7 @@ const createFetchAchievementsAction = (context: GamificationContext) => async ()
       context.api.gamification.achievements.get(),
       context.t("apiErrors.gamification.fetchAchievementsFailed"),
     );
-    context.achievements.value = Array.isArray(data)
-      ? data.filter((entry): entry is Achievement => isRecord(entry))
-      : [];
+    context.achievements.value = parseAchievementList(data);
   });
 
 const createFetchChallengesAction = (context: GamificationContext) => async () =>
@@ -174,13 +170,11 @@ const createFetchChallengesAction = (context: GamificationContext) => async () =
       context.api.gamification.challenges.get(),
       context.t("apiErrors.gamification.fetchChallengesFailed"),
     );
-    if (!(isRecord(data) && Array.isArray(data.challenges))) {
+    if (!isRecord(data)) {
       context.challenges.value = [];
       return;
     }
-    context.challenges.value = data.challenges.filter((entry): entry is DailyChallenge =>
-      isRecord(entry),
-    );
+    context.challenges.value = parseDailyChallengeList(data.challenges);
   });
 
 const createCompleteChallengeAction =
@@ -242,12 +236,12 @@ const createGamificationComputedState = (state: GamificationState) => {
     return 1.0;
   });
 
-  const actionHistory = computed<unknown[]>(() => {
+  const actionHistory = computed<JsonValue[]>(() => {
     const weeklyValue = state.weeklyProgress.value;
     if (!(isRecord(weeklyValue) && Array.isArray(weeklyValue.actionHistory))) {
       return [];
     }
-    return weeklyValue.actionHistory;
+    return asJsonArray(weeklyValue.actionHistory) ?? [];
   });
 
   return {

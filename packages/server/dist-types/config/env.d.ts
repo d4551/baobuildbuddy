@@ -9,6 +9,7 @@ export declare const isAuthDisabled: () => boolean;
 export declare function readConfig(): {
     disableAuth: boolean;
     authSetupToken: string | null;
+    encryptionKey: string | null;
     automationScriptTimeoutMs: number;
     automationStdioBufferLimit: number;
     smartFieldMapperRetries: number;

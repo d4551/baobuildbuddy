@@ -160,6 +160,125 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
         };
         dialect: 'sqlite';
     }>;
+    auditLog: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
+        name: "audit-log";
+        schema: undefined;
+        columns: {
+            id: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "id";
+                tableName: "audit-log";
+                dataType: "number";
+                columnType: "SQLiteInteger";
+                data: number;
+                driverParam: number;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: true;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: undefined;
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {}>;
+            event: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "event";
+                tableName: "audit-log";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            actor: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "actor";
+                tableName: "audit-log";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            detail: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "detail";
+                tableName: "audit-log";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            ip: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "ip";
+                tableName: "audit-log";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "created_at";
+                tableName: "audit-log";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+        };
+        dialect: 'sqlite';
+    }>;
     auth: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
         name: "auth";
         schema: undefined;
@@ -183,8 +302,65 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }, {}, {
                 length: number | undefined;
             }>;
-            apiKey: import("drizzle-orm/sqlite-core").SQLiteColumn<{
-                name: "api_key";
+            apiKeyHash: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "api_key_hash";
+                tableName: "auth";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            apiKeyCreatedAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "api_key_created_at";
+                tableName: "auth";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            apiKeyExpiresAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "api_key_expires_at";
+                tableName: "auth";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: false;
+                hasDefault: false;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            apiKeyRevokedAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "api_key_revoked_at";
                 tableName: "auth";
                 dataType: "string";
                 columnType: "SQLiteText";
@@ -309,7 +485,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "automation_runs";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: Record<string, unknown>;
+                data: import("@bao/shared/utils/json").JsonObject;
                 driverParam: string;
                 notNull: false;
                 hasDefault: false;
@@ -321,14 +497,14 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: Record<string, unknown>;
+                $type: import("@bao/shared/utils/json").JsonObject;
             }>;
             output: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "output";
                 tableName: "automation_runs";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: Record<string, unknown>;
+                data: import("@bao/shared/utils/json").JsonObject;
                 driverParam: string;
                 notNull: false;
                 hasDefault: false;
@@ -340,7 +516,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: Record<string, unknown>;
+                $type: import("@bao/shared/utils/json").JsonObject;
             }>;
             screenshots: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "screenshots";
@@ -3090,7 +3266,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "skill_mappings";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: unknown[];
+                data: import("@bao/shared/types/skill-mapping").SkillEvidence[];
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -3102,7 +3278,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: unknown[];
+                $type: import("@bao/shared/types/skill-mapping").SkillEvidence[];
             }>;
             confidence: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "confidence";
@@ -3991,6 +4167,51 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             updatedAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "updated_at";
                 tableName: "user_profile";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: false;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+        };
+        dialect: 'sqlite';
+    }>;
+    userRole: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
+        name: "user_role";
+        schema: undefined;
+        columns: {
+            id: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "id";
+                tableName: "user_role";
+                dataType: "string";
+                columnType: "SQLiteText";
+                data: string;
+                driverParam: string;
+                notNull: true;
+                hasDefault: true;
+                isPrimaryKey: true;
+                isAutoincrement: false;
+                hasRuntimeDefault: false;
+                enumValues: [string, ...string[]];
+                baseColumn: never;
+                identity: undefined;
+                generated: undefined;
+            }, {}, {
+                length: number | undefined;
+            }>;
+            role: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+                name: "role";
+                tableName: "user_role";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;
