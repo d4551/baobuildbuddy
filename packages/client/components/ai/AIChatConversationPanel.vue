@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  CHAT_PANEL_PADDING_SM_PX6_CLASS,
-} from "~/constants/ui-layout";
+import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import {
@@ -12,7 +10,6 @@ import {
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
-  MIN_HEIGHT_CONTENT_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
