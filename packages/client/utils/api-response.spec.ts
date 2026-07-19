@@ -1,6 +1,8 @@
 import { expect, it } from "vitest";
 import {
   hasApiResponseError,
+  readApiDataOrEmpty,
+  requireApiResponseData,
   requireApiResponsePayload,
   unwrapApiResponsePayload,
 } from "./api-response";
@@ -20,4 +22,18 @@ it("rejects repo-standard error envelopes", () => {
 
 it("rejects non-object payloads", () => {
   expect(() => requireApiResponsePayload("invalid", "fallback")).toThrow("fallback");
+});
+
+it("requireApiResponseData returns typed data and formats errors", () => {
+  expect(requireApiResponseData({ data: { ok: true } }, "fallback")).toEqual({ ok: true });
+  expect(() =>
+    requireApiResponseData({ data: null, error: "boom" }, "fallback", (error, fallback) =>
+      typeof error === "string" ? error : fallback,
+    ),
+  ).toThrow("boom");
+});
+
+it("readApiDataOrEmpty soft-fails to empty arrays", async () => {
+  await expect(readApiDataOrEmpty(Promise.resolve({ error: "nope" }))).resolves.toEqual([]);
+  await expect(readApiDataOrEmpty(Promise.resolve({ data: [1, 2] }))).resolves.toEqual([1, 2]);
 });

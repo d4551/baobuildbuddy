@@ -20,22 +20,6 @@ export interface SkillsPathwaysGamificationProgress {
   readonly xp?: number;
 }
 
-export const readApiData = <TData>(
-  response: {
-    data: TData;
-    error?: unknown;
-  },
-  fallbackMessage: string,
-): TData => {
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data;
-};
-
 const toSkillReadinessFeedbackId = (value: unknown): SkillReadinessFeedbackId | null => {
   if (typeof value !== "string") {
     return null;

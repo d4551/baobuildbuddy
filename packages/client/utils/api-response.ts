@@ -32,3 +32,38 @@ export function requireApiResponsePayload(response: unknown, fallbackMessage: st
 
   return unwrapApiResponsePayload(response);
 }
+
+/**
+ * Typed Eden/data-envelope reader — single SSOT for page bootstrap helpers.
+ * Prefer this over per-composable `readApiData` forks.
+ */
+export function requireApiResponseData<TData>(
+  response: {
+    data: TData;
+    error?: unknown;
+  },
+  fallbackMessage: string,
+  formatError: (error: unknown, fallback: string) => string = (_error, fallback) => fallback,
+): TData {
+  if (!(isRecord(response) && "data" in response)) {
+    throw new Error(fallbackMessage);
+  }
+  if ("error" in response && response.error) {
+    throw new Error(formatError(response.error, fallbackMessage));
+  }
+  return response.data;
+}
+
+/**
+ * Soft unwrap for list bootstraps that treat failures as empty collections.
+ */
+export async function readApiDataOrEmpty(request: Promise<unknown>): Promise<unknown> {
+  const response = await request;
+  if (!(isRecord(response) || Array.isArray(response))) {
+    return [];
+  }
+  if (hasApiResponseError(response)) {
+    return [];
+  }
+  return unwrapApiResponsePayload(response);
+}

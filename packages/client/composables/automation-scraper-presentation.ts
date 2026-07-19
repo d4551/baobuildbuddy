@@ -2,11 +2,11 @@ import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { formatRelativeTimeForDate } from "@bao/shared/utils/date-helpers";
 import type { ComputedRef, Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
+import { RUN_STATE_BADGE_CLASS } from "~/composables/automation-scraper-bootstrap";
 import {
   DATE_FORMAT_OPTIONS,
-  RUN_STATE_BADGE_CLASS,
   resolveScheduledRunAt,
-} from "~/composables/automation-scraper-bootstrap";
+} from "~/composables/schedule-timestamp";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,

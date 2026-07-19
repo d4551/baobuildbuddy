@@ -4,7 +4,7 @@ import type { ComposerTranslation } from "vue-i18n";
 import type { Router } from "vue-router";
 import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
-import { toIsoTimestamp } from "~/composables/automation-scraper-bootstrap";
+import { toIsoTimestamp } from "~/composables/schedule-timestamp";
 import type { AutomationRunEnvelope, ScrapePendingAction } from "~/types/automation-scraper";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";

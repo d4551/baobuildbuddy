@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
+import { readApiDataOrEmpty } from "~/utils/api-response";
 
 export interface JobApplyRequestBody {
   jobUrl: string;
@@ -64,20 +65,6 @@ export function useAutomationJobApplyDependencies() {
   };
 }
 
-export const readApiData = async (request: Promise<unknown>): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    return [];
-  }
-  if (isRecord(response) && "error" in response && response.error) {
-    return [];
-  }
-  if (isRecord(response) && "data" in response) {
-    return response.data;
-  }
-  return response;
-};
-
 export const toResumeSelectOptions = <T>(value: T): ResumeSelectOption[] => {
   const entries = asJsonArray(value);
   if (!entries) {
@@ -121,7 +108,7 @@ export function useAutomationJobApplyBootstrap(input: {
 }) {
   const { data: resumesData } = useAsyncData<ResumeSelectOption[]>(
     "automation-job-apply-resumes",
-    async () => toResumeSelectOptions(await readApiData(input.api.resumes.get())),
+    async () => toResumeSelectOptions(await readApiDataOrEmpty(input.api.resumes.get())),
     {
       default: () => [],
     },
@@ -131,7 +118,7 @@ export function useAutomationJobApplyBootstrap(input: {
     "automation-job-apply-cover-letters",
     async () =>
       toCoverLetterSelectOptions(
-        await readApiData(
+        await readApiDataOrEmpty(
           requestApi<unknown>(input.runtime, API_ENDPOINTS.coverLetters, {
             method: "GET",
           }),
