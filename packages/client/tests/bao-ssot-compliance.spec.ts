@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const CLIENT_ROOT = join(import.meta.dirname, "..");
+const PAGE_HERO_GLASS_SUBTLE_PATTERN = /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?glass-subtle/u;
 
 // ── Glass surface consistency ────────────────────────────────────────
 
@@ -103,7 +104,7 @@ describe("Layout SSOT — Layout token declarations", () => {
     ];
     for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
     expect(content, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
-      /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?glass-subtle/,
+      PAGE_HERO_GLASS_SUBTLE_PATTERN,
     );
   });
 
