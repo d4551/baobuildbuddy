@@ -32,7 +32,7 @@ const emit = defineEmits<{
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
-      <textarea
+      <textarea 
         v-model="applicationNotes"
         class="textarea" :class="[FLUID_WIDTH_CLASS]"
         rows="5"
@@ -42,7 +42,7 @@ const emit = defineEmits<{
     </fieldset>
 
     <div class="modal-action">
-      <button
+      <button 
         type="button"
         class="btn btn-ghost"
         :aria-label="t('jobDetail.cancelApplyAria')"
@@ -50,7 +50,7 @@ const emit = defineEmits<{
       >
         {{ t("jobDetail.cancelButton") }}
       </button>
-      <button
+      <button 
         type="button"
         class="btn btn-primary"
         :aria-label="t('jobDetail.submitApplyAria')"

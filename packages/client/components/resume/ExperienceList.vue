@@ -65,7 +65,7 @@ function removeExperience(index: number): void {
   <div class="card-body">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.experience.addButtonAria')"
         @click="addExperience"
@@ -74,7 +74,7 @@ function removeExperience(index: number): void {
       </button>
     </div>
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div
+      <div 
         v-for="(experience, index) in localValue"
         :key="`${experience.company}-${experience.title}-${index}`"
         :class="SURFACE_GLASS_CARD_CLASS"
@@ -84,7 +84,7 @@ function removeExperience(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"
@@ -95,7 +95,7 @@ function removeExperience(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.jobTitleLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.title"
                 type="text"
                 required
@@ -108,7 +108,7 @@ function removeExperience(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.companyLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.company"
                 type="text"
                 required
@@ -121,7 +121,7 @@ function removeExperience(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.locationLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.location"
                 type="text"
                 class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -132,7 +132,7 @@ function removeExperience(index: number): void {
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <fieldset class="fieldset flex-1">
                 <legend class="fieldset-legend">{{ t("resumePage.experience.startDateLegend") }}</legend>
-                <input
+                <input 
                   v-model="experience.startDate"
                   type="month"
                   class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -142,7 +142,7 @@ function removeExperience(index: number): void {
               </fieldset>
               <fieldset class="fieldset flex-1">
                 <legend class="fieldset-legend">{{ t("resumePage.experience.endDateLegend") }}</legend>
-                <input
+                <input 
                   v-model="experience.endDate"
                   type="month"
                   class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -155,7 +155,7 @@ function removeExperience(index: number): void {
           </SectionGrid>
           <fieldset class="fieldset">
             <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <input
+              <input 
                 v-model="experience.current"
                 type="checkbox"
                 class="checkbox checkbox-sm"
@@ -167,7 +167,7 @@ function removeExperience(index: number): void {
           </fieldset>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
-            <textarea
+            <textarea 
               v-model="experience.description"
               required
               minlength="20"

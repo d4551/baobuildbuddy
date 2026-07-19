@@ -59,7 +59,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
               {{ t("interviewSession.focusAreasTitle") }}
             </p>
             <div v-if="focusAreas.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <span
+              <span 
                 v-for="focusArea in focusAreas"
                 :key="focusArea"
                 class="badge badge-outline badge-primary"
@@ -77,7 +77,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
               {{ t("interviewSession.promptTagsLabel") }}
             </p>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <span
+              <span 
                 v-for="signal in targetSignals"
                 :key="signal"
                 class="badge badge-outline"

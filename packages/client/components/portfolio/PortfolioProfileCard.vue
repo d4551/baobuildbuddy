@@ -29,7 +29,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 </script>
 
 <template>
-  <section
+  <section 
     id="portfolio-profile-card"
     :class="SURFACE_GLASS_CARD_CLASS"
     aria-labelledby="portfolio-profile-title"
@@ -39,7 +39,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.titleLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.title"
             type="text"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -51,7 +51,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.emailLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.email"
             type="email"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -63,7 +63,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.websiteLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.website"
             type="url"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -75,7 +75,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset md:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.bioLegend") }}</legend>
-          <textarea
+          <textarea 
             :value="props.portfolioForm.bio"
             class="textarea" :class="[FLUID_WIDTH_CLASS]"
             rows="4"

@@ -119,3 +119,15 @@ export const WORKSPACE_NAV_MAX_WIDTH_XL_CLASS = "xl:max-w-4xl";
 
 /** Hero page title responsive sizing. */
 export const HERO_TITLE_RESPONSIVE_CLASS = "sm:text-5xl";
+
+/** Responsive padding tokens (breakpoint-prefixed; feature components must import these). */
+export const RESPONSIVE_PADDING_MD_P6_CLASS = "md:p-6";
+export const RESPONSIVE_PADDING_LG_P8_CLASS = "lg:p-8";
+export const RESPONSIVE_PADDING_SM_PX6_CLASS = "sm:px-6";
+
+/** Responsive width tokens. */
+export const RESPONSIVE_WIDTH_LG_W80_CLASS = "lg:w-80";
+
+/** Responsive typography tokens. */
+export const RESPONSIVE_TEXT_MD_3XL_CLASS = "md:text-3xl";
+export const RESPONSIVE_TEXT_XL_4XL_CLASS = "xl:text-4xl";

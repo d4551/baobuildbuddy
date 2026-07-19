@@ -74,7 +74,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
     <nav :aria-label="t('a11y.primaryNavigation')" class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, TRUNCATE_FLEX_CHILD_CLASS]">
       <ul :class="SHELL_SIDEBAR_MENU_CLASS">
         <li v-for="item in sidebarItems" :key="item.id">
-          <NuxtLink
+          <NuxtLink 
             :to="item.to"
             :class="sidebarLinkClass(item)"
             :data-tip="resolveSidebarLabel(item)"
@@ -82,7 +82,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             :aria-label="resolveSidebarLabel(item)"
           >
             <span class="indicator">
-              <span
+              <span 
                 v-if="item.id === 'settings' && isAiConfigurationIncomplete"
                 class="indicator-item badge badge-warning badge-xs font-bold"
                 role="status"
@@ -101,7 +101,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
           </NuxtLink>
         </li>
         <li class="mt-auto" :class="[PADDING_TOKEN_CLASS.pt4]">
-          <button
+          <button 
             type="button"
             class="btn btn-ghost btn-sm justify-start is-drawer-close:btn-square" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('a11y.toggleSidebarNavigation')"
@@ -117,7 +117,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         </li>
       </ul>
     </nav>
-    <footer
+    <footer 
       class="border-t border-base-300 text-muted is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.xs]"
       :aria-label="t('layout.shell.versionFooterAria')"
     >

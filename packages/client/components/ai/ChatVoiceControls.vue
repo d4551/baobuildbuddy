@@ -6,6 +6,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -92,7 +93,7 @@ function handleAutoSpeakChange(event: Event): void {
 </script>
 
 <template>
-  <button
+  <button 
     v-if="props.supportsRecognition"
     class="btn btn-ghost"
     :class="{ 'join-item': props.joinItem, 'btn-warning': props.isListening }"
@@ -108,7 +109,7 @@ function handleAutoSpeakChange(event: Event): void {
     "
     @click="emit('toggle-listening')"
   >
-    <svg
+    <svg 
       v-if="props.isListening"
       :class="iconClass"
       fill="none"
@@ -118,7 +119,7 @@ function handleAutoSpeakChange(event: Event): void {
     >
       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M6 6h12v12H6z" />
     </svg>
-    <svg
+    <svg 
       v-else
       :class="iconClass"
       fill="none"
@@ -135,7 +136,7 @@ function handleAutoSpeakChange(event: Event): void {
       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
-  <button
+  <button 
     v-if="props.supportsSynthesis"
     class="btn btn-ghost"
     :class="{ 'join-item': props.joinItem }"
@@ -144,7 +145,7 @@ function handleAutoSpeakChange(event: Event): void {
     :disabled="!props.canReplayAssistant || props.loading"
     @click="emit('replay-assistant')"
   >
-    <svg
+    <svg 
       :class="iconClass"
       fill="none"
       stroke="currentColor"
@@ -163,7 +164,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt2]">
     <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
-    <select
+    <select 
       :value="props.selectedVoiceId"
       class="select select-xs" :class="[FLUID_WIDTH_CLASS]"
       :aria-label="t('aiChatCommon.voice.voiceAria')"
@@ -177,9 +178,9 @@ function handleAutoSpeakChange(event: Event): void {
   </fieldset>
 
   <div v-if="!props.compact && props.supportsSynthesis" class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-    <label class="label cursor-pointer py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+    <label class="label cursor-pointer" :class="[FLEX_GAP_TOKEN_CLASS.gap2, PADDING_TOKEN_CLASS.py0]">
       <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
-      <input
+      <input 
         :checked="props.autoSpeakReplies"
         type="checkbox"
         class="toggle toggle-xs"
@@ -198,7 +199,7 @@ function handleAutoSpeakChange(event: Event): void {
     </p>
   </div>
 
-  <p
+  <p 
     v-if="!props.compact && props.supportHintKey"
     class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
@@ -207,7 +208,7 @@ function handleAutoSpeakChange(event: Event): void {
     {{ t(props.supportHintKey) }}
   </p>
 
-  <p
+  <p 
     v-if="!props.compact && props.errorLabel"
     class="text-error" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
@@ -216,21 +217,5 @@ function handleAutoSpeakChange(event: Event): void {
     {{ props.errorLabel }}
   </p>
 
-  <SpeechModelProfileFields
-    v-if="showAdvancedSpeechConfig"
-    class="mt-3"
-    :provider-options="props.speechProviderOptions ?? []"
-    :stt-provider="props.sttProvider"
-    :stt-model="props.sttModel"
-    :tts-provider="props.ttsProvider"
-    :tts-model="props.ttsModel"
-    :stt-model-options="props.sttModelOptions ?? []"
-    :tts-model-options="props.ttsModelOptions ?? []"
-    :saving="props.speechConfigSaving === true"
-    @update:stt-provider="emit('update:sttProvider', $event)"
-    @update:stt-model="emit('update:sttModel', $event)"
-    @update:tts-provider="emit('update:ttsProvider', $event)"
-    @update:tts-model="emit('update:ttsModel', $event)"
-    @save="emit('save-speech-settings')"
-  />
+  <SpeechModelProfileFields :class="[MARGIN_TOKEN_CLASS.mt3]" v-if="showAdvancedSpeechConfig" :provider-options="props.speechProviderOptions ?? []" :stt-provider="props.sttProvider" :stt-model="props.sttModel" :tts-provider="props.ttsProvider" :tts-model="props.ttsModel" :stt-model-options="props.sttModelOptions ?? []" :tts-model-options="props.ttsModelOptions ?? []" :saving="props.speechConfigSaving === true" @update:stt-provider="emit('update:sttProvider', $event)" @update:stt-model="emit('update:sttModel', $event)" @update:tts-provider="emit('update:ttsProvider', $event)" @update:tts-model="emit('update:ttsModel', $event)" @save="emit('save-speech-settings')"/>
 </template>

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  WIDTH_TOKEN_CLASS,
+} from "~/constants/layout";
 
 type ExportFormat = "pdf" | "docx";
 
@@ -226,7 +232,7 @@ function emitExport(format: ExportFormat): void {
 
 <template>
   <div ref="menu" class="dropdown dropdown-end" :class="{ 'dropdown-open': isOpen }">
-    <button
+    <button 
       :id="exportTriggerId"
       ref="exportTrigger"
       type="button"
@@ -240,20 +246,11 @@ function emitExport(format: ExportFormat): void {
       @click="handleTriggerClick"
       @keydown="handleTriggerKeydown"
     >
-      <IconDownload class="h-4 w-4" />
+      <IconDownload :class="[ICON_SIZE_CLASS[4]]"/>
       {{ props.buttonLabel }}
     </button>
 
-    <ul
-      v-show="isOpen"
-      :id="exportMenuId"
-      class="menu dropdown-content z-20 w-40 rounded-box border border-base-300 bg-base-100 p-2" :class="[MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
-      role="menu"
-      aria-orientation="vertical"
-      :aria-labelledby="exportTriggerId"
-      :aria-label="props.buttonAriaLabel"
-      @focusout="handleMenuFocusOut"
-    >
+    <ul class="menu dropdown-content z-20 rounded-box border border-base-300 bg-base-100" v-show="isOpen" :id="exportMenuId" :class="[MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]" role="menu" aria-orientation="vertical" :aria-labelledby="exportTriggerId" :aria-label="props.buttonAriaLabel" @focusout="handleMenuFocusOut">
       <li v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
           :id="`${exportMenuId}-${format}`"

@@ -55,7 +55,7 @@ const {
 
 <template>
   <Teleport to="body">
-    <div
+    <div 
       v-if="showWidget"
       class="fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
     >

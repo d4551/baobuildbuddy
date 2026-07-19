@@ -128,19 +128,25 @@ const collectClassAttributeViolations = (
   ];
 
   const scanClassValue = (classValue: string, baseLine: number): void => {
-    for (const { pattern, message } of patterns) {
-      pattern.lastIndex = 0;
-      for (const tokenMatch of classValue.matchAll(pattern)) {
-        const token = tokenMatch[0];
-        if (
-          token.includes("text-base") ||
-          token.includes("text-muted") ||
-          token.includes("text-secondary") ||
-          token.includes("text-primary")
-        ) {
-          continue;
+    // Match whole utility tokens only — avoid false positives like
+    // `max-h-72` → `h-72`, `scroll-mt-24` → `mt-24`, `mt-0.5` → `mt-0`.
+    const classTokens = classValue.split(/\s+/u).filter((token) => token.length > 0);
+    for (const token of classTokens) {
+      if (
+        token.includes("text-base") ||
+        token.includes("text-muted") ||
+        token.includes("text-secondary") ||
+        token.includes("text-primary")
+      ) {
+        continue;
+      }
+      for (const { pattern, message } of patterns) {
+        pattern.lastIndex = 0;
+        const match = pattern.exec(token);
+        if (match && match[0] === token) {
+          violations.push({ filePath, line: baseLine, message: message(token) });
+          break;
         }
-        violations.push({ filePath, line: baseLine, message: message(token) });
       }
     }
   };

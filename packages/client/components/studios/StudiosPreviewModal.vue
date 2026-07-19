@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -41,17 +42,17 @@ function studioLocation(location: string): string {
     :close-backdrop-label="t('studiosIndex.preview.closeBackdropButton')"
     @close="$emit('close')"
   >
-    <button
+    <button 
       type="button"
       class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
-      <CloseIcon class="h-4 w-4" />
+      <CloseIcon :class="[ICON_SIZE_CLASS[4]]"/>
     </button>
 
     <template v-if="studio">
-      <h3 :id="titleId" class="text-xl font-bold">
+      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ studio.name }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -67,7 +68,7 @@ function studioLocation(location: string): string {
         </span>
       </div>
 
-      <SectionGrid grid-token="threeColumnMd" extra-class="mt-5">
+      <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd" extra->
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
@@ -90,7 +91,7 @@ function studioLocation(location: string): string {
       </SectionGrid>
 
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: studio.name })"
@@ -98,7 +99,7 @@ function studioLocation(location: string): string {
         >
           {{ t("studiosIndex.preview.startInterviewButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-outline"
           :aria-label="t('studiosIndex.preview.openDetailAria', { studio: studio.name })"
@@ -106,7 +107,7 @@ function studioLocation(location: string): string {
         >
           {{ t("studiosIndex.preview.openDetailButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-ghost"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
@@ -118,14 +119,14 @@ function studioLocation(location: string): string {
     </template>
 
     <template v-else>
-      <h3 :id="titleId" class="text-xl font-bold">
+      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("studiosIndex.preview.missingDescription") }}
       </p>
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"

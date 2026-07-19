@@ -95,7 +95,7 @@ const cardClass = computed(() => [
 <template>
   <article :class="cardClass">
     <!-- Link overlay for clickable cards -->
-    <NuxtLink
+    <NuxtLink 
       v-if="to"
       :to="to"
       class="absolute inset-0 z-10 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"

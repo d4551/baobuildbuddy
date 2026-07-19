@@ -5,8 +5,11 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 import {
+  AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -74,24 +77,16 @@ const brandPreviewThemes = computed<
       </div>
 
       <SectionGrid grid-token="twoColumnXlGap4">
-        <section
-          v-for="themeSurface in brandPreviewThemes"
-          :key="themeSurface.id"
-          class="rounded-box border p-5" :class="[SHADOW_TOKEN_CLASS.sm, themeSurface.surfaceClass]"
-          :aria-label="t('settings.brand.previewTitle')"
-        >
+        <section class="rounded-box border" v-for="themeSurface in brandPreviewThemes" :key="themeSurface.id" :class="[SHADOW_TOKEN_CLASS.sm, themeSurface.surfaceClass, PADDING_TOKEN_CLASS.p5]" :aria-label="t('settings.brand.previewTitle')">
           <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <img
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="h-10 w-10 rounded-box border border-base-300 bg-base-100 object-contain p-1" :class="[SHADOW_TOKEN_CLASS.sm]"
+                class="rounded-box border border-base-300 bg-base-100 object-contain" :class="[SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10], PADDING_TOKEN_CLASS.p1]"
               />
-              <div
-                v-else
-                class="flex h-10 w-10 items-center justify-center rounded-box border border-base-300 bg-base-100 font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm]"
-              >
+              <div class="flex items-center justify-center rounded-box border border-base-300 bg-base-100 font-semibold" v-else :class="[TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10]]">
                 {{ brandPreviewInitial }}
               </div>
               <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
@@ -108,17 +103,17 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, MARGIN_TOKEN_CLASS.mt5]">
             <h4 class="brand-display font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
               {{ brandDraft.name }}
             </h4>
-            <p class="max-w-md text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ brandDraft.content.tagline }}</p>
-            <p class="max-w-md text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm, AUTH_CARD_MAX_WIDTH_CLASS]">{{ brandDraft.content.tagline }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, AUTH_CARD_MAX_WIDTH_CLASS]">
               {{ brandDraft.content.defaultDescription }}
             </p>
           </div>
 
-          <div class="mt-5 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt5]">
             <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
@@ -127,7 +122,7 @@ const brandPreviewThemes = computed<
             </span>
           </div>
 
-          <div class="mt-6 flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt6]">
             <span class="btn btn-accent border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>

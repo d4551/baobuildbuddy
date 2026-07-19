@@ -37,7 +37,7 @@ const dashOffset = computed(() => {
 </script>
 
 <template>
-  <div
+  <div 
     class="relative inline-flex items-center justify-center"
     :class="sizeClass"
     role="progressbar"
@@ -47,7 +47,7 @@ const dashOffset = computed(() => {
     :aria-valuenow="clampedValue"
   >
     <svg class="-rotate-90" :class="[FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS]" viewBox="0 0 100 100" aria-hidden="true">
-      <circle
+      <circle 
         class="fill-none"
         :class="trackClass"
         cx="50"
@@ -55,7 +55,7 @@ const dashOffset = computed(() => {
         :r="RADIUS"
         :stroke-width="STROKE_WIDTH"
       />
-      <circle
+      <circle 
         class="fill-none transition-[stroke-dashoffset] duration-[var(--motion-slow)] ease-[var(--ease-response)]"
         :class="fillClass"
         cx="50"

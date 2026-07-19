@@ -65,7 +65,7 @@ const { t } = useI18n();
                 <td>{{ session.studioName || session.studioId }}</td>
                 <td>{{ session.role || session.config.roleType }}</td>
                 <td>
-                  <span
+                  <span 
                     class="badge badge-sm"
                     :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'"
                   >
@@ -79,7 +79,7 @@ const { t } = useI18n();
                 </td>
                 <td>{{ formatSessionDate(session.createdAt) }}</td>
                 <td>
-                  <button
+                  <button 
                     class="btn btn-ghost btn-sm"
                     :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                     @click.stop="emit('viewSession', session.id)"

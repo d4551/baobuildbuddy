@@ -173,12 +173,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
+  <div 
     :class="['fab z-40 hidden lg:flex', FAB_POSITION_CLASS]"
     role="region"
     :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >
-    <button
+    <button 
       ref="quickActionToggle"
       class="btn btn-lg btn-circle btn-primary"
       :aria-label="isOpen ? t('quickFab.collapseAria') : t('quickFab.expandAria')"
@@ -193,7 +193,7 @@ onUnmounted(() => {
       <IconPlus v-else :class="ICON_SIZE_CLASS.md" />
     </button>
 
-    <Transition
+    <Transition 
       enter-active-class="transition-[transform,opacity] duration-[var(--motion-standard)] ease-[var(--ease-enter)]"
       enter-from-class="translate-y-2 scale-95 opacity-0"
       enter-to-class="translate-y-0 scale-100 opacity-100"
@@ -201,7 +201,7 @@ onUnmounted(() => {
       leave-from-class="translate-y-0 scale-100 opacity-100"
       leave-to-class="translate-y-2 scale-95 opacity-0"
     >
-      <div
+      <div 
         v-if="isOpen"
         :id="quickActionMenuId"
         role="menu"
@@ -212,7 +212,7 @@ onUnmounted(() => {
         aria-orientation="vertical"
         :aria-activedescendant="`quick-action-${activeActionIndex}`"
       >
-        <NuxtLink
+        <NuxtLink 
           v-for="(action, index) in FAB_QUICK_ACTIONS"
           :key="action.id"
           :to="action.to"

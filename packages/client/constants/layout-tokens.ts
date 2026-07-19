@@ -39,6 +39,7 @@ export const MARGIN_TOKEN_CLASS = {
   mr1: "mr-1",
   mr2: "mr-2",
   mt0: "mt-0",
+  mtHalf: "mt-0.5",
   mt1: "mt-1",
   mt2: "mt-2",
   mt3: "mt-3",
@@ -55,6 +56,21 @@ export const MARGIN_TOKEN_CLASS = {
 } as const;
 export type MarginToken = keyof typeof MARGIN_TOKEN_CLASS;
 
+/** Scroll-margin tokens (anchor offset under sticky chrome). */
+export const SCROLL_MARGIN_TOKEN_CLASS = {
+  scrollMt24: "scroll-mt-24",
+} as const;
+export type ScrollMarginToken = keyof typeof SCROLL_MARGIN_TOKEN_CLASS;
+
+/** Max-height tokens for scrollable panels. */
+export const MAX_HEIGHT_TOKEN_CLASS = {
+  maxH0: "max-h-0",
+  maxH72: "max-h-72",
+  maxH96: "max-h-96",
+  maxHScreen: "max-h-screen",
+} as const;
+export type MaxHeightToken = keyof typeof MAX_HEIGHT_TOKEN_CLASS;
+
 /** Common width tokens. */
 export const WIDTH_TOKEN_CLASS = {
   w3: "w-3",
@@ -62,6 +78,7 @@ export const WIDTH_TOKEN_CLASS = {
   w5: "w-5",
   w6: "w-6",
   w8: "w-8",
+  w10: "w-10",
   w12: "w-12",
   w14: "w-14",
   w16: "w-16",
@@ -77,6 +94,7 @@ export const HEIGHT_TOKEN_CLASS = {
   h5: "h-5",
   h6: "h-6",
   h8: "h-8",
+  h10: "h-10",
   h12: "h-12",
   h14: "h-14",
   h16: "h-16",

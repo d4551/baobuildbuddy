@@ -32,7 +32,7 @@ function updateTextValue(event: Event, emitEvent: "update:name" | "update:curren
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.profileTitle") }}</h2>
     <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.nameLegend") }}</span>
-      <input
+      <input 
         :value="name"
         type="text"
         :placeholder="t('setup.namePlaceholder')"
@@ -43,7 +43,7 @@ function updateTextValue(event: Event, emitEvent: "update:name" | "update:curren
     </label>
     <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.currentRoleLegend") }}</span>
-      <input
+      <input 
         :value="currentRole"
         type="text"
         :placeholder="t('setup.currentRolePlaceholder')"

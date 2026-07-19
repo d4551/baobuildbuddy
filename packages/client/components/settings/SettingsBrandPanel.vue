@@ -4,6 +4,8 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -118,13 +120,13 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"
         :description="t('settings.brand.subtitle')"
       >
         <template #meta>
-          <span
+          <span 
             class="badge"
             :class="getSaveStateBadgeClass(brandSaveState)"
             role="status"
@@ -136,13 +138,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
       </SettingsPanelHeader>
 
       <div role="alert" class="alert alert-info alert-soft">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 shrink-0 stroke-current"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
+        <svg class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -156,7 +152,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </div>
       </div>
 
-      <SectionGrid grid-token="twoColumnWide" extra-class="items-start gap-6">
+      <SectionGrid class="items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap6]" grid-token="twoColumnWide" extra->
         <div class="xl:sticky xl:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard
@@ -168,12 +164,12 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </div>
 
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <div
+          <div 
             role="tablist"
             class="tabs tabs-border tabs-sm overflow-x-auto whitespace-nowrap md:tabs-md" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-label="t('settings.brand.editorTabsAria')"
           >
-            <button
+            <button 
               v-for="panel in BRAND_EDITOR_PANELS"
               :id="`brand-tab-${panel.id}`"
               :key="panel.id"
@@ -238,8 +234,8 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
             />
           </div>
 
-          <div class="card-actions justify-end pt-2">
-            <button
+          <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
+            <button 
               class="btn btn-primary"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"

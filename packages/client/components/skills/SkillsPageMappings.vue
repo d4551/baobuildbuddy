@@ -7,6 +7,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
@@ -65,8 +66,8 @@ function normalizedConfidence(confidence: number): number {
             <td class="font-medium">{{ mapping.gameExpression }}</td>
             <td>{{ mapping.transferableSkill }}</td>
             <td>
-              <div class="flex flex-wrap gap-1">
-                <span
+              <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+                <span 
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
                   class="badge badge-sm badge-soft"
@@ -78,7 +79,7 @@ function normalizedConfidence(confidence: number): number {
                 </span>
               </div>
             </td>
-            <td class="w-40">
+            <td :class="[WIDTH_TOKEN_CLASS.w40]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <div class="flex items-center justify-between font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <span>{{ mapping.confidence }}%</span>
@@ -86,7 +87,7 @@ function normalizedConfidence(confidence: number): number {
                     {{ resolveCategoryLabel(mapping.category) }}
                   </span>
                 </div>
-                <progress
+                <progress 
                   class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
                   :value="normalizedConfidence(mapping.confidence)"
                   :max="SKILLS_CONFIDENCE_MAX"
@@ -100,7 +101,7 @@ function normalizedConfidence(confidence: number): number {
               </span>
             </td>
             <td>
-              <button
+              <button 
                 class="btn btn-ghost btn-sm btn-error"
                 :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                 @click="emit('delete', mapping.id)"
@@ -114,7 +115,7 @@ function normalizedConfidence(confidence: number): number {
     </div>
 
     <div class="md:hidden" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-      <article
+      <article 
         v-for="mapping in filteredMappings"
         :key="mapping.id"
         :class="SURFACE_GLASS_CARD_CLASS"
@@ -129,16 +130,16 @@ function normalizedConfidence(confidence: number): number {
             <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
           </div>
 
-          <progress
+          <progress 
             class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
             :value="normalizedConfidence(mapping.confidence)"
             :max="SKILLS_CONFIDENCE_MAX"
             :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
           ></progress>
 
-          <div class="flex flex-wrap gap-1">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
             <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
-            <span
+            <span 
               v-for="application in mapping.industryApplications.slice(0, 3)"
               :key="application"
               class="badge badge-sm badge-soft"
@@ -148,7 +149,7 @@ function normalizedConfidence(confidence: number): number {
           </div>
 
           <div class="card-actions justify-end">
-            <button
+            <button 
               class="btn btn-ghost btn-sm btn-error"
               :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
               @click="emit('delete', mapping.id)"

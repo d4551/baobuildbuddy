@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { SURFACE_GLASS_CARD_CLASS,
+import {
   FLEX_GAP_TOKEN_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
   SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -22,7 +24,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="flex min-h-0 flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+  <aside class="flex flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4, MIN_HEIGHT_ZERO_CLASS]">
     <section :class="SURFACE_GLASS_CARD_CLASS" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
@@ -51,7 +53,7 @@ const { t } = useI18n();
         </p>
         <ul class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" :aria-label="t('floatingChat.suggestionsAria')">
           <li v-for="prompt in contextualPrompts" :key="`sidebar-${prompt}`">
-            <button
+            <button 
               type="button"
               class="btn btn-sm btn-soft"
               :aria-label="t('floatingChat.suggestionAria', { prompt })"

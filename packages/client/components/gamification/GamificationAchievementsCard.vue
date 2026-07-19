@@ -18,7 +18,7 @@ defineProps<{
       <div v-if="unlockedAchievements.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
         <h3 class="font-semibold text-success" :class="[MARGIN_TOKEN_CLASS.mb3]">{{ t("gamificationPage.achievementsUnlockedLabel") }}</h3>
         <SectionGrid grid-token="fourColumnFromTwo">
-          <AchievementBadge
+          <AchievementBadge 
             v-for="achievement in unlockedAchievements"
             :key="achievement.id"
             :achievement="achievement"

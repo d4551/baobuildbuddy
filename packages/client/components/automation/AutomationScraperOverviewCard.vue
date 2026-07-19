@@ -30,7 +30,7 @@ const { t } = useI18n();
         </p>
       </div>
 
-      <ul
+      <ul 
         class="steps steps-vertical" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('automation.scraper.stepsAria')"
       >

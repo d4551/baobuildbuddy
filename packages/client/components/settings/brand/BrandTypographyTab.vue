@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -29,7 +32,7 @@ const brandForm = defineModel<{
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.typographyDescription") }}
       </p>
@@ -39,7 +42,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.fontStylesheetLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.fontStylesheetUrl"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
@@ -55,7 +58,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.displayFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.displayFontFamily"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.displayFontAria')"
@@ -66,7 +69,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.bodyFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.bodyFontFamily"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.bodyFontAria')"
@@ -77,7 +80,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.monoFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.monoFontFamily"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.monoFontAria')"

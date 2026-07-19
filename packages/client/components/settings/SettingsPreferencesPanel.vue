@@ -44,7 +44,7 @@ const { t } = useI18n();
             <span :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{
               t("settings.preferences.lightTheme")
             }}</span>
-            <input
+            <input 
               type="checkbox"
               class="toggle toggle-primary theme-controller"
               :value="themeNames.dark"
@@ -62,7 +62,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">
             {{ t("settings.preferences.languageLegend") }}
           </legend>
-          <select
+          <select 
             v-model="preferencesLanguage"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.preferences.languageAria')"
@@ -82,7 +82,7 @@ const { t } = useI18n();
             {{ t("settings.preferences.notificationsLegend") }}
           </legend>
           <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <input
+            <input 
               v-model="notificationForm.achievements"
               type="checkbox"
               class="checkbox checkbox-sm"
@@ -95,7 +95,7 @@ const { t } = useI18n();
             }}</span>
           </label>
           <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <input
+            <input 
               v-model="notificationForm.dailyChallenges"
               type="checkbox"
               class="checkbox checkbox-sm"
@@ -110,7 +110,7 @@ const { t } = useI18n();
             }}</span>
           </label>
           <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <input
+            <input 
               v-model="notificationForm.levelUp"
               type="checkbox"
               class="checkbox checkbox-sm"
@@ -123,7 +123,7 @@ const { t } = useI18n();
             }}</span>
           </label>
           <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <input
+            <input 
               v-model="notificationForm.jobAlerts"
               type="checkbox"
               class="checkbox checkbox-sm"
@@ -139,7 +139,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="t('settings.preferences.saveAria')"
           :disabled="preferencesSaveState === 'saving'"

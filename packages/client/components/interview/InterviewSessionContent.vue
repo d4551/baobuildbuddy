@@ -9,6 +9,7 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -71,17 +72,17 @@ const { t } = useI18n();
       :target-job="targetJob"
     />
 
-    <div
+    <div 
       v-if="completionState === 'completed'"
       class="alert alert-success"
       role="status"
       aria-live="polite"
     >
-      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg :class="[ICON_SIZE_CLASS[6]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>
-      <button
+      <button 
         type="button"
         class="btn btn-success btn-sm"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
@@ -98,17 +99,17 @@ const { t } = useI18n();
           :active-session="activeSession"
           :target-job="targetJob"
         />
-        <InterviewSessionFeedbackCard
+        <InterviewSessionFeedbackCard 
           :current-question="currentQuestion"
           :get-alert-class="getAlertClass"
         />
       </div>
 
-      <div
+      <div 
         v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
         class="lg:sticky lg:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
       >
-        <div
+        <div 
           v-if="canUseVoice"
           :class="SURFACE_GLASS_CARD_CLASS"
           :aria-label="t('interviewSession.voice.idle')"
@@ -122,7 +123,7 @@ const { t } = useI18n();
                 {{ stt.isListening.value ? t("interviewSession.voice.listening") : t("interviewSession.voice.idle") }}
               </p>
             </div>
-            <button
+            <button 
               type="button"
               class="btn btn-primary"
               :class="{ 'btn-error': stt.isListening.value }"
@@ -157,7 +158,7 @@ const { t } = useI18n();
         />
 
         <div class="flex justify-end">
-          <button
+          <button 
             type="button"
             class="btn btn-outline btn-error"
             :disabled="!canComplete || completionState !== 'ready'"

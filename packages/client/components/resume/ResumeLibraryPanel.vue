@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -54,7 +55,7 @@ function requestDelete(resumeId?: string): void {
       <div class="card-body">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("resumePage.filters.searchLegend") }}</legend>
-          <input
+          <input 
             v-model="searchQuery"
             type="search"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -64,7 +65,7 @@ function requestDelete(resumeId?: string): void {
         </fieldset>
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
-          <button
+          <button 
             class="btn btn-sm btn-ghost"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
@@ -76,7 +77,7 @@ function requestDelete(resumeId?: string): void {
     </section>
 
     <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
-      <IconInfoCircle class="h-6 w-6" />
+      <IconInfoCircle :class="[ICON_SIZE_CLASS[6]]"/>
       <span>{{ t("resumePage.emptyState") }}</span>
     </div>
 
@@ -86,7 +87,7 @@ function requestDelete(resumeId?: string): void {
     />
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">
-        <div
+        <div 
           v-for="resume in paginatedResumes"
           :key="resume.id"
           class="relative overflow-hidden transition-colors"
@@ -96,7 +97,7 @@ function requestDelete(resumeId?: string): void {
               : 'card card-dash bg-base-100 hover:bg-base-200'
           "
         >
-          <button
+          <button 
             type="button"
             class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
@@ -111,14 +112,14 @@ function requestDelete(resumeId?: string): void {
               </span>
             </div>
             <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-              <button
+              <button 
                 class="relative z-20 btn btn-sm btn-outline"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
-              <button
+              <button 
                 class="relative z-20 btn btn-sm btn-error btn-outline"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"

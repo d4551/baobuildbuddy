@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -92,7 +93,7 @@ function updateFeaturedFlag(event: Event): void {
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectTitleLegend") }}</legend>
-        <input
+        <input 
           :value="props.projectForm.title"
           type="text"
           :minlength="PORTFOLIO_PROJECT_TITLE_MIN_LENGTH"
@@ -108,7 +109,7 @@ function updateFeaturedFlag(event: Event): void {
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("portfolioPage.modal.descriptionLegend") }}</legend>
-        <textarea
+        <textarea 
           :value="props.projectForm.description"
           :minlength="PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH"
           class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
@@ -124,7 +125,7 @@ function updateFeaturedFlag(event: Event): void {
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("portfolioPage.modal.projectUrlLegend") }}</legend>
-        <input
+        <input 
           :value="props.projectForm.liveUrl"
           type="url"
           class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -136,7 +137,7 @@ function updateFeaturedFlag(event: Event): void {
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("portfolioPage.modal.imageUrlLegend") }}</legend>
-        <input
+        <input 
           :value="props.projectForm.image"
           type="url"
           class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -147,9 +148,9 @@ function updateFeaturedFlag(event: Event): void {
       </fieldset>
 
       <div>
-        <span class="mb-2 block font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
-        <div class="mb-2 flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <input
+        <span class="block font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, MARGIN_TOKEN_CLASS.mb2]">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
+        <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mb2]">
+          <input 
             :value="props.newTech"
             type="text"
             class="input input-sm flex-1"
@@ -169,26 +170,26 @@ function updateFeaturedFlag(event: Event): void {
         </datalist>
 
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <div
+          <div 
             v-for="(tech, idx) in props.projectForm.technologies"
             :key="`${tech}-${idx}`"
             class="badge" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
           >
             {{ tech }}
-            <button
+            <button 
               type="button"
               class="btn btn-ghost btn-xs btn-circle"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
-              <CloseIcon class="h-3 w-3" />
+              <CloseIcon :class="[ICON_SIZE_CLASS[3]]"/>
             </button>
           </div>
         </div>
       </div>
 
       <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <input
+        <input 
           :checked="props.projectForm.featured"
           type="checkbox"
           class="checkbox checkbox-primary"
@@ -203,7 +204,7 @@ function updateFeaturedFlag(event: Event): void {
       <button class="btn btn-ghost" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
-      <button
+      <button 
         class="btn btn-primary"
         :disabled="!props.projectForm.title || !props.projectForm.description"
         :aria-label="t('portfolioPage.modal.saveAria')"

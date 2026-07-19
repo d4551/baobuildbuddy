@@ -2,6 +2,7 @@
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -25,11 +26,11 @@ const emit = defineEmits<{
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
       <div class="alert alert-info alert-soft" role="status">
-        <IconInfoCircle class="h-5 w-5" />
+        <IconInfoCircle :class="[ICON_SIZE_CLASS[5]]"/>
         <span>{{ t("coverLetterDetailPage.editor.info") }}</span>
       </div>
 
-      <textarea
+      <textarea 
         v-model="contentText"
         class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
         rows="20"

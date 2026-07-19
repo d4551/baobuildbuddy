@@ -11,7 +11,7 @@ withDefaults(
 </script>
 
 <template>
-  <span
+  <span 
     :class="['loading loading-spinner', `loading-${size}`]"
     role="status"
     :aria-label="label"

@@ -39,7 +39,7 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
       </div>
 
       <ul class="steps steps-vertical xl:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="props.ariaLabel">
-        <li
+        <li 
           v-for="step in props.steps"
           :key="step.id"
           class="step"
@@ -48,7 +48,7 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
             'step-secondary': step.status === 'inProgress',
           }"
         >
-          <NuxtLink
+          <NuxtLink 
             :to="step.to"
             class="inline-flex items-center link link-hover" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-current="step.status === 'inProgress' ? 'step' : undefined"

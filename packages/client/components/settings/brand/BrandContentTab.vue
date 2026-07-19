@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -30,7 +33,7 @@ const brandForm = defineModel<{
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.contentDescription") }}
       </p>
@@ -40,7 +43,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultTitleLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.defaultTitle"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.defaultTitleAria')"
@@ -51,7 +54,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultDescriptionLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.defaultDescription"
             class="textarea" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="4"
@@ -63,7 +66,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.contentOverridesLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.contentOverridesJson"
             class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="10"

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { EMPTY_STATE_STACK_CLASS } from "~/constants/layout";
+import {
+  EMPTY_STATE_STACK_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -35,42 +41,23 @@ const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").tri
 
 <template>
   <div :class="EMPTY_STATE_STACK_CLASS">
-    <div
-      v-if="icon"
-      class="text-4xl text-muted"
-      aria-hidden="true"
-    >
+    <div class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xl4]" v-if="icon" aria-hidden="true">
       {{ icon }}
     </div>
-    <IconDocumentText
-      v-else
-      class="h-16 w-16 shrink-0 text-muted"
-      aria-hidden="true"
-    />
-    <h3 class="text-lg font-semibold">
+    <IconDocumentText class="shrink-0 text-muted" :class="[ICON_SIZE_CLASS[16]]" v-else aria-hidden="true"/>
+    <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t(titleKey) }}
     </h3>
     <p class="max-w-sm text-muted">
       {{ t(descriptionKey) }}
     </p>
-    <NuxtLink
-      v-if="hasCtaLink"
-      :to="ctaTo"
-      class="btn btn-primary mt-2"
-      :aria-label="t(ctaLabelKey)"
-    >
+    <NuxtLink class="btn btn-primary" :class="[MARGIN_TOKEN_CLASS.mt2]" v-if="hasCtaLink" :to="ctaTo" :aria-label="t(ctaLabelKey)">
       {{ t(ctaLabelKey) }}
     </NuxtLink>
-    <button
-      v-else-if="hasCtaButton"
-      type="button"
-      class="btn btn-primary mt-2"
-      :aria-label="t(ctaLabelKey)"
-      @click="emit('cta')"
-    >
+    <button class="btn btn-primary" :class="[MARGIN_TOKEN_CLASS.mt2]" v-else-if="hasCtaButton" type="button" :aria-label="t(ctaLabelKey)" @click="emit('cta')">
       {{ t(ctaLabelKey) }}
     </button>
-    <div v-if="$slots.actions" class="mt-2 flex flex-wrap items-center justify-center gap-2">
+    <div class="flex flex-wrap items-center justify-center" :class="[MARGIN_TOKEN_CLASS.mt2, FLEX_GAP_TOKEN_CLASS.gap2]" v-if="$slots.actions">
       <slot name="actions" />
     </div>
   </div>

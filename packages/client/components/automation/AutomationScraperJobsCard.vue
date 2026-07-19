@@ -74,7 +74,7 @@ const { t } = useI18n();
                     <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
                       {{ t("jobCard.hybridBadge") }}
                     </span>
-                    <span
+                    <span 
                       v-for="focusArea in jobInterviewFocusAreas(job)"
                       :key="`${job.id}-${focusArea}`"
                       class="badge badge-warning badge-soft badge-sm"
@@ -95,7 +95,7 @@ const { t } = useI18n();
               <td>{{ job.location }}</td>
               <td>{{ relativePostedDate(job.postedDate) }}</td>
               <td class="text-right">
-                <button
+                <button 
                   class="btn btn-primary btn-sm"
                   :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
                   @click="emit('interview', job.id)"

@@ -3,7 +3,9 @@ import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/int
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -59,7 +61,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
 
 <template>
   <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-briefing-title">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <PageHeaderBlock
         title-id="interview-session-briefing-title"
         :title="sessionTitle"
@@ -67,17 +69,17 @@ const roundedProgress = computed(() => Math.round(props.progress));
         heading-tag="h2"
       >
         <template #actions>
-          <div class="badge badge-outline badge-primary px-4 py-3">
+          <div class="badge badge-outline badge-primary" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             {{ sessionProgressLabel }}
           </div>
         </template>
       </PageHeaderBlock>
 
       <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.timeLabel") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
-            <time
+            <time 
               class="font-mono tabular-nums"
               :datetime="elapsedTimeDuration"
               :aria-label="elapsedTimeAriaLabel"
@@ -89,7 +91,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
           <div class="stat-desc">{{ t("interviewSession.overviewDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.progressStatTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ roundedProgress }}%</div>
           <div class="stat-desc">
@@ -97,20 +99,20 @@ const roundedProgress = computed(() => Math.round(props.progress));
           </div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.modeTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ modeLabel }}</div>
           <div class="stat-desc">{{ conversationStyleLabel }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.voiceTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ voiceValue }}</div>
           <div class="stat-desc">{{ voiceDescription }}</div>
         </div>
       </div>
 
-      <progress
+      <progress 
         class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
         :value="progress"
         max="100"

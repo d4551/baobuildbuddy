@@ -6,7 +6,9 @@ import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -56,7 +58,7 @@ const viewSession = (id: string): void => {
         <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
         <div class="flex flex-col sm:flex-row sm:items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="join">
-            <button
+            <button 
               class="join-item btn btn-sm btn-ghost"
               :class="{ 'btn-active': historyView === 'table' }"
               :aria-label="t('interviewHistory.tableAriaLabel')"
@@ -64,7 +66,7 @@ const viewSession = (id: string): void => {
             >
               {{ t("interviewHistory.viewModes.table") }}
             </button>
-            <button
+            <button 
               class="join-item btn btn-sm btn-ghost"
               :class="{ 'btn-active': historyView === 'timeline' }"
               :aria-label="t('interviewHistory.timelineAriaLabel')"
@@ -73,7 +75,7 @@ const viewSession = (id: string): void => {
               {{ t("interviewHistory.viewModes.timeline") }}
             </button>
           </div>
-          <select
+          <select 
             :value="studioFilter"
             class="select select-sm"
             :aria-label="t('interviewHistory.studioFilterAria')"
@@ -117,7 +119,7 @@ const viewSession = (id: string): void => {
               </td>
               <td>{{ props.formatDuration(session.duration ?? 0) }}</td>
               <td>
-                <button
+                <button 
                   class="btn btn-ghost btn-xs"
                   :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                   @click="viewSession(session.id)"
@@ -130,7 +132,7 @@ const viewSession = (id: string): void => {
         </table>
       </div>
 
-      <div v-else class="overflow-x-auto py-2">
+      <div class="overflow-x-auto" :class="[PADDING_TOKEN_CLASS.py2]" v-else>
         <ul class="timeline timeline-vertical timeline-compact" :class="[FLUID_WIDTH_CLASS]">
           <li v-for="(session, index) in filteredSessions" :key="session.id">
             <hr v-if="index !== 0" :class="props.getTimelineLineClass(session.score)" />
@@ -138,12 +140,7 @@ const viewSession = (id: string): void => {
               {{ props.formatDate(session.createdAt) }}
             </div>
             <div class="timeline-middle">
-              <UiRadialMeter
-                :value="session.score ?? 0"
-                size-class="h-12 w-12"
-                fill-class="stroke-primary"
-                :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
-              >
+              <UiRadialMeter :class="[ICON_SIZE_CLASS[12]]" :value="session.score ?? 0" size- fill-class="stroke-primary" :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })">
                 <span class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatScore(session.score) }}</span>
               </UiRadialMeter>
             </div>
@@ -151,7 +148,7 @@ const viewSession = (id: string): void => {
               <p class="font-semibold">{{ session.studioName }}</p>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatDuration(session.duration ?? 0) }}</p>
-              <button
+              <button 
                 class="btn btn-ghost btn-xs" :class="[MARGIN_TOKEN_CLASS.mt2]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
@@ -159,7 +156,7 @@ const viewSession = (id: string): void => {
                 {{ t("interviewHistory.viewButton") }}
               </button>
             </div>
-            <hr
+            <hr 
               v-if="index !== filteredSessions.length - 1"
               :class="props.getTimelineLineClass(session.score)"
             />

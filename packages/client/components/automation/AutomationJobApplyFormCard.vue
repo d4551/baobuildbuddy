@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
@@ -35,7 +36,7 @@ const { t } = useI18n();
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.jobUrlLegend") }}</legend>
-          <input
+          <input 
             v-model="jobUrl"
             type="url"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -46,7 +47,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.resumeLegend") }}</legend>
-          <select
+          <select 
             v-model="resumeId"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('automation.jobApply.resumeAria')"
@@ -60,7 +61,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.coverLetterLegend") }}</legend>
-          <select
+          <select 
             v-model="coverLetterId"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('automation.jobApply.coverLetterAria')"
@@ -79,7 +80,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.jobIdLegend") }}</legend>
-          <input
+          <input 
             v-model="jobId"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('automation.jobApply.jobIdPlaceholder')"
@@ -89,7 +90,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("automation.jobApply.schedule.legend") }}</legend>
-          <input
+          <input 
             v-model="runAt"
             type="datetime-local"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -99,8 +100,8 @@ const { t } = useI18n();
         </fieldset>
       </div>
 
-      <div class="mt-6 join">
-        <button
+      <div class="join" :class="[MARGIN_TOKEN_CLASS.mt6]">
+        <button 
           class="btn btn-primary join-item"
           :disabled="isSubmitDisabled"
           :aria-label="t('automation.jobApply.runButtonAria')"
@@ -109,7 +110,7 @@ const { t } = useI18n();
           <LoadingSpinner size="sm" label="Loading" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.runButton") }}</span>
         </button>
-        <button
+        <button 
           class="btn btn-outline join-item"
           :disabled="isScheduleDisabled"
           :aria-label="t('automation.jobApply.schedule.buttonAria')"

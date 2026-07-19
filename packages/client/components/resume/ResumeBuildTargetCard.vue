@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   studios: ReadonlyArray<{ id: string; name: string }>;
@@ -28,7 +33,7 @@ const emit = defineEmits<{
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.roleLegend") }}</legend>
         <label for="target-role" class="label">{{ t("resumeBuildPage.target.roleLabel") }}</label>
-        <input
+        <input 
           id="target-role"
           v-model="targetRole"
           type="text"
@@ -41,7 +46,7 @@ const emit = defineEmits<{
       <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.studioLegend") }}</legend>
         <label for="studio-select" class="label">{{ t("resumeBuildPage.target.studioLabel") }}</label>
-        <select
+        <select 
           id="studio-select"
           v-model="studioId"
           class="select" :class="[FLUID_WIDTH_CLASS]"
@@ -51,7 +56,7 @@ const emit = defineEmits<{
           <option v-for="studio in studios" :key="studio.id" :value="studio.id">{{ studio.name }}</option>
         </select>
         <label for="studio-name" class="label" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ t("resumeBuildPage.target.studioNameLabel") }}</label>
-        <input
+        <input 
           id="studio-name"
           v-model="studioName"
           type="text"
@@ -63,7 +68,7 @@ const emit = defineEmits<{
 
       <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.experienceLegend") }}</legend>
-        <select
+        <select 
           id="experience-level"
           v-model="experienceLevel"
           class="select" :class="[FLUID_WIDTH_CLASS]"
@@ -78,8 +83,8 @@ const emit = defineEmits<{
 
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
-      <div class="card-actions mt-6 justify-end">
-        <button
+      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
+        <button 
           class="btn btn-primary"
           :disabled="!canProceedTarget"
           :aria-label="t('resumeBuildPage.target.generateAria')"

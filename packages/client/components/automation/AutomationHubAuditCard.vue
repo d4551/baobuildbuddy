@@ -8,6 +8,7 @@ import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -77,7 +78,7 @@ const readyEntries = computed(() =>
             {{ t("automation.hub.audit.description") }}
           </p>
         </div>
-        <NuxtLink
+        <NuxtLink 
           :to="APP_ROUTES.automationScraper"
           class="btn btn-outline btn-sm"
           :aria-label="t('automation.hub.audit.openScraperAria')"
@@ -102,7 +103,7 @@ const readyEntries = computed(() =>
       />
 
       <template v-else-if="capabilitySummary">
-        <StatsRow
+        <StatsRow 
           background-class="border border-base-300 bg-base-200"
           :stats="[
             { titleKey: 'automation.hub.audit.summary.total', value: capabilitySummary.total, valueClass: 'text-primary', descKey: 'automation.hub.audit.summary.totalDesc' },
@@ -130,7 +131,7 @@ const readyEntries = computed(() =>
               />
 
               <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-                <div
+                <div 
                   v-for="capability in needsAttentionEntries"
                   :key="capability.id"
                   class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
@@ -139,19 +140,13 @@ const readyEntries = computed(() =>
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
-                          <span
-                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
-                          >
-                            <component
-                              :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
-                              aria-hidden="true"
-                            />
+                          <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                            <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName(capability))" aria-hidden="true"/>
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
                           </span>
                         </span>
                         <p class="font-semibold">{{ capabilityDisplayName(capability) }}</p>
-                        <span
+                        <span 
                           :class="[
                             capabilityStatusClass(capability.configured, capabilityIssueCount(capability)),
                             'whitespace-nowrap',
@@ -167,7 +162,7 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="space-y-1 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                      <ul class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -177,7 +172,7 @@ const readyEntries = computed(() =>
                       </ul>
                     </div>
 
-                    <NuxtLink
+                    <NuxtLink 
                       :to="capabilityAction(capability).to"
                       class="btn btn-outline btn-sm"
                       :aria-label="capabilityAction(capability).ariaLabel"
@@ -202,7 +197,7 @@ const readyEntries = computed(() =>
               </div>
 
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-                <div
+                <div 
                   v-for="capability in readyEntries"
                   :key="capability.id"
                   class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
@@ -211,14 +206,8 @@ const readyEntries = computed(() =>
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
-                          <span
-                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
-                          >
-                            <component
-                              :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
-                              aria-hidden="true"
-                            />
+                          <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                            <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName(capability))" aria-hidden="true"/>
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
                           </span>
                         </span>
@@ -236,7 +225,7 @@ const readyEntries = computed(() =>
                       />
                     </div>
 
-                    <NuxtLink
+                    <NuxtLink 
                       :to="capabilityAction(capability).to"
                       class="btn btn-ghost btn-sm"
                       :aria-label="capabilityAction(capability).ariaLabel"

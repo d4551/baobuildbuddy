@@ -6,6 +6,9 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
+  MIN_H_80_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -161,9 +164,9 @@ watch(renderedMessages, async () => {
 
 <template>
   <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
-    <div class="card-body gap-0 p-0">
-      <div class="border-b border-base-300 px-6 py-5">
-        <div class="space-y-1">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap0, PADDING_TOKEN_CLASS.p0]">
+      <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
           <h2 id="interview-chat-workspace-title" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
@@ -173,13 +176,7 @@ watch(renderedMessages, async () => {
         </div>
       </div>
 
-      <div
-        ref="chatHistoryRef"
-        class="min-h-80 flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
-        role="log"
-        :aria-label="t(props.responseAriaKey)"
-        aria-live="polite"
-      >
+      <div class="flex-1 overflow-y-auto glass-subtle" ref="chatHistoryRef" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, MIN_H_80_CLASS, PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]" role="log" :aria-label="t(props.responseAriaKey)" aria-live="polite">
         <AIChatBubble
           v-for="(messageRow, index) in renderedMessages"
           :key="messageRow.key"
@@ -192,26 +189,13 @@ watch(renderedMessages, async () => {
         />
       </div>
 
-      <div v-if="currentQuestion" class="border-t border-base-300 px-6 py-5">
+      <div class="border-t border-base-300" :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]" v-if="currentQuestion">
         <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="submitResponse">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">
               {{ t(props.responseLabelKey) }}
             </legend>
-            <textarea
-              :id="responseTextareaId"
-              v-model="currentResponse"
-              class="textarea min-h-40" :class="[FLUID_WIDTH_CLASS]"
-              :placeholder="t(props.responsePlaceholderKey)"
-              :aria-label="t(props.responseAriaKey)"
-              :aria-describedby="responseHintId"
-              :minlength="props.minResponseLength"
-              :disabled="props.disabled"
-              :aria-disabled="props.disabled ? 'true' : 'false'"
-              :aria-invalid="props.disabled || canSubmit ? undefined : 'true'"
-              @keyup.ctrl.enter.prevent="submitResponse"
-              @keyup.meta.enter.prevent="submitResponse"
-            ></textarea>
+            <textarea class="textarea" :id="responseTextareaId" v-model="currentResponse" :class="[FLUID_WIDTH_CLASS, MIN_HEIGHT_SCROLL_CLASS]" :placeholder="t(props.responsePlaceholderKey)" :aria-label="t(props.responseAriaKey)" :aria-describedby="responseHintId" :minlength="props.minResponseLength" :disabled="props.disabled" :aria-disabled="props.disabled ? 'true' : 'false'" :aria-invalid="props.disabled || canSubmit ? undefined : 'true'" @keyup.ctrl.enter.prevent="submitResponse" @keyup.meta.enter.prevent="submitResponse"></textarea>
             <p :id="responseHintId" class="validator-hint text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ responseHintText }}
             </p>
@@ -221,7 +205,7 @@ watch(renderedMessages, async () => {
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ currentQuestionProgressLabel }}
             </p>
-            <button
+            <button 
               type="submit"
               class="btn btn-primary"
               :aria-label="t(props.submitButtonAriaLabelKey)"
@@ -234,7 +218,7 @@ watch(renderedMessages, async () => {
         </form>
       </div>
 
-      <div v-else class="px-6 py-8">
+      <div :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py8]" v-else>
         <div class="alert alert-success">
           <span>{{ completeMessage }}</span>
         </div>

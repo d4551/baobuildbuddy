@@ -41,7 +41,7 @@ const { t } = useI18n();
             </span>
           </div>
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <progress
+            <progress 
               class="progress flex-1"
               :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
               :value="dailyChallenge.progress"
@@ -63,13 +63,13 @@ const { t } = useI18n();
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul class="list rounded-box border border-base-300 bg-base-100">
-          <li
+          <li 
             v-for="(activity, index) in recentActivity"
             :key="`${activity.timestamp.toISOString()}-${index}`"
             class="list-row items-center"
           >
             <div :class="getDashboardActivityPresentation(activity.type).avatarClass">
-              <svg
+              <svg 
                 aria-hidden="true"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -90,7 +90,7 @@ const { t } = useI18n();
             </div>
           </li>
 
-          <li
+          <li 
             v-if="recentActivity.length === 0"
             class="list-row text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
           >

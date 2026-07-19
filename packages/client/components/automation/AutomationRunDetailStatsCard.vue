@@ -31,7 +31,7 @@ const { t } = useI18n();
       <div class="stat-desc">
         {{ t("automation.runDetail.progressSummary", { percent: progressPercent }) }}
       </div>
-      <progress
+      <progress 
         class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mt2]"
         :value="progressPercent"
         max="100"

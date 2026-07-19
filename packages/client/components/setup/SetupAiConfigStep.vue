@@ -3,9 +3,11 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SVG_SIZE_13,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -55,24 +57,24 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 </script>
 
 <template>
-  <div class="space-y-5">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.aiConfigTitle") }}</h2>
     <div role="alert" class="alert alert-info alert-soft">
       <span>{{ t("setup.localFirstInfo", { brand: brandName }) }}</span>
     </div>
 
-    <div
+    <div 
       role="alert"
       class="alert alert-info alert-soft alert-vertical items-start sm:alert-horizontal"
     >
-      <IconInfoCircle class="h-6 w-6 shrink-0 stroke-current text-info" :class="[MARGIN_TOKEN_CLASS.mt1]" />
+      <IconInfoCircle class="shrink-0 stroke-current text-info" :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[6]]"/>
       <div class="flex-1 overflow-hidden" :class="[FLUID_WIDTH_CLASS]">
         <h3 class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1]">
           {{ t("settings.aiProviders.ollamaTipTitle") }}
         </h3>
-        <p class="mb-3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p :class="[TYPOGRAPHY_SCALE_CLASS.sm, MARGIN_TOKEN_CLASS.mb3]">
           {{ t("settings.aiProviders.ollamaTipDescription") }}
-          <NuxtLink
+          <NuxtLink 
             :to="ollamaWebsiteUrl"
             target="_blank"
             class="link link-primary inline-flex items-center"
@@ -80,17 +82,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             :aria-label="t('settings.aiProviders.ollamaTipLinkAria')"
           >
             {{ t("settings.aiProviders.ollamaTipLinkLabel") }}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="h-3 w-3 shrink-0"
-              aria-hidden="true"
-            >
+            <svg class="shrink-0" :class="[ICON_SIZE_CLASS[3]]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
               <polyline points="15 3 21 3 21 9" />
               <line x1="10" y1="14" x2="21" y2="3" />
@@ -99,28 +91,18 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
         </p>
 
         <div class="group relative overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
-          <div class="overflow-x-auto whitespace-nowrap pr-14 font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm]">
-            <span class="mr-2 text-muted">$</span>{{ ollamaCommand }}
+          <div class="overflow-x-auto whitespace-nowrap font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr14]">
+            <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
           </div>
-          <button
+          <button 
             class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
             @click="emit('copy')"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="h-4 w-4 shrink-0"
-              aria-hidden="true"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <svg class="shrink-0" :class="[ICON_SIZE_CLASS[4]]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" :width="SVG_SIZE_13" :height="SVG_SIZE_13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
             </svg>
           </button>
@@ -130,7 +112,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
     <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.localEndpointLegend") }}</span>
-      <input
+      <input 
         :value="localModelEndpoint"
         type="text"
         class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -142,7 +124,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 
     <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.localModelLegend") }}</span>
-      <input
+      <input 
         :value="localModelName"
         type="text"
         class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -151,7 +133,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       />
     </label>
 
-    <button
+    <button 
       class="btn btn-outline btn-sm"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
@@ -166,7 +148,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
         {{ t("setup.cloudOptionalTitle") }}
       </summary>
       <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-        <fieldset
+        <fieldset 
           v-for="provider in cloudProviderIds"
           :key="provider"
           class="fieldset"
@@ -175,7 +157,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             {{ t("setup.cloudProviderLegend", { provider: providerLabels[provider] }) }}
           </legend>
           <div class="join" :class="[FLUID_WIDTH_CLASS]">
-            <input
+            <input 
               :value="providerCredentials[provider]"
               type="password"
               :placeholder="t('setup.cloudProviderPlaceholder', { provider: providerLabels[provider] })"
@@ -183,7 +165,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               :aria-label="t('setup.cloudProviderAria', { provider: providerLabels[provider] })"
               @input="updateProviderCredential($event, provider)"
             />
-            <button
+            <button 
               class="btn btn-outline join-item"
               :disabled="testing || !providerCredentials[provider].trim()"
               :aria-label="t('setup.testProviderAria', { provider: providerLabels[provider] })"

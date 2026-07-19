@@ -40,7 +40,7 @@ defineProps<{
         </div>
         <div :class="[STAT_CARD_CTA_ROW_CLASS, statCard.accentClass]">
           <span>{{ statCard.ctaLabel }}</span>
-          <svg
+          <svg 
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"

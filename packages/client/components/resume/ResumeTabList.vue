@@ -86,7 +86,7 @@ watch(
 
 <template>
   <nav class="tabs tabs-lift" :aria-label="navigationAria">
-    <button
+    <button 
       v-for="(tab, index) in tabs"
       :key="tab"
       type="button"

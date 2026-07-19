@@ -27,20 +27,20 @@ const { t } = useI18n();
         {{ t("automation.runDetail.noScreenshots") }}
       </div>
       <SectionGrid v-else grid-token="threeColumn">
-        <article
+        <article 
           v-for="(screenshotPath, index) in screenshotPaths"
           :key="screenshotPath"
           :class="SURFACE_GLASS_CARD_CLASS"
         >
-          <figure class="px-4 pt-4">
-            <img
+          <figure :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.pt4]">
+            <img 
               v-if="!screenshotHasError(index)"
               :src="screenshotEndpoint(index)"
               :class="[RADIUS_TOKEN_CLASS.lg]"
               :alt="t('automation.runDetail.screenshotAlt', { index: index + 1 })"
               @error="markScreenshotError(index)"
             />
-            <div
+            <div 
               v-else
               class="border border-dashed border-base-content/30 text-secondary" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm, RADIUS_TOKEN_CLASS.lg]"
               role="status"
@@ -48,8 +48,8 @@ const { t } = useI18n();
               {{ t("automation.runDetail.screenshotLoadError", { index: index + 1 }) }}
             </div>
           </figure>
-          <div class="card-body px-4 py-3">
-            <a
+          <div class="card-body" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+            <a 
               class="link link-primary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
               :href="screenshotEndpoint(index)"
               target="_blank"

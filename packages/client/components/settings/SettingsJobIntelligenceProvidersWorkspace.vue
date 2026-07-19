@@ -48,7 +48,7 @@ const sourceCollectionCount = computed(
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
         :description="t('settings.jobIntelligence.providersDescription')"
@@ -58,14 +58,14 @@ const sourceCollectionCount = computed(
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
               {{ configuredSourceCount }}/3
             </span>
-            <span
+            <span 
               v-if="providerSaveStateLabelKey"
               class="badge badge-sm"
               :class="getSaveStateBadgeClass(providerSaveState)"
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button
+            <button 
               class="btn btn-primary btn-sm"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"
@@ -81,19 +81,19 @@ const sourceCollectionCount = computed(
       </SettingsPanelHeader>
 
       <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summarySourcesDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summaryCollectionsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ sourceCollectionCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summaryCollectionsDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.defaultsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ jobProviderForm.providerTimeoutMs }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.defaultsDescription") }}</div>
@@ -112,7 +112,7 @@ const sourceCollectionCount = computed(
           <SectionGrid grid-token="twoColumnWide">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.providerTimeoutLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.providerTimeoutMs"
                 :aria-label="t('settings.jobIntelligence.providerTimeoutLabel')"
                 type="number"
@@ -124,7 +124,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.companyLimitLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.companyBoardResultLimit"
                 :aria-label="t('settings.jobIntelligence.companyLimitLabel')"
                 type="number"
@@ -136,7 +136,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.gamingLimitLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.gamingBoardResultLimit"
                 :aria-label="t('settings.jobIntelligence.gamingLimitLabel')"
                 type="number"
@@ -148,7 +148,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.unknownLocationLabel") }}</legend>
-              <input
+              <input 
                 v-model="jobProviderForm.unknownLocationLabel"
                 :aria-label="t('settings.jobIntelligence.unknownLocationLabel')"
                 type="text"
@@ -158,7 +158,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.unknownCompanyLabel") }}</legend>
-              <input
+              <input 
                 v-model="jobProviderForm.unknownCompanyLabel"
                 :aria-label="t('settings.jobIntelligence.unknownCompanyLabel')"
                 type="text"
@@ -168,11 +168,11 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100 px-4 py-3" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
                 <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>
-                <input
+                <input 
                   v-model="jobProviderForm.hitmarkerEnabled"
                   :aria-label="t('settings.jobIntelligence.hitmarkerEnabledLabel')"
                   type="checkbox"

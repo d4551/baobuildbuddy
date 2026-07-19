@@ -28,7 +28,7 @@ const formData = defineModel<{
       <SectionGrid grid-token="threeColumnMd">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.companyLegend") }}</legend>
-          <input
+          <input 
             v-model="formData.company"
             type="text"
             :minlength="COVER_LETTER_COMPANY_MIN_LENGTH"
@@ -43,7 +43,7 @@ const formData = defineModel<{
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.positionLegend") }}</legend>
-          <input
+          <input 
             v-model="formData.position"
             type="text"
             :minlength="COVER_LETTER_POSITION_MIN_LENGTH"
@@ -58,7 +58,7 @@ const formData = defineModel<{
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.templateLegend") }}</legend>
-          <select
+          <select 
             v-model="formData.template"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('coverLetterDetailPage.details.templateAria')"

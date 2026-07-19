@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
-import { FLEX_GAP_TOKEN_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+} from "~/constants/layout";
 import { AUTOMATION_COVERAGE_ITEMS, type AutomationCoverageItem } from "./automation-visuals";
 
 const props = defineProps<{
@@ -28,20 +33,18 @@ function resolveCoverageClass(item: AutomationCoverageItem): string {
 </script>
 
 <template>
-  <div
+  <div 
     class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
     :aria-label="t('automation.hub.audit.coverageAria')"
   >
-    <span
+    <span 
       v-for="item in AUTOMATION_COVERAGE_ITEMS"
       :key="item.id"
       class="tooltip tooltip-bottom"
       :data-tip="t(item.labelKey)"
     >
-      <span
-        class="inline-flex h-8 w-8 items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, resolveCoverageClass(item)]"
-      >
-        <component :is="resolveAppIconComponent(item.iconName)" class="h-4 w-4" aria-hidden="true" />
+      <span class="inline-flex items-center justify-center border" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, resolveCoverageClass(item), ICON_SIZE_CLASS[8]]">
+        <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(item.iconName)" aria-hidden="true"/>
         <span class="sr-only">{{ t(item.labelKey) }}</span>
       </span>
     </span>

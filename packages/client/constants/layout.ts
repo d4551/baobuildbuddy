@@ -174,6 +174,7 @@ export const ICON_SIZE_CLASS = {
   "4": "h-4 w-4",
   "5": "h-5 w-5",
   "6": "h-6 w-6",
+  "8": "h-8 w-8",
   "10": "h-10 w-10",
   "12": "h-12 w-12",
   "14": "h-14 w-14",
@@ -370,9 +371,7 @@ export const AUTH_CARD_MAX_WIDTH_CLASS = "max-w-md";
 /** Error/empty page content max-width. */
 export const ERROR_PAGE_MAX_WIDTH_CLASS = "max-w-lg";
 
-// ── Extended token scale (split to keep file under 400 lines) ───────
-// All consumers still import from ~/constants/layout — we re-export from
-// layout-tokens.ts so the public API is unchanged.
+/** Re-export extended tokens from layout-tokens (public API stays ~/constants/layout). */
 export {
   FLEX_GAP_TOKEN_CLASS,
   type FlexGapToken,
@@ -384,8 +383,12 @@ export {
   type HeightToken,
   MARGIN_TOKEN_CLASS,
   type MarginToken,
+  MAX_HEIGHT_TOKEN_CLASS,
+  type MaxHeightToken,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
+  SCROLL_MARGIN_TOKEN_CLASS,
+  type ScrollMarginToken,
   STACK_SPACE_Y_TOKEN_CLASS,
   type StackSpaceYToken,
   SVG_STROKE_WIDTH_DEFAULT,

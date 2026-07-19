@@ -51,7 +51,7 @@ const { t } = useI18n();
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("jobsPage.locationLegend") }}</legend>
-          <input
+          <input 
             v-model="location"
             type="text"
             :placeholder="t('jobsPage.locationPlaceholder')"
@@ -63,7 +63,7 @@ const { t } = useI18n();
         <fieldset class="fieldset">
           <label class="label cursor-pointer">
             <span class="label">{{ t("jobsPage.remoteOnlyLabel") }}</span>
-            <input
+            <input 
               v-model="remote"
               type="checkbox"
               class="toggle toggle-primary toggle-sm"

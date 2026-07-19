@@ -7,6 +7,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -76,14 +77,8 @@ function handleScheduleInput(event: Event): void {
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="capability.name">
-              <span
-                class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
-              >
-                <component
-                  :is="resolveAppIconComponent(capabilityIconName)"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                />
+              <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName)" aria-hidden="true"/>
                 <span class="sr-only">{{ capability.name }}</span>
               </span>
             </span>
@@ -118,7 +113,7 @@ function handleScheduleInput(event: Event): void {
       <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
-          <div
+          <div 
             class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error']"
           >
             {{ capabilityAvailabilityLabel(capability) }}
@@ -156,7 +151,7 @@ function handleScheduleInput(event: Event): void {
       </div>
 
       <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="cardRunAria(capability.target)"
           :disabled="pendingAction !== null || !capability.configured"
@@ -168,7 +163,7 @@ function handleScheduleInput(event: Event): void {
       </div>
 
       <div v-if="showOperations && runState !== 'idle'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-        <div
+        <div 
           v-if="runState === 'running'"
           aria-live="polite"
           class="alert alert-info alert-vertical sm:alert-horizontal"
@@ -176,14 +171,14 @@ function handleScheduleInput(event: Event): void {
           <LoadingSpinner size="xs" :label="t('common.loading')" />
           <span>{{ runStateLabel(runState) }}</span>
         </div>
-        <div
+        <div 
           v-else-if="runState === 'success'"
           role="alert"
           class="alert alert-success alert-vertical sm:alert-horizontal"
         >
           <span>{{ runMessage }}</span>
         </div>
-        <div
+        <div 
           v-else-if="runState === 'error'"
           role="alert"
           class="alert alert-error alert-vertical sm:alert-horizontal"
@@ -234,7 +229,7 @@ function handleScheduleInput(event: Event): void {
         </div>
       </details>
 
-      <details
+      <details 
         v-if="showOperations"
         class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
       >
@@ -244,7 +239,7 @@ function handleScheduleInput(event: Event): void {
         <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-            <input
+            <input 
               :value="scheduledRunAt"
               class="input" :class="[FLUID_WIDTH_CLASS]"
               type="datetime-local"
@@ -254,7 +249,7 @@ function handleScheduleInput(event: Event): void {
             <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
           </fieldset>
           <div class="card-actions justify-end">
-            <button
+            <button 
               class="btn btn-outline btn-sm"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
@@ -267,7 +262,7 @@ function handleScheduleInput(event: Event): void {
         </div>
       </details>
 
-      <details
+      <details 
         v-if="showOperations && latestRun"
         class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
       >
@@ -279,7 +274,7 @@ function handleScheduleInput(event: Event): void {
             {{ latestRunStatusText(capability.target) }}
           </p>
           <div class="card-actions justify-end">
-            <NuxtLink
+            <NuxtLink 
               :to="buildRunDetailRoute(latestRun.id)"
               class="btn btn-ghost btn-sm"
               :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"

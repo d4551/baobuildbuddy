@@ -3,6 +3,7 @@ import type { ResumeData } from "@bao/shared/types/resume";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -16,21 +17,19 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 p-8 text-base-content print:rounded-none print:border-0 print:p-0 print:" :class="[SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.none]"
-  >
-    <div class="mb-8 border-b-2 border-base-content/30 pb-4 text-center">
-      <h2 class="mb-2 text-4xl font-bold">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
+  <div class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 text-base-content print:rounded-none print:border-0 print:p-0 print:" :class="[SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.none, PADDING_TOKEN_CLASS.p8]">
+    <div class="border-b-2 border-base-content/30 pb-4 text-center" :class="[MARGIN_TOKEN_CLASS.mb8]">
+      <h2 class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
       <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4, TYPOGRAPHY_SCALE_CLASS.sm]">
         <span v-if="resume.personalInfo?.email">{{ resume.personalInfo.email }}</span>
         <span v-if="resume.personalInfo?.phone">{{ resume.personalInfo.phone }}</span>
         <span v-if="resume.personalInfo?.location">{{ resume.personalInfo.location }}</span>
       </div>
-      <div
+      <div 
         v-if="resume.personalInfo?.linkedIn || resume.personalInfo?.portfolio"
         class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4, MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
-        <a
+        <a 
           v-if="resume.personalInfo?.linkedIn"
           :href="resume.personalInfo.linkedIn"
           class="link link-hover"
@@ -40,7 +39,7 @@ defineProps<{
         >
           {{ t("resumePreview.linkedin") }}
         </a>
-        <a
+        <a 
           v-if="resume.personalInfo?.portfolio"
           :href="resume.personalInfo.portfolio"
           class="link link-hover"
@@ -53,14 +52,14 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="resume.summary" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-summary-title" :title="t('resumePage.personal.summaryLegend')" extra-class="mb-3" />
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="resume.summary">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-summary-title" :title="t('resumePage.personal.summaryLegend')" extra-/>
       <p class="leading-relaxed" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
     </div>
 
-    <div v-if="resume.experience?.length" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-experience-title" :title="t('resumePage.experience.title')" extra-class="mb-3" />
-      <div
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="resume.experience?.length">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-experience-title" :title="t('resumePage.experience.title')" extra-/>
+      <div 
         v-for="(experience, index) in resume.experience"
         :key="`${experience.company}-${experience.title}-${index}`"
         :class="[MARGIN_TOKEN_CLASS.mb4]"
@@ -81,13 +80,9 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="resume.education?.length" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-education-title" :title="t('resumePage.education.title')" extra-class="mb-3" />
-      <div
-        v-for="(education, index) in resume.education"
-        :key="`${education.school}-${education.degree}-${index}`"
-        class="mb-3"
-      >
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="resume.education?.length">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-education-title" :title="t('resumePage.education.title')" extra-/>
+      <div :class="[MARGIN_TOKEN_CLASS.mb3]" v-for="(education, index) in resume.education" :key="`${education.school}-${education.degree}-${index}`">
         <div class="flex items-start justify-between">
           <div>
             <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ education.degree }}</h3>
@@ -101,42 +96,38 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="displaySkills.length" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-skills-title" :title="t('resumePage.skills.title')" extra-class="mb-3" />
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="displaySkills.length">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-skills-title" :title="t('resumePage.skills.title')" extra-/>
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline px-3 py-3" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+        <span class="badge badge-outline" v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3]">
           {{ skill }}
         </span>
       </div>
     </div>
 
-    <div v-if="resume.projects?.length" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-projects-title" :title="t('resumePage.projects.title')" extra-class="mb-3" />
-      <div v-for="(project, index) in resume.projects" :key="`${project.title}-${index}`" class="mb-3">
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="resume.projects?.length">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-projects-title" :title="t('resumePage.projects.title')" extra-/>
+      <div :class="[MARGIN_TOKEN_CLASS.mb3]" v-for="(project, index) in resume.projects" :key="`${project.title}-${index}`">
         <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ project.title }}</h3>
         <p v-if="project.link" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.link }}</p>
         <p class="leading-relaxed" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
       </div>
     </div>
 
-    <div v-if="hasGamingExperience" class="mb-6">
-      <PageHeaderBlock title-id="resume-preview-gaming-title" :title="t('resumePage.gaming.title')" extra-class="mb-3" />
-      <div v-if="resume.gamingExperience?.gameEngines" class="mb-2">
+    <div :class="[MARGIN_TOKEN_CLASS.mb6]" v-if="hasGamingExperience">
+      <PageHeaderBlock :class="[MARGIN_TOKEN_CLASS.mb3]" title-id="resume-preview-gaming-title" :title="t('resumePage.gaming.title')" extra-/>
+      <div :class="[MARGIN_TOKEN_CLASS.mb2]" v-if="resume.gamingExperience?.gameEngines">
         <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.gaming.rolesLegend") }}:</p>
         <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.gamingExperience.gameEngines }}</p>
       </div>
-      <div v-if="resume.gamingExperience?.genres" class="mb-2">
+      <div :class="[MARGIN_TOKEN_CLASS.mb2]" v-if="resume.gamingExperience?.genres">
         <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.gaming.genresLegend") }}:</p>
         <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.gamingExperience.genres }}</p>
       </div>
       <div v-if="resume.gamingExperience?.shippedTitles">
         <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.gaming.achievementsLegend") }}:</p>
         <ul class="list" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-          <li
-            v-for="(achievement, index) in resume.gamingExperience.shippedTitles.split(';')"
-            :key="`${achievement}-${index}`"
-            class="list-row px-0 py-1"
-          >
+          <li class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py1]" v-for="(achievement, index) in resume.gamingExperience.shippedTitles.split(';')" :key="`${achievement}-${index}`">
             {{ achievement.trim() }}
           </li>
         </ul>

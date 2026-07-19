@@ -43,7 +43,7 @@ const { t } = useI18n();
         :description="t('settings.emailDelivery.subtitle')"
       >
         <template #meta>
-          <span
+          <span 
             class="badge"
             :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
           >
@@ -61,7 +61,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">
             {{ t("settings.emailDelivery.hostLegend") }}
           </legend>
-          <input
+          <input 
             v-model="emailTransportForm.host"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             type="text"
@@ -75,7 +75,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.portLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="emailTransportForm.port"
               class="input" :class="[FLUID_WIDTH_CLASS]"
               type="number"
@@ -89,7 +89,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.timeoutLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="emailTransportForm.connectionTimeoutSeconds"
               class="input" :class="[FLUID_WIDTH_CLASS]"
               type="number"
@@ -105,7 +105,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.securityLegend") }}
             </legend>
-            <select
+            <select 
               v-model="emailTransportForm.security"
               class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.emailDelivery.securityAria')"
@@ -124,7 +124,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.authLegend") }}
             </legend>
-            <select
+            <select 
               v-model="emailTransportForm.authMethod"
               class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.emailDelivery.authAria')"
@@ -145,7 +145,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.usernameLegend") }}
             </legend>
-            <input
+            <input 
               v-model="emailTransportForm.username"
               class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
@@ -160,7 +160,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.emailDelivery.fromNameLegend") }}
             </legend>
-            <input
+            <input 
               v-model="emailTransportForm.fromName"
               class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
@@ -178,7 +178,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">
             {{ t("settings.emailDelivery.fromEmailLegend") }}
           </legend>
-          <input
+          <input 
             v-model="emailTransportForm.fromEmail"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             type="email"
@@ -196,7 +196,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">
             {{ t("settings.emailDelivery.passwordLegend") }}
           </legend>
-          <input
+          <input 
             v-model="emailTransportPasswordDraft"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             type="password"
@@ -214,7 +214,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-        <button
+        <button 
           class="btn btn-outline"
           :disabled="!hasStoredPassword"
           :aria-label="t('settings.emailDelivery.clearPasswordAria')"
@@ -222,14 +222,14 @@ const { t } = useI18n();
         >
           {{ t("settings.emailDelivery.clearPasswordButton") }}
         </button>
-        <button
+        <button 
           class="btn btn-secondary"
           :aria-label="t('settings.emailDelivery.savePasswordAria')"
           @click="emit('savePassword')"
         >
           {{ t("settings.emailDelivery.savePasswordButton") }}
         </button>
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="t('settings.emailDelivery.saveAria')"
           @click="emit('saveSettings')"

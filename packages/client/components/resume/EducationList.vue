@@ -63,7 +63,7 @@ function removeEducation(index: number): void {
   <div class="card-body">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.education.addButtonAria')"
         @click="addEducation"
@@ -72,7 +72,7 @@ function removeEducation(index: number): void {
       </button>
     </div>
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div
+      <div 
         v-for="(education, index) in localValue"
         :key="`${education.school}-${education.degree}-${index}`"
         :class="SURFACE_GLASS_CARD_CLASS"
@@ -82,7 +82,7 @@ function removeEducation(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.education.removeButtonAria', { index: index + 1 })"
               @click="removeEducation(index)"
@@ -93,7 +93,7 @@ function removeEducation(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.degreeLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.degree"
                 type="text"
                 required
@@ -106,7 +106,7 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.schoolLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.school"
                 type="text"
                 required
@@ -119,7 +119,7 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.locationLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.location"
                 type="text"
                 class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -129,7 +129,7 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.graduationDateLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.graduationDate"
                 type="month"
                 class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -139,7 +139,7 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.gpaLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.gpa"
                 type="text"
                 class="input input-sm" :class="[FLUID_WIDTH_CLASS]"

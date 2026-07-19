@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { SURFACE_GLASS_CARD_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   contentText: string;
@@ -11,7 +17,7 @@ defineProps<{
   <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.preview.title") }}</h2>
-      <div class="border border-base-300 bg-base-100 p-6" :class="[SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg]">
+      <div class="border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg, PADDING_TOKEN_CLASS.p6]">
         <div v-if="contentText.trim().length > 0" class="whitespace-pre-wrap leading-relaxed" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ contentText }}
         </div>

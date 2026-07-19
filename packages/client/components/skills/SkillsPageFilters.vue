@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
@@ -32,10 +33,10 @@ const { t } = useI18n();
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
-        <svg class="h-4 w-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg class="text-muted" :class="[ICON_SIZE_CLASS[4]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <input
+        <input 
           v-model="searchFilter"
           class="grow"
           type="text"
@@ -45,7 +46,7 @@ const { t } = useI18n();
       </label>
 
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" role="radiogroup" :aria-label="t('skillsPage.filters.categoryGroupAria')">
-        <button
+        <button 
           type="button"
           class="btn btn-sm btn-ghost"
           :class="categoryFilter === SKILLS_FILTER_ALL_VALUE ? 'btn-primary' : 'btn-ghost'"
@@ -55,7 +56,7 @@ const { t } = useI18n();
         >
           {{ t("skillsPage.filters.allButton") }}
         </button>
-        <button
+        <button 
           v-for="categoryOption in categoryOptions"
           :key="categoryOption.value"
           type="button"
@@ -70,7 +71,7 @@ const { t } = useI18n();
       </div>
 
       <div class="flex justify-end">
-        <button
+        <button 
           class="btn btn-ghost btn-sm"
           :disabled="!hasActiveFilters"
           :aria-label="t('skillsPage.filters.clearAria')"

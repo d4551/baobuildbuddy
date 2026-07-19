@@ -26,14 +26,14 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div
+  <div 
     :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'glass-interactive ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <div
+        <div 
           :class="[ACHIEVEMENT_ICON_BADGE_CLASS, achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-muted']"
         >
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">

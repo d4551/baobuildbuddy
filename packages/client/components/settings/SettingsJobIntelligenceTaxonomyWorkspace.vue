@@ -4,6 +4,7 @@ import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  MIN_HEIGHT_EDITOR_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -35,7 +36,7 @@ const populatedTaxonomyCount = computed(
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
         :description="t('settings.jobIntelligence.taxonomyDescription')"
@@ -45,14 +46,14 @@ const populatedTaxonomyCount = computed(
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summaryTaxonomyTitle')">
               {{ populatedTaxonomyCount }}/2
             </span>
-            <span
+            <span 
               v-if="taxonomySaveStateLabelKey"
               class="badge badge-sm"
               :class="getSaveStateBadgeClass(taxonomySaveState)"
             >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
-            <button
+            <button 
               class="btn btn-secondary btn-sm"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"
@@ -79,11 +80,7 @@ const populatedTaxonomyCount = computed(
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.keywordsJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.keywordsJson" :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>
@@ -99,11 +96,7 @@ const populatedTaxonomyCount = computed(
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.studioRulesJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.studioRulesJson" :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>

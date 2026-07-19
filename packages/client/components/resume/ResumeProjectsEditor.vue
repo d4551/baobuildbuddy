@@ -62,7 +62,7 @@ function removeProject(index: number): void {
   <div class="card-body">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.projects.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.projects.addButtonAria')"
         @click="addProject"
@@ -71,7 +71,7 @@ function removeProject(index: number): void {
       </button>
     </div>
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div
+      <div 
         v-for="(project, index) in localValue"
         :key="`${project.name}-${index}`"
         :class="SURFACE_GLASS_CARD_CLASS"
@@ -81,7 +81,7 @@ function removeProject(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.projects.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.projects.removeButtonAria', { index: index + 1 })"
               @click="removeProject(index)"
@@ -92,7 +92,7 @@ function removeProject(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.projects.nameLegend") }}</legend>
-              <input
+              <input 
                 v-model="project.name"
                 type="text"
                 required
@@ -105,7 +105,7 @@ function removeProject(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.projects.urlLegend") }}</legend>
-              <input
+              <input 
                 v-model="project.url"
                 type="url"
                 class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
@@ -116,7 +116,7 @@ function removeProject(index: number): void {
           </SectionGrid>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.projects.descriptionLegend") }}</legend>
-            <textarea
+            <textarea 
               v-model="project.description"
               required
               minlength="20"

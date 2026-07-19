@@ -50,7 +50,7 @@ const { t } = useI18n();
               </p>
             </div>
           </div>
-          <progress
+          <progress 
             class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
@@ -62,7 +62,7 @@ const { t } = useI18n();
         </div>
 
         <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-          <UiRadialMeter
+          <UiRadialMeter 
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
             :size-class="ICON_SIZE_CLASS['20']"

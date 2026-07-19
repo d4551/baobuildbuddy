@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -32,7 +35,7 @@ const brandForm = defineModel<{
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.identityDescription") }}
       </p>
@@ -42,7 +45,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.nameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.name"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.nameAria')"
@@ -53,7 +56,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.assistantNameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.assistantName"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.assistantNameAria')"
@@ -64,7 +67,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.apiNameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.apiName"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.apiNameAria')"
@@ -75,7 +78,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.taglineLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.tagline"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.taglineAria')"
@@ -86,7 +89,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.logoPathLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.logoPath"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :placeholder="t('settings.brand.assetPathPlaceholder')"
@@ -102,7 +105,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.faviconPathLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.faviconPath"
             class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :placeholder="t('settings.brand.assetPathPlaceholder')"

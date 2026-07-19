@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_TEXT_MD_3XL_CLASS,
+  RESPONSIVE_TEXT_XL_4XL_CLASS,
+} from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -28,7 +32,7 @@ const { t } = useI18n();
         <div class="badge badge-primary badge-soft w-fit">
           {{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}
         </div>
-        <h2 class="card-title md:text-3xl xl:text-4xl" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, TYPOGRAPHY_SCALE_CLASS.xl3]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, RESPONSIVE_TEXT_MD_3XL_CLASS, RESPONSIVE_TEXT_XL_4XL_CLASS]">
           {{ welcomeHeading }}
         </h2>
         <p class="text-base text-secondary">

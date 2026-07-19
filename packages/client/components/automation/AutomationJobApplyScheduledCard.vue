@@ -32,7 +32,7 @@ const { t } = useI18n();
             }}
           </p>
           <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.statusLabel", { status: run.status }) }}</p>
-          <NuxtLink
+          <NuxtLink 
             :to="runDetailRoute(run.id)"
             class="link link-primary link-hover"
             :aria-label="t('automation.jobApply.openRunDetailAria', { id: run.id })"

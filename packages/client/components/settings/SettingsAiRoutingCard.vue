@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
-import { SURFACE_GLASS_CARD_CLASS,
+import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  MIN_WIDTH_FORM_COL_CLASS,
+  MIN_WIDTH_SELECT_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -65,11 +68,7 @@ const emit = defineEmits<{
                 </div>
               </th>
               <td class="align-top">
-                <select
-                  v-model="aiRoutingDraft[section.id].provider"
-                  class="select select-sm min-w-40" :class="[FLUID_WIDTH_CLASS]"
-                  :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
-                >
+                <select class="select select-sm" v-model="aiRoutingDraft[section.id].provider" :class="[FLUID_WIDTH_CLASS, MIN_WIDTH_FORM_COL_CLASS]" :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })">
                   <option
                     v-for="provider in providerInputs"
                     :key="`${section.id}-${provider.id}`"
@@ -81,14 +80,7 @@ const emit = defineEmits<{
               </td>
               <td class="align-top">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-                  <input
-                    v-model="aiRoutingDraft[section.id].model"
-                    :list="`routing-model-options-${section.id}`"
-                    type="text"
-                    class="input input-sm min-w-52" :class="[FLUID_WIDTH_CLASS]"
-                    :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
-                    :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
-                  />
+                  <input class="input input-sm" v-model="aiRoutingDraft[section.id].model" :list="`routing-model-options-${section.id}`" type="text" :class="[FLUID_WIDTH_CLASS, MIN_WIDTH_SELECT_CLASS]" :placeholder="t('settings.aiProviders.purposeModelPlaceholder')" :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"/>
                   <datalist :id="`routing-model-options-${section.id}`">
                     <option
                       v-for="model in routingModelOptions[section.id]"

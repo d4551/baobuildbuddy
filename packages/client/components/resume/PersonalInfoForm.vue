@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -34,12 +35,12 @@ function emitValue(): void {
 </script>
 
 <template>
-  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p6]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.personal.title") }}</h2>
     <SectionGrid grid-token="twoColumn">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.fullNameLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.name"
           type="text"
           required
@@ -52,7 +53,7 @@ function emitValue(): void {
       </fieldset>
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.emailLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.email"
           type="email"
           required
@@ -64,7 +65,7 @@ function emitValue(): void {
       </fieldset>
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.phoneLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.phone"
           type="tel"
           pattern="^[+0-9()\\-\\s]{7,20}$"
@@ -76,7 +77,7 @@ function emitValue(): void {
       </fieldset>
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.locationLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.location"
           type="text"
           class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -86,7 +87,7 @@ function emitValue(): void {
       </fieldset>
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.linkedInLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.linkedIn"
           type="url"
           class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -96,7 +97,7 @@ function emitValue(): void {
       </fieldset>
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.personal.portfolioLegend") }}</legend>
-        <input
+        <input 
           v-model="localValue.portfolio"
           type="url"
           class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -107,7 +108,7 @@ function emitValue(): void {
     </SectionGrid>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.personal.summaryLegend") }}</legend>
-      <textarea
+      <textarea 
         v-model="localValue.summary"
         required
         minlength="50"
