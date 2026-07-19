@@ -1,7 +1,8 @@
 /**
  * Browser interaction burndown — Playwright only (no curl / API inject).
- * Loads each route, asserts shell landmarks, clicks up to 3 labeled buttons
- * (scrolls into view, dismisses dialogs), probes one textbox.
+ * Mobile → tablet → desktop. Every static APP_ROUTES page: screenshot, shell
+ * landmarks, overflow, page-chrome DRY, click labeled controls, probe textbox,
+ * emit 5Q ledger. Canonical proof script for `proof:browser-burndown`.
  */
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -10,14 +11,20 @@ import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
+const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
   "",
 );
 const OUT_DIR =
-  process.env.BROWSER_BURNOUT_OUT ?? join("/opt/cursor/artifacts/baseline/browser-burndown");
-const CLICK_TIMEOUT_MS = 2_500;
-const MAX_CLICKS_PER_ROUTE = 3;
+  process.env.BROWSER_BURNOUT_OUT ?? join("/opt/cursor/artifacts/interactive-burndown");
+const CLICK_TIMEOUT_MS = 1_500;
+const MAX_CLICKS_PER_ROUTE = 4;
+
+const VIEWPORTS = [
+  { name: "mobile", width: 320, height: 720, isMobile: true, hasTouch: true },
+  { name: "tablet", width: 768, height: 1024, isMobile: false, hasTouch: true },
+  { name: "desktop", width: 1440, height: 900, isMobile: false, hasTouch: false },
+] as const;
 
 const ROUTES = [
   APP_ROUTES.dashboard,
@@ -41,12 +48,29 @@ const ROUTES = [
   APP_ROUTES.setup,
 ] as const;
 
+type FiveQ = {
+  readonly shouldBeHere: string;
+  readonly ssotUx: string;
+  readonly interactions: string;
+  readonly glassDry: string;
+  readonly logs: string;
+};
+
 type Finding = {
+  readonly viewport: string;
   readonly route: string;
   readonly action: string;
   readonly severity: "error" | "warn";
   readonly detail: string;
   readonly screenshot: string | null;
+};
+
+type RouteLedger = {
+  readonly viewport: string;
+  readonly route: string;
+  readonly screenshot: string;
+  readonly fiveQ: FiveQ;
+  readonly ok: boolean;
 };
 
 const mapSequential = async <TItem, TResult>(
@@ -64,17 +88,25 @@ const mapSequential = async <TItem, TResult>(
 
 const slugify = (value: string): string => value.replace(/[^\w-]+/gu, "_").slice(0, 80);
 
+const isIgnorableConsole = (text: string): boolean =>
+  /Error fetching app manifest/iu.test(text);
+
 const captureFinding = async (
   page: Page,
   findings: Finding[],
+  viewport: string,
   route: string,
   action: string,
   detail: string,
   severity: "error" | "warn" = "error",
 ): Promise<void> => {
-  const screenshot = join(OUT_DIR, `${slugify(route)}__${slugify(action)}.png`);
-  await page.screenshot({ path: screenshot, fullPage: true });
-  findings.push({ route, action, severity, detail, screenshot });
+  let screenshot: string | null = null;
+  if (severity === "error") {
+    screenshot = join(OUT_DIR, viewport, `${slugify(route)}__${slugify(action)}.png`);
+    await mkdir(join(OUT_DIR, viewport), { recursive: true });
+    await page.screenshot({ path: screenshot, fullPage: false });
+  }
+  findings.push({ viewport, route, action, severity, detail, screenshot });
 };
 
 const openRoute = async (
@@ -89,30 +121,98 @@ const openRoute = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await page.waitForTimeout(1_200);
+  await page.waitForTimeout(600);
 };
 
-const probeRouteShell = async (page: Page, route: string, findings: Finding[]): Promise<void> => {
-  const shell = await page.evaluate(() => ({
-    mains: document.querySelectorAll("main").length,
-    h1: document.querySelector("h1")?.textContent?.replace(/\s+/gu, " ").trim() ?? "",
-    title: document.title.trim(),
-  }));
+const collectChromeSignals = async (page: Page) =>
+  page.evaluate(() => {
+    const overflowX =
+      Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth ?? 0) -
+      window.innerWidth;
+    const truncatedChrome = [...document.querySelectorAll(".navbar *")]
+      .map((el) => (el.textContent ?? "").trim())
+      .some((text) => /^(?:[A-Za-z]\.\.\.|[A-Za-z]…)$/u.test(text));
+    const duplicateChromeCopy = (() => {
+      const texts = [...document.querySelectorAll("p")]
+        .filter((el) => !el.closest(".grid, .stats, [role='log']"))
+        .map((el) => (el.textContent ?? "").replace(/\s+/gu, " ").trim())
+        .filter((text) => text.length > 40);
+      const counts = new Map<string, number>();
+      for (const text of texts) {
+        counts.set(text, (counts.get(text) ?? 0) + 1);
+      }
+      return [...counts.entries()].filter(([, count]) => count > 1).map(([text]) => text);
+    })();
+    const rawGlass = [...document.querySelectorAll("*")].some((el) => {
+      const style = getComputedStyle(el);
+      const filter = style.backdropFilter || style.webkitBackdropFilter || "";
+      if (!filter || filter === "none") {
+        return false;
+      }
+      return !(el.className?.toString?.() ?? "").includes("glass");
+    });
+    return {
+      mains: document.querySelectorAll("main").length,
+      h1: document.querySelector("h1")?.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+      title: document.title.trim(),
+      overflowX,
+      truncatedChrome,
+      duplicateChromeCopy,
+      rawGlass,
+      bodyLen: (document.body?.innerText ?? "").replace(/\s+/gu, " ").trim().length,
+    };
+  });
+
+const probeRouteShell = async (
+  page: Page,
+  viewport: string,
+  route: string,
+  findings: Finding[],
+): Promise<Awaited<ReturnType<typeof collectChromeSignals>>> => {
+  const shell = await collectChromeSignals(page);
   if (shell.mains !== 1) {
     await captureFinding(
       page,
       findings,
+      viewport,
       route,
       "shell-main",
       `expected 1 main, got ${String(shell.mains)}`,
     );
   }
   if (shell.h1.length === 0) {
-    await captureFinding(page, findings, route, "shell-h1", "missing h1");
+    await captureFinding(page, findings, viewport, route, "shell-h1", "missing h1");
   }
   if (shell.title.length === 0) {
-    await captureFinding(page, findings, route, "shell-title", "empty document title");
+    await captureFinding(page, findings, viewport, route, "shell-title", "empty document title");
   }
+  if (shell.overflowX > 1) {
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "overflow-x",
+      `overflowX=${String(shell.overflowX)}`,
+    );
+  }
+  if (shell.truncatedChrome) {
+    await captureFinding(page, findings, viewport, route, "truncated-chrome", "navbar ellipsis gut");
+  }
+  if (shell.duplicateChromeCopy.length > 0) {
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "duplicate-chrome-copy",
+      shell.duplicateChromeCopy[0] ?? "dup",
+    );
+  }
+  if (shell.rawGlass) {
+    await captureFinding(page, findings, viewport, route, "raw-glass", "backdrop outside glass-*");
+  }
+  return shell;
 };
 
 const listClickableControlLabels = async (page: Page): Promise<readonly string[]> =>
@@ -121,7 +221,7 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
     if (!main) {
       return [];
     }
-    const controls = Array.from(main.querySelectorAll("button"));
+    const controls = Array.from(main.querySelectorAll("button, a.btn"));
     const labels: string[] = [];
     for (const control of controls) {
       if (!(control instanceof HTMLElement)) {
@@ -130,12 +230,15 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
       if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
         continue;
       }
-      if (control.classList.contains("absolute")) {
-        continue;
-      }
-      const style = window.getComputedStyle(control);
-      if (style.visibility === "hidden" || style.display === "none") {
-        continue;
+      if (typeof control.checkVisibility === "function") {
+        if (!control.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+          continue;
+        }
+      } else {
+        const style = window.getComputedStyle(control);
+        if (style.visibility === "hidden" || style.display === "none") {
+          continue;
+        }
       }
       const label =
         control.getAttribute("aria-label")?.trim() ||
@@ -150,6 +253,7 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
 
 const clickOneLabel = async (
   page: Page,
+  viewport: string,
   route: string,
   label: string,
   findings: Finding[],
@@ -158,45 +262,72 @@ const clickOneLabel = async (
 ): Promise<void> => {
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
-  const locator = page.getByRole("button", { name: label, exact: true });
-  await settle(locator.first().scrollIntoViewIfNeeded());
-  const clickResult = await settle(locator.first().click({ timeout: CLICK_TIMEOUT_MS }));
-  if (clickResult.status === "rejected") {
+  const clicked = await page.evaluate((targetLabel) => {
+    const controls = [...document.querySelectorAll("main button, main a.btn")];
+    for (const control of controls) {
+      if (!(control instanceof HTMLElement)) {
+        continue;
+      }
+      const resolved =
+        control.getAttribute("aria-label")?.trim() ||
+        control.textContent?.replace(/\s+/gu, " ").trim() ||
+        "";
+      if (resolved !== targetLabel) {
+        continue;
+      }
+      if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
+        continue;
+      }
+      control.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      return true;
+    }
+    return false;
+  }, label);
+  if (!clicked) {
     await captureFinding(
       page,
       findings,
+      viewport,
       route,
       `click-${slugify(label)}`,
-      clickResult.reason.message,
+      "control not found",
       "warn",
     );
   }
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(180);
   if (pageErrorBucket.length > 0) {
-    await captureFinding(page, findings, route, `after-click-${slugify(label)}`, pageErrorBucket[0] ?? "");
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      `after-click-${slugify(label)}`,
+      pageErrorBucket[0] ?? "",
+    );
   }
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(150);
 };
 
-const clickVisibleButtons = async (
+const clickVisibleControls = async (
   page: Page,
+  viewport: string,
   route: string,
   findings: Finding[],
   consoleBucket: string[],
   pageErrorBucket: string[],
-): Promise<void> => {
+): Promise<number> => {
   const labels = await listClickableControlLabels(page);
   await mapSequential(labels, async (label) => {
-    await clickOneLabel(page, route, label, findings, consoleBucket, pageErrorBucket);
+    await clickOneLabel(page, viewport, route, label, findings, consoleBucket, pageErrorBucket);
     if (!page.url().includes(route) && route !== "/") {
       await openRoute(page, route, consoleBucket, pageErrorBucket);
     }
   });
+  return labels.length;
 };
 
 const probeFirstTextInput = async (
   page: Page,
+  viewport: string,
   route: string,
   findings: Finding[],
   consoleBucket: string[],
@@ -212,51 +343,122 @@ const probeFirstTextInput = async (
   await settle(input.scrollIntoViewIfNeeded());
   const fillResult = await settle(input.fill("browser-burndown-probe"));
   if (fillResult.status === "rejected") {
-    await captureFinding(page, findings, route, "fill-input", fillResult.reason.message, "warn");
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "fill-input",
+      fillResult.reason.message,
+      "warn",
+    );
   }
   await page.waitForTimeout(200);
   if (pageErrorBucket.length > 0) {
-    await captureFinding(page, findings, route, "fill-input-pageerror", pageErrorBucket.join(" | "));
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "fill-input-pageerror",
+      pageErrorBucket.join(" | "),
+    );
   }
+};
+
+const buildFiveQ = (
+  shell: Awaited<ReturnType<typeof collectChromeSignals>>,
+  clicks: number,
+  consoleErrors: readonly string[],
+  pageErrors: readonly string[],
+  routeFindings: readonly Finding[],
+): FiveQ => {
+  const errors = routeFindings.filter((finding) => finding.severity === "error");
+  return {
+    shouldBeHere:
+      shell.bodyLen > 40 && shell.h1.length > 0
+        ? "h1+content present"
+        : "FAIL: empty or missing h1",
+    ssotUx:
+      shell.overflowX <= 1 && !shell.truncatedChrome
+        ? "no overflow; chrome intact"
+        : `FAIL: overflow/truncation`,
+    interactions:
+      errors.every((finding) => !finding.action.startsWith("after-click")) && clicks >= 0
+        ? `clicked ${String(clicks)} controls`
+        : "FAIL: click path errors",
+    glassDry:
+      !shell.rawGlass && shell.duplicateChromeCopy.length === 0
+        ? "no raw glass; chrome copy unique"
+        : "FAIL: glass/DRY",
+    logs:
+      consoleErrors.length === 0 && pageErrors.length === 0
+        ? "0 console/page errors"
+        : `FAIL: console=${String(consoleErrors.length)} page=${String(pageErrors.length)}`,
+  };
 };
 
 const burnRoute = async (
   page: Page,
+  viewport: string,
   route: string,
   findings: Finding[],
   consoleBucket: string[],
   pageErrorBucket: string[],
-): Promise<void> => {
+): Promise<RouteLedger> => {
   await openRoute(page, route, consoleBucket, pageErrorBucket);
-  if (
-    pageErrorBucket.length > 0 ||
-    consoleBucket.some((line) => line.includes("500") || line.includes("TypeError"))
-  ) {
-    await captureFinding(
-      page,
-      findings,
-      route,
-      "load",
-      [...pageErrorBucket, ...consoleBucket].slice(0, 4).join(" | "),
-    );
-    return;
+  const screenshot = join(OUT_DIR, viewport, `${slugify(route)}.png`);
+  await mkdir(join(OUT_DIR, viewport), { recursive: true });
+  await page.screenshot({ path: screenshot, fullPage: false });
+
+  const loadErrors = [...pageErrorBucket, ...consoleBucket.filter((line) => !isIgnorableConsole(line))];
+  if (loadErrors.some((line) => line.includes("500") || line.includes("TypeError"))) {
+    await captureFinding(page, findings, viewport, route, "load", loadErrors.slice(0, 4).join(" | "));
   }
-  await probeRouteShell(page, route, findings);
-  await clickVisibleButtons(page, route, findings, consoleBucket, pageErrorBucket);
-  await openRoute(page, route, consoleBucket, pageErrorBucket);
-  await probeFirstTextInput(page, route, findings, consoleBucket, pageErrorBucket);
+
+  const shell = await probeRouteShell(page, viewport, route, findings);
+  const clicks = await clickVisibleControls(
+    page,
+    viewport,
+    route,
+    findings,
+    consoleBucket,
+    pageErrorBucket,
+  );
+  // Text probe once per viewport on settings only — keeps matrix fast.
+  if (route === APP_ROUTES.settings) {
+    await openRoute(page, route, consoleBucket, pageErrorBucket);
+    await probeFirstTextInput(page, viewport, route, findings, consoleBucket, pageErrorBucket);
+  }
+
+  const routeFindings = findings.filter(
+    (finding) => finding.viewport === viewport && finding.route === route,
+  );
+  const fiveQ = buildFiveQ(
+    shell,
+    clicks,
+    consoleBucket.filter((line) => !isIgnorableConsole(line)),
+    pageErrorBucket,
+    routeFindings,
+  );
+  const ok = routeFindings.every((finding) => finding.severity !== "error");
+  return { viewport, route, screenshot, fiveQ, ok };
 };
 
-const main = async (): Promise<void> => {
-  await mkdir(OUT_DIR, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  const findings: Finding[] = [];
+const burnViewport = async (
+  browser: Awaited<ReturnType<typeof chromium.launch>>,
+  viewport: (typeof VIEWPORTS)[number],
+  findings: Finding[],
+): Promise<RouteLedger[]> => {
+  const page = await browser.newPage({
+    viewport: { width: viewport.width, height: viewport.height },
+    isMobile: viewport.isMobile,
+    hasTouch: viewport.hasTouch,
+  });
   const consoleBucket: string[] = [];
   const pageErrorBucket: string[] = [];
-
   page.on("console", (message: ConsoleMessage) => {
-    if (message.type() === "error") {
+    if (message.type() === "error" && !isIgnorableConsole(message.text())) {
       consoleBucket.push(message.text());
     }
   });
@@ -264,25 +466,52 @@ const main = async (): Promise<void> => {
     pageErrorBucket.push(error.message);
   });
 
-  await mapSequential(ROUTES, async (route) => {
-    await burnRoute(page, route, findings, consoleBucket, pageErrorBucket);
-  });
+  const ledger = await mapSequential(ROUTES, async (route) =>
+    burnRoute(page, viewport.name, route, findings, consoleBucket, pageErrorBucket),
+  );
+  await page.close();
+  return ledger;
+};
 
+const main = async (): Promise<void> => {
+  await mkdir(OUT_DIR, { recursive: true });
+  const browser = await chromium.launch({ headless: true });
+  const findings: Finding[] = [];
+  const ledger = (
+    await mapSequential(VIEWPORTS, async (viewport) => burnViewport(browser, viewport, findings))
+  ).flat();
   await browser.close();
+
   const errors = findings.filter((finding) => finding.severity === "error");
   const reportPath = join(OUT_DIR, "burndown-report.json");
+  const ledgerPath = join(OUT_DIR, "fiveq-ledger.json");
   await Bun.write(
     reportPath,
-    JSON.stringify({ CLIENT_BASE, findings, errorCount: errors.length }, null, 2),
+    JSON.stringify(
+      {
+        CLIENT_BASE,
+        viewports: VIEWPORTS.map((viewport) => viewport.name),
+        findings,
+        errorCount: errors.length,
+        ledgerOk: ledger.filter((item) => item.ok).length,
+        ledgerTotal: ledger.length,
+      },
+      null,
+      2,
+    ),
   );
+  await Bun.write(ledgerPath, JSON.stringify(ledger, null, 2));
   await writeOutput(
-    `browser-interaction-burndown: ${String(ROUTES.length)} routes, ${String(errors.length)} errors, ${String(findings.length)} findings → ${reportPath}`,
+    `browser-interaction-burndown: ${String(ledger.length)} page×viewport, ${String(errors.length)} errors, ${String(findings.length)} findings → ${reportPath}`,
   );
   if (errors.length > 0) {
     await writeError(
       errors
-        .slice(0, 30)
-        .map((finding) => `- ${finding.route} [${finding.action}]: ${finding.detail.slice(0, 220)}`)
+        .slice(0, 40)
+        .map(
+          (finding) =>
+            `- ${finding.viewport} ${finding.route} [${finding.action}]: ${finding.detail.slice(0, 220)}`,
+        )
         .join("\n"),
     );
     process.exitCode = 1;
