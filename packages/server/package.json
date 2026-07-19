@@ -27,7 +27,7 @@
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "build": "rm -rf dist && bun build src/index.ts --outdir dist --target bun",
-    "build:types": "bun --bun ../../node_modules/@typescript/native/bin/tsc --emitDeclarationOnly --declarationMap false --outDir dist-types",
+    "build:types": "bun --bun ../../node_modules/@typescript/native/bin/tsc --project tsconfig.build.json --emitDeclarationOnly --declarationMap false --outDir dist-types",
     "typecheck": "bun --bun ../../node_modules/@typescript/native/bin/tsc --noEmit",
     "test": "bun test src",
     "db:generate": "bun --bun run drizzle-kit generate",

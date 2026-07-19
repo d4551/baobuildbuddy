@@ -1,4 +1,5 @@
 import { collectProjectFileEntries } from "./utils/validation-helpers";
+import { writeOutput } from "./utils/cli-output";
 
 const files = await collectProjectFileEntries({
   scanRoots: ["packages/client"],
@@ -27,6 +28,6 @@ for (const { filePath, content } of files) {
 }
 
 for (const hit of hits) {
-  console.log(`${hit.file}: ${hit.reason}`);
+  await writeOutput(`${hit.file}: ${hit.reason}`);
 }
-console.log(`Total: ${hits.length}`);
+await writeOutput(`Total: ${hits.length}`);
