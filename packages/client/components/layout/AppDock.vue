@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS } from "~/constants/layout";
+import {
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  SHELL_DOCK_CLASS,
+} from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getDockNavigationItems, isRouteActive } from "~/constants/navigation";
 
@@ -24,7 +28,7 @@ function isDockItemActive(item: NavigationItem): boolean {
 </script>
 
 <template>
-  <nav class="dock glass-clear border-t border-base-300 lg:hidden" :aria-label="t('a11y.mobilePrimaryNavigation')">
+  <nav :class="SHELL_DOCK_CLASS" :aria-label="t('a11y.mobilePrimaryNavigation')">
     <NuxtLink 
       v-for="item in dockItems"
       :key="item.id"

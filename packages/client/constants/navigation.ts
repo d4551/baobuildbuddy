@@ -85,7 +85,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
     to: APP_ROUTES.interview,
     includeInSidebar: true,
-    includeInDock: false,
+    includeInDock: true,
   },
   {
     id: "skills",
@@ -120,7 +120,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
     to: APP_ROUTES.aiChat,
     includeInSidebar: true,
-    includeInDock: true,
+    includeInDock: false,
   },
   {
     id: "automation",
@@ -129,7 +129,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
     to: APP_ROUTES.automation,
     includeInSidebar: true,
-    includeInDock: true,
+    includeInDock: false,
   },
   {
     id: "apiDocs",
@@ -138,7 +138,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M19 2H9a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V8l-7-7z M9 2h5l5 5v13a1 1 0 01-1 1H9a1 1 0 01-1-1V3a1 1 0 01 1-1z",
     to: APP_ROUTES.apiDocs,
     includeInSidebar: true,
-    includeInDock: true,
+    includeInDock: false,
   },
   {
     id: "gamification",
@@ -170,12 +170,18 @@ export function getSidebarNavigationItems(): readonly NavigationItem[] {
 }
 
 /**
+ * Apple HIG–aligned mobile dock cap (3–5 primary destinations).
+ * Enforced so dock labels never truncate into unreadable chrome.
+ */
+export const MOBILE_DOCK_MAX_ITEMS = 5;
+
+/**
  * Returns navigation items rendered in the mobile dock.
  *
- * @returns Mobile dock navigation item collection.
+ * @returns Mobile dock navigation item collection (≤ {@link MOBILE_DOCK_MAX_ITEMS}).
  */
 export function getDockNavigationItems(): readonly NavigationItem[] {
-  return NAVIGATION_ITEMS.filter((item) => item.includeInDock);
+  return NAVIGATION_ITEMS.filter((item) => item.includeInDock).slice(0, MOBILE_DOCK_MAX_ITEMS);
 }
 
 /**

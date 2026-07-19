@@ -48,7 +48,12 @@ const { t } = useI18n();
         <NuxtLink :to="primaryRoute" class="btn btn-primary">
           {{ primaryLabel }}
         </NuxtLink>
-        <NuxtLink :to="APP_ROUTES.setup" class="btn btn-ghost">
+        <!-- Avoid duplicate Complete Setup CTAs when primary already targets setup. -->
+        <NuxtLink
+          v-if="primaryRoute !== APP_ROUTES.setup"
+          :to="APP_ROUTES.setup"
+          class="btn btn-ghost"
+        >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>
       </div>

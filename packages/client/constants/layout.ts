@@ -33,7 +33,14 @@ export const TOAST_CONTAINER_DOM_ID = "toast-container";
  * Includes bottom padding for shell chrome (dock / FAB) on small viewports.
  */
 export const SHELL_MAIN_INNER_CLASS =
-  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8";
+  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-32 sm:px-6 lg:px-8 lg:pb-8";
+
+/**
+ * Fixed mobile primary dock chrome (daisyUI `dock` + glass-clear + safe-area).
+ * Desktop: hidden via `lg:hidden` (sidebar owns primary nav).
+ */
+export const SHELL_DOCK_CLASS =
+  "dock glass-clear fixed bottom-0 inset-x-0 z-30 border-t border-base-300 pb-[env(safe-area-inset-bottom)] lg:hidden";
 
 /** Root app drawer contract. */
 export const SHELL_DRAWER_CLASS = "min-h-screen lg:drawer-open";
