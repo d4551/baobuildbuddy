@@ -48,7 +48,7 @@ function updateTextValue(
         class="h-14 w-14 text-success"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"

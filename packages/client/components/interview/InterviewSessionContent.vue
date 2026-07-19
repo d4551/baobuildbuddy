@@ -78,7 +78,7 @@ const { t } = useI18n();
       aria-live="polite"
     >
       <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7" />
+        <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button
@@ -114,7 +114,7 @@ const { t } = useI18n();
           :aria-label="t('interviewSession.voice.idle')"
         >
           <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-            <div class="space-y-1">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("interviewSession.voiceTitle") }}
               </p>

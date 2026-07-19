@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import {
+import { SURFACE_GLASS_CARD_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -23,7 +23,7 @@ const { t } = useI18n();
 
 <template>
   <aside class="flex min-h-0 flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-    <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <section :class="SURFACE_GLASS_CARD_CLASS" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
         <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -43,7 +43,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <section class="card border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <section :class="SURFACE_GLASS_CARD_CLASS" :class="[SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
         <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

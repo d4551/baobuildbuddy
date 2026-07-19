@@ -138,7 +138,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         class="alert alert-info alert-soft"
         :aria-label="t('settings.aiProviders.openaiV1Aria')"
       >
-        <div class="space-y-1" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.openaiV1Description") }}</p>
           <code class="glass-subtle block break-all rounded-box px-3 py-2" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -171,7 +171,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.title')">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-              <div class="space-y-1">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <h3 class="card-title text-base">{{ t("settings.aiProviders.readinessTitle") }}</h3>
                 <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.aiProviders.readinessDescription") }}
@@ -222,7 +222,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
           :aria-label="t('settings.aiProviders.preferredProviderLegend')"
         >
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div class="space-y-1">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <h3 class="card-title text-base">{{ t("settings.aiProviders.preferredProviderLegend") }}</h3>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
             </div>
@@ -278,7 +278,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 
       <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.saveAria')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-          <div class="space-y-1">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.aiProviders.saveButton") }}</h3>
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.aiProviders.credentialsDescription") }}

@@ -20,7 +20,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 

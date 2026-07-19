@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
-import {
+import { SURFACE_GLASS_CARD_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -76,7 +76,7 @@ const draft = defineModel<string>("draft", { required: true });
   <div
     v-if="isOpen"
     :id="chatPanelId"
-    class="card border border-base-300 bg-base-100" :class="[FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
+    :class="SURFACE_GLASS_CARD_CLASS" :class="[FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
     <div class="card-body p-0" :class="[FLUID_HEIGHT_CLASS]">
       <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">

@@ -61,7 +61,7 @@ const { t } = useI18n();
           <tbody>
             <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
               <td>
-                <div class="space-y-1">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <div class="font-medium">{{ job.title }}</div>
                   <p v-if="hasJobEnrichment(job)" class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
@@ -85,7 +85,7 @@ const { t } = useI18n();
                 </div>
               </td>
               <td>
-                <div class="space-y-1">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <div class="font-medium">{{ job.company }}</div>
                   <div v-if="job.source" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                     {{ job.source }}

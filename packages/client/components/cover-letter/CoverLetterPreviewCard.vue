@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { SURFACE_GLASS_CARD_CLASS, RADIUS_TOKEN_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   contentText: string;
@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.preview.title") }}</h2>
       <div class="border border-base-300 bg-base-100 p-6" :class="[SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg]">

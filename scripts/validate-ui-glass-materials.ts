@@ -58,11 +58,19 @@ const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has
 const cardSurfaceWithoutGlassPattern =
   /\bclass\s*=\s*["'][^"']*\bcard\b[^"']*(?:shadow-(?:sm|md|lg|xl|2xl))[^"']*(?:(?!glass).)*["']/gu;
 
+// Dynamic :class binding variant of the above.
+const cardSurfaceWithoutGlassDynamicPattern =
+  /:class\s*=\s*["'][^"']*\bcard\b[^"']*(?:shadow-(?:sm|md|lg|xl|2xl))[^"']*(?:(?!glass).)*["']/gu;
+
 // A surface that composes bg-base-100 + shadow-* + border but isn't a card.
 // This is the bespoke-panel smell: three surface utilities that the glass
 // system already covers via .glass / .glass-subtle / .glass-strong.
 const bespokePanelSurfacePattern =
   /\bclass\s*=\s*["'][^"']*\bbg-base-\d+[^"']*\bshadow-(?:sm|md|lg|xl|2xl)\b[^"']*\bborder-(?:base-\d+|1|2)\b[^"']*["']/gu;
+
+// Dynamic :class binding variant of the above.
+const bespokePanelSurfaceDynamicPattern =
+  /:class\s*=\s*["'][^"']*\bbg-base-\d+[^"']*\bshadow-(?:sm|md|lg|xl|2xl)\b[^"']*\bborder-(?:base-\d+|1|2)\b[^"']*["']/gu;
 
 // Interactive card (has @click or role="button" or btn) without glass-interactive.
 const interactiveCardWithoutMixinPattern =
@@ -101,6 +109,16 @@ export const collectGlassMaterialViolationsForContent = (
     });
   }
 
+  cardSurfaceWithoutGlassDynamicPattern.lastIndex = 0;
+  for (const match of template.matchAll(cardSurfaceWithoutGlassDynamicPattern)) {
+    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Dynamic :class binding: Card surface with shadow but no glass material class. Add card-glass (or card-glass-strong/modal) or consume SURFACE_GLASS_CARD_CLASS from constants/layout.ts.`,
+    });
+  }
+
   bespokePanelSurfacePattern.lastIndex = 0;
   for (const match of template.matchAll(bespokePanelSurfacePattern)) {
     if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
@@ -108,6 +126,16 @@ export const collectGlassMaterialViolationsForContent = (
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
       message: `Bespoke panel surface (bg-base-* + shadow-* + border-*) bypasses the glass material system. Use glass / glass-subtle / glass-strong or a SURFACE_GLASS_*_CLASS constant.`,
+    });
+  }
+
+  bespokePanelSurfaceDynamicPattern.lastIndex = 0;
+  for (const match of template.matchAll(bespokePanelSurfaceDynamicPattern)) {
+    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Dynamic :class binding: Bespoke panel surface (bg-base-* + shadow-* + border-*) bypasses the glass material system. Use glass / glass-subtle / glass-strong or a SURFACE_GLASS_*_CLASS constant.`,
     });
   }
 

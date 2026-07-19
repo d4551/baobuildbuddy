@@ -6,7 +6,7 @@ import {
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 defineProps<{
   templateLabel: (template: CoverLetterTemplate) => string;
@@ -22,7 +22,7 @@ const formData = defineModel<{
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.details.title") }}</h2>
       <SectionGrid grid-token="threeColumnMd">

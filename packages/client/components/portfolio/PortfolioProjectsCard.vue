@@ -81,7 +81,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <h3 class="card-title text-base">{{ project.title }}</h3>
               <svg class="h-5 w-5 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M4 8h16M4 16h16" />
               </svg>
             </div>
 

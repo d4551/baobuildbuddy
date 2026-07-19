@@ -55,6 +55,37 @@ export const MARGIN_TOKEN_CLASS = {
 } as const;
 export type MarginToken = keyof typeof MARGIN_TOKEN_CLASS;
 
+/** Common width tokens. */
+export const WIDTH_TOKEN_CLASS = {
+  w3: "w-3",
+  w4: "w-4",
+  w5: "w-5",
+  w6: "w-6",
+  w8: "w-8",
+  w12: "w-12",
+  w14: "w-14",
+  w16: "w-16",
+  w20: "w-20",
+  w40: "w-40",
+} as const;
+export type WidthToken = keyof typeof WIDTH_TOKEN_CLASS;
+
+/** Common height tokens. */
+export const HEIGHT_TOKEN_CLASS = {
+  h3: "h-3",
+  h4: "h-4",
+  h5: "h-5",
+  h6: "h-6",
+  h8: "h-8",
+  h12: "h-12",
+  h14: "h-14",
+  h16: "h-16",
+  h48: "h-48",
+  h72: "h-72",
+  h96: "h-96",
+} as const;
+export type HeightToken = keyof typeof HEIGHT_TOKEN_CLASS;
+
 /** Common padding tokens. */
 export const PADDING_TOKEN_CLASS = {
   p0: "p-0",
@@ -119,3 +150,6 @@ export type FontWeightToken = keyof typeof FONT_WEIGHT_TOKEN_CLASS;
 export const GLASS_CARD_HOVER_CLASS = "glass-card-hover";
 
 export const GLASS_CARD_ENTER_CLASS = "glass-card-enter";
+
+/** SVG stroke-width for decorative icons (24x24 viewBox). */
+export const SVG_STROKE_WIDTH_DEFAULT = 2;

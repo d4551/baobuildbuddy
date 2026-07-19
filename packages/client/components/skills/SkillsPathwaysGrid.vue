@@ -22,7 +22,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
 
@@ -57,7 +57,7 @@ const { t } = useI18n();
               </div>
             </div>
 
-            <div class="space-y-1">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <div class="flex items-center justify-between" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                 <span>{{ t("skillsPathwaysPage.pathways.matchScoreLabel") }}</span>
                 <span class="font-semibold">{{ pathway.matchScore }}%</span>

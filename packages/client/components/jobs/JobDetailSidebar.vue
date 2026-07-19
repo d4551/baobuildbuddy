@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+import { SURFACE_GLASS_CARD_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -24,7 +24,7 @@ defineProps<{
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div class="card bg-base-200">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.companyInfoTitle") }}</h2>
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -59,7 +59,7 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="job.platforms?.length" class="card bg-base-200">
+    <div v-if="job.platforms?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.platformsTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -70,7 +70,7 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="job.gameGenres?.length" class="card bg-base-200">
+    <div v-if="job.gameGenres?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.genresTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

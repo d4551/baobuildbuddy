@@ -36,7 +36,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div class="card bg-base-200">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <PageHeroHeader
           :title-id="titleId"
@@ -47,8 +47,8 @@ const emit = defineEmits<{
           <template #actions>
             <button class="btn btn-outline" :aria-label="t('jobDetail.interviewAria')" @click="emit('interview')">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {{ t("jobDetail.interviewButton") }}
             </button>
@@ -65,7 +65,7 @@ const emit = defineEmits<{
               @click="emit('save')"
             >
               <svg class="h-5 w-5" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               {{ isSaved ? t("jobDetail.savedButton") : t("jobDetail.saveButton") }}
             </button>
@@ -84,8 +84,8 @@ const emit = defineEmits<{
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
           <span class="badge">
             <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             {{ job.location }}
           </span>
@@ -97,7 +97,7 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <div class="card bg-base-200">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.descriptionTitle") }}</h2>
         <div class="prose max-w-none">
@@ -107,7 +107,7 @@ const emit = defineEmits<{
     </div>
 
     <div v-if="job.requirements?.length" class="divider divider-primary">{{ t("jobDetail.requirementsTitle") }}</div>
-    <div v-if="job.requirements?.length" class="card bg-base-200">
+    <div v-if="job.requirements?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.requirementsTitle") }}</h2>
         <ul class="list">
@@ -119,7 +119,7 @@ const emit = defineEmits<{
     </div>
 
     <div v-if="job.technologies?.length" class="divider divider-primary">{{ t("jobDetail.technologiesTitle") }}</div>
-    <div v-if="job.technologies?.length" class="card bg-base-200">
+    <div v-if="job.technologies?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.technologiesTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

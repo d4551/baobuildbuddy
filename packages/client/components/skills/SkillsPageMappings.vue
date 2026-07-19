@@ -79,7 +79,7 @@ function normalizedConfidence(confidence: number): number {
               </div>
             </td>
             <td class="w-40">
-              <div class="space-y-1">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <div class="flex items-center justify-between font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <span>{{ mapping.confidence }}%</span>
                   <span class="text-muted">

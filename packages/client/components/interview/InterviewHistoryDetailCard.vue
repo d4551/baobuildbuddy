@@ -37,13 +37,13 @@ const { t } = useI18n();
       @retry="emit('retry')"
     />
 
-    <div v-if="detailLoading" class="card bg-base-200">
+    <div v-if="detailLoading" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <p role="status" aria-live="polite">{{ t("interviewHistory.loadingDetails") }}</p>
       </div>
     </div>
 
-    <div v-else-if="selectedSession" class="card bg-base-200 sticky top-6">
+    <div v-else-if="selectedSession" :class="[SURFACE_GLASS_CARD_CLASS, 'sticky top-6']">
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("interviewHistory.detailsTitle") }}</h3>
@@ -122,7 +122,7 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div v-else class="card bg-base-200">
+    <div v-else :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <EmptyState
           title-key="interviewHistory.selectPromptTitle"

@@ -30,7 +30,7 @@ const { t } = useI18n();
         <article
           v-for="(screenshotPath, index) in screenshotPaths"
           :key="screenshotPath"
-          class="card bg-base-200"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
           <figure class="px-4 pt-4">
             <img

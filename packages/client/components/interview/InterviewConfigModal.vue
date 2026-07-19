@@ -172,7 +172,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           />
         </div>
 
-        <div v-if="selectedJob" class="card bg-base-200" role="status" aria-live="polite">
+        <div v-if="selectedJob" :class="SURFACE_GLASS_CARD_CLASS" role="status" aria-live="polite">
           <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <h4 class="font-semibold">{{ selectedJob.title }}</h4>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

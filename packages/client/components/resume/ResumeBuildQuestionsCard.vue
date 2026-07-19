@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
@@ -18,7 +18,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="card bg-base-200">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">

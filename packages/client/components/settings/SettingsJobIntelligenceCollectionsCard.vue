@@ -30,7 +30,7 @@ const sourceCollectionCount = computed(
   <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <div class="space-y-1">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
           <h3 class="card-title text-base">{{ t("settings.jobIntelligence.advancedCollectionsTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.jobIntelligence.advancedCollectionsDescription") }}

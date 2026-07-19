@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
+import { SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 type ResumeEditorTabId = "personal" | "experience" | "education" | "skills" | "projects" | "gaming";
 
@@ -28,7 +29,7 @@ const emit = defineEmits<{
 <template>
   <div
     v-show="activeTab === 'personal'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <PersonalInfoForm
       :model-value="formData"
@@ -38,7 +39,7 @@ const emit = defineEmits<{
 
   <div
     v-show="activeTab === 'experience'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <ExperienceList
       :model-value="formData.experience"
@@ -48,7 +49,7 @@ const emit = defineEmits<{
 
   <div
     v-show="activeTab === 'education'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <EducationList
       :model-value="formData.education"
@@ -58,14 +59,14 @@ const emit = defineEmits<{
 
   <div
     v-show="activeTab === 'skills'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <SkillsEditor :model-value="formData.skills" @update:model-value="emit('updateSkills', $event)" />
   </div>
 
   <div
     v-show="activeTab === 'projects'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <ResumeProjectsEditor
       :model-value="formData.projects"
@@ -75,7 +76,7 @@ const emit = defineEmits<{
 
   <div
     v-show="activeTab === 'gaming'"
-    class="card bg-base-200"
+    :class="SURFACE_GLASS_CARD_CLASS"
   >
     <ResumeGamingFields
       :model-value="formData.gaming"

@@ -46,7 +46,7 @@ const { t } = useI18n();
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
       <article :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-          <div class="space-y-1">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.pathwaysDescription") }}
@@ -85,7 +85,7 @@ const { t } = useI18n();
 
       <article :class="SURFACE_GLASS_CARD_CLASS">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-          <div class="space-y-1">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.topMappingsDescription") }}

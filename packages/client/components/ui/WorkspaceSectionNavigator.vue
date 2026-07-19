@@ -79,7 +79,7 @@ const activeDescription = computed<string>(() => {
               </span>
             </span>
 
-            <div class="space-y-1" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
               <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
