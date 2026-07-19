@@ -134,4 +134,13 @@ export const APP_ROUTE_BUILDERS = {
   resumeEditor(resumeId: string): string {
     return `${APP_ROUTES.resume}?${APP_ROUTE_QUERY_KEYS.id}=${encodeRouteParam(resumeId)}`;
   },
+  /**
+   * Builds the resume preview route with selected resume id query.
+   *
+   * @param resumeId Resume identifier.
+   * @returns Canonical resume preview route with query.
+   */
+  resumePreview(resumeId: string): string {
+    return `${APP_ROUTES.resumePreview}?${APP_ROUTE_QUERY_KEYS.id}=${encodeRouteParam(resumeId)}`;
+  },
 } as const;

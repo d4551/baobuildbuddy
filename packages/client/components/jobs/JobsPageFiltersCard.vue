@@ -3,8 +3,11 @@ import { JOB_FILTER_ALL_VALUE } from "@bao/shared/constants/jobs";
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -22,8 +25,9 @@ defineProps<{
   studioTypeOptionLabel: (value: FilterSelection<StudioType>) => string;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   clear: [];
+  apply: [];
 }>();
 
 const location = defineModel<string>("location", { required: true });
@@ -36,14 +40,33 @@ const platform = defineModel<FilterSelection<Platform>>("platform", { required: 
 const genre = defineModel<FilterSelection<GameGenre>>("genre", { required: true });
 
 const { t } = useI18n();
+
+const activeFilterCount = computed(() => {
+  let count = 0;
+  if (location.value.trim().length > 0) count += 1;
+  if (remote.value) count += 1;
+  if (experienceLevel.value !== JOB_FILTER_ALL_VALUE) count += 1;
+  if (studioType.value !== JOB_FILTER_ALL_VALUE) count += 1;
+  if (platform.value !== JOB_FILTER_ALL_VALUE) count += 1;
+  if (genre.value !== JOB_FILTER_ALL_VALUE) count += 1;
+  return count;
+});
 </script>
 
 <template>
-  <div class="card sticky top-6 card-glass">
-    <div class="card-body">
-      <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
-        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobsPage.filtersTitle") }}</h2>
-        <button class="btn btn-ghost btn-xs" :aria-label="t('jobsPage.clearFiltersAria')" @click="$emit('clear')">
+  <div class="card sticky top-6 card-glass flex flex-col overflow-hidden">
+    <div class="card-body flex-1 overflow-y-auto" :class="[MIN_HEIGHT_ZERO_CLASS]">
+      <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4, FLEX_GAP_TOKEN_CLASS.gap2]">
+        <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobsPage.filtersTitle") }}</h2>
+          <span
+            v-if="activeFilterCount > 0"
+            class="badge badge-primary badge-sm"
+          >
+            {{ t("jobsPage.filtersActiveCount", { count: activeFilterCount }) }}
+          </span>
+        </div>
+        <button class="btn btn-ghost btn-xs" :aria-label="t('jobsPage.clearFiltersAria')" @click="emit('clear')">
           {{ t("jobsPage.clearFiltersButton") }}
         </button>
       </div>
@@ -112,6 +135,20 @@ const { t } = useI18n();
           </select>
         </fieldset>
       </div>
+    </div>
+    <div
+      class="sticky bottom-0 border-t border-base-300 bg-base-100/90 backdrop-blur lg:hidden"
+      :class="[PADDING_TOKEN_CLASS.p3]"
+    >
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        :class="[FLUID_WIDTH_CLASS]"
+        :aria-label="t('jobsPage.applyFiltersAria')"
+        @click="emit('apply')"
+      >
+        {{ t("jobsPage.applyFiltersButton") }}
+      </button>
     </div>
   </div>
 </template>

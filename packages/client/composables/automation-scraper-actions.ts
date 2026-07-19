@@ -8,6 +8,7 @@ import { toIsoTimestamp } from "~/composables/schedule-timestamp";
 import type { AutomationRunEnvelope, ScrapePendingAction } from "~/types/automation-scraper";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
+import { isFailedScrapeRun, readScrapeOutputErrors } from "~/utils/scrape-run-output";
 
 type AutomationScraperActionsInput = {
   awardForAction: (action: "scraperStudios" | "scraperJobs") => Promise<{
@@ -110,7 +111,13 @@ function createRunScrapeTarget(
       refreshScraperJobs: input.refreshScraperJobs,
       target,
     });
-    const reward = await rewardResolver(resolveRewardAction(target));
+    const scrapeFailed = isFailedScrapeRun({
+      aborted: completedRun.aborted,
+      exitCode: completedRun.exitCode,
+      output: completedRun.output,
+      timedOut: completedRun.timedOut,
+    });
+    const reward = scrapeFailed ? null : await rewardResolver(resolveRewardAction(target));
     applyRunSuccess({ completedRun, reward, target }, runStateStore, t);
     if (reward) {
       $toast.success(t(resolveRewardToastKey(target), { xp: reward }));
@@ -214,9 +221,24 @@ function applyRunSuccess(
   { lastRunAt, latestRuns, runMessages, runStates }: AutomationScraperSuccessStore,
   t: ComposerTranslation,
 ): void {
-  runStates[target] = "success";
   lastRunAt[target] = completedRun.completedAt ?? completedRun.updatedAt;
   latestRuns[target] = completedRun;
+
+  const failed = isFailedScrapeRun({
+    aborted: completedRun.aborted,
+    exitCode: completedRun.exitCode,
+    output: completedRun.output,
+    timedOut: completedRun.timedOut,
+  });
+  if (failed) {
+    runStates[target] = "error";
+    const outputErrors = readScrapeOutputErrors(completedRun.output);
+    const envelopeError = typeof completedRun.error === "string" ? completedRun.error : null;
+    runMessages[target] = outputErrors[0] ?? envelopeError ?? t(resolveRunFailureKey(target));
+    return;
+  }
+
+  runStates[target] = "success";
   const messageKey = resolveCompletionMessageKey(target, reward !== null);
   runMessages[target] = reward === null ? t(messageKey) : t(messageKey, { xp: reward });
 }

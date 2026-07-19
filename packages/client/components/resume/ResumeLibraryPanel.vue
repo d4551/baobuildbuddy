@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 import {
@@ -114,8 +115,16 @@ function requestDelete(resumeId?: string): void {
             </div>
             <div
               class="card-actions justify-end"
-              :class="[MARGIN_TOKEN_CLASS.mt4, POINTER_EVENTS_TOKEN_CLASS.auto]"
+              :class="[MARGIN_TOKEN_CLASS.mt4, POINTER_EVENTS_TOKEN_CLASS.auto, FLEX_GAP_TOKEN_CLASS.gap2]"
             >
+              <NuxtLink
+                :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
+                class="btn btn-sm btn-ghost"
+                :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
+                @click.stop
+              >
+                {{ t("resumePage.previewButton") }}
+              </NuxtLink>
               <button 
                 class="btn btn-sm btn-outline"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"

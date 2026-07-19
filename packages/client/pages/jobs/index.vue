@@ -86,6 +86,7 @@ const page = useJobsIndexPage();
           :genre-options="page.genreOptions"
           :genre-option-label="(value) => page.genreOptionLabel(value)"
           @clear="page.clearFilters"
+          @apply="page.showFilters.value = false"
         />
       </div>
 
