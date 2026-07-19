@@ -71,7 +71,12 @@ const main = async (): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 3_500);
+  await wait(page, 2_500);
+  const jobIntelNav = page.getByRole("button", { name: /Job Intelligence/i }).first();
+  if ((await jobIntelNav.count()) > 0) {
+    await jobIntelNav.click({ force: true });
+    await wait(page, 800);
+  }
   await shot(page, "01-settings-mobile-full");
 
   const toggleCount = await page
@@ -79,22 +84,25 @@ const main = async (): Promise<void> => {
     .count();
   await writeOutput(`portal toggles=${String(toggleCount)}`);
 
-  const portalNames = ["Work With Indies", "GrackleHQ", "RemoteGameJobs"] as const;
-  await Promise.all(
-    portalNames.map(async (name) => {
-      const toggle = page.getByRole("checkbox", { name: new RegExp(`Enable ${name}`, "i") });
-      if ((await toggle.count()) === 0) {
-        await writeOutput(`missing toggle: ${name}`);
-        return;
-      }
-      if (!(await toggle.isChecked())) {
-        await toggle.click({ force: true });
-      }
-      await writeOutput(`enabled ${name}=${String(await toggle.isChecked())}`);
-    }),
-  );
+  const enablePortal = async (name: string): Promise<void> => {
+    const toggle = page.getByRole("checkbox", { name: new RegExp(`Enable ${name}`, "i") });
+    if ((await toggle.count()) === 0) {
+      await writeOutput(`missing toggle: ${name}`);
+      return;
+    }
+    if (!(await toggle.isChecked())) {
+      await toggle.click({ force: true });
+      await wait(page, 200);
+    }
+    await writeOutput(`enabled ${name}=${String(await toggle.isChecked())}`);
+  };
+  // Sequential: each toggle rewrites shared gamingPortalsJson.
+  await enablePortal("Work With Indies");
+  await enablePortal("GrackleHQ");
+  await enablePortal("RemoteGameJobs");
 
-  await page.getByRole("button", { name: RE_SAVE_PROVIDERS }).click();
+  const saveProviders = page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first();
+  await saveProviders.click({ force: true });
   await wait(page, 2_500);
   await shot(page, "02-saved");
 
