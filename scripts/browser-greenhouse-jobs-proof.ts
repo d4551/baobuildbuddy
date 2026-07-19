@@ -19,6 +19,7 @@ const OUT =
 const RE_SAVE_PROVIDERS = /Save Provider Config/i;
 const RE_REFRESH_JOBS = /Refresh Jobs/i;
 const RE_BOARDS_LABEL = /Greenhouse boards JSON/i;
+const RE_JOB_INTELLIGENCE = /Job Intelligence/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
@@ -44,7 +45,7 @@ const main = async (): Promise<void> => {
     timeout: 90_000,
   });
   await wait(page, 2_500);
-  const jobIntelNav = page.getByRole("button", { name: /Job Intelligence/i }).first();
+  const jobIntelNav = page.getByRole("button", { name: RE_JOB_INTELLIGENCE }).first();
   if ((await jobIntelNav.count()) > 0) {
     await jobIntelNav.click({ force: true });
     await wait(page, 800);

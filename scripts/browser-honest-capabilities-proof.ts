@@ -7,7 +7,7 @@
  * AI chat/completions: Ollama SEGV on this host; cloud keys empty → reported BLOCKED in report.
  * STT: no microphone device → reported BLOCKED in report.
  */
-import { mkdir, readdir, stat } from "node:fs/promises";
+import { mkdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Download, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
@@ -29,6 +29,7 @@ const RE_REFRESH_JOBS = /Refresh Jobs/i;
 const RE_WWI = /Work With Indies|workwithindies/i;
 const RE_SCRAPE_RUN = /Run|Scrape|Start/i;
 const RE_NO_JOBS = /No jobs loaded yet/i;
+const RE_GREENHOUSE_BOARDS = /Greenhouse boards JSON/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
@@ -91,10 +92,8 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   // Enable Work With Indies portal checkbox if present
   const portalToggle = page.getByLabel(RE_WWI).or(page.getByText(RE_WWI)).first();
   await settle(portalToggle.click({ timeout: 5_000 }));
-  // Prefer checkbox near that label
-  const checkbox = page.locator("input[type='checkbox']").filter({ has: page.locator("..") });
   // Fill greenhouse board for a known public board as secondary source
-  const boards = page.getByLabel(/Greenhouse boards JSON/i).first();
+  const boards = page.getByLabel(RE_GREENHOUSE_BOARDS).first();
   if ((await boards.count()) > 0) {
     await boards.fill(
       JSON.stringify([{ board: "discord", company: "Discord", enabled: true }], null, 2),
@@ -111,18 +110,11 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   });
   await wait(page, 2_500);
   const runButtons = page.getByRole("button", { name: RE_SCRAPE_RUN });
-  const count = await runButtons.count();
-  await writeOutput(`scraper run buttons=${String(count)}`);
-  if (count > 0) {
-    // Click first enabled run-like control
-    for (let index = 0; index < count; index += 1) {
-      const button = runButtons.nth(index);
-      if (!(await button.isDisabled())) {
-        await button.click();
-        await wait(page, 35_000);
-        break;
-      }
-    }
+  await writeOutput(`scraper run buttons=${String(await runButtons.count())}`);
+  const enabledRun = runButtons.filter({ hasNot: page.locator(":disabled") }).first();
+  if ((await enabledRun.count()) > 0) {
+    await enabledRun.click();
+    await wait(page, 35_000);
   }
   await shot(page, "04-scraper-ran");
 

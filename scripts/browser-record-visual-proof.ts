@@ -35,6 +35,8 @@ const VIEWPORTS = [
   { name: "desktop", width: 1440, height: 900 },
 ] as const;
 
+const RE_BANNED_BUTTON_LABEL = /save|delete|submit|clear|remove|revoke|reset/i;
+
 const mapSequential = async <TItem>(
   items: readonly TItem[],
   mapper: (item: TItem) => Promise<void>,
@@ -112,12 +114,12 @@ const main = async (): Promise<void> => {
       }
 
       // Safe interaction: skip Save/Delete/Submit/Clear destructive actions.
-      const clicked = await page.evaluate(() => {
+      const clicked = await page.evaluate((bannedSource) => {
         const main = document.querySelector("main");
         if (!main) {
           return false;
         }
-        const banned = /save|delete|submit|clear|remove|revoke|reset/i;
+        const banned = new RegExp(bannedSource, "i");
         const button = Array.from(main.querySelectorAll("button")).find((candidate) => {
           if (!(candidate instanceof HTMLButtonElement)) {
             return false;
@@ -138,7 +140,7 @@ const main = async (): Promise<void> => {
         button.scrollIntoView({ block: "center" });
         button.click();
         return true;
-      });
+      }, RE_BANNED_BUTTON_LABEL.source);
       await page.waitForTimeout(400);
       await page.keyboard.press("Escape");
       await page.waitForTimeout(200);
