@@ -70,6 +70,7 @@ const inlineResponsiveBreakpointBypassPattern =
 
 const staticClassAttributePattern = /\bclass\s*=\s*["']([^"']+)["']/gu;
 const dynamicClassBindingPattern = /:class\s*=\s*["']([^"']+)["']/gu;
+const classTokenSplitPattern = /\s+/u;
 const designTokenPropDefaultPattern =
   /\b(?:sizeClass|trackClass|fillClass|widthClass|heightClass|radiusClass|spacingClass|paddingClass|gapClass)\s*:\s*["']([^"']+)["']/gu;
 
@@ -130,7 +131,7 @@ const collectClassAttributeViolations = (
   const scanClassValue = (classValue: string, baseLine: number): void => {
     // Match whole utility tokens only — avoid false positives like
     // `max-h-72` → `h-72`, `scroll-mt-24` → `mt-24`, `mt-0.5` → `mt-0`.
-    const classTokens = classValue.split(/\s+/u).filter((token) => token.length > 0);
+    const classTokens = classValue.split(classTokenSplitPattern).filter((token) => token.length > 0);
     for (const token of classTokens) {
       if (
         token.includes("text-base") ||

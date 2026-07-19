@@ -27,7 +27,5 @@ for (const { filePath, content } of files) {
   }
 }
 
-for (const hit of hits) {
-  await writeOutput(`${hit.file}: ${hit.reason}`);
-}
+await writeOutput(hits.map((hit) => `${hit.file}: ${hit.reason}`).join("\n"));
 await writeOutput(`Total: ${hits.length}`);
