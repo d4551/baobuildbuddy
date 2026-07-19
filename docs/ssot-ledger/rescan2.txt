@@ -1,0 +1,32 @@
+=== RESCAN2: abs symlink gate ===
+$ bun run scripts/validate-no-abs-path-symlinks.ts
+Absolute user-home symlink validation passed.
+=== RESCAN2: stack pins ===
+$ bun run scripts/validate-stack-versions.ts
+Stack version pin validation passed (installed == STACK-CONTRACT pins).
+=== RESCAN2: mutation abs symlink red ===
+MUTATION_ABS_RED_OK
+=== RESCAN2: mutation elysia 1.x red ===
+MUTATION_ELYSIA_RED_OK
+=== RESCAN2: shadow consumer flags ===
+MUTATION_SHADOW_RED_OK
+=== RESCAN2: nuxt prepare dups ===
+DUP_COUNT=0
+=== RESCAN2: no tracked abs dist ===
+DIST_ABSENT_OK
+=== RESCAN2: client test bootstrap ===
+$ bun run prepare:workspace-types && bun --bun run vitest run
+$ bun run --cwd ../server build:types && bun run prepare:nuxt
+$ bun --bun ../../node_modules/@typescript/native/bin/tsc --project tsconfig.build.json --emitDeclarationOnly --declarationMap false --outDir dist-types
+$ bun --bun run nuxt prepare
+[90m│[39m
+[32m◆[39m  Types generated in .nuxt.
+
+ RUN  v4.1.0 /workspace/packages/client
+
+
+ Test Files  16 passed (16)
+      Tests  77 passed (77)
+   Start at  19:36:19
+   Duration  1.31s (transform 456ms, setup 0ms, import 900ms, tests 119ms, environment 1.32s)
+
