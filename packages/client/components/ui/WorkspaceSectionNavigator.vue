@@ -64,10 +64,9 @@ onMounted(() => {
 
 watch(
   () => props.activeSection,
-  () => {
-    nextTick(() => {
-      scrollActiveSectionIntoView();
-    });
+  async () => {
+    await nextTick();
+    scrollActiveSectionIntoView();
   },
 );
 
