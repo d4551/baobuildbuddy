@@ -87,17 +87,46 @@ const main = async (): Promise<void> => {
         timeout: 60_000,
       });
       await page.waitForTimeout(1_400);
-      // Light interaction proof: click first enabled non-absolute main button if present.
+      // Theme proof once per viewport (label.swap — not the hidden checkbox alone).
+      if (route.slug === "dashboard") {
+        const beforeTheme = await page.evaluate(
+          () =>
+            document.querySelector("[data-theme]")?.getAttribute("data-theme") ??
+            document.documentElement.getAttribute("data-theme"),
+        );
+        await page.locator("label.swap").first().click({ timeout: 5_000 });
+        await page.waitForTimeout(500);
+        const afterTheme = await page.evaluate(
+          () =>
+            document.querySelector("[data-theme]")?.getAttribute("data-theme") ??
+            document.documentElement.getAttribute("data-theme"),
+        );
+        await writeOutput(`theme ${viewport.name}: ${String(beforeTheme)} → ${String(afterTheme)}`);
+        if (!beforeTheme || !afterTheme || beforeTheme === afterTheme) {
+          await writeError(`Theme failed to flip on ${viewport.name}`);
+          process.exitCode = 1;
+        }
+        // Flip back so subsequent pages stay on default light for visual consistency.
+        await page.locator("label.swap").first().click({ timeout: 5_000 });
+        await page.waitForTimeout(300);
+      }
+
+      // Safe interaction: skip Save/Delete/Submit/Clear destructive actions.
       const clicked = await page.evaluate(() => {
         const main = document.querySelector("main");
         if (!main) {
           return false;
         }
+        const banned = /save|delete|submit|clear|remove|revoke|reset/i;
         const button = Array.from(main.querySelectorAll("button")).find((candidate) => {
           if (!(candidate instanceof HTMLButtonElement)) {
             return false;
           }
           if (candidate.disabled || candidate.classList.contains("absolute")) {
+            return false;
+          }
+          const label = `${candidate.getAttribute("aria-label") ?? ""} ${candidate.textContent ?? ""}`;
+          if (banned.test(label)) {
             return false;
           }
           const style = window.getComputedStyle(candidate);
@@ -110,9 +139,22 @@ const main = async (): Promise<void> => {
         button.click();
         return true;
       });
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(400);
       await page.keyboard.press("Escape");
-      await page.waitForTimeout(250);
+      await page.waitForTimeout(200);
+
+      const hasDevtools = await page.evaluate(() => {
+        const el = document.getElementById("nuxt-devtools-container");
+        if (!el) {
+          return false;
+        }
+        const style = window.getComputedStyle(el);
+        return style.display !== "none" && style.visibility !== "hidden" && el.childElementCount > 0;
+      });
+      if (hasDevtools) {
+        await writeError(`Nuxt DevTools HUD still visible on ${viewport.name}/${route.slug}`);
+        process.exitCode = 1;
+      }
       await page.screenshot({
         path: join(stillsDir, `${viewport.name}-${route.slug}.png`),
         fullPage: false,

@@ -133,6 +133,20 @@
 body {
   font-family: var(--brand-font-body);
   color: var(--text-primary);
+  /* Soft ambient canvas so glass-subtle/card-glass materials read as translucent. */
+  min-height: 100%;
+  background:
+    radial-gradient(
+      80rem 40rem at 12% -8%,
+      color-mix(in oklab, var(--color-primary) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      60rem 36rem at 92% 0%,
+      color-mix(in oklab, var(--color-secondary) 12%, transparent),
+      transparent 55%
+    ),
+    var(--color-base-200);
 }
 
 h1,
