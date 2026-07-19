@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -36,7 +37,7 @@ const { t } = useI18n();
       role="status"
       :aria-label="t('dailyChallengeCard.completedBanner')"
     >
-      <div class="flex items-center text-success font-bold" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <div class="flex items-center text-success" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, FLEX_GAP_TOKEN_CLASS.gap2]">
         <IconCheckCircle :class="[ICON_SIZE_CLASS[12]]"/>
         <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("dailyChallengeCard.completedBanner") }}</span>
       </div>

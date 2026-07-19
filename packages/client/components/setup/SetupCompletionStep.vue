@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -60,7 +61,7 @@ function updateTextValue(
       class="alert alert-info alert-vertical text-left sm:alert-horizontal"
     >
       <div>
-        <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
+        <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.setupTokenTitle") }}</h3>
         <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.setupTokenDescription") }}</div>
       </div>
     </div>
@@ -71,7 +72,7 @@ function updateTextValue(
       class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
     >
       <div>
-        <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
+        <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
         <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
       </div>
     </div>

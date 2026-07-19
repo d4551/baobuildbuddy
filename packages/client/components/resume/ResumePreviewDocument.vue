@@ -61,12 +61,22 @@ const { t } = useI18n();
     </div>
 
     <div v-if="resume.summary" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-summary-title" :title="t('resumePage.personal.summaryLegend')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-summary-title"
+        :title="t('resumePage.personal.summaryLegend')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
  <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
     </div>
 
     <div v-if="resume.experience?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-experience-title" :title="t('resumePage.experience.title')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-experience-title"
+        :title="t('resumePage.experience.title')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
       <div
         v-for="(experience, index) in resume.experience"
         :key="`${experience.company}-${experience.title}-${index}`"
@@ -89,7 +99,12 @@ const { t } = useI18n();
     </div>
 
     <div v-if="resume.education?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-education-title" :title="t('resumePage.education.title')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-education-title"
+        :title="t('resumePage.education.title')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
       <div
         v-for="(education, index) in resume.education"
         :key="`${education.school}-${education.degree}-${index}`"
@@ -109,7 +124,12 @@ const { t } = useI18n();
     </div>
 
     <div v-if="displaySkills.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-skills-title" :title="t('resumePage.skills.title')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-skills-title"
+        :title="t('resumePage.skills.title')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
  <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ skill }}
@@ -118,7 +138,12 @@ const { t } = useI18n();
     </div>
 
     <div v-if="resume.projects?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-projects-title" :title="t('resumePage.projects.title')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-projects-title"
+        :title="t('resumePage.projects.title')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
       <div v-for="(project, index) in resume.projects" :key="`${project.title}-${index}`" :class="[MARGIN_TOKEN_CLASS.mb3]">
  <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ project.title }}</h3>
         <p v-if="project.link" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.link }}</p>
@@ -127,7 +152,12 @@ const { t } = useI18n();
     </div>
 
     <div v-if="hasGamingExperience" :class="[MARGIN_TOKEN_CLASS.mb6]">
-      <PageHeaderBlock title-id="resume-preview-gaming-title" :title="t('resumePage.gaming.title')" extra-:class="[MARGIN_TOKEN_CLASS.mb3]" />
+      <PageHeaderBlock
+        title-id="resume-preview-gaming-title"
+        :title="t('resumePage.gaming.title')"
+        heading-tag="h2"
+        :class="[MARGIN_TOKEN_CLASS.mb3]"
+      />
       <div v-if="resume.gamingExperience?.gameEngines" :class="[MARGIN_TOKEN_CLASS.mb2]">
         <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.gaming.rolesLegend") }}:</p>
         <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.gamingExperience.gameEngines }}</p>

@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -65,7 +66,7 @@ const promptExpectedMinutes = computed(() => {
       </div>
 
       <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p5]" v-if="currentQuestion">
-        <p class="font-semibold leading-relaxed text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
+        <p class="font-semibold text-base-content" :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.xl]">
           {{ currentQuestion.question }}
         </p>
       </div>

@@ -6,6 +6,7 @@ import {
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -86,7 +87,7 @@ function updateFeaturedFlag(event: Event): void {
     :close-backdrop-label="t('portfolioPage.modal.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="props.titleId" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
+    <h3 :id="props.titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ props.editing ? t("portfolioPage.modal.editTitle") : t("portfolioPage.modal.addTitle") }}
     </h3>
 
