@@ -129,7 +129,7 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
-          <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
+        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
           <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

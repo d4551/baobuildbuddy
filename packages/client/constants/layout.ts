@@ -42,9 +42,6 @@ export const SHELL_MAIN_INNER_CLASS =
 export const SHELL_DOCK_CLASS =
   "dock glass-clear fixed bottom-0 inset-x-0 z-30 border-t border-base-300 pb-[env(safe-area-inset-bottom)] lg:hidden";
 
-/** Per-item dock link: meets touch-target floor without forking dock chrome. */
-export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
-
 /** Root app drawer contract. */
 export const SHELL_DRAWER_CLASS = "min-h-screen lg:drawer-open";
 
@@ -377,6 +374,7 @@ export {
   MIN_H_60_CLASS,
   MIN_H_80_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  SHELL_DOCK_ITEM_CLASS,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
   POINTER_EVENTS_TOKEN_CLASS,

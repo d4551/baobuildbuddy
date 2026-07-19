@@ -266,6 +266,9 @@ export const MIN_H_80_CLASS = "min-h-80";
  */
 export const TOUCH_TARGET_MIN_CLASS = "min-h-11 min-w-11";
 
+/** Per-item dock link: meets touch-target floor without forking dock chrome. */
+export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
+
 /** Scroll margin for in-page anchor targets (scroll-mt-24). */
 export const SCROLL_MARGIN_TOP_24_CLASS = "scroll-mt-24";
 
