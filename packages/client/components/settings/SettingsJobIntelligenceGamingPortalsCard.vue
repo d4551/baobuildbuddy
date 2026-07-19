@@ -93,6 +93,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
             </span>
           </div>
           <input
+            :key="`${portal.id}-${portal.enabled ? 'on' : 'off'}`"
             class="toggle toggle-primary"
             type="checkbox"
             :checked="portal.enabled"
