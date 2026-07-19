@@ -8,7 +8,7 @@ import { chromium, type ConsoleMessage, type Page } from "playwright";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
+const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
   "",
 );

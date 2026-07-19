@@ -11,3 +11,8 @@
 | Automation test env | bash-only private-host flag | preload SSOT | bare `bun test` green 3/3 | SSRF opt-in for fixtures | `test-setup.ts` |
 | vue/html-indent | 183 warnings | 0 | −183 | clean client eslint | client eslint |
 | Integration parse errors | opaque failure | status+body slice | faster RCA | typed test helper | helpers change |
+
+| I1 | `scripts/dev-stack.ts` client bind | baseline: localhost→::1-only | new: 127.0.0.1 dual-stack-safe | Δ: browser smoke reachable on IPv4 | SSOT: runtime LOOPBACK_HOST_IPV4 | gate: `scripts/dev-stack.test.ts` |
+| I2 | Settings section copy | baseline: page subtitle×2 | new: page×1 + section-specific | Δ: subtitleHits 2→1 | SSOT: settings-sections + locales | gate: validate:i18n-parity + visual proof |
+| I3 | AI chat context | baseline: chips×2 surfaces | new: one visible set / viewport | Δ: visible badges 8→4 | SSOT: AIChatConversationPanel/Sidebar | gate: post-fix chip audit |
+| I4 | Touch targets | baseline: dock ~42px | new: min-h-11 (55px measured) | Δ: ≥44px | SSOT: TOUCH_TARGET_MIN_CLASS | gate: deep-audit dockItemMin |

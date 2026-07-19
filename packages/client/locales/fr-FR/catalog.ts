@@ -731,6 +731,8 @@ const catalog = {
     bootstrapRetryAria: "Réessayer le chargement des paramètres",
     profile: {
       title: "Profil utilisateur",
+      subtitle:
+        "Gardez votre identité professionnelle à jour pour les CV, lettres et candidatures.",
       nameLegend: "Nom",
       emailLegend: "E-mail",
       currentRoleLegend: "Poste actuel",
@@ -746,6 +748,7 @@ const catalog = {
     },
     preferences: {
       title: "Préférences",
+      subtitle: "Ajustez le thème, la langue et les notifications pour votre espace de travail.",
       themeLabel: "Thème",
       lightTheme: "Clair",
       darkTheme: "Sombre",

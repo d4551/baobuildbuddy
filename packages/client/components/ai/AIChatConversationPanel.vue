@@ -95,7 +95,8 @@ const updateInput = (event: Event): void => {
               </h1>
               <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
             </div>
-            <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+            <!-- Below xl the sidebar is hidden; header owns context chips. At xl+ sidebar owns them. -->
+            <div class="flex flex-wrap items-center xl:hidden" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span class="badge badge-soft badge-info">
                 {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
               </span>
@@ -128,17 +129,9 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
+          <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
           <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-              <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <span class="badge badge-soft badge-info">
-                  {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
-                </span>
-                <span v-if="focusedEntityLabel" class="badge badge-soft badge-primary">
-                  {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
-                </span>
-              </div>
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                 <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
                 <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -199,9 +192,6 @@ const updateInput = (event: Event): void => {
             />
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-                <p class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                  {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
-                </p>
                 <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ t("aiChatPage.composerHint") }}
                 </p>

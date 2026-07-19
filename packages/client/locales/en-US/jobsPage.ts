@@ -14,7 +14,7 @@ const jobsPage = {
     configureProvidersAria: "Open Settings to configure job providers",
     refreshButton: "Refresh Jobs",
     refreshAria: "Refresh job feed",
-    searchPlaceholder: "Search jobs by title, company, or keywords...",
+    searchPlaceholder: "Search jobs…",
     searchAria: "Search jobs by title, company, or keywords",
     clearSearchAria: "Clear job search input",
     searchButton: "Search",

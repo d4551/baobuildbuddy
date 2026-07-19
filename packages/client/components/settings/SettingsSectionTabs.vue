@@ -14,7 +14,6 @@ const activeSection = defineModel<SettingsSectionId>("activeSection", {
     :sections="SETTINGS_SECTION_ITEMS"
     :active-section="activeSection"
     v-bind="{ ariaLabelKey: 'settings.title' }"
-    fallback-description-key="settings.subtitle"
     :build-route="APP_ROUTE_BUILDERS.settingsSection"
   >
     <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">

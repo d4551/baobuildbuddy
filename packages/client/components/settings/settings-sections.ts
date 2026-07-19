@@ -18,12 +18,14 @@ export const SETTINGS_SECTION_ITEMS = [
   {
     id: "profile",
     labelKey: "settings.profile.title",
+    descriptionKey: "settings.profile.subtitle",
     slotName: "profile",
     iconName: "IconDocumentText",
   },
   {
     id: "preferences",
     labelKey: "settings.preferences.title",
+    descriptionKey: "settings.preferences.subtitle",
     slotName: "preferences",
     iconName: "IconGlobe",
   },

@@ -383,7 +383,7 @@ const catalog = {
       "Ajusta la búsqueda o los filtros para ampliar la vista actual de descubrimiento de empleos.",
     refreshButton: "Actualizar Empleos",
     refreshAria: "Actualizar feed de empleos",
-    searchPlaceholder: "Buscar empleos por título, empresa o palabras clave...",
+    searchPlaceholder: "Buscar empleos…",
     searchAria: "Buscar empleos por título, empresa o palabras clave",
     clearSearchAria: "Borrar búsqueda de empleos",
     searchButton: "Buscar",
@@ -2700,6 +2700,8 @@ const catalog = {
     },
     profile: {
       title: "Perfil de Usuario",
+      subtitle:
+        "Mantén tu identidad profesional actualizada para currículums, cartas y candidaturas.",
       nameLegend: "Nombre",
       nameAria: "Nombre",
       nameHint: "El nombre debe tener al menos 2 caracteres.",
@@ -2726,6 +2728,7 @@ const catalog = {
     },
     preferences: {
       title: "Preferencias",
+      subtitle: "Ajusta tema, idioma y notificaciones para tu espacio de trabajo.",
       themeLabel: "Tema",
       lightTheme: "Claro",
       darkTheme: "Oscuro",

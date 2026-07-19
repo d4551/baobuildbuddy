@@ -723,6 +723,7 @@ const catalog = {
     subtitle: "アイデンティティ、アシスタントの動作、自動化のデフォルト設定を一元管理します。",
     profile: {
       title: "ユーザープロフィール",
+      subtitle: "履歴書・カバーレター・応募で使うプロフィール情報を最新に保ちます。",
       nameLegend: "名前",
       emailLegend: "メール",
       currentRoleLegend: "現在の役職",
@@ -738,6 +739,7 @@ const catalog = {
     },
     preferences: {
       title: "環境設定",
+      subtitle: "テーマ、言語、通知の既定値をワークスペース向けに調整します。",
       themeLabel: "テーマ",
       lightTheme: "ライト",
       darkTheme: "ダーク",

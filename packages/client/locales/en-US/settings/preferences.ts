@@ -2,6 +2,7 @@ const settingspreferences = {
   settings: {
     preferences: {
       title: "Preferences",
+      subtitle: "Tune theme, language, and notification defaults for your workspace.",
       themeLabel: "Theme",
       lightTheme: "Light",
       darkTheme: "Dark",

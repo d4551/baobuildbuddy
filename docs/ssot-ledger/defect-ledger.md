@@ -34,3 +34,8 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | Dup Nuxt auto-imports | twin exports across composables | prepare warning silence + schedule/api SSOT |
 | Stack audit lied Elysia 1.4.29 | `npm view` latest ≠ override | `validate:stack-versions` |
 | Integration 401/disallowed host on bare `bun test` | env only in package.json bash wrapper | `src/test-setup.ts` preload |
+
+| D20 | BROKEN JOURNEY | Nuxt `--host localhost` IPv6-only; Playwright/`127.0.0.1` unreachable | FIXED | `dev-stack` defaults `LOOPBACK_HOST_IPV4`; smoke `CLIENT_BASE` IPv4; tests updated |
+| D21 | DUPLICATED | Settings page subtitle repeated via `fallback-description-key` | FIXED | removed fallback; section `descriptionKey` for profile/preferences (i18n×4) |
+| D22 | DUPLICATED | AI chat context chips stacked (panel+sidebar) below xl; header+aside at xl | FIXED | aside `hidden xl:flex`; header chips `xl:hidden` |
+| D23 | SUBPAR | Mobile dock/tab targets &lt;44px; jobs placeholder truncates @320 | FIXED | `TOUCH_TARGET_MIN_CLASS` / `SHELL_DOCK_ITEM_CLASS`; short placeholder + full aria |

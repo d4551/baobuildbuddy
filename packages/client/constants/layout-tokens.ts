@@ -260,6 +260,12 @@ export const MIN_H_36_CLASS = "min-h-36";
 export const MIN_H_60_CLASS = "min-h-60";
 export const MIN_H_80_CLASS = "min-h-80";
 
+/**
+ * Apple HIG / WCAG touch-target floor (44×44 CSS px).
+ * Use on primary interactive chrome (dock items, critical icon buttons).
+ */
+export const TOUCH_TARGET_MIN_CLASS = "min-h-11 min-w-11";
+
 /** Scroll margin for in-page anchor targets (scroll-mt-24). */
 export const SCROLL_MARGIN_TOP_24_CLASS = "scroll-mt-24";
 

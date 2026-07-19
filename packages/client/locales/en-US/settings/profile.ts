@@ -2,6 +2,7 @@ const settingsprofile = {
   settings: {
     profile: {
       title: "User Profile",
+      subtitle: "Keep your professional identity current for resumes, letters, and applications.",
       nameLegend: "Name",
       nameAria: "Name",
       nameHint: "Name must be at least 2 characters.",

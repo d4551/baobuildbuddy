@@ -79,10 +79,11 @@ export const createDevStackRuntime = (
     readCliFlagValue(argv, "--client-port") ?? environment.CLIENT_PORT,
     DEFAULT_CLIENT_DEV_PORT,
   );
+  // Bind Nuxt to IPv4 loopback by default. `localhost` often resolves to ::1-only on
+  // dual-stack hosts, which breaks Playwright/tooling that dials 127.0.0.1.
   const clientHost =
-    readCliFlagValue(argv, "--client-host") ?? environment.NUXT_HOST ?? LOOPBACK_HOST;
-  const localhostHost = LOOPBACK_HOST;
-  const apiBase = `http://${localhostHost}:${toStringPort(serverPort)}`;
+    readCliFlagValue(argv, "--client-host") ?? environment.NUXT_HOST ?? LOOPBACK_HOST_IPV4;
+  const apiBase = `http://${LOOPBACK_HOST_IPV4}:${toStringPort(serverPort)}`;
   const corsOrigins = [
     `http://${LOOPBACK_HOST}:${toStringPort(serverPort)}`,
     `http://${LOOPBACK_HOST_IPV4}:${toStringPort(serverPort)}`,

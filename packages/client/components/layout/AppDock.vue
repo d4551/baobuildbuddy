@@ -4,6 +4,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   SHELL_DOCK_CLASS,
+  SHELL_DOCK_ITEM_CLASS,
 } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getDockNavigationItems, isRouteActive } from "~/constants/navigation";
@@ -29,11 +30,11 @@ function isDockItemActive(item: NavigationItem): boolean {
 
 <template>
   <nav :class="SHELL_DOCK_CLASS" :aria-label="t('a11y.mobilePrimaryNavigation')">
-    <NuxtLink 
+    <NuxtLink
       v-for="item in dockItems"
       :key="item.id"
       :to="item.to"
-      :class="{ 'dock-active': isDockItemActive(item) }"
+      :class="[SHELL_DOCK_ITEM_CLASS, { 'dock-active': isDockItemActive(item) }]"
       :aria-current="isDockItemActive(item) ? 'page' : undefined"
       :aria-label="t(item.labelKey)"
     >

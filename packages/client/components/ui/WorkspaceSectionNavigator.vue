@@ -14,6 +14,7 @@ import {
   SCROLL_TOUCH_PAN_X_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -138,8 +139,9 @@ const activeDescription = computed<string>(() => {
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0"
+                class="tab h-auto grow justify-start rounded-box px-3 py-2 text-left xl:grow-0"
                 :class="[
+                  TOUCH_TARGET_MIN_CLASS,
                   FLEX_GAP_TOKEN_CLASS.gap3,
                   SCROLL_SNAP_ALIGN_START_CLASS,
                   activeSection === section.id ? 'tab-active' : '',
