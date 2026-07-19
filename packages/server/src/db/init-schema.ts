@@ -72,7 +72,22 @@ export const TABLE_DEFINITIONS = [
     )`,
   `CREATE TABLE IF NOT EXISTS auth (
       id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
-      api_key TEXT
+      api_key_hash TEXT,
+      api_key_created_at TEXT,
+      api_key_expires_at TEXT,
+      api_key_revoked_at TEXT
+    )`,
+  `CREATE TABLE IF NOT EXISTS user_role (
+      id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
+      role TEXT NOT NULL DEFAULT 'user'
+    )`,
+  `CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event TEXT NOT NULL,
+      actor TEXT,
+      detail TEXT,
+      ip TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
     )`,
   `CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,

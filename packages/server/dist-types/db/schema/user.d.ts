@@ -1,3 +1,48 @@
+export declare const userRole: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
+    name: "user_role";
+    schema: undefined;
+    columns: {
+        id: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "id";
+            tableName: "user_role";
+            dataType: "string";
+            columnType: "SQLiteText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: true;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            length: number | undefined;
+        }>;
+        role: import("drizzle-orm/sqlite-core").SQLiteColumn<{
+            name: "role";
+            tableName: "user_role";
+            dataType: "string";
+            columnType: "SQLiteText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {
+            length: number | undefined;
+        }>;
+    };
+    dialect: 'sqlite';
+}>;
 export declare const userProfile: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "user_profile";
     schema: undefined;

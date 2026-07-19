@@ -2,6 +2,7 @@
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -138,7 +139,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         class="alert alert-info alert-soft"
         :aria-label="t('settings.aiProviders.openaiV1Aria')"
       >
-        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.openaiV1Description") }}</p>
           <code class="glass-subtle block break-all rounded-box px-3 py-2" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

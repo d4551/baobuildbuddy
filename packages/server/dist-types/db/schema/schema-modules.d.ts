@@ -1,3 +1,4 @@
+import { auditLog } from "./audit-log";
 import { auth } from "./auth";
 import { automationRuns } from "./automation-runs";
 import { chatHistory } from "./chat-history";
@@ -11,5 +12,5 @@ import { resumes } from "./resumes";
 import { settings } from "./settings";
 import { skillMappings } from "./skill-mappings";
 import { studios } from "./studios";
-import { userProfile } from "./user";
-export { applications, auth, automationRuns, chatHistory, coverLetters, gamification, interviewSessions, jobs, jobTaxonomyKeywords, portfolioProjects, portfolios, resumes, savedJobs, settings, skillMappings, studioClassificationRules, studios, userProfile, };
+import { userProfile, userRole } from "./user";
+export { applications, auditLog, auth, automationRuns, chatHistory, coverLetters, gamification, interviewSessions, jobs, jobTaxonomyKeywords, portfolioProjects, portfolios, resumes, savedJobs, settings, skillMappings, studioClassificationRules, studios, userProfile, userRole, };

@@ -87,6 +87,58 @@ export declare const authRoutes: Elysia<string, "local", {
                 error: never;
             };
         };
+    } & {
+        rotate: {
+            post: {
+                body: unknown;
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        readonly configured: true;
+                        readonly apiKey: string;
+                        readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                    } & {
+                        readonly configured: true;
+                        readonly apiKey: string;
+                        readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                    };
+                    403: {
+                        readonly error: "Missing or invalid Authorization header";
+                    };
+                    404: {
+                        readonly error: "No API key configured to rotate";
+                    };
+                };
+                error: never;
+            };
+        };
+    } & {
+        revoke: {
+            post: {
+                body: unknown;
+                params: {};
+                query: unknown;
+                headers: unknown;
+                response: {
+                    200: {
+                        readonly revoked: true;
+                        readonly message: "API key has been revoked.";
+                    } & {
+                        readonly revoked: true;
+                        readonly message: "API key has been revoked.";
+                    };
+                    403: {
+                        readonly error: "Missing or invalid Authorization header";
+                    };
+                    404: {
+                        readonly error: "No API key configured to revoke";
+                    };
+                };
+                error: never;
+            };
+        };
     };
 }, import("elysia/types").DefaultEphemeral, {
     derive: {};

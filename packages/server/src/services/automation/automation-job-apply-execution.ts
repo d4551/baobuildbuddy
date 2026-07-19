@@ -29,6 +29,8 @@ import { runRpaScript } from "./rpa-runner-protocol";
 
 const logger = createServerLogger("automation-job-apply-execution");
 
+type FailureReason = Error | string;
+
 export const createExecutionTracking = (): JobApplyExecutionTracking => ({
   exitCode: null,
   timedOut: false,
@@ -134,10 +136,9 @@ const finalizeJobApplySuccess = async (
     gamificationService.awardXP(ROUTE_GAMIFICATION_XP.automationCompleted, "automation_success"),
   );
   if (awardXpResult.status === "rejected") {
-    logger.warn(
-      { err: String(awardXpResult.reason) },
-      "XP award failed after job apply automation",
-    );
+    logger.warn("XP award failed after job apply automation", {
+      err: String(awardXpResult.reason),
+    });
   }
 };
 
@@ -154,7 +155,7 @@ export const handleJobApplyExecutionFailure = async (params: {
   runId: string;
   automationSettings: AutomationSettings;
   tracking: JobApplyExecutionTracking;
-  reason: unknown;
+  reason: FailureReason;
   createProgressEvent: CreateProgressEvent;
 }): Promise<never> => {
   const message = toErrorMessage(params.reason, API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED);

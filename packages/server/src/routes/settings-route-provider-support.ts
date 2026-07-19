@@ -12,10 +12,14 @@ import { buildAIControlPlaneState } from "../services/ai/control-plane";
 import { LocalProvider } from "../services/ai/local-provider";
 import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { createServerLogger } from "../utils/logger";
+import { decryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
 
 const settingsProviderLogger = createServerLogger("settings-provider-test");
 
 const KEY_MASK_VISIBLE_CHARS = 4;
+
+const maybeDecrypt = (value: string): string =>
+  isEncryptionAvailable() && value.startsWith("enc:") ? decryptProviderKey(value) : value;
 type SettingsRow = typeof settingsTable.$inferSelect;
 
 export const buildSettingsResponse = async (row: SettingsRow) => {
@@ -38,11 +42,17 @@ export const buildSettingsResponse = async (row: SettingsRow) => {
     preferredModel: controlPlane.preferredModel,
     theme: normalizeAppDataTheme(row.theme),
     brandSettings: resolveBrandSettings(row.brandSettings),
-    geminiApiKey: row.geminiApiKey ? `***${row.geminiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
-    openaiApiKey: row.openaiApiKey ? `***${row.openaiApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
-    claudeApiKey: row.claudeApiKey ? `***${row.claudeApiKey.slice(-KEY_MASK_VISIBLE_CHARS)}` : null,
+    geminiApiKey: row.geminiApiKey
+      ? `***${maybeDecrypt(row.geminiApiKey).slice(-KEY_MASK_VISIBLE_CHARS)}`
+      : null,
+    openaiApiKey: row.openaiApiKey
+      ? `***${maybeDecrypt(row.openaiApiKey).slice(-KEY_MASK_VISIBLE_CHARS)}`
+      : null,
+    claudeApiKey: row.claudeApiKey
+      ? `***${maybeDecrypt(row.claudeApiKey).slice(-KEY_MASK_VISIBLE_CHARS)}`
+      : null,
     huggingfaceToken: row.huggingfaceToken
-      ? `***${row.huggingfaceToken.slice(-KEY_MASK_VISIBLE_CHARS)}`
+      ? `***${maybeDecrypt(row.huggingfaceToken).slice(-KEY_MASK_VISIBLE_CHARS)}`
       : null,
     hasGeminiKey: Boolean(row.geminiApiKey),
     hasOpenaiKey: Boolean(row.openaiApiKey),

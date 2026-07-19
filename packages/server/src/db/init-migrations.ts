@@ -1,5 +1,7 @@
 import type { Database } from "bun:sqlite";
 import {
+  AUTH_REQUIRED_COLUMNS,
+  AUTH_TABLE_NAME,
   AUTOMATION_RUNS_REQUIRED_COLUMNS,
   AUTOMATION_RUNS_TABLE_NAME,
   JOBS_REQUIRED_COLUMNS,
@@ -54,6 +56,7 @@ const ensureColumns = (
 };
 
 export const ensureDatabaseMigrations = (sqlite: Database): void => {
+  ensureColumns(sqlite, AUTH_TABLE_NAME, AUTH_REQUIRED_COLUMNS);
   ensureColumns(sqlite, AUTOMATION_RUNS_TABLE_NAME, AUTOMATION_RUNS_REQUIRED_COLUMNS);
   ensureColumns(sqlite, SETTINGS_TABLE_NAME, SETTINGS_REQUIRED_COLUMNS);
   ensureColumns(sqlite, JOBS_TABLE_NAME, JOBS_REQUIRED_COLUMNS);

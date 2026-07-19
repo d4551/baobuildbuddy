@@ -60,8 +60,11 @@ export class AutomationProgressEvents {
 
       persistProgress(normalizedEvent).then(
         () => undefined,
-        (error: unknown) => {
-          automationProgressLogger.error("Failed to persist progress event", error);
+        (error) => {
+          automationProgressLogger.error(
+            "Failed to persist progress event",
+            error instanceof Error ? error.message : String(error),
+          );
         },
       );
       broadcastAutomationEvent(normalizedEvent);

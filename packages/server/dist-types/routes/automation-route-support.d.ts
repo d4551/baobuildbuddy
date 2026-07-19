@@ -1,4 +1,5 @@
 import { type RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 import type { JobApplyRequestBody } from "./automation-route-contracts";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "./automation-route-contracts";
 export declare const readAutomationRunById: (runId: string) => Promise<RpaRunExecutionEnvelope | null>;
@@ -11,8 +12,8 @@ export declare const listAutomationRuns: (query: {
     status: "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
-    input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-    output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+    input: JsonObject | null;
+    output: JsonObject | {
         success: boolean;
         error: string | null;
         screenshots: string[];
@@ -33,7 +34,7 @@ export declare const listAutomationRuns: (query: {
     error: string | {
         code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
         message: string;
-        details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+        details?: JsonObject | undefined;
         source: string;
     } | null;
     progress: number | null;

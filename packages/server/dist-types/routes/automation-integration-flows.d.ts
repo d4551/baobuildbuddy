@@ -1,0 +1,12 @@
+import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import type { ApplicationAutomationService } from "../services/automation/application-automation-service";
+import { createResumeRecord, upsertDeterministicSettings } from "./automation-integration-helpers";
+export { createResumeRecord, upsertDeterministicSettings };
+export declare const startManualJobApplyRun: (resumeId: string, jobUrl: string) => Promise<RpaRunExecutionEnvelope>;
+export declare const verifyManualJobApplyFlow: (resumeId: string, fixtureBaseUrl: string, getSubmissionCount: () => number) => Promise<void>;
+export declare const startScheduledJobApplyRun: (resumeId: string, jobUrl: string) => Promise<RpaRunExecutionEnvelope>;
+export declare const verifyScheduledJobApplyFlow: (resumeId: string, fixtureBaseUrl: string, getSubmissionCount: () => number) => Promise<void>;
+export declare const configureDeterministicSmtp: (port: number) => Promise<void>;
+export declare const verifyEmailResponseFlow: () => Promise<void>;
+export declare const insertRecoveredScheduledRun: (resumeId: string, fixtureBaseUrl: string) => Promise<string>;
+export declare const verifyRecoveredScheduledRun: (resumeId: string, fixtureBaseUrl: string, getSubmissionCount: () => number, instantiateService: () => ApplicationAutomationService) => Promise<void>;

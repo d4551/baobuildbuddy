@@ -42,7 +42,7 @@ describe("collectRawDesignTokenViolationsForContent", () => {
 
   test("flags design-token prop defaults baking in utility tokens", () => {
     const violations = collectRawDesignTokenViolationsForContent(
-      "packages/client/components/ui/UiRadialMeter.vue",
+      CONSUMER_PATH,
       [
         '<script setup lang="ts">',
         'withDefaults(defineProps<{ sizeClass?: string }>(), { sizeClass: "h-24 w-24" });',

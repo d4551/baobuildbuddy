@@ -1,15 +1,15 @@
 import { log } from "../middleware/logger";
 
-type ServerLogLevel = "debug" | "info" | "warn" | "error";
+type LogDetail = object | string | number | boolean | null;
 
 /**
  * Minimal logger contract used by runtime modules to avoid direct console usage.
  */
 export type ServerLogger = {
-  debug: (...values: readonly unknown[]) => void;
-  info: (...values: readonly unknown[]) => void;
-  warn: (...values: readonly unknown[]) => void;
-  error: (...values: readonly unknown[]) => void;
+  debug: (message: string, detail?: LogDetail) => void;
+  info: (message: string, detail?: LogDetail) => void;
+  warn: (message: string, detail?: LogDetail) => void;
+  error: (message: string, detail?: LogDetail) => void;
 };
 
 /**
@@ -21,43 +21,18 @@ export type ServerLogger = {
 export const createServerLogger = (component: string): ServerLogger => {
   const scopedLogger = log.child({ component });
 
-  const emit = (level: ServerLogLevel, values: readonly unknown[]): void => {
-    if (values.length === 0) {
-      return;
-    }
-
-    const [primary, ...rest] = values;
-
-    if (typeof primary === "string") {
-      if (rest.length === 0) {
-        scopedLogger[level](primary);
-        return;
-      }
-
-      scopedLogger[level](rest.length === 1 ? { details: rest[0] } : { details: rest }, primary);
-      return;
-    }
-
-    if (values.length === 1) {
-      scopedLogger[level](primary);
-      return;
-    }
-
-    scopedLogger[level]({ details: values });
-  };
-
   return {
-    debug: (...values: unknown[]) => {
-      emit("debug", values);
+    debug: (message: string, detail?: LogDetail) => {
+      scopedLogger.debug(detail !== undefined ? { details: detail } : {}, message);
     },
-    info: (...values: unknown[]) => {
-      emit("info", values);
+    info: (message: string, detail?: LogDetail) => {
+      scopedLogger.info(detail !== undefined ? { details: detail } : {}, message);
     },
-    warn: (...values: unknown[]) => {
-      emit("warn", values);
+    warn: (message: string, detail?: LogDetail) => {
+      scopedLogger.warn(detail !== undefined ? { details: detail } : {}, message);
     },
-    error: (...values: unknown[]) => {
-      emit("error", values);
+    error: (message: string, detail?: LogDetail) => {
+      scopedLogger.error(detail !== undefined ? { details: detail } : {}, message);
     },
   };
 };

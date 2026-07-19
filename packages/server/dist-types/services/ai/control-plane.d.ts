@@ -32,5 +32,5 @@ export interface AIControlPlaneState {
 /**
  * Builds the canonical AI control-plane state from one persisted settings row.
  */
-export declare function buildAIControlPlaneState(row: SettingsRow): Promise<AIControlPlaneState>;
+export declare function buildAIControlPlaneState(settingsRow: SettingsRow): Promise<AIControlPlaneState>;
 export {};

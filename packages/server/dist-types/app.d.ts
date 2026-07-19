@@ -133,6 +133,58 @@ export declare const app: Elysia<"/api", "local", {
                     error: never;
                 };
             };
+        } & {
+            rotate: {
+                post: {
+                    body: unknown;
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            readonly configured: true;
+                            readonly apiKey: string;
+                            readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                        } & {
+                            readonly configured: true;
+                            readonly apiKey: string;
+                            readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                        };
+                        403: {
+                            readonly error: "Missing or invalid Authorization header";
+                        };
+                        404: {
+                            readonly error: "No API key configured to rotate";
+                        };
+                    };
+                    error: never;
+                };
+            };
+        } & {
+            revoke: {
+                post: {
+                    body: unknown;
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            readonly revoked: true;
+                            readonly message: "API key has been revoked.";
+                        } & {
+                            readonly revoked: true;
+                            readonly message: "API key has been revoked.";
+                        };
+                        403: {
+                            readonly error: "Missing or invalid Authorization header";
+                        };
+                        404: {
+                            readonly error: "No API key configured to revoke";
+                        };
+                    };
+                    error: never;
+                };
+            };
         };
     };
 } & {
@@ -3214,7 +3266,14 @@ export declare const app: Elysia<"/api", "local", {
                             gameExpression: string;
                             transferableSkill: string;
                             industryApplications: string[] | null;
-                            evidence: unknown[] | null;
+                            evidence: {
+                                id: string;
+                                type: string;
+                                title: string;
+                                description: string;
+                                url?: string | undefined;
+                                verificationStatus: string;
+                            }[] | null;
                             confidence: number | null;
                             category: string | null;
                             demandLevel: string | null;
@@ -3245,7 +3304,14 @@ export declare const app: Elysia<"/api", "local", {
                         gameExpression: string;
                         transferableSkill: string;
                         industryApplications?: string[] | undefined;
-                        evidence?: Record<string, unknown>[] | undefined;
+                        evidence?: {
+                            id?: string | undefined;
+                            type?: string | undefined;
+                            title: string;
+                            description: string;
+                            url?: string | undefined;
+                            verificationStatus?: string | undefined;
+                        }[] | undefined;
                         confidence?: number | undefined;
                         category?: string | undefined;
                         demandLevel?: string | undefined;
@@ -3299,7 +3365,14 @@ export declare const app: Elysia<"/api", "local", {
                             gameExpression?: string | undefined;
                             transferableSkill?: string | undefined;
                             industryApplications?: string[] | undefined;
-                            evidence?: Record<string, unknown>[] | undefined;
+                            evidence?: {
+                                id?: string | undefined;
+                                type?: string | undefined;
+                                title: string;
+                                description: string;
+                                url?: string | undefined;
+                                verificationStatus?: string | undefined;
+                            }[] | undefined;
                             confidence?: number | undefined;
                             category?: string | undefined;
                             demandLevel?: string | undefined;
@@ -3366,9 +3439,18 @@ export declare const app: Elysia<"/api", "local", {
                         query: unknown;
                         headers: unknown;
                         response: {
-                            200: unknown;
-                            404: unknown;
-                            410: unknown;
+                            200: {
+                                message: string;
+                                id: string;
+                            };
+                            404: {
+                                error: string;
+                                id?: string | undefined;
+                            };
+                            410: {
+                                error: string;
+                                id?: string | undefined;
+                            };
                         };
                         error: never;
                     };
@@ -3486,8 +3568,8 @@ export declare const app: Elysia<"/api", "local", {
             "ai-analyze": {
                 post: {
                     body: {
-                        gameExperience?: Record<string, unknown> | undefined;
-                        resume?: Record<string, unknown> | undefined;
+                        gameExperience?: Record<string, string | number | boolean | null> | undefined;
+                        resume?: Record<string, string | number | boolean | null> | undefined;
                         autoCreateMappings?: boolean | undefined;
                     };
                     params: {};
@@ -3497,7 +3579,7 @@ export declare const app: Elysia<"/api", "local", {
                         200: {
                             message: string;
                             detectedSkills: string[];
-                            suggestedMappings: Record<string, unknown>[];
+                            suggestedMappings: Record<string, string | number | boolean | null>[];
                             recommendations: string[];
                             provider?: string | undefined;
                         };
@@ -3514,7 +3596,7 @@ export declare const app: Elysia<"/api", "local", {
                         500: {
                             message: string;
                             detectedSkills: string[];
-                            suggestedMappings: Record<string, unknown>[];
+                            suggestedMappings: Record<string, string | number | boolean | null>[];
                             recommendations: string[];
                             provider?: string | undefined;
                         };

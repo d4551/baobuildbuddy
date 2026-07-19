@@ -67,7 +67,10 @@ export class JobAggregator {
         this.logger.info(`${providerName}: fetched ${result.value.length} jobs`);
         return result.value;
       }
-      this.logger.error(`${providerName}: failed`, result.reason);
+      this.logger.error(
+        `${providerName}: failed`,
+        result.reason instanceof Error ? result.reason.message : String(result.reason),
+      );
       return [];
     });
   }
@@ -122,7 +125,10 @@ export class JobAggregator {
         }
         continue;
       }
-      this.logger.error("Failed to save job:", result.reason);
+      this.logger.error(
+        "Failed to save job:",
+        result.reason instanceof Error ? result.reason.message : String(result.reason),
+      );
     }
 
     this.logger.info(`Refresh complete: ${newCount} new, ${updatedCount} updated`);

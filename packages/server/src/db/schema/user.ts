@@ -2,6 +2,11 @@ import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+export const userRole = sqliteTable("user_role", {
+  id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
+  role: text("role").notNull().default("user"),
+});
+
 export const userProfile = sqliteTable("user_profile", {
   id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
   name: text("name").notNull().default(""),

@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import { isRecord } from "@bao/shared/utils/type-guards";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
@@ -78,34 +78,42 @@ export const readApiData = async (request: Promise<unknown>): Promise<unknown> =
   return response;
 };
 
-export const toResumeSelectOptions = (value: unknown): ResumeSelectOption[] =>
-  Array.isArray(value)
-    ? value.flatMap((entry) =>
-        isRecord(entry) && typeof entry.id === "string"
-          ? [
-              {
-                id: entry.id,
-                ...(typeof entry.name === "string" ? { name: entry.name } : {}),
-              } satisfies ResumeSelectOption,
-            ]
-          : [],
-      )
-    : [];
+export const toResumeSelectOptions = <T>(value: T): ResumeSelectOption[] => {
+  const entries = asJsonArray(value);
+  if (!entries) {
+    return [];
+  }
+  const options: ResumeSelectOption[] = [];
+  for (const entry of entries) {
+    if (!isRecord(entry) || typeof entry.id !== "string") {
+      continue;
+    }
+    options.push({
+      id: entry.id,
+      ...(typeof entry.name === "string" ? { name: entry.name } : {}),
+    });
+  }
+  return options;
+};
 
-export const toCoverLetterSelectOptions = (value: unknown): CoverLetterSelectOption[] =>
-  Array.isArray(value)
-    ? value.flatMap((entry) =>
-        isRecord(entry) && typeof entry.id === "string"
-          ? [
-              {
-                id: entry.id,
-                ...(typeof entry.company === "string" ? { company: entry.company } : {}),
-                ...(typeof entry.position === "string" ? { position: entry.position } : {}),
-              } satisfies CoverLetterSelectOption,
-            ]
-          : [],
-      )
-    : [];
+export const toCoverLetterSelectOptions = <T>(value: T): CoverLetterSelectOption[] => {
+  const entries = asJsonArray(value);
+  if (!entries) {
+    return [];
+  }
+  const options: CoverLetterSelectOption[] = [];
+  for (const entry of entries) {
+    if (!isRecord(entry) || typeof entry.id !== "string") {
+      continue;
+    }
+    options.push({
+      id: entry.id,
+      ...(typeof entry.company === "string" ? { company: entry.company } : {}),
+      ...(typeof entry.position === "string" ? { position: entry.position } : {}),
+    });
+  }
+  return options;
+};
 
 export function useAutomationJobApplyBootstrap(input: {
   api: ReturnType<typeof useApi>;

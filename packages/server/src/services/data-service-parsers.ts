@@ -1,11 +1,12 @@
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import type { JsonObject } from "@bao/shared/utils/json";
 import {
   asBoolean,
   asNumber,
   asRecord,
   asString,
   asStringArray,
-  asUnknownArray,
+  asJsonArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
 import type { chatHistory } from "../db/schema/chat-history";
@@ -16,6 +17,8 @@ import type { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import type { resumes } from "../db/schema/resumes";
 import { DEFAULT_SETTINGS_ID } from "../db/schema/settings";
 import type { skillMappings } from "../db/schema/skill-mappings";
+import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
+import { normalizeEvidenceEntries } from "./skill-mapping-normalizers";
 
 type ResumeInsert = typeof resumes.$inferInsert;
 type CoverLetterInsert = typeof coverLetters.$inferInsert;
@@ -26,7 +29,7 @@ type GamificationInsert = typeof gamification.$inferInsert;
 type SkillMappingInsert = typeof skillMappings.$inferInsert;
 type ChatHistoryInsert = typeof chatHistory.$inferInsert;
 
-const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefined => {
+const asStringArrayRecord = <T>(value: T): Record<string, string[]> | undefined => {
   if (!isRecord(value)) return;
   const result: Record<string, string[]> = {};
   for (const [key, entry] of Object.entries(value)) {
@@ -36,11 +39,15 @@ const asStringArrayRecord = (value: unknown): Record<string, string[]> | undefin
   return result;
 };
 
-export const omitImportMetadata = (value: Record<string, unknown>): Record<string, unknown> =>
-  Object.fromEntries(Object.entries(value).filter(([key]) => key !== "id" && key !== "createdAt"));
+export const omitImportMetadata = <T extends object>(value: T): JsonObject => {
+  const record = asRecord(value) ?? {};
+  return Object.fromEntries(
+    Object.entries(record).filter(([key]) => key !== "id" && key !== "createdAt"),
+  );
+};
 
-export const sanitizeImportedSettings = (value: unknown): Record<string, unknown> => {
-  const settingsRecord = isRecord(value) ? { ...value } : {};
+export const sanitizeImportedSettings = <T>(value: T): JsonObject => {
+  const settingsRecord: JsonObject = isRecord(value) ? { ...value } : {};
   const secretKeys = [
     "geminiApiKey",
     "openaiApiKey",
@@ -49,16 +56,19 @@ export const sanitizeImportedSettings = (value: unknown): Record<string, unknown
     "emailTransportPassword",
   ] as const;
   for (const key of secretKeys) {
-    if (settingsRecord[key] === "***REDACTED***") {
-      settingsRecord[key] = undefined;
+    const secretValue = settingsRecord[key];
+    if (secretValue === "***REDACTED***") {
+      delete settingsRecord[key];
+    } else if (typeof secretValue === "string" && secretValue.length > 0) {
+      settingsRecord[key] = isEncryptionAvailable() ? encryptProviderKey(secretValue) : secretValue;
     }
   }
-  settingsRecord.id = undefined;
-  settingsRecord.createdAt = undefined;
+  delete settingsRecord.id;
+  delete settingsRecord.createdAt;
   return settingsRecord;
 };
 
-export const parseResumeInsert = (value: unknown): ResumeInsert | null => {
+export const parseResumeInsert = <T>(value: T): ResumeInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   if (!id) return null;
@@ -68,10 +78,10 @@ export const parseResumeInsert = (value: unknown): ResumeInsert | null => {
     name: asString(value.name),
     personalInfo: asRecord(value.personalInfo),
     summary: asString(value.summary),
-    experience: asUnknownArray(value.experience) ?? [],
-    education: asUnknownArray(value.education) ?? [],
+    experience: asJsonArray(value.experience) ?? [],
+    education: asJsonArray(value.education) ?? [],
     skills: asRecord(value.skills),
-    projects: asUnknownArray(value.projects) ?? [],
+    projects: asJsonArray(value.projects) ?? [],
     gamingExperience: asRecord(value.gamingExperience),
     template: asString(value.template),
     theme: asString(value.theme),
@@ -81,7 +91,7 @@ export const parseResumeInsert = (value: unknown): ResumeInsert | null => {
   };
 };
 
-export const parseCoverLetterInsert = (value: unknown): CoverLetterInsert | null => {
+export const parseCoverLetterInsert = <T>(value: T): CoverLetterInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const company = asString(value.company);
@@ -100,7 +110,7 @@ export const parseCoverLetterInsert = (value: unknown): CoverLetterInsert | null
   };
 };
 
-export const parsePortfolioInsert = (value: unknown): PortfolioInsert | null => {
+export const parsePortfolioInsert = <T>(value: T): PortfolioInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   if (!id) return null;
@@ -112,7 +122,7 @@ export const parsePortfolioInsert = (value: unknown): PortfolioInsert | null => 
   };
 };
 
-export const parsePortfolioProjectInsert = (value: unknown): PortfolioProjectInsert | null => {
+export const parsePortfolioProjectInsert = <T>(value: T): PortfolioProjectInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const portfolioId = asString(value.portfolioId);
@@ -140,7 +150,7 @@ export const parsePortfolioProjectInsert = (value: unknown): PortfolioProjectIns
   };
 };
 
-export const parseInterviewSessionInsert = (value: unknown): InterviewSessionInsert | null => {
+export const parseInterviewSessionInsert = <T>(value: T): InterviewSessionInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const studioId = asString(value.studioId);
@@ -150,8 +160,8 @@ export const parseInterviewSessionInsert = (value: unknown): InterviewSessionIns
     id,
     studioId,
     config: asRecord(value.config),
-    questions: asUnknownArray(value.questions) ?? [],
-    responses: asUnknownArray(value.responses) ?? [],
+    questions: asJsonArray(value.questions) ?? [],
+    responses: asJsonArray(value.responses) ?? [],
     finalAnalysis: asRecord(value.finalAnalysis),
     status: asString(value.status),
     startTime: asNumber(value.startTime),
@@ -161,7 +171,7 @@ export const parseInterviewSessionInsert = (value: unknown): InterviewSessionIns
   };
 };
 
-export const parseGamificationInsert = (value: unknown): GamificationInsert | null => {
+export const parseGamificationInsert = <T>(value: T): GamificationInsert | null => {
   if (!isRecord(value)) return null;
   return {
     id: asString(value.id) ?? DEFAULT_PROFILE_ID,
@@ -178,7 +188,7 @@ export const parseGamificationInsert = (value: unknown): GamificationInsert | nu
   };
 };
 
-export const parseSkillMappingInsert = (value: unknown): SkillMappingInsert | null => {
+export const parseSkillMappingInsert = <T>(value: T): SkillMappingInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const gameExpression = asString(value.gameExpression);
@@ -190,7 +200,7 @@ export const parseSkillMappingInsert = (value: unknown): SkillMappingInsert | nu
     gameExpression,
     transferableSkill,
     industryApplications: asStringArray(value.industryApplications) ?? [],
-    evidence: asUnknownArray(value.evidence) ?? [],
+    evidence: normalizeEvidenceEntries(asJsonArray(value.evidence)),
     confidence: asNumber(value.confidence),
     category: asString(value.category),
     demandLevel: asString(value.demandLevel),
@@ -200,7 +210,7 @@ export const parseSkillMappingInsert = (value: unknown): SkillMappingInsert | nu
   };
 };
 
-export const parseChatHistoryInsert = (value: unknown): ChatHistoryInsert | null => {
+export const parseChatHistoryInsert = <T>(value: T): ChatHistoryInsert | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const role = asString(value.role);

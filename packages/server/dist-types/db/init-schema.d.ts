@@ -20,7 +20,14 @@ export declare const TABLE_DEFINITIONS: readonly ["CREATE TABLE IF NOT EXISTS us
       email_transport_password TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
-    )`, "CREATE TABLE IF NOT EXISTS auth (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      api_key TEXT\n    )", `CREATE TABLE IF NOT EXISTS jobs (
+    )`, "CREATE TABLE IF NOT EXISTS auth (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      api_key_hash TEXT,\n      api_key_created_at TEXT,\n      api_key_expires_at TEXT,\n      api_key_revoked_at TEXT\n    )", "CREATE TABLE IF NOT EXISTS user_role (\n      id TEXT PRIMARY KEY DEFAULT 'default',\n      role TEXT NOT NULL DEFAULT 'user'\n    )", `CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event TEXT NOT NULL,
+      actor TEXT,
+      detail TEXT,
+      ip TEXT,
+      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+    )`, `CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       company TEXT NOT NULL,

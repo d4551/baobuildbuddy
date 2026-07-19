@@ -29,6 +29,7 @@ import {
 } from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { resolveKnownProvider } from "./settings-route-contracts";
+import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
 const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
@@ -240,18 +241,23 @@ export const buildApiKeysUpdate = (body: {
   localModelName?: string;
   emailTransportPassword?: string;
 }): Partial<SettingsInsert> => {
+  const maybeEncrypt = (value: string): string =>
+    isEncryptionAvailable() ? encryptProviderKey(value) : value;
+
   const update: Partial<SettingsInsert> = {};
   if (body.geminiApiKey !== undefined) {
-    update.geminiApiKey = body.geminiApiKey;
+    update.geminiApiKey = body.geminiApiKey ? maybeEncrypt(body.geminiApiKey) : null;
   }
   if (body.openaiApiKey !== undefined) {
-    update.openaiApiKey = body.openaiApiKey;
+    update.openaiApiKey = body.openaiApiKey ? maybeEncrypt(body.openaiApiKey) : null;
   }
   if (body.claudeApiKey !== undefined) {
-    update.claudeApiKey = body.claudeApiKey;
+    update.claudeApiKey = body.claudeApiKey ? maybeEncrypt(body.claudeApiKey) : null;
   }
   if (body.huggingfaceToken !== undefined) {
-    update.huggingfaceToken = body.huggingfaceToken;
+    update.huggingfaceToken = body.huggingfaceToken
+      ? maybeEncrypt(body.huggingfaceToken)
+      : null;
   }
   if (body.localModelEndpoint !== undefined) {
     update.localModelEndpoint = normalizeLocalModelEndpoint(body.localModelEndpoint);
@@ -261,7 +267,9 @@ export const buildApiKeysUpdate = (body: {
   }
   if (body.emailTransportPassword !== undefined) {
     update.emailTransportPassword =
-      body.emailTransportPassword.length > 0 ? body.emailTransportPassword : null;
+      body.emailTransportPassword.length > 0
+        ? maybeEncrypt(body.emailTransportPassword)
+        : null;
   }
   update.updatedAt = new Date().toISOString();
   return update;

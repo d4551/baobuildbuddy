@@ -1,10 +1,11 @@
 import type { ErrorEnvelope } from "@bao/shared/schemas/error-envelope.schema";
 import type { RpaRunEvent, RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 type ProgressRunEvent = Extract<RpaRunEvent, {
     eventType: "progress";
 }>;
-export declare const toFiniteNumber: (value: unknown) => number;
+export declare const toFiniteNumber: <T>(value: T) => number;
 export declare const createProgressUpdate: (event: ProgressRunEvent) => {
     status?: string;
     progress?: number;
@@ -33,7 +34,7 @@ export declare const createFailedRunUpdate: (errorMessage: string, execution?: {
         errorEnvelope: {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: JsonObject | undefined;
         } | null;
     };
     error: string;
@@ -49,7 +50,7 @@ export declare const createFailedRunUpdate: (errorMessage: string, execution?: {
 };
 export declare const createCompletedRunUpdate: (output: RpaRunResult, execution: Pick<RpaScriptExecutionResult, "exitCode" | "timedOut" | "aborted" | "executionMs">) => {
     status: string;
-    output: Record<string, unknown>;
+    output: JsonObject;
     screenshots: string[];
     error: string | null;
     progress: number;

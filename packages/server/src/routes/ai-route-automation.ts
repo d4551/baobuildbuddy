@@ -21,8 +21,11 @@ const startJobApplyRun = (
     jobId?: string;
   },
 ) => {
-  applicationAutomationService.runJobApply(runId, payload).then(undefined, (error: unknown) => {
-    aiRoutesLogger.error("Failed to execute job application automation run:", error);
+  applicationAutomationService.runJobApply(runId, payload).then(undefined, (error) => {
+    aiRoutesLogger.error(
+      "Failed to execute job application automation run:",
+      error instanceof Error ? error.message : String(error),
+    );
   });
 };
 

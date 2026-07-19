@@ -137,6 +137,7 @@ const resolveAuthConfig = () => {
   return {
     disableAuth: disableAuthEnv === "true" || disableAuthEnv === "1",
     authSetupToken: parseOptionalNonEmptyString(Bun.env.BAO_AUTH_SETUP_TOKEN),
+    encryptionKey: parseOptionalNonEmptyString(Bun.env.BAO_ENCRYPTION_KEY),
   };
 };
 

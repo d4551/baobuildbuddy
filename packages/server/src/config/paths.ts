@@ -6,6 +6,7 @@ import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
 } from "@bao/shared/utils/playwright-browsers-path";
+import { resolveScraperDirectory } from "./scraper-dir-resolve";
 
 type AutomationScriptRunnerConfig = {
   executablePath: string | null;
@@ -53,29 +54,8 @@ mkdirSync(AUTOMATION_SCREENSHOT_DIR, { recursive: true });
  * Resolved from current working directory with fallback candidates so tooling runs
  * reliably even when drizzle-kit executes the config in CJS mode.
  */
-const resolveScraperDir = (): string => {
-  const configuredScraperDir = process.env.BAO_SCRAPER_DIR?.trim();
-  if (configuredScraperDir && configuredScraperDir.length > 0) {
-    return resolve(configuredScraperDir);
-  }
-
-  const cwd = process.cwd();
-  const candidates = [
-    resolve(cwd, "scraper"),
-    resolve(cwd, "packages", "scraper"),
-    resolve(cwd, "..", "packages", "scraper"),
-    resolve(cwd, "..", "..", "packages", "scraper"),
-    resolve(cwd, "..", "..", "..", "packages", "scraper"),
-  ];
-
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return candidates[0];
-};
+const resolveScraperDir = (): string =>
+  resolveScraperDirectory(process.cwd(), process.env.BAO_SCRAPER_DIR);
 
 export const readAutomationScriptRunnerConfig = (): AutomationScriptRunnerConfig => {
   const executablePath = process.env.BAO_SCRIPT_RUNNER_PATH?.trim();
