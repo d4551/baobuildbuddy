@@ -77,6 +77,41 @@ if (mode === "timeout") {
   process.exit(0);
 }
 
+if (mode === "browser_missing" || mode === "browser_crash" || mode === "browser_polluted") {
+  const failureMode =
+    mode === "browser_missing"
+      ? "BROWSER_EXECUTABLE_MISSING"
+      : mode === "browser_crash"
+        ? "BROWSER_PROCESS_CRASHED"
+        : "BROWSER_PATH_POLLUTED";
+  const causeMessage =
+    mode === "browser_missing"
+      ? "browserType.launch: Executable doesn't exist at /tmp/chromium"
+      : mode === "browser_crash"
+        ? "browserType.launch: Target closed (Received signal SIGSEGV)"
+        : "browserType.launch: Failed to launch browser from cursor-sandbox-cache";
+  process.stdout.write(
+    \`\${JSON.stringify({
+      protocolVersion,
+      runId,
+      sequence: 0,
+      timestamp: "2026-02-23T00:00:02+00:00",
+      eventType: "error",
+      error: {
+        code: "AUTOMATION_RUNTIME_ERROR",
+        message: \`Unable to launch automation browser (\${failureMode}).\`,
+        source: "@bao/scraper",
+        details: {
+          failureMode,
+          causeMessage,
+          stage: "launch",
+        },
+      },
+    })}\\n\`,
+  );
+  process.exit(1);
+}
+
 process.stderr.write("runtime failure\\n");
 process.exit(1);
 `,
@@ -177,10 +212,51 @@ const registerTimeoutCase = (): void => {
   });
 };
 
+const registerBrowserLaunchFailureDifferentiationCase = (): void => {
+  test("surfaces distinct browser launch failure modes through protocol error details", async () => {
+    const missing = await runRpaScript({
+      scriptPath: TEST_SCRIPT_NAME,
+      scriptInput: { mode: "browser_missing" },
+      executionContext: createExecutionContext(5_000),
+    });
+    const crashed = await runRpaScript({
+      scriptPath: TEST_SCRIPT_NAME,
+      scriptInput: { mode: "browser_crash" },
+      executionContext: createExecutionContext(5_000),
+    });
+    const polluted = await runRpaScript({
+      scriptPath: TEST_SCRIPT_NAME,
+      scriptInput: { mode: "browser_polluted" },
+      executionContext: createExecutionContext(5_000),
+    });
+
+    expect(missing.error?.code).toBe("AUTOMATION_RUNTIME_ERROR");
+    expect(crashed.error?.code).toBe("AUTOMATION_RUNTIME_ERROR");
+    expect(polluted.error?.code).toBe("AUTOMATION_RUNTIME_ERROR");
+
+    expect(missing.error?.details?.failureMode).toBe("BROWSER_EXECUTABLE_MISSING");
+    expect(crashed.error?.details?.failureMode).toBe("BROWSER_PROCESS_CRASHED");
+    expect(polluted.error?.details?.failureMode).toBe("BROWSER_PATH_POLLUTED");
+
+    expect(missing.error?.details?.failureMode).not.toBe(crashed.error?.details?.failureMode);
+    expect(crashed.error?.details?.failureMode).not.toBe(polluted.error?.details?.failureMode);
+    expect(polluted.error?.details?.failureMode).not.toBe(missing.error?.details?.failureMode);
+
+    expect(String(missing.error?.details?.causeMessage)).toContain("Executable doesn't exist");
+    expect(String(crashed.error?.details?.causeMessage)).toContain("SIGSEGV");
+    expect(String(polluted.error?.details?.causeMessage)).toContain("cursor-sandbox-cache");
+
+    expect(missing.error?.message).toContain("BROWSER_EXECUTABLE_MISSING");
+    expect(crashed.error?.message).toContain("BROWSER_PROCESS_CRASHED");
+    expect(polluted.error?.message).toContain("BROWSER_PATH_POLLUTED");
+  });
+};
+
 describe("runRpaScript", () => {
   registerSuccessCase();
   registerMalformedPayloadCase();
   registerRuntimeFailureCase();
   registerUnexpectedProgressCase();
   registerTimeoutCase();
+  registerBrowserLaunchFailureDifferentiationCase();
 });

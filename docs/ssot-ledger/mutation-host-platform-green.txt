@@ -1,0 +1,18 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/shared/src/utils/playwright-browsers-path.test.ts:
+(pass) playwright browsers path sanitization > detects cursor-sandbox browser caches as polluted [0.04ms]
+(pass) playwright browsers path sanitization > detects missing browser cache paths as polluted [0.01ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path when host cache exists [0.07ms]
+(pass) playwright browsers path sanitization > unsets polluted browsers path when host cache is missing [0.02ms]
+(pass) playwright browsers path sanitization > derives mac arm64 host platform without reading os.cpus [0.06ms]
+(pass) playwright browsers path sanitization > leaves non-mac platforms without a host override
+(pass) playwright browsers path sanitization > injects host platform override into automation child env [0.01ms]
+(pass) playwright browsers path sanitization > preserves an existing host platform override
+(pass) playwright browsers path sanitization > rewrites polluted browsers path and injects host override together [0.02ms]
+(pass) playwright browsers path sanitization > skips host override injection when resolver returns null
+
+ 10 pass
+ 0 fail
+ 11 expect() calls
+Ran 10 tests across 1 file. [17.00ms]

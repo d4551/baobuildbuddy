@@ -18,6 +18,34 @@ export const rpaRunErrorCodeSchema = z.enum([
 ]);
 
 /**
+ * Discriminated browser-launch failure modes under AUTOMATION_RUNTIME_ERROR.
+ * Keeps top-level code stable; surfaces root cause in details.failureMode.
+ */
+export const automationBrowserLaunchFailureModeSchema = z.enum([
+  "BROWSER_EXECUTABLE_MISSING",
+  "BROWSER_PATH_POLLUTED",
+  "BROWSER_PROCESS_CRASHED",
+  "BROWSER_CONTEXT_FAILED",
+  "BROWSER_PAGE_FAILED",
+  "BROWSER_LAUNCH_FAILED",
+]);
+
+/**
+ * Playwright session stage where launch failed.
+ */
+export const automationBrowserLaunchStageSchema = z.enum(["launch", "context", "page"]);
+
+/**
+ * Typed details payload for automation browser launch failures.
+ */
+export const automationBrowserLaunchFailureDetailsSchema = z.object({
+  failureMode: automationBrowserLaunchFailureModeSchema,
+  causeMessage: z.string().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  stage: automationBrowserLaunchStageSchema,
+  browsersPath: z.string().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
+});
+
+/**
  * Error detail envelope shared across backend and UI contracts.
  */
 export const errorEnvelopeSchema = z.object({
@@ -44,3 +72,10 @@ export const rpaErrorEnvelopeSchema = errorEnvelopeSchema.extend({
 
 export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;
 export type RpaRunErrorCode = z.infer<typeof rpaRunErrorCodeSchema>;
+export type AutomationBrowserLaunchFailureMode = z.infer<
+  typeof automationBrowserLaunchFailureModeSchema
+>;
+export type AutomationBrowserLaunchStage = z.infer<typeof automationBrowserLaunchStageSchema>;
+export type AutomationBrowserLaunchFailureDetails = z.infer<
+  typeof automationBrowserLaunchFailureDetailsSchema
+>;

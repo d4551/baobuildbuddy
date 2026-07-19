@@ -54,7 +54,7 @@
     "db:generate": "bun --env-file=.env run drizzle-kit generate",
     "db:push": "bun --env-file=.env run drizzle-kit push",
     "db:studio": "bun --env-file=.env run drizzle-kit studio",
-    "test": "bun run --cwd packages/shared test && bun run --cwd packages/server test && bun run --cwd packages/scraper test && bun run --cwd packages/client test && bun test ./scripts",
+    "test": "bash -c 'if [ \"$(uname -s)\" = Darwin ]; then if [ -z \"${PLAYWRIGHT_HOST_PLATFORM_OVERRIDE:-}\" ]; then export PLAYWRIGHT_HOST_PLATFORM_OVERRIDE=\"$(bun -e \"import { arch, platform, release } from \\\"node:os\\\"; import { resolvePlaywrightHostPlatformOverride } from \\\"./packages/shared/src/utils/playwright-browsers-path.ts\\\"; process.stdout.write(resolvePlaywrightHostPlatformOverride(platform(), arch(), release()) ?? \\\"\\\");\")\"; fi; case \"${PLAYWRIGHT_BROWSERS_PATH:-}\" in *cursor-sandbox-cache*) unset PLAYWRIGHT_BROWSERS_PATH ;; esac; fi; bun run --cwd packages/shared test && bun run --cwd packages/server test && bun run --cwd packages/scraper test && bun run --cwd packages/client test && bun test ./scripts'",
     "format": "bun --bun run biome format . --write",
     "format:check": "bun --bun run biome format .",
     "validate:ui": "bun run scripts/validate-ui-accessibility.ts",

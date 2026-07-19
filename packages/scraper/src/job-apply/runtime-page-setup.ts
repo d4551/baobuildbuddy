@@ -1,6 +1,10 @@
 import type { JobApplyScriptEnvelope } from "@bao/shared/schemas/automation-scripts.schema";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import {
+  automationBrowserLaunchFailureToDetails,
+  formatAutomationBrowserLaunchFailureMessage,
+} from "@bao/shared/utils/automation-browser-launch-failure";
 import { settle } from "@bao/shared/utils/promise";
 import type { Page } from "playwright";
 import { closeAutomationBrowser, launchAutomationBrowser } from "../runtime/browser";
@@ -126,9 +130,15 @@ export const createExecutionState = async (
     return null;
   }
 
-  const session = await launchAutomationBrowser(payload.settings ?? DEFAULT_AUTOMATION_SETTINGS);
-  if (!session) {
-    emitter.emitError("AUTOMATION_RUNTIME_ERROR", "Unable to launch automation browser.");
+  const launchResult = await launchAutomationBrowser(
+    payload.settings ?? DEFAULT_AUTOMATION_SETTINGS,
+  );
+  if (!launchResult.ok) {
+    emitter.emitError(
+      "AUTOMATION_RUNTIME_ERROR",
+      formatAutomationBrowserLaunchFailureMessage(launchResult.failure),
+      automationBrowserLaunchFailureToDetails(launchResult.failure),
+    );
     return null;
   }
 
@@ -136,7 +146,7 @@ export const createExecutionState = async (
     emitter,
     payload,
     outputDir,
-    session,
+    session: launchResult.session,
     steps: [],
     screenshots: [],
   };

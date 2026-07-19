@@ -3,7 +3,6 @@ import {
   API_ERROR_AUTH_SETUP_TOKEN_INVALID,
   API_ERROR_AUTH_SETUP_TOKEN_REQUIRED,
   API_ERROR_AUTH_SETUP_TOKEN_UNAVAILABLE,
-  API_ERROR_MISSING_AUTH_HEADER,
 } from "@bao/shared/constants/api-errors";
 import {
   API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
@@ -33,7 +32,8 @@ import {
 import { db } from "../db/client";
 import { auditLog } from "../db/schema/audit-log";
 import { auth } from "../db/schema/auth";
-import { hashApiKey, verifyApiKey } from "../utils/crypto";
+import { authenticateApiKey } from "../middleware/auth";
+import { hashApiKey } from "../utils/crypto";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
@@ -220,28 +220,21 @@ export const authRoutes = new Elysia({
         },
       )
       .post(
-        "/rotate",
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRotate),
         {
           // no inline detail for rotate,revoke routes
         },
         async ({ request, status }) => {
+          const authFailure = await authenticateApiKey(request);
+          if (authFailure) {
+            return status(authFailure.status, { error: authFailure.error });
+          }
+
           const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
           const row = rows[0];
           if (!row?.apiKeyHash) {
             return status(HTTP_STATUS_NOT_FOUND, {
               error: "No API key configured to rotate",
-            });
-          }
-
-          const parsed = (() => {
-            const raw = request.headers.get("authorization");
-            if (!raw?.startsWith("Bearer ")) return "";
-            return raw.slice("Bearer ".length).trim();
-          })();
-
-          if (!parsed || !verifyApiKey(parsed, row.apiKeyHash)) {
-            return status(HTTP_STATUS_FORBIDDEN, {
-              error: API_ERROR_MISSING_AUTH_HEADER,
             });
           }
 
@@ -269,28 +262,21 @@ export const authRoutes = new Elysia({
         },
       )
       .post(
-        "/revoke",
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRevoke),
         {
           // no inline detail for rotate,revoke routes
         },
         async ({ request, status }) => {
+          const authFailure = await authenticateApiKey(request);
+          if (authFailure) {
+            return status(authFailure.status, { error: authFailure.error });
+          }
+
           const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
           const row = rows[0];
           if (!row?.apiKeyHash) {
             return status(HTTP_STATUS_NOT_FOUND, {
               error: "No API key configured to revoke",
-            });
-          }
-
-          const parsed = (() => {
-            const raw = request.headers.get("authorization");
-            if (!raw?.startsWith("Bearer ")) return "";
-            return raw.slice("Bearer ".length).trim();
-          })();
-
-          if (!parsed || !verifyApiKey(parsed, row.apiKeyHash)) {
-            return status(HTTP_STATUS_FORBIDDEN, {
-              error: API_ERROR_MISSING_AUTH_HEADER,
             });
           }
 

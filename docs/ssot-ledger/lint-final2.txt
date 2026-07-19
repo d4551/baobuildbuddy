@@ -1,0 +1,721 @@
+$ bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-inline-styles && bun run validate:ui-motion-tokens && bun run validate:ui-glass-materials && bun run validate:ui-responsive-overflow && bun run validate:ui-typography && bun run validate:ui-pagination-tables && bun run validate:ui-stubs-noops && bun run validate:ui-density && bun run validate:ai-annotation-provenance && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-dead-vue-components && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ui-canonical-primitives && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck
+$ bun run validate:stack-alignment && bun run validate:ui-layout-tokens && bun run validate:daisyui-contracts
+$ bun run verify:bun-baseline && bun run audit:stack-versions && bun run capability:matrix:check
+$ bash scripts/verify-bun-baseline.sh
+[2.82ms] ".env"
+✅ Bun baseline and stale 1.3.9 reference checks passed
+$ for pkg in bun nuxt tailwindcss daisyui elysia @elysiajs/eden drizzle-orm drizzle-kit @tauri-apps/cli @tauri-apps/api; do printf "%s\t" "$pkg"; bunx npm view "$pkg" version; done
+bun	1.3.14
+nuxt	4.5.0
+tailwindcss	4.3.3
+daisyui	5.6.18
+elysia	1.4.29
+@elysiajs/eden	1.4.9
+drizzle-orm	0.45.2
+drizzle-kit	0.31.10
+@tauri-apps/cli	2.11.4
+@tauri-apps/api	2.11.1
+$ bun run scripts/check-agentiflow-capability-matrix.ts
+agentiflow capability matrix is current: agentiflow/capability-matrix.generated.json
+$ bun run scripts/validate-ui-layout-tokens.ts
+UI layout token validation passed.
+$ bun run scripts/validate-daisyui-contracts.ts
+daisyUI component contract validation passed.
+$ bun run scripts/validate-skip-libcheck-waiver.ts
+skipLibCheck waiver validation passed.
+$ bun run scripts/validate-no-htmx.ts
+No htmx usage found.
+$ bun run scripts/validate-no-monoliths.ts
+Monolith validation passed.
+$ bun run scripts/validate-no-raw-design-tokens.ts
+Raw design token validation passed.
+$ bun run scripts/validate-no-local-styles.ts
+Local style validation passed.
+$ bun run scripts/validate-no-inline-styles.ts
+Inline style validation passed.
+$ bun run scripts/validate-ui-motion-tokens.ts
+UI motion token validation passed.
+$ bun run scripts/validate-ui-glass-materials.ts
+UI glass material validation passed.
+$ bun run scripts/validate-ui-responsive-overflow.ts
+UI responsive overflow validation passed.
+$ bun run scripts/validate-ui-typography.ts
+UI typography validation passed.
+$ bun run scripts/validate-ui-pagination-tables.ts
+UI pagination/table validation passed.
+$ bun run scripts/validate-ui-stubs-noops.ts
+UI stub/noop validation passed.
+$ bun run scripts/validate-ui-density.ts
+UI density validation passed.
+$ bun run scripts/validate-ai-annotation-provenance.ts
+AI annotation provenance validation passed.
+$ bun run scripts/validate-no-hardcoded-user-strings.ts
+Hardcoded user string validation passed.
+$ bun run scripts/validate-i18n-parity.ts
+Locale parity validation passed.
+$ bun run scripts/validate-no-direct-route-literals.ts
+Direct route literal validation passed.
+$ bun run scripts/validate-no-direct-env-access.ts
+Direct environment access validation passed.
+$ bun run scripts/validate-no-client-fetch-drift.ts
+Client fetch drift validation passed.
+$ bun run scripts/validate-no-schema-duplication.ts
+Schema duplication validation passed.
+$ bun run scripts/validate-no-unsafe-storage.ts
+Unsafe storage validation passed.
+$ bun run scripts/validate-page-state-contracts.ts
+Page state contract validation passed.
+$ bun run scripts/validate-seo-contracts.ts
+SEO contract validation passed.
+$ bun run scripts/validate-accessibility-landmarks.ts
+Accessibility landmark validation passed.
+$ bun run scripts/validate-no-dead-exports.ts
+Dead export validation passed.
+$ bun run scripts/validate-no-dead-vue-components.ts
+Dead Vue component validation passed.
+$ bun run scripts/validate-no-fallback-shims.ts
+Fallback term validation passed.
+$ bun run scripts/validate-no-try-catch.ts
+No try/catch blocks found.
+$ bun run scripts/validate-no-unsafe-casts.ts
+No unsafe type casts (`as-any` / `as-unknown`) found.
+$ bun run scripts/validate-no-hardcoded-paths.ts
+Hardcoded path validation passed: client routes and API endpoints use shared constants.
+$ bun run scripts/validate-locale-overrides.ts
+Locale override validation passed: no schema drift or cross-locale copy detected.
+$ bun run scripts/validate-page-seo-metadata.ts
+Page SEO metadata validation passed for all client pages.
+$ bun run scripts/validate-ui-i18n.ts
+UI i18n validation passed: no missing translation keys or static UI text/attributes detected.
+$ bun run scripts/validate-ui-aria-labels.ts
+ARIA validation passed for dialogs, tab contracts, pagination semantics, disclosure widgets, and native interactive controls.
+$ bun run scripts/validate-ui-accessibility.ts
+UI accessibility validation passed: WCAG contrast (daisyUI corporate/business) and tokenized colors are enforced.
+$ bun run scripts/validate-ui-single-source-of-truth.ts
+UI single-source-of-truth validation passed.
+$ bun run scripts/validate-ui-canonical-primitives.ts
+UI canonical primitive validation passed.
+$ bun run scripts/validate-ascii-geometry.ts README.md docs/STARTER_GUIDE.md
+✅ geometry pass in README.md
+✅ geometry pass in docs/STARTER_GUIDE.md
+$ bun --bun run eslint --config eslint.config.mjs .
+packages/server/src/routes/automation-integration-flows.ts:36:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    34 │   });
+    35 │   if (response.status !== 200) {
+  > 36 │     throw new Error("Manual automation run failed to start: status " + String(response.status));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │   }
+    38 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     34  34 │     });
+     35  35 │     if (response.status !== 200) {
+     36     │ - ····throw·new·Error("Manual·automation·run·failed·to·start:·status·"·+·String(response.status));
+         36 │ + ····throw·new·Error(`Manual·automation·run·failed·to·start:·status·${String(response.status)}`);
+     37  37 │     }
+     38  38 │   
+  
+
+packages/server/src/routes/automation-integration-flows.ts:74:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    72 │   });
+    73 │   if (response.status !== 200) {
+  > 74 │     throw new Error("Scheduled automation run failed to start: status " + String(response.status));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │   }
+    76 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     72  72 │     });
+     73  73 │     if (response.status !== 200) {
+     74     │ - ····throw·new·Error("Scheduled·automation·run·failed·to·start:·status·"·+·String(response.status));
+         74 │ + ····throw·new·Error(`Scheduled·automation·run·failed·to·start:·status·${String(response.status)}`);
+     75  75 │     }
+     76  76 │   
+  
+
+packages/server/src/routes/automation-integration-flows.ts:142:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    140 │   });
+    141 │   if (response.status !== 200) {
+  > 142 │     throw new Error("Email automation failed: status " + String(response.status));
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    143 │   }
+    144 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    140 140 │     });
+    141 141 │     if (response.status !== 200) {
+    142     │ - ····throw·new·Error("Email·automation·failed:·status·"·+·String(response.status));
+        142 │ + ····throw·new·Error(`Email·automation·failed:·status·${String(response.status)}`);
+    143 143 │     }
+    144 144 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:109:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    107 │   if (!responseContentType.includes("application/json")) {
+    108 │     throw new Error(
+  > 109 │       "Expected JSON response from " + path + ", got content-type " + responseContentType,
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │     );
+    111 │   }
+  
+  i Unsafe fix: Use a template literal.
+  
+    107 107 │     if (!responseContentType.includes("application/json")) {
+    108 108 │       throw new Error(
+    109     │ - ······"Expected·JSON·response·from·"·+·path·+·",·got·content-type·"·+·responseContentType,
+        109 │ + ······`Expected·JSON·response·from·${path},·got·content-type·${responseContentType}`,
+    110 110 │       );
+    111 111 │     }
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:114:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    112 │   const body = parseJson(rawBody, schema);
+    113 │   if (body === null) {
+  > 114 │     throw new Error("Failed to parse JSON response from " + path);
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    115 │   }
+    116 │   return { status: response.status, body };
+  
+  i Unsafe fix: Use a template literal.
+  
+    112 112 │     const body = parseJson(rawBody, schema);
+    113 113 │     if (body === null) {
+    114     │ - ····throw·new·Error("Failed·to·parse·JSON·response·from·"·+·path);
+        114 │ + ····throw·new·Error(`Failed·to·parse·JSON·response·from·${path}`);
+    115 115 │     }
+    116 116 │     return { status: response.status, body };
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:125:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    123 │   const response = await requestJson(path, rpaRunExecutionEnvelopeSchema, init);
+    124 │   if (response.body === null) {
+  > 125 │     throw new Error("Empty execution envelope from " + path);
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    126 │   }
+    127 │   return { status: response.status, body: response.body };
+  
+  i Unsafe fix: Use a template literal.
+  
+    123 123 │     const response = await requestJson(path, rpaRunExecutionEnvelopeSchema, init);
+    124 124 │     if (response.body === null) {
+    125     │ - ····throw·new·Error("Empty·execution·envelope·from·"·+·path);
+        125 │ + ····throw·new·Error(`Empty·execution·envelope·from·${path}`);
+    126 126 │     }
+    127 127 │     return { status: response.status, body: response.body };
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:136:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    134 │   const response = await requestJson(path, emailResponseBodySchema, init);
+    135 │   if (response.body === null) {
+  > 136 │     throw new Error("Empty email response body from " + path);
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    137 │   }
+    138 │   return { status: response.status, body: response.body };
+  
+  i Unsafe fix: Use a template literal.
+  
+    134 134 │     const response = await requestJson(path, emailResponseBodySchema, init);
+    135 135 │     if (response.body === null) {
+    136     │ - ····throw·new·Error("Empty·email·response·body·from·"·+·path);
+        136 │ + ····throw·new·Error(`Empty·email·response·body·from·${path}`);
+    137 137 │     }
+    138 138 │     return { status: response.status, body: response.body };
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:216:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    214 │       return run?.status === "success" || run?.status === "error";
+    215 │     },
+  > 216 │     "Timed out waiting for automation run " + runId + " to complete",
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    217 │   );
+    218 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    214 214 │         return run?.status === "success" || run?.status === "error";
+    215 215 │       },
+    216     │ - ····"Timed·out·waiting·for·automation·run·"·+·runId·+·"·to·complete",
+        216 │ + ····`Timed·out·waiting·for·automation·run·${runId}·to·complete`,
+    217 217 │     );
+    218 218 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:220:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    219 │   if (!lastRun) {
+  > 220 │     throw new Error("Automation run " + runId + " did not produce a terminal state.");
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    221 │   }
+    222 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    218 218 │   
+    219 219 │     if (!lastRun) {
+    220     │ - ····throw·new·Error("Automation·run·"·+·runId·+·"·did·not·produce·a·terminal·state.");
+        220 │ + ····throw·new·Error(`Automation·run·${runId}·did·not·produce·a·terminal·state.`);
+    221 221 │     }
+    222 222 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:257:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    255 │     await waitForCondition(
+    256 │       () => Promise.resolve(terminalEvent !== null),
+  > 257 │       "Timed out waiting for websocket events for run " + runId,
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    258 │       Date.now() + RUN_TIMEOUT_MS,
+    259 │     );
+  
+  i Unsafe fix: Use a template literal.
+  
+    255 255 │       await waitForCondition(
+    256 256 │         () => Promise.resolve(terminalEvent !== null),
+    257     │ - ······"Timed·out·waiting·for·websocket·events·for·run·"·+·runId,
+        257 │ + ······`Timed·out·waiting·for·websocket·events·for·run·${runId}`,
+    258 258 │         Date.now() + RUN_TIMEOUT_MS,
+    259 259 │       );
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:261:23 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    259 │     );
+    260 │     if (!terminalEvent) {
+  > 261 │       throw new Error("Automation websocket did not emit a terminal event for run " + runId);
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    262 │     }
+    263 │     return terminalEvent;
+  
+  i Unsafe fix: Use a template literal.
+  
+    259 259 │       );
+    260 260 │       if (!terminalEvent) {
+    261     │ - ······throw·new·Error("Automation·websocket·did·not·emit·a·terminal·event·for·run·"·+·runId);
+        261 │ + ······throw·new·Error(`Automation·websocket·did·not·emit·a·terminal·event·for·run·${runId}`);
+    262 262 │       }
+    263 263 │       return terminalEvent;
+  
+
+packages/server/src/routes/automation.integration.test.ts:58:26 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    56 │   }
+    57 │ 
+  > 58 │   setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ });
+    60 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     56  56 │     }
+     57  57 │   
+     58     │ - ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·"ws://127.0.0.1:"·+·String(port));
+         58 │ + ··setIntegrationBaseUrls(`http://127.0.0.1:${String(port)}`,·"ws://127.0.0.1:"·+·String(port));
+     59  59 │   });
+     60  60 │   
+  
+
+packages/server/src/routes/automation.integration.test.ts:58:62 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    56 │   }
+    57 │ 
+  > 58 │   setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+       │                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ });
+    60 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     56  56 │     }
+     57  57 │   
+     58     │ - ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·"ws://127.0.0.1:"·+·String(port));
+         58 │ + ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·`ws://127.0.0.1:${String(port)}`);
+     59  59 │   });
+     60  60 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:3:18 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    1 │ const runtimeProcess = globalThis.process;
+    2 │ if (runtimeProcess) {
+  > 3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+      │                  ^^^^^
+    4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    5 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     1  1 │   const runtimeProcess = globalThis.process;
+     2  2 │   if (runtimeProcess) {
+     3    │ - ··runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        3 │ + ··runtimeProcess.env["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+     4  4 │     delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:3:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    1 │ const runtimeProcess = globalThis.process;
+    2 │ if (runtimeProcess) {
+  > 3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    5 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     1  1 │   const runtimeProcess = globalThis.process;
+     2  2 │   if (runtimeProcess) {
+     3    │ - ··runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        3 │ + ··runtimeProcess["env"].BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS·=·"true";
+     4  4 │     delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:4:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    2 │ if (runtimeProcess) {
+    3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+      │                         ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     2  2 │   if (runtimeProcess) {
+     3  3 │     runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+     4    │ - ··delete·runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+        4 │ + ··delete·runtimeProcess.env["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+     6  6 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:4:32 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    2 │ if (runtimeProcess) {
+    3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     2  2 │   if (runtimeProcess) {
+     3  3 │     runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+     4    │ - ··delete·runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+        4 │ + ··delete·runtimeProcess["env"].BAO_ENABLE_AUTOMATION_VERIFY;
+     5  5 │   }
+     6  6 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:9:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     7 │ const runtimeBun = globalThis.Bun;
+     8 │ if (runtimeBun) {
+   > 9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+       │              ^^^^^
+    10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     7  7 │   const runtimeBun = globalThis.Bun;
+     8  8 │   if (runtimeBun) {
+     9    │ - ··runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        9 │ + ··runtimeBun.env["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+    10 10 │     delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 11 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:9:21 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     7 │ const runtimeBun = globalThis.Bun;
+     8 │ if (runtimeBun) {
+   > 9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     7  7 │   const runtimeBun = globalThis.Bun;
+     8  8 │   if (runtimeBun) {
+     9    │ - ··runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        9 │ + ··runtimeBun["env"].BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS·=·"true";
+    10 10 │     delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 11 │   }
+  
+
+packages/client/assets/css/main.css:645:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 0)
+  
+    643 │     --motion-slow: 1ms;
+    644 │   }
+  > 645 │   *,
+        │   ^
+    646 │   *::before,
+    647 │   *::after {
+  
+  i This selector specificity is (0, 1, 0)
+  
+    499 │ /* Prevent nested backdrop roots inside glass (§10). Children must not
+    500 │  * establish their own backdrop-filter sampling context. */
+  > 501 │ .glass > *,
+        │ ^^^^^^^^^^
+    502 │ .card.card-glass > *,
+    503 │ .glass-subtle > *,
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 2.
+Checked 879 files in 362ms. No fixes applied.
+Found 1 warning.
+Found 21 infos.
+$ bun run prepare:workspace-types && bun --bun run eslint .
+$ bun run --cwd ../server build:types && bun run prepare:nuxt
+$ bun --bun ../../node_modules/@typescript/native/bin/tsc --emitDeclarationOnly --declarationMap false --outDir dist-types
+$ bun --bun run nuxt prepare
+
+ WARN  Duplicated imports "readApiData", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-job-apply-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/skills-pathways-page-data.ts" is used
+
+
+ WARN  Duplicated imports "toIsoTimestamp", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+
+ WARN  Duplicated imports "resolveScheduledRunAt", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+
+ WARN  Duplicated imports "DATE_FORMAT_OPTIONS", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+
+ WARN  Duplicated imports "readApiData", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-job-apply-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/skills-pathways-page-data.ts" is used
+
+
+ WARN  Duplicated imports "toIsoTimestamp", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+
+ WARN  Duplicated imports "resolveScheduledRunAt", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+
+ WARN  Duplicated imports "DATE_FORMAT_OPTIONS", the one from "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-email-page-form.ts" has been ignored and "/Users/brandon/Downloads/baobuildbuddy/packages/client/composables/automation-scraper-bootstrap.ts" is used
+
+[90m│[39m
+[32m◆[39m  Types generated in .nuxt.
+[0m
+[4m/Users/brandon/Downloads/baobuildbuddy/packages/client/components/portfolio/PortfolioProjectsCard.vue[24m
+   [2m46:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m47:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m48:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m49:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m50:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m51:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m52:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m54:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m55:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m56:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m57:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m59:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m60:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m61:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m62:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m64:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+   [2m65:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m66:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m67:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m68:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m69:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+   [2m70:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m71:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m72:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m73:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m74:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m75:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m76:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m77:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m78:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m80:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+   [2m81:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m82:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m83:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m84:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+   [2m85:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m86:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m88:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m90:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+   [2m91:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m92:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+   [2m93:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+   [2m94:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+   [2m95:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m96:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+   [2m97:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m98:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+   [2m99:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m100:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m101:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m102:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m103:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m104:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m106:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m107:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m108:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m109:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m110:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m111:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m112:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m113:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m114:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m115:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m116:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m117:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m118:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m119:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m120:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m122:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m123:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m124:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m125:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m126:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m127:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m128:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m129:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m130:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m131:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m132:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m133:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m134:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m135:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m136:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m137:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m138:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m139:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m140:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m142:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m143:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m144:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m145:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m146:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m147:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m148:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m149:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m150:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m151:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m152:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m153:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m154:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m155:1[22m  [33mwarning[39m  Expected indentation of 16 spaces but found 18 spaces  [2mvue/html-indent[22m
+  [2m156:1[22m  [33mwarning[39m  Expected indentation of 14 spaces but found 16 spaces  [2mvue/html-indent[22m
+  [2m157:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m158:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m159:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m160:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m161:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+  [2m163:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+  [2m164:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m165:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m166:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m167:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m168:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m169:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m170:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m171:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m172:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m173:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 6 spaces    [2mvue/html-indent[22m
+
+[4m/Users/brandon/Downloads/baobuildbuddy/packages/client/components/ui/ToastContainer.vue[24m
+  [2m53:1[22m  [33mwarning[39m  Expected indentation of 4 spaces but found 0 spaces    [2mvue/html-indent[22m
+  [2m54:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m55:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m56:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m57:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m58:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m59:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m60:1[22m  [33mwarning[39m  Expected indentation of 6 spaces but found 8 spaces    [2mvue/html-indent[22m
+  [2m61:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m62:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m63:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m64:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m65:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m66:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m67:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m68:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m69:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m70:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+
+[4m/Users/brandon/Downloads/baobuildbuddy/packages/client/pages/portfolio/index.vue[24m
+  [2m147:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m148:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m149:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m150:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m151:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+  [2m152:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m153:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m154:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m155:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m156:1[22m  [33mwarning[39m  Expected indentation of 12 spaces but found 14 spaces  [2mvue/html-indent[22m
+  [2m157:1[22m  [33mwarning[39m  Expected indentation of 10 spaces but found 12 spaces  [2mvue/html-indent[22m
+  [2m158:1[22m  [33mwarning[39m  Expected indentation of 8 spaces but found 10 spaces   [2mvue/html-indent[22m
+
+[33m[1m✖ 148 problems (0 errors, 148 warnings)[22m[39m
+[33m[1m  0 errors and 148 warnings potentially fixable with the `--fix` option.[22m[39m
+[0m
+$ bun run scripts/typecheck-workspace.ts
+[typecheck:shared] sourceErrors=0 upstreamDeclarationErrors=0
+[typecheck:scraper] sourceErrors=0 upstreamDeclarationErrors=0
+[typecheck:server] sourceErrors=0 upstreamDeclarationErrors=0
+[typecheck:client] sourceErrors=0 upstreamDeclarationErrors=0
+Workspace source typecheck passed (TypeScript 7 native).

@@ -1,0 +1,58 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/server/src/routes/automation.integration.test.ts:
+{"level":50,"time":1784461540048,"pid":38475,"hostname":"Brandons-MacBook-Pro-2.local","component":"automation-routes","details":"Unable to initialize automation output directory.","msg":"[automation] job-apply execution failed for runId=019f7a32-3772-7000-b2e3-fd648f01dc74"}
+46 | ): Promise<void> => {
+47 |   const manualResponse = await startManualJobApplyRun(resumeId, fixtureBaseUrl);
+48 |   expect(manualResponse.status).toBe("running");
+49 | 
+50 |   const completedManualRun = await waitForRunCompletion(manualResponse.id);
+51 |   expect(completedManualRun.status).toBe("success");
+                                         ^
+error: expect(received).toBe(expected)
+
+Expected: "success"
+Received: "error"
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation-integration-flows.ts:51:37)
+      at async <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation.integration.test.ts:93:15)
+(fail) automation route integration > manual job-apply, scheduled websocket flow, email-response, and scheduler recovery all work end to end [1613.18ms]
+
+packages/server/src/services/automation/job-apply-script.test.ts:
+103 |   test("uploads a real resume artifact and fills select, radio, and checkbox answers", async () => {
+104 |     const tempDirectory = createTempDirectory();
+105 |     await Promise.resolve()
+106 |       .then(async () => {
+107 |         const { execution, submittedPayload } = await runJobApplyScriptFixture(tempDirectory);
+108 |         expect(execution.error).toBeNull();
+                                      ^
+error: expect(received).toBeNull()
+
+Received: {
+  code: "AUTOMATION_RUNTIME_ERROR",
+  message: "Automation script exited with an error",
+  details: {
+    exitCode: 1,
+    stderrTail: [
+      "{\"protocolVersion\":\"1.0\",\"runId\":\"019f7a32-3db9-7000-b9ef-03fca580ae3e\",\"sequence\":0,\"timestamp\":\"2026-07-19T11:45:41.105Z\",\"eventType\":\"progress\",\"action\":\"preflight_strategy\",\"status\":\"running\",\"step\":0,\"totalSteps\":1,\"message\":\"Detected generic\"}",
+      "55 |     } else if (ver[0] === 19) {", "56 |       macVersion = \"mac10.15\";", "57 |     } else {",
+      "58 |       const LAST_STABLE_MACOS_MAJOR_VERSION = 15;", "59 |       macVersion = \"mac\" + Math.min(ver[0] - 9, LAST_STABLE_MACOS_MAJOR_VERSION);",
+      "60 |       if (import_os.default.cpus().some((cpu) => cpu.model.includes(\"Apple\")))",
+      "^", "error: Failed to get CPU information", "errno: 0,", "code: \"ERR_SYSTEM_ERROR\"",
+      "at populate (node:os:18:25)", "at model (node:os:27:21)", "at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/node_modules/.bun/playwright-core@1.58.2/node_modules/playwright-core/lib/server/utils/hostPlatform.js:60:50)",
+      "at some (1:11)", "at calculatePlatform (/Users/brandon/Downloads/baobuildbuddy/node_modules/.bun/playwright-core@1.58.2/node_modules/playwright-core/lib/server/utils/hostPlatform.js:60:36)",
+      "at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/node_modules/.bun/playwright-core@1.58.2/node_modules/playwright-core/lib/server/utils/hostPlatform.js:109:57)",
+      "at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/node_modules/.bun/playwright-core@1.58.2/node_modules/playwright-core/lib/server/registry/dependencies.js:47:5)",
+      "Bun v1.3.14 (macOS arm64)"
+    ],
+    stdoutTail: [],
+  },
+}
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/services/automation/job-apply-script.test.ts:108:33)
+(fail) job-apply script > uploads a real resume artifact and fills select, radio, and checkbox answers [548.22ms]
+
+ 0 pass
+ 2 fail
+ 3 expect() calls
+Ran 2 tests across 2 files. [5.46s]

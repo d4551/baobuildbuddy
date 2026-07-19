@@ -1,0 +1,22 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/server/src/config/paths.test.ts:
+(pass) server config paths > resolves the packaged runtime scraper directory from the current working directory [11.69ms]
+(pass) server config paths > prefers explicit configured scraper directory over cwd candidates [9.31ms]
+
+packages/shared/src/utils/playwright-browsers-path.test.ts:
+(pass) playwright browsers path sanitization > detects cursor-sandbox browser caches as polluted [0.06ms]
+(pass) playwright browsers path sanitization > detects missing browser cache paths as polluted [0.01ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path when host cache exists [0.09ms]
+(pass) playwright browsers path sanitization > unsets polluted browsers path when host cache is missing [0.02ms]
+(pass) playwright browsers path sanitization > derives mac arm64 host platform without reading os.cpus [0.10ms]
+(pass) playwright browsers path sanitization > leaves non-mac platforms without a host override [0.02ms]
+(pass) playwright browsers path sanitization > injects host platform override into automation child env [0.02ms]
+(pass) playwright browsers path sanitization > preserves an existing host platform override [0.02ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path and injects host override together [0.03ms]
+(pass) playwright browsers path sanitization > skips host override injection when resolver returns null [0.01ms]
+
+ 12 pass
+ 0 fail
+ 13 expect() calls
+Ran 12 tests across 2 files. [188.00ms]

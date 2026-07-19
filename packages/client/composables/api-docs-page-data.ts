@@ -1,15 +1,16 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { computed } from "vue";
 import {
   API_DOCS_ASYNC_DATA_KEY,
   type ApiDocsTranslate,
   UNKNOWN_TAG_LABEL_KEY,
 } from "~/composables/api-docs-page-contracts";
-import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
+import { requestApi } from "~/composables/api-request";
+import type { ApiDocsUiState, ApiEndpointGroup, OpenApiSpec } from "~/types/api-docs";
 import { buildApiEndpointGroups } from "~/utils/api-docs-endpoints";
 import { readOpenApiSpec } from "~/utils/api-docs-openapi";
 import { toApiDocsUiStateFromStatusCode, toErrorStatusCode } from "~/utils/api-docs-status";
-import { resolveApiEndpoint } from "~/utils/endpoints";
 
 interface ApiDocsPageDataOptions {
   readonly t: ApiDocsTranslate;
@@ -18,20 +19,21 @@ interface ApiDocsPageDataOptions {
 }
 
 export const useApiDocsPageData = ({ t, apiBase, requestUrl }: ApiDocsPageDataOptions) => {
-  const fetchOpenApiSpec = (): Promise<unknown> =>
-    $fetch<unknown>(resolveApiEndpoint(apiBase, requestUrl, API_ENDPOINTS.apiDocsJson));
+  const fetchOpenApiSpec = async (): Promise<OpenApiSpec | null> => {
+    const raw = await requestApi<JsonValue>({ apiBase, requestUrl }, API_ENDPOINTS.apiDocsJson);
+    return readOpenApiSpec(raw);
+  };
 
   const {
-    data: rawSpec,
+    data: parsedSpec,
     status: rawSpecStatus,
     error: rawSpecError,
     refresh: refreshSpec,
-  } = useAsyncData<unknown>(API_DOCS_ASYNC_DATA_KEY, fetchOpenApiSpec, {
+  } = useAsyncData<OpenApiSpec | null>(API_DOCS_ASYNC_DATA_KEY, fetchOpenApiSpec, {
     server: true,
     default: () => null,
   });
 
-  const parsedSpec = computed(() => readOpenApiSpec(rawSpec.value));
   const endpointGroups = computed<readonly ApiEndpointGroup[]>(() =>
     buildApiEndpointGroups(parsedSpec.value, t(UNKNOWN_TAG_LABEL_KEY)),
   );

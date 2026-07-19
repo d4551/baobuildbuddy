@@ -38,27 +38,11 @@ export const setIntegrationBaseUrls = (httpBase: string, wsBase: string): void =
 };
 
 const toJsonRecord = (value: object | undefined): JsonObject => {
-  const entries = Object.entries(value ?? {});
-  const record: JsonObject = {};
-  for (const [key, entryValue] of entries) {
-    if (
-      entryValue === null ||
-      typeof entryValue === "string" ||
-      typeof entryValue === "number" ||
-      typeof entryValue === "boolean"
-    ) {
-      record[key] = entryValue;
-      continue;
-    }
-    if (Array.isArray(entryValue) || (typeof entryValue === "object" && entryValue !== null)) {
-      const serialized = JSON.stringify(entryValue);
-      const parsed = safeParseJson(serialized);
-      if (parsed !== null) {
-        record[key] = parsed;
-      }
-    }
+  const parsed = safeParseJson(JSON.stringify(value ?? {}));
+  if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+    return parsed;
   }
-  return record;
+  return {};
 };
 
 export const waitForCondition = async (

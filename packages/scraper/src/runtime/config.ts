@@ -1,11 +1,12 @@
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { arch, homedir, platform, release } from "node:os";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
   resolvePlaywrightBrowsersPath,
+  resolvePlaywrightHostPlatformOverride,
   type PlaywrightBrowsersPathDeps,
 } from "@bao/shared/utils/playwright-browsers-path";
 
@@ -14,9 +15,13 @@ const playwrightBrowsersPathDeps = (): PlaywrightBrowsersPathDeps => ({
   hostDefaultPath: defaultPlaywrightBrowsersPathForPlatform(process.platform, homedir()),
 });
 
+const resolveHostPlatformOverride = (): string | null =>
+  resolvePlaywrightHostPlatformOverride(platform(), arch(), release());
+
 /**
- * Sanitizes process.env.PLAYWRIGHT_BROWSERS_PATH before Playwright resolves
- * its registry. Prefer a host-usable cache over an incomplete agent cache.
+ * Sanitizes process.env Playwright browsers path and host-platform override
+ * before Playwright resolves its registry. Prefer a host-usable cache over an
+ * incomplete agent cache; avoid os.cpus() in agent sandboxes.
  */
 export const sanitizePlaywrightBrowsersPathEnv = (): void => {
   const resolution = resolvePlaywrightBrowsersPath(
@@ -25,19 +30,28 @@ export const sanitizePlaywrightBrowsersPathEnv = (): void => {
   );
   if (resolution.action === "set") {
     process.env.PLAYWRIGHT_BROWSERS_PATH = resolution.value;
-    return;
-  }
-  if (resolution.action === "unset") {
+  } else if (resolution.action === "unset") {
     delete process.env.PLAYWRIGHT_BROWSERS_PATH;
+  }
+
+  const hostOverride = resolveHostPlatformOverride();
+  if (hostOverride && !process.env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE) {
+    process.env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE = hostOverride;
   }
 };
 
 /**
- * Builds a child-process env with a non-polluted Playwright browsers path.
+ * Builds a child-process env with a non-polluted Playwright browsers path
+ * and PLAYWRIGHT_HOST_PLATFORM_OVERRIDE when missing.
  */
 export const buildAutomationProcessEnv = (
   baseEnv: NodeJS.ProcessEnv = process.env,
-): NodeJS.ProcessEnv => buildAutomationProcessEnvFromShared(baseEnv, playwrightBrowsersPathDeps());
+): NodeJS.ProcessEnv =>
+  buildAutomationProcessEnvFromShared(
+    baseEnv,
+    playwrightBrowsersPathDeps(),
+    resolveHostPlatformOverride(),
+  );
 
 const parsePositiveInt = (rawValue: string | undefined, defaultValue: number): number => {
   if (!rawValue) {

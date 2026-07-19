@@ -134,7 +134,7 @@ export declare const app: Elysia<"/api", "local", {
                 };
             };
         } & {
-            rotate: {
+            [x: string]: {
                 post: {
                     body: unknown;
                     params: {};
@@ -150,8 +150,8 @@ export declare const app: Elysia<"/api", "local", {
                             readonly apiKey: string;
                             readonly message: "API key rotated. Save this new key — it will not be shown again.";
                         };
-                        403: {
-                            readonly error: "Missing or invalid Authorization header";
+                        401: {
+                            readonly error: string;
                         };
                         404: {
                             readonly error: "No API key configured to rotate";
@@ -161,7 +161,7 @@ export declare const app: Elysia<"/api", "local", {
                 };
             };
         } & {
-            revoke: {
+            [x: string]: {
                 post: {
                     body: unknown;
                     params: {};
@@ -175,8 +175,8 @@ export declare const app: Elysia<"/api", "local", {
                             readonly revoked: true;
                             readonly message: "API key has been revoked.";
                         };
-                        403: {
-                            readonly error: "Missing or invalid Authorization header";
+                        401: {
+                            readonly error: string;
                         };
                         404: {
                             readonly error: "No API key configured to revoke";

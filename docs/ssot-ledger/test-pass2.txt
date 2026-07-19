@@ -1,0 +1,354 @@
+$ bash -c 'if [ "$(uname -s)" = Darwin ]; then export PLAYWRIGHT_HOST_PLATFORM_OVERRIDE="${PLAYWRIGHT_HOST_PLATFORM_OVERRIDE:-mac15-arm64}"; fi; bun run --cwd packages/shared test && bun run --cwd packages/server test && bun run --cwd packages/scraper test && bun run --cwd packages/client test && bun test ./scripts'
+$ bun test
+bun test v1.3.14 (0d9b296a)
+
+src/types/settings-normalization.test.ts:
+(pass) job provider normalization > replaces legacy placeholder hitmarker endpoints with current defaults [0.39ms]
+(pass) job provider normalization > preserves non-placeholder custom provider values [0.18ms]
+(pass) normalizeAutomationSettings > normalizes nested job provider settings [0.12ms]
+(pass) normalizeLocalModelEndpoint > upgrades the legacy Ollama root endpoint to the OpenAI Chat Completions v1 route [0.19ms]
+(pass) normalizeLocalModelEndpoint > preserves custom model endpoints [0.02ms]
+
+src/utils/desktop-release-contract.test.ts:
+(pass) desktop release contract artifact names > builds canonical macOS artifact names [0.29ms]
+(pass) desktop release contract artifact names > builds canonical Linux x64 artifact names [0.04ms]
+(pass) desktop release contract artifact names > builds canonical Linux ARM64 artifact names [0.01ms]
+(pass) desktop release contract artifact names > builds canonical macOS artifact variants for profile order and defaults [0.04ms]
+(pass) desktop release contract artifact names > builds canonical Windows artifact names [0.02ms]
+(pass) desktop release contract staging and matrix > keeps assembled paths scoped to the canonical target bucket [0.02ms]
+(pass) desktop release contract staging and matrix > builds Cargo release directory candidates for target-aware staging [0.04ms]
+(pass) desktop release contract staging and matrix > builds bundle directory candidates for target-aware staging [0.04ms]
+(pass) desktop release contract staging and matrix > resolves Tauri target matrix deterministically from profile [0.21ms]
+(pass) desktop release contract optional variants > includes Linux AppImage and signatures when profile enables them [0.08ms]
+(pass) desktop release contract optional variants > includes MSI when profile enables it [0.02ms]
+
+src/utils/export-contract.test.ts:
+(pass) export contract > collects only defined non-empty string values [0.06ms]
+(pass) export contract > resolves the explicit resume template first [0.05ms]
+(pass) export contract > formats export dates with the shared locale contract [0.05ms]
+(pass) export contract > normalizes canonical cover-letter content sections [0.08ms]
+(pass) export contract > falls back to alternate cover-letter section names [0.01ms]
+(pass) export contract > preserves mixed cover-letter section naming without dropping intro or closing text [0.01ms]
+(pass) export contract > splits raw text cover letters into paragraphs [0.04ms]
+
+src/utils/desktop-runtime-contract.test.ts:
+(pass) desktop runtime contract: target resolution > resolves the canonical Windows runtime layout [3.51ms]
+(pass) desktop runtime contract: target resolution > resolves Linux runtime layout from the Tauri target triple [0.28ms]
+(pass) desktop runtime contract: target resolution > builds and normalizes the canonical runtime manifest [2.56ms]
+(pass) desktop runtime contract: target resolution > falls back to canonical host target resolution [0.03ms]
+(pass) desktop runtime contract: packaged payload entries > lists all runtime contract paths for packaged verification [0.06ms]
+
+src/utils/playwright-browsers-path.test.ts:
+(pass) playwright browsers path sanitization > detects cursor-sandbox browser caches as polluted [0.02ms]
+(pass) playwright browsers path sanitization > detects missing browser cache paths as polluted [0.01ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path when host cache exists [0.06ms]
+(pass) playwright browsers path sanitization > unsets polluted browsers path when host cache is missing [0.02ms]
+(pass) playwright browsers path sanitization > derives mac arm64 host platform without reading os.cpus [0.04ms]
+(pass) playwright browsers path sanitization > leaves non-mac platforms without a host override
+(pass) playwright browsers path sanitization > injects host platform override into automation child env [0.01ms]
+
+src/schemas/brand-theme-palette.test.ts:
+(pass) brandThemePaletteSchema > accepts canonical default light and dark brand palettes [35.65ms]
+(pass) brandThemePaletteSchema > rejects arbitrary CSS color strings [1.12ms]
+(pass) brandThemePaletteSchema > rejects non-length radius values [1.66ms]
+(pass) brandThemePaletteSchema > rejects non-flag depth values [0.10ms]
+
+ 39 pass
+ 0 fail
+ 58 expect() calls
+Ran 39 tests across 6 files. [304.00ms]
+$ bash -c 'if [ "$(uname -s)" = Darwin ]; then export PLAYWRIGHT_HOST_PLATFORM_OVERRIDE="${PLAYWRIGHT_HOST_PLATFORM_OVERRIDE:-mac15-arm64}"; fi; bun test src'
+bun test v1.3.14 (0d9b296a)
+
+src/interview.test.ts:
+(pass) interview service > startSession applies config defaults and avoids technical questions when disabled [11.22ms]
+(pass) interview service > startSession keeps natural interviews asset-aware and starts with one contextual question [3.70ms]
+(pass) interview service > addResponse stores AI feedback, completes session, and writes final analysis [12.77ms]
+(pass) interview service > addResponse returns null for missing sessions [1.17ms]
+(pass) interview service > addResponse appends the next natural follow-up question until the configured count is reached [8.25ms]
+(pass) interview API contract > POST /api/interview/sessions accepts roleType and returns created payload [133.05ms]
+(pass) interview API response payload contract > POST /api/interview/sessions/:id/response accepts canonical response payload [64.06ms]
+(pass) interview API job context contract > POST /api/interview/sessions persists job interview context [10.33ms]
+(pass) interview API conversation config contract > POST /api/interview/sessions persists conversation style and candidate asset context [6.50ms]
+
+src/middleware/auth.test.ts:
+(pass) authenticateApiKey rejection cases > rejects request without Authorization header [1.34ms]
+(pass) authenticateApiKey rejection cases > rejects Authorization header without Bearer scheme [0.35ms]
+(pass) authenticateApiKey rejection cases > rejects Authorization header with Bearer scheme but no token value [0.22ms]
+(pass) authenticateApiKey rejection cases > rejects Bearer token that normalizes to empty [0.26ms]
+(pass) authenticateApiKey rejection cases > rejects mismatched Bearer token [0.56ms]
+(pass) authenticateApiKey rejection cases > rejects when no profile key has been configured yet [1.09ms]
+(pass) authenticateApiKey acceptance cases > accepts matching Bearer token and returns null [1.03ms]
+(pass) authenticateApiKey acceptance cases > skips validation when disableAuth is set [0.23ms]
+(pass) isAuthDisabled production guard > throws when BAO_DISABLE_AUTH is enabled in production [0.09ms]
+(pass) authGuard HTTP default-deny > blocks protected routes without Authorization [2.99ms]
+(pass) authGuard HTTP default-deny > allows protected routes with a valid Bearer token [0.77ms]
+
+src/config/env.test.ts:
+(pass) config.disableAuth > does not disable auth just because the host is loopback [0.11ms]
+(pass) config.disableAuth > disables auth only when explicitly configured [0.02ms]
+(pass) pretty log transport gating > enables pretty logging for Bun-driven development processes [0.03ms]
+(pass) pretty log transport gating > disables pretty logging for packaged desktop server executables
+(pass) pretty log transport gating > disables pretty logging for production runtimes
+(pass) pretty log transport gating > disables pretty logging for test runtimes
+
+src/config/paths.test.ts:
+(pass) server config paths > resolves the packaged runtime scraper directory from the current working directory [94.00ms]
+(pass) server config paths > prefers explicit configured scraper directory over cwd candidates [62.54ms]
+
+src/db/init.test.ts:
+(pass) initializeDatabase > creates singleton rows with valid default automation settings [5.16ms]
+
+src/routes/automation.integration.test.ts:
+{"level":50,"time":1784462338871,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"automation-routes","details":"Unable to launch automation browser.","msg":"[automation] job-apply execution failed for runId=019f7a3e-5a93-7000-ab4b-1a445770ae36"}
+46 | ): Promise<void> => {
+47 |   const manualResponse = await startManualJobApplyRun(resumeId, fixtureBaseUrl);
+48 |   expect(manualResponse.status).toBe("running");
+49 | 
+50 |   const completedManualRun = await waitForRunCompletion(manualResponse.id);
+51 |   expect(completedManualRun.status).toBe("success");
+                                         ^
+error: expect(received).toBe(expected)
+
+Expected: "success"
+Received: "error"
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation-integration-flows.ts:51:37)
+      at async <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation.integration.test.ts:93:15)
+(fail) automation route integration > manual job-apply, scheduled websocket flow, email-response, and scheduler recovery all work end to end [5244.29ms]
+
+src/routes/openapi-tags.test.ts:
+(pass) openapi tags > generated OpenAPI spec tags every documented API operation [15.88ms]
+
+src/routes/studio.test.ts:
+(pass) studio routes > GET studios returns list (includes seeded) [29.09ms]
+(pass) studio routes > POST studios creates studio [4.16ms]
+(pass) studio routes > GET studio detail returns 404 for missing [1.32ms]
+
+src/routes/jobs.test.ts:
+(pass) jobs routes listing > GET jobs returns jobs list [5.52ms]
+(pass) jobs routes listing > GET job detail returns 404 for missing job [4.37ms]
+(pass) jobs routes saved items > POST job save requires existing job [1.65ms]
+(pass) jobs routes saved items > POST job save and GET saved jobs round-trip [17.97ms]
+(pass) jobs routes applications > POST job apply requires existing job [3.32ms]
+(pass) jobs routes applications > GET job applications returns list [13.43ms]
+
+src/routes/resume.test.ts:
+(pass) resume routes > POST resume from questions generate returns interview questionnaire prompts [2.77ms]
+(pass) resume routes > POST resume from questions synthesize creates a dynamic resume payload [4.44ms]
+(pass) resume routes > POST resumes creates resume [9.37ms]
+(pass) resume routes > GET resumes returns list [1.15ms]
+(pass) resume routes > GET resume detail returns created resume [0.97ms]
+(pass) resume routes > GET resume detail returns 404 for missing [0.23ms]
+(pass) resume routes > PUT resume detail updates resume [1.09ms]
+(pass) resume routes > POST resume ai enhance returns structured suggestions [1.62ms]
+(pass) resume routes > POST resume ai score returns dynamic scoring details [5.32ms]
+(pass) resume routes > POST resume export returns a PDF attachment [10.16ms]
+(pass) resume routes > POST resume export returns a DOCX attachment [38.07ms]
+(pass) resume routes > DELETE resume detail removes resume [1.55ms]
+(pass) resume routes > GET resume detail returns 404 after delete [0.45ms]
+(pass) resume routes > GET resume detail still returns synthesized resumes [0.65ms]
+
+src/routes/settings.test.ts:
+(pass) settings read routes > GET settings returns settings [12.74ms]
+(pass) settings read routes > GET settings export returns export payload [15.14ms]
+(pass) settings write routes - preferences > PUT settings updates [14.26ms]
+(pass) settings write routes - api keys > PUT settings api keys updates keys [1.85ms]
+(pass) settings write routes - api keys > GET settings exposes email delivery password presence without returning the secret [0.66ms]
+(pass) settings write routes - taxonomy > PUT settings job taxonomy persists taxonomy updates outside the settings row [5.46ms]
+
+src/routes/automation.test.ts:
+(pass) automation routes > POST automation job apply validates required fields [4.08ms]
+(pass) automation routes > POST automation job apply rejects missing resume [1.28ms]
+(pass) automation routes > POST automation job apply enqueues a run and returns run contract [2.05ms]
+(pass) automation routes > POST automation job apply schedule validates runAt [2.38ms]
+(pass) automation routes > POST automation job apply schedule creates a pending run [2.03ms]
+(pass) automation routes > POST automation email response creates a successful email run [2.02ms]
+(pass) automation routes > POST automation email response schedule creates a pending email run [2.46ms]
+(pass) automation routes > POST automation scrape executes a scrape run and persists history [5.49ms]
+(pass) automation routes > POST automation scrape schedule creates a pending scrape run [2.55ms]
+(pass) automation routes > GET automation capabilities returns the full RPA capability audit [2.45ms]
+
+src/routes/cover-letter.test.ts:
+(pass) cover-letter routes create/read > POST cover letters creates cover letter [4.39ms]
+(pass) cover-letter routes create/read > GET cover letters returns list [2.39ms]
+(pass) cover-letter routes create/read > GET cover letter detail returns created [1.15ms]
+(pass) cover-letter routes create/read > GET cover letter detail returns 404 for missing [0.61ms]
+(pass) cover-letter routes update/delete > PUT cover letter detail updates [1.95ms]
+(pass) cover-letter routes update/delete > DELETE cover letter detail removes [3.54ms]
+(pass) cover-letter routes generation/export > POST cover letters generate returns unsaved dynamic content [5.00ms]
+(pass) cover-letter routes generation/export > POST cover letters generate persists a saved cover letter [5.32ms]
+(pass) cover-letter routes generation/export > POST cover letter export returns a PDF attachment [20.23ms]
+(pass) cover-letter routes generation/export > POST cover letter export returns a DOCX attachment [20.69ms]
+
+src/routes/scraper.test.ts:
+(pass) scraper routes > POST scraper studios returns scrape result contract on success [1.35ms]
+(pass) scraper routes > POST scraper studios forwards service errors as API error payload [0.19ms]
+(pass) scraper routes > POST scraper jobs hitmarker returns scrape result contract on success [0.87ms]
+(pass) scraper routes > POST scraper jobs grackle forwards service errors as API error payload [0.13ms]
+(pass) scraper routes > POST scraper jobs portal rejects unsupported portals [0.08ms]
+
+src/routes/cover-letter-route-generation.test.ts:
+(pass) toGeneratedCoverLetterContent > parses fenced JSON responses into clean letter segments [0.12ms]
+(pass) toGeneratedCoverLetterContent > parses plain multi-line content into introduction, body, and conclusion [0.37ms]
+(pass) toGeneratedCoverLetterContent > parses JSON-like quoted segments when the model wraps the payload in raw braces [0.11ms]
+(pass) toGeneratedCoverLetterContent > parses reasoning-style draft sections when the local model leaves content empty [0.07ms]
+(pass) toGeneratedCoverLetterContent > strips bullet prefixes and numbered reasoning tails from parsed sections [0.02ms]
+(pass) toGeneratedCoverLetterContent > parses partial fenced JSON when the model truncates before closing the block [0.05ms]
+(pass) toGeneratedCoverLetterContent > strips leading quotes and trailing editorial commentary from generated sections [0.05ms]
+{"level":50,"time":1784462340365,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"cover-letter-generation","details":{"reason":"All providers failed to generate: openai: Invalid API key sk-proj-LEAKED_PROVIDER_SECRET_VALUE"},"msg":"Cover letter AI generation rejected"}
+(pass) handleGenerateCoverLetter secret hygiene > AI generation failures omit provider secrets from the client response [0.62ms]
+(pass) validateGeneratedCoverLetterContent > fails loud when conclusion contains planning artifacts [0.05ms]
+(pass) validateGeneratedCoverLetterContent > fails loud when generated sections are empty [0.02ms]
+(pass) validateGeneratedCoverLetterContent > accepts complete generated letter sections [0.02ms]
+
+src/routes/automation-screenshots.test.ts:
+(pass) automationScreenshotRoutes > returns 404 when screenshot metadata points to a missing file [2.19ms]
+(pass) automationScreenshotRoutes > serves screenshot bytes with the expected content headers [5.48ms]
+
+src/routes/portfolio.test.ts:
+(pass) portfolio routes > GET portfolio returns or auto-creates portfolio [15.45ms]
+(pass) portfolio routes > PUT portfolio updates metadata [7.60ms]
+(pass) portfolio routes > POST portfolio projects creates project [3.84ms]
+(pass) portfolio routes > POST portfolio projects creates a second project for reorder coverage [3.87ms]
+(pass) portfolio routes > POST portfolio projects reorder persists the requested project order [2.59ms]
+(pass) portfolio routes > PUT portfolio project detail updates project [1.65ms]
+(pass) portfolio routes > DELETE portfolio project detail removes project [0.68ms]
+(pass) portfolio routes > POST portfolio export returns a PDF attachment [3.94ms]
+(pass) portfolio routes > POST portfolio export returns a DOCX attachment [11.79ms]
+(pass) portfolio routes > DELETE portfolio project detail removes the second project [0.60ms]
+
+src/routes/openai-v1.test.ts:
+(pass) openai v1 auth default-deny > rejects unauthenticated models list when auth is enabled [8.25ms]
+(pass) openai v1 auth default-deny > rejects invalid bearer token when auth is enabled [1.40ms]
+(pass) openai v1 routes > GET /v1/models returns OpenAI list envelope [0.87ms]
+(pass) openai v1 routes > GET /v1/models/* returns 404 for unknown model [0.72ms]
+(pass) openai v1 routes > POST /v1/chat/completions returns OpenAI chat.completion shape [1.86ms]
+(pass) openai v1 routes > POST /v1/chat/completions stream emits SSE framing [2.29ms]
+
+src/routes/skill-mapping.test.ts:
+(pass) skill-mapping list routes > GET skill mappings returns list [3.33ms]
+(pass) skill-mapping list routes > GET skill mappings category filters [0.61ms]
+(pass) skill-mapping readiness route > GET skill readiness returns typed readiness ids [4.53ms]
+(pass) skill-mapping mutation routes > POST skill mappings creates mapping [8.08ms]
+(pass) skill-mapping mutation routes > PUT skill mapping detail updates [4.07ms]
+(pass) skill-mapping mutation routes > DELETE skill mapping detail removes [7.53ms]
+
+src/routes/ai.test.ts:
+(pass) GET ai models returns the shared AI control-plane contract [1.62ms]
+(pass) POST ai chat accepts message [5.16ms]
+(pass) POST ai chat requires message (validation error) [2.23ms]
+(pass) POST ai chat accepts contextual payload without validation drift [2.88ms]
+(pass) GET ai models preserves configured providers when provider probing fails [0.85ms]
+
+src/routes/core-routes.test.ts:
+(pass) search routes > GET search returns empty results for short queries [2.31ms]
+(pass) search routes > GET search filters by requested types [1.11ms]
+(pass) search routes > GET search autocomplete returns empty results for short prefix [1.04ms]
+(pass) search routes > GET search autocomplete returns suggestions for valid prefix [0.15ms]
+(pass) auth routes > GET auth status returns auth mode [0.47ms]
+(pass) auth init routes > POST auth init requires a valid setup token before initializing API key [0.89ms]
+(pass) auth configured routes > GET auth configured reflects key configuration state [0.31ms]
+(pass) user routes > GET user profile auto-creates the default profile [3.99ms]
+(pass) user routes > PUT user profile updates and persists profile values [2.65ms]
+(pass) gamification routes > GET gamification progress returns base progress [1.41ms]
+(pass) gamification routes > POST gamification award xp accepts positive XP grant [4.64ms]
+(pass) gamification routes > GET gamification challenges returns today's challenge list [1.82ms]
+(pass) gamification routes > POST gamification challenge completion rejects unknown challenge id [1.11ms]
+(pass) stats routes > GET stats dashboard returns aggregate values [5.97ms]
+(pass) stats routes > GET stats weekly returns 7-day activity view [1.56ms]
+(pass) stats routes > GET stats career returns skill coverage metrics [1.67ms]
+
+src/services/scraper-service-enrichment.test.ts:
+(pass) parseScrapeEnrichmentContent > parses fenced JSON responses [2.76ms]
+(pass) parseScrapeEnrichmentContent > parses embedded JSON surrounded by commentary [0.17ms]
+(pass) parseScrapeEnrichmentContent > builds grounded job fallback enrichment when JSON parsing fails [0.18ms]
+(pass) parseScrapeEnrichmentContent > builds grounded studio fallback enrichment when JSON parsing fails [0.07ms]
+
+src/services/data-service.test.ts:
+(pass) data-service > exportAll returns valid export structure [1.71ms]
+(pass) data-service > export/import round-trip preserves data integrity [6.41ms]
+(pass) data-service > importAll rejects unsupported version [0.09ms]
+
+src/services/email-delivery-service.test.ts:
+{"level":30,"time":1784462340645,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"email-delivery","details":{"recipientEmail":"recruiter@example.test","fromEmail":"mailer@example.test","messageId":"<019f7a3e-7221-7000-b893-4f42acc8836c@example.test>"},"msg":"email delivered"}
+(pass) email delivery service > sends a message using AUTH PLAIN [5.21ms]
+{"level":30,"time":1784462340647,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"email-delivery","details":{"recipientEmail":"producer@example.test","fromEmail":"mailer@example.test","messageId":"<019f7a3e-7226-7000-a2f1-1a3928d64d82@example.test>"},"msg":"email delivered"}
+(pass) email delivery service > sends a message using AUTH LOGIN [1.49ms]
+(pass) email delivery service > fails when STARTTLS is required but missing [0.66ms]
+(pass) email delivery service > fails when requested auth method is not advertised [0.53ms]
+(pass) email delivery service > fails when the SMTP connection closes before message delivery completes [0.97ms]
+
+src/services/scraper-service.test.ts:
+(pass) scraperService > captures row-level errors while ingesting valid rows [404.55ms]
+(pass) scraperService > reports malformed scraper JSON payloads [29.70ms]
+(pass) scraperService > derives deterministic content hashes when scraper rows omit contentHash [100.05ms]
+(pass) scraperService > refreshes stored enrichment when an existing content hash is scraped again [173.16ms]
+
+src/services/ai/local-provider.test.ts:
+(pass) generate falls back to reasoning for email responses when content is empty [10.10ms]
+
+src/services/ai/ai-service.test.ts:
+(pass) generate fails over to the first healthy provider with a concrete provider model [0.92ms]
+{"level":50,"time":1784462341388,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"ai-provider-failover","details":{"failures":[{"provider":"local","error":"local generate failed"},{"provider":"huggingface","error":"huggingface generate failed"}]},"msg":"All providers failed to generate"}
+{"level":50,"time":1784462341388,"pid":93532,"hostname":"Brandons-MacBook-Pro-2.local","component":"ai-provider-failover","details":{"failures":[{"provider":"local","error":"local generate failed"},{"provider":"huggingface","error":"huggingface generate failed"}]},"msg":"All providers failed to generate"}
+(pass) generate throws when every provider in the failover order fails [0.71ms]
+
+src/services/automation/automation-validation.test.ts:
+(pass) sanitizeAndValidateJobUrl private-host SSRF gate > denies loopback hosts by default [0.32ms]
+(pass) sanitizeAndValidateJobUrl private-host SSRF gate > allows private hosts only when BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS is true [0.04ms]
+(pass) sanitizeAndValidateJobUrl private-host SSRF gate > still accepts public https job URLs when private-host opt-in is off [0.16ms]
+
+src/services/automation/smart-field-mapper.test.ts:
+(pass) smartFieldMapper > returns empty mapping when page fetch status is not successful [504.37ms]
+(pass) smartFieldMapper > returns empty mapping for invalid AI selector JSON [521.00ms]
+(pass) smartFieldMapper > retries AI generation and returns validated selectors on second attempt [503.68ms]
+(pass) smartFieldMapper > retries page fetch for transient status codes before AI analysis [511.51ms]
+
+src/services/automation/job-apply-script.test.ts:
+103 |   test("uploads a real resume artifact and fills select, radio, and checkbox answers", async () => {
+104 |     const tempDirectory = createTempDirectory();
+105 |     await Promise.resolve()
+106 |       .then(async () => {
+107 |         const { execution, submittedPayload } = await runJobApplyScriptFixture(tempDirectory);
+108 |         expect(execution.error).toBeNull();
+                                      ^
+error: expect(received).toBeNull()
+
+Received: {
+  code: "AUTOMATION_RUNTIME_ERROR",
+  message: "Unable to launch automation browser.",
+  source: "@bao/scraper",
+}
+
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/services/automation/job-apply-script.test.ts:108:33)
+(fail) job-apply script > uploads a real resume artifact and fills select, radio, and checkbox answers [3099.87ms]
+
+src/services/automation/rpa-runner.test.ts:
+(pass) runRpaScript > parses NDJSON protocol progress/result events [27.89ms]
+(pass) runRpaScript > returns protocol error for malformed terminal payload [22.97ms]
+(pass) runRpaScript > returns runtime error when script exits non-zero [27.20ms]
+(pass) runRpaScript > returns protocol error when stdout emits unexpected progress events [27.07ms]
+(pass) runRpaScript > returns timeout error when process exceeds timeout [104.15ms]
+
+src/services/jobs/job-taxonomy-repository.test.ts:
+(pass) job taxonomy repository > seeds default taxonomy when taxonomy tables are empty [5.43ms]
+(pass) job taxonomy repository > replaces taxonomy rows with validated persisted values [0.91ms]
+
+src/services/jobs/providers/gaming-providers.test.ts:
+(pass) Hitmarker gaming provider > logs settings failures for Hitmarker requests [1.68ms]
+(pass) Hitmarker gaming provider > logs invalid JSON responses for Hitmarker requests [1.54ms]
+(pass) Hitmarker gaming provider > treats empty successful responses as empty results without failure logging [1.28ms]
+(pass) portal-backed gaming providers > logs disabled gaming portals as skipped [1.43ms]
+(pass) portal-backed gaming providers > logs scrape failures for portal-backed providers [1.00ms]
+
+2 tests failed:
+(fail) automation route integration > manual job-apply, scheduled websocket flow, email-response, and scheduler recovery all work end to end [5244.29ms]
+(fail) job-apply script > uploads a real resume artifact and fills select, radio, and checkbox answers [3099.87ms]
+
+ 178 pass
+ 2 fail
+ 878 expect() calls
+Ran 180 tests across 33 files. [15.13s]
+error: script "test" exited with code 1
+error: script "test" exited with code 1

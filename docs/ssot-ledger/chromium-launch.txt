@@ -1,0 +1,39 @@
+Error: launch: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /Users/brandon/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/91/5qxhhcj142j402qfvs_twnh80000gn/T/playwright_chromiumdev_profile-RKLx7k --remote-debugging-pipe --no-startup-window
+<launched> pid=7524
+[pid=7524][err] Received signal 11 SEGV_ACCERR 000000000010
+[pid=7524][err]  [0x000109343674]
+[pid=7524][err]  [0x000109346b98]
+[pid=7524][err]  [0x00019033d7a4]
+[pid=7524][err]  [0x000106b031a0]
+[pid=7524][err]  [0x000106b031a0]
+[pid=7524][err]  [0x000106489b50]
+[pid=7524][err]  [0x000105ab8188]
+[pid=7524][err]  [0x0001092fc8b8]
+[pid=7524][err]  [0x0001077922ec]
+[pid=7524][err]  [0x00018ff77da4]
+[pid=7524][err] [end of stack trace]
+Call log:
+  - <launching> /Users/brandon/Library/Caches/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --enable-automation --disable-infobars --disable-search-engine-choice-screen --disable-sync --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/91/5qxhhcj142j402qfvs_twnh80000gn/T/playwright_chromiumdev_profile-RKLx7k --remote-debugging-pipe --no-startup-window
+  - <launched> pid=7524
+  - [pid=7524][err] Received signal 11 SEGV_ACCERR 000000000010
+  - [pid=7524][err]  [0x000109343674]
+  - [pid=7524][err]  [0x000109346b98]
+  - [pid=7524][err]  [0x00019033d7a4]
+  2 × [pid=7524][err]  [0x000106b031a0]
+  - [pid=7524][err]  [0x000106489b50]
+  - [pid=7524][err]  [0x000105ab8188]
+  - [pid=7524][err]  [0x0001092fc8b8]
+  - [pid=7524][err]  [0x0001077922ec]
+  - [pid=7524][err]  [0x00018ff77da4]
+  - [pid=7524][err] [end of stack trace]
+  - [pid=7524] <gracefully close start>
+  - [pid=7524] <kill>
+  - [pid=7524] <will force kill>
+  - [pid=7524] exception while trying to kill process: SystemError: kill() failed: EPERM: Operation not permitted
+  - [pid=7524] <process did exit: exitCode=null, signal=SIGSEGV>
+  - [pid=7524] starting temporary directories cleanup
+  - [pid=7524] finished temporary directories cleanup
+  - [pid=7524] <gracefully close end>

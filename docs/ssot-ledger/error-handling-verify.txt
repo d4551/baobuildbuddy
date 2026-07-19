@@ -1,0 +1,20 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/shared/src/utils/automation-browser-launch-failure.test.ts:
+(pass) classifyAutomationBrowserLaunchFailure > classifies missing browser executable distinctly from SEGV [1.86ms]
+(pass) classifyAutomationBrowserLaunchFailure > classifies polluted sandbox browser path distinctly [0.06ms]
+(pass) classifyAutomationBrowserLaunchFailure > classifies context and page stage failures distinctly [0.02ms]
+(pass) classifyAutomationBrowserLaunchFailure > formats message and details without dropping failureMode [0.03ms]
+
+packages/server/src/services/automation/rpa-runner.test.ts:
+(pass) runRpaScript > parses NDJSON protocol progress/result events [20.79ms]
+(pass) runRpaScript > returns protocol error for malformed terminal payload [20.18ms]
+(pass) runRpaScript > returns runtime error when script exits non-zero [16.37ms]
+(pass) runRpaScript > returns protocol error when stdout emits unexpected progress events [19.42ms]
+(pass) runRpaScript > returns timeout error when process exceeds timeout [102.91ms]
+(pass) runRpaScript > surfaces distinct browser launch failure modes through protocol error details [63.52ms]
+
+ 10 pass
+ 0 fail
+ 47 expect() calls
+Ran 10 tests across 2 files. [312.00ms]
