@@ -102,11 +102,8 @@ describe("Layout SSOT — Layout token declarations", () => {
       "SIDEBAR_WIDTH_LG_CLASS",
     ];
     for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
-    const heroLine = content
-      .split("\n")
-      .find((line) => line.includes("PAGE_HERO_SECTION_CLASS"));
-    expect(heroLine ?? "", "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
-      /glass-subtle/,
+    expect(content, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
+      /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?glass-subtle/,
     );
   });
 
