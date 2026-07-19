@@ -83,7 +83,7 @@ const { t } = useI18n();
     :id="chatPanelId"
     :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
- <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
+    <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
       <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
         <div>
           <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.assistantName }}</h2>
@@ -140,11 +140,11 @@ const { t } = useI18n();
         :aria-busy="loading || streaming"
         @scroll="emit('scroll')"
       >
- <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_H_60_CLASS, FLUID_HEIGHT_CLASS]">
+        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_H_60_CLASS, FLUID_HEIGHT_CLASS]">
           <div class="card border border-base-300 glass-subtle" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
- <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
+              <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
             </div>
           </div>
         </div>
@@ -182,7 +182,7 @@ const { t } = useI18n();
           <textarea
             v-model="draft"
             rows="3"
- class="textarea resize-y" 
+            class="textarea resize-y" 
             :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
             :aria-label="t('floatingChat.inputAria')"
             :disabled="loading"

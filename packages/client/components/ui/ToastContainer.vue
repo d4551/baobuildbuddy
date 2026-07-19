@@ -50,24 +50,24 @@ function resolveIconPath(type: ToastType): string {
     aria-atomic="false"
     :aria-label="t('a11y.notifications')"
   >
-<TransitionGroup name="toast-motion" tag="div" class="flex flex-col" :class="[AUTH_CARD_MAX_WIDTH_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
-        <div 
-          v-for="toast in toasts"
-          :key="toast.id"
-          class="alert pointer-events-auto items-start sm:alert-horizontal" :class="[SHADOW_TOKEN_CLASS.lg, resolveAlertClass(toast.type)]"
-          :role="toast.type === 'error' ? 'alert' : 'status'"
-          :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
+    <TransitionGroup name="toast-motion" tag="div" class="flex flex-col" :class="[AUTH_CARD_MAX_WIDTH_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+      <div 
+        v-for="toast in toasts"
+        :key="toast.id"
+        class="alert pointer-events-auto items-start sm:alert-horizontal" :class="[SHADOW_TOKEN_CLASS.lg, resolveAlertClass(toast.type)]"
+        :role="toast.type === 'error' ? 'alert' : 'status'"
+        :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
+      >
+        <svg 
+          class="shrink-0"
+          :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[5]]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
         >
-          <svg 
-            class="shrink-0"
-            :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[5]]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="resolveIconPath(toast.type)" />
-          </svg>
+          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="resolveIconPath(toast.type)" />
+        </svg>
 
         <div class="grow" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
           <h3 class="font-bold">{{ toast.title }}</h3>

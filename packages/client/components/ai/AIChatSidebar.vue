@@ -25,11 +25,11 @@ const { t } = useI18n();
 </script>
 
 <template>
- <aside class="flex flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
+  <aside class="flex flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
     <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
- <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.contextPanelDescription") }}
         </p>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -49,7 +49,7 @@ const { t } = useI18n();
     <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
- <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("aiChatPage.promptsDescription") }}
         </p>
         <ChatPromptChips

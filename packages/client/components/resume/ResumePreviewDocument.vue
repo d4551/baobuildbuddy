@@ -27,7 +27,7 @@ const { t } = useI18n();
     :class="[PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
   >
     <div class="border-b-2 border-base-content/30 text-center" :class="[MARGIN_TOKEN_CLASS.mb8, PADDING_TOKEN_CLASS.pb4]">
- <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
+      <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
       <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4, TYPOGRAPHY_SCALE_CLASS.sm]">
         <span v-if="resume.personalInfo?.email">{{ resume.personalInfo.email }}</span>
         <span v-if="resume.personalInfo?.phone">{{ resume.personalInfo.phone }}</span>
@@ -67,7 +67,7 @@ const { t } = useI18n();
         heading-tag="h2"
         :class="[MARGIN_TOKEN_CLASS.mb3]"
       />
- <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
+      <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
     </div>
 
     <div v-if="resume.experience?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
@@ -84,7 +84,7 @@ const { t } = useI18n();
       >
         <div class="flex items-start justify-between" :class="[MARGIN_TOKEN_CLASS.mb1]">
           <div>
- <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ experience.title }}</h3>
+            <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ experience.title }}</h3>
             <p class="text-base font-semibold">{{ experience.company }}</p>
           </div>
           <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -92,7 +92,7 @@ const { t } = useI18n();
             <p v-if="experience.location">{{ experience.location }}</p>
           </div>
         </div>
- <p v-if="experience.description" class="whitespace-pre-wrap" :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <p v-if="experience.description" class="whitespace-pre-wrap" :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ experience.description }}
         </p>
       </div>
@@ -112,7 +112,7 @@ const { t } = useI18n();
       >
         <div class="flex items-start justify-between">
           <div>
- <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ education.degree }}</h3>
+            <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ education.degree }}</h3>
             <p class="text-base">{{ education.school }}</p>
           </div>
           <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -131,7 +131,7 @@ const { t } = useI18n();
         :class="[MARGIN_TOKEN_CLASS.mb3]"
       />
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
- <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ skill }}
         </span>
       </div>
@@ -145,9 +145,9 @@ const { t } = useI18n();
         :class="[MARGIN_TOKEN_CLASS.mb3]"
       />
       <div v-for="(project, index) in resume.projects" :key="`${project.title}-${index}`" :class="[MARGIN_TOKEN_CLASS.mb3]">
- <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ project.title }}</h3>
+        <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ project.title }}</h3>
         <p v-if="project.link" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.link }}</p>
- <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
+        <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
       </div>
     </div>
 

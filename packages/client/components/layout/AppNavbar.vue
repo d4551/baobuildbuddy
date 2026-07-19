@@ -115,7 +115,7 @@ onUnmounted(() => {
       </label>
       <NuxtLink 
         :to="APP_ROUTES.dashboard"
- class="btn btn-ghost shrink-0 text-primary lg:hidden" 
+        class="btn btn-ghost shrink-0 text-primary lg:hidden" 
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
