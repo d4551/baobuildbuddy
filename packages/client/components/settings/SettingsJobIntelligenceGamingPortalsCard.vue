@@ -100,9 +100,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
               t('settings.jobIntelligence.gamingPortalToggleAria', { name: portal.name })
             "
             :disabled="portal.fallbackUrl.trim().length === 0"
-            @change="
-              onToggle(portal, ($event.target as HTMLInputElement | null)?.checked === true)
-            "
+            @click.prevent="onToggle(portal, !portal.enabled)"
           />
         </li>
       </ul>
