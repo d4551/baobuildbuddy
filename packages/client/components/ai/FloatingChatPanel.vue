@@ -153,8 +153,6 @@ const { t } = useI18n();
             v-for="(messageRow, index) in renderedMessages"
             :key="messageRow.key"
             :assistant-label="resolvedBrand.assistantName"
-            :context-chips="index === latestAssistantMessageIndex && messageRow.message.role === 'assistant' ? contextChips : []"
-            :context-chips-aria="t('floatingChat.contextChipsAria')"
             :is-latest-assistant-message="index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'"
             :is-streaming="false"
             :locale="locale"
@@ -165,8 +163,6 @@ const { t } = useI18n();
           <AIChatBubble
             v-if="streaming"
             :assistant-label="resolvedBrand.assistantName"
-            :context-chips="contextChips"
-            :context-chips-aria="t('floatingChat.contextChipsAria')"
             :is-latest-assistant-message="true"
             :is-streaming="true"
             :locale="locale"

@@ -248,6 +248,12 @@ export const ACHIEVEMENT_ICON_BADGE_CLASS =
 
 /** Quick-action FAB position + action minimum width. */
 export const FAB_POSITION_CLASS = "left-6 bottom-24";
+
+/**
+ * Floating chat stack (above mobile dock). Right rail; desktop lowers to bottom-6.
+ */
+export const SHELL_FLOATING_CHAT_STACK_CLASS =
+  "fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6";
 export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
 
 /** Inline CTA chevron icon size (small directional arrow). */
