@@ -27,7 +27,7 @@ const { t } = useI18n();
       <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
 
       <SectionGrid grid-token="threeColumn">
-        <article
+        <article 
           v-for="pathway in pathways"
           :key="pathway.id"
           :class="SURFACE_GLASS_CARD_CLASS"
@@ -62,7 +62,7 @@ const { t } = useI18n();
                 <span>{{ t("skillsPathwaysPage.pathways.matchScoreLabel") }}</span>
                 <span class="font-semibold">{{ pathway.matchScore }}%</span>
               </div>
-              <progress
+              <progress 
                 class="progress" :class="[FLUID_WIDTH_CLASS, getReadinessColor(pathway.matchScore)]"
                 :value="pathway.matchScore"
                 :max="readinessMax"

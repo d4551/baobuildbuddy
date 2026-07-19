@@ -31,7 +31,7 @@ const emit = defineEmits<{
       <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4]">{{ t("gamificationPage.dailyChallengesTitle") }}</h2>
 
       <div v-if="challenges.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-        <article
+        <article 
           v-for="challenge in challenges"
           :key="challenge.id"
           :class="SURFACE_GLASS_CARD_CLASS"
@@ -48,8 +48,8 @@ const emit = defineEmits<{
             </div>
 
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
- <span aria-hidden="true" :class="[WIDTH_TOKEN_CLASS.w8, TYPOGRAPHY_SCALE_CLASS.lg]">{{ challenge.icon }}</span>
-              <progress
+              <span :class="[TYPOGRAPHY_SCALE_CLASS.lg, WIDTH_TOKEN_CLASS.w8]" aria-hidden="true">{{ challenge.icon }}</span>
+              <progress 
                 class="progress flex-1"
                 :class="challenge.completed ? 'progress-success' : 'progress-primary'"
                 :value="getChallengeProgress(challenge)"
@@ -65,7 +65,7 @@ const emit = defineEmits<{
             </div>
 
             <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-              <button
+              <button 
                 type="button"
                 class="btn btn-success btn-sm"
                 :disabled="completingChallenge === challenge.id"

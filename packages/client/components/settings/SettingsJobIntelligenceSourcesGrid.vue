@@ -35,7 +35,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.hitmarkerDescription") }}
             </p>
           </div>
-          <span
+          <span 
             class="badge badge-sm shrink-0"
             :class="providerBadgeClass(jobProviderForm.hitmarkerEnabled && jobProviderForm.hitmarkerApiBaseUrl.trim().length > 0)"
           >
@@ -50,7 +50,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerApiLabel") }}</legend>
-          <input
+          <input 
             v-model="jobProviderForm.hitmarkerApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.hitmarkerApiLabel')"
             type="url"
@@ -60,7 +60,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerQueryLabel") }}</legend>
-          <input
+          <input 
             v-model="jobProviderForm.hitmarkerDefaultQuery"
             :aria-label="t('settings.jobIntelligence.hitmarkerQueryLabel')"
             type="text"
@@ -70,7 +70,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerLocationLabel") }}</legend>
-          <input
+          <input 
             v-model="jobProviderForm.hitmarkerDefaultLocation"
             :aria-label="t('settings.jobIntelligence.hitmarkerLocationLabel')"
             type="text"
@@ -89,7 +89,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.greenhouseDescription") }}
             </p>
           </div>
-          <span
+          <span 
             class="badge badge-sm shrink-0"
             :class="providerBadgeClass(jobProviderForm.greenhouseApiBaseUrl.trim().length > 0)"
           >
@@ -99,7 +99,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.greenhouseApiLabel") }}</legend>
-          <input
+          <input 
             v-model="jobProviderForm.greenhouseApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.greenhouseApiLabel')"
             type="url"
@@ -109,7 +109,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.greenhouseMaxPagesLabel") }}</legend>
-          <input
+          <input 
             v-model.number="jobProviderForm.greenhouseMaxPages"
             :aria-label="t('settings.jobIntelligence.greenhouseMaxPagesLabel')"
             type="number"
@@ -130,7 +130,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.leverDescription") }}
             </p>
           </div>
-          <span
+          <span 
             class="badge badge-sm shrink-0"
             :class="providerBadgeClass(jobProviderForm.leverApiBaseUrl.trim().length > 0)"
           >
@@ -140,7 +140,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.leverApiLabel") }}</legend>
-          <input
+          <input 
             v-model="jobProviderForm.leverApiBaseUrl"
             :aria-label="t('settings.jobIntelligence.leverApiLabel')"
             type="url"
@@ -150,7 +150,7 @@ function providerBadgeLabel(isConfigured: boolean): string {
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.jobIntelligence.leverMaxPagesLabel") }}</legend>
-          <input
+          <input 
             v-model.number="jobProviderForm.leverMaxPages"
             :aria-label="t('settings.jobIntelligence.leverMaxPagesLabel')"
             type="number"

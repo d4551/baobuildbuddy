@@ -25,7 +25,7 @@ describe("collectRawDesignTokenViolationsForContent", () => {
 
   test("flags inline shadow tokens", () => {
     const violations = collectRawDesignTokenViolationsForContent(
-      "packages/client/components/jobs/JobMatchScore.vue",
+      "packages/client/components/ui/QuickActionFab.vue",
       '<template><button class="btn btn-primary shadow-lg">+</button></template>',
     );
     expect(violations.some((v) => v.message.includes("shadow-lg"))).toBe(true);
@@ -42,7 +42,7 @@ describe("collectRawDesignTokenViolationsForContent", () => {
 
   test("flags design-token prop defaults baking in utility tokens", () => {
     const violations = collectRawDesignTokenViolationsForContent(
-      CONSUMER_PATH,
+      "packages/client/components/example/ExampleMeter.vue",
       [
         '<script setup lang="ts">',
         'withDefaults(defineProps<{ sizeClass?: string }>(), { sizeClass: "h-24 w-24" });',

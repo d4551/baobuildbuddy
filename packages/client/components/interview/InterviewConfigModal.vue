@@ -5,9 +5,8 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
-  MAX_HEIGHT_72_CLASS,
+  MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -79,7 +78,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     :close-backdrop-label="t('interviewHub.config.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
- <h3 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">
+    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("interviewHub.config.title") }}
     </h3>
     <p :id="descriptionId" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -87,7 +86,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     </p>
 
     <div class="join" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button
+      <button 
         type="button"
         class="btn join-item btn-outline"
         :class="{ 'btn-primary': selectedMode === 'job' }"
@@ -96,7 +95,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       >
         {{ t("interviewHub.config.modeJobButton") }}
       </button>
-      <button
+      <button 
         type="button"
         class="btn join-item btn-outline"
         :class="{ 'btn-primary': selectedMode === 'studio' }"
@@ -107,11 +106,11 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
     </div>
 
-    <SectionGrid grid-token="twoColumnWide" extra-:class="[MARGIN_TOKEN_CLASS.mt6]">
+    <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt6]" grid-token="twoColumnWide" extra->
       <div v-if="selectedMode === 'job'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
-          <input
+          <input 
             :value="jobSearchTerm"
             type="text"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -127,7 +126,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         />
 
         <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <div class="overflow-x-auto rounded-box border border-base-300" :class="[MAX_HEIGHT_72_CLASS]">
+          <div class="overflow-x-auto rounded-box border border-base-300" :class="[MAX_HEIGHT_TOKEN_CLASS.maxH72]">
             <table class="table table-sm table-zebra" :aria-label="t('interviewHub.config.jobsTableAria')">
               <thead>
                 <tr>
@@ -143,7 +142,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                   <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
                   <td>{{ job.company }}</td>
                   <td class="text-right">
-                    <button
+                    <button 
                       type="button"
                       class="btn btn-sm btn-ghost"
                       :class="{ 'btn-primary': job.id === selectedJobId }"
@@ -182,7 +181,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               {{ selectedJob.company }} · {{ selectedJob.location }}
             </p>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-              <span
+              <span 
                 v-for="tech in selectedJob.technologies?.slice(0, 6)"
                 :key="tech"
                 class="badge badge-sm badge-outline"
@@ -227,7 +226,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       />
 
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-ghost"
           :aria-label="t('interviewHub.config.cancelAria')"
@@ -235,7 +234,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         >
           {{ t("interviewHub.config.cancelButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :aria-label="t('interviewHub.config.startAria')"

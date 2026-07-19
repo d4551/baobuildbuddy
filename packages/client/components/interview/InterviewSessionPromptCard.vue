@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -57,7 +56,7 @@ const promptExpectedMinutes = computed(() => {
   <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-prompt-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-        <h2 id="interview-session-prompt-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" id="interview-session-prompt-title">
           {{ t("interviewSession.promptTitle") }}
         </h2>
         <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -65,11 +64,8 @@ const promptExpectedMinutes = computed(() => {
         </p>
       </div>
 
-      <div
-        v-if="currentQuestion"
-        class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p5]"
-      >
- <p class="font-semibold text-base-content" :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.xl]">
+      <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p5]" v-if="currentQuestion">
+        <p class="font-semibold leading-relaxed text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
           {{ currentQuestion.question }}
         </p>
       </div>
@@ -105,7 +101,7 @@ const promptExpectedMinutes = computed(() => {
         </p>
 
         <div v-if="promptTags.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <span
+          <span 
             v-for="tag in promptTags"
             :key="tag"
             class="badge badge-outline badge-primary"

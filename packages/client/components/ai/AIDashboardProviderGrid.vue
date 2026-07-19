@@ -55,7 +55,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
 
 <template>
   <SectionGrid grid-token="twoColumnMdGap6">
-    <div
+    <div 
       v-for="provider in providers"
       :key="provider.id"
       :class="SURFACE_GLASS_CARD_CLASS"
@@ -63,7 +63,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
-            <AIProviderIcon
+            <AIProviderIcon 
               :provider-id="provider.iconId"
               :class="[ICON_SIZE_CLASS.lg, 'shrink-0 text-primary']"
             />
@@ -77,7 +77,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
           </span>
         </div>
 
-        <div
+        <div 
           v-if="testResults[provider.id]"
           role="status"
           class="alert alert-soft"
@@ -96,7 +96,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
         </div>
 
         <div class="card-actions justify-end">
-          <button
+          <button 
             class="btn btn-outline btn-sm"
             :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
@@ -109,7 +109,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
                 : t("aiDashboard.providerCard.testButton")
             }}</span>
           </button>
-          <NuxtLink
+          <NuxtLink 
             :to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
             class="btn btn-primary btn-sm"
             :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"

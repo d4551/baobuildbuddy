@@ -31,7 +31,7 @@ const { t } = useI18n();
       <SectionGrid grid-token="fourColumnLg">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.searchLegend") }}</legend>
-          <input
+          <input 
             v-model="searchQuery"
             type="search"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -42,7 +42,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.typeLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedType"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('studiosIndex.filters.typeAria')"
@@ -56,7 +56,7 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.sizeLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedSize"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('studiosIndex.filters.sizeAria')"
@@ -70,8 +70,8 @@ const { t } = useI18n();
       </SectionGrid>
 
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
- <label class="label cursor-pointer justify-start" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
-          <input
+        <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap2, PADDING_TOKEN_CLASS.py0]">
+          <input 
             v-model="remoteWork"
             type="checkbox"
             class="toggle toggle-primary toggle-sm"

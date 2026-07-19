@@ -32,7 +32,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedProviderModel"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.providerAria')"
@@ -51,7 +51,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.modelLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedModelValue"
             class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.modelAria')"
@@ -66,7 +66,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button
+        <button 
           class="btn btn-primary"
           :disabled="!selectedProviderModel || !selectedModelValue || loading"
           :aria-label="t('aiDashboard.preference.saveAria')"

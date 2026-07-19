@@ -78,7 +78,7 @@ function updateEnableVoiceMode(event: Event): void {
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.roleLegend") }}</legend>
-      <input
+      <input 
         v-if="selectedMode === 'job'"
         :value="sessionConfig.role"
         :list="roleSuggestionsListId"
@@ -86,7 +86,7 @@ function updateEnableVoiceMode(event: Event): void {
         :aria-label="t('interviewHub.config.roleAria')"
         @input="updateTextValue($event, 'update:role')"
       />
-      <select
+      <select 
         v-else
         :value="sessionConfig.role"
         class="select" :class="[FLUID_WIDTH_CLASS]"
@@ -108,7 +108,7 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.experienceLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.experienceLevel"
         class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.experienceAria')"
@@ -122,7 +122,7 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.questionCountLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.questionCount"
         class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.questionCountAria')"
@@ -140,7 +140,7 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.conversationStyleLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.conversationStyle"
         class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.conversationStyleAria')"
@@ -159,7 +159,7 @@ function updateEnableVoiceMode(event: Event): void {
     </fieldset>
 
     <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-      <input
+      <input 
         :checked="sessionConfig.enableVoiceMode"
         type="checkbox"
         class="toggle toggle-primary"
@@ -171,7 +171,7 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset v-if="sessionConfig.enableVoiceMode" class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.ttsVoiceLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.voiceSettings.voiceId ?? ''"
         class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.ttsVoiceAria')"

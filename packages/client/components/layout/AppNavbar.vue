@@ -12,6 +12,7 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
+  MAX_HEIGHT_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHELL_NAVBAR_CLASS,
   SHELL_NAVBAR_DROPDOWN_CLASS,
@@ -91,14 +92,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <nav
+  <nav 
     class="navbar"
     :class="SHELL_NAVBAR_CLASS"
     :data-scrolled="isScrolled || undefined"
     :aria-label="t('a11y.appHeader')"
   >
     <div class="navbar-start flex flex-1 items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2, FLEX_GAP_TOKEN_CLASS.gap4]">
-      <label
+      <label 
         :for="APP_DRAWER_ID"
         role="button"
         tabindex="0"
@@ -113,7 +114,7 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
-      <NuxtLink
+      <NuxtLink 
         :to="APP_ROUTES.dashboard"
  class="btn btn-ghost shrink-0 text-primary lg:hidden" 
       >
@@ -125,12 +126,12 @@ onUnmounted(() => {
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
       </div>
     </div>
-    <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="{ 'overflow-hidden opacity-0 max-h-0': isScrolled }">
+    <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="isScrolled ? ['overflow-hidden', 'opacity-0', MAX_HEIGHT_TOKEN_CLASS.maxH0] : []">
       <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
       <label class="swap swap-rotate btn btn-ghost btn-circle">
-        <input
+        <input 
           type="checkbox"
           class="theme-controller"
           value="business"
@@ -151,7 +152,7 @@ onUnmounted(() => {
         </span>
       </label>
       <details ref="userMenu" class="dropdown dropdown-end" @toggle="syncUserMenuState">
-        <summary
+        <summary 
           class="btn btn-ghost btn-circle"
           :aria-label="t('a11y.userMenu')"
           :aria-controls="userMenuId"
@@ -161,7 +162,7 @@ onUnmounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </summary>
-        <ul
+        <ul 
           :id="userMenuId"
           :class="SHELL_NAVBAR_DROPDOWN_CLASS"
           :aria-label="t('a11y.userMenu')"
@@ -177,7 +178,7 @@ onUnmounted(() => {
           </li>
           <li class="menu-title">{{ t("a11y.localeSwitcher") }}</li>
           <li v-for="loc in availableLocales" :key="loc">
-            <button
+            <button 
               type="button"
               class="text-left" :class="[FLUID_WIDTH_CLASS, { active: locale === loc }]"
               :aria-label="t('a11y.localeOptionAria', { locale: getLocaleLabel(loc) })"

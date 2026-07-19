@@ -65,7 +65,7 @@ function handleClose(): void {
 </script>
 
 <template>
-  <dialog
+  <dialog 
     :id="id"
     ref="modalFrame"
     class="modal modal-bottom sm:modal-middle"

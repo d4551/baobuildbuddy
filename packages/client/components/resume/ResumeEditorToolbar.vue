@@ -26,22 +26,22 @@ const { t } = useI18n();
 <template>
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
     <button class="btn btn-ghost btn-sm" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
-      <IconArrowLeft :class="[ICON_SIZE_CLASS['4']]" />
+      <IconArrowLeft :class="[ICON_SIZE_CLASS[4]]"/>
       {{ t("resumePage.backButton") }}
     </button>
 
     <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-      <button
+      <button 
         class="btn btn-sm btn-outline"
         :disabled="enhancing"
         :aria-label="t('resumePage.aiEnhanceButtonAria')"
         @click="emit('enhance')"
       >
         <LoadingSpinner size="xs" label="Loading" v-if="enhancing" />
-        <IconBolt v-else :class="[ICON_SIZE_CLASS['4']]" />
+        <IconBolt :class="[ICON_SIZE_CLASS[4]]" v-else/>
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
-      <button
+      <button 
         class="btn btn-sm btn-outline"
         :disabled="scoring"
         :aria-label="t('resumePage.aiScoreButtonAria')"
@@ -50,7 +50,7 @@ const { t } = useI18n();
         <LoadingSpinner size="xs" label="Loading" v-if="scoring" />
         {{ t("resumePage.aiScoreButton") }}
       </button>
-      <AppExportMenu
+      <AppExportMenu 
         :button-label="t('resumePage.exportButton')"
         :button-aria-label="t('resumePage.exportButtonAria')"
         summary-class="btn btn-sm btn-outline"

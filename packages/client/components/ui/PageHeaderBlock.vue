@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  FLEX_GAP_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_CLASS,
   PAGE_HEADER_OUTER_CLASS,
   PAGE_HEADER_TITLE_CLASS,
@@ -36,7 +37,7 @@ const resolvedDescriptionClass = computed(() =>
       </component>
       <p v-if="description" :class="resolvedDescriptionClass">{{ description }}</p>
     </div>
-    <div v-if="hasActions" class="flex shrink-0 flex-wrap gap-2">
+    <div class="flex shrink-0 flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" v-if="hasActions">
       <slot name="actions" />
     </div>
   </header>

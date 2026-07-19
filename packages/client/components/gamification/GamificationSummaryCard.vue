@@ -11,7 +11,6 @@ import {
 } from "~/constants/gamification";
 import {
   FLUID_WIDTH_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   HEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -36,7 +35,7 @@ const { t } = useI18n();
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
- <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
+            <h2 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
             <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
@@ -44,15 +43,7 @@ const { t } = useI18n();
           <div :class="[TYPOGRAPHY_SCALE_CLASS.xl6]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
         </div>
 
-        <progress
- class="progress progress-primary" 
-          :value="levelProgress"
-          :max="GAMIFICATION_PROGRESS_MAX"
-          :aria-valuenow="levelProgress"
-          :aria-valuemin="GAMIFICATION_PROGRESS_MIN"
-          :aria-valuemax="GAMIFICATION_PROGRESS_MAX"
-          :aria-label="t('gamificationPage.a11y.levelProgress')"
-        ></progress>
+        <progress class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, HEIGHT_TOKEN_CLASS.h4]" :value="levelProgress" :max="GAMIFICATION_PROGRESS_MAX" :aria-valuenow="levelProgress" :aria-valuemin="GAMIFICATION_PROGRESS_MIN" :aria-valuemax="GAMIFICATION_PROGRESS_MAX" :aria-label="t('gamificationPage.a11y.levelProgress')"></progress>
 
         <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
@@ -60,7 +51,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <StatsRow
+    <StatsRow 
       background-class="bg-base-200"
       :stats="[
         { titleKey: 'gamificationPage.currentStreakTitle', value: progress.currentStreak || 0, valueClass: 'text-primary', descKey: 'gamificationPage.streakDaysSuffix', figure: GAMIFICATION_CURRENT_STREAK_ICON },

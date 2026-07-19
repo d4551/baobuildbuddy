@@ -80,10 +80,10 @@ function updateRequestBodyValue(event: Event): void {
   >
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <header :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-        <h2 :id="dialogTitleId" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
+        <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="dialogTitleId">
           {{ t("apiDocs.tester.title") }}
         </h2>
-        <p
+        <p 
           v-if="selectedEndpoint"
           :id="dialogDescriptionId"
           class="font-mono text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
@@ -104,7 +104,7 @@ function updateRequestBodyValue(event: Event): void {
           <li class="step" :class="{ 'step-primary': testerState !== 'idle' && testerState !== 'loading' }">
             {{ t("apiDocs.tester.steps.send") }}
           </li>
-          <li
+          <li 
             class="step"
             :class="{
               'step-success': testerState === 'success' || testerState === 'empty',
@@ -126,7 +126,7 @@ function updateRequestBodyValue(event: Event): void {
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.pathParametersIntro") }}</h3>
         <SectionGrid grid-token="twoColumnMdGap3">
-          <div
+          <div 
             v-for="parameterName in selectedEndpoint.pathParameters"
             :key="`path-${parameterName}`"
             class="fieldset"
@@ -134,7 +134,7 @@ function updateRequestBodyValue(event: Event): void {
             <span class="label">
               {{ t("apiDocs.tester.parameterLabel", { name: parameterName }) }}
             </span>
-            <input
+            <input 
               :value="pathParameterValues[parameterName] ?? ''"
               type="text"
               class="input"
@@ -153,7 +153,7 @@ function updateRequestBodyValue(event: Event): void {
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.queryParametersIntro") }}</h3>
         <SectionGrid grid-token="twoColumnMdGap3">
-          <div
+          <div 
             v-for="parameter in selectedEndpoint.queryParameters"
             :key="`query-${parameter.name}`"
             class="fieldset"
@@ -161,7 +161,7 @@ function updateRequestBodyValue(event: Event): void {
             <span class="label">
               {{ t("apiDocs.tester.parameterLabel", { name: parameter.name }) }}
             </span>
-            <input
+            <input 
               :value="queryParameterValues[parameter.name] ?? ''"
               type="text"
               class="input"
@@ -173,20 +173,14 @@ function updateRequestBodyValue(event: Event): void {
         </SectionGrid>
       </section>
 
-      <section
+      <section 
         v-if="selectedEndpoint"
         :aria-label="t('apiDocs.tester.requestBodyIntro')"
         :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
-        <textarea
-          :value="requestBodyValue"
- class="textarea font-mono" 
-          :placeholder="t('apiDocs.tester.bodyPlaceholder')"
-          :aria-label="t('apiDocs.tester.requestBodyAria')"
-          @input="updateRequestBodyValue"
-        />
-        <p
+        <textarea class="textarea font-mono" :value="requestBodyValue" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm, MIN_HEIGHT_SCROLL_CLASS]" :placeholder="t('apiDocs.tester.bodyPlaceholder')" :aria-label="t('apiDocs.tester.requestBodyAria')" @input="updateRequestBodyValue"/>
+        <p 
           v-if="!selectedEndpoint.requestBodyTemplate && !selectedEndpoint.requestBodyRequired"
           class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"
         >
@@ -195,7 +189,7 @@ function updateRequestBodyValue(event: Event): void {
       </section>
 
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :disabled="testerState === 'loading'"
@@ -205,7 +199,7 @@ function updateRequestBodyValue(event: Event): void {
           <LoadingSpinner size="sm" label="Loading" v-if="testerState === 'loading'" />
           <span v-else>{{ t("apiDocs.tester.send") }}</span>
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-ghost"
           :aria-label="t('apiDocs.tester.closeAria')"
@@ -219,7 +213,7 @@ function updateRequestBodyValue(event: Event): void {
         <h3 class="font-medium">{{ t("apiDocs.tester.responseTitle") }}</h3>
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ testerStateLabel }}</p>
 
-        <div
+        <div 
           v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
           class="alert alert-error"
           role="alert"

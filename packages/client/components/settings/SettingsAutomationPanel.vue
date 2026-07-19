@@ -43,7 +43,7 @@ const { t } = useI18n();
               {{ t("settings.automation.headlessDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.headless"
             type="checkbox"
             class="toggle toggle-primary"
@@ -60,7 +60,7 @@ const { t } = useI18n();
               {{ t("settings.automation.smartSelectorsDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.enableSmartSelectors"
             type="checkbox"
             class="toggle toggle-primary"
@@ -77,7 +77,7 @@ const { t } = useI18n();
               {{ t("settings.automation.autoScreenshotsDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.autoSaveScreenshots"
             type="checkbox"
             class="toggle toggle-primary"
@@ -90,7 +90,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.timeoutLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.defaultTimeout"
               type="number"
               min="1"
@@ -104,7 +104,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.retentionLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.screenshotRetention"
               type="number"
               min="1"
@@ -118,7 +118,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.concurrentRunsLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.maxConcurrentRuns"
               type="number"
               min="1"
@@ -132,7 +132,7 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.defaultBrowserLegend") }}
             </legend>
-            <select
+            <select 
               v-model="automationForm.defaultBrowser"
               class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.defaultBrowserAria')"
@@ -150,7 +150,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="t('settings.automation.saveAria')"
           @click="emit('save')"

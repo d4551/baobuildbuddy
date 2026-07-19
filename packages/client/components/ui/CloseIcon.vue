@@ -3,7 +3,7 @@ import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS } from "~/constants/layou
 </script>
 
 <template>
-  <svg
+  <svg 
     :class="ICON_SIZE_CLASS[4]"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"

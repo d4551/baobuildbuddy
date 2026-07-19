@@ -151,7 +151,7 @@ watch(
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ summary }}</p>
 
       <nav class="join" :aria-label="navigationAria">
-        <button
+        <button 
           type="button"
           class="join-item btn btn-sm btn-outline"
           :aria-label="previousAria"
@@ -163,7 +163,7 @@ watch(
           <span class="sr-only">{{ previousAria }}</span>
         </button>
 
-        <button
+        <button 
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
@@ -180,7 +180,7 @@ watch(
           {{ page }}
         </button>
 
-        <button
+        <button 
           type="button"
           class="join-item btn btn-sm btn-outline"
           :aria-label="nextAria"

@@ -43,7 +43,7 @@ function resolveIconPath(type: ToastType): string {
 </script>
 
 <template>
-  <div
+  <div 
     :id="TOAST_CONTAINER_DOM_ID"
     class="toast toast-end toast-top z-50 pointer-events-none"
     aria-live="polite"
@@ -51,14 +51,14 @@ function resolveIconPath(type: ToastType): string {
     :aria-label="t('a11y.notifications')"
   >
 <TransitionGroup name="toast-motion" tag="div" class="flex flex-col" :class="[AUTH_CARD_MAX_WIDTH_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
-        <div
+        <div 
           v-for="toast in toasts"
           :key="toast.id"
           class="alert pointer-events-auto items-start sm:alert-horizontal" :class="[SHADOW_TOKEN_CLASS.lg, resolveAlertClass(toast.type)]"
           :role="toast.type === 'error' ? 'alert' : 'status'"
           :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
         >
-          <svg
+          <svg 
             class="shrink-0"
             :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[5]]"
             fill="none"
@@ -74,7 +74,7 @@ function resolveIconPath(type: ToastType): string {
           <p class="break-words" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ toast.message }}</p>
         </div>
 
-        <button
+        <button 
           type="button"
           class="btn btn-ghost btn-circle btn-xs"
           :aria-label="t('a11y.dismissNotification')"

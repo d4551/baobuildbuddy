@@ -110,7 +110,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         <li :class="lifecycleStepClasses[2]">{{ t("automation.jobApply.stream.steps.completed") }}</li>
       </ul>
 
-      <div
+      <div 
         class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[MARGIN_TOKEN_CLASS.mt4]"
         :aria-label="t('automation.jobApply.stream.aria')"
       >
@@ -135,7 +135,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
               })
             }}
           </div>
-          <progress
+          <progress 
             class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mt2]"
             :value="streamProgressValue"
             max="100"
@@ -145,14 +145,14 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
       </div>
 
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
-        <NuxtLink
+        <NuxtLink 
           :to="runDetailRoute(activeRunId)"
           class="btn btn-sm btn-outline"
           :aria-label="t('automation.jobApply.openRunDetailAria', { id: activeRunId })"
         >
           {{ t("automation.jobApply.openRunDetailLink") }}
         </NuxtLink>
-        <button
+        <button 
           type="button"
           class="btn btn-sm btn-ghost"
           :disabled="isStreamLoading"
@@ -161,7 +161,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         >
           {{ t("automation.jobApply.stream.retryButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-sm btn-ghost"
           :aria-label="t('automation.jobApply.stream.cancelAria')"
@@ -171,7 +171,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </button>
       </div>
 
-      <BootstrapErrorAlert
+      <BootstrapErrorAlert 
         v-if="streamErrorMessage"
         :class="[MARGIN_TOKEN_CLASS.mt4]"
         :title="t('automation.jobApply.stream.errorTitle')"

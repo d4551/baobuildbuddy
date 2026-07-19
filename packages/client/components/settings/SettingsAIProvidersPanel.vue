@@ -2,7 +2,6 @@
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -12,6 +11,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -135,7 +135,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </template>
       </SettingsPanelHeader>
 
-      <div
+      <div 
         role="note"
         class="alert alert-info alert-soft"
         :aria-label="t('settings.aiProviders.openaiV1Aria')"
@@ -143,7 +143,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.openaiV1Description") }}</p>
- <code class="glass-subtle block break-all rounded-box" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2, TYPOGRAPHY_SCALE_CLASS.sm]">
+          <code class="glass-subtle block break-all rounded-box" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
             {{ openaiV1BaseUrl }}
           </code>
         </div>
@@ -185,14 +185,14 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             </div>
 
             <SectionGrid grid-token="twoColumnMdGap3">
-              <article
+              <article 
                 v-for="provider in props.providerInputs"
                 :key="provider.id"
                 class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4]"
               >
                 <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                   <div class="flex items-start" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
-                    <AIProviderIcon :provider-id="provider.id" class="shrink-0 text-primary" :class="[MARGIN_TOKEN_CLASS.mt05, ICON_SIZE_CLASS['5']]" />
+                    <AIProviderIcon class="shrink-0 text-primary" :class="[ICON_SIZE_CLASS[5], MARGIN_TOKEN_CLASS.mtHalf]" :provider-id="provider.id"/>
                     <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
                       <p class="font-medium">{{ provider.label }}</p>
                       <p class="text-muted" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -205,10 +205,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
                   </span>
                 </div>
 
-                <p
-                  v-if="props.testResults[provider.id]?.message || props.providerDiagnostics[provider.id]?.message"
- class="text-muted" 
-                >
+                <p class="text-muted" v-if="props.testResults[provider.id]?.message || props.providerDiagnostics[provider.id]?.message" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.mt3]">
                   {{
                     props.testResults[provider.id]?.message ||
                       props.providerDiagnostics[provider.id]?.message
@@ -219,7 +216,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
           </div>
         </section>
 
-        <section
+        <section 
           :class="SURFACE_GLASS_CARD_CLASS"
           :aria-label="t('settings.aiProviders.preferredProviderLegend')"
         >
@@ -241,7 +238,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               <legend class="fieldset-legend">
                 {{ t("settings.aiProviders.preferredProviderLegend") }}
               </legend>
-              <select
+              <select 
                 v-model="preferredProviderSelection"
                 class="select" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('settings.aiProviders.preferredProviderAria')"
@@ -257,7 +254,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             </fieldset>
 
             <div class="flex justify-end">
-              <button
+              <button 
                 class="btn btn-primary btn-sm"
                 :aria-label="t('settings.aiProviders.preferredProviderAria')"
                 @click="emit('savePreferredProvider')"

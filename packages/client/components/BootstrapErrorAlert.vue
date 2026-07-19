@@ -38,13 +38,7 @@ const hasRetry = computed(
 
 <template>
   <div :class="alertClass" role="alert">
-    <svg
-      class="shrink-0" :class="[ICON_SIZE_CLASS['6']]"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
+    <svg class="shrink-0" :class="[ICON_SIZE_CLASS[6]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
@@ -60,7 +54,7 @@ const hasRetry = computed(
         {{ message }}
       </p>
     </div>
-    <button
+    <button 
       v-if="hasRetry"
       type="button"
       class="btn btn-sm btn-ghost shrink-0"

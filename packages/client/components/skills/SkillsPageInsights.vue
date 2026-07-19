@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <StatsRow
+    <StatsRow 
       background-class="bg-base-200"
       :stats="[
         { titleKey: 'skillsPage.stats.totalMappingsTitle', value: mappingMetrics.total, valueClass: 'text-primary', descKey: 'skillsPage.stats.totalMappingsDesc' },
@@ -72,7 +72,7 @@ const { t } = useI18n();
           </ul>
 
           <div class="card-actions justify-end">
-            <NuxtLink
+            <NuxtLink 
               :to="APP_ROUTES.skillsPathways"
               class="btn btn-primary btn-sm"
               :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
@@ -97,7 +97,7 @@ const { t } = useI18n();
             class="list rounded-box glass-subtle"
             :aria-label="t('skillsPage.insights.topMappingsAria')"
           >
-            <li
+            <li 
               v-for="mapping in topMappings"
               :key="mapping.id"
               class="list-row items-center"

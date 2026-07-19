@@ -132,7 +132,7 @@ function handleClose(): void {
     <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ title }}</h3>
     <p :id="descriptionId" :class="[PADDING_TOKEN_CLASS.py4]">{{ message }}</p>
     <div class="modal-action">
-      <button
+      <button 
         ref="cancelButton"
         type="button"
         class="btn btn-ghost"
@@ -141,7 +141,7 @@ function handleClose(): void {
       >
         {{ resolvedCancelText }}
       </button>
-      <button
+      <button 
         ref="confirmButton"
         type="button"
         :class="confirmButtonClass"

@@ -41,7 +41,7 @@ const { t } = useI18n();
           {{ t("resumePage.completion.percentLabel", { percent: completionPercent }) }}
         </span>
       </div>
-      <progress
+      <progress 
         class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
         :value="completionPercent"
         max="100"
@@ -56,7 +56,7 @@ const { t } = useI18n();
         }}
       </p>
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <button
+        <button 
           v-for="section in sections"
           :key="section.id"
           class="badge badge-sm cursor-pointer"
@@ -76,7 +76,7 @@ const { t } = useI18n();
           }}
         </p>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <NuxtLink
+          <NuxtLink 
             v-for="action in quickActions"
             :key="action.id"
             :to="action.to"

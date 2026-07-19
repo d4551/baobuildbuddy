@@ -48,7 +48,7 @@
     "verify:production-client": "bun run scripts/verify-production-client-output.ts",
     "proof:pages": "bun run scripts/capture-page-proof.ts",
     "build:verify": "bun run build && bun run verify:production-client",
-    "postinstall": "bun run scripts/patch-upstream-dts-nocheck.ts",
+    "postinstall": "bun run scripts/patch-upstream-dts-nocheck.ts && bun run scripts/link-eslint-typescript6.ts",
     "typecheck": "bun run scripts/typecheck-workspace.ts",
     "typecheck:packages": "bun run --cwd packages/shared typecheck && bun run --cwd packages/scraper typecheck && bun run --cwd packages/server typecheck && bun run --cwd packages/client typecheck",
     "db:generate": "bun --env-file=.env run drizzle-kit generate",

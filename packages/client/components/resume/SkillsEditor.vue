@@ -52,10 +52,10 @@ function removeSkill(index: number): void {
 </script>
 
 <template>
- <div :class="[PADDING_TOKEN_CLASS.p6, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p6]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.skills.title") }}</h2>
     <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mb4]">
-      <input
+      <input 
         v-model="newSkill"
         type="text"
         :placeholder="t('resumePage.skills.inputPlaceholder')"
@@ -63,7 +63,7 @@ function removeSkill(index: number): void {
         :aria-label="t('resumePage.skills.inputAria')"
         @keyup.enter="addSkill"
       />
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.skills.addButtonAria')"
         @click="addSkill"
@@ -72,19 +72,19 @@ function removeSkill(index: number): void {
       </button>
     </div>
     <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-      <div
+      <div 
         v-for="(skill, index) in localValue"
         :key="`${skill}-${index}`"
         class="badge badge-lg" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         {{ skill }}
-        <button
+        <button 
           type="button"
           class="btn btn-ghost btn-xs btn-circle"
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >
-          <CloseIcon :class="[ICON_SIZE_CLASS['3']]" />
+          <CloseIcon :class="[ICON_SIZE_CLASS[3]]"/>
         </button>
       </div>
     </div>

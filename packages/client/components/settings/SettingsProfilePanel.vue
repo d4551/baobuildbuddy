@@ -42,7 +42,7 @@ const profileSaveStateLabel = computed(() => {
     <div class="card-body">
       <SettingsPanelHeader :title="t('settings.profile.title')">
         <template #meta>
-          <span
+          <span 
             class="badge"
             :class="getSaveStateBadgeClass(profileSaveState)"
             role="status"
@@ -56,7 +56,7 @@ const profileSaveStateLabel = computed(() => {
       <SectionGrid grid-token="twoColumn">
         <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
           <span>{{ t("settings.profile.nameLegend") }}</span>
-          <input
+          <input 
             v-model="profileForm.name"
             required
             minlength="2"
@@ -68,7 +68,7 @@ const profileSaveStateLabel = computed(() => {
 
         <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
           <span>{{ t("settings.profile.emailLegend") }}</span>
-          <input
+          <input 
             v-model="profileForm.email"
             type="email"
             required
@@ -82,7 +82,7 @@ const profileSaveStateLabel = computed(() => {
 
         <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
           <span>{{ t("settings.profile.currentRoleLegend") }}</span>
-          <input
+          <input 
             v-model="profileForm.currentRole"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.profile.currentRoleAria')"
@@ -91,7 +91,7 @@ const profileSaveStateLabel = computed(() => {
 
         <label class="floating-label" :class="[FLUID_WIDTH_CLASS]">
           <span>{{ t("settings.profile.currentCompanyLegend") }}</span>
-          <input
+          <input 
             v-model="profileForm.currentCompany"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.profile.currentCompanyAria')"
@@ -102,7 +102,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.locationLegend") }}
           </legend>
-          <input
+          <input 
             v-model="profileForm.location"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.profile.locationAria')"
@@ -113,7 +113,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.yearsExperienceLegend") }}
           </legend>
-          <input
+          <input 
             v-model.number="profileForm.yearsExperience"
             type="number"
             min="0"
@@ -127,7 +127,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.githubLegend") }}
           </legend>
-          <input
+          <input 
             v-model="profileForm.github"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.profile.githubAria')"
@@ -138,7 +138,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.linkedinLegend") }}
           </legend>
-          <input
+          <input 
             v-model="profileForm.linkedin"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('settings.profile.linkedinAria')"
@@ -149,7 +149,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.summaryLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="profileForm.summary"
             class="textarea" :class="[FLUID_WIDTH_CLASS]"
             rows="4"
@@ -161,7 +161,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.technicalSkillsLegend") }}
           </legend>
-          <input
+          <input 
             v-model="profileForm.technicalSkillsText"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('settings.profile.technicalSkillsPlaceholder')"
@@ -173,7 +173,7 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.softSkillsLegend") }}
           </legend>
-          <input
+          <input 
             v-model="profileForm.softSkillsText"
             class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('settings.profile.softSkillsPlaceholder')"
@@ -183,7 +183,7 @@ const profileSaveStateLabel = computed(() => {
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="t('settings.profile.saveAria')"
           :disabled="profileSaveState === 'saving'"

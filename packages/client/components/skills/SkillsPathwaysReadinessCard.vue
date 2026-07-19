@@ -6,11 +6,9 @@ import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-c
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIAL_METER_GEOMETRY,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TRACKING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -35,7 +33,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
+  <section 
     v-if="readinessAssessment"
     class="card card-border bg-linear-to-br from-primary to-secondary text-on-primary"
   >
@@ -45,7 +43,7 @@ const { t } = useI18n();
       <SectionGrid grid-token="threeColumnXlGap6">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <p class="text-on-primary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("skillsPathwaysPage.readiness.overallReadinessLabel") }}</p>
-          <UiRadialMeter
+          <UiRadialMeter 
             :value="readinessAssessment.overallScore"
             :max="readinessMax"
             :size-class="RADIAL_METER_GEOMETRY.readinessSizeClass"
@@ -53,13 +51,13 @@ const { t } = useI18n();
             fill-class="stroke-primary-content"
             :aria-label="t('skillsPathwaysPage.readiness.overallReadinessAria', { score: readinessAssessment.overallScore })"
           >
- <span :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl2]">{{ readinessAssessment.overallScore }}%</span>
+            <span class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ readinessAssessment.overallScore }}%</span>
           </UiRadialMeter>
         </div>
 
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <p class="text-on-primary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("skillsPathwaysPage.readiness.categoryScoresLabel") }}</p>
-          <div
+          <div 
             v-for="category in readinessCategories"
             :key="category.key"
             :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]"
@@ -67,7 +65,7 @@ const { t } = useI18n();
             <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ getCategoryLabel(category.key) }}: {{ category.score }}%
             </p>
-            <progress
+            <progress 
               class="progress" :class="[FLUID_WIDTH_CLASS, getReadinessColor(category.score)]"
               :value="category.score"
               :max="readinessMax"
@@ -81,30 +79,22 @@ const { t } = useI18n();
 
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <div>
- <p class="font-semibold uppercase" :class="[TRACKING_TOKEN_CLASS.wide, TYPOGRAPHY_SCALE_CLASS.xs]">
+            <p class="font-semibold uppercase tracking-wide" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
               {{ t("skillsPathwaysPage.readiness.topImprovementsTitle") }}
             </p>
             <ul class="list" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              <li
-                v-for="item in readinessAssessment.improvementSuggestions"
-                :key="item"
-                class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py1]"
-              >
+              <li class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py1]" v-for="item in readinessAssessment.improvementSuggestions" :key="item">
                 <span>{{ getReadinessImprovementLabel(item) }}</span>
               </li>
             </ul>
           </div>
 
           <div>
- <p class="font-semibold uppercase" :class="[TRACKING_TOKEN_CLASS.wide, TYPOGRAPHY_SCALE_CLASS.xs]">
+            <p class="font-semibold uppercase tracking-wide" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
               {{ t("skillsPathwaysPage.readiness.nextStepsTitle") }}
             </p>
             <ul class="list" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              <li
-                v-for="item in readinessAssessment.nextSteps"
-                :key="item"
-                class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py1]"
-              >
+              <li class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py1]" v-for="item in readinessAssessment.nextSteps" :key="item">
                 <span>{{ getReadinessNextStepLabel(item) }}</span>
               </li>
             </ul>

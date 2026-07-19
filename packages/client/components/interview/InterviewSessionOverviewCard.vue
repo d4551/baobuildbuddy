@@ -79,7 +79,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.timeLabel") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
-            <time
+            <time 
               class="font-mono tabular-nums"
               :datetime="elapsedTimeDuration"
               :aria-label="elapsedTimeAriaLabel"
@@ -112,7 +112,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         </div>
       </div>
 
-      <progress
+      <progress 
         class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
         :value="progress"
         max="100"

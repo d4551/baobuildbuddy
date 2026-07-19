@@ -40,7 +40,7 @@ defineProps<{
 
           <div v-if="job.url">
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.websiteLabel") }}</p>
-            <a
+            <a 
               :href="job.url"
               target="_blank"
               rel="noopener noreferrer"

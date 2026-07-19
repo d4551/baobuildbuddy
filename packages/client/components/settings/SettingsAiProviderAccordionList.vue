@@ -45,12 +45,12 @@ const emit = defineEmits<{
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-    <div
+    <div 
       v-if="showOllamaHotTip"
       role="alert"
       class="alert alert-info alert-soft alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mb4]"
     >
-      <IconInfoCircle class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS['6']]" />
+      <IconInfoCircle class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]"/>
       <div>
         <h3 class="font-semibold">{{ t("settings.aiProviders.ollamaTipTitle") }}</h3>
         <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -62,13 +62,13 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <details
+    <details 
       v-for="provider in providerInputs"
       :key="provider.id"
       class="collapse collapse-arrow border border-base-300 bg-base-100"
     >
       <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <AIProviderIcon :provider-id="provider.id" class="text-primary" :class="[ICON_SIZE_CLASS['5']]" />
+        <AIProviderIcon class="text-primary" :class="[ICON_SIZE_CLASS[5]]" :provider-id="provider.id"/>
         {{ provider.label }}
         <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
           {{ t("settings.aiProviders.configuredBadge") }}
@@ -79,14 +79,14 @@ const emit = defineEmits<{
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ providerKeyLabel(provider.id) }}</legend>
           <div class="join" :class="[FLUID_WIDTH_CLASS]">
-            <input
+            <input 
               v-model="apiKeys[provider.field]"
               :type="provider.id === 'local' ? 'text' : 'password'"
               :placeholder="providerPlaceholder(provider.id, provider.label)"
               class="input join-item" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="providerKeyLabel(provider.id)"
             />
-            <button
+            <button 
               type="button"
               class="btn btn-outline join-item"
               :aria-label="t('settings.aiProviders.testAria')"
@@ -104,7 +104,7 @@ const emit = defineEmits<{
 
         <fieldset v-if="provider.id === 'local'" class="fieldset">
           <legend class="fieldset-legend">{{ t("settings.aiProviders.localModelLegend") }}</legend>
-          <input
+          <input 
             v-model="apiKeys.localModelName"
             type="text"
             class="input" :class="[FLUID_WIDTH_CLASS]"
@@ -113,7 +113,7 @@ const emit = defineEmits<{
           />
         </fieldset>
 
-        <span
+        <span 
           v-if="testResults[provider.id]"
           class="badge"
           :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
@@ -124,7 +124,7 @@ const emit = defineEmits<{
               : t("settings.aiProviders.failedBadge")
           }}
         </span>
-        <p
+        <p 
           v-if="!testResults[provider.id] && providerDiagnostics[provider.id]?.message"
           class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
         >

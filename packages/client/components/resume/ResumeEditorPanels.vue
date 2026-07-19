@@ -27,7 +27,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div
+  <div 
     v-show="activeTab === 'personal'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >
@@ -37,7 +37,7 @@ const emit = defineEmits<{
     />
   </div>
 
-  <div
+  <div 
     v-show="activeTab === 'experience'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >
@@ -47,7 +47,7 @@ const emit = defineEmits<{
     />
   </div>
 
-  <div
+  <div 
     v-show="activeTab === 'education'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >
@@ -57,14 +57,14 @@ const emit = defineEmits<{
     />
   </div>
 
-  <div
+  <div 
     v-show="activeTab === 'skills'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >
     <SkillsEditor :model-value="formData.skills" @update:model-value="emit('updateSkills', $event)" />
   </div>
 
-  <div
+  <div 
     v-show="activeTab === 'projects'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >
@@ -74,7 +74,7 @@ const emit = defineEmits<{
     />
   </div>
 
-  <div
+  <div 
     v-show="activeTab === 'gaming'"
     :class="SURFACE_GLASS_CARD_CLASS"
   >

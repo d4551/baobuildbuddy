@@ -5,7 +5,7 @@ import {
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  MAX_HEIGHT_96_CLASS,
+  MAX_HEIGHT_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -205,7 +205,7 @@ function studioLocationLabel(location: string): string {
 
 <template>
   <div class="dropdown" :class="[FLUID_WIDTH_CLASS, { 'dropdown-open': isOpen }]">
-    <button
+    <button 
       type="button"
       class="btn btn-outline justify-between" :class="[FLUID_WIDTH_CLASS]"
       :aria-label="t('studioSelector.toggleAria')"
@@ -222,16 +222,12 @@ function studioLocationLabel(location: string): string {
         </span>
       </span>
       <span v-else class="text-muted">{{ t("studioSelector.selectPlaceholder") }}</span>
-      <IconChevronDown class="shrink-0" :class="[ICON_SIZE_CLASS['5']]" />
+      <IconChevronDown class="shrink-0" :class="[ICON_SIZE_CLASS[5]]"/>
     </button>
 
-    <div
-      v-if="isOpen"
-      class="dropdown-content z-10 overflow-auto rounded-box bg-base-100"
-      :class="[MAX_HEIGHT_96_CLASS, PADDING_TOKEN_CLASS.p2, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
-    >
+    <div class="dropdown-content z-10 overflow-auto rounded-box bg-base-100" v-if="isOpen" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, PADDING_TOKEN_CLASS.p2, MAX_HEIGHT_TOKEN_CLASS.maxH96]">
       <div class="sticky top-0 bg-base-100 z-10" :class="[PADDING_TOKEN_CLASS.p2]">
-        <input
+        <input 
           ref="studioSelectorSearchInput"
           v-model="searchQuery"
           :id="comboboxId"
@@ -250,14 +246,9 @@ function studioLocationLabel(location: string): string {
         />
       </div>
 
-      <ul
-        :id="listboxId"
-        role="listbox"
- class="menu" 
-        :aria-label="t('studioSelector.menuAria')"
-      >
+      <ul class="menu" :id="listboxId" role="listbox" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
         <li v-for="(studio, index) in filteredStudios" :key="studio.id">
-          <button
+          <button 
             :id="optionId(studio.id)"
             type="button"
             role="option"
@@ -295,7 +286,7 @@ function studioLocationLabel(location: string): string {
     </div>
   </div>
 
-  <button
+  <button 
     v-if="isOpen"
     type="button"
     class="fixed inset-0 z-0"

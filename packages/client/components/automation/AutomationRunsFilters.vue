@@ -23,7 +23,7 @@ const statusFilter = defineModel<string>("statusFilter", { required: true });
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("automation.runs.statusLabel") }}</legend>
-      <select
+      <select 
         v-model="statusFilter"
         class="select"
         :aria-label="t('automation.runs.statusFilterAria')"

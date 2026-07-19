@@ -7,7 +7,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
-  SCROLL_MARGIN_TOP_24_CLASS,
+  SCROLL_MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -33,7 +33,7 @@ const { t } = useI18n();
 
 <template>
   <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section
+    <section 
       v-for="group in endpointGroups"
       :key="group.id"
       :class="SURFACE_GLASS_CARD_CLASS"
@@ -41,12 +41,12 @@ const { t } = useI18n();
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
         <h2 class="card-title">{{ group.label }}</h2>
 
-        <article
+        <article 
           v-for="endpoint in group.endpoints"
           :id="endpoint.id"
           :key="endpoint.id"
           :ref="registerEndpointSectionRef(endpoint.id)"
-          class="border border-base-200 bg-base-100" :class="[SCROLL_MARGIN_TOP_24_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4, RADIUS_TOKEN_CLASS.lg]"
+          class="border border-base-200 bg-base-100" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4, RADIUS_TOKEN_CLASS.lg, SCROLL_MARGIN_TOKEN_CLASS.scrollMt24]"
         >
           <header class="flex flex-wrap items-start justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2]">
@@ -63,7 +63,7 @@ const { t } = useI18n();
                 {{ endpoint.operation.description || t("apiDocs.endpoint.noDescription") }}
               </p>
             </div>
-            <button
+            <button 
               type="button"
               class="btn btn-sm btn-outline"
               :aria-label="

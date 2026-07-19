@@ -73,7 +73,7 @@ function handleScheduledRunAtUpdate(payload: {
       </div>
 
       <SectionGrid grid-token="twoColumnXl">
-        <AutomationScraperCapabilityCard
+        <AutomationScraperCapabilityCard 
           v-for="capability in readyCapabilities"
           :key="capability.id"
           :capability="capability"
@@ -112,7 +112,7 @@ function handleScheduledRunAtUpdate(payload: {
       </div>
 
       <SectionGrid grid-token="twoColumnXl">
-        <AutomationScraperCapabilityCard
+        <AutomationScraperCapabilityCard 
           v-for="capability in attentionCapabilities"
           :key="capability.id"
           :capability="capability"

@@ -3,7 +3,6 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -44,17 +43,7 @@ function updateTextValue(
 <template>
   <div class="text-center" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <div class="flex justify-center" :class="[MARGIN_TOKEN_CLASS.mb4]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        class="text-success" :class="[ICON_SIZE_CLASS['14']]"
-        fill="none"
-        stroke="currentColor"
-        :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
+      <svg class="text-success" :class="[ICON_SIZE_CLASS[14]]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9" />
         <path d="m8.5 12.5 2.5 2.5 4.5-5" />
       </svg>
@@ -65,31 +54,31 @@ function updateTextValue(
       {{ t("setup.doneDescription", { assistant: assistantName }) }}
     </p>
 
-    <div
+    <div 
       v-if="authBootstrapRequired && authSetupTokenConfigured"
       role="alert"
       class="alert alert-info alert-vertical text-left sm:alert-horizontal"
     >
       <div>
-        <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.setupTokenTitle") }}</h3>
+        <h3 class="font-bold">{{ t("setup.auth.setupTokenTitle") }}</h3>
         <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.setupTokenDescription") }}</div>
       </div>
     </div>
 
-    <div
+    <div 
       v-else-if="authBootstrapRequired"
       role="alert"
       class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
     >
       <div>
-        <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
+        <h3 class="font-bold">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
         <div :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("setup.auth.bootstrapUnavailableDescription") }}</div>
       </div>
     </div>
 
     <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.setupTokenLegend") }}</span>
-      <input
+      <input 
         :value="authSetupToken"
         type="password"
         :placeholder="t('setup.auth.setupTokenPlaceholder')"
@@ -101,7 +90,7 @@ function updateTextValue(
 
     <label v-if="needsStoredApiKey" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.apiKeyLegend") }}</span>
-      <input
+      <input 
         :value="existingApiKey"
         type="password"
         :placeholder="t('setup.auth.apiKeyPlaceholder')"
@@ -115,7 +104,7 @@ function updateTextValue(
       <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="emit('back')">
         {{ t("setup.backButton") }}
       </button>
-      <button
+      <button 
         class="btn btn-primary"
         :disabled="saving"
         :aria-label="t('setup.launchAria')"

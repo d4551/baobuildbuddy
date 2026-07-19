@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -10,7 +13,6 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import { BRAND_CARD_BODY_RESPONSIVE_CLASS } from "~/constants/ui-layout";
 
 const props = defineProps<{
   hintIds: {
@@ -31,7 +33,7 @@ const brandForm = defineModel<{
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div :class="[BRAND_CARD_BODY_RESPONSIVE_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.themesDescription") }}
       </p>
@@ -41,7 +43,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.lightThemeLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.lightThemeJson"
             class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="12"
@@ -57,7 +59,7 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.darkThemeLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.darkThemeJson"
             class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="12"

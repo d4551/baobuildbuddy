@@ -50,14 +50,14 @@ function emitValue(): void {
 </script>
 
 <template>
- <div :class="[PADDING_TOKEN_CLASS.p6, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p6]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.gaming.title") }}</h2>
     <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ t("resumePage.gaming.description") }}
     </p>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.gaming.rolesLegend") }}</legend>
-      <input
+      <input 
         v-model="localValue.roles"
         type="text"
         :placeholder="t('resumePage.gaming.rolesPlaceholder')"
@@ -68,7 +68,7 @@ function emitValue(): void {
     </fieldset>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.gaming.genresLegend") }}</legend>
-      <input
+      <input 
         v-model="localValue.genres"
         type="text"
         :placeholder="t('resumePage.gaming.genresPlaceholder')"
@@ -79,7 +79,7 @@ function emitValue(): void {
     </fieldset>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.gaming.achievementsLegend") }}</legend>
-      <textarea
+      <textarea 
         v-model="localValue.achievements"
         class="textarea" :class="[FLUID_WIDTH_CLASS]"
         rows="4"

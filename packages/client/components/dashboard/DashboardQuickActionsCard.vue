@@ -21,7 +21,7 @@ const { t } = useI18n();
     <div class="card-body">
       <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("dashboard.quickActionsTitle") }}</h2>
       <SectionGrid grid-token="bento">
-        <NuxtLink
+        <NuxtLink 
           v-for="action in actions"
           :key="action.id"
           :to="action.to"

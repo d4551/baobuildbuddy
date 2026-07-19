@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import {
@@ -47,14 +46,14 @@ const populatedTaxonomyCount = computed(
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summaryTaxonomyTitle')">
               {{ populatedTaxonomyCount }}/2
             </span>
-            <span
+            <span 
               v-if="taxonomySaveStateLabelKey"
               class="badge badge-sm"
               :class="getSaveStateBadgeClass(taxonomySaveState)"
             >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
-            <button
+            <button 
               class="btn btn-secondary btn-sm"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"
@@ -81,11 +80,7 @@ const populatedTaxonomyCount = computed(
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.keywordsJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
- class="textarea font-mono" 
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.keywordsJson" :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>
@@ -101,11 +96,7 @@ const populatedTaxonomyCount = computed(
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.studioRulesJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
- class="textarea font-mono" 
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.studioRulesJson" :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>

@@ -59,7 +59,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
   <div :class="[SURFACE_GLASS_CARD_CLASS, extraClass]">
     <div class="card-body">
       <div class="flex flex-col sm:flex-row" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <input
+        <input 
           :value="modelValue"
           type="text"
           :placeholder="placeholder"
@@ -68,7 +68,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
           @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
           @keydown="onSearchKeydown"
         />
-        <button
+        <button 
           class="btn btn-primary"
           :aria-label="buttonAriaLabel"
           @click="emit('search')"
@@ -80,7 +80,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
           </slot>
           <slot name="search-text" />
         </button>
-        <button
+        <button 
           v-if="showMobileFilterToggle"
           class="btn btn-outline sm:hidden"
           :aria-label="mobileToggleAriaLabel"

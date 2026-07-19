@@ -39,7 +39,7 @@ defineProps<{
               <td>
                 <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <span>{{ formatRunStatus(run.status) }}</span>
-                  <span
+                  <span 
                     v-if="isLiveRun(run)"
                     class="badge badge-info badge-outline"
                     :aria-label="t('automation.runs.liveBadgeAria')"
@@ -52,7 +52,7 @@ defineProps<{
               <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
               <td>{{ formatDate(run.updatedAt) }}</td>
               <td>
-                <NuxtLink
+                <NuxtLink 
                   :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
                   class="btn btn-xs btn-ghost"
                   :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"

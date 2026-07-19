@@ -18,7 +18,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
+  <section 
     v-if="currentQuestion?.feedback"
     :class="SURFACE_GLASS_CARD_CLASS"
     aria-labelledby="interview-session-feedback-title"
@@ -33,7 +33,7 @@ const { t } = useI18n();
         </p>
       </div>
 
-      <div
+      <div 
         class="alert"
         :class="currentQuestion.score !== undefined ? getAlertClass(currentQuestion.score) : 'alert-info'"
         aria-live="polite"

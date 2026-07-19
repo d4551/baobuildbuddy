@@ -95,7 +95,7 @@ const ariaLabel = computed(() => {
 </script>
 
 <template>
-  <article
+  <article 
     class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
     role="listitem"
     :aria-label="ariaLabel"
@@ -104,24 +104,24 @@ const ariaLabel = computed(() => {
     :aria-atomic="true"
     :aria-describedby="statusTextId.length > 0 ? statusTextId : undefined"
   >
-    <div
+    <div 
       v-if="isAssistant"
       class="chat-image avatar"
       :class="avatarClass"
       :aria-label="avatarLabel"
     >
-      <div
+      <div 
         class="flex items-center justify-center border border-base-300 bg-base-200 text-base-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
         <IconLightbulb :class="ICON_SIZE_CLASS.md" />
       </div>
     </div>
-    <div
+    <div 
       v-else
       class="chat-image avatar placeholder"
       :aria-label="userLabel"
     >
-      <div
+      <div 
         class="flex items-center justify-center bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
         <span class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ userAvatarInitial }}</span>
@@ -129,7 +129,7 @@ const ariaLabel = computed(() => {
     </div>
     <div class="chat-header" :class="[MARGIN_TOKEN_CLASS.mb1, messageWidthClass]">
       {{ messageTitle }}
-      <time
+      <time 
         v-if="formattedTime"
         class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.ml1]"
         :datetime="props.message.timestamp ?? undefined"
@@ -137,7 +137,7 @@ const ariaLabel = computed(() => {
         {{ formattedTime }}
       </time>
     </div>
-    <div
+    <div 
       class="chat-bubble whitespace-pre-wrap break-words"
       :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
@@ -150,7 +150,7 @@ const ariaLabel = computed(() => {
           <span class="badge badge-outline badge-xs">{{ chip }}</span>
         </li>
       </ul>
-      <span
+      <span 
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"
         role="status"
@@ -160,7 +160,7 @@ const ariaLabel = computed(() => {
       </span>
       <template v-else>{{ message.content }}</template>
     </div>
-    <div
+    <div 
       v-if="isStreamingStatusVisible"
       :id="statusTextId"
       class="chat-footer text-muted"
@@ -169,7 +169,7 @@ const ariaLabel = computed(() => {
     >
       {{ statusText }}
     </div>
-    <div
+    <div 
       v-if="isAssistant && (props.message.provider || props.message.model)"
       class="chat-footer flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap1]"
     >

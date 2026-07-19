@@ -14,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
- <ul class="steps steps-horizontal" :aria-label="t('setup.stepsAriaLabel')" :class="[MARGIN_TOKEN_CLASS.mb8, FLUID_WIDTH_CLASS]">
+  <ul class="steps steps-horizontal" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mb8]" :aria-label="t('setup.stepsAriaLabel')">
     <li class="step" :class="{ 'step-primary': currentStep >= 1 }" :data-content="currentStep > 1 ? '✓' : '1'">
       {{ t("setup.steps.profile") }}
     </li>
