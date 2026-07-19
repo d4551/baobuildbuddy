@@ -11,6 +11,7 @@ import {
   MAX_W_64_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { InterviewHubSessionConfig, StudioSelectorOption } from "~/types/interview";

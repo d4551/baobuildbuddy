@@ -7,6 +7,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   SHELL_SKIP_LINK_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
