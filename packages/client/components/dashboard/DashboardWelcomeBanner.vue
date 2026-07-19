@@ -44,15 +44,19 @@ const { t } = useI18n();
           </Transition>
         </div>
       </div>
-      <div v-if="showSetupAction" class="card-actions relative flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1]">
-        <NuxtLink :to="primaryRoute" class="btn btn-primary">
+      <div
+        v-if="showSetupAction"
+        class="card-actions relative flex w-full flex-col sm:flex-row"
+        :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap2]"
+      >
+        <NuxtLink :to="primaryRoute" class="btn btn-primary w-full sm:w-auto">
           {{ primaryLabel }}
         </NuxtLink>
         <!-- Avoid duplicate Complete Setup CTAs when primary already targets setup. -->
         <NuxtLink
           v-if="primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
-          class="btn btn-ghost"
+          class="btn btn-ghost w-full sm:w-auto"
         >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>

@@ -59,30 +59,45 @@ function onSearchKeydown(event: KeyboardEvent): void {
   <div :class="[SURFACE_GLASS_CARD_CLASS, extraClass]">
     <div class="card-body">
       <div class="flex flex-col sm:flex-row" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <input 
-          :value="modelValue"
-          type="text"
-          :placeholder="placeholder"
-          class="input flex-1"
-          :aria-label="ariaLabel"
-          @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-          @keydown="onSearchKeydown"
-        />
-        <button 
-          class="btn btn-primary"
-          :aria-label="buttonAriaLabel"
-          @click="emit('search')"
-        >
-          <slot name="search-icon">
-            <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </slot>
-          <slot name="search-text" />
-        </button>
+        <div class="join w-full min-w-0 flex-1">
+          <input 
+            :value="modelValue"
+            type="search"
+            :placeholder="placeholder"
+            class="input join-item min-w-0 flex-1"
+            :aria-label="ariaLabel"
+            @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+            @keydown="onSearchKeydown"
+          />
+          <button 
+            class="btn btn-primary join-item"
+            :aria-label="buttonAriaLabel"
+            @click="emit('search')"
+          >
+            <slot name="search-icon">
+              <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </slot>
+            <span class="hidden sm:inline"><slot name="search-text" /></span>
+          </button>
+          <button 
+            v-if="showMobileFilterToggle"
+            class="btn btn-outline join-item sm:hidden"
+            :aria-label="mobileToggleAriaLabel"
+            @click="emit('toggle-filters')"
+          >
+            <slot name="filter-icon">
+              <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+            </slot>
+            <span class="sr-only">{{ mobileToggleText }}</span>
+          </button>
+        </div>
         <button 
           v-if="showMobileFilterToggle"
-          class="btn btn-outline sm:hidden"
+          class="btn btn-outline hidden sm:inline-flex lg:hidden"
           :aria-label="mobileToggleAriaLabel"
           @click="emit('toggle-filters')"
         >

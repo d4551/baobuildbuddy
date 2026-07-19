@@ -115,11 +115,16 @@ onUnmounted(() => {
       </label>
       <NuxtLink 
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink-0 text-primary lg:hidden" 
+        class="btn btn-ghost min-w-0 shrink text-primary lg:hidden"
+        :class="[TRUNCATE_FLEX_CHILD_CLASS]"
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
-        <span>{{ resolvedBrand.name }}</span>
-        <span v-if="mobileSectionLabel" class="font-medium text-secondary before:content-['/'] before:mx-1 before:text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mobileSectionLabel }}</span>
+        <span class="hidden truncate min-[380px]:inline">{{ resolvedBrand.name }}</span>
+        <span
+          v-if="mobileSectionLabel"
+          class="min-w-0 truncate font-medium text-secondary before:mx-1 before:text-muted before:content-['/']"
+          :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+        >{{ mobileSectionLabel }}</span>
       </NuxtLink>
       <div class="hidden flex-1 lg:block" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
         <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />

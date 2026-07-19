@@ -140,7 +140,7 @@ export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-secondary";
  * Shared hero surface for page-level headers that need elevated context.
  */
 export const PAGE_HERO_SECTION_CLASS =
-  "hero min-w-0 overflow-x-clip rounded-box border border-base-300 bg-base-200";
+  "hero min-w-0 overflow-x-clip rounded-box border border-base-300 glass-subtle";
 
 /** Aside width contract inside page hero headers. */
 export const PAGE_HERO_ASIDE_CLASS = "w-full min-w-0 max-w-full lg:max-w-2xl";
