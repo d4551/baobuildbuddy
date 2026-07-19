@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
+import type { ComposerTranslation } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_WIDTH_FORM_COL_CLASS,
   MIN_WIDTH_SELECT_CLASS,
@@ -27,7 +29,7 @@ defineProps<{
     description: string;
   }>;
   routingModelOptions: Readonly<Record<AIRoutingPurpose, ReadonlyArray<string>>>;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: ComposerTranslation;
 }>();
 
 const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
@@ -64,7 +66,7 @@ const emit = defineEmits<{
               <th scope="row" class="align-top">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <p class="font-medium">{{ section.label }}</p>
-                  <p class="leading-5 text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
+                  <p class="text-muted" :class="[LEADING_TOKEN_CLASS.leading5, TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
                 </div>
               </th>
               <td class="align-top">

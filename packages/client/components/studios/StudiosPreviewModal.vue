@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -52,7 +53,7 @@ function studioLocation(location: string): string {
     </button>
 
     <template v-if="studio">
-      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
+      <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ studio.name }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -68,7 +69,7 @@ function studioLocation(location: string): string {
         </span>
       </div>
 
-      <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd" extra->
+      <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd">
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
@@ -119,7 +120,7 @@ function studioLocation(location: string): string {
     </template>
 
     <template v-else>
-      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
+      <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">

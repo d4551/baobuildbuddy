@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import { useScoreColor } from "~/composables/useScoreColor";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_XS_CLASS,
@@ -56,7 +57,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           {{ score }}%
         </span>
       </div>
-      <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
+      <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
       <progress 
         class="progress" :class="[FLUID_WIDTH_CLASS, scoreProgressClass]"
         :value="score"

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_WIDTH_LG_W80_CLASS,
-} from "~/constants/ui-layout";
+import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -10,6 +8,7 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TRACKING_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -36,7 +35,7 @@ const { t } = useI18n();
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
         <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <li v-for="group in endpointGroups" :key="group.id" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-            <p class="font-semibold uppercase tracking-wide text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+            <p class="font-semibold uppercase text-muted" :class="[TRACKING_TOKEN_CLASS.wide, TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ group.label }}
             </p>
             <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

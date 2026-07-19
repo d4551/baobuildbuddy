@@ -4,6 +4,7 @@ import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
@@ -78,7 +79,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     :close-backdrop-label="t('interviewHub.config.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+    <h3 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("interviewHub.config.title") }}
     </h3>
     <p :id="descriptionId" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -106,7 +107,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
     </div>
 
-    <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt6]" grid-token="twoColumnWide" extra->
+    <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt6]" grid-token="twoColumnWide">
       <div v-if="selectedMode === 'job'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>

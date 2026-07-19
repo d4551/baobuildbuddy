@@ -5,6 +5,7 @@ import CloseIcon from "~/components/ui/CloseIcon.vue";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -72,8 +73,8 @@ const { t } = useI18n();
           <div>
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHistory.detailScoreLabel") }}</p>
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <UiRadialMeter :class="[ICON_SIZE_CLASS[16]]" :value="selectedSession.score ?? 0" size- fill-class="stroke-primary" :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })">
-                <span class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatScore(selectedSession.score) }}</span>
+              <UiRadialMeter :value="selectedSession.score ?? 0" :size-class="ICON_SIZE_CLASS[16]" fill-class="stroke-primary" :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })">
+                <span :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatScore(selectedSession.score) }}</span>
               </UiRadialMeter>
             </div>
           </div>

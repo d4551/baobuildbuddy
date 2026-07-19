@@ -6,6 +6,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   HEIGHT_TOKEN_CLASS,
@@ -46,7 +47,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 <template>
   <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <h2 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
+        <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
         <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
           <IconPlus :class="[ICON_SIZE_CLASS[4]]"/>
           {{ t("portfolioPage.projects.addButton") }}

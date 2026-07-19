@@ -152,7 +152,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </div>
       </div>
 
-      <SectionGrid class="items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap6]" grid-token="twoColumnWide" extra->
+      <SectionGrid class="items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap6]" grid-token="twoColumnWide">
         <div class="xl:sticky xl:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard

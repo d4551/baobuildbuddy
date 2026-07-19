@@ -4,6 +4,7 @@ import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
 import {
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -37,7 +38,7 @@ defineEmits<{
     :close-aria-label="$t('coverLetterPage.generate.closeBackdropAria')"
     :close-backdrop-label="$t('coverLetterPage.generate.closeBackdropButton')"
   >
-    <h2 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+    <h2 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ $t("coverLetterPage.generate.title") }}
     </h2>
     <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">

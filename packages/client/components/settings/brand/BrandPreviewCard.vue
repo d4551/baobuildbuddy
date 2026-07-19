@@ -13,6 +13,7 @@ import {
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TRACKING_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -63,7 +64,7 @@ const brandPreviewThemes = computed<
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div>
-          <p class="font-semibold uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+          <p class="font-semibold uppercase text-muted" :class="[TRACKING_TOKEN_CLASS.widest, TYPOGRAPHY_SCALE_CLASS.xs]">
             {{ t("settings.brand.previewEyebrow") }}
           </p>
           <h3 class="card-title" :class="[MARGIN_TOKEN_CLASS.mt2]">
@@ -90,7 +91,7 @@ const brandPreviewThemes = computed<
                 {{ brandPreviewInitial }}
               </div>
               <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
-                <p class="uppercase tracking-widest text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                <p class="uppercase text-muted" :class="[TRACKING_TOKEN_CLASS.widest, TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ t("settings.brand.previewEyebrow") }}
                 </p>
                 <p class="truncate font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -123,10 +124,14 @@ const brandPreviewThemes = computed<
           </div>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt6]">
-            <span class="btn btn-accent border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
+            <span
+              class="btn btn-accent border-0"
+              :class="[SHADOW_TOKEN_CLASS.sm]"
+              aria-hidden="true"
+            >
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>
-            <span class="btn btn-secondary btn-outline">
+            <span class="btn btn-secondary btn-outline" aria-hidden="true">
               {{ t("settings.brand.previewSecondaryAction") }}
             </span>
           </div>
