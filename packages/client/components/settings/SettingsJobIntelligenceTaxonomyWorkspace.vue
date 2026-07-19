@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MIN_HEIGHT_EDITOR_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
@@ -27,25 +35,25 @@ const populatedTaxonomyCount = computed(
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
-    <div class="card-body gap-6">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
         :description="t('settings.jobIntelligence.taxonomyDescription')"
       >
         <template #meta>
-          <div class="flex flex-wrap items-center justify-end gap-2">
+          <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summaryTaxonomyTitle')">
               {{ populatedTaxonomyCount }}/2
             </span>
-            <span
+            <span 
               v-if="taxonomySaveStateLabelKey"
               class="badge badge-sm"
               :class="getSaveStateBadgeClass(taxonomySaveState)"
             >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
-            <button
+            <button 
               class="btn btn-secondary btn-sm"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"
@@ -61,42 +69,34 @@ const populatedTaxonomyCount = computed(
       </SettingsPanelHeader>
 
       <SectionGrid grid-token="twoColumnWide">
-        <article class="card card-border bg-base-200/60">
-          <div class="card-body gap-4 p-4">
-            <div class="space-y-1">
+        <article :class="SURFACE_GLASS_CARD_CLASS">
+          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</h3>
-              <p class="text-sm text-base-content/60">
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyKeywordsDescription") }}
               </p>
             </div>
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.keywordsJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
-                class="textarea min-h-64 w-full font-mono text-xs"
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.keywordsJson" :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>
 
-        <article class="card card-border bg-base-200/60">
-          <div class="card-body gap-4 p-4">
-            <div class="space-y-1">
+        <article :class="SURFACE_GLASS_CARD_CLASS">
+          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <h3 class="card-title text-base">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</h3>
-              <p class="text-sm text-base-content/60">
+              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("settings.jobIntelligence.taxonomyStudiosDescription") }}
               </p>
             </div>
 
             <fieldset class="fieldset">
               <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</legend>
-              <textarea
-                v-model="jobTaxonomyForm.studioRulesJson"
-                :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
-                class="textarea min-h-64 w-full font-mono text-xs"
-              />
+              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.studioRulesJson" :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
             </fieldset>
           </div>
         </article>

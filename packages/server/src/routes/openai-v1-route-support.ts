@@ -1,6 +1,4 @@
-import {
-  AI_DEFAULT_TEMPERATURE_CREATIVE,
-} from "@bao/shared/constants/ai-generation";
+import { AI_DEFAULT_TEMPERATURE_CREATIVE } from "@bao/shared/constants/ai-generation";
 import { AI_PROVIDER_CATALOG } from "@bao/shared/constants/ai-provider";
 import {
   API_ERROR_OPENAI_V1_GENERATION_FAILED,
@@ -37,7 +35,11 @@ const routeResult = <const Status extends number, Body>(status: Status, body: Bo
   body,
 });
 
-export const toOpenAIV1Error = (message: string, type = "invalid_request_error", code: string | null = null) => ({
+export const toOpenAIV1Error = (
+  message: string,
+  type = "invalid_request_error",
+  code: string | null = null,
+) => ({
   error: { message, type, code },
 });
 
@@ -107,7 +109,11 @@ export const getOpenAIV1Model = async (modelId: string) => {
   if (!match) {
     return routeResult(
       HTTP_STATUS_NOT_FOUND,
-      toOpenAIV1Error(API_ERROR_OPENAI_V1_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
+      toOpenAIV1Error(
+        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
+        "invalid_request_error",
+        "model_not_found",
+      ),
     );
   }
   return routeResult(HTTP_STATUS_OK, match);
@@ -135,7 +141,11 @@ export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletions
   if (!requested) {
     return routeResult(
       HTTP_STATUS_NOT_FOUND,
-      toOpenAIV1Error(API_ERROR_OPENAI_V1_MODEL_NOT_FOUND, "invalid_request_error", "model_not_found"),
+      toOpenAIV1Error(
+        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
+        "invalid_request_error",
+        "model_not_found",
+      ),
     );
   }
 

@@ -60,7 +60,7 @@ const iconClass = computed(() => ["inline-block shrink-0 align-middle", props.cl
 </script>
 
 <template>
-  <svg
+  <svg 
     xmlns="http://www.w3.org/2000/svg"
     :class="iconClass"
     fill="none"

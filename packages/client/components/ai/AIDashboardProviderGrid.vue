@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,
@@ -46,22 +54,22 @@ function resolveProviderStatus(provider: ProviderConfig): {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-    <div
+  <SectionGrid grid-token="twoColumnMdGap6">
+    <div 
       v-for="provider in providers"
       :key="provider.id"
-      class="card card-border card-glass card-glass-interactive"
+      :class="SURFACE_GLASS_CARD_CLASS"
     >
-      <div class="card-body gap-4">
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
-            <AIProviderIcon
+      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
+            <AIProviderIcon 
               :provider-id="provider.iconId"
-              class="h-8 w-8 shrink-0 text-primary"
+              :class="[ICON_SIZE_CLASS.lg, 'shrink-0 text-primary']"
             />
-            <div class="min-w-0">
-              <h3 class="card-title text-lg">{{ providerLabel(provider.id) }}</h3>
-              <p class="text-xs text-base-content/70">{{ providerDescription(provider.id) }}</p>
+            <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+              <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ providerLabel(provider.id) }}</h3>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
           <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">
@@ -69,7 +77,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
           </span>
         </div>
 
-        <div
+        <div 
           v-if="testResults[provider.id]"
           role="status"
           class="alert alert-soft"
@@ -83,25 +91,25 @@ function resolveProviderStatus(provider: ProviderConfig): {
                   : t("aiDashboard.alerts.testErrorTitle")
               }}
             </h4>
-            <p class="text-xs">{{ testResults[provider.id]?.message }}</p>
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ testResults[provider.id]?.message }}</p>
           </div>
         </div>
 
         <div class="card-actions justify-end">
-          <button
+          <button 
             class="btn btn-outline btn-sm"
             :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
             @click="onTestProvider(provider.id)"
           >
-            <span v-if="testingProvider === provider.id" class="loading loading-spinner loading-xs"></span>
+            <LoadingSpinner v-if="testingProvider === provider.id" size="xs" :label="t('aiDashboard.providerCard.testingLabel')" />
             <span>{{
               testingProvider === provider.id
                 ? t("aiDashboard.providerCard.testingLabel")
                 : t("aiDashboard.providerCard.testButton")
             }}</span>
           </button>
-          <NuxtLink
+          <NuxtLink 
             :to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
             class="btn btn-primary btn-sm"
             :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"
@@ -111,5 +119,5 @@ function resolveProviderStatus(provider: ProviderConfig): {
         </div>
       </div>
     </div>
-  </div>
+  </SectionGrid>
 </template>

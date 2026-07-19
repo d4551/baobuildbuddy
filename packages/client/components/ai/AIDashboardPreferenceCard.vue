@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import type { AIProviderType } from "@bao/shared/types/ai";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ProviderConfig } from "~/types/ai-dashboard";
 
 defineProps<{
@@ -17,17 +24,17 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 </script>
 
 <template>
-  <div class="card card-border card-glass">
-    <div class="card-body gap-4">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
-      <p class="text-sm text-base-content/70">{{ t("aiDashboard.preference.description") }}</p>
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("aiDashboard.preference.description") }}</p>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedProviderModel"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.providerAria')"
           >
             <option disabled value="">{{ t("aiDashboard.preference.selectProviderOption") }}</option>
@@ -44,9 +51,9 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("aiDashboard.preference.modelLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedModelValue"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('aiDashboard.preference.modelAria')"
             :disabled="selectedProviderModels.length === 0"
           >
@@ -56,16 +63,16 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
             </option>
           </select>
         </fieldset>
-      </div>
+      </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button
+        <button 
           class="btn btn-primary"
           :disabled="!selectedProviderModel || !selectedModelValue || loading"
           :aria-label="t('aiDashboard.preference.saveAria')"
           @click="onSave"
         >
-          <span v-if="loading" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="loading" />
           <span>{{ t("aiDashboard.preference.saveButton") }}</span>
         </button>
       </div>

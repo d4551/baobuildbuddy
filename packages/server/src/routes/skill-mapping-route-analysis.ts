@@ -3,10 +3,11 @@ import { API_ERROR_UNKNOWN } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_SKILL_ANALYSIS_COMPLETE } from "@bao/shared/constants/api-messages";
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
+import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { parseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
-import { isRecord } from "@bao/shared/utils/type-guards";
-import { z } from "zod";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
@@ -19,12 +20,31 @@ import {
   normalizeStringArray,
 } from "./skill-mapping-route-normalizers";
 
+type SkillSuggestedMapping = Record<string, string | number | boolean | null>;
+
 type SkillAnalysisResponse = {
   message: string;
   detectedSkills: string[];
-  suggestedMappings: Record<string, unknown>[];
+  suggestedMappings: SkillSuggestedMapping[];
   recommendations: string[];
   provider?: string;
+};
+
+const toSuggestedMappingResponse = (mapping: JsonObject): SkillSuggestedMapping => {
+  const out: SkillSuggestedMapping = {};
+  for (const [key, value] of Object.entries(mapping)) {
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      value === null
+    ) {
+      out[key] = value;
+      continue;
+    }
+    out[key] = JSON.stringify(value);
+  }
+  return out;
 };
 
 const skillMappingRoutesLogger = createServerLogger("skill-mapping-routes");
@@ -55,8 +75,8 @@ const collectSkillsToAnalyze = (body: SkillAnalyzeBody): string[] => {
   return skillsToAnalyze;
 };
 
-const parseSkillAnalysisContent = (content: string): Record<string, unknown> => {
-  const parsedResult: Record<string, unknown> = {
+const parseSkillAnalysisContent = (content: string): JsonObject => {
+  const parsedResult: JsonObject = {
     detectedSkills: [],
     suggestedMappings: [],
     recommendations: [],
@@ -67,7 +87,7 @@ const parseSkillAnalysisContent = (content: string): Record<string, unknown> => 
     return parsedResult;
   }
 
-  const parsed = parseJson(jsonMatch[0], z.record(z.string(), z.unknown()));
+  const parsed = parseJson(jsonMatch[0], jsonObjectSchema);
   if (!parsed) {
     parsedResult.recommendations = [content];
     return parsedResult;
@@ -75,12 +95,21 @@ const parseSkillAnalysisContent = (content: string): Record<string, unknown> => 
   return parsed;
 };
 
-const normalizeSuggestedMappings = (value: unknown): Record<string, unknown>[] => {
-  if (!Array.isArray(value)) return [];
-  return value.filter(isRecord);
+const normalizeSuggestedMappings = (value: JsonValue | undefined): JsonObject[] => {
+  const rawMappings = asJsonArray(value);
+  if (!rawMappings) {
+    return [];
+  }
+  const mappings: JsonObject[] = [];
+  for (const entry of rawMappings) {
+    if (isRecord(entry)) {
+      mappings.push(entry);
+    }
+  }
+  return mappings;
 };
 
-const autoCreateSuggestedMappings = async (suggestedMappings: Record<string, unknown>[]) => {
+const autoCreateSuggestedMappings = async (suggestedMappings: JsonObject[]) => {
   const createOperations = suggestedMappings
     .map((suggestedMapping) => mapSuggestedMappingToCreateInput(suggestedMapping))
     .filter(
@@ -106,7 +135,7 @@ export const analyzeSkillMappingsSafely = async (
     skillMappingRoutesLogger.error("AI analysis error:", analysisResult.reason);
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
-      message: `Error during AI analysis: ${analysisResult.reason instanceof Error ? analysisResult.reason.message : API_ERROR_UNKNOWN}`,
+      message: `Error during AI analysis: ${analysisResult.reason.message || API_ERROR_UNKNOWN}`,
       detectedSkills: [],
       suggestedMappings: [],
       recommendations: [],
@@ -145,7 +174,7 @@ const analyzeSkillMappings = async (
   return {
     message: API_MESSAGE_SKILL_ANALYSIS_COMPLETE,
     detectedSkills: normalizeStringArray(parsedAnalysis.detectedSkills),
-    suggestedMappings,
+    suggestedMappings: suggestedMappings.map(toSuggestedMappingResponse),
     recommendations: normalizeStringArray(parsedAnalysis.recommendations),
     provider: response.provider,
   };

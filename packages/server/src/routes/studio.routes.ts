@@ -13,9 +13,9 @@ import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
 import {
   studioAnalyticsResponses,
-  studioIdParamsSchema,
   studioDeleteResponses,
   studioEntityResponses,
+  studioIdParamsSchema,
   studioListQuerySchema,
   studioListResponses,
   studioMutationBodySchema,

@@ -2,7 +2,22 @@
 import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
 import { KEYBOARD_ROUTE_SHORTCUTS } from "~/composables/useKeyboardShortcuts";
-import { APP_DRAWER_ID, SHELL_SIDEBAR_MENU_CLASS } from "~/constants/layout";
+import {
+  APP_DRAWER_ID,
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHELL_SIDEBAR_ITEM_CLASS,
+  SHELL_SIDEBAR_MENU_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
@@ -45,25 +60,22 @@ function resolveSidebarLabel(item: NavigationItem): string {
 }
 
 function sidebarLinkClass(item: NavigationItem): string[] {
-  return [
-    "flex min-h-10 items-center gap-2 rounded-box px-2 transition-colors duration-200 is-drawer-close:tooltip is-drawer-close:tooltip-right",
-    isSidebarItemActive(item) ? "menu-active font-medium" : "",
-  ];
+  return [SHELL_SIDEBAR_ITEM_CLASS, isSidebarItemActive(item) ? "menu-active font-medium" : ""];
 }
 </script>
 
 <template>
-  <div class="flex min-h-full w-full flex-col">
-    <div class="border-b border-base-300 p-4 is-drawer-close:hidden">
-      <span class="flex items-center gap-2 text-lg font-bold text-primary">
-        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" class="h-5 w-5 shrink-0 rounded-sm" />
+  <div class="flex flex-col" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]">
+    <div class="border-b border-base-300 is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4]">
+ <span class="flex items-center text-primary" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, FLEX_GAP_TOKEN_CLASS.gap2, TYPOGRAPHY_SCALE_CLASS.lg]">
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
       </span>
     </div>
-    <nav :aria-label="t('a11y.primaryNavigation')" class="flex min-h-0 min-w-0 flex-1 flex-col">
+    <nav :aria-label="t('a11y.primaryNavigation')" class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, TRUNCATE_FLEX_CHILD_CLASS]">
       <ul :class="SHELL_SIDEBAR_MENU_CLASS">
         <li v-for="item in sidebarItems" :key="item.id">
-          <NuxtLink
+          <NuxtLink 
             :to="item.to"
             :class="sidebarLinkClass(item)"
             :data-tip="resolveSidebarLabel(item)"
@@ -71,43 +83,43 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             :aria-label="resolveSidebarLabel(item)"
           >
             <span class="indicator">
-              <span
+              <span 
                 v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-                class="indicator-item badge badge-warning badge-xs font-bold"
+                class="indicator-item badge badge-warning badge-xs" :class="[FONT_WEIGHT_TOKEN_CLASS.bold]"
                 role="status"
                 :aria-label="t('a11y.aiConfigIncompleteAria')"
                 :title="t('a11y.aiConfigIncompleteAria')"
               >!</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
+              <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="item.iconPath" />
               </svg>
             </span>
             <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
-            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center gap-1 text-base-content/60">
+            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center text-muted" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>
             </span>
           </NuxtLink>
         </li>
-        <li class="mt-auto pt-4">
-          <button
+        <li class="mt-auto" :class="[PADDING_TOKEN_CLASS.pt4]">
+          <button 
             type="button"
-            class="btn btn-ghost btn-sm w-full justify-start is-drawer-close:btn-square"
+            class="btn btn-ghost btn-sm justify-start is-drawer-close:btn-square" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('a11y.toggleSidebarNavigation')"
             :aria-controls="APP_DRAWER_ID"
             :aria-expanded="isDrawerOpen"
             @click="setDrawerToggleState(!isDrawerOpen)"
           >
-            <svg class="h-5 w-5 transition-transform duration-200 is-drawer-open:rotate-y-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <svg :class="[ICON_SIZE_CLASS.sm, 'transition-transform duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-open:rotate-y-180']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 19l-7-7 7-7" />
             </svg>
             <span class="is-drawer-close:hidden">{{ t("a11y.toggleSidebarNavigation") }}</span>
           </button>
         </li>
       </ul>
     </nav>
-    <footer
-      class="border-t border-base-300 p-4 text-xs text-base-content/40 is-drawer-close:hidden"
+    <footer 
+      class="border-t border-base-300 text-muted is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.xs]"
       :aria-label="t('layout.shell.versionFooterAria')"
     >
       {{ t("layout.shell.appVersion", { version: APP_SEMVER }) }}

@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
@@ -39,25 +47,25 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
-    <div class="card-body gap-6">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
         :description="t('settings.jobIntelligence.providersDescription')"
       >
         <template #meta>
-          <div class="flex flex-wrap items-center justify-end gap-2">
+          <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
               {{ configuredSourceCount }}/3
             </span>
-            <span
+            <span 
               v-if="providerSaveStateLabelKey"
               class="badge badge-sm"
               :class="getSaveStateBadgeClass(providerSaveState)"
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button
+            <button 
               class="btn btn-primary btn-sm"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"
@@ -72,31 +80,31 @@ const sourceCollectionCount = computed(
         </template>
       </SettingsPanelHeader>
 
-      <div class="stats stats-vertical w-full bg-base-200 shadow-sm lg:stats-horizontal">
-        <div class="stat px-4 py-3">
+      <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
-          <div class="stat-value text-primary text-2xl">{{ configuredSourceCount }}</div>
+          <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summarySourcesDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summaryCollectionsTitle") }}</div>
-          <div class="stat-value text-2xl">{{ sourceCollectionCount }}</div>
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ sourceCollectionCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summaryCollectionsDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.defaultsTitle") }}</div>
-          <div class="stat-value text-2xl">{{ jobProviderForm.providerTimeoutMs }}</div>
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ jobProviderForm.providerTimeoutMs }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.defaultsDescription") }}</div>
         </div>
       </div>
 
-      <section class="card card-border bg-base-200/60" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
-        <div class="card-body gap-4 p-4">
-          <div class="space-y-1">
+      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.defaultsTitle") }}</h3>
-            <p class="text-sm text-base-content/60">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.defaultsDescription") }}
             </p>
           </div>
@@ -104,67 +112,67 @@ const sourceCollectionCount = computed(
           <SectionGrid grid-token="twoColumnWide">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.providerTimeoutLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.providerTimeoutMs"
                 :aria-label="t('settings.jobIntelligence.providerTimeoutLabel')"
                 type="number"
                 min="100"
                 max="60000"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
               />
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.companyLimitLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.companyBoardResultLimit"
                 :aria-label="t('settings.jobIntelligence.companyLimitLabel')"
                 type="number"
                 min="1"
                 max="200"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
               />
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.gamingLimitLabel") }}</legend>
-              <input
+              <input 
                 v-model.number="jobProviderForm.gamingBoardResultLimit"
                 :aria-label="t('settings.jobIntelligence.gamingLimitLabel')"
                 type="number"
                 min="1"
                 max="200"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
               />
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.unknownLocationLabel") }}</legend>
-              <input
+              <input 
                 v-model="jobProviderForm.unknownLocationLabel"
                 :aria-label="t('settings.jobIntelligence.unknownLocationLabel')"
                 type="text"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
               />
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.unknownCompanyLabel") }}</legend>
-              <input
+              <input 
                 v-model="jobProviderForm.unknownCompanyLabel"
                 :aria-label="t('settings.jobIntelligence.unknownCompanyLabel')"
                 type="text"
-                class="input w-full"
+                class="input" :class="[FLUID_WIDTH_CLASS]"
               />
             </fieldset>
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between gap-4 rounded-box border border-base-300 bg-base-100 px-4 py-3">
-                <span class="text-sm text-base-content/70">
+              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+                <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>
-                <input
+                <input 
                   v-model="jobProviderForm.hitmarkerEnabled"
                   :aria-label="t('settings.jobIntelligence.hitmarkerEnabledLabel')"
                   type="checkbox"

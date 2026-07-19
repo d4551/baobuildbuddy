@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import type { InterviewConfig, InterviewSession, VoiceSettings } from "@bao/shared/types/interview";
+import type { Static } from "typebox";
 export type CreateSessionConfigInput = Omit<Partial<InterviewConfig>, "voiceSettings"> & {
     voiceSettings?: Partial<VoiceSettings>;
 };
@@ -225,16 +225,40 @@ export declare const interviewSessionsListResponses: {
 };
 export declare const interviewSessionResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const submitInterviewResponseResponses: {
     200: import("typebox").TUnknown;
-    400: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
+    400: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const completeInterviewSessionResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const interviewStatsResponses: {
     200: import("typebox").TObject<{

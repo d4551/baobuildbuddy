@@ -8,6 +8,7 @@ import {
   type AutomationScraperSectionId,
   isAutomationScraperSectionId,
 } from "~/components/automation/scraper-sections";
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 definePageMeta({
@@ -104,7 +105,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       title-id="automation-scraper-title"
       :title="t('automation.scraper.title')"
       :description="t('automation.scraper.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
       density="compact"
     >
       <template #actions>
@@ -150,7 +151,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
             <StatsRow :stats="summaryStats" />
 
             <template v-if="activeSection === 'providers'">
-              <div class="space-y-6">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
                 <AutomationScraperOverviewCard :runs-route="APP_ROUTES.automationRuns" />
 
                 <AutomationScraperCapabilityGrid

@@ -20,21 +20,21 @@ import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { createEmailResponseRun, executeEmailResponseRun } from "./automation-email-response";
 import { normalizeEmailResponsePayload } from "./automation-email-response-payload";
-import { normalizeScrapeTarget, type JobApplyPayload } from "./automation-run-inputs";
 import {
-  executePreparedJobApplyRun,
   createExecutionTracking,
+  executePreparedJobApplyRun,
   handleJobApplyExecutionFailure,
   markJobApplyRunStarted,
 } from "./automation-job-apply-execution";
 import { prepareJobApplyRun } from "./automation-job-apply-preparation";
 import { AutomationProgressEvents } from "./automation-progress-events";
 import { AutomationRunCreator } from "./automation-run-creation";
+import { type JobApplyPayload, normalizeScrapeTarget } from "./automation-run-inputs";
 import { AutomationRunScheduler } from "./automation-run-scheduler";
 import { AutomationScheduledRunExecutor } from "./automation-scheduled-run-executor";
 import { executeScrapeRun, getRpaCapabilityAudit } from "./automation-scrape-run";
-import { loadEmailTransportConfig, tryLoadAIService } from "./automation-settings-support";
 import type { AutomationRunRow } from "./automation-service-contracts";
+import { loadEmailTransportConfig, tryLoadAIService } from "./automation-settings-support";
 
 const automationServiceLogger = createServerLogger("application-automation-service");
 
@@ -61,8 +61,11 @@ export class ApplicationAutomationService {
     });
     this.scheduler.restorePendingRuns(AutomationRunCreator.maxRecoverableScheduledRuns).then(
       () => undefined,
-      (error: unknown) => {
-        automationServiceLogger.error("[automation] scheduler recovery failed", error);
+      (error) => {
+        automationServiceLogger.error(
+          "[automation] scheduler recovery failed",
+          error instanceof Error ? error.message : String(error),
+        );
       },
     );
   }

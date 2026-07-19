@@ -11,7 +11,8 @@ import {
 import { useFlowEngine } from "~/composables/useFlowEngine";
 import type { DashboardPipelineStepViewModel } from "~/constants/dashboard-contracts";
 import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
-import { createFlowEngineInput, type FlowActionId } from "~/constants/flow-engine";
+import { createFlowEngineInput } from "~/constants/flow-engine";
+import type { FlowActionId } from "~/constants/flow-engine-types";
 
 const createAutomationPipelineSteps = (stats: Readonly<Ref<DashboardStats | null>>) =>
   computed<readonly DashboardPipelineStepViewModel[]>(() => {

@@ -2,12 +2,12 @@ import { JOB_DISCOVERY_DEFAULT_PAGE_SIZE, JOB_FILTER_ALL_VALUE } from "@bao/shar
 import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/shared/types/jobs";
 import { formatRelativeTimeForDate } from "@bao/shared/utils/date-helpers";
 import { computed } from "vue";
-import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 import type {
   FilterSelection,
   JobsFilterState,
   JobsTranslate,
 } from "~/composables/jobs-index-page-contracts";
+import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 
 const translateRelativeDate = (
   t: JobsTranslate,

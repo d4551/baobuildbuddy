@@ -257,9 +257,6 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
     status: RouteStatus;
 }) => Promise<import("elysia").ElysiaStatus<200, Response | {
     error: string;
-    details: string;
-} | {
-    error: string;
 }, 200> | import("elysia").ElysiaStatus<404, {
     error: string;
     details: string;

@@ -2,6 +2,7 @@
 import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
+import { PADDING_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 type ConfirmDialogVariant = "default" | "danger";
 
@@ -128,10 +129,10 @@ function handleClose(): void {
     @update:open="handleUpdateOpen"
     @close="handleClose"
   >
-    <h3 :id="titleId" class="text-lg font-bold">{{ title }}</h3>
-    <p :id="descriptionId" class="py-4">{{ message }}</p>
+    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ title }}</h3>
+    <p :id="descriptionId" :class="[PADDING_TOKEN_CLASS.py4]">{{ message }}</p>
     <div class="modal-action">
-      <button
+      <button 
         ref="cancelButton"
         type="button"
         class="btn btn-ghost"
@@ -140,7 +141,7 @@ function handleClose(): void {
       >
         {{ resolvedCancelText }}
       </button>
-      <button
+      <button 
         ref="confirmButton"
         type="button"
         :class="confirmButtonClass"

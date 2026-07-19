@@ -5,6 +5,7 @@ import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/setti
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { coverLetters } from "../db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
@@ -242,7 +243,7 @@ export async function resolveStudioContext(studioId: string): Promise<StudioCont
 
 export async function createAIService(): Promise<AIService> {
   const settingsRows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
-  return AIService.fromSettings(settingsRows[0]);
+  return AIService.fromSettings({ ...settingsRows[0], ...decryptProviderKeys(settingsRows[0]) });
 }
 
 export async function resolveCandidateInterviewContext(

@@ -3,13 +3,13 @@ import { buildProviderConfigs } from "./ai-provider-config";
 import type { AIProvider } from "./provider-interface";
 type AIServiceSettings = Parameters<typeof buildProviderConfigs>[0];
 /**
- * Multi-provider AI service with fallback capabilities
+ * Multi-provider AI service with ordered failover across configured providers.
  */
 export declare class AIService {
     private providers;
     private preferredProvider?;
     private routing;
-    private fallbackOrder;
+    private providerFailoverOrder;
     constructor(configs: AIProviderConfig[], preferredProvider?: AIProviderType, routing?: AIRouting);
     /**
      * Create an AIService from a settings DB row.
@@ -18,18 +18,18 @@ export declare class AIService {
      */
     static fromSettings(settings?: AIServiceSettings): AIService;
     private static createDeterministicTestService;
-    private refreshFallbackOrder;
+    private refreshProviderFailoverOrder;
     private resolveHealthyProviderOrder;
     /**
      * Get a specific provider by name
      */
     getProvider(name?: AIProviderType): AIProvider | null;
     /**
-     * Generate a response with automatic fallback
+     * Generate a response with ordered provider failover. Throws when every provider fails.
      */
     generate(prompt: string, options?: GenerateOptions): Promise<AIResponse>;
     /**
-     * Stream a response with automatic fallback
+     * Stream a response with ordered provider failover. Throws when every provider fails.
      */
     stream(prompt: string, options?: GenerateOptions): AsyncGenerator<{
         chunk: string;
@@ -67,9 +67,9 @@ export declare class AIService {
      */
     getConfiguredProviders(): AIProviderType[];
     /**
-     * Get the current fallback order
+     * Get the current provider failover order
      */
-    getFallbackOrder(): AIProviderType[];
+    getProviderFailoverOrder(): AIProviderType[];
     /**
      * Get the current purpose-aware routing table.
      */

@@ -1,11 +1,15 @@
+import {
+  BRAND_PREVIEW_STYLES_FILE_PATH,
+  collectBrandPreviewThemeViolations,
+  collectProgressMarkupViolations,
+  collectRadialProgressViolations,
+  collectTableMarkupViolations,
+  type DaisyUiViolation,
+} from "./validate-daisyui-contracts-markup";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
-type Violation = {
-  filePath: string;
-  line: number;
-  message: string;
-};
+type Violation = DaisyUiViolation;
 
 type FileContract = {
   filePath: string;
@@ -39,15 +43,8 @@ const SCAN_ROOTS = [
 ] as const;
 
 const STATIC_CLASS_ATTRIBUTE_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/gu;
-const SINGLE_CLASS_ATTRIBUTE_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/u;
-const TABLE_TAG_PATTERN = /<table\b[^>]*>/gu;
-const PROGRESS_TAG_PATTERN = /<progress\b[^>]*>/gu;
-const RADIAL_PROGRESS_TAG_PATTERN =
-  /<[^>]*class\s*=\s*["'][^"']*\bradial-progress\b[^"']*["'][^>]*>/gu;
+const UI_GLASS_CARD_TAG_PATTERN = /<UiGlassCard\b/u;
 const WHITESPACE_PATTERN = /\s+/u;
-const RADIAL_ROLE_PATTERN = /\brole\s*=\s*["']progressbar["']/u;
-const RADIAL_VALUE_NOW_PATTERN = /\baria-valuenow\s*=\s*/u;
-const STYLE_ATTRIBUTE_PATTERN = /\b:style\s*=\s*["'][^"']+["']|\bstyle\s*=\s*["'][^"']+["']/u;
 
 const SAME_ATTRIBUTE_BASE_REQUIREMENTS = [
   { baseClass: "btn", modifierPattern: /^btn-/u },
@@ -101,37 +98,32 @@ const BTN_SEMANTIC_MODIFIERS = [
   "btn-disabled",
 ] as const;
 
-const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
-const BRAND_PREVIEW_REQUIRED_THEME_VARIABLES = [
-  "--color-base-100",
-  "--color-base-200",
-  "--color-base-300",
-  "--color-base-content",
-  "--color-primary",
-  "--color-primary-content",
-  "--color-secondary",
-  "--color-secondary-content",
-  "--color-accent",
-  "--color-accent-content",
-  "--color-neutral",
-  "--color-neutral-content",
-  "--color-info",
-  "--color-info-content",
-  "--color-success",
-  "--color-success-content",
-  "--color-warning",
-  "--color-warning-content",
-  "--color-error",
-  "--color-error-content",
-  "--radius-selector",
-  "--radius-field",
-  "--radius-box",
-  "--size-selector",
-  "--size-field",
-  "--border",
-  "--depth",
-  "--noise",
+/**
+ * Layout SSOT surface class constants that carry the `card` base class.
+ * When a Vue file uses a `:class` binding to one of these constants, the
+ * validator recognizes that the file satisfies the card → card-body/title/actions
+ * contract even though the raw string `card` does not appear in a static
+ * `class="..."` attribute.
+ */
+const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
+  "SURFACE_GLASS_CARD_CLASS",
+  "SURFACE_GLASS_CARD_STRONG_CLASS",
+  "SURFACE_GLASS_CARD_MODAL_CLASS",
+  "AUTH_CARD_SHELL_CLASS",
+  // Canonical glass card primitive wraps SURFACE_GLASS_CARD_CLASS internally.
+  "UiGlassCard",
 ] as const;
+
+const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(
+  `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_CARD.join("|")})\\b`,
+  "u",
+);
+
+// Also create a global variant for matchAll-style scanning
+const SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL = new RegExp(
+  SSOT_SURFACE_CONSTANT_USAGE_PATTERN.source,
+  "gu",
+);
 
 const extractClassTokens = (value: string): string[] =>
   value.split(WHITESPACE_PATTERN).filter((token) => token.length > 0);
@@ -152,10 +144,19 @@ const collectVueFiles = async (): Promise<string[]> => {
 
 const collectRequiredClassViolations = (filePath: string, fileContent: string): Violation[] => {
   const classTokens = new Set<string>();
+  // Scan static class="..." attributes
   for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
     for (const token of extractClassTokens(classMatch[1])) {
       classTokens.add(token);
     }
+  }
+  // Recognize SSOT surface constants that carry `card` implicitly
+  if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    classTokens.add("card");
+  }
+  // UiGlassCard component usage implicitly carries the `card` class
+  if (UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) {
+    classTokens.add("card");
   }
 
   const fileContract = REQUIRED_FILE_CONTRACTS.find((contract) => contract.filePath === filePath);
@@ -196,12 +197,34 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
   const firstLineByClass = new Map<string, number>();
   const classTokens = new Set<string>();
 
+  // Scan static class="..." attributes
   for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
     const line = getLineFromOffset(fileContent, classMatch.index ?? 0);
     for (const token of extractClassTokens(classMatch[1])) {
       classTokens.add(token);
       if (!firstLineByClass.has(token)) {
         firstLineByClass.set(token, line);
+      }
+    }
+  }
+  // Scan SSOT surface constant bindings that carry `card` implicitly
+  if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    classTokens.add("card");
+    // Find the first SURFACE_GLASS_CARD_CLASS occurrence for line reporting
+    // Reset the global variant since .test() advanced lastIndex on the non-global won't matter
+    SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.lastIndex = 0;
+    const firstSurfaceMatch = SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.exec(fileContent);
+    if (firstSurfaceMatch && !firstLineByClass.has("card")) {
+      firstLineByClass.set("card", getLineFromOffset(fileContent, firstSurfaceMatch.index));
+    }
+  }
+  // UiGlassCard component usage implicitly carries the `card` class
+  if (UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) {
+    classTokens.add("card");
+    if (!firstLineByClass.has("card")) {
+      const match = UI_GLASS_CARD_TAG_PATTERN.exec(fileContent);
+      if (match) {
+        firstLineByClass.set("card", getLineFromOffset(fileContent, match.index));
       }
     }
   }
@@ -215,87 +238,6 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
         message: `File uses \`${partClass}\` without the base \`${requirement.baseClass}\` class.`,
       })),
   );
-};
-
-const collectTableMarkupViolations = (filePath: string, fileContent: string): Violation[] => {
-  const violations: Violation[] = [];
-  for (const tableTag of fileContent.matchAll(TABLE_TAG_PATTERN)) {
-    const classMatch = tableTag[0].match(SINGLE_CLASS_ATTRIBUTE_PATTERN);
-    if (!classMatch) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, tableTag.index ?? 0),
-        message: "Raw HTML table must opt into the daisyUI `table` primitive.",
-      });
-      continue;
-    }
-
-    const tokens = extractClassTokens(classMatch[1]);
-    if (!tokens.includes("table")) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, tableTag.index ?? 0),
-        message: "daisyUI table usage requires the base `table` class.",
-      });
-    }
-  }
-  return violations;
-};
-
-const collectProgressMarkupViolations = (filePath: string, fileContent: string): Violation[] => {
-  const violations: Violation[] = [];
-  for (const progressTag of fileContent.matchAll(PROGRESS_TAG_PATTERN)) {
-    const classMatch = progressTag[0].match(SINGLE_CLASS_ATTRIBUTE_PATTERN);
-    if (!classMatch) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, progressTag.index ?? 0),
-        message: "Progress elements must opt into the daisyUI `progress` primitive.",
-      });
-      continue;
-    }
-
-    const tokens = extractClassTokens(classMatch[1]);
-    if (!tokens.includes("progress")) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(fileContent, progressTag.index ?? 0),
-        message: "daisyUI progress usage requires the base `progress` class.",
-      });
-    }
-  }
-  return violations;
-};
-
-const collectRadialProgressViolations = (filePath: string, fileContent: string): Violation[] => {
-  const violations: Violation[] = [];
-  for (const radialTag of fileContent.matchAll(RADIAL_PROGRESS_TAG_PATTERN)) {
-    const tag = radialTag[0];
-    const line = getLineFromOffset(fileContent, radialTag.index ?? 0);
-    if (!RADIAL_ROLE_PATTERN.test(tag)) {
-      violations.push({
-        filePath,
-        line,
-        message: 'daisyUI radial-progress requires `role="progressbar"`.',
-      });
-    }
-    if (!RADIAL_VALUE_NOW_PATTERN.test(tag)) {
-      violations.push({
-        filePath,
-        line,
-        message: "daisyUI radial-progress requires `aria-valuenow`.",
-      });
-    }
-    if (!STYLE_ATTRIBUTE_PATTERN.test(tag)) {
-      violations.push({
-        filePath,
-        line,
-        message:
-          "daisyUI radial-progress requires a style or `:style` binding for the `--value` contract.",
-      });
-    }
-  }
-  return violations;
 };
 
 const collectIncompatibleClassViolations = (filePath: string, fileContent: string): Violation[] => {
@@ -342,38 +284,6 @@ const collectBtnModifierViolations = (filePath: string, fileContent: string): Vi
     }
   }
   return violations;
-};
-
-const collectBrandPreviewThemeViolations = (filePath: string, fileContent: string): Violation[] => {
-  if (filePath !== BRAND_PREVIEW_STYLES_FILE_PATH) {
-    return [];
-  }
-
-  const previewSurfaceOffset = fileContent.indexOf("function paletteRules");
-  const previewSurfaceLine =
-    previewSurfaceOffset >= 0 ? getLineFromOffset(fileContent, previewSurfaceOffset) : 1;
-
-  const missingOwner =
-    fileContent.includes("function paletteRules") && fileContent.includes("useBrandPreviewStyles")
-      ? []
-      : [
-          {
-            filePath,
-            line: previewSurfaceLine,
-            message:
-              "Brand preview CSS variable owner must export `paletteRules` via `useBrandPreviewStyles` (no Vue `:style` bindings).",
-          },
-        ];
-
-  const missingVariables = BRAND_PREVIEW_REQUIRED_THEME_VARIABLES.filter(
-    (variableName) => !fileContent.includes(variableName),
-  ).map((variableName) => ({
-    filePath,
-    line: previewSurfaceLine,
-    message: `Brand preview surfaces must scope \`${variableName}\` inside \`paletteRules\` / \`useBrandPreviewStyles\` so daisyUI semantic classes render the preview palette instead of the outer app theme.`,
-  }));
-
-  return [...missingOwner, ...missingVariables];
 };
 
 /**

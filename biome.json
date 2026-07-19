@@ -17,7 +17,8 @@
       "!**/bun.lock",
       "!**/packages/desktop/src-tauri/target",
       "!**/packages/desktop/src-tauri/gen",
-      "!**/packages/desktop/src-tauri/icons"
+      "!**/packages/desktop/src-tauri/icons",
+      "!**/.omo"
     ]
   },
   "formatter": {
@@ -82,6 +83,26 @@
         "rules": {
           "security": {
             "noSecrets": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["scripts/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "security": {
+            "noSecrets": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/client/constants/layout.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
           }
         }
       }

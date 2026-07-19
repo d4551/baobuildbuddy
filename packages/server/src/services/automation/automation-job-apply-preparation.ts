@@ -11,18 +11,18 @@ import {
   AutomationValidationError,
 } from "./automation-errors";
 import {
-  assertRunExists,
-  markRunFailed,
-  resolveRunArtifactDir,
-} from "./automation-run-persistence";
-import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
-import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
-import {
   normalizeGeneratedFieldAnswers,
   resolveAutofillAnalysis,
 } from "./automation-job-apply-autofill";
 import { createResumeUploadArtifact } from "./automation-job-apply-resume-artifact";
+import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
+import {
+  assertRunExists,
+  markRunFailed,
+  resolveRunArtifactDir,
+} from "./automation-run-persistence";
 import type { JobApplyRunPreparation } from "./automation-service-contracts";
+import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
 import { sanitizeAndValidateJobUrl, sanitizeCustomAnswers } from "./automation-validation";
 
 const MIN_RESUME_ID_LENGTH = 1;

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
+import {
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -57,19 +61,19 @@ function handleScheduledRunAtUpdate(payload: {
 </script>
 
 <template>
-  <div class="space-y-8">
-    <section v-if="readyCapabilities.length > 0" class="space-y-4">
-      <div class="space-y-1">
-        <h2 class="text-lg font-semibold text-base-content">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack8]">
+    <section v-if="readyCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+        <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.sections.providers.label") }}
         </h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.sections.providers.description") }}
         </p>
       </div>
 
       <SectionGrid grid-token="twoColumnXl">
-        <AutomationScraperCapabilityCard
+        <AutomationScraperCapabilityCard 
           v-for="capability in readyCapabilities"
           :key="capability.id"
           :capability="capability"
@@ -97,18 +101,18 @@ function handleScheduledRunAtUpdate(payload: {
       </SectionGrid>
     </section>
 
-    <section v-if="attentionCapabilities.length > 0" class="space-y-4">
-      <div class="space-y-1">
-        <h2 class="text-lg font-semibold text-base-content">
+    <section v-if="attentionCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+        <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("automation.scraper.providerCard.issuesTitle") }}
         </h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.providerCard.issuesNeedsAttention") }}
         </p>
       </div>
 
       <SectionGrid grid-token="twoColumnXl">
-        <AutomationScraperCapabilityCard
+        <AutomationScraperCapabilityCard 
           v-for="capability in attentionCapabilities"
           :key="capability.id"
           :capability="capability"

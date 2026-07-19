@@ -1,5 +1,7 @@
 const common = {
   common: {
+    save: "Save",
+    loading: "Loading",
     exportMenu: {
       formatAria: "{action} {format}",
       formats: {

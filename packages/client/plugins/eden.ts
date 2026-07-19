@@ -53,39 +53,42 @@ export function setStoredApiKey(key: string | null): void {
   writeStoredApiKey(resolveAuthKeyCookieRef(), key);
 }
 
-export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig();
-  const requestUrl = useRequestURL();
-  const cookieRef = getAuthKeyCookieRef();
+export default defineNuxtPlugin({
+  name: "eden",
+  setup() {
+    const config = useRuntimeConfig();
+    const requestUrl = useRequestURL();
+    const cookieRef = getAuthKeyCookieRef();
 
-  const configuredBase = (config.public.apiBase || "/").toString();
-  const treatyBase = resolveTreatyBase(configuredBase, requestUrl);
+    const configuredBase = (config.public.apiBase || "/").toString();
+    const treatyBase = resolveTreatyBase(configuredBase, requestUrl);
 
-  const readApiKey = () => readStoredApiKey(cookieRef);
-  const writeApiKey = (key: string | null) => writeStoredApiKey(cookieRef, key);
+    const readApiKey = () => readStoredApiKey(cookieRef);
+    const writeApiKey = (key: string | null) => writeStoredApiKey(cookieRef, key);
 
-  const api = treaty<App>(treatyBase, {
-    fetch: {
-      credentials: "include",
-    },
-    headers: () => {
-      const key = readApiKey();
-      return key ? { Authorization: `Bearer ${key}` } : {};
-    },
-    onResponse: (response) => {
-      if (response.status === 401) {
-        writeApiKey(null);
-      }
-    },
-  });
+    const api = treaty<App>(treatyBase, {
+      fetch: {
+        credentials: "include",
+      },
+      headers: () => {
+        const key = readApiKey();
+        return key ? { Authorization: `Bearer ${key}` } : {};
+      },
+      onResponse: (response) => {
+        if (response.status === 401) {
+          writeApiKey(null);
+        }
+      },
+    });
 
-  assertClientApi(api.api);
+    assertClientApi(api.api);
 
-  return {
-    provide: {
-      api: api.api, // enters the /api prefix group
-      getStoredApiKey: readApiKey,
-      setStoredApiKey: writeApiKey,
-    },
-  };
+    return {
+      provide: {
+        api: api.api, // enters the /api prefix group
+        getStoredApiKey: readApiKey,
+        setStoredApiKey: writeApiKey,
+      },
+    };
+  },
 });

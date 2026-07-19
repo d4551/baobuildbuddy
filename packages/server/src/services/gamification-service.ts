@@ -9,14 +9,14 @@ import type {
 } from "@bao/shared/types/gamification";
 import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
-import { findUnlockableAchievements, buildAchievementStatuses } from "./gamification-achievements";
-import { completeChallengeState, buildDailyChallengesView } from "./gamification-challenges";
+import { buildAchievementStatuses, findUnlockableAchievements } from "./gamification-achievements";
+import { buildDailyChallengesView, completeChallengeState } from "./gamification-challenges";
 import { GAMIFICATION_DEFAULT_ID, type WeeklyProgressResult } from "./gamification-definitions";
 import {
   buildMonthlyStats,
   buildWeeklyProgress,
-  getStreakMultiplier,
   getNumericStat,
+  getStreakMultiplier,
   toNumericStats,
   typeSafeStats,
 } from "./gamification-progress";

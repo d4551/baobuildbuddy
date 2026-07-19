@@ -13,10 +13,7 @@ import {
 import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
-import {
-  scraperOperationResponses,
-  scraperPortalParamsSchema,
-} from "./scraper-route-contracts";
+import { scraperOperationResponses, scraperPortalParamsSchema } from "./scraper-route-contracts";
 
 const SCRAPER_BASE_PATH = API_ENDPOINTS.scraperBase;
 

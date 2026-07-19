@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   screenshotPaths: readonly string[];
@@ -13,37 +20,37 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.screenshotsTitle')">
+  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
-      <div v-if="screenshotPaths.length === 0" class="text-sm opacity-70">
+      <div v-if="screenshotPaths.length === 0" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("automation.runDetail.noScreenshots") }}
       </div>
       <SectionGrid v-else grid-token="threeColumn">
-        <article
+        <article 
           v-for="(screenshotPath, index) in screenshotPaths"
           :key="screenshotPath"
-          class="card bg-base-200"
+          :class="SURFACE_GLASS_CARD_CLASS"
         >
-          <figure class="px-4 pt-4">
-            <img
+          <figure :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.pt4]">
+            <img 
               v-if="!screenshotHasError(index)"
               :src="screenshotEndpoint(index)"
-              class="rounded-lg"
+              :class="[RADIUS_TOKEN_CLASS.lg]"
               :alt="t('automation.runDetail.screenshotAlt', { index: index + 1 })"
               @error="markScreenshotError(index)"
             />
-            <div
+            <div 
               v-else
-              class="w-full rounded-lg border border-dashed border-base-content/30 p-4 text-sm text-base-content/70"
+              class="border border-dashed border-base-content/30 text-secondary" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm, RADIUS_TOKEN_CLASS.lg]"
               role="status"
             >
               {{ t("automation.runDetail.screenshotLoadError", { index: index + 1 }) }}
             </div>
           </figure>
-          <div class="card-body px-4 py-3">
-            <a
-              class="link link-primary text-sm"
+          <div class="card-body" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+            <a 
+              class="link link-primary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
               :href="screenshotEndpoint(index)"
               target="_blank"
               rel="noopener noreferrer"

@@ -7,16 +7,16 @@ import type {
   OpenApiSpec,
 } from "~/types/api-docs";
 import {
-  API_DOCS_HTTP_METHODS_ORDER,
-  isApiHttpMethod,
-  normalizeApiDocsPathForId,
-} from "~/utils/api-docs-status";
-import {
   getOperationParameters,
   getPathParameters,
   readOpenApiRequestBody,
   readOpenApiResponses,
 } from "~/utils/api-docs-openapi";
+import {
+  API_DOCS_HTTP_METHODS_ORDER,
+  isApiHttpMethod,
+  normalizeApiDocsPathForId,
+} from "~/utils/api-docs-status";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);

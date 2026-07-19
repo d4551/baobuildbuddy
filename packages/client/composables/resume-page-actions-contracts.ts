@@ -1,6 +1,6 @@
 import type { ResumeTemplate } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
-import type { ResumeFormData, formDataToResumeData } from "@bao/shared/utils/resume-transform";
+import type { formDataToResumeData, ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { Ref } from "vue";
 
 export type ResumePageActionsInput = {

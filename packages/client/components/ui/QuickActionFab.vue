@@ -3,7 +3,14 @@ import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FAB_QUICK_ACTIONS } from "~/constants/dashboard-pipeline";
-import { QUICK_ACTION_MENU_ID } from "~/constants/layout";
+import {
+  FAB_ACTION_MIN_WIDTH_CLASS,
+  FAB_POSITION_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  QUICK_ACTION_MENU_ID,
+} from "~/constants/layout";
 
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();
@@ -166,14 +173,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="fab z-40 left-6 bottom-24 hidden lg:flex"
+  <div 
+    :class="['fab z-40 hidden lg:flex', FAB_POSITION_CLASS]"
     role="region"
     :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >
-    <button
+    <button 
       ref="quickActionToggle"
-      class="btn btn-lg btn-circle btn-primary shadow-lg"
+      class="btn btn-lg btn-circle btn-primary"
       :aria-label="isOpen ? t('quickFab.collapseAria') : t('quickFab.expandAria')"
       :aria-expanded="isOpen"
       :aria-controls="quickActionMenuId"
@@ -182,35 +189,35 @@ onUnmounted(() => {
       @keydown="handleQuickActionButtonKeydown"
       @click="toggleQuickActions"
     >
-      <CloseIcon v-if="isOpen" class="h-6 w-6" />
-      <IconPlus v-else class="h-6 w-6" />
+      <CloseIcon v-if="isOpen" :class="ICON_SIZE_CLASS.md" />
+      <IconPlus v-else :class="ICON_SIZE_CLASS.md" />
     </button>
 
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
+    <Transition 
+      enter-active-class="transition-[transform,opacity] duration-[var(--motion-standard)] ease-[var(--ease-enter)]"
       enter-from-class="translate-y-2 scale-95 opacity-0"
       enter-to-class="translate-y-0 scale-100 opacity-100"
-      leave-active-class="transition-all duration-150 ease-in"
+      leave-active-class="transition-[transform,opacity] duration-[var(--motion-fast)] ease-[var(--ease-exit)]"
       leave-from-class="translate-y-0 scale-100 opacity-100"
       leave-to-class="translate-y-2 scale-95 opacity-0"
     >
-      <div
+      <div 
         v-if="isOpen"
         :id="quickActionMenuId"
         role="menu"
-        class="flex flex-col items-end gap-2"
+        class="flex flex-col items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
         :aria-label="t('quickFab.menuAria')"
         ref="quickActionMenu"
         @focusout="handleQuickActionMenuFocusOut"
         aria-orientation="vertical"
         :aria-activedescendant="`quick-action-${activeActionIndex}`"
       >
-        <NuxtLink
+        <NuxtLink 
           v-for="(action, index) in FAB_QUICK_ACTIONS"
           :key="action.id"
           :to="action.to"
           :id="`quick-action-${index}`"
-          class="btn btn-lg btn-primary justify-between min-w-52 transition-colors duration-150"
+          :class="['btn btn-lg btn-primary justify-between transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)]', FAB_ACTION_MIN_WIDTH_CLASS]"
           role="menuitem"
           :tabindex="index === activeActionIndex ? 0 : -1"
           :aria-label="t(action.labelKey)"
@@ -219,8 +226,8 @@ onUnmounted(() => {
           @click="closeQuickActions"
         >
           <span>{{ t(action.labelKey) }}</span>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.iconPath" />
+          <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="action.iconPath" />
           </svg>
         </NuxtLink>
       </div>

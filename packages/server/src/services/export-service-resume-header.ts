@@ -7,9 +7,9 @@ import {
 import type { ResumeData } from "@bao/shared/types/resume";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import {
-  toPdfColor,
   type ResumePersonalInfo,
   type ResumeRenderContext,
+  toPdfColor,
 } from "./export-service-contracts";
 import { drawResumeWrappedText, renderResumeSectionHeader } from "./export-service-resume-layout";
 

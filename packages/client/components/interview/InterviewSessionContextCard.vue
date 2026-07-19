@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -22,38 +28,38 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" aria-labelledby="interview-session-context-title">
-    <div class="card-body gap-4">
-      <div class="space-y-1">
-        <h2 id="interview-session-context-title" class="card-title text-lg">
+  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-context-title">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+        <h2 id="interview-session-context-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.overviewTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.overviewDescription") }}
         </p>
       </div>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200/60">
+      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.targetTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
-          <div class="space-y-1">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <p class="text-base font-semibold text-base-content">
               {{ targetJob?.title ?? activeSession.role }}
             </p>
-            <p class="text-sm text-base-content/70">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ targetJob?.company ?? activeSession.studioName }}
               <span v-if="targetJob?.location"> · {{ targetJob.location }}</span>
             </p>
           </div>
 
-          <div class="space-y-2">
-            <p class="text-sm font-medium text-base-content/70">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.focusAreasTitle") }}
             </p>
-            <div v-if="focusAreas.length > 0" class="flex flex-wrap gap-2">
-              <span
+            <div v-if="focusAreas.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+              <span 
                 v-for="focusArea in focusAreas"
                 :key="focusArea"
                 class="badge badge-outline badge-primary"
@@ -61,17 +67,17 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
                 {{ focusArea }}
               </span>
             </div>
-            <p v-else class="text-sm text-base-content/60">
+            <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.focusAreasEmpty") }}
             </p>
           </div>
 
-          <div v-if="targetSignals.length > 0" class="space-y-2">
-            <p class="text-sm font-medium text-base-content/70">
+          <div v-if="targetSignals.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewSession.promptTagsLabel") }}
             </p>
-            <div class="flex flex-wrap gap-2">
-              <span
+            <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+              <span 
                 v-for="signal in targetSignals"
                 :key="signal"
                 class="badge badge-outline"
@@ -83,42 +89,42 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </div>
       </details>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200/60">
+      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.interviewerTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <template v-if="interviewerPersona">
-            <div class="space-y-1">
+            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <p class="text-base font-semibold text-base-content">{{ interviewerPersona.name }}</p>
-              <p class="text-sm text-base-content/70">
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ interviewerPersona.role }} · {{ interviewerPersona.studioName }}
               </p>
             </div>
 
-            <dl class="space-y-3">
-              <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+            <dl :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerRoleLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.role }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.role }}</dd>
               </div>
-              <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerStyleLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.style }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.style }}</dd>
               </div>
-              <div class="space-y-1">
-                <dt class="text-sm font-medium text-base-content/70">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                <dt class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("interviewSession.interviewerBackgroundLabel") }}
                 </dt>
-                <dd class="text-sm text-base-content">{{ interviewerPersona.background }}</dd>
+                <dd class="text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ interviewerPersona.background }}</dd>
               </div>
             </dl>
           </template>
 
-          <p v-else class="text-sm text-base-content/60">
+          <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.interviewerFallback") }}
           </p>
         </div>

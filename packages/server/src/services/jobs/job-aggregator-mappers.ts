@@ -1,7 +1,6 @@
 import type { Job, SalaryRange } from "@bao/shared/types/jobs";
 import type { jobs } from "../../db/schema/jobs";
 import { generateContentHash } from "./deduplication";
-import type { RawJob } from "./providers/provider-interface";
 import {
   detectExperienceLevel,
   detectHybrid,
@@ -19,6 +18,7 @@ import {
   normalizePlatforms,
   normalizeStudioType,
 } from "./job-aggregator-taxonomy";
+import type { RawJob } from "./providers/provider-interface";
 
 const normalizeSalary = (value: Record<string, unknown> | null): Job["salary"] | undefined => {
   if (!value) {

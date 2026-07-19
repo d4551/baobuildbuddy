@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { SURFACE_GLASS_CARD_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   job: {
     company?: string;
@@ -17,24 +23,24 @@ defineProps<{
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="card bg-base-200">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
-        <h2 class="card-title text-lg">{{ t("jobDetail.companyInfoTitle") }}</h2>
-        <div class="space-y-3">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.companyInfoTitle") }}</h2>
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div v-if="job.company">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.companyLabel") }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.companyLabel") }}</p>
             <p class="font-medium">{{ job.company }}</p>
           </div>
 
           <div v-if="job.studioType">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.studioTypeLabel") }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.studioTypeLabel") }}</p>
             <p class="font-medium">{{ studioTypeLabel(job.studioType) }}</p>
           </div>
 
           <div v-if="job.url">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.websiteLabel") }}</p>
-            <a
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.websiteLabel") }}</p>
+            <a 
               :href="job.url"
               target="_blank"
               rel="noopener noreferrer"
@@ -46,17 +52,17 @@ defineProps<{
           </div>
 
           <div v-if="job.postedDate">
-            <p class="text-xs text-base-content/60">{{ t("jobDetail.postedLabel") }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("jobDetail.postedLabel") }}</p>
             <p class="font-medium">{{ formatDate(job.postedDate) }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="job.platforms?.length" class="card bg-base-200">
+    <div v-if="job.platforms?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
-        <h2 class="card-title text-lg">{{ t("jobDetail.platformsTitle") }}</h2>
-        <div class="flex flex-wrap gap-2">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.platformsTitle") }}</h2>
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <span v-for="platform in job.platforms" :key="platform" class="badge">
             {{ platformLabel(platform) }}
           </span>
@@ -64,10 +70,10 @@ defineProps<{
       </div>
     </div>
 
-    <div v-if="job.gameGenres?.length" class="card bg-base-200">
+    <div v-if="job.gameGenres?.length" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
-        <h2 class="card-title text-lg">{{ t("jobDetail.genresTitle") }}</h2>
-        <div class="flex flex-wrap gap-2">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.genresTitle") }}</h2>
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <span v-for="genre in job.gameGenres" :key="genre" class="badge">
             {{ gameGenreLabel(genre) }}
           </span>

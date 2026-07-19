@@ -5,15 +5,15 @@ import type {
   PortfolioMetadata,
   PortfolioProject,
 } from "@bao/shared/types/portfolio";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toPortfolioData } from "./api-normalizer-portfolio";
 import {
+  type ClientApiRequestRuntime,
   downloadApiFile,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "./api-request";
 import { assertApiResponse, withLoadingState } from "./async-flow";
-import { isRecord } from "@bao/shared/utils/type-guards";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdatePortfolioPayload = NonNullable<Parameters<ApiClient["portfolio"]["put"]>[0]>;

@@ -3,16 +3,16 @@ import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";
 import type { AppSettings } from "@bao/shared/types/settings-contracts";
 import { computed, readonly } from "vue";
 import { useI18n } from "vue-i18n";
-import { toAppSettings } from "./api-normalizer-settings";
-import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
-import { useNuxtState } from "./nuxtRuntime";
-import { useApi } from "./useApi";
 import {
   type ClientProviderTestResult,
   resolveAIRoutingPreference,
   resolveLocalProviderState,
   resolveProviderDiagnostics,
 } from "~/utils/ai-control-plane";
+import { toAppSettings } from "./api-normalizer-settings";
+import { assertApiResponse, requireValue, withLoadingState } from "./async-flow";
+import { useNuxtState } from "./nuxtRuntime";
+import { useApi } from "./useApi";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdateSettingsInput = NonNullable<Parameters<ApiClient["settings"]["put"]>[0]>;

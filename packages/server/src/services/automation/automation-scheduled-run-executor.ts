@@ -1,5 +1,6 @@
 import { API_ERROR_EMAIL_DELIVERY_SETTINGS_MISSING } from "@bao/shared/constants/api-errors";
 import { AUTOMATION_SCHEDULE_RETRY_DELAY_MS } from "@bao/shared/constants/automation-limits";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
@@ -11,29 +12,27 @@ import {
   isEmailResponseTone,
 } from "./automation-email-response-payload";
 import { AutomationConcurrencyLimitError } from "./automation-errors";
+import { normalizeJobApplyPayload } from "./automation-job-apply-preparation";
 import {
   buildScheduledJobApplyInput,
+  type JobApplyPayload,
   parseScheduledEmailResponsePayload,
   parseScheduledJobApplyPayload,
   parseScheduledScrapePayload,
-  type JobApplyPayload,
 } from "./automation-run-inputs";
-import { normalizeJobApplyPayload } from "./automation-job-apply-preparation";
 import { markRunFailed } from "./automation-run-persistence";
 import { executeScrapeRun } from "./automation-scrape-run";
+import type { AutomationRunRow, CreateProgressEvent } from "./automation-service-contracts";
 import {
   loadAutomationSettings,
   loadEmailTransportConfig,
   tryLoadAIService,
 } from "./automation-settings-support";
-import type { AutomationRunRow, CreateProgressEvent } from "./automation-service-contracts";
 
 const SCHEDULED_ACTION_JOB_APPLY = "job_apply";
 
-const asJsonRecord = (value: unknown): Record<string, unknown> | null =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : null;
+const asJsonRecord = (value: JsonValue | null | undefined): JsonObject | null =>
+  value && typeof value === "object" && !Array.isArray(value) ? value : null;
 
 type ScheduledRunQueue = (runId: string, runAt: string) => void;
 type ReadRunRow = (runId: string) => Promise<AutomationRunRow | null>;

@@ -1,8 +1,8 @@
 import { createServerLogger } from "../utils/logger";
 import {
-  type SmtpResponse,
   SmtpConnectionClosedError,
   SmtpProtocolError,
+  type SmtpResponse,
 } from "./email-delivery-contracts";
 import { SMTP_LINE_BREAK } from "./email-delivery-message";
 

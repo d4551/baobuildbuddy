@@ -6,6 +6,23 @@ definePageMeta({
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import {
+  CONTENT_H_48_CLASS,
+  CONTENT_H_64_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  PROSE_MEASURE_CENTER_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const router = useRouter();
@@ -62,7 +79,7 @@ async function handleExport(format: "pdf" | "docx") {
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
         >
-          <IconArrowLeft class="h-4 w-4" />
+          <IconArrowLeft :class="ICON_SIZE_CLASS['4']" />
           {{ t("portfolioPage.preview.backButton") }}
         </button>
 
@@ -95,24 +112,24 @@ async function handleExport(format: "pdf" | "docx") {
       :cta-to="APP_ROUTES.portfolio"
     />
 
-    <div v-else class="mx-auto max-w-6xl space-y-8">
-      <div class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body items-center gap-6 py-12 text-center">
-          <div class="space-y-4">
-            <h2 class="text-4xl font-bold sm:text-5xl">
+    <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
+      <div :class="SURFACE_GLASS_CARD_CLASS">
+        <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+            <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS]">
               {{ portfolio.metadata?.title || t("portfolioPage.preview.defaultTitle") }}
             </h2>
-            <p class="mx-auto max-w-2xl text-base-content/70">{{ portfolio.metadata?.bio }}</p>
+            <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
           </div>
-          <div class="flex flex-wrap justify-center gap-4">
+          <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"
               class="btn btn-outline"
               :aria-label="t('portfolioPage.preview.contactAria')"
             >
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               {{ t("portfolioPage.preview.contactButton") }}
             </a>
@@ -124,29 +141,29 @@ async function handleExport(format: "pdf" | "docx") {
               class="btn btn-outline"
               :aria-label="t('portfolioPage.preview.websiteAria')"
             >
-              <IconGlobe class="h-5 w-5" />
+              <IconGlobe :class="ICON_SIZE_CLASS.sm" />
               {{ t("portfolioPage.preview.websiteButton") }}
             </a>
           </div>
         </div>
       </div>
 
-      <div v-if="featuredProjects.length" class="space-y-6">
+      <div v-if="featuredProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
           title-id="portfolio-featured-projects-title"
           :title="t('portfolioPage.preview.featuredProjectsTitle')"
         />
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <SectionGrid grid-token="twoColumnMdGap6">
           <div
             v-for="project in featuredProjects"
             :key="project.id"
-            class="card card-border bg-base-100 shadow-sm"
+            :class="SURFACE_GLASS_CARD_CLASS"
           >
-            <figure v-if="project.image" class="h-64">
+            <figure v-if="project.image" :class="[CONTENT_H_64_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
-                class="h-full w-full object-cover"
+                class="object-cover" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]"
                 sizes="sm:100vw md:50vw"
                 format="webp"
               />
@@ -154,7 +171,7 @@ async function handleExport(format: "pdf" | "docx") {
             <div class="card-body">
               <h3 class="card-title">{{ project.title }}</h3>
               <p>{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="mt-2 flex flex-wrap gap-2">
+              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
@@ -163,7 +180,7 @@ async function handleExport(format: "pdf" | "docx") {
                   {{ tech }}
                 </span>
               </div>
-              <div v-if="project.liveUrl" class="card-actions mt-4">
+              <div v-if="project.liveUrl" class="card-actions" :class="[MARGIN_TOKEN_CLASS.mt4]">
                 <a
                   :href="project.liveUrl"
                   target="_blank"
@@ -172,38 +189,38 @@ async function handleExport(format: "pdf" | "docx") {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
-                  <IconExternalLink class="h-4 w-4" />
+                  <IconExternalLink :class="ICON_SIZE_CLASS['4']" />
                 </a>
               </div>
             </div>
           </div>
-        </div>
+        </SectionGrid>
       </div>
 
-      <div v-if="regularProjects.length" class="space-y-6">
+      <div v-if="regularProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
           title-id="portfolio-all-projects-title"
           :title="featuredProjects.length ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
         />
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <SectionGrid grid-token="threeColumnMdGap6">
           <div
             v-for="project in regularProjects"
             :key="project.id"
-            class="card card-border bg-base-100 shadow-sm"
+            :class="SURFACE_GLASS_CARD_CLASS"
           >
-            <figure v-if="project.image" class="h-48">
+            <figure v-if="project.image" :class="[CONTENT_H_48_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
                 :alt="project.title"
-                class="h-full w-full object-cover"
+                class="object-cover" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]"
                 sizes="sm:100vw md:33vw"
                 format="webp"
               />
             </figure>
             <div class="card-body">
               <h3 class="card-title text-base">{{ project.title }}</h3>
-              <p class="text-sm">{{ project.description }}</p>
-              <div v-if="project.technologies?.length" class="mt-2 flex flex-wrap gap-1">
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ project.description }}</p>
+              <div v-if="project.technologies?.length" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1, MARGIN_TOKEN_CLASS.mt2]">
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
@@ -212,7 +229,7 @@ async function handleExport(format: "pdf" | "docx") {
                   {{ tech }}
                 </span>
               </div>
-              <div v-if="project.liveUrl" class="card-actions mt-4">
+              <div v-if="project.liveUrl" class="card-actions" :class="[MARGIN_TOKEN_CLASS.mt4]">
                 <a
                   :href="project.liveUrl"
                   target="_blank"
@@ -221,12 +238,12 @@ async function handleExport(format: "pdf" | "docx") {
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}
-                  <IconExternalLink class="h-3 w-3" />
+                  <IconExternalLink :class="ICON_SIZE_CLASS.xs" />
                 </a>
               </div>
             </div>
           </div>
-        </div>
+        </SectionGrid>
       </div>
 
       <EmptyState

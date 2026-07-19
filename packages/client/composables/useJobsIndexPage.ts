@@ -1,6 +1,6 @@
+import { createJobsPageActions } from "~/composables/jobs-index-page-actions";
 import { createJobsFilterOptions } from "~/composables/jobs-index-page-contracts";
 import { createJobsDerivedState, createJobsLabels } from "~/composables/jobs-index-page-derived";
-import { createJobsPageActions } from "~/composables/jobs-index-page-actions";
 import {
   createJobsPageRuntime,
   registerJobsPageEffects,

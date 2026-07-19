@@ -1,5 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -71,7 +80,7 @@ const {
       title-id="interview-hub-title"
       :title="t('interviewHub.title')"
       :description="t('interviewHub.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
       density="comfortable"
     >
       <template #actions>
@@ -91,7 +100,7 @@ const {
         </button>
       </template>
       <template #aside>
-        <ul class="steps steps-vertical w-full lg:steps-horizontal" :aria-label="t('interviewHub.hero.stepsAria')">
+        <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('interviewHub.hero.stepsAria')">
           <li class="step step-primary">{{ t("interviewHub.hero.steps.chooseContext") }}</li>
           <li class="step" :class="showConfigModal ? 'step-primary' : ''">{{ t("interviewHub.hero.steps.configureSession") }}</li>
           <li class="step">{{ t("interviewHub.hero.steps.practiceAndScore") }}</li>
@@ -109,7 +118,7 @@ const {
       @retry="() => refreshInterviewHub()"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <BootstrapErrorAlert
         v-if="pathwaysRecommendationError"
         severity="warning"
@@ -126,12 +135,12 @@ const {
         ]"
       />
 
-      <div class="card card-border bg-base-100">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
         <div class="card-body">
-          <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div>
               <h2 class="card-title">{{ t("interviewHub.prep.title") }}</h2>
-              <p class="text-sm text-base-content/70">{{ t("interviewHub.prep.subtitle") }}</p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("interviewHub.prep.subtitle") }}</p>
             </div>
             <span class="badge badge-primary badge-outline">
               {{ t("interviewHub.prep.progressLabel", { done: prepReadyCount, total: prepChecklist.length }) }}
@@ -139,23 +148,28 @@ const {
           </div>
 
           <progress
-            class="progress progress-primary w-full"
+            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
             :value="prepCompletionPercent"
             max="100"
             :aria-label="t('interviewHub.prep.progressAria')"
           ></progress>
 
           <SectionGrid grid-token="threeColumnWide">
-            <article v-for="item in prepChecklist" :key="item.id" class="card bg-base-200">
-              <div class="card-body p-4">
-                <div class="flex items-center justify-between gap-2">
+            <UiGlassCard
+              v-for="(item, index) in prepChecklist"
+              :key="item.id"
+              :stagger-index="Math.min(index + 1, 11)"
+              variant="subtle"
+            >
+              <div :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+                <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <h3 class="font-semibold">{{ item.title }}</h3>
                   <span class="badge badge-sm" :class="prepStatusBadgeClass(item.ready)">
                     {{ item.ready ? t("interviewHub.prep.readyBadge") : t("interviewHub.prep.pendingBadge") }}
                   </span>
                 </div>
-                <p class="text-xs text-base-content/70">{{ item.description }}</p>
-                <div class="card-actions justify-end">
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ item.description }}</p>
+                <div class="flex justify-end">
                   <NuxtLink
                     :to="item.route"
                     class="btn btn-xs btn-outline"
@@ -165,25 +179,25 @@ const {
                   </NuxtLink>
                 </div>
               </div>
-            </article>
+            </UiGlassCard>
           </SectionGrid>
         </div>
       </div>
 
       <SectionGrid grid-token="twoColumnWide">
-        <div class="card card-border bg-base-100">
+        <UiGlassCard variant="standard" :stagger-index="1">
           <div class="card-body">
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
               <span class="badge badge-primary badge-outline">{{ t("interviewHub.cards.recommendedBadge") }}</span>
             </div>
-            <p class="text-sm text-base-content/70">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewHub.cards.jobPracticeDescription") }}
             </p>
-            <div v-if="selectedJob" class="alert alert-info alert-vertical sm:alert-horizontal mt-2">
+            <div v-if="selectedJob" class="alert alert-info alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <div>
                 <h3 class="font-semibold">{{ t("interviewHub.cards.selectedJobTitle") }}</h3>
-                <div class="text-xs">{{ t("interviewHub.cards.selectedJobValue", { title: selectedJob.title, company: selectedJob.company }) }}</div>
+                <div :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHub.cards.selectedJobValue", { title: selectedJob.title, company: selectedJob.company }) }}</div>
               </div>
               <button
                 class="btn btn-sm btn-ghost"
@@ -203,15 +217,15 @@ const {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
 
-        <div class="card card-border bg-base-100">
+        <UiGlassCard variant="standard" :stagger-index="2">
           <div class="card-body">
             <h2 class="card-title">{{ t("interviewHub.cards.studioDrillTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("interviewHub.cards.studioDrillDescription") }}
             </p>
-            <div v-if="selectedStudioName" class="alert alert-soft mt-2">
+            <div v-if="selectedStudioName" class="alert alert-soft" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <span>{{ t("interviewHub.cards.currentStudio", { studio: selectedStudioName }) }}</span>
             </div>
             <div class="card-actions justify-end">
@@ -224,7 +238,7 @@ const {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </SectionGrid>
 
       <InterviewRecentSessionsCard

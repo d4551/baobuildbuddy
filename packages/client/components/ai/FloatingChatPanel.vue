@@ -1,6 +1,23 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  LEADING_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_CHAT_CLASS,
+  MIN_H_60_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   aiChatPagePath: string;
@@ -33,7 +50,6 @@ defineProps<{
   streamingBubble: { role: string; content: string };
   supportsRecognition: boolean;
   supportsSynthesis: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
   ttsModelOptions: ReadonlyArray<string>;
   voiceErrorLabel: string;
   voiceSupportHintKey: string;
@@ -59,21 +75,21 @@ const emit = defineEmits<{
 }>();
 
 const draft = defineModel<string>("draft", { required: true });
+const { t } = useI18n();
 </script>
 
 <template>
   <div
     v-if="isOpen"
     :id="chatPanelId"
-    class="card h-full border border-base-300 bg-base-100 shadow-xl"
-    :class="FLOATING_CHAT_PANEL_SIZE_CLASS"
+    :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
-    <div class="card-body h-full p-0">
-      <header class="flex items-center justify-between border-b border-base-300 p-3">
+ <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
+      <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
         <div>
-          <h2 class="text-sm font-semibold">{{ resolvedBrand.assistantName }}</h2>
-          <div class="mt-1 flex items-center gap-2">
-            <p class="text-xs text-base-content/60">{{ t("floatingChat.subtitle") }}</p>
+          <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.assistantName }}</h2>
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("floatingChat.subtitle") }}</p>
             <span class="badge badge-soft badge-info badge-xs" :aria-label="t('floatingChat.contextAria', { context: currentContextLabel })">
               {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
             </span>
@@ -85,13 +101,13 @@ const draft = defineModel<string>("draft", { required: true });
               {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
             </span>
           </div>
-          <ul v-if="contextChips.length > 0" class="mt-2 flex flex-wrap gap-2" :aria-label="t('floatingChat.contextChipsAria')">
+          <ul v-if="contextChips.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]" :aria-label="t('floatingChat.contextChipsAria')">
             <li v-for="chip in contextChips" :key="chip">
               <span class="badge badge-ghost badge-xs">{{ chip }}</span>
             </li>
           </ul>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap1, TRUNCATE_FLEX_CHILD_CLASS]">
           <NuxtLink :to="aiChatPagePath" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.expandAria')">
             {{ t("floatingChat.expandButton") }}
           </NuxtLink>
@@ -102,29 +118,22 @@ const draft = defineModel<string>("draft", { required: true });
             {{ t("floatingChat.clearButton") }}
           </button>
           <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.closeAria')" @click="emit('close')">
-            <CloseIcon class="h-4 w-4" />
+            <CloseIcon :class="[ICON_SIZE_CLASS['4']]" />
           </button>
         </div>
       </header>
 
-      <div class="border-b border-base-300 px-3 py-2">
-        <ul class="flex flex-wrap gap-2" :aria-label="t('floatingChat.suggestionsAria')">
-          <li v-for="prompt in contextualPrompts" :key="prompt">
-            <button
-              type="button"
-              class="btn btn-xs btn-soft"
-              :aria-label="t('floatingChat.suggestionAria', { prompt })"
-              :disabled="loading"
-              @click="emit('prompt', prompt)"
-            >
-              {{ prompt }}
-            </button>
-          </li>
-        </ul>
+      <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
+        <ChatPromptChips
+          :prompts="contextualPrompts"
+          :loading="loading"
+          size="xs"
+          @prompt="emit('prompt', $event)"
+        />
       </div>
 
       <div
-        class="flex-1 space-y-3 overflow-y-auto p-3"
+        class="flex-1 overflow-y-auto" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
         role="log"
         aria-live="polite"
         aria-atomic="false"
@@ -132,11 +141,11 @@ const draft = defineModel<string>("draft", { required: true });
         :aria-busy="loading || streaming"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex h-full min-h-60 items-center justify-center">
-          <div class="card w-full border border-base-300 bg-base-200/60 shadow-sm">
-            <div class="card-body gap-3 p-4">
+ <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_H_60_CLASS, FLUID_HEIGHT_CLASS]">
+          <div class="card border border-base-300 glass-subtle" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
-              <p class="text-sm leading-6 text-base-content/70">{{ t("floatingChat.emptyDescription") }}</p>
+ <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
             </div>
           </div>
         </div>
@@ -169,20 +178,20 @@ const draft = defineModel<string>("draft", { required: true });
         </template>
       </div>
 
-      <div class="border-t border-base-300 p-3">
-        <form class="space-y-3" @submit.prevent="emit('send')">
+      <div class="border-t border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
+        <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]" @submit.prevent="emit('send')">
           <textarea
             v-model="draft"
             rows="3"
-            class="textarea min-h-24 w-full resize-y"
+ class="textarea resize-y" 
             :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
             :aria-label="t('floatingChat.inputAria')"
             :disabled="loading"
             @keydown="emit('draftKeydown', $event)"
           />
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-xs text-base-content/70">{{ t("floatingChat.composerHint") }}</p>
-            <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("floatingChat.composerHint") }}</p>
+            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <ClientOnly>
                 <ChatVoiceControls
                   :selected-voice-id="selectedVoiceId"
@@ -204,24 +213,24 @@ const draft = defineModel<string>("draft", { required: true });
                 />
               </ClientOnly>
               <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
-                <span v-if="loading" class="loading loading-spinner loading-xs" />
-                <IconSend v-else class="h-4 w-4" />
+                <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
+                <IconSend v-else :class="[ICON_SIZE_CLASS['4']]" />
               </button>
             </div>
           </div>
         </form>
-        <p v-if="voiceSupportHintKey" class="mt-2 text-xs text-base-content/70" role="status" aria-live="polite">
+        <p v-if="voiceSupportHintKey" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]" role="status" aria-live="polite">
           {{ t(voiceSupportHintKey) }}
         </p>
-        <p v-if="voiceErrorLabel" class="mt-1 text-xs text-error" role="status" aria-live="assertive">
+        <p v-if="voiceErrorLabel" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.xs]" role="status" aria-live="assertive">
           {{ voiceErrorLabel }}
         </p>
-        <p v-if="isSpeechConfigDirty && isSpeechSettingsOpen" class="mt-2 text-xs text-base-content/60">
+        <p v-if="isSpeechConfigDirty && isSpeechSettingsOpen" class="text-muted" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]">
           {{ t("aiChatPage.voiceSettings.unsavedHint") }}
         </p>
         <SpeechModelProfileFields
           v-if="isSpeechSettingsOpen"
-          class="mt-2"
+          :class="[MARGIN_TOKEN_CLASS.mt2]"
           :provider-options="speechProviderOptions"
           :stt-provider="speechConfig.sttProvider"
           :stt-model="speechConfig.sttModel"

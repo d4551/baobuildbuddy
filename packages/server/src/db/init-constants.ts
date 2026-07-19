@@ -11,6 +11,7 @@ export const AUTOMATION_RUNS_TABLE_NAME = "automation_runs";
 export const SETTINGS_TABLE_NAME = "settings";
 export const JOBS_TABLE_NAME = "jobs";
 export const STUDIOS_TABLE_NAME = "studios";
+export const AUTH_TABLE_NAME = "auth";
 
 export const AUTOMATION_RUNS_REQUIRED_COLUMNS = {
   exit_code: "INTEGER",
@@ -27,6 +28,13 @@ export const SETTINGS_REQUIRED_COLUMNS = {
 
 export const JOBS_REQUIRED_COLUMNS = {
   enrichment: "TEXT",
+} as const;
+
+export const AUTH_REQUIRED_COLUMNS = {
+  api_key_hash: "TEXT",
+  api_key_created_at: "TEXT",
+  api_key_expires_at: "TEXT",
+  api_key_revoked_at: "TEXT",
 } as const;
 
 export const STUDIOS_REQUIRED_COLUMNS = {

@@ -61,9 +61,7 @@ const registerFallbackJobTest = (): void => {
 
     expect(enrichment.summary).toContain("Build AI gameplay systems");
     expect(enrichment.hiringSignals).toContain("AI Gameplay Engineer is the stated role.");
-    expect(enrichment.candidatePitchAngles).toContain(
-      "Show why Studio Hash is a strong match.",
-    );
+    expect(enrichment.candidatePitchAngles).toContain("Show why Studio Hash is a strong match.");
   });
 };
 

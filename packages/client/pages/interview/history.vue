@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -65,8 +67,8 @@ useSeoMeta({
       description-key="interviewHistory.emptyStateDescription"
     />
 
-    <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <div class="lg:col-span-2 space-y-6">
+    <SectionGrid v-else grid-token="threeColumnLg">
+      <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <InterviewHistorySessionsCard
           :filtered-sessions="filteredSessions"
           :studios="studios"
@@ -96,6 +98,6 @@ useSeoMeta({
           @close="closeDetail"
         />
       </div>
-    </div>
+    </SectionGrid>
   </PageScaffold>
 </template>

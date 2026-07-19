@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 import type { RecentInterviewSession } from "~/types/interview";
 
 defineProps<{
@@ -24,9 +30,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <div class="mb-4 flex items-center justify-between gap-3">
+      <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHub.recent.title") }}</h2>
         <NuxtLink :to="viewAllTo" class="btn btn-ghost btn-sm">
           {{ t("interviewHub.recent.viewAllButton") }}
@@ -39,7 +45,7 @@ const { t } = useI18n();
         description-key="interviewHub.recent.emptyState"
       />
 
-      <div v-else class="space-y-4">
+      <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="overflow-x-auto">
           <table class="table table-zebra table-sm" :aria-label="t('interviewHub.recent.tableAria')">
             <thead>
@@ -59,7 +65,7 @@ const { t } = useI18n();
                 <td>{{ session.studioName || session.studioId }}</td>
                 <td>{{ session.role || session.config.roleType }}</td>
                 <td>
-                  <span
+                  <span 
                     class="badge badge-sm"
                     :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'"
                   >
@@ -73,7 +79,7 @@ const { t } = useI18n();
                 </td>
                 <td>{{ formatSessionDate(session.createdAt) }}</td>
                 <td>
-                  <button
+                  <button 
                     class="btn btn-ghost btn-sm"
                     :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                     @click.stop="emit('viewSession', session.id)"

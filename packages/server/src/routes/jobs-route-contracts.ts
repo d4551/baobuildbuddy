@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -13,6 +12,7 @@ import {
   SCHEMA_MAX_LENGTH_TINY,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type JobListQuery = {
@@ -173,7 +173,7 @@ export const saveJobResponses = {
 export const deleteSavedJobResponses = {
   [HTTP_STATUS_OK]: t.Object({
     success: t.Boolean(),
-    deleted: t.Unknown(),
+    deletedCount: t.Number(),
   }),
 } as const;
 

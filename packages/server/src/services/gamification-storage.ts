@@ -3,9 +3,9 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { gamification } from "../db/schema/schema-modules";
 import {
+  type ActionHistoryEntry,
   GAMIFICATION_DEFAULT_ID,
   MAX_ACTION_HISTORY,
-  type ActionHistoryEntry,
 } from "./gamification-definitions";
 import { appendActionHistoryEntry } from "./gamification-progress";
 

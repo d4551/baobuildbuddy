@@ -5,6 +5,8 @@ import {
   COVER_LETTER_TEMPLATE_OPTIONS,
   type CoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 defineProps<{
   templateLabel: (template: CoverLetterTemplate) => string;
@@ -20,17 +22,17 @@ const formData = defineModel<{
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.details.title") }}</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <SectionGrid grid-token="threeColumnMd">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.companyLegend") }}</legend>
-          <input
+          <input 
             v-model="formData.company"
             type="text"
             :minlength="COVER_LETTER_COMPANY_MIN_LENGTH"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('coverLetterDetailPage.details.companyPlaceholder')"
             :aria-label="t('coverLetterDetailPage.details.companyAria')"
           />
@@ -41,11 +43,11 @@ const formData = defineModel<{
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.positionLegend") }}</legend>
-          <input
+          <input 
             v-model="formData.position"
             type="text"
             :minlength="COVER_LETTER_POSITION_MIN_LENGTH"
-            class="input validator w-full"
+            class="input validator" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('coverLetterDetailPage.details.positionPlaceholder')"
             :aria-label="t('coverLetterDetailPage.details.positionAria')"
           />
@@ -56,9 +58,9 @@ const formData = defineModel<{
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("coverLetterDetailPage.details.templateLegend") }}</legend>
-          <select
+          <select 
             v-model="formData.template"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('coverLetterDetailPage.details.templateAria')"
           >
             <option v-for="template in COVER_LETTER_TEMPLATE_OPTIONS" :key="template" :value="template">
@@ -66,7 +68,7 @@ const formData = defineModel<{
             </option>
           </select>
         </fieldset>
-      </div>
+      </SectionGrid>
     </div>
   </section>
 </template>

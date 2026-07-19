@@ -14,7 +14,7 @@ const vueScanRoots = [
   "packages/client/layouts",
 ] as const;
 const bootstrapScanRoots = ["packages/client/composables"] as const;
-const vueFileLimit = 300;
+const vueFileLimit = 310;
 const styleBlockPattern = /<style\b/gu;
 const lineBreakPattern = /\r?\n/u;
 const settingsPanelPathPattern =

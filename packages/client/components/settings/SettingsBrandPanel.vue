@@ -2,7 +2,14 @@
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
 import BrandPreviewCard from "./brand/BrandPreviewCard.vue";
@@ -11,6 +18,7 @@ import BrandThemeSwatches from "./brand/BrandThemeSwatches.vue";
 import BrandThemesTab from "./brand/BrandThemesTab.vue";
 import BrandTypographyTab from "./brand/BrandTypographyTab.vue";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
 
@@ -111,14 +119,14 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
-    <div class="card-body gap-6">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"
         :description="t('settings.brand.subtitle')"
       >
         <template #meta>
-          <span
+          <span 
             class="badge"
             :class="getSaveStateBadgeClass(brandSaveState)"
             role="status"
@@ -130,28 +138,22 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
       </SettingsPanelHeader>
 
       <div role="alert" class="alert alert-info alert-soft">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 shrink-0 stroke-current"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
+        <svg class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
+            :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
         <div>
           <h3 class="font-semibold">{{ t("settings.brand.infoTitle") }}</h3>
-          <p class="text-sm">{{ t("settings.brand.infoDescription") }}</p>
+          <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.brand.infoDescription") }}</p>
         </div>
       </div>
 
-      <SectionGrid grid-token="twoColumnWide" extra-class="items-start gap-6">
-        <div class="space-y-4 xl:sticky xl:top-24">
+      <SectionGrid class="items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap6]" grid-token="twoColumnWide" extra->
+        <div class="xl:sticky xl:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard
             :brand-draft="brandDraft"
@@ -161,13 +163,13 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
           <BrandThemeSwatches :brand-draft="brandDraft" :theme-names="themeNames" />
         </div>
 
-        <div class="space-y-4">
-          <div
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <div 
             role="tablist"
-            class="tabs tabs-border tabs-sm gap-2 overflow-x-auto whitespace-nowrap md:tabs-md"
+            class="tabs tabs-border tabs-sm overflow-x-auto whitespace-nowrap md:tabs-md" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-label="t('settings.brand.editorTabsAria')"
           >
-            <button
+            <button 
               v-for="panel in BRAND_EDITOR_PANELS"
               :id="`brand-tab-${panel.id}`"
               :key="panel.id"
@@ -232,17 +234,18 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
             />
           </div>
 
-          <div class="card-actions justify-end pt-2">
-            <button
+          <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
+            <button 
               class="btn btn-primary"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"
               @click="emit('save')"
             >
-              <span
+              <LoadingSpinner
                 v-if="brandSaveState === 'saving'"
-                class="loading loading-spinner loading-xs"
-              ></span>
+                size="xs"
+                :label="t('settings.brand.saveButton')"
+              />
               {{ t("settings.brand.saveButton") }}
             </button>
           </div>

@@ -18,7 +18,8 @@ export const log = pino({
 });
 
 /**
- * Request-access logging plugin for Elysia 2 (replaces @bogeychan/elysia-logger).
+ * Request-access logging plugin for Elysia 2.
+ * Logs request method, path, and status. Trace ID is handled by the main app.
  */
 export const logger = new Elysia({ name: "request-logger" }).afterHandle(({ request, set }) => {
   const pathname = new URL(request.url).pathname;

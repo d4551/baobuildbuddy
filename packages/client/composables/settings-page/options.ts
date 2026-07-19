@@ -12,8 +12,8 @@ import {
   buildLanguageLabel,
   emailTransportAuthModeLabel,
   emailTransportSecurityLabel,
-  providerFieldById,
   type ProviderInputConfig,
+  providerFieldById,
 } from "./shared";
 
 export function createSettingsPageOptionState(t: TranslateFn) {

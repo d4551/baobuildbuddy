@@ -1,0 +1,110 @@
+$ bun run validate:alignment && bun run validate:skip-libcheck-waiver && bun run validate:no-htmx && bun run validate:no-monoliths && bun run validate:no-raw-design-tokens && bun run validate:no-local-styles && bun run validate:no-inline-styles && bun run validate:ui-motion-tokens && bun run validate:ui-glass-materials && bun run validate:ui-responsive-overflow && bun run validate:ui-typography && bun run validate:ui-pagination-tables && bun run validate:ui-stubs-noops && bun run validate:ui-density && bun run validate:ai-annotation-provenance && bun run validate:no-hardcoded-user-strings && bun run validate:i18n-parity && bun run validate:no-direct-route-literals && bun run validate:no-direct-env-access && bun run validate:no-client-fetch-drift && bun run validate:no-schema-duplication && bun run validate:no-unsafe-storage && bun run validate:page-state-contracts && bun run validate:seo-contracts && bun run validate:accessibility-landmarks && bun run validate:no-dead-exports && bun run validate:no-dead-vue-components && bun run validate:no-fallback-shims && bun run validate:no-try-catch && bun run validate:no-unsafe-casts && bun run validate:no-hardcoded-paths && bun run validate:locales && bun run validate:page-seo && bun run validate:i18n-ui && bun run validate:aria && bun run validate:ui && bun run validate:ui-ssot && bun run validate:ui-canonical-primitives && bun run validate:ascii && bun run lint:typed && bun --bun run biome lint . && bun run --cwd packages/client lint && bun run typecheck
+$ bun run validate:stack-alignment && bun run validate:ui-layout-tokens && bun run validate:daisyui-contracts
+$ bun run verify:bun-baseline && bun run audit:stack-versions && bun run capability:matrix:check
+$ bash scripts/verify-bun-baseline.sh
+[2.00ms] ".env"
+✅ Bun baseline and stale 1.3.9 reference checks passed
+$ for pkg in bun nuxt tailwindcss daisyui elysia @elysiajs/eden drizzle-orm drizzle-kit @tauri-apps/cli @tauri-apps/api; do printf "%s\t" "$pkg"; bunx npm view "$pkg" version; done
+bun	1.3.14
+nuxt	4.5.0
+tailwindcss	4.3.3
+daisyui	5.6.18
+elysia	1.4.29
+@elysiajs/eden	1.4.9
+drizzle-orm	0.45.2
+drizzle-kit	0.31.10
+@tauri-apps/cli	2.11.4
+@tauri-apps/api	2.11.1
+$ bun run scripts/check-agentiflow-capability-matrix.ts
+agentiflow capability matrix is current: agentiflow/capability-matrix.generated.json
+$ bun run scripts/validate-ui-layout-tokens.ts
+UI layout token validation passed.
+$ bun run scripts/validate-daisyui-contracts.ts
+daisyUI component contract validation passed.
+$ bun run scripts/validate-skip-libcheck-waiver.ts
+skipLibCheck waiver validation passed.
+$ bun run scripts/validate-no-htmx.ts
+No htmx usage found.
+$ bun run scripts/validate-no-monoliths.ts
+Monolith validation passed.
+$ bun run scripts/validate-no-raw-design-tokens.ts
+Raw design token validation passed.
+$ bun run scripts/validate-no-local-styles.ts
+Local style validation passed.
+$ bun run scripts/validate-no-inline-styles.ts
+Inline style validation passed.
+$ bun run scripts/validate-ui-motion-tokens.ts
+UI motion token validation passed.
+$ bun run scripts/validate-ui-glass-materials.ts
+UI glass material validation passed.
+$ bun run scripts/validate-ui-responsive-overflow.ts
+UI responsive overflow validation passed.
+$ bun run scripts/validate-ui-typography.ts
+UI typography validation passed.
+$ bun run scripts/validate-ui-pagination-tables.ts
+UI pagination/table validation passed.
+$ bun run scripts/validate-ui-stubs-noops.ts
+UI stub/noop validation passed.
+$ bun run scripts/validate-ui-density.ts
+UI density validation passed.
+$ bun run scripts/validate-ai-annotation-provenance.ts
+AI annotation provenance validation passed.
+$ bun run scripts/validate-no-hardcoded-user-strings.ts
+Hardcoded user string validation passed.
+$ bun run scripts/validate-i18n-parity.ts
+Locale parity validation passed.
+$ bun run scripts/validate-no-direct-route-literals.ts
+Direct route literal validation passed.
+$ bun run scripts/validate-no-direct-env-access.ts
+Direct environment access validation passed.
+$ bun run scripts/validate-no-client-fetch-drift.ts
+Client fetch drift validation passed.
+$ bun run scripts/validate-no-schema-duplication.ts
+Schema duplication validation passed.
+$ bun run scripts/validate-no-unsafe-storage.ts
+Unsafe storage validation passed.
+$ bun run scripts/validate-page-state-contracts.ts
+Page state contract validation passed.
+$ bun run scripts/validate-seo-contracts.ts
+SEO contract validation passed.
+$ bun run scripts/validate-accessibility-landmarks.ts
+Accessibility landmark validation passed.
+$ bun run scripts/validate-no-dead-exports.ts
+Dead export validation passed.
+$ bun run scripts/validate-no-dead-vue-components.ts
+Dead Vue component validation passed.
+$ bun run scripts/validate-no-fallback-shims.ts
+Fallback term validation passed.
+$ bun run scripts/validate-no-try-catch.ts
+No try/catch blocks found.
+$ bun run scripts/validate-no-unsafe-casts.ts
+No unsafe type casts (`as-any` / `as-unknown`) found.
+$ bun run scripts/validate-no-hardcoded-paths.ts
+Hardcoded path validation passed: client routes and API endpoints use shared constants.
+$ bun run scripts/validate-locale-overrides.ts
+Locale override validation passed: no schema drift or cross-locale copy detected.
+$ bun run scripts/validate-page-seo-metadata.ts
+Page SEO metadata validation passed for all client pages.
+$ bun run scripts/validate-ui-i18n.ts
+UI i18n validation passed: no missing translation keys or static UI text/attributes detected.
+$ bun run scripts/validate-ui-aria-labels.ts
+ARIA validation passed for dialogs, tab contracts, pagination semantics, disclosure widgets, and native interactive controls.
+$ bun run scripts/validate-ui-accessibility.ts
+UI accessibility validation passed: WCAG contrast (daisyUI corporate/business) and tokenized colors are enforced.
+$ bun run scripts/validate-ui-single-source-of-truth.ts
+UI single-source-of-truth validation passed.
+$ bun run scripts/validate-ui-canonical-primitives.ts
+UI canonical primitive validation passed.
+$ bun run scripts/validate-ascii-geometry.ts README.md docs/STARTER_GUIDE.md
+✅ geometry pass in README.md
+✅ geometry pass in docs/STARTER_GUIDE.md
+$ bun --bun run eslint --config eslint.config.mjs .
+[0m
+[4m/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/auth.routes.ts[24m
+  [2m6:3[22m  [31merror[39m  'API_ERROR_MISSING_AUTH_HEADER' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m
+
+[31m[1m✖ 1 problem (1 error, 0 warnings)[22m[39m
+[0m
+error: "eslint" exited with code 1
+error: script "lint:typed" exited with code 1
+error: script "lint" exited with code 1

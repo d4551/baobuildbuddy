@@ -15,9 +15,9 @@ import {
 } from "@bao/shared/constants/api-messages";
 import { resolveBrandSettings } from "@bao/shared/constants/branding";
 import {
-  HTTP_STATUS_OK,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
 import type { AIChatContextDomain, AIResponse } from "@bao/shared/types/ai";

@@ -55,7 +55,7 @@ useSeoMeta({
 
 <template>
   <div :class="CHAT_PAGE_CONTAINER_CLASS">
-    <div class="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+    <SectionGrid grid-token="chatSplit">
       <AIChatConversationPanel
         :resolved-brand="resolvedBrand"
         :locale="locale"
@@ -113,6 +113,6 @@ useSeoMeta({
         :loading="loading"
         @prompt="handlePromptSelection"
       />
-    </div>
+    </SectionGrid>
   </div>
 </template>

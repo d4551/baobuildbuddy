@@ -1,11 +1,11 @@
 import { createServerLogger } from "../../utils/logger";
+import type { AutofillAnalysisOptions } from "./automation-service-contracts";
+import { tryLoadAIService } from "./automation-settings-support";
 import {
   type SmartFieldAnalysisContext,
   type SmartFieldAnalysisResult,
   smartFieldMapper,
 } from "./smart-field-mapper";
-import { tryLoadAIService } from "./automation-settings-support";
-import type { AutofillAnalysisOptions } from "./automation-service-contracts";
 
 const automationPreparationLogger = createServerLogger("automation-job-apply-preparation");
 

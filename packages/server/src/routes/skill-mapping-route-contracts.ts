@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_GONE,
@@ -12,7 +11,9 @@ import {
   SCHEMA_MAX_LENGTH_LABEL,
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type SkillMappingsQuery = {
@@ -23,8 +24,8 @@ export type SkillMappingsQuery = {
 export type SkillMappingMutationBody = {
   gameExpression: string;
   transferableSkill: string;
-  industryApplications?: unknown;
-  evidence?: unknown;
+  industryApplications?: string[];
+  evidence?: JsonValue;
   confidence?: number;
   category?: string;
   demandLevel?: string;
@@ -34,14 +35,26 @@ export type SkillMappingMutationBody = {
 export type SkillMappingUpdateBody = Partial<SkillMappingMutationBody>;
 
 export type SkillAnalyzeBody = {
-  gameExperience?: Record<string, unknown>;
-  resume?: Record<string, unknown>;
+  gameExperience?: JsonObject;
+  resume?: JsonObject;
   autoCreateMappings?: boolean;
 };
 
 export type SkillMappingRouteSetState = {
   status?: number | string;
 };
+
+const jsonPrimitiveBodySchema = t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]);
+const jsonObjectBodySchema = t.Record(t.String(), jsonPrimitiveBodySchema);
+
+const skillEvidenceInputSchema = t.Object({
+  id: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  type: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  title: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  description: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
+  url: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
+  verificationStatus: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+});
 
 export const skillMappingsQuerySchema = t.Object({
   category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
@@ -66,9 +79,7 @@ export const skillMappingCreateBodySchema = t.Object(
         maxItems: SCHEMA_MAX_ITEMS_LARGE,
       }),
     ),
-    evidence: t.Optional(
-      t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
-    ),
+    evidence: t.Optional(t.Array(skillEvidenceInputSchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
     confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
     category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
     demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
@@ -86,9 +97,7 @@ export const skillMappingUpdateBodySchema = t.Object({
       maxItems: SCHEMA_MAX_ITEMS_LARGE,
     }),
   ),
-  evidence: t.Optional(
-    t.Array(t.Record(t.String(), t.Unknown()), { maxItems: SCHEMA_MAX_ITEMS_LARGE }),
-  ),
+  evidence: t.Optional(t.Array(skillEvidenceInputSchema, { maxItems: SCHEMA_MAX_ITEMS_LARGE })),
   confidence: t.Optional(t.Number({ minimum: 0, maximum: 100 })),
   category: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
   demandLevel: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
@@ -97,8 +106,8 @@ export const skillMappingUpdateBodySchema = t.Object({
 export type SkillMappingUpdateRouteBody = Static<typeof skillMappingUpdateBodySchema>;
 
 export const skillAnalysisBodySchema = t.Object({
-  gameExperience: t.Optional(t.Record(t.String(), t.Unknown())),
-  resume: t.Optional(t.Record(t.String(), t.Unknown())),
+  gameExperience: t.Optional(jsonObjectBodySchema),
+  resume: t.Optional(jsonObjectBodySchema),
   autoCreateMappings: t.Optional(t.Boolean()),
 });
 export type SkillAnalysisRouteBody = Static<typeof skillAnalysisBodySchema>;
@@ -112,21 +121,6 @@ const nullableStringSchema = t.Union([t.String(), t.Null()]);
 const nullableNumberSchema = t.Union([t.Number(), t.Null()]);
 const nullableBooleanSchema = t.Union([t.Boolean(), t.Null()]);
 const nullableStringArraySchema = t.Union([t.Array(t.String()), t.Null()]);
-const nullableUnknownArraySchema = t.Union([t.Array(t.Unknown()), t.Null()]);
-
-export const skillMappingRowResponseSchema = t.Object({
-  id: t.String(),
-  gameExpression: t.String(),
-  transferableSkill: t.String(),
-  industryApplications: nullableStringArraySchema,
-  evidence: nullableUnknownArraySchema,
-  confidence: nullableNumberSchema,
-  category: nullableStringSchema,
-  demandLevel: nullableStringSchema,
-  aiGenerated: nullableBooleanSchema,
-  createdAt: t.String(),
-  updatedAt: t.String(),
-});
 
 export const skillEvidenceResponseSchema = t.Object({
   id: t.String(),
@@ -135,6 +129,22 @@ export const skillEvidenceResponseSchema = t.Object({
   description: t.String(),
   url: t.Optional(t.String()),
   verificationStatus: t.String(),
+});
+
+const nullableEvidenceArraySchema = t.Union([t.Array(skillEvidenceResponseSchema), t.Null()]);
+
+export const skillMappingRowResponseSchema = t.Object({
+  id: t.String(),
+  gameExpression: t.String(),
+  transferableSkill: t.String(),
+  industryApplications: nullableStringArraySchema,
+  evidence: nullableEvidenceArraySchema,
+  confidence: nullableNumberSchema,
+  category: nullableStringSchema,
+  demandLevel: nullableStringSchema,
+  aiGenerated: nullableBooleanSchema,
+  createdAt: t.String(),
+  updatedAt: t.String(),
 });
 
 export const skillMappingResponseSchema = t.Object({
@@ -212,10 +222,15 @@ export const skillReadinessResponseSchema = t.Object({
   jobId: t.Optional(t.String()),
 });
 
+const skillSuggestedMappingResponseSchema = t.Record(
+  t.String(),
+  t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]),
+);
+
 export const skillAnalysisResponseSchema = t.Object({
   message: t.String(),
   detectedSkills: t.Array(t.String()),
-  suggestedMappings: t.Array(t.Record(t.String(), t.Unknown())),
+  suggestedMappings: t.Array(skillSuggestedMappingResponseSchema),
   recommendations: t.Array(t.String()),
   provider: t.Optional(t.String()),
 });
@@ -223,6 +238,11 @@ export const skillAnalysisResponseSchema = t.Object({
 export const skillMappingDeleteResponseSchema = t.Object({
   message: t.String(),
   id: t.String(),
+});
+
+const skillMappingDeleteErrorResponseSchema = t.Object({
+  error: t.String(),
+  id: t.Optional(t.String()),
 });
 
 export const skillMappingsListResponses = {
@@ -239,9 +259,9 @@ export const skillMappingUpdateResponses = {
 };
 
 export const skillMappingDeleteResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_GONE]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_OK]: skillMappingDeleteResponseSchema,
+  [HTTP_STATUS_GONE]: skillMappingDeleteErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: skillMappingDeleteErrorResponseSchema,
 };
 
 export const skillPathwaysResponses = {

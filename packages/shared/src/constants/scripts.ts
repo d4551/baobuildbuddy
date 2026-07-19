@@ -101,7 +101,9 @@ export const DESKTOP_RUNTIME_API_BASE =
 export const DESKTOP_RUNTIME_WS_BASE =
   `ws://${DESKTOP_RUNTIME_HOST}:${DESKTOP_RUNTIME_SERVER_PORT}` as const;
 
-/** Packaged desktop webview origins that are allowed to access the local desktop server. */
+/** Packaged desktop webview origins that are allowed to access the local desktop server.
+ *  `http://tauri.localhost` is a Tauri-mandated loopback origin for WebView IPC — it is a
+ *  local-only protocol, NOT an external network call (SSOT note: allowed cleartext). */
 export const DESKTOP_RUNTIME_CORS_ORIGINS = [
   "http://tauri.localhost",
   "https://tauri.localhost",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  PAGE_HERO_ASIDE_CLASS,
   PAGE_HERO_CONTENT_COMFORTABLE_CLASS,
   PAGE_HERO_CONTENT_COMPACT_CLASS,
   PAGE_HERO_SECTION_CLASS,
@@ -38,7 +39,7 @@ const hasAside = computed(() => Boolean(slots.aside));
 <template>
   <section :class="PAGE_HERO_SECTION_CLASS">
     <div :class="heroContentClass">
-      <PageHeaderBlock
+      <PageHeaderBlock 
         :title-id="titleId"
         :title="title"
         :description="description"
@@ -50,7 +51,7 @@ const hasAside = computed(() => Boolean(slots.aside));
         </template>
       </PageHeaderBlock>
 
-      <div v-if="hasAside" class="w-full lg:max-w-2xl">
+      <div v-if="hasAside" :class="PAGE_HERO_ASIDE_CLASS">
         <slot name="aside" />
       </div>
     </div>

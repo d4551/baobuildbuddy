@@ -1,6 +1,6 @@
-import type { JobApplyStrategy, JobApplySelectorBundle } from "./strategy-registry";
 import type { SelectorMapInput } from "./runtime-contracts";
 import { getCustomSelectorList } from "./runtime-locators";
+import type { JobApplySelectorBundle, JobApplyStrategy } from "./strategy-registry";
 
 export const getStrategySelectorList = (
   strategy: JobApplyStrategy,

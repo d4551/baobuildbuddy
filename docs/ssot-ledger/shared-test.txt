@@ -1,0 +1,58 @@
+$ bun test
+bun test v1.3.14 (0d9b296a)
+
+src/types/settings-normalization.test.ts:
+(pass) job provider normalization > replaces legacy placeholder hitmarker endpoints with current defaults [0.20ms]
+(pass) job provider normalization > preserves non-placeholder custom provider values [0.04ms]
+(pass) normalizeAutomationSettings > normalizes nested job provider settings [0.39ms]
+(pass) normalizeLocalModelEndpoint > upgrades the legacy Ollama root endpoint to the OpenAI Chat Completions v1 route [0.15ms]
+(pass) normalizeLocalModelEndpoint > preserves custom model endpoints [0.04ms]
+
+src/utils/desktop-release-contract.test.ts:
+(pass) desktop release contract artifact names > builds canonical macOS artifact names [0.12ms]
+(pass) desktop release contract artifact names > builds canonical Linux x64 artifact names [0.04ms]
+(pass) desktop release contract artifact names > builds canonical Linux ARM64 artifact names [0.02ms]
+(pass) desktop release contract artifact names > builds canonical macOS artifact variants for profile order and defaults [0.04ms]
+(pass) desktop release contract artifact names > builds canonical Windows artifact names [0.02ms]
+(pass) desktop release contract staging and matrix > keeps assembled paths scoped to the canonical target bucket [0.02ms]
+(pass) desktop release contract staging and matrix > builds Cargo release directory candidates for target-aware staging [0.03ms]
+(pass) desktop release contract staging and matrix > builds bundle directory candidates for target-aware staging [0.03ms]
+(pass) desktop release contract staging and matrix > resolves Tauri target matrix deterministically from profile [0.04ms]
+(pass) desktop release contract optional variants > includes Linux AppImage and signatures when profile enables them [0.04ms]
+(pass) desktop release contract optional variants > includes MSI when profile enables it [0.01ms]
+
+src/utils/export-contract.test.ts:
+(pass) export contract > collects only defined non-empty string values [0.06ms]
+(pass) export contract > resolves the explicit resume template first [0.06ms]
+(pass) export contract > formats export dates with the shared locale contract [0.04ms]
+(pass) export contract > normalizes canonical cover-letter content sections [0.10ms]
+(pass) export contract > falls back to alternate cover-letter section names [0.01ms]
+(pass) export contract > preserves mixed cover-letter section naming without dropping intro or closing text
+(pass) export contract > splits raw text cover letters into paragraphs [0.04ms]
+
+src/utils/desktop-runtime-contract.test.ts:
+(pass) desktop runtime contract: target resolution > resolves the canonical Windows runtime layout [0.62ms]
+(pass) desktop runtime contract: target resolution > resolves Linux runtime layout from the Tauri target triple [0.08ms]
+(pass) desktop runtime contract: target resolution > builds and normalizes the canonical runtime manifest [1.06ms]
+(pass) desktop runtime contract: target resolution > falls back to canonical host target resolution [0.03ms]
+(pass) desktop runtime contract: packaged payload entries > lists all runtime contract paths for packaged verification [0.05ms]
+
+src/utils/playwright-browsers-path.test.ts:
+(pass) playwright browsers path sanitization > detects cursor-sandbox browser caches as polluted [0.03ms]
+(pass) playwright browsers path sanitization > detects missing browser cache paths as polluted [0.01ms]
+(pass) playwright browsers path sanitization > rewrites polluted browsers path when host cache exists [0.06ms]
+(pass) playwright browsers path sanitization > unsets polluted browsers path when host cache is missing [0.02ms]
+(pass) playwright browsers path sanitization > derives mac arm64 host platform without reading os.cpus [0.04ms]
+(pass) playwright browsers path sanitization > leaves non-mac platforms without a host override
+(pass) playwright browsers path sanitization > injects host platform override into automation child env [0.01ms]
+
+src/schemas/brand-theme-palette.test.ts:
+(pass) brandThemePaletteSchema > accepts canonical default light and dark brand palettes [4.96ms]
+(pass) brandThemePaletteSchema > rejects arbitrary CSS color strings [0.46ms]
+(pass) brandThemePaletteSchema > rejects non-length radius values [0.15ms]
+(pass) brandThemePaletteSchema > rejects non-flag depth values [0.05ms]
+
+ 39 pass
+ 0 fail
+ 58 expect() calls
+Ran 39 tests across 6 files. [306.00ms]

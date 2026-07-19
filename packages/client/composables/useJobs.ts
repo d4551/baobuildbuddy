@@ -1,16 +1,16 @@
 import { buildJobDetailEndpoint } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
-import { isRecord } from "@bao/shared/utils/type-guards";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import { requireApiResponsePayload } from "~/utils/api-response";
+import { toJob } from "./api-normalizer-jobs";
 import {
+  type ClientApiRequestRuntime,
   requestApi,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "./api-request";
-import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
-import { requireApiResponsePayload } from "~/utils/api-response";
 
 const toJobList = (value: unknown): Job[] =>
   Array.isArray(value)
@@ -76,9 +76,18 @@ async function fetchSavedJobs(context: JobsContext): Promise<void> {
       context.savedJobs.value = [];
       return;
     }
-    context.savedJobs.value = data
-      .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
-      .filter((entry): entry is Job => entry !== null);
+    const entries = asJsonArray(data) ?? [];
+    const jobs: Job[] = [];
+    for (const entry of entries) {
+      if (!isRecord(entry)) {
+        continue;
+      }
+      const job = toJob(entry.job);
+      if (job) {
+        jobs.push(job);
+      }
+    }
+    context.savedJobs.value = jobs;
   });
 }
 
@@ -111,9 +120,18 @@ async function fetchApplications(context: JobsContext): Promise<void> {
       context.applications.value = [];
       return;
     }
-    context.applications.value = data
-      .map((entry) => (isRecord(entry) ? toJob(entry.job) : null))
-      .filter((entry): entry is Job => entry !== null);
+    const entries = asJsonArray(data) ?? [];
+    const jobs: Job[] = [];
+    for (const entry of entries) {
+      if (!isRecord(entry)) {
+        continue;
+      }
+      const job = toJob(entry.job);
+      if (job) {
+        jobs.push(job);
+      }
+    }
+    context.applications.value = jobs;
   });
 }
 

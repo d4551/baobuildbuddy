@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   title: string;
   description?: string;
@@ -6,10 +13,10 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-    <div class="min-w-0 space-y-1">
-      <h2 class="text-xl font-semibold leading-tight">{{ title }}</h2>
-      <p v-if="description" class="text-sm text-base-content/70">
+  <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
+      <h2 class="font-semibold leading-tight" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ title }}</h2>
+      <p v-if="description" class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ description }}
       </p>
     </div>

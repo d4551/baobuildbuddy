@@ -2,6 +2,12 @@
 import type { ResumeFormEducation } from "@bao/shared/utils/resume-transform";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormEducation[];
@@ -55,9 +61,9 @@ function removeEducation(index: number): void {
 
 <template>
   <div class="card-body">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.education.addButtonAria')"
         @click="addEducation"
@@ -65,18 +71,18 @@ function removeEducation(index: number): void {
         {{ t("resumePage.education.addButton") }}
       </button>
     </div>
-    <div class="space-y-6">
-      <div
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+      <div 
         v-for="(education, index) in localValue"
         :key="`${education.school}-${education.degree}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
-          <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
               {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.education.removeButtonAria', { index: index + 1 })"
               @click="removeEducation(index)"
@@ -87,12 +93,12 @@ function removeEducation(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.degreeLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.degree"
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.degreeAria')"
                 @input="emitValue"
               />
@@ -100,12 +106,12 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.schoolLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.school"
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.schoolAria')"
                 @input="emitValue"
               />
@@ -113,30 +119,30 @@ function removeEducation(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.locationLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.location"
                 type="text"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.locationAria')"
                 @input="emitValue"
               />
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.graduationDateLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.graduationDate"
                 type="month"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.graduationDateAria')"
                 @input="emitValue"
               />
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.education.gpaLegend") }}</legend>
-              <input
+              <input 
                 v-model="education.gpa"
                 type="text"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.education.gpaAria')"
                 @input="emitValue"
               />

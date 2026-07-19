@@ -55,9 +55,7 @@ const createEvaluatePage = (html: string): PageEvaluator => {
 
       const [evaluationResult] = await Promise.allSettled([
         Promise.resolve(
-          typeof arg === "undefined"
-            ? (pageFunction as () => Result)()
-            : (pageFunction)(arg),
+          typeof arg === "undefined" ? (pageFunction as () => Result)() : pageFunction(arg),
         ),
       ]);
       restoreDomGlobals(previousGlobals);

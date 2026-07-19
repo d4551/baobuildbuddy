@@ -1,0 +1,2 @@
+$ bun run scripts/validate-no-fallback-shims.ts
+Fallback term validation passed.

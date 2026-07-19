@@ -2,6 +2,14 @@
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   orderedCards: readonly AutomationHubCard[];
@@ -13,24 +21,17 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div
+    <div 
       v-for="card in orderedCards"
       :key="card.id"
-      class="card card-border h-full bg-base-100 transition-colors hover:bg-base-200"
-      :class="primaryCardId === card.id ? 'ring-2 ring-primary/40' : ''"
+      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
     >
       <div class="card-body">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="t(card.titleKey)">
-              <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"
-              >
-                <component
-                  :is="resolveAppIconComponent(card.iconName)"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                />
+              <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(card.iconName)" aria-hidden="true"/>
                 <span class="sr-only">{{ t(card.titleKey) }}</span>
               </span>
             </span>
@@ -40,9 +41,9 @@ const { t } = useI18n();
             {{ t("automation.hub.pipelineTitle") }}
           </span>
         </div>
-        <p class="text-sm text-base-content/70">{{ t(card.descriptionKey) }}</p>
-        <div class="card-actions mt-4 justify-end">
-          <NuxtLink
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t(card.descriptionKey) }}</p>
+        <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
+          <NuxtLink 
             :to="card.to"
             class="btn btn-outline"
             :class="{ 'btn-primary': primaryCardId === card.id }"

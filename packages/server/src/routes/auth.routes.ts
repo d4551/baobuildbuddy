@@ -18,6 +18,7 @@ import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/cons
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
@@ -29,7 +30,10 @@ import {
   RATE_LIMIT_AUTH_BOOTSTRAP_MAX_REQUESTS,
 } from "../config/rate-limit";
 import { db } from "../db/client";
+import { auditLog } from "../db/schema/audit-log";
 import { auth } from "../db/schema/auth";
+import { authenticateApiKey } from "../middleware/auth";
+import { hashApiKey } from "../utils/crypto";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
@@ -66,13 +70,27 @@ function generateApiKey(): string {
   return `${AUTH_KEY_PREFIX}${encodeBase64Url(bytes)}`;
 }
 
+async function insertAuditLog(
+  event: string,
+  actor: string,
+  detail: string,
+  ip?: string,
+): Promise<void> {
+  await db.insert(auditLog).values({
+    event,
+    actor,
+    detail,
+    ip: ip ?? null,
+  });
+}
+
 export const authRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.authBase),
 })
   .get(
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),
     {
-      detail: { tags: ["Auth"] },
+      // no inline detail for rotate,revoke routes
       response: authStatusResponses,
     },
     async ({ status }) => {
@@ -85,7 +103,7 @@ export const authRoutes = new Elysia({
         });
       }
       const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-      const hasKey = Boolean(rows[0]?.apiKey);
+      const hasKey = Boolean(rows[0]?.apiKeyHash);
       return status(HTTP_STATUS_OK, {
         authRequired: true,
         configured: hasKey,
@@ -97,7 +115,7 @@ export const authRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
     {
-      detail: { tags: ["Auth"] },
+      // no inline detail for rotate,revoke routes
       response: authConfiguredResponses,
     },
     async ({ status }) => {
@@ -105,7 +123,7 @@ export const authRoutes = new Elysia({
         return status(HTTP_STATUS_OK, { configured: false });
       }
       const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-      const hasKey = Boolean(rows[0]?.apiKey);
+      const hasKey = Boolean(rows[0]?.apiKeyHash);
       return status(HTTP_STATUS_OK, { configured: hasKey });
     },
   )
@@ -122,19 +140,22 @@ export const authRoutes = new Elysia({
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
         {
-          detail: { tags: ["Auth"] },
+          // no inline detail for rotate,revoke routes
           body: authBootstrapBody,
           response: authInitResponses,
         },
         async ({ body, request, status }) => {
           if (config.disableAuth) {
-            return status(HTTP_STATUS_OK, { configured: false, message: API_MESSAGE_AUTH_DISABLED });
+            return status(HTTP_STATUS_OK, {
+              configured: false,
+              message: API_MESSAGE_AUTH_DISABLED,
+            });
           }
 
           const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-          const existingApiKey = rows[0]?.apiKey;
+          const existingHash = rows[0]?.apiKeyHash;
 
-          if (existingApiKey) {
+          if (existingHash) {
             return status(HTTP_STATUS_OK, {
               configured: true,
               message: API_MESSAGE_API_KEY_ALREADY_CONFIGURED,
@@ -166,16 +187,110 @@ export const authRoutes = new Elysia({
             });
           }
 
-          const apiKey = generateApiKey();
-          await db.insert(auth).values({ id: DEFAULT_PROFILE_ID, apiKey }).onConflictDoUpdate({
-            target: auth.id,
-            set: { apiKey },
-          });
+          const rawApiKey = generateApiKey();
+          const keyHash = hashApiKey(rawApiKey);
+          const now = new Date().toISOString();
+
+          await db
+            .insert(auth)
+            .values({
+              id: DEFAULT_PROFILE_ID,
+              apiKeyHash: keyHash,
+              apiKeyCreatedAt: now,
+              apiKeyExpiresAt: null,
+              apiKeyRevokedAt: null,
+            })
+            .onConflictDoUpdate({
+              target: auth.id,
+              set: {
+                apiKeyHash: keyHash,
+                apiKeyCreatedAt: now,
+                apiKeyExpiresAt: null,
+                apiKeyRevokedAt: null,
+              },
+            });
+
+          await insertAuditLog("api_key_created", "system", "first_run_bootstrap");
 
           return status(HTTP_STATUS_OK, {
             configured: true,
-            apiKey,
+            apiKey: rawApiKey,
             message: API_MESSAGE_SAVE_API_KEY_ONCE,
+          });
+        },
+      )
+      .post(
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRotate),
+        {
+          // no inline detail for rotate,revoke routes
+        },
+        async ({ request, status }) => {
+          const authFailure = await authenticateApiKey(request);
+          if (authFailure) {
+            return status(authFailure.status, { error: authFailure.error });
+          }
+
+          const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+          const row = rows[0];
+          if (!row?.apiKeyHash) {
+            return status(HTTP_STATUS_NOT_FOUND, {
+              error: "No API key configured to rotate",
+            });
+          }
+
+          const newRawKey = generateApiKey();
+          const newHash = hashApiKey(newRawKey);
+          const now = new Date().toISOString();
+
+          await db
+            .update(auth)
+            .set({
+              apiKeyHash: newHash,
+              apiKeyCreatedAt: now,
+              apiKeyExpiresAt: null,
+              apiKeyRevokedAt: null,
+            })
+            .where(eq(auth.id, DEFAULT_PROFILE_ID));
+
+          await insertAuditLog("api_key_rotated", "admin", "manual_rotation");
+
+          return status(HTTP_STATUS_OK, {
+            configured: true,
+            apiKey: newRawKey,
+            message: "API key rotated. Save this new key — it will not be shown again.",
+          });
+        },
+      )
+      .post(
+        toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRevoke),
+        {
+          // no inline detail for rotate,revoke routes
+        },
+        async ({ request, status }) => {
+          const authFailure = await authenticateApiKey(request);
+          if (authFailure) {
+            return status(authFailure.status, { error: authFailure.error });
+          }
+
+          const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+          const row = rows[0];
+          if (!row?.apiKeyHash) {
+            return status(HTTP_STATUS_NOT_FOUND, {
+              error: "No API key configured to revoke",
+            });
+          }
+
+          const now = new Date().toISOString();
+          await db
+            .update(auth)
+            .set({ apiKeyRevokedAt: now })
+            .where(eq(auth.id, DEFAULT_PROFILE_ID));
+
+          await insertAuditLog("api_key_revoked", "admin", "manual_revocation");
+
+          return status(HTTP_STATUS_OK, {
+            revoked: true,
+            message: "API key has been revoked.",
           });
         },
       ),

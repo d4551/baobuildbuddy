@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import { COVER_LETTER_TEMPLATE_OPTIONS } from "@bao/shared/constants/cover-letter";
 import {
   HTTP_STATUS_CREATED,
@@ -13,6 +12,7 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type GenerateCoverLetterBody = {

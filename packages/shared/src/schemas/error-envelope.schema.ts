@@ -1,5 +1,6 @@
 import z from "zod";
 import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
+import type { JsonObject } from "../utils/json";
 import { jsonObjectSchema } from "./json.schema";
 
 /**
@@ -18,6 +19,34 @@ export const rpaRunErrorCodeSchema = z.enum([
 ]);
 
 /**
+ * Discriminated browser-launch failure modes under AUTOMATION_RUNTIME_ERROR.
+ * Keeps top-level code stable; surfaces root cause in details.failureMode.
+ */
+export const automationBrowserLaunchFailureModeSchema = z.enum([
+  "BROWSER_EXECUTABLE_MISSING",
+  "BROWSER_PATH_POLLUTED",
+  "BROWSER_PROCESS_CRASHED",
+  "BROWSER_CONTEXT_FAILED",
+  "BROWSER_PAGE_FAILED",
+  "BROWSER_LAUNCH_FAILED",
+]);
+
+/**
+ * Playwright session stage where launch failed.
+ */
+export const automationBrowserLaunchStageSchema = z.enum(["launch", "context", "page"]);
+
+/**
+ * Typed details payload for automation browser launch failures.
+ */
+export const automationBrowserLaunchFailureDetailsSchema = z.object({
+  failureMode: automationBrowserLaunchFailureModeSchema,
+  causeMessage: z.string().min(1).max(SCHEMA_MAX_LENGTH_LONG),
+  stage: automationBrowserLaunchStageSchema,
+  browsersPath: z.string().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
+});
+
+/**
  * Error detail envelope shared across backend and UI contracts.
  */
 export const errorEnvelopeSchema = z.object({
@@ -27,12 +56,23 @@ export const errorEnvelopeSchema = z.object({
 });
 
 /**
+ * Error `details` remain open JSON objects at runtime, with known diagnostic
+ * string fields narrowed for typed consumers (failureMode/causeMessage/stage).
+ */
+export type ErrorEnvelopeDetails = JsonObject & {
+  causeMessage?: string;
+  failureMode?: string;
+  stage?: string;
+  browsersPath?: string;
+};
+
+/**
  * Result payload from a strict validator without control-flow exceptions.
  */
 export interface ErrorEnvelopeResult {
   code: z.infer<typeof rpaRunErrorCodeSchema>;
   message: string;
-  details?: Record<string, unknown>;
+  details?: ErrorEnvelopeDetails;
 }
 
 /**
@@ -42,5 +82,16 @@ export const rpaErrorEnvelopeSchema = errorEnvelopeSchema.extend({
   source: z.string().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
 });
 
-export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;
+export type ErrorEnvelope = {
+  code: z.infer<typeof rpaRunErrorCodeSchema>;
+  message: string;
+  details?: ErrorEnvelopeDetails;
+};
 export type RpaRunErrorCode = z.infer<typeof rpaRunErrorCodeSchema>;
+export type AutomationBrowserLaunchFailureMode = z.infer<
+  typeof automationBrowserLaunchFailureModeSchema
+>;
+export type AutomationBrowserLaunchStage = z.infer<typeof automationBrowserLaunchStageSchema>;
+export type AutomationBrowserLaunchFailureDetails = z.infer<
+  typeof automationBrowserLaunchFailureDetailsSchema
+>;

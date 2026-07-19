@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -6,8 +5,12 @@ import {
   HTTP_STATUS_OK,
   HTTP_STATUS_UNAUTHORIZED,
 } from "@bao/shared/constants/http";
-import { SCHEMA_MAX_ITEMS_LARGE, SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
+import {
+  SCHEMA_MAX_ITEMS_LARGE,
+  SCHEMA_MAX_LENGTH_LONG,
+} from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export const openaiV1ChatMessageSchema = t.Object({
   role: t.Union([t.Literal("system"), t.Literal("user"), t.Literal("assistant")]),

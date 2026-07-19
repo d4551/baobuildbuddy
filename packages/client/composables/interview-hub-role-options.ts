@@ -1,8 +1,8 @@
 import { INTERVIEW_DEFAULT_ROLE_TYPE } from "@bao/shared/constants/interview";
 import type { Ref } from "vue";
 import {
-  normalizeRoleCandidate,
   type InterviewJobView,
+  normalizeRoleCandidate,
 } from "~/composables/interview-hub-bootstrap";
 
 type InterviewHubRoleOptionsInput = {

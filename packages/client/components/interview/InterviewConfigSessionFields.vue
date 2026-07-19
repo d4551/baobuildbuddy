@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import type { InterviewConversationStyle, InterviewMode } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { InterviewHubSessionConfig } from "~/types/interview";
 
 defineProps<{
@@ -68,21 +75,21 @@ function updateEnableVoiceMode(event: Event): void {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.roleLegend") }}</legend>
-      <input
+      <input 
         v-if="selectedMode === 'job'"
         :value="sessionConfig.role"
         :list="roleSuggestionsListId"
-        class="input w-full"
+        class="input" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.roleAria')"
         @input="updateTextValue($event, 'update:role')"
       />
-      <select
+      <select 
         v-else
         :value="sessionConfig.role"
-        class="select w-full"
+        class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.roleAria')"
         @change="updateTextValue($event, 'update:role')"
       >
@@ -101,9 +108,9 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.experienceLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.experienceLevel"
-        class="select w-full"
+        class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.experienceAria')"
         @change="updateTextValue($event, 'update:experience-level')"
       >
@@ -115,9 +122,9 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.questionCountLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.questionCount"
-        class="select w-full"
+        class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.questionCountAria')"
         @change="updateQuestionCount"
       >
@@ -133,9 +140,9 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.conversationStyleLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.conversationStyle"
-        class="select w-full"
+        class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.conversationStyleAria')"
         @change="updateConversationStyle"
       >
@@ -146,13 +153,13 @@ function updateEnableVoiceMode(event: Event): void {
           {{ t("interviewHub.config.conversationStyleStructured") }}
         </option>
       </select>
-      <p class="mt-2 text-xs text-base-content/60">
+      <p class="text-muted" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("interviewHub.config.conversationStyleHint") }}
       </p>
     </fieldset>
 
-    <label class="label cursor-pointer justify-start gap-3">
-      <input
+    <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+      <input 
         :checked="sessionConfig.enableVoiceMode"
         type="checkbox"
         class="toggle toggle-primary"
@@ -164,9 +171,9 @@ function updateEnableVoiceMode(event: Event): void {
 
     <fieldset v-if="sessionConfig.enableVoiceMode" class="fieldset">
       <legend class="fieldset-legend">{{ t("interviewHub.config.ttsVoiceLegend") }}</legend>
-      <select
+      <select 
         :value="sessionConfig.voiceSettings.voiceId ?? ''"
-        class="select w-full"
+        class="select" :class="[FLUID_WIDTH_CLASS]"
         :aria-label="t('interviewHub.config.ttsVoiceAria')"
         @change="updateTextValue($event, 'update:voice-id')"
       >

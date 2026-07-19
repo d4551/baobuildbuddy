@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
@@ -19,24 +26,24 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <SettingsPanelHeader
         :title="t('settings.automation.title')"
         :description="t('settings.automation.subtitle')"
       />
 
-      <div class="space-y-4">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="flex items-center justify-between">
           <div>
             <span class="font-medium">{{
               t("settings.automation.headlessTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.headlessDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.headless"
             type="checkbox"
             class="toggle toggle-primary"
@@ -49,11 +56,11 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.smartSelectorsTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.smartSelectorsDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.enableSmartSelectors"
             type="checkbox"
             class="toggle toggle-primary"
@@ -66,11 +73,11 @@ const { t } = useI18n();
             <span class="font-medium">{{
               t("settings.automation.autoScreenshotsTitle")
             }}</span>
-            <p class="text-sm text-base-content/60">
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.automation.autoScreenshotsDescription") }}
             </p>
           </div>
-          <input
+          <input 
             v-model="automationForm.autoSaveScreenshots"
             type="checkbox"
             class="toggle toggle-primary"
@@ -83,12 +90,12 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.timeoutLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.defaultTimeout"
               type="number"
               min="1"
               max="120"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.timeoutAria')"
             />
           </fieldset>
@@ -97,12 +104,12 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.retentionLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.screenshotRetention"
               type="number"
               min="1"
               max="30"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.retentionAria')"
             />
           </fieldset>
@@ -111,12 +118,12 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.concurrentRunsLegend") }}
             </legend>
-            <input
+            <input 
               v-model.number="automationForm.maxConcurrentRuns"
               type="number"
               min="1"
               max="5"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.concurrentRunsAria')"
             />
           </fieldset>
@@ -125,9 +132,9 @@ const { t } = useI18n();
             <legend class="fieldset-legend">
               {{ t("settings.automation.defaultBrowserLegend") }}
             </legend>
-            <select
+            <select 
               v-model="automationForm.defaultBrowser"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('settings.automation.defaultBrowserAria')"
             >
               <option
@@ -142,8 +149,8 @@ const { t } = useI18n();
         </SectionGrid>
       </div>
 
-      <div class="card-actions justify-end mt-2">
-        <button
+      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
+        <button 
           class="btn btn-primary"
           :aria-label="t('settings.automation.saveAria')"
           @click="emit('save')"

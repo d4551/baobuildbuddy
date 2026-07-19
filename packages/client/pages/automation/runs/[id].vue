@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -38,7 +40,7 @@ useSeoMeta({
 
 <template>
   <PageScaffold tag="section" width-token="content" labelled-by="automation-run-detail-title">
-    <div class="space-y-3">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
       <AppBreadcrumbs :crumbs="breadcrumbs" />
       <PageHeroHeader title-id="automation-run-detail-title" :title="t('automation.runDetail.title')">
         <template #actions>
@@ -62,7 +64,7 @@ useSeoMeta({
       @retry="retryRunStream"
     />
 
-    <div v-if="run" class="space-y-6">
+    <div v-if="run" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <AutomationRunDetailStatsCard
         :input-summary="inputSummary"
         :output-summary="outputSummary"

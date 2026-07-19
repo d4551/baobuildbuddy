@@ -4,9 +4,9 @@ import type {
   ReadinessAssessment,
   SkillMapping,
 } from "@bao/shared/types/skill-mapping";
+import { toSkillMapping } from "./skill-mapping-normalizers";
 import { buildCareerPathways } from "./skill-mapping-pathways";
 import { buildSkillReadinessAssessment } from "./skill-mapping-readiness";
-import { toSkillMapping } from "./skill-mapping-normalizers";
 import {
   createSkillMappingRow,
   deleteSkillMappingRow,

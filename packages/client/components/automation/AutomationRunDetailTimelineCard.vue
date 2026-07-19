@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";
+import { SURFACE_GLASS_CARD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   timelineEntries: readonly TimelineEntry[];
@@ -11,7 +12,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="card bg-base-100 shadow-sm" :aria-label="t('automation.runDetail.timeline.aria')">
+  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.runDetail.timeline.aria')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.timeline.title") }}</h2>
       <div class="overflow-x-auto">
@@ -32,7 +33,7 @@ const { t } = useI18n();
               <td>{{ entry.message }}</td>
             </tr>
             <tr v-if="timelineEntries.length === 0">
-              <td colspan="4" class="text-center text-sm text-base-content/60">
+              <td colspan="4" class="text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("automation.runDetail.timeline.empty") }}
               </td>
             </tr>

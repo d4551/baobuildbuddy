@@ -100,8 +100,10 @@ export const API_ERROR_CUSTOM_ANSWERS_VALUE_EXCEEDS =
   "customAnswers[__KEY__] exceeds __MAX__ characters";
 /** Use with: `${API_ERROR_AI_STREAMING_FAILED}: ${toErrorMessage(err)}` */
 export const API_ERROR_AI_STREAMING_FAILED = "AI streaming error";
-/** Use with: `${API_ERROR_ALL_PROVIDERS_STREAM_FAILED}: ${errorMessage}` */
+/** Client-safe stream failure. Provider details stay in server logs only. */
 export const API_ERROR_ALL_PROVIDERS_STREAM_FAILED = "All providers failed to stream";
+/** Client-safe generate failure. Provider details stay in server logs only. */
+export const API_ERROR_ALL_PROVIDERS_GENERATE_FAILED = "All providers failed to generate";
 /** Use with: `${API_ERROR_UNSUPPORTED_RESUME_TEMPLATE}: ${template}` */
 export const API_ERROR_UNSUPPORTED_RESUME_TEMPLATE = "Unsupported resume template";
 /** Use with: `${API_ERROR_INVALID_PORT}: ${port}` */
@@ -138,6 +140,10 @@ export const API_ERROR_AI_SETTINGS_NOT_CONFIGURED =
 
 /** Cover letter generation failed. */
 export const API_ERROR_COVER_LETTER_GENERATION_FAILED = "Cover letter generation failed";
+
+/** Cover letter model output missing usable introduction, body, or conclusion. */
+export const API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT =
+  "Cover letter generation returned incomplete content";
 
 /** Network request failed. */
 export const API_ERROR_NETWORK_REQUEST_FAILED = "Network request failed";

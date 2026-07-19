@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { chromium } from "playwright";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "../packages/shared/src/constants/routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 type JsonRecord = Record<string, unknown>;
@@ -23,7 +23,10 @@ type PageSignalSnapshot = {
 };
 
 type PageInstance = {
-  goto(url: string, options: { readonly waitUntil: "domcontentloaded"; readonly timeout: number }): Promise<void>;
+  goto(
+    url: string,
+    options: { readonly waitUntil: "domcontentloaded"; readonly timeout: number },
+  ): Promise<void>;
   waitForTimeout(timeoutMs: number): Promise<void>;
   title(): Promise<string>;
   evaluate<Result>(handler: () => Result): Promise<Result>;
@@ -115,10 +118,11 @@ const resolveOutputDirectory = (): string => {
 };
 
 const resolveClientBase = (): string =>
-  (resolveFlagValue("--client-base") ?? process.env.PAGE_PROOF_CLIENT_BASE ?? DEFAULT_CLIENT_BASE).replace(
-    TRAILING_SLASH_PATTERN,
-    "",
-  );
+  (
+    resolveFlagValue("--client-base") ??
+    process.env.PAGE_PROOF_CLIENT_BASE ??
+    DEFAULT_CLIENT_BASE
+  ).replace(TRAILING_SLASH_PATTERN, "");
 
 const resolveApiBase = (): string =>
   (resolveFlagValue("--api-base") ?? process.env.PAGE_PROOF_API_BASE ?? DEFAULT_API_BASE).replace(
@@ -272,7 +276,8 @@ const pageStillLoading = async (page: PageInstance): Promise<boolean> =>
   page.evaluate(() => {
     const skeletonCount = document.querySelectorAll(".skeleton").length;
     const loadingIndicatorCount = document.querySelectorAll(".loading").length;
-    const mainText = document.querySelector("main")?.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+    const mainText =
+      document.querySelector("main")?.textContent?.replace(/\s+/gu, " ").trim() ?? "";
 
     if (skeletonCount > 0) {
       return true;
@@ -410,7 +415,8 @@ const main = async (): Promise<void> => {
 };
 
 await main().then(undefined, async (error: unknown) => {
-  const message = error instanceof Error ? error.message : `Unknown page proof failure: ${String(error)}`;
+  const message =
+    error instanceof Error ? error.message : `Unknown page proof failure: ${String(error)}`;
   await writeError(`page-proof: ${message}`);
   process.exitCode = 1;
 });

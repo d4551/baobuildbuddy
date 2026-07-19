@@ -1,6 +1,6 @@
 import type { InterviewMode } from "@bao/shared/types/interview";
-import type { ComposerTranslation } from "vue-i18n";
 import type { Ref } from "vue";
+import type { ComposerTranslation } from "vue-i18n";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
 type InterviewHubPresentationInput = {

@@ -1,4 +1,15 @@
 <script setup lang="ts">
+import {
+  CARD_BODY_COMFORTABLE_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CHEVRON_CLASS,
+  ICON_SIZE_CLASS,
+  STAT_CARD_CTA_ROW_CLASS,
+  STAT_CARD_HEADER_ROW_CLASS,
+  STAT_CARD_ICON_BADGE_CLASS,
+  STAT_CARD_TITLE_BLOCK_CLASS,
+  STAT_CARD_VALUE_CLASS,
+} from "~/constants/layout";
 import type { DashboardStatCardViewModel } from "./dashboard-page-contracts";
 
 defineProps<{
@@ -8,43 +19,42 @@ defineProps<{
 
 <template>
   <SectionGrid grid-token="bento">
-    <NuxtLink
-      v-for="statCard in statCards"
+    <UiGlassCard
+      v-for="(statCard, index) in statCards"
       :key="statCard.id"
       :to="statCard.to"
-      class="card h-full bg-base-100 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-      :aria-label="statCard.ariaLabel"
+      :link-aria-label="statCard.ariaLabel"
+      :stagger-index="index"
     >
-      <div class="card-body flex flex-col justify-between p-5 md:p-6">
-        <div class="mb-4 flex items-start justify-between">
+      <div :class="CARD_BODY_COMFORTABLE_CLASS">
+        <div :class="STAT_CARD_HEADER_ROW_CLASS">
           <div>
-            <div class="mb-1 text-sm font-medium text-base-content/60">{{ statCard.title }}</div>
-            <div class="text-3xl font-bold">{{ statCard.value }}</div>
+            <div :class="STAT_CARD_TITLE_BLOCK_CLASS">{{ statCard.title }}</div>
+            <div :class="STAT_CARD_VALUE_CLASS">{{ statCard.value }}</div>
           </div>
-          <div class="rounded-2xl bg-base-200/50 p-3" :class="statCard.accentClass">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="statCard.iconPath" />
+          <div :class="[STAT_CARD_ICON_BADGE_CLASS, statCard.accentClass]">
+            <svg :class="ICON_SIZE_CLASS.md" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="statCard.iconPath" />
             </svg>
           </div>
         </div>
-        <div class="mt-auto flex items-center gap-1 text-xs font-semibold" :class="statCard.accentClass">
+        <div :class="[STAT_CARD_CTA_ROW_CLASS, statCard.accentClass]">
           <span>{{ statCard.ctaLabel }}</span>
-          <svg
+          <svg 
             xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
             stroke-linecap="round"
             stroke-linejoin="round"
             aria-hidden="true"
+            :class="ICON_SIZE_CHEVRON_CLASS"
           >
             <path d="m9 18 6-6-6-6" />
           </svg>
         </div>
       </div>
-    </NuxtLink>
+    </UiGlassCard>
   </SectionGrid>
 </template>

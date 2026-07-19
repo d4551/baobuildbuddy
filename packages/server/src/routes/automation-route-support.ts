@@ -6,6 +6,7 @@ import {
   type RpaRunExecutionEnvelope,
   rpaRunExecutionEnvelopeSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
@@ -31,14 +32,27 @@ const isAutomationRunType = (value: string): value is (typeof AUTOMATION_RUN_TYP
 const isAutomationRunStatus = (value: string): value is (typeof AUTOMATION_RUN_STATUSES)[number] =>
   AUTOMATION_RUN_STATUSES.some((runStatus) => runStatus === value);
 
-const toJsonObject = (value: unknown): AutomationJsonObject | null => {
+const toJsonObject = (value: JsonValue | null | undefined): AutomationJsonObject | null => {
   const parsed = jsonObjectSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) {
+    return null;
+  }
+  return parsed.data;
 };
 
-const toBooleanFlag = (value: unknown): boolean => value === true || value === 1 || value === "1";
+const toBooleanFlag = (value: JsonValue | null | undefined): boolean =>
+  value === true || value === 1 || value === "1";
 
-const normalizeRunError = (value: unknown): RpaRunExecutionEnvelope["error"] => {
+const detailsFromErrorObject = (value: JsonObject): AutomationJsonObject | null => {
+  if (!("details" in value)) {
+    return null;
+  }
+  return toJsonObject(value.details);
+};
+
+const normalizeRunError = (
+  value: JsonValue | string | null | undefined,
+): RpaRunExecutionEnvelope["error"] => {
   if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }
@@ -59,7 +73,7 @@ const normalizeRunError = (value: unknown): RpaRunExecutionEnvelope["error"] => 
     return null;
   }
 
-  const details = "details" in value ? toJsonObject(value.details) : undefined;
+  const details = detailsFromErrorObject(value);
   return {
     code: parsedCode.data,
     message,
@@ -198,10 +212,10 @@ export const ensureAutomationVerifyContext = async (): Promise<{ resumeId: strin
 export const runJobApplyInBackground = (runId: string, payload: JobApplyRequestBody): void => {
   applicationAutomationService.runJobApply(runId, payload).then(
     () => undefined,
-    (error: unknown) => {
+    (error) => {
       automationRoutesLogger.error(
         `[automation] job-apply execution failed for runId=${runId}`,
-        error,
+        error instanceof Error ? error.message : String(error),
       );
     },
   );

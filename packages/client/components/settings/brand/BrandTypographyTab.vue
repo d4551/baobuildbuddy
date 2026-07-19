@@ -1,13 +1,24 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const BRAND_HINT_IDS = {
   fontStylesheet: "settings-brand-font-stylesheet-hint",
 } as const;
 
-const brandFieldsetClass =
-  "fieldset min-w-0 gap-2 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm";
+const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
 
@@ -20,20 +31,20 @@ const brandForm = defineModel<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
-    <div class="card-body gap-4 p-4 md:p-6">
-      <p class="text-sm text-base-content/70">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.typographyDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+      <SectionGrid grid-token="twoColumn" :extra-class="FLEX_GAP_TOKEN_CLASS.gap4">
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.fontStylesheetLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.fontStylesheetUrl"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-describedby="BRAND_HINT_IDS.fontStylesheet"
             :placeholder="t('settings.brand.fontStylesheetPlaceholder')"
             :aria-label="t('settings.brand.fontStylesheetAria')"
@@ -44,34 +55,34 @@ const brandForm = defineModel<{
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.displayFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.displayFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.displayFontAria')"
           />
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.bodyFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.bodyFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.bodyFontAria')"
           />
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.monoFontLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.monoFontFamily"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.monoFontAria')"
           />
         </fieldset>

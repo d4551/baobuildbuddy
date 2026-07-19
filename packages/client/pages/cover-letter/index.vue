@@ -2,6 +2,15 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -67,7 +76,7 @@ const bootstrapErrorMessage = computed(() =>
       title-id="cover-letter-page-title"
       :title="t('coverLetterPage.title')"
       :description="t('coverLetterPage.subtitle')"
-      description-class="max-w-2xl text-base-content/70"
+      :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>
         <button
@@ -75,13 +84,13 @@ const bootstrapErrorMessage = computed(() =>
           :aria-label="t('coverLetterPage.generateButtonAria')"
           @click="showGenerateModal = true"
         >
-          <IconBolt class="h-4 w-4" />
+          <IconBolt :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterPage.generateButton") }}
         </button>
       </template>
       <template #aside>
         <StatsRow
-          class="mt-4"
+          :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
             { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
             { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
@@ -91,15 +100,15 @@ const bootstrapErrorMessage = computed(() =>
       </template>
     </PageHeroHeader>
 
-    <section class="card card-border bg-base-100">
+    <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
       <div class="card-body">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.searchLegend") }}</legend>
             <input
               v-model="searchQuery"
               type="search"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               :placeholder="t('coverLetterPage.filters.searchPlaceholder')"
               :aria-label="t('coverLetterPage.filters.searchAria')"
             />
@@ -109,7 +118,7 @@ const bootstrapErrorMessage = computed(() =>
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.templateLegend") }}</legend>
             <select
               v-model="templateFilter"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('coverLetterPage.filters.templateAria')"
             >
               <option
@@ -126,7 +135,7 @@ const bootstrapErrorMessage = computed(() =>
             <legend class="fieldset-legend">{{ t("coverLetterPage.filters.sortLegend") }}</legend>
             <select
               v-model="sortOrder"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('coverLetterPage.filters.sortAria')"
             >
               <option
@@ -138,7 +147,7 @@ const bootstrapErrorMessage = computed(() =>
               </option>
             </select>
           </fieldset>
-        </div>
+        </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
           <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
@@ -171,33 +180,30 @@ const bootstrapErrorMessage = computed(() =>
       message-key="coverLetterPage.filteredEmptyState"
     />
 
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <article
-        v-for="letter in coverLetterCards"
+    <SectionGrid v-else grid-token="threeColumnResponsive">
+      <UiGlassCard
+        v-for="(letter, index) in coverLetterCards"
         :key="letter.id"
-        class="card card-border relative overflow-hidden bg-base-100 transition-colors hover:bg-base-200"
+        :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
+        :link-aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
+        :stagger-index="Math.min(index, 11)"
       >
-        <NuxtLink
-          :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
-          class="absolute inset-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-          :aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
-        />
         <div class="card-body relative z-10">
-          <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <div>
-              <h2 class="card-title text-lg">{{ letter.position }}</h2>
-              <p class="text-sm text-base-content/70">{{ letter.company }}</p>
+              <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ letter.position }}</h2>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ letter.company }}</p>
             </div>
             <span class="badge badge-outline badge-sm">
               {{ letter.templateLabel }}
             </span>
           </div>
 
-          <p class="line-clamp-4 text-sm text-base-content/80">
+          <p class="line-clamp-4 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ letter.previewText }}
           </p>
 
-          <div class="flex items-center justify-between text-xs text-base-content/60">
+          <div class="flex items-center justify-between text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
             <span>{{ t("coverLetterPage.cards.updatedAtLabel") }}</span>
             <time>{{ letter.updatedAtLabel }}</time>
           </div>
@@ -219,8 +225,8 @@ const bootstrapErrorMessage = computed(() =>
             </button>
           </div>
         </div>
-      </article>
-    </div>
+      </UiGlassCard>
+    </SectionGrid>
 
     <AppPagination
       :current-page="coverLetterPagination.currentPage.value"

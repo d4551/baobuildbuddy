@@ -3,8 +3,7 @@ import {
   AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
 } from "@bao/shared/constants/ai-generation";
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
-import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
-import type { ScrapeEnrichmentRunSummary } from "@bao/shared/types/jobs";
+import type { ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { safeParseJson } from "@bao/shared/utils/json";
@@ -12,6 +11,7 @@ import { settle } from "@bao/shared/utils/promise";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { settings } from "../db/schema/settings";
 import { AIService } from "./ai/ai-service";
 import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts-scrape";
@@ -61,7 +61,7 @@ export const createScrapeEnrichmentService = async (): Promise<AIService | null>
   if (!settingsRow) {
     return null;
   }
-  return AIService.fromSettings(settingsRow);
+  return AIService.fromSettings({ ...settingsRow, ...decryptProviderKeys(settingsRow) });
 };
 
 const extractScrapeEnrichmentJson = (content: string): string => {
@@ -154,15 +154,21 @@ export const buildFallbackStudioEnrichment = (
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,
-    studioRow.games?.length ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.` : undefined,
+    studioRow.games?.length
+      ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.`
+      : undefined,
     studioRow.technologies?.length
       ? `Experience with technologies such as ${studioRow.technologies.slice(0, 2).join(", ")}.`
       : undefined,
-    studioRow.interviewStyle ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.` : undefined,
+    studioRow.interviewStyle
+      ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.`
+      : undefined,
   ]),
   candidatePitchAngles: compactList([
     `Explain why ${studioRow.name} matches your target studios.`,
-    studioRow.description ? "Use the studio description to mirror product or team language." : undefined,
+    studioRow.description
+      ? "Use the studio description to mirror product or team language."
+      : undefined,
     studioRow.remoteWork ? "Highlight async collaboration and ownership." : undefined,
     studioRow.website ? `Reference the public studio presence at ${studioRow.website}.` : undefined,
   ]),

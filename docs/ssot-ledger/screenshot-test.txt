@@ -1,0 +1,25 @@
+bun test v1.3.14 (0d9b296a)
+
+packages/server/src/routes/automation-screenshots.test.ts:
+(pass) automationScreenshotRoutes > returns 404 when screenshot metadata points to a missing file [18.06ms]
+41 |   createdRunIds.add(runId);
+42 | };
+43 | 
+44 | const createRunDirectory = (runId: string): string => {
+45 |   const runDir = join(AUTOMATION_SCREENSHOT_DIR, runId);
+46 |   mkdirSync(runDir, { recursive: true });
+       ^
+EPERM: operation not permitted, mkdir '/Users/brandon/.bao/automation/screenshots/c52f05c1-aedb-42b2-b15f-b007737502c4'
+    path: "/Users/brandon/.bao/automation/screenshots/c52f05c1-aedb-42b2-b15f-b007737502c4",
+ syscall: "mkdir",
+   errno: -1,
+    code: "EPERM"
+
+      at createRunDirectory (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation-screenshots.test.ts:46:3)
+      at <anonymous> (/Users/brandon/Downloads/baobuildbuddy/packages/server/src/routes/automation-screenshots.test.ts:91:20)
+(fail) automationScreenshotRoutes > serves screenshot bytes with the expected content headers [2.58ms]
+
+ 1 pass
+ 1 fail
+ 2 expect() calls
+Ran 2 tests across 1 file. [758.00ms]

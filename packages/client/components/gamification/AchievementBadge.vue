@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { GAMIFICATION_ICON_FALLBACK } from "@bao/shared/constants/gamification-icons";
 import { useI18n } from "vue-i18n";
+import {
+  ACHIEVEMENT_ICON_BADGE_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   achievement: {
@@ -17,37 +27,31 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div
-    class="card bg-base-100 shadow-md hover:shadow-lg transition-all"
-    :class="[
-      achievement.unlocked
-        ? 'ring-2 ring-primary cursor-pointer'
-        : 'opacity-50 grayscale'
-    ]"
+  <div 
+    :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'glass-interactive ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >
-    <div class="card-body p-4">
-      <div class="flex items-center gap-3">
-        <div
-          class="w-12 h-12 rounded-full flex items-center justify-center"
-          :class="achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-base-content/50'"
+    <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
+      <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <div 
+          :class="[ACHIEVEMENT_ICON_BADGE_CLASS, achievement.unlocked ? 'bg-primary text-primary-content' : 'bg-base-300 text-muted']"
         >
-          <span class="text-2xl" aria-hidden="true">
+          <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">
             {{ achievement.icon ?? GAMIFICATION_ICON_FALLBACK }}
           </span>
         </div>
 
         <div class="flex-1">
-          <h3 class="font-bold">{{ achievement.name }}</h3>
-          <p class="text-xs text-base-content/70">{{ achievement.description }}</p>
-          <span class="badge badge-soft badge-sm mt-2">
+          <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ achievement.name }}</h3>
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ achievement.description }}</p>
+          <span class="badge badge-soft badge-sm" :class="[MARGIN_TOKEN_CLASS.mt2]">
             +{{ achievement.xpReward }} {{ t("gamificationPage.xpSuffix") }}
           </span>
         </div>
 
         <div v-if="achievement.unlocked" class="text-success">
-          <IconCheckCircle class="h-6 w-6" />
+          <IconCheckCircle :class="ICON_SIZE_CLASS.md" />
         </div>
       </div>
     </div>

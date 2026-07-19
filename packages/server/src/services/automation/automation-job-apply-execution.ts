@@ -11,9 +11,9 @@ import { eq } from "drizzle-orm";
 import { config } from "../../config/env";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
+import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { gamificationService } from "../gamification-service";
-import { createServerLogger } from "../../utils/logger";
 import {
   markRunCompleted,
   markRunFailed,
@@ -28,6 +28,8 @@ import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 import { runRpaScript } from "./rpa-runner-protocol";
 
 const logger = createServerLogger("automation-job-apply-execution");
+
+type FailureReason = Error | string;
 
 export const createExecutionTracking = (): JobApplyExecutionTracking => ({
   exitCode: null,
@@ -134,7 +136,9 @@ const finalizeJobApplySuccess = async (
     gamificationService.awardXP(ROUTE_GAMIFICATION_XP.automationCompleted, "automation_success"),
   );
   if (awardXpResult.status === "rejected") {
-    logger.warn({ err: String(awardXpResult.reason) }, "XP award failed after job apply automation");
+    logger.warn("XP award failed after job apply automation", {
+      err: String(awardXpResult.reason),
+    });
   }
 };
 
@@ -151,7 +155,7 @@ export const handleJobApplyExecutionFailure = async (params: {
   runId: string;
   automationSettings: AutomationSettings;
   tracking: JobApplyExecutionTracking;
-  reason: unknown;
+  reason: FailureReason;
   createProgressEvent: CreateProgressEvent;
 }): Promise<never> => {
   const message = toErrorMessage(params.reason, API_ERROR_JOB_APPLICATION_AUTOMATION_FAILED);

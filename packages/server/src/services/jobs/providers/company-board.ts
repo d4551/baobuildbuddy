@@ -2,8 +2,6 @@ import type { CompanyBoardConfig, JobProviderSettings } from "@bao/shared/types/
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
-import type { JobProvider, RawJob } from "./provider-interface";
-import { loadJobProviderSettings } from "./provider-settings";
 import {
   type ATSResponse,
   isAtsResponse,
@@ -13,6 +11,8 @@ import {
   resolveLocation,
   toISODate,
 } from "./company-board-support";
+import type { JobProvider, RawJob } from "./provider-interface";
+import { loadJobProviderSettings } from "./provider-settings";
 
 const REMOTE_PATTERN = /remote/i;
 

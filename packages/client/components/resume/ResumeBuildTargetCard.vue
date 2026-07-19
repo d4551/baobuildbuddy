@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   studios: ReadonlyArray<{ id: string; name: string }>;
   experienceLevelOptions: ReadonlyArray<{ value: string; labelKey: string }>;
@@ -18,53 +25,53 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="card bg-base-200">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("resumeBuildPage.target.title") }}</h2>
-      <p class="mb-4 text-sm text-base-content/70">{{ t("resumeBuildPage.target.description") }}</p>
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumeBuildPage.target.description") }}</p>
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.roleLegend") }}</legend>
         <label for="target-role" class="label">{{ t("resumeBuildPage.target.roleLabel") }}</label>
-        <input
+        <input 
           id="target-role"
           v-model="targetRole"
           type="text"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :placeholder="t('resumeBuildPage.target.rolePlaceholder')"
           :aria-label="t('resumeBuildPage.target.roleAria')"
         />
       </fieldset>
 
-      <fieldset class="fieldset mt-4">
+      <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.studioLegend") }}</legend>
         <label for="studio-select" class="label">{{ t("resumeBuildPage.target.studioLabel") }}</label>
-        <select
+        <select 
           id="studio-select"
           v-model="studioId"
-          class="select w-full"
+          class="select" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumeBuildPage.target.studioAria')"
         >
           <option value="">{{ t("resumeBuildPage.target.noStudioOption") }}</option>
           <option v-for="studio in studios" :key="studio.id" :value="studio.id">{{ studio.name }}</option>
         </select>
-        <label for="studio-name" class="label mt-2">{{ t("resumeBuildPage.target.studioNameLabel") }}</label>
-        <input
+        <label for="studio-name" class="label" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ t("resumeBuildPage.target.studioNameLabel") }}</label>
+        <input 
           id="studio-name"
           v-model="studioName"
           type="text"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :placeholder="t('resumeBuildPage.target.studioNamePlaceholder')"
           :aria-label="t('resumeBuildPage.target.studioNameAria')"
         />
       </fieldset>
 
-      <fieldset class="fieldset mt-4">
+      <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
         <legend class="fieldset-legend">{{ t("resumeBuildPage.target.experienceLegend") }}</legend>
-        <select
+        <select 
           id="experience-level"
           v-model="experienceLevel"
-          class="select w-full"
+          class="select" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumeBuildPage.target.experienceAria')"
         >
           <option value="">{{ t("resumeBuildPage.experienceLevels.any") }}</option>
@@ -74,10 +81,10 @@ const emit = defineEmits<{
         </select>
       </fieldset>
 
-      <p v-if="errorMessage" class="mt-2 text-sm text-error">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
-      <div class="card-actions mt-6 justify-end">
-        <button
+      <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
+        <button 
           class="btn btn-primary"
           :disabled="!canProceedTarget"
           :aria-label="t('resumeBuildPage.target.generateAria')"

@@ -1,4 +1,16 @@
 <script setup lang="ts">
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MIN_H_36_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -60,14 +72,14 @@ useSeoMeta({
       @retry="() => refreshEmailSettings()"
     />
 
-    <div v-else class="card card-border bg-base-100 shadow-sm">
+    <div v-else :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
-        <div class="space-y-4">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.email.subjectLegend") }}</legend>
             <input
               v-model="form.subject"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
               required
               minlength="3"
@@ -82,7 +94,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.senderLegend") }}</legend>
             <input
               v-model="form.sender"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="text"
               maxlength="200"
               :placeholder="t('automation.email.senderPlaceholder')"
@@ -95,7 +107,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.recipientLegend") }}</legend>
             <input
               v-model="form.recipientEmail"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="email"
               maxlength="320"
               :placeholder="t('automation.email.recipientPlaceholder')"
@@ -108,7 +120,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.toneLegend") }}</legend>
             <select
               v-model="form.tone"
-              class="select w-full"
+              class="select" :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('automation.email.toneAria')"
             >
               <option v-for="tone in toneOptions" :key="tone" :value="tone">
@@ -121,7 +133,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
             <textarea
               v-model="form.message"
-              class="textarea min-h-36 w-full"
+              class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_H_36_CLASS]"
               required
               minlength="10"
               maxlength="12000"
@@ -131,8 +143,8 @@ useSeoMeta({
             <p class="validator-hint">{{ t("automation.email.messageHint") }}</p>
           </fieldset>
 
-          <div class="rounded-box border border-base-300 bg-base-200/60 p-4">
-            <label class="label cursor-pointer justify-start gap-3">
+          <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+            <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <input
                 v-model="form.deliverAfterGeneration"
                 type="checkbox"
@@ -144,7 +156,7 @@ useSeoMeta({
                 {{ t("automation.email.deliverLabel") }}
               </span>
             </label>
-            <p class="mt-2 text-sm text-base-content/70">
+            <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
               {{
                 emailDeliveryConfigured
                   ? t("automation.email.deliveryConfiguredDescription")
@@ -154,7 +166,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTES.settings"
-              class="btn btn-link btn-sm px-0"
+              class="btn btn-link btn-sm" :class="[PADDING_TOKEN_CLASS.px0]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -165,7 +177,7 @@ useSeoMeta({
             <legend class="fieldset-legend">{{ t("automation.email.schedule.legend") }}</legend>
             <input
               v-model="form.runAt"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="datetime-local"
               :aria-label="t('automation.email.schedule.aria')"
             />
@@ -173,17 +185,14 @@ useSeoMeta({
           </fieldset>
         </div>
 
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
           <button
             class="btn btn-primary"
             :disabled="pending || !canSubmit"
             :aria-label="t('automation.email.generateAria')"
             @click="submitEmailResponse"
           >
-            <span
-              v-if="pendingAction === 'generate'"
-              class="loading loading-spinner loading-sm"
-            ></span>
+            <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'generate'" />
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
@@ -192,10 +201,7 @@ useSeoMeta({
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"
           >
-            <span
-              v-if="pendingAction === 'schedule'"
-              class="loading loading-spinner loading-sm"
-            ></span>
+            <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'schedule'" />
             <span v-else>{{ t("automation.email.schedule.button") }}</span>
           </button>
         </div>
@@ -208,20 +214,20 @@ useSeoMeta({
       :message="submitError"
     />
 
-    <div v-if="scheduledRun" class="card card-border bg-base-100 shadow-sm">
+    <div v-if="scheduledRun" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <div>
             <h3 class="font-semibold">{{ t("automation.email.schedule.createdTitle") }}</h3>
-            <p class="text-sm">{{ t("automation.email.runIdLabel", { id: scheduledRun.id }) }}</p>
-            <p class="text-sm">
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.email.runIdLabel", { id: scheduledRun.id }) }}</p>
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{
                 t("automation.email.schedule.scheduledForLabel", {
                   date: toLocalizedDateTime(resolveScheduledRunAt(scheduledRun)),
                 })
               }}
             </p>
-            <p class="text-sm">
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("automation.email.schedule.statusLabel", { status: scheduledRun.status }) }}
             </p>
           </div>
@@ -239,7 +245,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <div v-if="lastResult" class="card card-border bg-base-100 shadow-sm">
+    <div v-if="lastResult" :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
@@ -250,21 +256,21 @@ useSeoMeta({
                   : t("automation.email.generatedTitle")
               }}
             </h3>
-            <p class="text-sm">{{ t("automation.email.generatedProvider", { provider: lastResult.provider, model: lastResult.model }) }}</p>
-            <p class="text-sm">{{ t("automation.email.runIdLabel", { id: lastResult.runId }) }}</p>
-            <p v-if="lastResult.recipientEmail" class="text-sm">
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.email.generatedProvider", { provider: lastResult.provider, model: lastResult.model }) }}</p>
+            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.email.runIdLabel", { id: lastResult.runId }) }}</p>
+            <p v-if="lastResult.recipientEmail" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("automation.email.recipientLabel", { email: lastResult.recipientEmail }) }}
             </p>
-            <p v-if="lastResult.messageId" class="text-sm">
+            <p v-if="lastResult.messageId" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("automation.email.messageIdLabel", { id: lastResult.messageId }) }}
             </p>
           </div>
         </div>
 
-        <fieldset class="fieldset mt-4">
+        <fieldset class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt4]">
           <legend class="fieldset-legend">{{ t("automation.email.replyLegend") }}</legend>
           <textarea
-            class="textarea w-full min-h-40"
+            class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_HEIGHT_SCROLL_CLASS]"
             readonly
             :value="lastResult.reply"
             :aria-label="t('automation.email.replyAria')"

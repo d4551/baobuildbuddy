@@ -39,7 +39,6 @@ export class GeminiProvider extends BaseAIProvider {
       topK: options?.topK ?? 40,
     };
 
-    // Build the prompt with system prompt if provided
     let fullPrompt = prompt;
     if (options?.systemPrompt) {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;
@@ -92,7 +91,6 @@ export class GeminiProvider extends BaseAIProvider {
       topK: options?.topK ?? 40,
     };
 
-    // Build the prompt with system prompt if provided
     let fullPrompt = prompt;
     if (options?.systemPrompt) {
       fullPrompt = `${options.systemPrompt}\n\n${prompt}`;

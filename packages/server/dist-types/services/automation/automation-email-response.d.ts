@@ -1,5 +1,5 @@
-import type { EmailResponseExecutionPayload } from "./automation-run-inputs";
 import type { EmailExecutionResult, EmailResponseRuntime } from "./automation-email-response-contracts";
+import type { EmailResponseExecutionPayload } from "./automation-run-inputs";
 export declare const createEmailResponseRun: (runId: string, normalized: EmailResponseExecutionPayload, options?: {
     status: "running" | "pending";
     scheduledFor?: string;

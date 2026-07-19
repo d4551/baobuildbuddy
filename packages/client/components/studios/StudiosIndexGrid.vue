@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_DESCRIPTION_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+  WIDTH_TOKEN_CLASS,
+} from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
@@ -34,31 +45,31 @@ function studioLocation(location: string): string {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <SectionGrid grid-token="threeColumn">
-      <article
+      <article 
         v-for="studio in studios"
         :key="studio.id"
-        class="card card-border bg-base-100 transition-shadow hover:shadow-md"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'transition-shadow']"
       >
-        <div class="card-body gap-3">
-          <div class="flex items-center gap-3">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content rounded-full w-12">
-                <span class="text-xl">{{ studioInitial(studio.name) }}</span>
+              <div class="bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, WIDTH_TOKEN_CLASS.w12]">
+                <span :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ studioInitial(studio.name) }}</span>
               </div>
             </div>
-            <div class="min-w-0">
-              <h2 class="card-title text-lg truncate">{{ studio.name }}</h2>
-              <p class="text-xs text-base-content/60 truncate">{{ studioLocation(studio.location) }}</p>
+            <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+              <h2 class="card-title truncate" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ studio.name }}</h2>
+              <p class="text-muted truncate" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ studioLocation(studio.location) }}</p>
             </div>
           </div>
 
-          <p class="text-sm text-base-content/70 min-h-14">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm, MIN_HEIGHT_DESCRIPTION_CLASS]">
             {{ studioDescription(studio.description) }}
           </p>
 
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-primary badge-sm">{{ studioTypeLabel(t, studio.type) }}</span>
             <span class="badge badge-outline badge-sm">{{ studioSizeLabel(t, studio.size) }}</span>
             <span v-if="studio.remoteWork" class="badge badge-success badge-sm">
@@ -66,15 +77,15 @@ function studioLocation(location: string): string {
             </span>
           </div>
 
-          <div class="card-actions justify-end mt-1">
-            <button
+          <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt1]">
+            <button 
               class="btn btn-ghost btn-sm"
               :aria-label="t('studiosIndex.card.previewAria', { studio: studio.name })"
               @click="$emit('preview', studio.id)"
             >
               {{ t("studiosIndex.card.previewButton") }}
             </button>
-            <button
+            <button 
               class="btn btn-primary btn-sm"
               :aria-label="t('studiosIndex.card.viewAria', { studio: studio.name })"
               @click="$emit('view', studio.id)"
@@ -87,7 +98,7 @@ function studioLocation(location: string): string {
     </SectionGrid>
 
     <div v-if="hasAdditionalStudios" class="flex justify-center">
-      <button
+      <button 
         type="button"
         class="btn btn-outline"
         :aria-label="t('studiosIndex.list.loadMoreAria')"

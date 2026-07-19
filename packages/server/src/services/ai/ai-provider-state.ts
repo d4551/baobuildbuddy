@@ -28,7 +28,7 @@ export const initializeProviders = (
   return providers;
 };
 
-export const buildFallbackOrder = (
+export const buildProviderFailoverOrder = (
   configs: readonly AIProviderConfig[],
   preferredProvider?: AIProviderType,
 ): AIProviderType[] => {
@@ -65,7 +65,7 @@ export const buildFallbackOrder = (
   return ordered;
 };
 
-export const rebuildFallbackOrderFromProviders = (
+export const rebuildProviderFailoverOrderFromProviders = (
   providers: ReadonlyMap<AIProviderType, AIProvider>,
   preferredProvider?: AIProviderType,
 ): AIProviderType[] => {
@@ -75,7 +75,7 @@ export const rebuildFallbackOrderFromProviders = (
     providerConfigs.push({ provider, enabled: true });
   }
 
-  return buildFallbackOrder(providerConfigs, preferredProvider);
+  return buildProviderFailoverOrder(providerConfigs, preferredProvider);
 };
 
 export const resolveRoutingTarget = (
@@ -103,7 +103,7 @@ export const resolveRoutingTarget = (
 };
 
 export const buildProviderOrder = (
-  fallbackOrder: readonly AIProviderType[],
+  failoverOrder: readonly AIProviderType[],
   routing: AIRouting,
   preferredProvider: AIProviderType | undefined,
   options?: GenerateOptions,
@@ -115,7 +115,7 @@ export const buildProviderOrder = (
     ordered.push(preferredProvider);
   }
 
-  for (const provider of fallbackOrder) {
+  for (const provider of failoverOrder) {
     if (!ordered.includes(provider)) {
       ordered.push(provider);
     }

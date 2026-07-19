@@ -1,15 +1,15 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
-import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
+import { readFileSync } from "node:fs";
 import { ROUTE_JOBS } from "../packages/shared/src/constants/routes";
-import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
+import { collectAccessibilityLandmarkViolationsForContent } from "./validate-accessibility-landmarks";
 import { collectDaisyUiContractViolationsForContent } from "./validate-daisyui-contracts";
+import { collectClientFetchDriftViolationsForContent } from "./validate-no-client-fetch-drift";
 import { collectDirectEnvAccessViolationsForContent } from "./validate-no-direct-env-access";
 import { collectFallbackShimViolationsForContent } from "./validate-no-fallback-shims";
 import { collectHardcodedUserStringViolationsForContent } from "./validate-no-hardcoded-user-strings";
 import { collectNoHtmxViolationsForContent } from "./validate-no-htmx";
-import { collectPageStateViolationsForContent } from "./validate-page-state-contracts";
 import { collectNoTryCatchViolationsForContent } from "./validate-no-try-catch";
+import { collectPageStateViolationsForContent } from "./validate-page-state-contracts";
 import { collectUiSingleSourceViolationsForContent } from "./validate-ui-single-source-of-truth";
 
 const BRAND_PREVIEW_STYLES_FILE_PATH = "packages/client/composables/useBrandPreviewStyles.ts";
@@ -73,6 +73,10 @@ const REQUIRED_ROOT_LINT_VALIDATORS = [
   "validate:i18n-ui",
   "validate:aria",
   "validate:ui-ssot",
+  "validate:ui-canonical-primitives",
+  "validate:ui-truncated-class-tokens",
+  "validate:ui-control-dedup",
+  "validate:ui-ssot-authority",
 ] as const;
 
 const collectExamplePageStateViolations = (content: string) =>
@@ -198,9 +202,7 @@ describe("collectDaisyUiContractViolationsForContent", () => {
       BROKEN_BRAND_PREVIEW_SAMPLE,
     );
 
-    expect(
-      violations.some((violation) => violation.message.includes("Brand preview")),
-    ).toBe(true);
+    expect(violations.some((violation) => violation.message.includes("Brand preview"))).toBe(true);
   });
 
   test("accepts brand previews that scope the full daisyUI theme contract", () => {

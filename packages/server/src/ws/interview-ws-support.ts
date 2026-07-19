@@ -10,9 +10,9 @@ import {
   INTERVIEW_UNKNOWN_STUDIO_NAME,
 } from "@bao/shared/constants/interview";
 import { settle } from "@bao/shared/utils/promise";
-import { interviewService } from "../services/interview-service";
-import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
 import { sessionConfigFromUi } from "../routes/interview-route-config";
+import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
+import { interviewService } from "../services/interview-service";
 
 type InterviewSocket = { send: (data: string) => void };
 
@@ -37,6 +37,10 @@ type InterviewFeedback = {
   improvements: string[];
   summary: string;
 };
+
+type InterviewFeedbackResult =
+  | { feedback: InterviewFeedback; error: null }
+  | { feedback: null; error: string };
 
 const mapWsConfigToInterviewConfig = (config: CreateSessionConfigInput | undefined) => {
   const normalizedConfig = sessionConfigFromUi(config ?? {});
@@ -74,13 +78,6 @@ const toWsQuestions = (
 const sendInterviewError = (socket: InterviewSocket, message: string): void => {
   socket.send(JSON.stringify({ type: "error", message }));
 };
-
-const getAiFallbackFeedback = (): InterviewFeedback => ({
-  score: 65,
-  strengths: ["Attempted answer"],
-  improvements: ["More detail needed"],
-  summary: "Response recorded.",
-});
 
 export async function handleStartSession(socket: InterviewSocket, data: InterviewMessage) {
   if (!data.studioId) {
@@ -141,20 +138,27 @@ export async function handleSubmitResponse(socket: InterviewSocket, data: Interv
   const latestResponse = updatedSession.responses.at(-1);
   const isComplete = updatedSession.status === "completed";
   const nextQuestion = updatedSession.questions[updatedSession.currentQuestionIndex] ?? null;
-  const feedback = latestResponse?.aiAnalysis
+  const feedbackResult: InterviewFeedbackResult = latestResponse?.aiAnalysis
     ? {
-        score: latestResponse.aiAnalysis.score,
-        strengths: latestResponse.aiAnalysis.strengths,
-        improvements: latestResponse.aiAnalysis.improvements,
-        summary: latestResponse.aiAnalysis.feedback,
+        feedback: {
+          score: latestResponse.aiAnalysis.score,
+          strengths: latestResponse.aiAnalysis.strengths,
+          improvements: latestResponse.aiAnalysis.improvements,
+          summary: latestResponse.aiAnalysis.feedback,
+        },
+        error: null,
       }
-    : getAiFallbackFeedback();
+    : {
+        feedback: null,
+        error: "Interview AI analysis unavailable for this response.",
+      };
 
   socket.send(
     JSON.stringify({
       type: "response_feedback",
       sessionId: data.sessionId,
-      feedback,
+      feedback: feedbackResult.feedback,
+      error: feedbackResult.error,
       questionIndex: Math.max(0, updatedSession.responses.length - 1),
       isComplete,
       nextQuestion: isComplete ? null : nextQuestion,

@@ -11,8 +11,8 @@ import {
 import type { Job, JobFilters, JobSearchResult } from "@bao/shared/types/jobs";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
-import { jobs, savedJobs } from "../../db/schema/jobs";
 import type { applications } from "../../db/schema/jobs";
+import { jobs, savedJobs } from "../../db/schema/jobs";
 import { createServerLogger } from "../../utils/logger";
 import { deduplicateJobs } from "./deduplication";
 import {
@@ -67,7 +67,10 @@ export class JobAggregator {
         this.logger.info(`${providerName}: fetched ${result.value.length} jobs`);
         return result.value;
       }
-      this.logger.error(`${providerName}: failed`, result.reason);
+      this.logger.error(
+        `${providerName}: failed`,
+        result.reason instanceof Error ? result.reason.message : String(result.reason),
+      );
       return [];
     });
   }
@@ -122,7 +125,10 @@ export class JobAggregator {
         }
         continue;
       }
-      this.logger.error("Failed to save job:", result.reason);
+      this.logger.error(
+        "Failed to save job:",
+        result.reason instanceof Error ? result.reason.message : String(result.reason),
+      );
     }
 
     this.logger.info(`Refresh complete: ${newCount} new, ${updatedCount} updated`);

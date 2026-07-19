@@ -1,4 +1,4 @@
-import type { ProviderConfig } from "~/types/ai-dashboard";
+import type { AIProviderType } from "@bao/shared/types/ai";
 import { createAIDashboardActions } from "~/composables/ai-dashboard-actions";
 import {
   createAIDashboardBootstrapState,
@@ -13,10 +13,10 @@ import {
   syncDashboardSelections,
   useAIDashboardSelection,
 } from "~/composables/ai-dashboard-selection";
+import { resolveProviderMetadata } from "~/utils/ai-control-plane";
 
-function createAIDashboardSelectionState(runtime: ReturnType<typeof createAIDashboardRuntime>) {
-  const placeholderProviders = computed<ProviderConfig[]>(() => []);
-  return useAIDashboardSelection(runtime.dependencies.settings, placeholderProviders);
+function resolveCatalogDefaultModel(providerId: AIProviderType): string {
+  return resolveProviderMetadata(providerId)?.modelHints[0] ?? "";
 }
 
 function createAIDashboardPresentationState(input: {
@@ -55,11 +55,7 @@ function createAIDashboardLoadingState(
 
 export function useAIDashboardPage() {
   const runtime = createAIDashboardRuntime();
-  const bootstrapSelection = createAIDashboardSelectionState(runtime);
-  const bootstrap = createAIDashboardBootstrapState(
-    runtime,
-    bootstrapSelection.resolveDefaultModel,
-  );
+  const bootstrap = createAIDashboardBootstrapState(runtime, resolveCatalogDefaultModel);
   const providers = computed(() => bootstrap.dashboardBootstrap.value?.resolvedProviders ?? []);
   const dashboardSelection = useAIDashboardSelection(runtime.dependencies.settings, providers);
   const presentationState = createAIDashboardPresentationState({

@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
+import type { Static } from "typebox";
 export type PortfolioMetadataRecord = PortfolioMetadata;
 export declare const portfolioUpdateBodySchema: import("typebox").TObject<{
     metadata: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;

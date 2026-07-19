@@ -1,10 +1,10 @@
-import { WS_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { rpaRunEventSchema, type RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
+import { toApiScopedPath, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { type RpaRunEvent, rpaRunEventSchema } from "@bao/shared/schemas/rpa-events.schema";
 import { Elysia } from "elysia";
 import { authenticateApiKey } from "../middleware/auth";
 import {
-  automationWebSocketBodySchema,
   type AutomationWebSocketMessage,
+  automationWebSocketBodySchema,
 } from "./automation-ws-contracts";
 
 const WS_READY_STATE_OPEN = 1;

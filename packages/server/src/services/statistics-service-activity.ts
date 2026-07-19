@@ -1,22 +1,29 @@
-import type { CareerProgress, WeeklyActivity } from "@bao/shared/types/search";
-import { isRecord } from "@bao/shared/utils/type-guards";
 import { STATISTICS_SKILL_COVERAGE_TARGET } from "@bao/shared/constants/statistics";
+import type { CareerProgress, WeeklyActivity } from "@bao/shared/types/search";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 
 type ActionHistoryEntry = { action: string; xpGained: number; timestamp: string };
 
-export const parseActionHistory = (value: unknown): ActionHistoryEntry[] => {
-  if (!Array.isArray(value)) {
+export const parseActionHistory = <T>(value: T): ActionHistoryEntry[] => {
+  const rawHistory = asJsonArray(value);
+  if (!rawHistory) {
     return [];
   }
 
-  return value
-    .filter(isRecord)
-    .map((entry) => ({
-      action: typeof entry.action === "string" ? entry.action : "other",
-      xpGained: typeof entry.xpGained === "number" ? entry.xpGained : 0,
-      timestamp: typeof entry.timestamp === "string" ? entry.timestamp : "",
-    }))
-    .filter((entry) => entry.timestamp.length > 0);
+  const entries: ActionHistoryEntry[] = [];
+  for (const entry of rawHistory) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    const action = typeof entry.action === "string" ? entry.action : "other";
+    const xpGained = typeof entry.xpGained === "number" ? entry.xpGained : 0;
+    const timestamp = typeof entry.timestamp === "string" ? entry.timestamp : "";
+    if (timestamp.length === 0) {
+      continue;
+    }
+    entries.push({ action, xpGained, timestamp });
+  }
+  return entries;
 };
 
 export const buildWeeklyActivity = (actionHistory: ActionHistoryEntry[]): WeeklyActivity => {

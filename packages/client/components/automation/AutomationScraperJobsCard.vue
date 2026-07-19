@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   jobsLoading: boolean;
@@ -19,11 +24,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
-    <div class="card-body gap-4">
-      <div class="flex flex-wrap items-center justify-between gap-3">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title">{{ t("automation.scraper.table.title") }}</h2>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <span class="badge badge-soft badge-primary">
             {{ t("automation.scraper.stats.interviewEntryTitle") }}:
             {{ t("automation.scraper.stats.interviewEntryValue") }}
@@ -56,20 +61,20 @@ const { t } = useI18n();
           <tbody>
             <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
               <td>
-                <div class="space-y-1">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <div class="font-medium">{{ job.title }}</div>
-                  <p v-if="hasJobEnrichment(job)" class="text-sm text-base-content/70">
+                  <p v-if="hasJobEnrichment(job)" class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
                     {{ job.enrichment?.summary }}
                   </p>
-                  <div class="flex flex-wrap gap-2">
+                  <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                     <span v-if="job.remote" class="badge badge-ghost badge-sm">
                       {{ t("jobCard.remoteBadge") }}
                     </span>
                     <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
                       {{ t("jobCard.hybridBadge") }}
                     </span>
-                    <span
+                    <span 
                       v-for="focusArea in jobInterviewFocusAreas(job)"
                       :key="`${job.id}-${focusArea}`"
                       class="badge badge-warning badge-soft badge-sm"
@@ -80,9 +85,9 @@ const { t } = useI18n();
                 </div>
               </td>
               <td>
-                <div class="space-y-1">
+                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <div class="font-medium">{{ job.company }}</div>
-                  <div v-if="job.source" class="text-xs text-base-content/60">
+                  <div v-if="job.source" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                     {{ job.source }}
                   </div>
                 </div>
@@ -90,7 +95,7 @@ const { t } = useI18n();
               <td>{{ job.location }}</td>
               <td>{{ relativePostedDate(job.postedDate) }}</td>
               <td class="text-right">
-                <button
+                <button 
                   class="btn btn-primary btn-sm"
                   :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
                   @click="emit('interview', job.id)"

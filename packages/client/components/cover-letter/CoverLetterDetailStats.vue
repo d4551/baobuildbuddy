@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS } from "~/constants/layout";
+
 defineProps<{
   contentCharacterCount: number;
   contentSectionCount: number;
@@ -8,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="stats stats-vertical w-full border border-base-300 bg-base-100 shadow-sm lg:stats-horizontal">
+  <div class="stats stats-vertical border border-base-300 bg-base-100 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
     <div class="stat">
       <div class="stat-title">{{ t("coverLetterDetailPage.stats.charactersTitle") }}</div>
       <div class="stat-value text-primary">{{ contentCharacterCount }}</div>

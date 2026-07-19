@@ -1,12 +1,12 @@
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
-import { settlePromise } from "~/composables/async-flow";
 import type { CloudProvider, SetupProvider } from "~/components/setup/setup-page-contracts";
+import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
 import type {
   SetupPageActionsContext,
   SetupPageToastApi,
 } from "~/utils/setup-page-action-contracts";
 import { useSetupCompletion } from "~/utils/setup-page-completion";
-import { getErrorMessage } from "~/utils/errors";
 
 const useProviderTesting = ({
   localModelEndpoint,

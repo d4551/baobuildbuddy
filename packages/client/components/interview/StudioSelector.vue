@@ -1,5 +1,17 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MAX_HEIGHT_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
 interface Studio {
@@ -192,10 +204,10 @@ function studioLocationLabel(location: string): string {
 </script>
 
 <template>
-  <div class="dropdown w-full" :class="{ 'dropdown-open': isOpen }">
-    <button
+  <div class="dropdown" :class="[FLUID_WIDTH_CLASS, { 'dropdown-open': isOpen }]">
+    <button 
       type="button"
-      class="btn btn-outline w-full justify-between"
+      class="btn btn-outline justify-between" :class="[FLUID_WIDTH_CLASS]"
       :aria-label="t('studioSelector.toggleAria')"
       :aria-expanded="isOpen"
       :aria-controls="listboxId"
@@ -203,27 +215,24 @@ function studioLocationLabel(location: string): string {
       @click="toggleDropdown"
       @keydown.esc.stop.prevent="onEscape"
     >
-      <span v-if="selectedStudio" class="flex items-center gap-2 truncate">
+      <span v-if="selectedStudio" class="flex items-center truncate" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <span class="truncate">{{ selectedStudio.name }}</span>
         <span class="badge badge-sm" :class="studioTypeBadgeClass(selectedStudio.type)">
           {{ resolvedStudioTypeLabel(selectedStudio.type) }}
         </span>
       </span>
-      <span v-else class="text-base-content/50">{{ t("studioSelector.selectPlaceholder") }}</span>
-      <IconChevronDown class="h-5 w-5 shrink-0" />
+      <span v-else class="text-muted">{{ t("studioSelector.selectPlaceholder") }}</span>
+      <IconChevronDown class="shrink-0" :class="[ICON_SIZE_CLASS[5]]"/>
     </button>
 
-    <div
-      v-if="isOpen"
-      class="dropdown-content z-10 mt-2 max-h-96 w-full overflow-auto rounded-box bg-base-100 p-2 shadow-lg"
-    >
-      <div class="p-2 sticky top-0 bg-base-100 z-10">
-        <input
+    <div class="dropdown-content z-10 overflow-auto rounded-box bg-base-100" v-if="isOpen" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, PADDING_TOKEN_CLASS.p2, MAX_HEIGHT_TOKEN_CLASS.maxH96]">
+      <div class="sticky top-0 bg-base-100 z-10" :class="[PADDING_TOKEN_CLASS.p2]">
+        <input 
           ref="studioSelectorSearchInput"
           v-model="searchQuery"
           :id="comboboxId"
           type="search"
-          class="input input-sm w-full"
+          class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
           role="combobox"
           aria-autocomplete="list"
           :aria-controls="listboxId"
@@ -237,45 +246,47 @@ function studioLocationLabel(location: string): string {
         />
       </div>
 
-      <ul
-        :id="listboxId"
-        role="listbox"
-        class="menu w-full space-y-1"
-        :aria-label="t('studioSelector.menuAria')"
-      >
+      <ul class="menu" :id="listboxId" role="listbox" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
         <li v-for="(studio, index) in filteredStudios" :key="studio.id">
-          <button
+          <button 
             :id="optionId(studio.id)"
             type="button"
             role="option"
-            class="flex w-full cursor-pointer flex-col items-start gap-1 rounded-box px-3 py-2 text-left"
+            class="flex cursor-pointer flex-col items-start rounded-box text-left"
+            :class="[
+              FLEX_GAP_TOKEN_CLASS.gap1,
+              PADDING_TOKEN_CLASS.px3,
+              PADDING_TOKEN_CLASS.py2,
+              TRUNCATE_FLEX_CHILD_CLASS,
+              FLUID_WIDTH_CLASS,
+              {
+                'bg-base-200': index === activeOptionIndex,
+                'ring-1 ring-primary': studio.id === modelValue,
+              },
+            ]"
             :aria-label="t('studioSelector.optionAria', { studio: studio.name })"
             :aria-selected="studio.id === modelValue"
-            :class="{
-              'bg-base-200': index === activeOptionIndex,
-              'ring-1 ring-primary': studio.id === modelValue,
-            }"
             @mouseenter="activeOptionIndex = index"
             @focus="activeOptionIndex = index"
             @click="selectStudio(studio.id)"
           >
-            <div class="flex w-full items-center gap-2">
+            <div class="flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <span class="font-medium truncate">{{ studio.name }}</span>
               <span class="badge badge-sm" :class="studioTypeBadgeClass(studio.type)">
                 {{ resolvedStudioTypeLabel(studio.type) }}
               </span>
             </div>
-            <span class="text-xs text-base-content/60">{{ studioLocationLabel(studio.location) }}</span>
+            <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ studioLocationLabel(studio.location) }}</span>
           </button>
         </li>
         <li v-if="filteredStudios.length === 0">
-          <span class="text-base-content/50">{{ t("studioSelector.emptyState") }}</span>
+          <span class="text-muted">{{ t("studioSelector.emptyState") }}</span>
         </li>
       </ul>
     </div>
   </div>
 
-  <button
+  <button 
     v-if="isOpen"
     type="button"
     class="fixed inset-0 z-0"

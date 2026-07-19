@@ -1,9 +1,10 @@
 import {
   AUTOMATION_SCRAPE_TARGETS,
-  automationScrapeTargetToAction,
   type AutomationScrapeTarget,
+  automationScrapeTargetToAction,
 } from "@bao/shared/constants/automation";
 import type { EmailResponseTone } from "@bao/shared/schemas/automation-email.schema";
+import type { JsonObject } from "@bao/shared/utils/json";
 import { AutomationValidationError } from "./automation-errors";
 
 export interface JobApplyPayload {
@@ -42,15 +43,12 @@ export interface ScrapeExecutionPayload {
 const isScrapeTarget = (value: string): value is AutomationScrapeTarget =>
   AUTOMATION_SCRAPE_TARGETS.some((target) => target === value);
 
-const withScheduleMetadata = (
-  input: Record<string, unknown>,
-  runAt: string,
-): Record<string, unknown> => ({
+const withScheduleMetadata = (input: JsonObject, runAt: string): JsonObject => ({
   ...input,
   schedule: { runAt },
 });
 
-const parseCustomAnswers = (input: Record<string, unknown> | null): Record<string, string> => {
+const parseCustomAnswers = (input: JsonObject | null): Record<string, string> => {
   if (!input) {
     return {};
   }
@@ -72,11 +70,11 @@ const parseCustomAnswers = (input: Record<string, unknown> | null): Record<strin
 export const buildAuditInput = (
   payload: JobApplyExecutionPayload,
   includeAction: boolean,
-): Record<string, unknown> => {
-  const auditInput: Record<string, unknown> = {
+): JsonObject => {
+  const auditInput: JsonObject = {
     jobUrl: payload.jobUrl,
     resumeId: payload.resumeId,
-    jobId: payload.jobId,
+    jobId: payload.jobId ?? null,
     customAnswers: payload.customAnswers,
   };
 
@@ -92,7 +90,7 @@ export const buildAuditInput = (
 };
 
 export const parseScheduledRunMetadata = (
-  input: Record<string, unknown> | null,
+  input: JsonObject | null,
 ): ScheduledRunMetadata | null => {
   if (!input) {
     return null;
@@ -115,9 +113,7 @@ export const parseScheduledRunMetadata = (
   return { runAt: runAt.trim() };
 };
 
-export const parseScheduledJobApplyPayload = (
-  input: Record<string, unknown> | null,
-): JobApplyPayload | null => {
+export const parseScheduledJobApplyPayload = (input: JsonObject | null): JobApplyPayload | null => {
   if (!input) {
     return null;
   }
@@ -151,13 +147,13 @@ export const parseScheduledJobApplyPayload = (
 export const buildScheduledJobApplyInput = (
   payload: JobApplyExecutionPayload,
   scheduledFor: string,
-): Record<string, unknown> => withScheduleMetadata(buildAuditInput(payload, true), scheduledFor);
+): JsonObject => withScheduleMetadata(buildAuditInput(payload, true), scheduledFor);
 
 export const buildEmailResponseInput = (
   normalized: EmailResponseExecutionPayload,
   options: { includeAction: boolean; scheduledFor?: string },
-): Record<string, unknown> => {
-  const baseInput: Record<string, unknown> = {
+): JsonObject => {
+  const baseInput: JsonObject = {
     subject: normalized.subject,
     message: normalized.message,
     tone: normalized.tone,
@@ -171,7 +167,7 @@ export const buildEmailResponseInput = (
 };
 
 export const parseScheduledEmailResponsePayload = (
-  input: Record<string, unknown> | null,
+  input: JsonObject | null,
   options: {
     defaultTone: EmailResponseTone;
     isEmailResponseTone: (value: string) => value is EmailResponseTone;
@@ -218,8 +214,8 @@ export const normalizeScrapeTarget = (target: string): AutomationScrapeTarget =>
 export const buildScrapeInput = (
   payload: ScrapeExecutionPayload,
   options: { includeAction: boolean; scheduledFor?: string },
-): Record<string, unknown> => {
-  const baseInput: Record<string, unknown> = {
+): JsonObject => {
+  const baseInput: JsonObject = {
     target: payload.target,
     ...(options.includeAction ? { action: resolveScrapeAction(payload.target) } : {}),
   };
@@ -228,7 +224,7 @@ export const buildScrapeInput = (
 };
 
 export const parseScheduledScrapePayload = (
-  input: Record<string, unknown> | null,
+  input: JsonObject | null,
 ): ScrapeExecutionPayload | null => {
   if (!input || typeof input.target !== "string") {
     return null;

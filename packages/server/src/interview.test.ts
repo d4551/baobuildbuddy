@@ -9,8 +9,8 @@ import {
   setDefaultTimeout,
   test,
 } from "bun:test";
-import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { eq } from "drizzle-orm";
+import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import type * as schema from "./db/schema/schema-modules";
 
 /** AI-backed interview tests require additional headroom for cold-start provider calls. */

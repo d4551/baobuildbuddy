@@ -113,7 +113,7 @@ export declare const getJobById: (id: string) => Promise<{
 export declare const saveJob: (jobId: string) => Promise<SaveJobResult>;
 export declare const deleteSavedJob: (jobId: string) => Promise<{
     success: boolean;
-    deleted: void;
+    deletedCount: number;
 }>;
 export declare const listSavedJobs: () => Promise<{
     id: string;

@@ -1,3 +1,4 @@
+import type { JsonObject } from "@bao/shared/utils/json";
 /**
  * Persisted audit trail for automation run execution and output.
  */
@@ -105,7 +106,7 @@ export declare const automationRuns: import("drizzle-orm/sqlite-core").SQLiteTab
             tableName: "automation_runs";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: Record<string, unknown>;
+            data: JsonObject;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -117,14 +118,14 @@ export declare const automationRuns: import("drizzle-orm/sqlite-core").SQLiteTab
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: Record<string, unknown>;
+            $type: JsonObject;
         }>;
         output: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "output";
             tableName: "automation_runs";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: Record<string, unknown>;
+            data: JsonObject;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -136,7 +137,7 @@ export declare const automationRuns: import("drizzle-orm/sqlite-core").SQLiteTab
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: Record<string, unknown>;
+            $type: JsonObject;
         }>;
         screenshots: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "screenshots";

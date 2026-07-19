@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -80,7 +88,7 @@ const {
           :aria-label="t('resumePage.createButtonAria')"
           @click="showCreateModal = true"
         >
-          <IconPlus class="h-4 w-4" />
+          <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("resumePage.createButton") }}
         </button>
         <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
@@ -123,7 +131,7 @@ const {
     />
 
     <!-- Resume Editor -->
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <ResumeEditorToolbar
         :enhancing="enhancing"
         :scoring="scoring"
@@ -179,7 +187,7 @@ const {
       :close-aria-label="t('resumePage.createModal.closeBackdropAria')"
       :close-backdrop-label="t('resumePage.createModal.closeBackdropButton')"
     >
-      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" class="font-bold text-lg mb-4">
+      <h3 :id="RESUME_CREATE_DIALOG_TITLE_ID" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
         {{ t("resumePage.createModal.title") }}
       </h3>
 
@@ -189,14 +197,14 @@ const {
           v-model="newResumeName"
           type="text"
           :placeholder="t('resumePage.createModal.namePlaceholder')"
-          class="input w-full"
+          class="input" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="t('resumePage.createModal.nameAria')"
         />
       </fieldset>
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("resumePage.createModal.templateLegend") }}</legend>
-        <select v-model="newResumeTemplate" class="select w-full" :aria-label="t('resumePage.createModal.templateAria')">
+        <select v-model="newResumeTemplate" class="select" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('resumePage.createModal.templateAria')">
           <option
             v-for="templateOption in createResumeTemplateOptions"
             :key="templateOption.value"
@@ -221,7 +229,7 @@ const {
           :aria-label="t('resumePage.createModal.createAria')"
           @click="handleCreate"
         >
-          <span v-if="creating" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" label="Loading" v-if="creating" />
           {{ t("resumePage.createModal.createButton") }}
         </button>
       </div>

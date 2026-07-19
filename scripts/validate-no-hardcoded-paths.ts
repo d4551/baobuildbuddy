@@ -71,15 +71,20 @@ const collectApiViolations = (filePath: string, content: string): Violation[] =>
   return violations;
 };
 
+export const collectHardcodedPathViolationsForContent = (
+  filePath: string,
+  content: string,
+): Violation[] => [
+  ...collectRouteViolations(filePath, content),
+  ...collectApiViolations(filePath, content),
+];
+
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectClientFiles();
   const violationGroups = await Promise.all(
     files.map(async (filePath) => {
       const fileContent = await Bun.file(filePath).text();
-      return [
-        ...collectRouteViolations(filePath, fileContent),
-        ...collectApiViolations(filePath, fileContent),
-      ];
+      return collectHardcodedPathViolationsForContent(filePath, fileContent);
     }),
   );
   return violationGroups.flat();
@@ -106,4 +111,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
-  isCoverLetterTemplate,
   type CoverLetterTemplate,
+  isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import {
+  ICON_SIZE_CLASS,
+  PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+} from "~/constants/layout";
 import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
@@ -220,7 +225,7 @@ async function handleExport(format: "pdf" | "docx") {
       title-id="cover-letter-detail-title"
       :title="heroTitle"
       :description="heroDescription"
-      description-class="max-w-2xl text-base-content/70"
+      :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #breadcrumbs>
         <AppBreadcrumbs :crumbs="breadcrumbs" />
@@ -232,8 +237,8 @@ async function handleExport(format: "pdf" | "docx") {
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
           @click="requestRegenerate"
         >
-          <span v-if="regenerating" class="loading loading-spinner loading-xs"></span>
-          <IconRefresh v-else class="h-4 w-4" />
+          <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
+          <IconRefresh v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>
 
@@ -258,7 +263,7 @@ async function handleExport(format: "pdf" | "docx") {
 
     <LoadingSkeleton v-if="loading" :lines="10" />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <CoverLetterDetailStats
         :content-character-count="contentCharacterCount"
         :content-section-count="contentSectionCount"

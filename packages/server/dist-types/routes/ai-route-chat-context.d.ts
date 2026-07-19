@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import { type AIChatContext } from "@bao/shared/types/ai";
+import type { Static } from "typebox";
 export declare const chatContextSchema: import("typebox").TObject<{
     source: import("typebox").TString;
     domain: import("typebox").TOptional<import("typebox").TString>;

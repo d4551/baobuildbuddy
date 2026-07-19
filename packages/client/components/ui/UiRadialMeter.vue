@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, RADIAL_METER_GEOMETRY } from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -12,13 +13,14 @@ const props = withDefaults(
   }>(),
   {
     max: 100,
-    sizeClass: "h-24 w-24",
+    sizeClass: RADIAL_METER_GEOMETRY.defaultSizeClass,
     trackClass: "stroke-base-300",
     fillClass: "stroke-primary",
   },
 );
 
-const RADIUS = 42;
+const RADIUS = RADIAL_METER_GEOMETRY.radius;
+const STROKE_WIDTH = RADIAL_METER_GEOMETRY.strokeWidth;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const clampedValue = computed(() => {
@@ -35,7 +37,7 @@ const dashOffset = computed(() => {
 </script>
 
 <template>
-  <div
+  <div 
     class="relative inline-flex items-center justify-center"
     :class="sizeClass"
     role="progressbar"
@@ -44,22 +46,22 @@ const dashOffset = computed(() => {
     :aria-valuemax="max"
     :aria-valuenow="clampedValue"
   >
-    <svg class="h-full w-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
-      <circle
+    <svg class="-rotate-90" :class="[FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS]" viewBox="0 0 100 100" aria-hidden="true">
+      <circle 
         class="fill-none"
         :class="trackClass"
         cx="50"
         cy="50"
         :r="RADIUS"
-        stroke-width="8"
+        :stroke-width="STROKE_WIDTH"
       />
-      <circle
-        class="fill-none transition-[stroke-dashoffset] duration-300"
+      <circle 
+        class="fill-none transition-[stroke-dashoffset] duration-[var(--motion-slow)] ease-[var(--ease-response)]"
         :class="fillClass"
         cx="50"
         cy="50"
         :r="RADIUS"
-        stroke-width="8"
+        :stroke-width="STROKE_WIDTH"
         stroke-linecap="round"
         :stroke-dasharray="CIRCUMFERENCE"
         :stroke-dashoffset="dashOffset"

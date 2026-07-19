@@ -1,17 +1,17 @@
 import type { DailyChallenge, UserGamificationData } from "@bao/shared/types/gamification";
 import type { DashboardStats } from "@bao/shared/types/search";
 import { isRecord } from "@bao/shared/utils/type-guards";
+import type {
+  DailyChallengesResponse,
+  DashboardActivity,
+  DashboardChallengeViewModel,
+  DashboardViewModel,
+} from "~/components/dashboard/dashboard-page-contracts";
 import { toUserProfile } from "~/composables/api-normalizer-user";
 import { requireValue } from "~/composables/async-flow";
 import { DASHBOARD_ACTIVITY_FALLBACK_KEY, DASHBOARD_ERROR_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_RECENT_ACTIVITY_LIMIT } from "~/constants/dashboard-core";
 import { resolveDashboardActivityType } from "~/constants/dashboard-pipeline";
-import type {
-  DashboardActivity,
-  DashboardChallengeViewModel,
-  DashboardViewModel,
-  DailyChallengesResponse,
-} from "~/components/dashboard/dashboard-page-contracts";
 import { getErrorMessage } from "~/utils/errors";
 
 type TranslateFn = (key: string, values?: Record<string, unknown>) => string;

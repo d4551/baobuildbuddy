@@ -64,17 +64,22 @@ function buildProfilePayload(
 
 function createHandleToggleTheme(state: SettingsPageState) {
   return async () => {
+    const previousTheme = state.theme.value;
     const nextTheme =
-      state.theme.value === state.THEME_NAMES.light
-        ? state.THEME_NAMES.dark
-        : state.THEME_NAMES.light;
-    state.toggleTheme();
+      previousTheme === state.THEME_NAMES.light ? state.THEME_NAMES.dark : state.THEME_NAMES.light;
+    // Preview locally; persist cookie only after settings SSOT save succeeds.
+    state.setTheme(nextTheme, { persist: false });
     const savedTheme = await runToastTask(
       state.updateSettings({ theme: nextTheme }),
       state.t("settings.errors.failedToSaveTheme"),
       state.$toast,
     );
-    if (savedTheme !== null) state.$toast.success(state.t("settings.toasts.themeSaved"));
+    if (savedTheme === null) {
+      state.setTheme(previousTheme, { persist: false });
+      return;
+    }
+    state.setTheme(nextTheme, { persist: true });
+    state.$toast.success(state.t("settings.toasts.themeSaved"));
   };
 }
 

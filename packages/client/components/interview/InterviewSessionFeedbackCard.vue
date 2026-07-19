@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  LEADING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   currentQuestion: InterviewQuestion | undefined;
@@ -11,31 +18,31 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
+  <section 
     v-if="currentQuestion?.feedback"
-    class="card card-border bg-base-100"
+    :class="SURFACE_GLASS_CARD_CLASS"
     aria-labelledby="interview-session-feedback-title"
   >
-    <div class="card-body gap-4">
-      <div class="space-y-1">
-        <h2 id="interview-session-feedback-title" class="card-title text-lg">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+        <h2 id="interview-session-feedback-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
           {{ t("interviewSession.feedbackTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.feedbackDescription") }}
         </p>
       </div>
 
-      <div
+      <div 
         class="alert"
         :class="currentQuestion.score !== undefined ? getAlertClass(currentQuestion.score) : 'alert-info'"
         aria-live="polite"
       >
-        <div class="space-y-2">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <p v-if="currentQuestion.score !== undefined" class="font-semibold">
             {{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}
           </p>
-          <p class="text-sm leading-6">
+ <p :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ currentQuestion.feedback }}
           </p>
         </div>

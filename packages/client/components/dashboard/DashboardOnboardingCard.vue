@@ -1,8 +1,20 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_LG_P8_CLASS,
+} from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_ONBOARDING_STEPS } from "~/constants/dashboard-core";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   primaryRoute: string;
@@ -13,30 +25,28 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
-    class="hero overflow-hidden rounded-box border border-base-300 bg-linear-to-br from-base-100 via-base-100 to-primary/10 shadow-sm"
-  >
-    <div class="hero-content w-full max-w-none px-0">
-      <div class="card w-full bg-base-100/90 backdrop-blur">
-        <div class="card-body gap-5 p-6 lg:p-8">
-          <div class="space-y-2">
+  <section class="hero overflow-hidden rounded-box border border-base-300 card-glass" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <div class="hero-content max-w-none" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.px0]">
+      <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS]">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, RESPONSIVE_PADDING_LG_P8_CLASS]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <div class="badge badge-primary badge-outline w-fit">
               {{ t(DASHBOARD_COPY_KEYS.pageTitle) }}
             </div>
-            <h2 class="card-title text-2xl">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateTitle) }}
             </h2>
-            <p class="text-sm text-base-content/70">
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t(DASHBOARD_COPY_KEYS.emptyStateDescription) }}
             </p>
           </div>
 
-          <div class="space-y-3">
-            <h3 class="text-sm font-semibold">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+            <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t(DASHBOARD_COPY_KEYS.onboardingChecklistTitle) }}
             </h3>
-            <ul class="steps steps-vertical w-full lg:steps-horizontal">
-              <li
+            <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]">
+              <li 
                 v-for="step in DASHBOARD_ONBOARDING_STEPS"
                 :key="step.id"
                 class="step step-primary"

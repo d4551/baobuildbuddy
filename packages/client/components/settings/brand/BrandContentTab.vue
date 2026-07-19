@@ -1,6 +1,18 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   hintIds: {
@@ -8,8 +20,7 @@ const props = defineProps<{
   };
 }>();
 
-const brandFieldsetClass =
-  "fieldset min-w-0 gap-2 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm";
+const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
 
@@ -21,43 +32,43 @@ const brandForm = defineModel<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
-    <div class="card-body gap-4 p-4 md:p-6">
-      <p class="text-sm text-base-content/70">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.contentDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+      <SectionGrid grid-token="twoColumn" :extra-class="FLEX_GAP_TOKEN_CLASS.gap4">
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultTitleLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.defaultTitle"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.defaultTitleAria')"
           />
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultDescriptionLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.defaultDescription"
-            class="textarea min-w-0 w-full"
+            class="textarea" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="4"
             :aria-label="t('settings.brand.defaultDescriptionAria')"
           ></textarea>
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.contentOverridesLegend") }}
           </legend>
-          <textarea
+          <textarea 
             v-model="brandForm.contentOverridesJson"
-            class="textarea font-mono min-w-0 w-full"
+            class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             rows="10"
             :aria-describedby="props.hintIds.contentOverrides"
             :aria-label="t('settings.brand.contentOverridesAria')"

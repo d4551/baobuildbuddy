@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
   currentQuestionIndex: number;
@@ -16,9 +23,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="card bg-base-200">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <div class="mb-4 flex items-center justify-between">
+      <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">
           {{
             t("resumeBuildPage.questions.title", {
@@ -27,7 +34,7 @@ const emit = defineEmits<{
             })
           }}
         </h2>
-        <button
+        <button 
           class="btn btn-ghost btn-sm"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
@@ -41,10 +48,10 @@ const emit = defineEmits<{
         <label :for="`answer-${aiQuestions[currentQuestionIndex]?.id}`" class="label">
           {{ aiQuestions[currentQuestionIndex]?.question }}
         </label>
-        <textarea
+        <textarea 
           :id="`answer-${aiQuestions[currentQuestionIndex]?.id}`"
           v-model="answers[aiQuestions[currentQuestionIndex]!.id]"
-          class="textarea w-full"
+          class="textarea" :class="[FLUID_WIDTH_CLASS]"
           rows="4"
           :placeholder="
             t('resumeBuildPage.questions.answerPlaceholder', {
@@ -59,10 +66,10 @@ const emit = defineEmits<{
         />
       </fieldset>
 
-      <p v-if="errorMessage" class="mt-2 text-sm text-error">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
-      <div class="card-actions mt-6 justify-between">
-        <button
+      <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
+        <button 
           class="btn btn-ghost"
           :disabled="currentQuestionIndex === 0"
           :aria-label="t('resumeBuildPage.questions.backAria')"
@@ -70,7 +77,7 @@ const emit = defineEmits<{
         >
           {{ t("resumeBuildPage.questions.backButton") }}
         </button>
-        <button
+        <button 
           class="btn btn-primary"
           :disabled="!(answers[aiQuestions[currentQuestionIndex]?.id ?? ''] ?? '').trim()"
           :aria-label="t('resumeBuildPage.questions.nextAria')"

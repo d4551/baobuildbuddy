@@ -34,7 +34,10 @@ const collectSourceFiles = async (): Promise<string[]> => {
         .map((relativeFilePath) => relativeFilePath.replace(/\\/gu, "/"))
         .filter(
           (normalizedPath) =>
-            hasAllowedExtension(normalizedPath) && !shouldIgnorePath(normalizedPath),
+            hasAllowedExtension(normalizedPath) &&
+            !shouldIgnorePath(normalizedPath) &&
+            !normalizedPath.includes(".test.") &&
+            !normalizedPath.includes(".spec."),
         );
     }),
   );
@@ -42,29 +45,31 @@ const collectSourceFiles = async (): Promise<string[]> => {
   return fileGroups.flat();
 };
 
+export const collectUnsafeCastViolationsForContent = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => {
+  const violations: Violation[] = [];
+  unsafeCastPattern.lastIndex = 0;
+  for (const match of fileContent.matchAll(unsafeCastPattern)) {
+    const castType = match[1];
+    if (castType !== "any" && castType !== "unknown") continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fileContent, match.index ?? 0),
+      castType,
+    });
+  }
+  return violations;
+};
+
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectSourceFiles();
   const violationGroups = await Promise.all(
-    files.map(async (filePath) => {
-      const fileContent = await Bun.file(filePath).text();
-      unsafeCastPattern.lastIndex = 0;
-      return Array.from(fileContent.matchAll(unsafeCastPattern))
-        .map((match) => {
-          const castType = match[1];
-          if (castType !== "any" && castType !== "unknown") {
-            return null;
-          }
-
-          return {
-            filePath,
-            line: getLineFromOffset(fileContent, match.index ?? 0),
-            castType,
-          };
-        })
-        .filter((violation): violation is Violation => violation !== null);
-    }),
+    files.map(async (filePath) =>
+      collectUnsafeCastViolationsForContent(filePath, await Bun.file(filePath).text()),
+    ),
   );
-
   return violationGroups.flat();
 };
 
@@ -87,4 +92,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

@@ -8,6 +8,15 @@ import {
   CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
   type ChatDensity,
 } from "~/constants/chat";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
@@ -51,8 +60,8 @@ const avatarLabel = computed(() =>
 );
 const chatBubbleClass = computed(() =>
   isAssistant.value
-    ? "border border-base-300 bg-base-200 text-base-content shadow-sm"
-    : "chat-bubble-primary shadow-sm",
+    ? `border border-base-300 bg-base-200 text-base-content ${SHADOW_TOKEN_CLASS.sm}`
+    : `chat-bubble-primary ${SHADOW_TOKEN_CLASS.sm}`,
 );
 const messageWidthClass = computed(() => CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY[props.density]);
 const bubbleSizeClass = computed(() => CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY[props.density]);
@@ -86,9 +95,8 @@ const ariaLabel = computed(() => {
 </script>
 
 <template>
-  <article
-    class="chat w-full"
-    :class="chatClass"
+  <article 
+    class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
     role="listitem"
     :aria-label="ariaLabel"
     :aria-busy="isStreaming"
@@ -96,55 +104,53 @@ const ariaLabel = computed(() => {
     :aria-atomic="true"
     :aria-describedby="statusTextId.length > 0 ? statusTextId : undefined"
   >
-    <div
+    <div 
       v-if="isAssistant"
       class="chat-image avatar"
       :class="avatarClass"
       :aria-label="avatarLabel"
     >
-      <div
-        class="flex items-center justify-center rounded-full border border-base-300 bg-base-200 text-base-content"
-        :class="avatarSizeClass"
+      <div 
+        class="flex items-center justify-center border border-base-300 bg-base-200 text-base-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
-        <IconLightbulb class="h-6 w-6" />
+        <IconLightbulb :class="ICON_SIZE_CLASS.md" />
       </div>
     </div>
-    <div
+    <div 
       v-else
       class="chat-image avatar placeholder"
       :aria-label="userLabel"
     >
-      <div
-        class="flex items-center justify-center rounded-full bg-primary text-primary-content"
-        :class="avatarSizeClass"
+      <div 
+        class="flex items-center justify-center bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, avatarSizeClass]"
       >
-        <span class="text-sm font-semibold">{{ userAvatarInitial }}</span>
+        <span class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ userAvatarInitial }}</span>
       </div>
     </div>
-    <div class="chat-header mb-1" :class="messageWidthClass">
+    <div class="chat-header" :class="[MARGIN_TOKEN_CLASS.mb1, messageWidthClass]">
       {{ messageTitle }}
-      <time
+      <time 
         v-if="formattedTime"
-        class="text-xs opacity-50 ml-1"
+        class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.ml1]"
         :datetime="props.message.timestamp ?? undefined"
       >
         {{ formattedTime }}
       </time>
     </div>
-    <div
+    <div 
       class="chat-bubble whitespace-pre-wrap break-words"
       :class="[chatBubbleClass, bubbleSizeClass, messageWidthClass]"
     >
       <ul
         v-if="props.contextChips.length > 0"
-        class="mb-2 flex flex-wrap gap-1"
+        class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mb2, FLEX_GAP_TOKEN_CLASS.gap1]"
         :aria-label="props.contextChipsAria || undefined"
       >
         <li v-for="chip in props.contextChips" :key="chip">
           <span class="badge badge-outline badge-xs">{{ chip }}</span>
         </li>
       </ul>
-      <span
+      <span 
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"
         role="status"
@@ -154,14 +160,24 @@ const ariaLabel = computed(() => {
       </span>
       <template v-else>{{ message.content }}</template>
     </div>
-    <div
+    <div 
       v-if="isStreamingStatusVisible"
       :id="statusTextId"
-      class="chat-footer opacity-50"
+      class="chat-footer text-muted"
       role="status"
       aria-live="polite"
     >
       {{ statusText }}
+    </div>
+    <div 
+      v-if="isAssistant && (props.message.provider || props.message.model)"
+      class="chat-footer flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap1]"
+    >
+      <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
+      <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>
+      <span v-if="props.message.confidence !== undefined" class="badge badge-outline badge-xs">
+        {{ props.message.confidence }}%
+      </span>
     </div>
   </article>
 </template>

@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { ResumeFormProject } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormProject[];
@@ -54,9 +60,9 @@ function removeProject(index: number): void {
 
 <template>
   <div class="card-body">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.projects.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.projects.addButtonAria')"
         @click="addProject"
@@ -64,18 +70,18 @@ function removeProject(index: number): void {
         {{ t("resumePage.projects.addButton") }}
       </button>
     </div>
-    <div class="space-y-6">
-      <div
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+      <div 
         v-for="(project, index) in localValue"
         :key="`${project.name}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
-          <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
               {{ t("resumePage.projects.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.projects.removeButtonAria', { index: index + 1 })"
               @click="removeProject(index)"
@@ -86,12 +92,12 @@ function removeProject(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.projects.nameLegend") }}</legend>
-              <input
+              <input 
                 v-model="project.name"
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.projects.nameAria')"
                 @input="emitValue"
               />
@@ -99,10 +105,10 @@ function removeProject(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.projects.urlLegend") }}</legend>
-              <input
+              <input 
                 v-model="project.url"
                 type="url"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.projects.urlAria')"
                 @input="emitValue"
               />
@@ -110,11 +116,11 @@ function removeProject(index: number): void {
           </SectionGrid>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.projects.descriptionLegend") }}</legend>
-            <textarea
+            <textarea 
               v-model="project.description"
               required
               minlength="20"
-              class="textarea validator w-full"
+              class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
               rows="3"
               :aria-label="t('resumePage.projects.descriptionAria')"
               @input="emitValue"

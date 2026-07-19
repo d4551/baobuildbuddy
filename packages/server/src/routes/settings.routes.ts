@@ -1,4 +1,3 @@
-import { Elysia, type status } from "elysia";
 import {
   API_ERROR_INIT_SETTINGS_ROW,
   API_ERROR_INVALID_AUTOMATION_PAYLOAD,
@@ -12,6 +11,7 @@ import {
 } from "@bao/shared/constants/http";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
+import { Elysia, type status } from "elysia";
 import {
   RATE_LIMIT_SETTINGS_DURATION_MS,
   RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS,
@@ -25,20 +25,20 @@ import { resolveRateLimitClientKey } from "../utils/request";
 import {
   type ApiKeysUpdateBody,
   apiKeysUpdateBodySchema,
+  apiKeysUpdateResponses,
   type ImportSettingsBody,
   importSettingsBodySchema,
   type JobTaxonomyUpdateBody,
   jobTaxonomyUpdateBodySchema,
+  jobTaxonomyUpdateResponses,
   type ProviderTestBody,
   providerTestBodySchema,
-  type SettingsUpdateBody,
-  apiKeysUpdateResponses,
-  settingsUpdateBodySchema,
-  jobTaxonomyUpdateResponses,
   providerTestResponses,
+  type SettingsUpdateBody,
   settingsExportResponses,
   settingsImportResponses,
   settingsReadResponses,
+  settingsUpdateBodySchema,
   settingsUpdateResponses,
 } from "./settings-route-contracts";
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";

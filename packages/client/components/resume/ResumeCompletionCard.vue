@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   ResumeCompletionQuickAction,
   ResumeCompletionSection,
@@ -26,21 +33,21 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
-    <div class="card-body py-4">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <h3 class="text-sm font-semibold">{{ t("resumePage.completion.title") }}</h3>
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[PADDING_TOKEN_CLASS.py4]">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.completion.title") }}</h3>
         <span class="badge badge-primary badge-outline">
           {{ t("resumePage.completion.percentLabel", { percent: completionPercent }) }}
         </span>
       </div>
-      <progress
-        class="progress progress-primary w-full"
+      <progress 
+        class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
         :value="completionPercent"
         max="100"
         :aria-label="t('resumePage.completion.progressAria')"
       ></progress>
-      <p class="text-xs text-base-content/70">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
         {{
           t("resumePage.completion.summary", {
             completed: completedSectionCount,
@@ -48,8 +55,8 @@ const { t } = useI18n();
           })
         }}
       </p>
-      <div class="flex flex-wrap gap-2">
-        <button
+      <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+        <button 
           v-for="section in sections"
           :key="section.id"
           class="badge badge-sm cursor-pointer"
@@ -61,15 +68,15 @@ const { t } = useI18n();
         </button>
       </div>
       <div class="card-actions justify-between">
-        <p class="text-xs text-base-content/70">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
           {{
             nextRecommendedTab
               ? t("resumePage.completion.nextStep", { section: tabLabel(nextRecommendedTab) })
               : t("resumePage.completion.complete")
           }}
         </p>
-        <div class="flex flex-wrap gap-2">
-          <NuxtLink
+        <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <NuxtLink 
             v-for="action in quickActions"
             :key="action.id"
             :to="action.to"

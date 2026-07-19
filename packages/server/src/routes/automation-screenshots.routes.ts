@@ -1,4 +1,3 @@
-import { Elysia, type status } from "elysia";
 import { join } from "node:path";
 import {
   API_ERROR_INVALID_RUN_ID,
@@ -18,6 +17,7 @@ import {
 import { RUN_ID_MIN_LENGTH, RUN_ID_SAFE_PATTERN_SOURCE } from "@bao/shared/constants/schema-limits";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
+import { Elysia, type status } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";

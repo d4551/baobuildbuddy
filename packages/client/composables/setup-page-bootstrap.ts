@@ -1,7 +1,7 @@
 import type { DashboardStats } from "@bao/shared/types/search";
 import type { Ref } from "vue";
-import { settlePromise } from "~/composables/async-flow";
 import type { SetupAuthStatus } from "~/components/setup/setup-page-contracts";
+import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 
 interface SetupPageSettingsSnapshot {

@@ -1,37 +1,63 @@
 import { DEFAULT_SPEECH_SETTINGS, SPEECH_PROVIDER_OPTIONS } from "@bao/shared/constants/settings";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
-import { asBoolean, asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { normalizeJobProviderSettings as normalizeSharedJobProviderSettings } from "@bao/shared/types/settings-normalization";
-import { asEnum } from "~/composables/api-normalizer-shared";
+import {
+  asBoolean,
+  asJsonArray,
+  asNumber,
+  asString,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import {
   COMPANY_BOARD_ATS_TYPES,
   COMPANY_BOARD_TEMPLATE_KEYS,
   GAMING_PORTAL_IDS,
   SPEECH_AUDIO_FORMATS,
 } from "~/composables/api-normalizer-settings-constants";
+import { asEnum } from "~/composables/api-normalizer-shared";
 
-const normalizeGreenhouseBoards = (
-  value: unknown,
-): AutomationSettings["jobProviders"]["greenhouseBoards"] =>
-  Array.isArray(value)
-    ? value.filter(isRecord).map((board) => ({
-        board: asString(board.board) ?? "",
-        company: asString(board.company) ?? "",
-        enabled: asBoolean(board.enabled) ?? false,
-      }))
-    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards;
+const normalizeGreenhouseBoards = <T>(
+  value: T,
+): AutomationSettings["jobProviders"]["greenhouseBoards"] => {
+  const boards = asJsonArray(value);
+  if (!boards) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseBoards;
+  }
+  const normalized: AutomationSettings["jobProviders"]["greenhouseBoards"] = [];
+  for (const board of boards) {
+    if (!isRecord(board)) {
+      continue;
+    }
+    normalized.push({
+      board: asString(board.board) ?? "",
+      company: asString(board.company) ?? "",
+      enabled: asBoolean(board.enabled) ?? false,
+    });
+  }
+  return normalized;
+};
 
-const normalizeLeverCompanies = (
-  value: unknown,
-): AutomationSettings["jobProviders"]["leverCompanies"] =>
-  Array.isArray(value)
-    ? value.filter(isRecord).map((company) => ({
-        slug: asString(company.slug) ?? "",
-        company: asString(company.company) ?? "",
-        enabled: asBoolean(company.enabled) ?? false,
-      }))
-    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies;
+const normalizeLeverCompanies = <T>(
+  value: T,
+): AutomationSettings["jobProviders"]["leverCompanies"] => {
+  const companies = asJsonArray(value);
+  if (!companies) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.leverCompanies;
+  }
+  const normalized: AutomationSettings["jobProviders"]["leverCompanies"] = [];
+  for (const company of companies) {
+    if (!isRecord(company)) {
+      continue;
+    }
+    normalized.push({
+      slug: asString(company.slug) ?? "",
+      company: asString(company.company) ?? "",
+      enabled: asBoolean(company.enabled) ?? false,
+    });
+  }
+  return normalized;
+};
 
 const normalizeCompanyBoardTemplates = (
   value: unknown,
@@ -45,25 +71,38 @@ const normalizeCompanyBoardTemplates = (
   return templates;
 };
 
-const normalizeCompanyBoards = (
-  value: unknown,
-): AutomationSettings["jobProviders"]["companyBoards"] =>
-  Array.isArray(value)
-    ? value.filter(isRecord).map((board) => ({
-        name: asString(board.name) ?? "",
-        token: asString(board.token) ?? "",
-        type: asEnum(board.type, COMPANY_BOARD_ATS_TYPES) ?? "greenhouse",
-        enabled: asBoolean(board.enabled) ?? false,
-        priority: asNumber(board.priority) ?? 0,
-      }))
-    : DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards;
+const normalizeCompanyBoards = <T>(
+  value: T,
+): AutomationSettings["jobProviders"]["companyBoards"] => {
+  const boards = asJsonArray(value);
+  if (!boards) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.companyBoards;
+  }
+  const normalized: AutomationSettings["jobProviders"]["companyBoards"] = [];
+  for (const board of boards) {
+    if (!isRecord(board)) {
+      continue;
+    }
+    normalized.push({
+      name: asString(board.name) ?? "",
+      token: asString(board.token) ?? "",
+      type: asEnum(board.type, COMPANY_BOARD_ATS_TYPES) ?? "greenhouse",
+      enabled: asBoolean(board.enabled) ?? false,
+      priority: asNumber(board.priority) ?? 0,
+    });
+  }
+  return normalized;
+};
 
-const normalizeGamingPortals = (
-  value: unknown,
+const normalizeGamingPortals = <T>(
+  value: T,
 ): AutomationSettings["jobProviders"]["gamingPortals"] => {
-  if (!Array.isArray(value)) return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals;
+  const portals = asJsonArray(value);
+  if (!portals) {
+    return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals;
+  }
 
-  const configuredPortals = value.filter(isRecord);
+  const configuredPortals = portals.filter(isRecord);
   return DEFAULT_AUTOMATION_SETTINGS.jobProviders.gamingPortals.map((defaultPortal, index) => {
     const matchedPortal =
       configuredPortals.find(

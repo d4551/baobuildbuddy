@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   open: boolean;
   titleId: string;
@@ -24,15 +31,15 @@ const emit = defineEmits<{
     :close-backdrop-label="t('jobDetail.closeButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="mb-4 text-lg font-bold">
+ <h3 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("jobDetail.applyDialogTitle", { title: jobTitle }) }}
     </h3>
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
-      <textarea
+      <textarea 
         v-model="applicationNotes"
-        class="textarea w-full"
+        class="textarea" :class="[FLUID_WIDTH_CLASS]"
         rows="5"
         :placeholder="t('jobDetail.applicationNotesPlaceholder')"
         :aria-label="t('jobDetail.applicationNotesAria')"
@@ -40,7 +47,7 @@ const emit = defineEmits<{
     </fieldset>
 
     <div class="modal-action">
-      <button
+      <button 
         type="button"
         class="btn btn-ghost"
         :aria-label="t('jobDetail.cancelApplyAria')"
@@ -48,14 +55,14 @@ const emit = defineEmits<{
       >
         {{ t("jobDetail.cancelButton") }}
       </button>
-      <button
+      <button 
         type="button"
         class="btn btn-primary"
         :aria-label="t('jobDetail.submitApplyAria')"
         :disabled="applying"
         @click="emit('submit')"
       >
-        <span v-if="applying" class="loading loading-spinner loading-xs"></span>
+        <LoadingSpinner size="xs" label="Loading" v-if="applying" />
         {{ t("jobDetail.submitButton") }}
       </button>
     </div>

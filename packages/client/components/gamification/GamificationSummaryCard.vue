@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UserGamificationData } from "@bao/shared/types/gamification";
+import { useI18n } from "vue-i18n";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_CURRENT_STREAK_ICON,
@@ -8,6 +9,14 @@ import {
   GAMIFICATION_PROGRESS_MAX,
   GAMIFICATION_PROGRESS_MIN,
 } from "~/constants/gamification";
+import {
+  FLUID_WIDTH_CLASS,
+  HEIGHT_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_STRONG_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   progress: UserGamificationData;
@@ -15,41 +24,34 @@ defineProps<{
   xpTarget: number;
   xpUntilNextLevel: number;
   unlockedAchievementsCount: number;
-  t: (key: string, values?: Record<string, unknown>) => string;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
-  <div class="space-y-6">
-    <section class="card bg-linear-to-br from-primary to-secondary text-primary-content">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+    <section :class="[SURFACE_GLASS_CARD_STRONG_CLASS, 'text-on-glass']">
       <div class="card-body">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
-            <h2 class="text-4xl font-bold">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
-            <p class="opacity-80">
+            <h2 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
+            <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
           </div>
-          <div class="text-6xl" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
+          <div :class="[TYPOGRAPHY_SCALE_CLASS.xl6]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
         </div>
 
-        <progress
-          class="progress progress-primary-content h-4 w-full"
-          :value="levelProgress"
-          :max="GAMIFICATION_PROGRESS_MAX"
-          :aria-valuenow="levelProgress"
-          :aria-valuemin="GAMIFICATION_PROGRESS_MIN"
-          :aria-valuemax="GAMIFICATION_PROGRESS_MAX"
-          :aria-label="t('gamificationPage.a11y.levelProgress')"
-        ></progress>
+        <progress class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, HEIGHT_TOKEN_CLASS.h4]" :value="levelProgress" :max="GAMIFICATION_PROGRESS_MAX" :aria-valuenow="levelProgress" :aria-valuemin="GAMIFICATION_PROGRESS_MIN" :aria-valuemax="GAMIFICATION_PROGRESS_MAX" :aria-label="t('gamificationPage.a11y.levelProgress')"></progress>
 
-        <p class="mt-2 text-sm opacity-80">
+        <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
         </p>
       </div>
     </section>
 
-    <StatsRow
+    <StatsRow 
       background-class="bg-base-200"
       :stats="[
         { titleKey: 'gamificationPage.currentStreakTitle', value: progress.currentStreak || 0, valueClass: 'text-primary', descKey: 'gamificationPage.streakDaysSuffix', figure: GAMIFICATION_CURRENT_STREAK_ICON },

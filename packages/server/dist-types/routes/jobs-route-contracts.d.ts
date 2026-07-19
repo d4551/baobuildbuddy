@@ -1,5 +1,5 @@
-import type { Static } from "typebox";
 import { HTTP_STATUS_CREATED } from "@bao/shared/constants/http";
+import type { Static } from "typebox";
 export type JobListQuery = {
     q?: string;
     location?: string;
@@ -239,7 +239,7 @@ export declare const saveJobResponses: {
 export declare const deleteSavedJobResponses: {
     readonly 200: import("typebox").TObject<{
         success: import("typebox").TBoolean;
-        deleted: import("typebox").TUnknown;
+        deletedCount: import("typebox").TNumber;
     }>;
 };
 export declare const savedJobsListResponses: {

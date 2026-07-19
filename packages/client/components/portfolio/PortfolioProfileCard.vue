@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 const props = defineProps<{
   portfolioForm: PortfolioMetadata;
@@ -27,16 +29,20 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 </script>
 
 <template>
-  <section id="portfolio-profile-card" class="card bg-base-200">
+  <section 
+    id="portfolio-profile-card"
+    :class="SURFACE_GLASS_CARD_CLASS"
+    aria-labelledby="portfolio-profile-title"
+  >
     <div class="card-body">
-      <h2 class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <h2 id="portfolio-profile-title" class="card-title">{{ t("portfolioPage.profile.title") }}</h2>
+      <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.titleLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.title"
             type="text"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.titlePlaceholder')"
             :aria-label="t('portfolioPage.profile.titleAria')"
             @input="updatePortfolioField('title', $event)"
@@ -45,10 +51,10 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.emailLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.email"
             type="email"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.emailPlaceholder')"
             :aria-label="t('portfolioPage.profile.emailAria')"
             @input="updatePortfolioField('email', $event)"
@@ -57,10 +63,10 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.websiteLegend") }}</legend>
-          <input
+          <input 
             :value="props.portfolioForm.website"
             type="url"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('portfolioPage.profile.websitePlaceholder')"
             :aria-label="t('portfolioPage.profile.websiteAria')"
             @input="updatePortfolioField('website', $event)"
@@ -69,16 +75,16 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset md:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.bioLegend") }}</legend>
-          <textarea
+          <textarea 
             :value="props.portfolioForm.bio"
-            class="textarea w-full"
+            class="textarea" :class="[FLUID_WIDTH_CLASS]"
             rows="4"
             :placeholder="t('portfolioPage.profile.bioPlaceholder')"
             :aria-label="t('portfolioPage.profile.bioAria')"
             @input="updatePortfolioField('bio', $event)"
           ></textarea>
         </fieldset>
-      </div>
+      </SectionGrid>
 
       <div class="card-actions justify-end">
         <button class="btn btn-primary" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">

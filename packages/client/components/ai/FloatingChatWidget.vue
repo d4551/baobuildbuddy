@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useFloatingChatWidget } from "~/composables/useFloatingChatWidget";
+import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+
 const {
   AI_CHAT_PAGE_PATH: aiChatPagePath,
   availableVoices,
@@ -53,9 +55,9 @@ const {
 
 <template>
   <Teleport to="body">
-    <div
+    <div 
       v-if="showWidget"
-      class="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3 lg:bottom-6 lg:right-6"
+      class="fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
     >
       <FloatingChatPanel
         :ai-chat-page-path="aiChatPagePath"
@@ -89,7 +91,6 @@ const {
         :streaming-bubble="streamingBubble"
         :supports-recognition="supportsRecognition"
         :supports-synthesis="supportsSynthesis"
-        :t="t"
         :tts-model-options="ttsModelOptions"
         :voice-error-label="voiceErrorLabel"
         :voice-support-hint-key="voiceSupportHintKey"

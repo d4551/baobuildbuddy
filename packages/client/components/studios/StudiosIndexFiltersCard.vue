@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
@@ -20,15 +26,15 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
-    <div class="card-body gap-4">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <SectionGrid grid-token="fourColumnLg">
         <fieldset class="fieldset lg:col-span-2">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.searchLegend") }}</legend>
-          <input
+          <input 
             v-model="searchQuery"
             type="search"
-            class="input w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS]"
             :placeholder="t('studiosIndex.filters.searchPlaceholder')"
             :aria-label="t('studiosIndex.filters.searchAria')"
           />
@@ -36,9 +42,9 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.typeLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedType"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('studiosIndex.filters.typeAria')"
           >
             <option value="">{{ t("studiosIndex.filters.allTypesOption") }}</option>
@@ -50,9 +56,9 @@ const { t } = useI18n();
 
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("studiosIndex.filters.sizeLegend") }}</legend>
-          <select
+          <select 
             v-model="selectedSize"
-            class="select w-full"
+            class="select" :class="[FLUID_WIDTH_CLASS]"
             :aria-label="t('studiosIndex.filters.sizeAria')"
           >
             <option value="">{{ t("studiosIndex.filters.allSizesOption") }}</option>
@@ -63,9 +69,9 @@ const { t } = useI18n();
         </fieldset>
       </SectionGrid>
 
-      <div class="flex flex-wrap items-center gap-3">
-        <label class="label cursor-pointer justify-start gap-2 py-0">
-          <input
+      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap2, PADDING_TOKEN_CLASS.py0]">
+          <input 
             v-model="remoteWork"
             type="checkbox"
             class="toggle toggle-primary toggle-sm"

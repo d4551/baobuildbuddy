@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   currentQuestion: InterviewQuestion | undefined;
@@ -44,58 +53,55 @@ const promptExpectedMinutes = computed(() => {
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" aria-labelledby="interview-session-prompt-title">
-    <div class="card-body gap-5">
-      <div class="space-y-1">
-        <h2 id="interview-session-prompt-title" class="card-title text-xl">
+  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-prompt-title">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5]">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" id="interview-session-prompt-title">
           {{ t("interviewSession.promptTitle") }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.promptDescription") }}
         </p>
       </div>
 
-      <div
-        v-if="currentQuestion"
-        class="rounded-box border border-base-300 bg-base-200/60 p-5"
-      >
-        <p class="text-xl font-semibold leading-relaxed text-base-content">
+      <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p5]" v-if="currentQuestion">
+        <p class="font-semibold leading-relaxed text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
           {{ currentQuestion.question }}
         </p>
       </div>
 
-      <div v-if="currentQuestion" class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+      <SectionGrid v-if="currentQuestion" grid-token="threeColumnMd">
+        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+          <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptTypeLabel") }}
           </p>
-          <p class="mt-2 text-base font-semibold text-base-content">{{ promptType }}</p>
+          <p class="text-base font-semibold text-base-content" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ promptType }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+          <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptDifficultyLabel") }}
           </p>
-          <p class="mt-2 text-base font-semibold text-base-content">{{ promptDifficulty }}</p>
+          <p class="text-base font-semibold text-base-content" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ promptDifficulty }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 bg-base-200/40 p-4">
-          <p class="text-sm font-medium text-base-content/70">
+        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+          <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptExpectedDurationLabel") }}
           </p>
-          <p class="mt-2 text-base font-semibold text-base-content">
+          <p class="text-base font-semibold text-base-content" :class="[MARGIN_TOKEN_CLASS.mt2]">
             {{ t("interviewSession.promptExpectedDurationValue", { count: promptExpectedMinutes }) }}
           </p>
         </div>
-      </div>
+      </SectionGrid>
 
-      <div class="space-y-2">
-        <p class="text-sm font-medium text-base-content/70">
+      <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+        <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.promptTagsLabel") }}
         </p>
 
-        <div v-if="promptTags.length > 0" class="flex flex-wrap gap-2">
-          <span
+        <div v-if="promptTags.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <span 
             v-for="tag in promptTags"
             :key="tag"
             class="badge badge-outline badge-primary"
@@ -104,7 +110,7 @@ const promptExpectedMinutes = computed(() => {
           </span>
         </div>
 
-        <p v-else class="text-sm text-base-content/60">
+        <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewSession.promptTagsEmpty") }}
         </p>
       </div>

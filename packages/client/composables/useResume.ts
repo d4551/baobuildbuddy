@@ -10,15 +10,16 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import { requireApiResponsePayload } from "~/utils/api-response";
+import { toResumeData } from "./api-normalizer-resume";
 import {
+  type ClientApiRequestRuntime,
   downloadApiFile,
   requestApi,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "./api-request";
-import { toResumeData } from "./api-normalizer-resume";
 import { requireValue, withLoadingState } from "./async-flow";
-import { requireApiResponsePayload } from "~/utils/api-response";
+
 type CreateResumeInput = Record<string, unknown>;
 type UpdateResumeInput = Record<string, unknown>;
 type ExportResumeInput = Record<string, unknown>;

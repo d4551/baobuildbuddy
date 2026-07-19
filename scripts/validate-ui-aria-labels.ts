@@ -31,7 +31,18 @@ const interactiveRolePattern = new RegExp(
   `<[^>]+role\\s*=\\s*["'](?:${interactiveRoleNames.join("|")})["'][^>]*>`,
   "gu",
 );
-const tabindexPattern = /<[^>]+tabindex\s*=\s*["']?-?\d+["']?[^>]*>/gu;
+const tabbablePattern = /<[^>]+tabindex\s*=\s*["']?-?\d+["']?[^>]*>/gu;
+const programmaticFocusOnlyPattern = /tabindex\s*=\s*["']-1["']/u;
+const landmarkTagNames = [
+  "main",
+  "section",
+  "nav",
+  "header",
+  "footer",
+  "aside",
+  "form",
+  "article",
+] as const;
 const menuTriggerPattern = /<[^>]+aria-haspopup\s*=\s*["']menu["'][^>]*>/gu;
 const dialogTagPattern = /<dialog\b[\s\S]*?>/gu;
 const iconOnlyControlPattern = /<(button|a|NuxtLink|summary)\b[\s\S]*?>([\s\S]*?)<\/\1>/gu;
@@ -194,10 +205,13 @@ const collectInteractiveRoleViolations = (filePath: string, fileContent: string)
   return violations;
 };
 
+const isLandmarkTag = (tagName: string): boolean =>
+  landmarkTagNames.includes(tagName as (typeof landmarkTagNames)[number]);
+
 const collectFocusableViolations = (filePath: string, fileContent: string): Violation[] => {
   const violations: Violation[] = [];
 
-  for (const match of fileContent.matchAll(tabindexPattern)) {
+  for (const match of fileContent.matchAll(tabbablePattern)) {
     const tagMarkup = match[0];
     if (isAriaHiddenElement(tagMarkup)) {
       continue;
@@ -211,6 +225,9 @@ const collectFocusableViolations = (filePath: string, fileContent: string): Viol
       continue;
     }
     if (isNativeFocusableTag(tagName)) {
+      continue;
+    }
+    if (isLandmarkTag(tagName) && programmaticFocusOnlyPattern.test(tagMarkup)) {
       continue;
     }
 
@@ -466,25 +483,27 @@ const collectIconOnlyControlViolations = (filePath: string, fileContent: string)
   return violations;
 };
 
-const collectFileViolations = async (filePath: string): Promise<Violation[]> => {
-  const fileContent = await Bun.file(filePath).text();
+export const collectAriaLabelViolationsForContent = (
+  filePath: string,
+  fileContent: string,
+): Violation[] => [
+  ...formControlTagNames.flatMap((tagName) =>
+    collectFormControlViolations(filePath, fileContent, tagName),
+  ),
+  ...collectDialogViolations(filePath, fileContent),
+  ...collectInteractiveRoleViolations(filePath, fileContent),
+  ...collectFocusableViolations(filePath, fileContent),
+  ...collectMenuTriggerViolations(filePath, fileContent),
+  ...collectMenuKeyboardViolations(filePath, fileContent),
+  ...collectDisclosureMenuViolations(filePath, fileContent),
+  ...collectLabelControlViolations(filePath, fileContent),
+  ...collectTabContractViolations(filePath, fileContent),
+  ...collectPaginationViolations(filePath, fileContent),
+  ...collectIconOnlyControlViolations(filePath, fileContent),
+];
 
-  return [
-    ...formControlTagNames.flatMap((tagName) =>
-      collectFormControlViolations(filePath, fileContent, tagName),
-    ),
-    ...collectDialogViolations(filePath, fileContent),
-    ...collectInteractiveRoleViolations(filePath, fileContent),
-    ...collectFocusableViolations(filePath, fileContent),
-    ...collectMenuTriggerViolations(filePath, fileContent),
-    ...collectMenuKeyboardViolations(filePath, fileContent),
-    ...collectDisclosureMenuViolations(filePath, fileContent),
-    ...collectLabelControlViolations(filePath, fileContent),
-    ...collectTabContractViolations(filePath, fileContent),
-    ...collectPaginationViolations(filePath, fileContent),
-    ...collectIconOnlyControlViolations(filePath, fileContent),
-  ];
-};
+const collectFileViolations = async (filePath: string): Promise<Violation[]> =>
+  collectAriaLabelViolationsForContent(filePath, await Bun.file(filePath).text());
 
 const collectViolations = async (): Promise<Violation[]> => {
   const files = await collectVueFiles();
@@ -518,4 +537,6 @@ const main = async (): Promise<void> => {
   process.exit(1);
 };
 
-await main();
+if (import.meta.main) {
+  await main();
+}

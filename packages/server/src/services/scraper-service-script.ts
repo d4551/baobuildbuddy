@@ -3,12 +3,12 @@ import {
   API_ERROR_INVALID_SCRIPT_ID,
 } from "@bao/shared/constants/api-errors";
 import {
-  automationScriptIdSchema,
-  scrapedJobSchema,
-  scrapedStudioSchema,
   type AutomationScriptId,
+  automationScriptIdSchema,
   type ScrapedJob,
   type ScrapedStudio,
+  scrapedJobSchema,
+  scrapedStudioSchema,
 } from "@bao/shared/schemas/automation-scripts.schema";
 import type { JobSearchResult } from "@bao/shared/types/jobs";
 import { safeParseJson } from "@bao/shared/utils/json";
@@ -17,11 +17,11 @@ import { config } from "../config/env";
 import { runAutomationScript } from "./automation/rpa-runner-process";
 import type {
   AutomationScriptReference,
+  ScraperScriptExecutionResult,
   ScriptExecutionOptions,
   ScriptInputPayload,
   ScriptReferenceOverride,
   ScriptRows,
-  ScraperScriptExecutionResult,
 } from "./scraper-service-contracts";
 import {
   CONTENT_HASH_LENGTH,

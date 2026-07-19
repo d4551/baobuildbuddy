@@ -6,10 +6,10 @@ import type {
 } from "@bao/shared/types/gamification";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import {
+  type ActionHistoryEntry,
   DAILY_CHALLENGE_DEFINITIONS,
   GAMIFICATION_STAT_KEYS,
   type NumericGamificationStats,
-  type ActionHistoryEntry,
   WEEK_DAYS,
   type WeeklyDaySummary,
   type WeeklyProgressResult,
@@ -41,7 +41,7 @@ export function toNumericStats(
   return normalized;
 }
 
-export function toActionHistory(stats: unknown): ActionHistoryEntry[] {
+export function toActionHistory<T>(stats: T): ActionHistoryEntry[] {
   if (!isRecord(stats)) {
     return [];
   }
@@ -51,13 +51,27 @@ export function toActionHistory(stats: unknown): ActionHistoryEntry[] {
     return [];
   }
 
-  return rawHistory.filter(
-    (entry): entry is ActionHistoryEntry =>
-      isRecord(entry) &&
-      typeof entry.action === "string" &&
-      typeof entry.xpGained === "number" &&
-      typeof entry.timestamp === "string",
-  );
+  const entries: ActionHistoryEntry[] = [];
+  for (const entry of rawHistory) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    if (typeof entry.action !== "string") {
+      continue;
+    }
+    if (typeof entry.xpGained !== "number") {
+      continue;
+    }
+    if (typeof entry.timestamp !== "string") {
+      continue;
+    }
+    entries.push({
+      action: entry.action,
+      xpGained: entry.xpGained,
+      timestamp: entry.timestamp,
+    });
+  }
+  return entries;
 }
 
 export function getNumericStat(stats: NumericGamificationStats, key: string): number {

@@ -1,5 +1,18 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_WIDTH_LG_W80_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{
@@ -17,34 +30,22 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="card bg-base-100 shadow-sm lg:sticky lg:top-6 lg:w-80 lg:shrink-0">
-    <div class="card-body gap-4">
+  <aside :class="[SURFACE_GLASS_CARD_CLASS, 'lg:sticky', 'lg:top-6', RESPONSIVE_WIDTH_LG_W80_CLASS, 'lg:shrink-0']">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
-        <ul class="space-y-4">
-          <li v-for="group in endpointGroups" :key="group.id" class="space-y-2">
-            <p class="text-sm font-semibold uppercase tracking-wide text-base-content/60">
+        <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <li v-for="group in endpointGroups" :key="group.id" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+            <p class="font-semibold uppercase tracking-wide text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ group.label }}
             </p>
-            <ul class="space-y-2">
+            <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
               <li v-for="endpoint in group.endpoints" :key="endpoint.id">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-ghost h-auto w-full justify-start whitespace-normal py-2 text-left"
-                  :class="{ 'btn-primary': activeEndpointId === endpoint.id }"
-                  :aria-label="
-                    t('apiDocs.endpoint.navigateAria', {
-                      method: methodLabel(endpoint.method),
-                      path: endpoint.path,
-                    })
-                  "
-                  :aria-current="activeEndpointId === endpoint.id ? 'location' : undefined"
-                  @click="emit('navigate', endpoint.id)"
-                >
-                  <span :class="methodBadgeClass(endpoint.method)" class="mr-2">
+                <button class="btn btn-sm btn-ghost h-auto justify-start whitespace-normal text-left" type="button" :class="[FLUID_WIDTH_CLASS, { 'btn-primary': activeEndpointId === endpoint.id }, PADDING_TOKEN_CLASS.py2]" :aria-label=" t('apiDocs.endpoint.navigateAria', { method: methodLabel(endpoint.method), path: endpoint.path, }) " :aria-current="activeEndpointId === endpoint.id ? 'location' : undefined" @click="emit('navigate', endpoint.id)">
+                  <span :class="[methodBadgeClass(endpoint.method), MARGIN_TOKEN_CLASS.mr2]">
                     {{ methodLabel(endpoint.method) }}
                   </span>
-                  <span class="font-mono text-xs">{{ endpoint.path }}</span>
+                  <span class="break-all font-mono" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">{{ endpoint.path }}</span>
                 </button>
               </li>
             </ul>

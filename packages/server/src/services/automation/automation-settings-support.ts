@@ -15,6 +15,7 @@ import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
+import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { AIService } from "../ai/ai-service";
 import type { EmailTransportRuntimeConfig } from "../email-delivery-service";
@@ -59,7 +60,7 @@ export const tryLoadAIService = async (): Promise<AIService | null> => {
   }
 
   const [row] = settingsQueryResult.value;
-  return AIService.fromSettings(row);
+  return AIService.fromSettings({ ...row, ...decryptProviderKeys(row) });
 };
 
 export const loadEmailTransportConfig = async (

@@ -2,14 +2,14 @@ import { API_ENDPOINTS, buildStudioDetailEndpoint } from "@bao/shared/constants/
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import { requireApiResponsePayload } from "~/utils/api-response";
+import { toGameStudio } from "./api-normalizer-studios";
 import {
+  type ClientApiRequestRuntime,
   requestApi,
   useClientApiRequestRuntime,
-  type ClientApiRequestRuntime,
 } from "./api-request";
-import { toGameStudio } from "./api-normalizer-studios";
 import { requireValue, withLoadingState } from "./async-flow";
-import { requireApiResponsePayload } from "~/utils/api-response";
 
 interface StudioContext {
   t: ReturnType<typeof useI18n>["t"];

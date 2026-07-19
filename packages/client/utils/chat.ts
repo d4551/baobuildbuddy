@@ -37,6 +37,9 @@ export function createChatMessage(params: {
   timestamp?: string;
   sessionId?: string;
   id?: string;
+  provider?: string;
+  model?: string;
+  confidence?: number;
 }): ChatMessage {
   return {
     id: params.id ?? generateId(),
@@ -44,6 +47,9 @@ export function createChatMessage(params: {
     content: params.content,
     timestamp: params.timestamp ?? new Date().toISOString(),
     ...(params.sessionId ? { sessionId: params.sessionId } : {}),
+    ...(params.provider ? { provider: params.provider } : {}),
+    ...(params.model ? { model: params.model } : {}),
+    ...(params.confidence !== undefined ? { confidence: params.confidence } : {}),
   };
 }
 

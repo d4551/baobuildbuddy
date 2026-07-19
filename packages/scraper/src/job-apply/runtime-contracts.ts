@@ -2,7 +2,7 @@ import type { JobApplyScriptEnvelope } from "@bao/shared/schemas/automation-scri
 import type { Page } from "playwright";
 import type { AutomationBrowserSession } from "../runtime/browser";
 import type { ProtocolEmitter } from "../runtime/protocol";
-import type { JobApplyStrategy, JobApplySelectorBundle } from "./strategy-registry";
+import type { JobApplySelectorBundle, JobApplyStrategy } from "./strategy-registry";
 
 export type StepStatus = "ok" | "error";
 

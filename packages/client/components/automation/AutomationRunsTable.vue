@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { FLEX_GAP_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
@@ -16,7 +17,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-100">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <div class="overflow-x-auto">
         <table class="table table-zebra" :aria-label="t('automation.runs.tableAriaLabel')">
@@ -36,9 +37,9 @@ defineProps<{
               <th>{{ run.id }}</th>
               <td>{{ formatRunType(run.type) }}</td>
               <td>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <span>{{ formatRunStatus(run.status) }}</span>
-                  <span
+                  <span 
                     v-if="isLiveRun(run)"
                     class="badge badge-info badge-outline"
                     :aria-label="t('automation.runs.liveBadgeAria')"
@@ -51,7 +52,7 @@ defineProps<{
               <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
               <td>{{ formatDate(run.updatedAt) }}</td>
               <td>
-                <NuxtLink
+                <NuxtLink 
                   :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
                   class="btn btn-xs btn-ghost"
                   :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
@@ -61,7 +62,7 @@ defineProps<{
               </td>
             </tr>
             <tr v-if="!isLoading && runs.length === 0">
-              <td colspan="7" class="text-center opacity-60">{{ t("automation.runs.emptyState") }}</td>
+              <td colspan="7" class="text-center text-muted">{{ t("automation.runs.emptyState") }}</td>
             </tr>
           </tbody>
         </table>

@@ -13,43 +13,43 @@ import type {
   AIRouting,
   GenerateOptions,
 } from "@bao/shared/types/ai";
+import { settle } from "@bao/shared/utils/promise";
+import { isTestRuntime } from "../../config/env";
 import { TEST_AI_PROVIDER_NAME } from "./ai-deterministic-provider";
-import { detectLocalProviders, getProviderStatuses } from "./ai-provider-diagnostics";
-import {
-  buildGenerateFailureResponse,
-  buildStreamFailure,
-  generateWithFallback,
-  mergePromptWithContext,
-  streamWithFallback,
-  toProviderOptions,
-} from "./ai-provider-fallback";
 import {
   buildProviderConfigs,
   createDeterministicServiceState,
   createProvider,
   resolvePreferredProvider,
 } from "./ai-provider-config";
+import { detectLocalProviders, getProviderStatuses } from "./ai-provider-diagnostics";
 import {
-  buildFallbackOrder,
+  buildGenerateFailure,
+  buildStreamFailure,
+  generateWithProviderFailover,
+  mergePromptWithContext,
+  streamWithProviderFailover,
+  toProviderOptions,
+} from "./ai-provider-failover";
+import {
+  buildProviderFailoverOrder,
   buildProviderOrder,
   initializeProviders,
-  rebuildFallbackOrderFromProviders,
+  rebuildProviderFailoverOrderFromProviders,
   resolveRoutingTarget,
 } from "./ai-provider-state";
 import type { AIProvider } from "./provider-interface";
-import { settle } from "@bao/shared/utils/promise";
-import { isTestRuntime } from "../../config/env";
 
 type AIServiceSettings = Parameters<typeof buildProviderConfigs>[0];
 
 /**
- * Multi-provider AI service with fallback capabilities
+ * Multi-provider AI service with ordered failover across configured providers.
  */
 export class AIService {
   private providers: Map<AIProviderType, AIProvider> = new Map();
   private preferredProvider?: AIProviderType;
   private routing: AIRouting = DEFAULT_AI_ROUTING;
-  private fallbackOrder: AIProviderType[] = [];
+  private providerFailoverOrder: AIProviderType[] = [];
 
   constructor(
     configs: AIProviderConfig[],
@@ -59,7 +59,7 @@ export class AIService {
     this.preferredProvider = preferredProvider;
     this.routing = normalizeAIRouting(routing, preferredProvider ?? AI_PROVIDER_DEFAULT);
     this.providers = initializeProviders(configs);
-    this.fallbackOrder = buildFallbackOrder(configs, this.preferredProvider);
+    this.providerFailoverOrder = buildProviderFailoverOrder(configs, this.preferredProvider);
   }
 
   /**
@@ -88,19 +88,22 @@ export class AIService {
     const service = new AIService([], TEST_AI_PROVIDER_NAME, DEFAULT_AI_ROUTING);
     const deterministicState = createDeterministicServiceState();
     service.providers = deterministicState.providers;
-    service.fallbackOrder = deterministicState.fallbackOrder;
+    service.providerFailoverOrder = [...deterministicState.providerFailoverOrder];
     service.preferredProvider = deterministicState.preferredProvider;
     service.routing = deterministicState.routing;
     return service;
   }
 
-  private refreshFallbackOrder(): void {
-    this.fallbackOrder = rebuildFallbackOrderFromProviders(this.providers, this.preferredProvider);
+  private refreshProviderFailoverOrder(): void {
+    this.providerFailoverOrder = rebuildProviderFailoverOrderFromProviders(
+      this.providers,
+      this.preferredProvider,
+    );
   }
 
   private async resolveHealthyProviderOrder(options?: GenerateOptions): Promise<AIProviderType[]> {
     const baseOrder = buildProviderOrder(
-      this.fallbackOrder,
+      this.providerFailoverOrder,
       this.routing,
       this.preferredProvider,
       options,
@@ -131,7 +134,6 @@ export class AIService {
       return this.providers.get(name) || null;
     }
 
-    // Return preferred provider or first in fallback order
     if (this.preferredProvider && this.providers.has(this.preferredProvider)) {
       return this.providers.get(this.preferredProvider) || null;
     }
@@ -140,28 +142,28 @@ export class AIService {
   }
 
   /**
-   * Generate a response with automatic fallback
+   * Generate a response with ordered provider failover. Throws when every provider fails.
    */
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const contextualPrompt = mergePromptWithContext(prompt, options);
     const routingTarget = resolveRoutingTarget(this.routing, this.preferredProvider, options);
     const providerOrder = await this.resolveHealthyProviderOrder(options);
     const providerOptions = toProviderOptions(routingTarget, options);
-    const { response, errors } = await generateWithFallback({
+    const failoverResult = await generateWithProviderFailover({
       providers: this.providers,
       providerOrder,
       routingTarget,
       contextualPrompt,
       providerOptions,
     });
-    if (response) {
-      return response;
+    if (!failoverResult.success) {
+      throw buildGenerateFailure(failoverResult.errors);
     }
-    return buildGenerateFailureResponse(errors, providerOrder[0] ?? routingTarget.provider);
+    return failoverResult.data;
   }
 
   /**
-   * Stream a response with automatic fallback
+   * Stream a response with ordered provider failover. Throws when every provider fails.
    */
   async *stream(
     prompt: string,
@@ -171,7 +173,7 @@ export class AIService {
     const routingTarget = resolveRoutingTarget(this.routing, this.preferredProvider, options);
     const providerOrder = await this.resolveHealthyProviderOrder(options);
     const providerOptions = toProviderOptions(routingTarget, options);
-    const streamResult = yield* streamWithFallback({
+    const streamResult = yield* streamWithProviderFailover({
       providers: this.providers,
       providerOrder,
       routingTarget,
@@ -213,7 +215,7 @@ export class AIService {
   setPreferredProvider(provider: AIProviderType): void {
     if (this.providers.has(provider)) {
       this.preferredProvider = provider;
-      this.refreshFallbackOrder();
+      this.refreshProviderFailoverOrder();
     }
   }
 
@@ -227,7 +229,7 @@ export class AIService {
     }
 
     this.providers.set(config.provider, provider);
-    this.refreshFallbackOrder();
+    this.refreshProviderFailoverOrder();
     return true;
   }
 
@@ -238,18 +240,16 @@ export class AIService {
     const deleted = this.providers.delete(provider);
 
     if (deleted) {
-      // Remove from fallback order
-      this.fallbackOrder = this.fallbackOrder.filter((p) => p !== provider);
+      this.providerFailoverOrder = this.providerFailoverOrder.filter((p) => p !== provider);
 
-      // Update preferred if it was removed
       if (this.preferredProvider === provider) {
-        this.preferredProvider = this.fallbackOrder[0];
+        this.preferredProvider = this.providerFailoverOrder[0];
         if (!this.preferredProvider) {
           this.preferredProvider = AI_PROVIDER_DEFAULT_ORDER[0];
         }
       }
 
-      this.refreshFallbackOrder();
+      this.refreshProviderFailoverOrder();
     }
 
     return deleted;
@@ -263,10 +263,10 @@ export class AIService {
   }
 
   /**
-   * Get the current fallback order
+   * Get the current provider failover order
    */
-  getFallbackOrder(): AIProviderType[] {
-    return [...this.fallbackOrder];
+  getProviderFailoverOrder(): AIProviderType[] {
+    return [...this.providerFailoverOrder];
   }
 
   /**

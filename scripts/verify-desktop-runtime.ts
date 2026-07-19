@@ -4,8 +4,8 @@ import { extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { startJobApplyFixtureServer } from "../packages/server/src/test-support/automation/job-apply-fixture";
 import {
-  API_ENDPOINTS,
   API_ENDPOINT_PREFIX,
+  API_ENDPOINTS,
   buildAutomationRunEndpoint,
   WS_ENDPOINTS,
 } from "../packages/shared/src/constants/endpoints";

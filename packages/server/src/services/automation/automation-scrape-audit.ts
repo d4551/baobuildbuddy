@@ -1,12 +1,12 @@
 import {
   AUTOMATION_SCRAPE_JOB_TARGETS,
+  type AutomationScrapePortalId,
   automationScrapeTargetToPortalId,
   buildRpaCapabilityIdFromScrapeTarget,
-  type AutomationScrapePortalId,
   type RpaCapabilityAuditEntry,
   type RpaCapabilityAuditReport,
-  type RpaCapabilityIssue,
   type RpaCapabilityAuditSummary,
+  type RpaCapabilityIssue,
 } from "@bao/shared/constants/automation";
 import { settle } from "@bao/shared/utils/promise";
 import { loadJobProviderSettings } from "../jobs/providers/provider-settings";

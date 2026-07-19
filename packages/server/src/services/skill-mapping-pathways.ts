@@ -356,7 +356,7 @@ const buildPathway = (category: SkillCategory, mappings: SkillMapping[]): Career
 
 export const buildCareerPathways = (mappings: SkillMapping[]): CareerPathway[] => {
   const grouped = groupMappingsByCategory(mappings);
-  const categories = Object.keys(grouped) as SkillCategory[];
+  const categories = Object.keys(grouped) as Array<keyof typeof grouped>;
   return categories
     .map((category) => buildPathway(category, grouped[category]))
     .sort((left, right) => right.matchScore - left.matchScore);

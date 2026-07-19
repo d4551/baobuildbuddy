@@ -1,6 +1,6 @@
 import {
-  API_ERROR_CUSTOM_ANSWERS_KEYS,
   API_ERROR_CUSTOM_ANSWERS_KEY_EXCEEDS,
+  API_ERROR_CUSTOM_ANSWERS_KEYS,
   API_ERROR_CUSTOM_ANSWERS_MAX_COUNT,
   API_ERROR_CUSTOM_ANSWERS_OBJECT,
   API_ERROR_CUSTOM_ANSWERS_VALUE_EXCEEDS,
@@ -56,10 +56,11 @@ const DISALLOWED_HOST_PATTERNS = [
 
 const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
 
-/** Bypass SSRF guards only for explicit verification runs that opt into private hosts. */
-const allowAutomationPrivateHostsInVerificationContext = (): boolean => {
-  return config.enableAutomationVerification && config.allowAutomationPrivateHosts;
-};
+/**
+ * Bypass SSRF guards when the process explicitly opts into private hosts.
+ * Used by local fixture / integration runs; default remains deny.
+ */
+const allowAutomationPrivateHostsOptIn = (): boolean => config.allowAutomationPrivateHosts;
 
 /**
  * Validate and normalize an automation URL while blocking unsafe host targets.
@@ -158,7 +159,7 @@ function isDisallowedAutomationHost(hostname: string): boolean {
     return true;
   }
 
-  if (allowAutomationPrivateHostsInVerificationContext()) {
+  if (allowAutomationPrivateHostsOptIn()) {
     return false;
   }
 

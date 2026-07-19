@@ -2,6 +2,13 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
+import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   mappingMetrics: {
@@ -17,8 +24,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="space-y-6">
-    <StatsRow
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+    <StatsRow 
       background-class="bg-base-200"
       :stats="[
         { titleKey: 'skillsPage.stats.totalMappingsTitle', value: mappingMetrics.total, valueClass: 'text-primary', descKey: 'skillsPage.stats.totalMappingsDesc' },
@@ -28,25 +35,25 @@ const { t } = useI18n();
       ]"
     />
 
-    <div class="card card-border bg-base-100 shadow-sm">
+    <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
-        <p class="text-sm text-base-content/70">
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
         </p>
       </div>
     </div>
 
-    <section class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      <article class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body gap-4">
-          <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+    <SectionGrid tag="section" grid-token="twoColumnXlGap4">
+      <article :class="SURFACE_GLASS_CARD_CLASS">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.pathwaysDescription") }}
             </p>
           </div>
 
-          <ul class="list rounded-box bg-base-200/60">
+          <ul class="list rounded-box glass-subtle">
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
               <span class="list-col-grow"></span>
@@ -65,7 +72,7 @@ const { t } = useI18n();
           </ul>
 
           <div class="card-actions justify-end">
-            <NuxtLink
+            <NuxtLink 
               :to="APP_ROUTES.skillsPathways"
               class="btn btn-primary btn-sm"
               :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
@@ -76,28 +83,28 @@ const { t } = useI18n();
         </div>
       </article>
 
-      <article class="card card-border bg-base-100 shadow-sm">
-        <div class="card-body gap-4">
-          <div class="space-y-1">
-            <h2 class="card-title text-lg">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
-            <p class="text-sm text-base-content/70">
+      <article :class="SURFACE_GLASS_CARD_CLASS">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+            <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
+            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("skillsPage.insights.topMappingsDescription") }}
             </p>
           </div>
 
           <ul
             v-if="topMappings.length > 0"
-            class="list rounded-box bg-base-200/60"
+            class="list rounded-box glass-subtle"
             :aria-label="t('skillsPage.insights.topMappingsAria')"
           >
-            <li
+            <li 
               v-for="mapping in topMappings"
               :key="mapping.id"
               class="list-row items-center"
             >
               <div class="list-col-grow">
                 <p class="font-medium">{{ mapping.transferableSkill }}</p>
-                <p class="text-xs text-base-content/70">{{ mapping.gameExpression }}</p>
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ mapping.gameExpression }}</p>
               </div>
               <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
             </li>
@@ -110,6 +117,6 @@ const { t } = useI18n();
           />
         </div>
       </article>
-    </section>
+    </SectionGrid>
   </div>
 </template>

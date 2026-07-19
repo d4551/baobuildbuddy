@@ -1,11 +1,19 @@
 <script setup lang="ts">
+import type { SkillMapping } from "@bao/shared/types/skill-mapping";
+import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+  WIDTH_TOKEN_CLASS,
+} from "~/constants/layout";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
 } from "~/constants/skills";
-import type { SkillMapping } from "@bao/shared/types/skill-mapping";
-import { useI18n } from "vue-i18n";
 
 defineProps<{
   hasMappings: boolean;
@@ -40,7 +48,7 @@ function normalizedConfidence(confidence: number): number {
     description-key="skillsPage.filteredEmptyDescription"
   />
 
-  <div v-else class="space-y-4">
+  <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <div class="hidden overflow-x-auto md:block">
       <table class="table table-zebra" :aria-label="t('skillsPage.table.ariaLabel')">
         <thead>
@@ -58,8 +66,8 @@ function normalizedConfidence(confidence: number): number {
             <td class="font-medium">{{ mapping.gameExpression }}</td>
             <td>{{ mapping.transferableSkill }}</td>
             <td>
-              <div class="flex flex-wrap gap-1">
-                <span
+              <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+                <span 
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
                   class="badge badge-sm badge-soft"
@@ -71,16 +79,16 @@ function normalizedConfidence(confidence: number): number {
                 </span>
               </div>
             </td>
-            <td class="w-40">
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-xs font-semibold">
+            <td :class="[WIDTH_TOKEN_CLASS.w40]">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                <div class="flex items-center justify-between font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <span>{{ mapping.confidence }}%</span>
-                  <span class="text-base-content/60">
+                  <span class="text-muted">
                     {{ resolveCategoryLabel(mapping.category) }}
                   </span>
                 </div>
-                <progress
-                  class="progress progress-primary w-full"
+                <progress 
+                  class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
                   :value="normalizedConfidence(mapping.confidence)"
                   :max="SKILLS_CONFIDENCE_MAX"
                   :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
@@ -93,7 +101,7 @@ function normalizedConfidence(confidence: number): number {
               </span>
             </td>
             <td>
-              <button
+              <button 
                 class="btn btn-ghost btn-sm btn-error"
                 :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                 @click="emit('delete', mapping.id)"
@@ -106,32 +114,32 @@ function normalizedConfidence(confidence: number): number {
       </table>
     </div>
 
-    <div class="space-y-3 md:hidden">
-      <article
+    <div class="md:hidden" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+      <article 
         v-for="mapping in filteredMappings"
         :key="mapping.id"
-        class="card card-border bg-base-100 shadow-sm"
+        :class="SURFACE_GLASS_CARD_CLASS"
         :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
       >
-        <div class="card-body gap-3">
-          <div class="flex items-start justify-between gap-3">
+        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div>
               <h2 class="card-title text-base">{{ mapping.transferableSkill }}</h2>
-              <p class="text-sm text-base-content/70">{{ mapping.gameExpression }}</p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mapping.gameExpression }}</p>
             </div>
             <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
           </div>
 
-          <progress
-            class="progress progress-primary w-full"
+          <progress 
+            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
             :value="normalizedConfidence(mapping.confidence)"
             :max="SKILLS_CONFIDENCE_MAX"
             :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
           ></progress>
 
-          <div class="flex flex-wrap gap-1">
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
             <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
-            <span
+            <span 
               v-for="application in mapping.industryApplications.slice(0, 3)"
               :key="application"
               class="badge badge-sm badge-soft"
@@ -141,7 +149,7 @@ function normalizedConfidence(confidence: number): number {
           </div>
 
           <div class="card-actions justify-end">
-            <button
+            <button 
               class="btn btn-ghost btn-sm btn-error"
               :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
               @click="emit('delete', mapping.id)"

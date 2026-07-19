@@ -1,3 +1,4 @@
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -9,10 +10,8 @@ const automationSchedulerLogger = createServerLogger("automation-run-scheduler")
 
 type SchedulerTimer = ReturnType<typeof setTimeout>;
 
-const asJsonRecord = (value: unknown): Record<string, unknown> | null =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : null;
+const asJsonRecord = (value: JsonValue | null | undefined): JsonObject | null =>
+  value && typeof value === "object" && !Array.isArray(value) ? value : null;
 
 export class AutomationRunScheduler {
   private readonly scheduledRunTimers = new Map<string, SchedulerTimer>();
@@ -28,8 +27,11 @@ export class AutomationRunScheduler {
       this.scheduledRunTimers.delete(runId);
       this.executeScheduledRun(runId).then(
         () => undefined,
-        (error: unknown) => {
-          automationSchedulerLogger.error("[automation] scheduled run execution failed", error);
+        (error) => {
+          automationSchedulerLogger.error(
+            "[automation] scheduled run execution failed",
+            error instanceof Error ? error.message : String(error),
+          );
         },
       );
     }, delayMs);

@@ -1,6 +1,7 @@
 import type { Database } from "bun:sqlite";
-import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
 import {
+  AUTH_REQUIRED_COLUMNS,
+  AUTH_TABLE_NAME,
   AUTOMATION_RUNS_REQUIRED_COLUMNS,
   AUTOMATION_RUNS_TABLE_NAME,
   JOBS_REQUIRED_COLUMNS,
@@ -10,6 +11,7 @@ import {
   STUDIOS_REQUIRED_COLUMNS,
   STUDIOS_TABLE_NAME,
 } from "./init-constants";
+import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -54,6 +56,7 @@ const ensureColumns = (
 };
 
 export const ensureDatabaseMigrations = (sqlite: Database): void => {
+  ensureColumns(sqlite, AUTH_TABLE_NAME, AUTH_REQUIRED_COLUMNS);
   ensureColumns(sqlite, AUTOMATION_RUNS_TABLE_NAME, AUTOMATION_RUNS_REQUIRED_COLUMNS);
   ensureColumns(sqlite, SETTINGS_TABLE_NAME, SETTINGS_REQUIRED_COLUMNS);
   ensureColumns(sqlite, JOBS_TABLE_NAME, JOBS_REQUIRED_COLUMNS);

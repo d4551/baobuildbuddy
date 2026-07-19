@@ -50,6 +50,17 @@ export function getLineFromOffset(text: string, offset: number): number {
 }
 
 /**
+ * Find the offset of a `<template>` block in Vue SFC content. Returns the
+ * offset of the `<` in `<template>`, or -1 if no template block exists.
+ * Use this to translate a `match.index` returned from `template.matchAll(...)`
+ * (which is relative to the template slice) into an offset into the full
+ * content (so `getLineFromOffset(content, offset)` reports the correct line).
+ */
+export function getTemplateOffset(content: string): number {
+  return content.indexOf("<template>");
+}
+
+/**
  * Returns true if the path contains any ignored directory segment.
  */
 export function shouldIgnorePath(

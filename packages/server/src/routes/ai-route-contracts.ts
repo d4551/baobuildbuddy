@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import { AI_CHAT_CONTEXT_TAIL_LIMIT } from "@bao/shared/constants/ai-chat";
 import {
   HTTP_STATUS_BAD_REQUEST,
@@ -18,6 +17,7 @@ import {
   SCHEMA_MAX_LENGTH_SHORT,
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { aiPreferenceSchema, chatContextSchema } from "./ai-route-chat-context";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 import { aiRoutingBodySchema, preferredProviderBodySchema } from "./settings-route-schema-ai-brand";
@@ -202,6 +202,9 @@ export const automationActionResponseSchema = t.Object({
   message: t.String(),
 });
 
+// Concrete body schemas above are the SSOT for AI payloads. Response maps stay
+// open until route handlers return SelectiveStatus-compatible status/body branches
+// instead of dynamic `status(result.status, result.body)` helper envelopes.
 export const chatRouteResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,

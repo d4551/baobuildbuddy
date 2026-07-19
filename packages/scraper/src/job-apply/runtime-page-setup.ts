@@ -1,13 +1,15 @@
 import type { JobApplyScriptEnvelope } from "@bao/shared/schemas/automation-scripts.schema";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import {
+  automationBrowserLaunchFailureToDetails,
+  formatAutomationBrowserLaunchFailureMessage,
+} from "@bao/shared/utils/automation-browser-launch-failure";
 import { settle } from "@bao/shared/utils/promise";
 import type { Page } from "playwright";
 import { closeAutomationBrowser, launchAutomationBrowser } from "../runtime/browser";
 import { automationRuntimeConfig } from "../runtime/config";
 import type { ProtocolEmitter } from "../runtime/protocol";
-import type { JobApplyStrategy } from "./strategy-registry";
-import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import {
   addStep,
   buildOutputDirectory,
@@ -15,11 +17,13 @@ import {
   createArtifacts,
 } from "./runtime-artifacts";
 import {
-  type JobApplyExecutionState,
   JOB_APPLY_STEP_INDEX,
+  type JobApplyExecutionState,
   type StepRecord,
 } from "./runtime-contracts";
-import { resolveJobApplyStrategy, JOB_APPLY_TOTAL_STEPS } from "./strategy-registry";
+import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
+import type { JobApplyStrategy } from "./strategy-registry";
+import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
 
 const buildResult = (
   success: boolean,
@@ -126,9 +130,15 @@ export const createExecutionState = async (
     return null;
   }
 
-  const session = await launchAutomationBrowser(payload.settings ?? DEFAULT_AUTOMATION_SETTINGS);
-  if (!session) {
-    emitter.emitError("AUTOMATION_RUNTIME_ERROR", "Unable to launch automation browser.");
+  const launchResult = await launchAutomationBrowser(
+    payload.settings ?? DEFAULT_AUTOMATION_SETTINGS,
+  );
+  if (!launchResult.ok) {
+    emitter.emitError(
+      "AUTOMATION_RUNTIME_ERROR",
+      formatAutomationBrowserLaunchFailureMessage(launchResult.failure),
+      automationBrowserLaunchFailureToDetails(launchResult.failure),
+    );
     return null;
   }
 
@@ -136,7 +146,7 @@ export const createExecutionState = async (
     emitter,
     payload,
     outputDir,
-    session,
+    session: launchResult.session,
     steps: [],
     screenshots: [],
   };

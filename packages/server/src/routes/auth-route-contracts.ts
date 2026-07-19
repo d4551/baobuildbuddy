@@ -1,10 +1,10 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const authBootstrapBodySchema = t.Object({

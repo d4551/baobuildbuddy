@@ -1,7 +1,7 @@
-import { computed, nextTick, onBeforeUnmount, watch } from "vue";
 import type { ComponentPublicInstance, Ref } from "vue";
-import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
+import { computed, nextTick, onBeforeUnmount, watch } from "vue";
 import { useScrollSpy } from "~/composables/useScrollSpy";
+import type { ApiDocsUiState, ApiEndpointGroup } from "~/types/api-docs";
 
 interface ApiDocsPageNavigationOptions {
   readonly route: { readonly hash: string };

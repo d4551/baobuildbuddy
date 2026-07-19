@@ -30,7 +30,6 @@ export class OpenAIProvider extends BaseAIProvider {
     const model = this.resolveModel(options);
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
-    // Add system message if provided
     if (options?.systemPrompt) {
       messages.push({
         role: "system",
@@ -83,7 +82,6 @@ export class OpenAIProvider extends BaseAIProvider {
     const model = this.resolveModel(options);
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
 
-    // Add system message if provided
     if (options?.systemPrompt) {
       messages.push({
         role: "system",

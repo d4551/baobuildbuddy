@@ -1,7 +1,7 @@
 import {
-  THEME_NAMES,
-  normalizeAppDataTheme,
   type AppDataTheme,
+  normalizeAppDataTheme,
+  THEME_NAMES,
 } from "@bao/shared/constants/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import { readonly } from "vue";
@@ -35,15 +35,16 @@ export function useTheme() {
   }
 
   function initTheme(preferredTheme?: AppDataTheme) {
+    // Settings are the persisted SSOT; cookie is a hydration cache only.
+    if (preferredTheme) {
+      setTheme(preferredTheme, { persist: true });
+      return;
+    }
+
     const savedRaw = themeCookie.value;
     if (savedRaw) {
       const normalized = normalizeAppDataTheme(savedRaw);
       setTheme(normalized, { persist: normalized !== savedRaw });
-      return;
-    }
-
-    if (preferredTheme) {
-      setTheme(preferredTheme, { persist: false });
       return;
     }
 

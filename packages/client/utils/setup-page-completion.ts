@@ -2,18 +2,18 @@ import {
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared/constants/ai-provider";
-import { settlePromise } from "~/composables/async-flow";
 import {
   API_KEY_FIELD_BY_PROVIDER,
   CLOUD_PROVIDER_IDS,
 } from "~/components/setup/setup-page-contracts";
+import { settlePromise } from "~/composables/async-flow";
+import { getErrorMessage } from "~/utils/errors";
 import type {
   ProviderCredentialState,
   SetupCompletionInput,
   SetupPageActionsContext,
   SetupPageToastApi,
 } from "~/utils/setup-page-action-contracts";
-import { getErrorMessage } from "~/utils/errors";
 
 const createCompletionInput = (context: SetupPageActionsContext): SetupCompletionInput => ({
   providedApiKey: context.existingApiKey.value.trim(),

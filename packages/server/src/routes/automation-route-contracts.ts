@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
@@ -25,6 +24,7 @@ import {
 import type { EmailResponseRequest } from "@bao/shared/schemas/automation-email.schema";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { t } from "elysia";
+import type { Static } from "typebox";
 import { routeErrorBodySchema, simpleErrorResponseSchema } from "./route-error-envelope";
 
 export { routeErrorBodySchema };

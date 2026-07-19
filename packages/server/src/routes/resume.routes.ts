@@ -1,4 +1,3 @@
-import { Elysia, type status } from "elysia";
 import {
   API_ERROR_GENERATE_QUESTIONS,
   API_ERROR_RESUME_NOT_FOUND,
@@ -21,6 +20,7 @@ import {
 } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { settle } from "@bao/shared/utils/promise";
+import { Elysia, type status } from "elysia";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";

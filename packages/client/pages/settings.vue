@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -113,7 +115,7 @@ watch(
       title-id="settings-page-title"
       :title="t('settings.title')"
       :description="t('settings.subtitle')"
-      description-class="text-base-content/70"
+      description-class="text-secondary"
     />
 
     <BootstrapErrorAlert
@@ -132,7 +134,7 @@ watch(
       :lines="8"
     />
 
-    <div v-else class="space-y-6">
+    <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <SettingsSectionTabs v-model:active-section="activeSection">
         <template #profile>
           <SettingsProfilePanel

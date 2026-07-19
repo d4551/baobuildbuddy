@@ -6,6 +6,7 @@ import {
   type SkillEvidence,
   type SkillMapping,
 } from "@bao/shared/types/skill-mapping";
+import type { JsonArray, JsonValue } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import type { skillMappings } from "../db/schema/skill-mappings";
 
@@ -15,10 +16,12 @@ type DemandLevel = SkillMapping["demandLevel"];
 const isSkillCategory = (value: string | null): value is SkillCategory =>
   typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
 
-const isEvidenceType = (value: unknown): value is SkillEvidence["type"] =>
+const isEvidenceType = (value: JsonValue | undefined): value is SkillEvidence["type"] =>
   typeof value === "string" && SKILL_EVIDENCE_TYPE_IDS.some((typeId) => typeId === value);
 
-const isEvidenceStatus = (value: unknown): value is SkillEvidence["verificationStatus"] =>
+const isEvidenceStatus = (
+  value: JsonValue | undefined,
+): value is SkillEvidence["verificationStatus"] =>
   typeof value === "string" &&
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS.some((statusId) => statusId === value);
 
@@ -28,13 +31,14 @@ export const normalizeSkillCategory = (value: string | null): SkillCategory =>
 export const normalizeDemandLevel = (value: string | null): DemandLevel =>
   value === "high" || value === "low" ? value : "medium";
 
-const normalizeEvidenceType = (value: unknown): SkillEvidence["type"] =>
+const normalizeEvidenceType = (value: JsonValue | undefined): SkillEvidence["type"] =>
   isEvidenceType(value) ? value : "document";
 
-const normalizeEvidenceStatus = (value: unknown): SkillEvidence["verificationStatus"] =>
-  isEvidenceStatus(value) ? value : "pending";
+const normalizeEvidenceStatus = (
+  value: JsonValue | undefined,
+): SkillEvidence["verificationStatus"] => (isEvidenceStatus(value) ? value : "pending");
 
-export const normalizeEvidenceEntries = (value: unknown[] | null): SkillEvidence[] => {
+export const normalizeEvidenceEntries = (value: JsonArray | null | undefined): SkillEvidence[] => {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -64,7 +68,7 @@ export const toSkillMapping = (row: SkillMappingRow): SkillMapping => ({
   gameExpression: row.gameExpression,
   transferableSkill: row.transferableSkill,
   industryApplications: row.industryApplications || [],
-  evidence: normalizeEvidenceEntries(row.evidence),
+  evidence: row.evidence ?? [],
   confidence: row.confidence || 50,
   category: normalizeSkillCategory(row.category),
   demandLevel: normalizeDemandLevel(row.demandLevel),

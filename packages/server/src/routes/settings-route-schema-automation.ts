@@ -224,9 +224,7 @@ const speechEngineSettingsTtsBodyShape = {
   voice: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
   format: t.Union([t.Literal("mp3"), t.Literal("wav")]),
 };
-const speechEngineSettingsTtsBodySchema = t.Required(
-  t.Object(speechEngineSettingsTtsBodyShape),
-);
+const speechEngineSettingsTtsBodySchema = t.Required(t.Object(speechEngineSettingsTtsBodyShape));
 
 export const speechSettingsBodySchema = t.Required(
   t.Object({
@@ -241,12 +239,9 @@ export const jobTaxonomyKeywordEntryBodySchema = t.Required(
     id: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_LONG }),
     category: jobTaxonomyKeywordCategoryBodySchema,
     label: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
-    synonyms: t.Array(
-      t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }),
-      {
-        maxItems: SCHEMA_MAX_ITEMS_LARGE,
-      },
-    ),
+    synonyms: t.Array(t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_LABEL }), {
+      maxItems: SCHEMA_MAX_ITEMS_LARGE,
+    }),
     sortOrder: t.Number({ minimum: 0, maximum: SCHEMA_MAX_ITEMS_LARGE }),
     enabled: t.Boolean(),
   }),

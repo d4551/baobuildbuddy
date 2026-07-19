@@ -3,6 +3,17 @@ import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_HEIGHT_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -60,20 +71,14 @@ function handleScheduleInput(event: Event): void {
 </script>
 
 <template>
-  <div class="card card-border h-full bg-base-100">
-    <div class="card-body gap-4">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2">
+  <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+          <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="capability.name">
-              <span
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary"
-              >
-                <component
-                  :is="resolveAppIconComponent(capabilityIconName)"
-                  class="h-4 w-4"
-                  aria-hidden="true"
-                />
+              <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName)" aria-hidden="true"/>
                 <span class="sr-only">{{ capability.name }}</span>
               </span>
             </span>
@@ -85,7 +90,7 @@ function handleScheduleInput(event: Event): void {
               {{ runStateLabel(runState) }}
             </span>
           </div>
-          <p class="text-sm text-base-content/70">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ cardDescription(capability.target) }}
           </p>
           <AutomationCoverageChips
@@ -105,12 +110,11 @@ function handleScheduleInput(event: Event): void {
         </NuxtLink>
       </div>
 
-      <div class="stats stats-vertical w-full border border-base-300 bg-base-200 xl:stats-horizontal">
+      <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
-          <div
-            class="stat-value text-2xl"
-            :class="capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error'"
+          <div 
+            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error']"
           >
             {{ capabilityAvailabilityLabel(capability) }}
           </div>
@@ -120,7 +124,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.issuesTitle") }}</div>
-          <div class="stat-value text-2xl" :class="issueCount === 0 ? 'text-success' : 'text-warning'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, issueCount === 0 ? 'text-success' : 'text-warning']">
             {{ issueCount }}
           </div>
           <div class="stat-desc">
@@ -133,7 +137,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value text-2xl" :class="runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content'">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content']">
             {{ runStateLabel(runState) }}
           </div>
           <div class="stat-desc">
@@ -146,35 +150,35 @@ function handleScheduleInput(event: Event): void {
         </div>
       </div>
 
-      <div v-if="showOperations" class="card-actions justify-end gap-3">
-        <button
+      <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+        <button 
           class="btn btn-primary"
           :aria-label="cardRunAria(capability.target)"
           :disabled="pendingAction !== null || !capability.configured"
           @click="emit('run', capability.target)"
         >
-          <span v-if="isPendingAction(capability.target, 'run')" class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner v-if="isPendingAction(capability.target, 'run')" size="xs" :label="t('common.loading')" />
           <span>{{ cardRunButtonLabel(capability.target) }}</span>
         </button>
       </div>
 
-      <div v-if="showOperations && runState !== 'idle'" class="space-y-3">
-        <div
+      <div v-if="showOperations && runState !== 'idle'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <div 
           v-if="runState === 'running'"
           aria-live="polite"
           class="alert alert-info alert-vertical sm:alert-horizontal"
         >
-          <span class="loading loading-spinner loading-xs"></span>
+          <LoadingSpinner size="xs" :label="t('common.loading')" />
           <span>{{ runStateLabel(runState) }}</span>
         </div>
-        <div
+        <div 
           v-else-if="runState === 'success'"
           role="alert"
           class="alert alert-success alert-vertical sm:alert-horizontal"
         >
           <span>{{ runMessage }}</span>
         </div>
-        <div
+        <div 
           v-else-if="runState === 'error'"
           role="alert"
           class="alert alert-error alert-vertical sm:alert-horizontal"
@@ -185,13 +189,13 @@ function handleScheduleInput(event: Event): void {
 
       <div
         v-if="issueCount > 0 && compactMode"
-        class="rounded-box border border-base-300 bg-base-200 p-4 text-sm text-base-content/75"
+        class="rounded-box border border-base-300 bg-base-200 text-secondary" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
-        <div class="space-y-4">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <p class="font-semibold text-base-content">
             {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
           </p>
-          <ul class="space-y-2">
+          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
               {{ issue }}
             </li>
@@ -211,8 +215,8 @@ function handleScheduleInput(event: Event): void {
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
         </summary>
-        <div class="collapse-content space-y-4 text-sm text-base-content/75">
-          <ul class="space-y-2">
+        <div class="collapse-content text-secondary" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, TYPOGRAPHY_SCALE_CLASS.sm]">
+          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
               {{ issue }}
             </li>
@@ -225,19 +229,19 @@ function handleScheduleInput(event: Event): void {
         </div>
       </details>
 
-      <details
+      <details 
         v-if="showOperations"
         class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.schedule.disclosureTitle") }}
         </summary>
-        <div class="collapse-content space-y-4">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-            <input
+            <input 
               :value="scheduledRunAt"
-              class="input w-full"
+              class="input" :class="[FLUID_WIDTH_CLASS]"
               type="datetime-local"
               :aria-label="t('automation.scraper.schedule.aria')"
               @input="handleScheduleInput"
@@ -245,35 +249,32 @@ function handleScheduleInput(event: Event): void {
             <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
           </fieldset>
           <div class="card-actions justify-end">
-            <button
+            <button 
               class="btn btn-outline btn-sm"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
               @click="emit('schedule', capability.target)"
             >
-              <span
-                v-if="isPendingAction(capability.target, 'schedule')"
-                class="loading loading-spinner loading-xs"
-              ></span>
+              <LoadingSpinner v-if="isPendingAction(capability.target, 'schedule')" size="xs" :label="t('common.loading')" />
               <span>{{ t("automation.scraper.schedule.button") }}</span>
             </button>
           </div>
         </div>
       </details>
 
-      <details
+      <details 
         v-if="showOperations && latestRun"
         class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ latestRunNoticeText(capability.target) }}
         </summary>
-        <div class="collapse-content space-y-4">
-          <p class="text-sm text-base-content/75">
+        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ latestRunStatusText(capability.target) }}
           </p>
           <div class="card-actions justify-end">
-            <NuxtLink
+            <NuxtLink 
               :to="buildRunDetailRoute(latestRun.id)"
               class="btn btn-ghost btn-sm"
               :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"

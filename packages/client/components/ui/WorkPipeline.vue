@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
 import type {
   DashboardPipelineStatus,
   DashboardPipelineStepViewModel,
 } from "~/constants/dashboard-contracts";
+import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 interface WorkPipelineProps {
   readonly title: string;
@@ -25,15 +31,15 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
 </script>
 
 <template>
-  <section class="card bg-base-200">
-    <div class="card-body gap-4">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div>
-        <h2 class="card-title text-lg">{{ props.title }}</h2>
-        <p class="text-sm text-base-content/70">{{ props.description }}</p>
+        <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ props.title }}</h2>
+        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ props.description }}</p>
       </div>
 
-      <ul class="steps steps-vertical xl:steps-horizontal w-full" :aria-label="props.ariaLabel">
-        <li
+      <ul class="steps steps-vertical xl:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="props.ariaLabel">
+        <li 
           v-for="step in props.steps"
           :key="step.id"
           class="step"
@@ -42,9 +48,9 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
             'step-secondary': step.status === 'inProgress',
           }"
         >
-          <NuxtLink
+          <NuxtLink 
             :to="step.to"
-            class="inline-flex items-center gap-2 link link-hover"
+            class="inline-flex items-center link link-hover" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
             :aria-current="step.status === 'inProgress' ? 'step' : undefined"
           >
             <span>{{ t(step.labelKey) }}</span>

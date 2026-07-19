@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
 
 const props = defineProps<{
   modelValue: ResumeFormExperience[];
@@ -56,9 +63,9 @@ function removeExperience(index: number): void {
 
 <template>
   <div class="card-body">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
-      <button
+      <button 
         class="btn btn-sm btn-primary"
         :aria-label="t('resumePage.experience.addButtonAria')"
         @click="addExperience"
@@ -66,18 +73,18 @@ function removeExperience(index: number): void {
         {{ t("resumePage.experience.addButton") }}
       </button>
     </div>
-    <div class="space-y-6">
-      <div
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
+      <div 
         v-for="(experience, index) in localValue"
         :key="`${experience.company}-${experience.title}-${index}`"
-        class="card bg-base-100"
+        :class="SURFACE_GLASS_CARD_CLASS"
       >
         <div class="card-body">
-          <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button 
               class="btn btn-error btn-xs"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"
@@ -88,12 +95,12 @@ function removeExperience(index: number): void {
           <SectionGrid grid-token="twoColumn">
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.jobTitleLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.title"
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.experience.jobTitleAria')"
                 @input="emitValue"
               />
@@ -101,12 +108,12 @@ function removeExperience(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.companyLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.company"
                 type="text"
                 required
                 minlength="2"
-                class="input validator w-full input-sm"
+                class="input validator input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.experience.companyAria')"
                 @input="emitValue"
               />
@@ -114,31 +121,31 @@ function removeExperience(index: number): void {
             </fieldset>
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("resumePage.experience.locationLegend") }}</legend>
-              <input
+              <input 
                 v-model="experience.location"
                 type="text"
-                class="input w-full input-sm"
+                class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                 :aria-label="t('resumePage.experience.locationAria')"
                 @input="emitValue"
               />
             </fieldset>
-            <div class="flex gap-2">
+            <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <fieldset class="fieldset flex-1">
                 <legend class="fieldset-legend">{{ t("resumePage.experience.startDateLegend") }}</legend>
-                <input
+                <input 
                   v-model="experience.startDate"
                   type="month"
-                  class="input w-full input-sm"
+                  class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                   :aria-label="t('resumePage.experience.startDateAria')"
                   @input="emitValue"
                 />
               </fieldset>
               <fieldset class="fieldset flex-1">
                 <legend class="fieldset-legend">{{ t("resumePage.experience.endDateLegend") }}</legend>
-                <input
+                <input 
                   v-model="experience.endDate"
                   type="month"
-                  class="input w-full input-sm"
+                  class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
                   :disabled="experience.current"
                   :aria-label="t('resumePage.experience.endDateAria')"
                   @input="emitValue"
@@ -147,8 +154,8 @@ function removeExperience(index: number): void {
             </div>
           </SectionGrid>
           <fieldset class="fieldset">
-            <label class="label cursor-pointer justify-start gap-2">
-              <input
+            <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+              <input 
                 v-model="experience.current"
                 type="checkbox"
                 class="checkbox checkbox-sm"
@@ -160,11 +167,11 @@ function removeExperience(index: number): void {
           </fieldset>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
-            <textarea
+            <textarea 
               v-model="experience.description"
               required
               minlength="20"
-              class="textarea validator w-full"
+              class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
               rows="3"
               :aria-label="t('resumePage.experience.descriptionAria')"
               @input="emitValue"

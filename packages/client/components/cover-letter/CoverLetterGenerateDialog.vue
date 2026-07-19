@@ -2,6 +2,13 @@
 import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
+import {
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const open = defineModel<boolean>("open", { default: false });
 const form = defineModel<CoverLetterGenerateForm>("form", { required: true });
@@ -30,24 +37,24 @@ defineEmits<{
     :close-aria-label="$t('coverLetterPage.generate.closeBackdropAria')"
     :close-backdrop-label="$t('coverLetterPage.generate.closeBackdropButton')"
   >
-    <h2 :id="titleId" class="text-lg font-bold">
+    <h2 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ $t("coverLetterPage.generate.title") }}
     </h2>
-    <p class="mt-1 text-sm text-base-content/70">
+    <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ $t("coverLetterPage.generate.subtitle") }}
     </p>
 
-    <div class="mt-4 space-y-4">
+    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, MARGIN_TOKEN_CLASS.mt4]">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.companyLegend") }}
         </legend>
-        <input
+        <input 
           v-model="form.company"
           type="text"
           :minlength="companyMinLength"
           required
-          class="input validator w-full"
+          class="input validator" :class="[FLUID_WIDTH_CLASS]"
           :placeholder="$t('coverLetterPage.generate.companyPlaceholder')"
           :aria-label="$t('coverLetterPage.generate.companyAria')"
         />
@@ -60,12 +67,12 @@ defineEmits<{
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.positionLegend") }}
         </legend>
-        <input
+        <input 
           v-model="form.position"
           type="text"
           :minlength="positionMinLength"
           required
-          class="input validator w-full"
+          class="input validator" :class="[FLUID_WIDTH_CLASS]"
           :placeholder="$t('coverLetterPage.generate.positionPlaceholder')"
           :aria-label="$t('coverLetterPage.generate.positionAria')"
         />
@@ -78,9 +85,9 @@ defineEmits<{
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.resumeLegend") }}
         </legend>
-        <select
+        <select 
           v-model="form.resumeId"
-          class="select w-full"
+          class="select" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="$t('coverLetterPage.generate.resumeAria')"
         >
           <option value="">
@@ -96,10 +103,10 @@ defineEmits<{
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.jobDescriptionLegend") }}
         </legend>
-        <textarea
+        <textarea 
           v-model="form.jobDescription"
           :minlength="jobDescriptionMinLength"
-          class="textarea validator w-full"
+          class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
           rows="5"
           :placeholder="$t('coverLetterPage.generate.jobDescriptionPlaceholder')"
           :aria-label="$t('coverLetterPage.generate.jobDescriptionAria')"
@@ -113,9 +120,9 @@ defineEmits<{
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.templateLegend") }}
         </legend>
-        <select
+        <select 
           v-model="form.template"
-          class="select w-full"
+          class="select" :class="[FLUID_WIDTH_CLASS]"
           :aria-label="$t('coverLetterPage.generate.templateAria')"
         >
           <option v-for="template in templateOptions" :key="template" :value="template">
@@ -126,21 +133,21 @@ defineEmits<{
     </div>
 
     <div class="modal-action">
-      <button
+      <button 
         class="btn btn-ghost"
         :aria-label="$t('coverLetterPage.generate.cancelAria')"
         @click="open = false"
       >
         {{ $t("coverLetterPage.generate.cancelButton") }}
       </button>
-      <button
+      <button 
         class="btn btn-primary"
         :disabled="generating || !form.company || !form.position"
         :aria-label="$t('coverLetterPage.generate.submitAria')"
         @click="$emit('generate')"
       >
-        <span v-if="generating" class="loading loading-spinner loading-xs"></span>
-        <IconBolt v-else class="h-4 w-4" />
+        <LoadingSpinner v-if="generating" size="xs" :label="$t('coverLetterPage.generate.submitButton')" />
+        <IconBolt :class="[ICON_SIZE_CLASS[4]]" v-else/>
         {{ $t("coverLetterPage.generate.submitButton") }}
       </button>
     </div>

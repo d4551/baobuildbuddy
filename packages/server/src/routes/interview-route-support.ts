@@ -9,7 +9,12 @@ import {
   API_MESSAGE_RESPONSE_RECORDED,
 } from "@bao/shared/constants/api-messages";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
 import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import { asString } from "@bao/shared/utils/type-guards";
@@ -49,7 +54,7 @@ export const createInterviewSession = async (
   const created = await interviewService.startSession(resolvedStudioId, normalizedConfig);
   const response = await sessionWithDerivedFields(created);
   return {
-    status: 201,
+    status: HTTP_STATUS_CREATED,
     body: {
       ...response,
       message: API_MESSAGE_INTERVIEW_SESSION_CREATED,
@@ -61,12 +66,12 @@ export const getInterviewSession = async (id: string) => {
   const session = await interviewService.getSession(id);
   if (!session) {
     return {
-      status: HTTP_STATUS_NOT_FOUND,
+      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
       body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
     };
   }
   return {
-    status: null,
+    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
     body: await sessionWithDerivedFields(session),
   };
 };
@@ -75,7 +80,7 @@ export const submitInterviewResponse = async (id: string, body: SubmitResponseBo
   const session = await interviewService.getSession(id);
   if (!session) {
     return {
-      status: HTTP_STATUS_NOT_FOUND,
+      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
       body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
     };
   }
@@ -83,7 +88,7 @@ export const submitInterviewResponse = async (id: string, body: SubmitResponseBo
   const payload = parseResponsePayload(body);
   if (!payload) {
     return {
-      status: HTTP_STATUS_BAD_REQUEST,
+      status: HTTP_STATUS_BAD_REQUEST as typeof HTTP_STATUS_BAD_REQUEST,
       body: { error: API_ERROR_INTERVIEW_RESPONSE_REQUIRED },
     };
   }
@@ -91,7 +96,7 @@ export const submitInterviewResponse = async (id: string, body: SubmitResponseBo
   const resolvedQuestionId = resolveQuestionId(session, payload);
   if (!resolvedQuestionId) {
     return {
-      status: HTTP_STATUS_BAD_REQUEST,
+      status: HTTP_STATUS_BAD_REQUEST as typeof HTTP_STATUS_BAD_REQUEST,
       body: { error: API_ERROR_INTERVIEW_QUESTION_UNRESOLVED },
     };
   }
@@ -100,13 +105,13 @@ export const submitInterviewResponse = async (id: string, body: SubmitResponseBo
   const updated = await interviewService.addResponse(id, response);
   if (!updated) {
     return {
-      status: HTTP_STATUS_NOT_FOUND,
+      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
       body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
     };
   }
 
   return {
-    status: null,
+    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
     body: {
       ...(await sessionWithDerivedFields(updated)),
       message: API_MESSAGE_RESPONSE_RECORDED,
@@ -118,7 +123,7 @@ export const completeInterviewSession = async (id: string) => {
   const completed = await interviewService.completeSession(id);
   if (!completed) {
     return {
-      status: HTTP_STATUS_NOT_FOUND,
+      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
       body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
     };
   }
@@ -130,7 +135,7 @@ export const completeInterviewSession = async (id: string) => {
   );
 
   return {
-    status: null,
+    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
     body: {
       ...(await sessionWithDerivedFields(completed)),
       message: API_MESSAGE_INTERVIEW_COMPLETED,

@@ -1,4 +1,3 @@
-import type { Static } from "typebox";
 import {
   HTTP_STATUS_CREATED,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -18,6 +17,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { t } from "elysia";
+import type { Static } from "typebox";
 
 export type PortfolioMetadataRecord = PortfolioMetadata;
 
@@ -70,9 +70,7 @@ export const portfolioProjectReorderBodySchema = t.Object(
   },
   { required: ["orderedIds"] },
 );
-export type PortfolioProjectReorderRouteBody = Static<
-  typeof portfolioProjectReorderBodySchema
->;
+export type PortfolioProjectReorderRouteBody = Static<typeof portfolioProjectReorderBodySchema>;
 
 export const portfolioProjectIdParamsSchema = t.Object(
   {

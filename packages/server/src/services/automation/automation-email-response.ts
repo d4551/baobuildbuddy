@@ -2,8 +2,6 @@ import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
-import type { EmailResponseExecutionPayload } from "./automation-run-inputs";
-import { buildEmailResponseInput } from "./automation-run-inputs";
 import type {
   EmailDeliveryResult,
   EmailExecutionResult,
@@ -15,6 +13,8 @@ import {
   failEmailResponseRun,
   markEmailResponseDraftGenerated,
 } from "./automation-email-response-updates";
+import type { EmailResponseExecutionPayload } from "./automation-run-inputs";
+import { buildEmailResponseInput } from "./automation-run-inputs";
 
 export const createEmailResponseRun = async (
   runId: string,

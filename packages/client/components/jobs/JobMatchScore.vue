@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useScoreColor } from "~/composables/useScoreColor";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MAX_W_XS_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+  WIDTH_TOKEN_CLASS,
+} from "~/constants/layout";
 
 interface MatchBreakdown {
   skills: number;
@@ -28,47 +37,42 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 </script>
 
 <template>
-  <div
-    v-if="compact"
-    class="w-20 shrink-0 space-y-2 text-right"
-  >
-    <p class="text-sm font-semibold" :class="scoreTextClass">
+  <div class="shrink-0 text-right" v-if="compact" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, WIDTH_TOKEN_CLASS.w20]">
+    <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, scoreTextClass]">
       {{ score }}%
     </p>
-    <progress
-      class="progress w-full"
-      :class="scoreProgressClass"
+    <progress 
+      class="progress" :class="[FLUID_WIDTH_CLASS, scoreProgressClass]"
       :value="score"
       max="100"
       :aria-label="t('jobsPage.matchBreakdown.overallProgressAria', { score })"
     ></progress>
   </div>
 
-  <div v-else class="flex flex-col items-center gap-4">
-    <div class="w-full max-w-xs space-y-3 text-center">
+  <div v-else class="flex flex-col items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+    <div class="text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, MAX_W_XS_CLASS]">
       <div class="flex justify-center">
         <span class="badge badge-lg" :class="scoreBadgeClass">
           {{ score }}%
         </span>
       </div>
-      <p class="text-3xl font-bold" :class="scoreTextClass">{{ score }}%</p>
-      <progress
-        class="progress w-full"
-        :class="scoreProgressClass"
+      <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
+      <progress 
+        class="progress" :class="[FLUID_WIDTH_CLASS, scoreProgressClass]"
         :value="score"
         max="100"
         :aria-label="t('jobsPage.matchBreakdown.overallProgressAria', { score })"
       ></progress>
     </div>
 
-    <div v-if="breakdown" class="w-full space-y-3">
+    <div v-if="breakdown" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
       <div>
-        <div class="mb-1 flex justify-between text-sm">
+        <div class="flex justify-between" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">
           <span>{{ t("jobsPage.matchBreakdown.skillsMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.skills }}%</span>
         </div>
-        <progress
-          class="progress progress-success w-full"
+        <progress 
+          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
           :value="breakdown.skills"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.skillsProgressAria')"
@@ -76,12 +80,12 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
       </div>
 
       <div>
-        <div class="mb-1 flex justify-between text-sm">
+        <div class="flex justify-between" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">
           <span>{{ t("jobsPage.matchBreakdown.experienceMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.experience }}%</span>
         </div>
-        <progress
-          class="progress progress-success w-full"
+        <progress 
+          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
           :value="breakdown.experience"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.experienceProgressAria')"
@@ -89,12 +93,12 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
       </div>
 
       <div>
-        <div class="mb-1 flex justify-between text-sm">
+        <div class="flex justify-between" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.sm]">
           <span>{{ t("jobsPage.matchBreakdown.locationMatchLabel") }}</span>
           <span class="font-medium">{{ breakdown.location }}%</span>
         </div>
-        <progress
-          class="progress progress-success w-full"
+        <progress 
+          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
           :value="breakdown.location"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.locationProgressAria')"

@@ -9,24 +9,24 @@ import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { normalizeEmailResponsePayload } from "./automation-email-response-payload";
 import { AutomationConcurrencyLimitError } from "./automation-errors";
 import {
+  assertJobApplyDependencies,
+  normalizeJobApplyPayload,
+} from "./automation-job-apply-preparation";
+import {
   buildAuditInput,
   buildEmailResponseInput,
   buildScheduledJobApplyInput,
   buildScrapeInput,
+  type JobApplyPayload,
   normalizeScrapeTarget,
   resolveScrapeAction,
-  type JobApplyPayload,
 } from "./automation-run-inputs";
-import {
-  assertJobApplyDependencies,
-  normalizeJobApplyPayload,
-} from "./automation-job-apply-preparation";
+import type { CreateProgressEvent } from "./automation-service-contracts";
 import {
   loadAutomationSettings,
   normalizeScheduledRunAt,
   resolveMaxConcurrentRuns,
 } from "./automation-settings-support";
-import type { CreateProgressEvent } from "./automation-service-contracts";
 
 const DEFAULT_PROGRESS = 0;
 const SCHEDULED_ACTION_EMAIL_RESPONSE = "email_response";

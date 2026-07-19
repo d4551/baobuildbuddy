@@ -8,63 +8,57 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
 } from "@bao/shared/constants/http";
+import { TRACE_ID_HEADER } from "@bao/shared/constants/runtime";
 import { Elysia } from "elysia";
 import { createServerLogger } from "../utils/logger";
 
-/**
- * Collects validation details from Elysia error shapes when available.
- *
- * @param error Validation error payload.
- * @returns Flattened field-level details when present.
- */
-interface ErrorWithAll {
-  all?: unknown;
+interface ValidationField {
+  path: string;
+  message: string;
 }
 
-function hasAllProperty(obj: object): obj is ErrorWithAll {
-  return "all" in obj;
+interface HasValidationAll {
+  all: readonly ValidationField[] | (() => readonly ValidationField[]);
 }
 
-function readValidationFields(error: unknown): unknown[] | undefined {
-  if (typeof error !== "object" || error === null) {
-    return;
+function hasValidationAll(value: object): value is HasValidationAll {
+  return "all" in value && value.all !== null && value.all !== undefined;
+}
+
+function hasArrayAll(value: object): value is { all: readonly ValidationField[] } {
+  return hasValidationAll(value) && Array.isArray(value.all);
+}
+
+function collectValidationFields(error: object): ValidationField[] | undefined {
+  if (hasArrayAll(error)) {
+    const entries = error.all;
+    return entries.length > 0 ? [...entries] : undefined;
   }
-
-  const details = hasAllProperty(error) ? error.all : undefined;
-  if (isUnknownArray(details)) return details;
-  if (isValueFactory(details)) {
-    const computed = details();
-    return isUnknownArray(computed) ? computed : undefined;
+  if (hasValidationAll(error)) {
+    const fn = error.all;
+    if (typeof fn === "function") {
+      const entries = fn();
+      return entries.length > 0 ? [...entries] : undefined;
+    }
   }
+  return undefined;
 }
 
-/**
- * Narrows an unknown value to a parameterless function returning unknown.
- */
-function isValueFactory(value: unknown): value is () => unknown {
-  return typeof value === "function";
-}
-
-/**
- * Narrows unknown values to unknown arrays without leaking any.
- */
-function isUnknownArray(value: unknown): value is unknown[] {
-  return Array.isArray(value);
-}
-
-/**
- * Centralized Elysia error envelope for deterministic API responses.
- */
 const logger = createServerLogger("error-handler");
 
+/**
+ * Centralized error handler for Elysia that extracts trace IDs and returns
+ * typed JSON error responses for each error category.
+ */
 export const errorHandler = new Elysia({ name: "error-handler" }).error((context) => {
   const { error, set } = context;
-  const code =
-    "code" in context && typeof context.code === "string" ? context.code : undefined;
+  const code = "code" in context && typeof context.code === "string" ? context.code : undefined;
+  const headerTrace = set.headers[TRACE_ID_HEADER];
+  const traceId = typeof headerTrace === "string" ? headerTrace : undefined;
 
   if (code === "NOT_FOUND") {
     set.status = HTTP_STATUS_NOT_FOUND;
-    return { error: API_ERROR_NOT_FOUND, code };
+    return { error: API_ERROR_NOT_FOUND, code, traceId };
   }
 
   const isValidation =
@@ -74,18 +68,26 @@ export const errorHandler = new Elysia({ name: "error-handler" }).error((context
       "constructor" in error &&
       error.constructor.name === "ValidationError");
 
-  if (isValidation) {
+  if (isValidation && typeof error === "object" && error !== null) {
+    const fields = collectValidationFields(error);
     set.status = HTTP_STATUS_BAD_REQUEST;
     return {
       error: API_ERROR_VALIDATION_FAILED,
       code: "VALIDATION",
-      fields: readValidationFields(error),
+      fields: fields ? fields.map((f) => f.path) : undefined,
+      traceId,
     };
   }
 
-  // Log internally but don't leak raw error details to the client
-  logger.error(`[${code}]`, error instanceof Error ? error.message : error);
-  set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-  return { error: API_ERROR_INTERNAL_SERVER, code };
-});
+  if (isValidation) {
+    set.status = HTTP_STATUS_BAD_REQUEST;
+    return { error: API_ERROR_VALIDATION_FAILED, code: "VALIDATION", traceId };
+  }
 
+  logger.error(
+    `[${code}] traceId=${traceId}`,
+    error instanceof Error ? error.message : String(error),
+  );
+  set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  return { error: API_ERROR_INTERNAL_SERVER, code, traceId };
+});

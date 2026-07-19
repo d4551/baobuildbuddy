@@ -35,7 +35,7 @@ const scaffoldClass = computed(() => [
 </script>
 
 <template>
-  <component
+  <component 
     :is="tag"
     :class="scaffoldClass"
     :aria-labelledby="labelledBy"

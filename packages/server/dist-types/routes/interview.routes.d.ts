@@ -3,7 +3,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     error: [];
 }, import("elysia/types").DefaultMetadata, {
     [x: string]: {
-        sessions: {
+        [x: string]: {
             post: {
                 body: {
                     studioId?: string | undefined;
@@ -71,7 +71,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     };
 } & {
     [x: string]: {
-        sessions: {
+        [x: string]: {
             get: {
                 body: unknown;
                 params: {};
@@ -86,7 +86,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     };
 } & {
     [x: string]: {
-        sessions: {
+        [x: string]: {
             ":id": {
                 get: {
                     body: unknown;
@@ -97,7 +97,13 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                     headers: unknown;
                     response: {
                         200: unknown;
-                        404: unknown;
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -106,7 +112,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     };
 } & {
     [x: string]: {
-        sessions: {
+        [x: string]: {
             ":id": {
                 response: {
                     post: {
@@ -122,8 +128,20 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                         headers: unknown;
                         response: {
                             200: unknown;
-                            400: unknown;
-                            404: unknown;
+                            400: {
+                                error: string;
+                                code?: string | undefined;
+                                details?: string | undefined;
+                                fields?: string[] | undefined;
+                                id?: string | undefined;
+                            };
+                            404: {
+                                error: string;
+                                code?: string | undefined;
+                                details?: string | undefined;
+                                fields?: string[] | undefined;
+                                id?: string | undefined;
+                            };
                             422: {
                                 type: 'validation';
                                 title: 'Validation Error';
@@ -143,7 +161,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
     };
 } & {
     [x: string]: {
-        sessions: {
+        [x: string]: {
             ":id": {
                 complete: {
                     post: {
@@ -155,7 +173,13 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                         headers: unknown;
                         response: {
                             200: unknown;
-                            404: unknown;
+                            404: {
+                                error: string;
+                                code?: string | undefined;
+                                details?: string | undefined;
+                                fields?: string[] | undefined;
+                                id?: string | undefined;
+                            };
                         };
                         error: never;
                     };

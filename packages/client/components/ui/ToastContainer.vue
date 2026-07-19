@@ -2,7 +2,18 @@
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import type { ToastType } from "~/composables/useToast";
-import { TOAST_CONTAINER_DOM_ID } from "~/constants/layout";
+import {
+  AUTH_CARD_MAX_WIDTH_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  TOAST_CONTAINER_DOM_ID,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();
@@ -32,38 +43,38 @@ function resolveIconPath(type: ToastType): string {
 </script>
 
 <template>
-  <div
+  <div 
     :id="TOAST_CONTAINER_DOM_ID"
     class="toast toast-end toast-top z-50 pointer-events-none"
     aria-live="polite"
     aria-atomic="false"
     :aria-label="t('a11y.notifications')"
   >
-    <TransitionGroup name="toast-motion" tag="div" class="flex w-full max-w-md flex-col gap-2">
-      <div
-        v-for="toast in toasts"
-        :key="toast.id"
-        class="alert shadow-lg pointer-events-auto items-start sm:alert-horizontal"
-        :class="resolveAlertClass(toast.type)"
-        :role="toast.type === 'error' ? 'alert' : 'status'"
-        :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
-      >
-        <svg
-          class="mt-0.5 h-5 w-5 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
+<TransitionGroup name="toast-motion" tag="div" class="flex flex-col" :class="[AUTH_CARD_MAX_WIDTH_CLASS, FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+        <div 
+          v-for="toast in toasts"
+          :key="toast.id"
+          class="alert pointer-events-auto items-start sm:alert-horizontal" :class="[SHADOW_TOKEN_CLASS.lg, resolveAlertClass(toast.type)]"
+          :role="toast.type === 'error' ? 'alert' : 'status'"
+          :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="resolveIconPath(toast.type)" />
-        </svg>
+          <svg 
+            class="shrink-0"
+            :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[5]]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" :d="resolveIconPath(toast.type)" />
+          </svg>
 
-        <div class="min-w-0 grow">
+        <div class="grow" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
           <h3 class="font-bold">{{ toast.title }}</h3>
-          <p class="text-sm break-words">{{ toast.message }}</p>
+          <p class="break-words" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ toast.message }}</p>
         </div>
 
-        <button
+        <button 
           type="button"
           class="btn btn-ghost btn-circle btn-xs"
           :aria-label="t('a11y.dismissNotification')"

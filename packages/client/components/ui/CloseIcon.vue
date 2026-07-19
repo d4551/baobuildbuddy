@@ -1,11 +1,15 @@
+<script setup lang="ts">
+import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS } from "~/constants/layout";
+</script>
+
 <template>
-  <svg
-    class="h-4 w-4"
+  <svg 
+    :class="ICON_SIZE_CLASS[4]"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
-    stroke-width="2"
+    :stroke-width="ICON_DECORATIVE_STROKE_WIDTH"
     aria-hidden="true"
     v-bind="$attrs"
   >

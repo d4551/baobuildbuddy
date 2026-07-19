@@ -1,5 +1,5 @@
-import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import { HUGGING_FACE_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
+import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";

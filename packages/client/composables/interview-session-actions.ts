@@ -1,5 +1,5 @@
 import { INTERVIEW_MIN_RESPONSE_LENGTH } from "@bao/shared/constants/interview";
-import { APP_ROUTES, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
 

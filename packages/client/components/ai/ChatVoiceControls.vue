@@ -2,6 +2,13 @@
 import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared/constants/ai-voice";
 import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 interface ChatVoiceControlsProps {
   readonly loading: boolean;
@@ -110,7 +117,7 @@ function handleAutoSpeakChange(event: Event): void {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6h12v12H6z" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M6 6h12v12H6z" />
     </svg>
     <svg
       v-else
@@ -123,10 +130,10 @@ function handleAutoSpeakChange(event: Event): void {
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
-        stroke-width="2"
+        :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
         d="M12 1a3 3 0 00-3 3v6a3 3 0 106 0V4a3 3 0 00-3-3z"
       />
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10a7 7 0 11-14 0M12 21v-3" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
   <button
@@ -145,21 +152,21 @@ function handleAutoSpeakChange(event: Event): void {
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5 6 9H3v6h3l5 4V5z" />
+      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M11 5 6 9H3v6h3l5 4V5z" />
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
-        stroke-width="2"
+        :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
         d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"
       />
     </svg>
   </button>
 
-  <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset mt-2">
-    <legend class="fieldset-legend text-xs">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
+  <fieldset v-if="!props.compact && props.supportsSynthesis && props.voices.length > 0" class="fieldset" :class="[MARGIN_TOKEN_CLASS.mt2]">
+    <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.voiceLegend") }}</legend>
     <select
       :value="props.selectedVoiceId"
-      class="select select-xs w-full"
+      class="select select-xs" :class="[FLUID_WIDTH_CLASS]"
       :aria-label="t('aiChatCommon.voice.voiceAria')"
       @change="handleVoiceSelectionChange"
     >
@@ -170,9 +177,9 @@ function handleAutoSpeakChange(event: Event): void {
     </select>
   </fieldset>
 
-  <div v-if="!props.compact && props.supportsSynthesis" class="mt-2 flex items-center justify-between gap-2">
-    <label class="label cursor-pointer gap-2 py-0">
-      <span class="text-xs">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
+  <div v-if="!props.compact && props.supportsSynthesis" class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
+ <label class="label cursor-pointer" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
+      <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
       <input
         :checked="props.autoSpeakReplies"
         type="checkbox"
@@ -181,7 +188,7 @@ function handleAutoSpeakChange(event: Event): void {
         @change="handleAutoSpeakChange"
       />
     </label>
-    <p class="text-xs text-base-content/70" aria-live="polite">
+    <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" aria-live="polite">
       {{
         props.isListening
           ? t("aiChatCommon.voice.listeningStatus")
@@ -194,7 +201,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <p
     v-if="!props.compact && props.supportHintKey"
-    class="mt-2 text-xs text-base-content/70"
+    class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
     aria-live="polite"
   >
@@ -203,7 +210,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <p
     v-if="!props.compact && props.errorLabel"
-    class="mt-1 text-xs text-error"
+    class="text-error" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.xs]"
     role="status"
     aria-live="assertive"
   >
@@ -212,7 +219,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <SpeechModelProfileFields
     v-if="showAdvancedSpeechConfig"
-    class="mt-3"
+    :class="[MARGIN_TOKEN_CLASS.mt3]"
     :provider-options="props.speechProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"

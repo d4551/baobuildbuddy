@@ -1,14 +1,25 @@
 <script setup lang="ts">
+import {
+  RESPONSIVE_PADDING_MD_P6_CLASS,
+} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const BRAND_HINT_IDS = {
   logoPath: "settings-brand-logo-path-hint",
   faviconPath: "settings-brand-favicon-path-hint",
 } as const;
 
-const brandFieldsetClass =
-  "fieldset min-w-0 gap-2 rounded-box border border-base-300 bg-base-100 p-4 shadow-sm";
+const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
 
@@ -23,64 +34,64 @@ const brandForm = defineModel<{
 </script>
 
 <template>
-  <div class="card card-border bg-base-100 shadow-sm">
-    <div class="card-body gap-4 p-4 md:p-6">
-      <p class="text-sm text-base-content/70">
+  <div :class="SURFACE_GLASS_CARD_CLASS">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.identityDescription") }}
       </p>
 
-      <SectionGrid grid-token="twoColumn" extra-class="gap-4">
+      <SectionGrid grid-token="twoColumn" :extra-class="FLEX_GAP_TOKEN_CLASS.gap4">
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.nameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.name"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.nameAria')"
           />
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.assistantNameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.assistantName"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.assistantNameAria')"
           />
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.apiNameLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.apiName"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.apiNameAria')"
           />
         </fieldset>
 
         <fieldset :class="brandFieldsetClass">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.taglineLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.tagline"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t('settings.brand.taglineAria')"
           />
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.logoPathLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.logoPath"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :placeholder="t('settings.brand.assetPathPlaceholder')"
             :aria-describedby="BRAND_HINT_IDS.logoPath"
             :aria-label="t('settings.brand.logoPathAria')"
@@ -91,12 +102,12 @@ const brandForm = defineModel<{
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">
-          <legend class="fieldset-legend text-sm font-semibold">
+          <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.faviconPathLegend") }}
           </legend>
-          <input
+          <input 
             v-model="brandForm.faviconPath"
-            class="input min-w-0 w-full"
+            class="input" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :placeholder="t('settings.brand.assetPathPlaceholder')"
             :aria-describedby="BRAND_HINT_IDS.faviconPath"
             :aria-label="t('settings.brand.faviconPathAria')"

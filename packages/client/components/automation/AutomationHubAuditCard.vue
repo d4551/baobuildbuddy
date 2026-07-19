@@ -7,6 +7,16 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
+  RADIUS_TOKEN_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+import {
   resolveAutomationCapabilityAction,
   resolveAutomationCapabilityDisplayName,
   resolveAutomationCapabilityIssues,
@@ -59,16 +69,16 @@ const readyEntries = computed(() =>
 </script>
 
 <template>
-  <section class="card card-border bg-base-100" :aria-label="t('automation.hub.audit.aria')">
-    <div class="card-body gap-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.hub.audit.aria')">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div>
           <h2 class="card-title">{{ t("automation.hub.audit.title") }}</h2>
-          <p class="text-sm text-base-content/70">
+          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("automation.hub.audit.description") }}
           </p>
         </div>
-        <NuxtLink
+        <NuxtLink 
           :to="APP_ROUTES.automationScraper"
           class="btn btn-outline btn-sm"
           :aria-label="t('automation.hub.audit.openScraperAria')"
@@ -93,7 +103,7 @@ const readyEntries = computed(() =>
       />
 
       <template v-else-if="capabilitySummary">
-        <StatsRow
+        <StatsRow 
           background-class="border border-base-300 bg-base-200"
           :stats="[
             { titleKey: 'automation.hub.audit.summary.total', value: capabilitySummary.total, valueClass: 'text-primary', descKey: 'automation.hub.audit.summary.totalDesc' },
@@ -103,13 +113,13 @@ const readyEntries = computed(() =>
         />
 
         <SectionGrid grid-token="twoColumnWide">
-          <section class="card card-border bg-base-100" aria-labelledby="automation-capability-attention-title">
-            <div class="card-body gap-4">
+          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-attention-title">
+            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
-                <h3 id="automation-capability-attention-title" class="card-title text-lg">
+                <h3 id="automation-capability-attention-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                   {{ t("automation.hub.audit.groups.attentionTitle") }}
                 </h3>
-                <p class="text-sm text-base-content/70">
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("automation.hub.audit.groups.attentionDescription") }}
                 </p>
               </div>
@@ -120,29 +130,23 @@ const readyEntries = computed(() =>
                 description-key="automation.hub.audit.groups.attentionEmptyDescription"
               />
 
-              <div v-else class="space-y-3">
-                <div
+              <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+                <div 
                   v-for="capability in needsAttentionEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200 p-4"
+                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
                 >
-                  <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div class="space-y-2">
-                      <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+                      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
-                          <span
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-sm"
-                          >
-                            <component
-                              :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
-                              aria-hidden="true"
-                            />
+                          <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                            <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName(capability))" aria-hidden="true"/>
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
                           </span>
                         </span>
                         <p class="font-semibold">{{ capabilityDisplayName(capability) }}</p>
-                        <span
+                        <span 
                           :class="[
                             capabilityStatusClass(capability.configured, capabilityIssueCount(capability)),
                             'whitespace-nowrap',
@@ -158,7 +162,7 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="space-y-1 text-sm text-base-content/80">
+                      <ul class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -168,7 +172,7 @@ const readyEntries = computed(() =>
                       </ul>
                     </div>
 
-                    <NuxtLink
+                    <NuxtLink 
                       :to="capabilityAction(capability).to"
                       class="btn btn-outline btn-sm"
                       :aria-label="capabilityAction(capability).ariaLabel"
@@ -181,35 +185,29 @@ const readyEntries = computed(() =>
             </div>
           </section>
 
-          <section class="card card-border bg-base-100" aria-labelledby="automation-capability-ready-title">
-            <div class="card-body gap-4">
+          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-ready-title">
+            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
-                <h3 id="automation-capability-ready-title" class="card-title text-lg">
+                <h3 id="automation-capability-ready-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
                   {{ t("automation.hub.audit.groups.readyTitle") }}
                 </h3>
-                <p class="text-sm text-base-content/70">
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("automation.hub.audit.groups.readyDescription") }}
                 </p>
               </div>
 
-              <div class="space-y-3">
-                <div
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+                <div 
                   v-for="capability in readyEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200 p-4"
+                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
                 >
-                  <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div class="space-y-2">
-                      <div class="flex flex-wrap items-center gap-2">
+                  <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
+                      <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
-                          <span
-                            class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-sm"
-                          >
-                            <component
-                              :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
-                              aria-hidden="true"
-                            />
+                          <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
+                            <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName(capability))" aria-hidden="true"/>
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
                           </span>
                         </span>
@@ -227,7 +225,7 @@ const readyEntries = computed(() =>
                       />
                     </div>
 
-                    <NuxtLink
+                    <NuxtLink 
                       :to="capabilityAction(capability).to"
                       class="btn btn-ghost btn-sm"
                       :aria-label="capabilityAction(capability).ariaLabel"

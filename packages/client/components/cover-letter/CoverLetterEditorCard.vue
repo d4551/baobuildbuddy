@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
+
 defineProps<{
   contentCharacterCount: number;
   t: (key: string, values?: Record<string, unknown>) => string;
@@ -13,28 +21,28 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="card bg-base-200">
+  <section :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
       <div class="alert alert-info alert-soft" role="status">
-        <IconInfoCircle class="h-5 w-5" />
+        <IconInfoCircle :class="[ICON_SIZE_CLASS[5]]"/>
         <span>{{ t("coverLetterDetailPage.editor.info") }}</span>
       </div>
 
-      <textarea
+      <textarea 
         v-model="contentText"
-        class="textarea w-full font-mono text-sm"
+        class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
         rows="20"
         :placeholder="t('coverLetterDetailPage.editor.placeholder')"
         :aria-label="t('coverLetterDetailPage.editor.aria')"
       ></textarea>
 
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <span class="text-sm text-base-content/60">
+      <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
+        <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
-        <div class="flex gap-2">
+        <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>

@@ -2,6 +2,12 @@
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
@@ -36,24 +42,24 @@ function studioLocation(location: string): string {
     :close-backdrop-label="t('studiosIndex.preview.closeBackdropButton')"
     @close="$emit('close')"
   >
-    <button
+    <button 
       type="button"
       class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
-      <CloseIcon class="h-4 w-4" />
+      <CloseIcon :class="[ICON_SIZE_CLASS[4]]"/>
     </button>
 
     <template v-if="studio">
-      <h3 :id="titleId" class="text-xl font-bold">
+      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ studio.name }}
       </h3>
-      <p class="mt-2 text-sm text-base-content/70">
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ studioDescription(studio.description) }}
       </p>
 
-      <div class="mt-4 flex flex-wrap gap-2">
+      <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
         <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
         <span class="badge badge-outline">{{ studioSizeLabel(t, studio.size) }}</span>
         <span class="badge badge-ghost">{{ studioLocation(studio.location) }}</span>
@@ -62,22 +68,22 @@ function studioLocation(location: string): string {
         </span>
       </div>
 
-      <SectionGrid grid-token="threeColumnMd" extra-class="mt-5">
+      <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd" extra->
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
-          <div class="stat-value text-primary text-2xl">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
+          <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
         </div>
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
-          <div class="stat-value text-secondary text-lg">
+          <div class="stat-value text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studioLocation(studio.location) }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
         </div>
         <div class="stat rounded-box border border-base-300 bg-base-100">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
-          <div class="stat-value text-accent text-lg">
+          <div class="stat-value text-accent" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.remoteDesc") }}</div>
@@ -85,7 +91,7 @@ function studioLocation(location: string): string {
       </SectionGrid>
 
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: studio.name })"
@@ -93,7 +99,7 @@ function studioLocation(location: string): string {
         >
           {{ t("studiosIndex.preview.startInterviewButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-outline"
           :aria-label="t('studiosIndex.preview.openDetailAria', { studio: studio.name })"
@@ -101,7 +107,7 @@ function studioLocation(location: string): string {
         >
           {{ t("studiosIndex.preview.openDetailButton") }}
         </button>
-        <button
+        <button 
           type="button"
           class="btn btn-ghost"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
@@ -113,14 +119,14 @@ function studioLocation(location: string): string {
     </template>
 
     <template v-else>
-      <h3 :id="titleId" class="text-xl font-bold">
+      <h3 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" :id="titleId">
         {{ t("studiosIndex.preview.missingTitle") }}
       </h3>
-      <p class="mt-2 text-sm text-base-content/70">
+      <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("studiosIndex.preview.missingDescription") }}
       </p>
       <div class="modal-action">
-        <button
+        <button 
           type="button"
           class="btn btn-primary"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"

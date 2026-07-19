@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS } from "~/constants/layout";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -104,7 +106,7 @@ function handlePrint() {
           :aria-label="t('resumePage.backButtonAria')"
           @click="router.back()"
         >
-          <IconArrowLeft class="h-4 w-4" />
+          <IconArrowLeft :class="ICON_SIZE_CLASS['4']" />
           {{ t("resumePage.backButton") }}
         </button>
 
@@ -113,8 +115,8 @@ function handlePrint() {
           :aria-label="t('resumePreview.printAria')"
           @click="handlePrint"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          <svg :class="ICON_SIZE_CLASS['4']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
           {{ t("resumePreview.printButton") }}
         </button>
@@ -153,7 +155,6 @@ function handlePrint() {
       :resume="resume"
       :display-skills="displaySkills"
       :has-gaming-experience="hasGamingExperience"
-      :t="t"
     />
   </PageScaffold>
 </template>

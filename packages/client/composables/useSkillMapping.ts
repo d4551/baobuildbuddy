@@ -1,16 +1,22 @@
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import {
+  type CareerPathway,
+  type ReadinessAssessment,
   SKILL_READINESS_FEEDBACK_IDS,
   SKILL_READINESS_IMPROVEMENT_IDS,
   SKILL_READINESS_NEXT_STEP_IDS,
-  type CareerPathway,
-  type ReadinessAssessment,
   type SkillMapping,
   type SkillReadinessFeedbackId,
   type SkillReadinessImprovementId,
   type SkillReadinessNextStepId,
 } from "@bao/shared/types/skill-mapping";
-import { asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
+import {
+  asJsonArray,
+  asNumber,
+  asString,
+  asStringArray,
+  isRecord,
+} from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizer-skills";
 import { assertApiResponse, withLoadingState } from "./async-flow";
@@ -170,42 +176,40 @@ function toReadinessCategory(entry: unknown): ReadinessCategory | null {
   };
 }
 
-function toTargetRoleReadiness(
-  value: unknown,
+function toTargetRoleReadiness<T>(
+  value: T,
 ): NonNullable<ReadinessAssessment["targetRoleReadiness"]> {
-  if (!Array.isArray(value)) {
+  const entries = asJsonArray(value);
+  if (!entries) {
     return [];
   }
 
-  return value
-    .map((entry) => {
-      if (!isRecord(entry)) {
-        return null;
-      }
-      const roleId = asString(entry.roleId);
-      const roleTitle = asString(entry.roleTitle);
-      if (!(roleId && roleTitle)) {
-        return null;
-      }
+  const readinessEntries: NonNullable<ReadinessAssessment["targetRoleReadiness"]> = [];
+  for (const entry of entries) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    const roleId = asString(entry.roleId);
+    const roleTitle = asString(entry.roleTitle);
+    if (!(roleId && roleTitle)) {
+      continue;
+    }
 
-      const readiness: NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] = {
-        roleId,
-        roleTitle,
-        readinessScore: asNumber(entry.readinessScore) ?? 0,
-        missingSkills: asStringArray(entry.missingSkills),
-        matchingSkills: asStringArray(entry.matchingSkills),
-        recommendedActions: asStringArray(entry.recommendedActions),
-      };
-      const timeToReady = asString(entry.timeToReady);
-      if (timeToReady) {
-        readiness.timeToReady = timeToReady;
-      }
-      return readiness;
-    })
-    .filter(
-      (entry): entry is NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] =>
-        entry !== null,
-    );
+    const readiness: NonNullable<ReadinessAssessment["targetRoleReadiness"]>[number] = {
+      roleId,
+      roleTitle,
+      readinessScore: asNumber(entry.readinessScore) ?? 0,
+      missingSkills: asStringArray(entry.missingSkills),
+      matchingSkills: asStringArray(entry.matchingSkills),
+      recommendedActions: asStringArray(entry.recommendedActions),
+    };
+    const timeToReady = asString(entry.timeToReady);
+    if (timeToReady) {
+      readiness.timeToReady = timeToReady;
+    }
+    readinessEntries.push(readiness);
+  }
+  return readinessEntries;
 }
 
 function toReadinessAssessment(value: unknown): ReadinessAssessment | null {

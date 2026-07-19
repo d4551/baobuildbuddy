@@ -10,6 +10,10 @@ import {
 } from "../../test-support/automation/job-apply-fixture";
 import { runRpaScript } from "./rpa-runner-protocol";
 
+// Real Playwright apply — never inherit the verification stub into child RPA processes.
+delete process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+delete Bun.env.BAO_ENABLE_AUTOMATION_VERIFY;
+
 const TEMP_DIRECTORY_PREFIX = "bao-job-apply-script-";
 const TEST_RESUME_FILE_NAME = "candidate-resume.pdf";
 const TEST_RESUME_PDF_BYTES = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37]);

@@ -1,8 +1,12 @@
-import { Elysia } from "elysia";
-import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import {
+  API_ERROR_INVALID_API_KEY,
+  API_ERROR_MISSING_AUTH_HEADER,
+} from "@bao/shared/constants/api-errors";
+import { OPENAI_V1_ENDPOINT_PREFIX, OPENAI_V1_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
-import { authGuard } from "../middleware/auth";
+import { Elysia } from "elysia";
+import { authenticateApiKey } from "../middleware/auth";
 import { corsPlugin } from "../middleware/cors";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
@@ -17,6 +21,26 @@ import {
   listOpenAIV1Models,
 } from "./openai-v1-route-support";
 
+const resolveOpenAIV1AuthErrorCode = (error: string): string => {
+  if (error === API_ERROR_INVALID_API_KEY) {
+    return "invalid_api_key";
+  }
+  if (error === API_ERROR_MISSING_AUTH_HEADER) {
+    return "missing_authorization";
+  }
+  return "invalid_request_error";
+};
+
+function toOpenAIV1ChildPath(endpointPath: string): string {
+  if (endpointPath === OPENAI_V1_ENDPOINT_PREFIX) {
+    return "/";
+  }
+  if (!endpointPath.startsWith(OPENAI_V1_ENDPOINT_PREFIX)) {
+    return endpointPath;
+  }
+  return endpointPath.slice(OPENAI_V1_ENDPOINT_PREFIX.length) || "/";
+}
+
 /**
  * OpenAI Chat Completions API surface for external SDK clients.
  * Mounted at OPENAI_V1_ENDPOINT_PREFIX alongside the main API app.
@@ -26,7 +50,19 @@ export const openaiV1Routes = new Elysia({
   prefix: OPENAI_V1_ENDPOINT_PREFIX,
 })
   .use(corsPlugin)
-  .use(authGuard)
+  .beforeHandle(async ({ request, status }) => {
+    const failure = await authenticateApiKey(request);
+    if (!failure) {
+      return;
+    }
+    return status(failure.status, {
+      error: {
+        message: failure.error,
+        type: "invalid_request_error",
+        code: resolveOpenAIV1AuthErrorCode(failure.error),
+      },
+    });
+  })
   .use(
     rateLimit({
       duration: MS_PER_MINUTE,
@@ -35,7 +71,7 @@ export const openaiV1Routes = new Elysia({
     }),
   )
   .get(
-    "/models",
+    toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models),
     {
       detail: { tags: ["OpenAI V1"] },
       response: openaiV1ModelsListResponses,
@@ -45,19 +81,13 @@ export const openaiV1Routes = new Elysia({
       return status(HTTP_STATUS_OK, { object: "list" as const, data });
     },
   )
-  .get(
-    "/models/*",
-    {
-      detail: { tags: ["OpenAI V1"] },
-    },
-    async ({ params, status }) => {
-      const modelId = decodeURIComponent(params["*"] ?? "");
-      const result = await getOpenAIV1Model(modelId);
-      return status(result.status, result.body);
-    },
-  )
+  .get(`${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`, async ({ params, status }) => {
+    const modelId = decodeURIComponent(params["*"] ?? "");
+    const result = await getOpenAIV1Model(modelId);
+    return status(result.status, result.body);
+  })
   .post(
-    "/chat/completions",
+    toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {
       detail: { tags: ["OpenAI V1"] },
       body: openaiV1ChatCompletionsBodySchema,

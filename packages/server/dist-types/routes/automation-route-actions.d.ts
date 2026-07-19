@@ -19,8 +19,8 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Prom
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -41,7 +41,7 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Prom
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;
@@ -70,8 +70,8 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -92,7 +92,7 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;
@@ -140,8 +140,8 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -162,7 +162,7 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;
@@ -191,8 +191,8 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody) => Promi
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -213,7 +213,7 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody) => Promi
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;
@@ -242,8 +242,8 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -264,7 +264,7 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;
@@ -302,8 +302,8 @@ export declare const handleAutomationRunByIdRoute: (runId: string) => Promise<{
         status: "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
-        input: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | null;
-        output: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | {
+        input: import("@bao/shared/utils/json").JsonObject | null;
+        output: import("@bao/shared/utils/json").JsonObject | {
             success: boolean;
             error: string | null;
             screenshots: string[];
@@ -324,7 +324,7 @@ export declare const handleAutomationRunByIdRoute: (runId: string) => Promise<{
         error: string | {
             code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
             message: string;
-            details?: Record<string, string | number | boolean | unknown[] | Record<string, unknown> | null> | undefined;
+            details?: import("@bao/shared/utils/json").JsonObject | undefined;
             source: string;
         } | null;
         progress: number | null;

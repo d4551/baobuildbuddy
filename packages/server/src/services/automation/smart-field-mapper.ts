@@ -1,12 +1,12 @@
 import { config } from "../../config/env";
 import { generateFieldAnalysisWithRetry, stripToFormElements } from "./smart-field-mapper-analysis";
+import { getCandidateContextSummary } from "./smart-field-mapper-context";
 import {
   EMPTY_FIELD_ANALYSIS_RESULT,
   type FieldMapperAIClient,
   type SmartFieldAnalysisContext,
   type SmartFieldAnalysisResult,
 } from "./smart-field-mapper-contracts";
-import { getCandidateContextSummary } from "./smart-field-mapper-context";
 import { fetchPageWithRetry } from "./smart-field-mapper-fetch";
 
 /**

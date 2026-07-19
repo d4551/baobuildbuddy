@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 interface StatItem {
   titleKey: string;
@@ -19,12 +20,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div
-    class="stats stats-vertical w-full shadow-sm sm:stats-horizontal"
-    :class="backgroundClass ?? 'border border-base-300 bg-base-100'"
+  <div 
+    class="stats stats-vertical sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? 'border border-base-300 bg-base-100 glass-card-enter glass-card-enter-0']"
   >
     <div v-for="(stat, index) in stats" :key="index" class="stat">
-      <div v-if="stat.figure" class="stat-figure text-4xl" aria-hidden="true">
+      <div v-if="stat.figure" class="stat-figure" :class="[TYPOGRAPHY_SCALE_CLASS.xl4]" aria-hidden="true">
         {{ stat.figure }}
       </div>
       <div class="stat-title">{{ t(stat.titleKey) }}</div>

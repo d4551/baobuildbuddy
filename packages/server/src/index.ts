@@ -1,7 +1,4 @@
-import {
-  API_ENDPOINTS,
-  OPENAI_V1_ENDPOINT_PREFIX,
-} from "@bao/shared/constants/endpoints";
+import { API_ENDPOINTS, OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { JOB_AGGREGATOR_CACHE_EXPIRY_MS } from "@bao/shared/constants/jobs";
 import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
@@ -16,26 +13,37 @@ import { createServerLogger } from "./utils/logger";
 
 const logger = createServerLogger("server-lifecycle");
 
-const runBackgroundTask = (task: Promise<unknown>, onError?: (error: unknown) => void): void => {
+process.on("uncaughtException", (error) => {
+  logger.error("uncaughtException", error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error("unhandledRejection", reason instanceof Error ? reason.message : String(reason));
+  process.exit(1);
+});
+
+const runBackgroundTask = (
+  task: Promise<void>,
+  onError?: (error: Error | string) => void,
+): void => {
   task.then(
     () => undefined,
     (error) => {
-      onError?.(error);
+      onError?.(error instanceof Error ? error.message : String(error));
     },
   );
 };
 
-// Initialize database
 initializeDatabase(sqlite);
 
-// Seed database with gaming studios (idempotent — only seeds if empty)
 runBackgroundTask(
   (async () => {
     const seedResult = await settle(Promise.resolve().then(() => seedDatabase(db)));
     if (seedResult.status === "rejected") {
       logger.error(
         "Seed failed",
-        seedResult.reason instanceof Error ? seedResult.reason.message : seedResult.reason,
+        seedResult.reason instanceof Error ? seedResult.reason.message : String(seedResult.reason),
       );
     }
   })(),
@@ -52,7 +60,7 @@ const runJobRefresh = (): void => {
           "JobRefresh failed",
           refreshResult.reason instanceof Error
             ? refreshResult.reason.message
-            : refreshResult.reason,
+            : String(refreshResult.reason),
         );
         return;
       }
@@ -66,19 +74,15 @@ const runJobRefresh = (): void => {
 runJobRefresh();
 setInterval(runJobRefresh, JOB_AGGREGATOR_CACHE_EXPIRY_MS);
 
-// Start server: API app + OpenAI Chat Completions facade on one listener.
 const serverApp = new Elysia().use(openaiV1Routes).use(app);
 const server = serverApp.listen(config.port);
 
 logger.info(`BaoBuildBuddy server running at http://${config.host}:${config.port}`);
-logger.info(
-  `Health check: http://${config.host}:${config.port}${API_ENDPOINTS.health}`,
-);
+logger.info(`Health check: http://${config.host}:${config.port}${API_ENDPOINTS.health}`);
 logger.info(
   `OpenAI Chat Completions API: http://${config.host}:${config.port}${OPENAI_V1_ENDPOINT_PREFIX}`,
 );
 
-// Graceful shutdown
 async function gracefulShutdown(signal: string): Promise<void> {
   logger.warn(`Received ${signal}, shutting down gracefully...`);
   await server.stop();

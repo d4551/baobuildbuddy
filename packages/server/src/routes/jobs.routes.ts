@@ -12,20 +12,20 @@ import { Elysia } from "elysia";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
 import {
-  applyJobBodySchema,
   applicationsListResponses,
+  applyJobBodySchema,
   applyJobResponses,
   deleteSavedJobResponses,
   jobEntityResponses,
   jobIdParamsSchema,
-  jobsListResponses,
   jobsListQuerySchema,
+  jobsListResponses,
   jobsRefreshResponses,
   recommendationsResponses,
-  savedJobsListResponses,
-  saveJobResponses,
-  saveJobBodySchema,
   savedJobParamsSchema,
+  savedJobsListResponses,
+  saveJobBodySchema,
+  saveJobResponses,
   updateApplicationBodySchema,
   updateApplicationParamsSchema,
   updateApplicationResponses,
@@ -96,8 +96,7 @@ export const jobsRoutes = new Elysia({
       params: savedJobParamsSchema,
       response: deleteSavedJobResponses,
     },
-    async ({ params, status }) =>
-      status(HTTP_STATUS_OK, await deleteSavedJob(params.jobId)),
+    async ({ params, status }) => status(HTTP_STATUS_OK, await deleteSavedJob(params.jobId)),
   )
   .get(
     "/saved",

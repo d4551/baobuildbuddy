@@ -5,14 +5,15 @@ import { config } from "../config/env";
 import { resolveDatabasePath } from "../config/paths";
 import {
   applications,
+  auditLog,
   auth,
   automationRuns,
   chatHistory,
   coverLetters,
   gamification,
   interviewSessions,
-  jobTaxonomyKeywords,
   jobs,
+  jobTaxonomyKeywords,
   portfolioProjects,
   portfolios,
   resumes,
@@ -22,10 +23,12 @@ import {
   studioClassificationRules,
   studios,
   userProfile,
+  userRole,
 } from "./schema/schema-modules";
 
 const schema = {
   applications,
+  auditLog,
   auth,
   automationRuns,
   chatHistory,
@@ -43,6 +46,7 @@ const schema = {
   studioClassificationRules,
   studios,
   userProfile,
+  userRole,
 };
 
 const dbPath = resolveDatabasePath(config.dbPath);
