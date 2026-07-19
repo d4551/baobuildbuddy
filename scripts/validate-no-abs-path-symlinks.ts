@@ -1,5 +1,6 @@
 import { lstat, readlink, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { settle } from "../packages/shared/src/utils/promise";
 import { IGNORED_DIRECTORY_NAMES, reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 /**
@@ -92,11 +93,12 @@ export const collectTrackedSymlinkEntriesFromGitLsFiles = async (
 };
 
 const readWorkingTreeSymlinkTarget = async (filePath: string): Promise<string | null> => {
-  const stats = await lstat(filePath).catch(() => null);
-  if (!stats?.isSymbolicLink()) {
+  const statsResult = await settle(lstat(filePath));
+  if (statsResult.status === "rejected" || !statsResult.value.isSymbolicLink()) {
     return null;
   }
-  return readlink(filePath);
+  const linkResult = await settle(readlink(filePath));
+  return linkResult.status === "fulfilled" ? linkResult.value : null;
 };
 
 export const collectAbsPathSymlinkViolations = async (

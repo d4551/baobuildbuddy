@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { settle } from "../packages/shared/src/utils/promise";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 export type StackVersionPin = {
@@ -118,15 +119,16 @@ const resolveInstalledPackage = async (
   pin: StackVersionPin,
 ): Promise<ResolvedPackageVersion | { packageName: string; error: string }> => {
   const fromPackageDir = join(rootDir, pin.resolveFromPackage);
-  let resolvedPath: string;
-  try {
-    resolvedPath = Bun.resolveSync(`${pin.packageName}/package.json`, fromPackageDir);
-  } catch (error) {
+  const resolveResult = await settle(
+    Promise.resolve().then(() => Bun.resolveSync(`${pin.packageName}/package.json`, fromPackageDir)),
+  );
+  if (resolveResult.status === "rejected") {
     return {
       packageName: pin.packageName,
-      error: error instanceof Error ? error.message : String(error),
+      error: resolveResult.reason.message,
     };
   }
+  const resolvedPath = resolveResult.value;
   const content = await Bun.file(resolvedPath).text();
   const version = readPackageVersionFromJson(pin.packageName, content);
   if (!version) {

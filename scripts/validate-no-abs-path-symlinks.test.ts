@@ -54,11 +54,11 @@ describe("collectTrackedSymlinkEntriesFromGitLsFiles", () => {
       "100644 abcdef0123456789abcdef0123456789abcdef01 0\tREADME.md",
       "120000 bee82e0177f906ce66e110766c792d30df584b29 0\tpackages/client/dist",
     ].join("\n");
-    const entries = await collectTrackedSymlinkEntriesFromGitLsFiles(gitLs, async (filePath) => {
+    const entries = await collectTrackedSymlinkEntriesFromGitLsFiles(gitLs, (filePath) => {
       if (filePath === "packages/client/dist") {
-        return "/Users/example/project/packages/client/.output/public";
+        return Promise.resolve("/Users/example/project/packages/client/.output/public");
       }
-      return null;
+      return Promise.resolve(null);
     });
     expect(entries).toEqual([
       {
