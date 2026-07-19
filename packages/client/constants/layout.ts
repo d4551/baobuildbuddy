@@ -368,6 +368,7 @@ export {
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
   MAX_W_3XL_CLASS,
+  MAX_W_40_CLASS,
   MAX_W_64_CLASS,
   MAX_W_XS_CLASS,
   type MarginToken,

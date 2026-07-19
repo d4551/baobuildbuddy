@@ -39,3 +39,4 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D21 | DUPLICATED | Settings page subtitle repeated via `fallback-description-key` | FIXED | removed fallback; section `descriptionKey` for profile/preferences (i18n×4) |
 | D22 | DUPLICATED | AI chat context chips stacked (panel+sidebar) below xl; header+aside at xl | FIXED | aside `hidden xl:flex`; header chips `xl:hidden` |
 | D23 | SUBPAR | Mobile dock/tab targets &lt;44px; jobs placeholder truncates @320 | FIXED | `TOUCH_TARGET_MIN_CLASS` / `SHELL_DOCK_ITEM_CLASS`; short placeholder + full aria |
+| D24 | BROKEN UX | Mobile navbar section label truncates to "A…"/"In…" @320 | FIXED | hide label below `sm`; logo+aria brand; page h1 owns section; `MAX_W_40_CLASS` for sm+ |

@@ -16,3 +16,4 @@
 | I2 | Settings section copy | baseline: page subtitle×2 | new: page×1 + section-specific | Δ: subtitleHits 2→1 | SSOT: settings-sections + locales | gate: validate:i18n-parity + visual proof |
 | I3 | AI chat context | baseline: chips×2 surfaces | new: one visible set / viewport | Δ: visible badges 8→4 | SSOT: AIChatConversationPanel/Sidebar | gate: post-fix chip audit |
 | I4 | Touch targets | baseline: dock ~42px | new: min-h-11 (55px measured) | Δ: ≥44px | SSOT: TOUCH_TARGET_MIN_CLASS | gate: deep-audit dockItemMin |
+| I5 | AppNavbar mobile chrome | baseline: truncating section crumbs @320 | new: logo-only &lt;sm, labeled ≥sm | Δ: ellipsis false @320; label visible @640 | SSOT: AppNavbar + MAX_W_40_CLASS | gate: validate:no-raw-design-tokens + navbar-320 proof |

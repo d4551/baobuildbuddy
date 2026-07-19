@@ -12,6 +12,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
+  MAX_W_40_CLASS,
   RADIUS_TOKEN_CLASS,
   SHELL_NAVBAR_CLASS,
   SHELL_NAVBAR_DROPDOWN_CLASS,
@@ -113,18 +114,19 @@ onUnmounted(() => {
           <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </label>
-      <NuxtLink 
+      <NuxtLink
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink text-primary lg:hidden"
-        :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]"
+        class="btn btn-ghost shrink-0 text-primary lg:hidden"
+        :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
         :aria-label="resolvedBrand.name"
       >
-        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
+        <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0', RADIUS_TOKEN_CLASS.sm]" />
         <span class="sr-only">{{ resolvedBrand.name }}</span>
+        <!-- Below sm the page h1 owns the section title; avoid "A…" / "In…" chrome truncation @320. -->
         <span
           v-if="mobileSectionLabel"
-          class="truncate font-semibold"
-          :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
+          class="hidden truncate font-semibold sm:inline"
+          :class="[MAX_W_40_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
         >{{ mobileSectionLabel }}</span>
       </NuxtLink>
       <div class="hidden flex-1 lg:block" :class="[TRUNCATE_FLEX_CHILD_CLASS]">

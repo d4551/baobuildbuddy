@@ -279,5 +279,6 @@ export const PRINT_PADDING_RESET_CLASS = "print:p-0";
 /** Max-width extended tokens. */
 export const MAX_W_2XL_CLASS = "max-w-2xl";
 export const MAX_W_3XL_CLASS = "max-w-3xl";
+export const MAX_W_40_CLASS = "max-w-40";
 export const MAX_W_64_CLASS = "max-w-64";
 export const MAX_W_XS_CLASS = "max-w-xs";
