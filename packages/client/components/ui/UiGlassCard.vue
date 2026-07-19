@@ -18,6 +18,7 @@
  */
 import { computed } from "vue";
 import {
+  POINTER_EVENTS_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SURFACE_GLASS_CARD_STRONG_CLASS,
   SURFACE_GLASS_CARD_MODAL_CLASS,
@@ -94,15 +95,17 @@ const cardClass = computed(() => [
 
 <template>
   <article :class="cardClass">
-    <!-- Link overlay for clickable cards -->
+    <!-- Link overlay sits under content; content shell passes clicks through except interactive children. -->
     <NuxtLink 
       v-if="to"
       :to="to"
-      class="absolute inset-0 z-10 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+      class="absolute inset-0 z-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
       :aria-label="linkAriaLabel"
     />
-    <!-- Content slot -->
-    <div class="relative z-0">
+    <div
+      class="relative z-10"
+      :class="to ? POINTER_EVENTS_TOKEN_CLASS.none : undefined"
+    >
       <slot />
     </div>
   </article>

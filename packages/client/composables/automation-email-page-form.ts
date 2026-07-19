@@ -3,6 +3,7 @@ import { isValidEmail } from "@bao/shared/utils/validation";
 import type { Ref } from "vue";
 import type { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { DATE_FORMAT_OPTIONS, toIsoTimestamp } from "~/composables/schedule-timestamp";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
@@ -28,10 +29,6 @@ export interface EmailActionResult {
   deliveredAt?: string;
   messageId?: string;
 }
-export const DATE_FORMAT_OPTIONS = {
-  dateStyle: "medium",
-  timeStyle: "short",
-} as const satisfies Intl.DateTimeFormatOptions;
 export const EMAIL_TONE_OPTIONS: readonly EmailResponseTone[] = [
   "professional",
   "friendly",
@@ -76,27 +73,6 @@ export const createToLocalizedDateTime =
   (value: string): string =>
     formatDateWithLocale(value, localeValue(), fallbackLocaleValue(), DATE_FORMAT_OPTIONS) ?? value;
 
-export const resolveScheduledRunAt = (run: RpaRunExecutionEnvelope): string => {
-  const runInput = run.input;
-  if (!(runInput && isRecord(runInput))) {
-    return run.createdAt;
-  }
-  const scheduleValue = runInput.schedule;
-  if (!isRecord(scheduleValue)) {
-    return run.createdAt;
-  }
-  return typeof scheduleValue.runAt === "string" && scheduleValue.runAt.length > 0
-    ? scheduleValue.runAt
-    : run.createdAt;
-};
-
-export const toIsoTimestamp = (dateTimeLocal: string): string | null => {
-  const parsed = new Date(dateTimeLocal);
-  if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
-    return null;
-  }
-  return parsed.toISOString();
-};
 export const resetEmailAutomationResults = (
   submitError: Ref<string>,
   lastResult: Ref<EmailActionResult | null>,

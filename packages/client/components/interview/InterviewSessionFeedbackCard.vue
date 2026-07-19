@@ -42,7 +42,7 @@ const { t } = useI18n();
           <p v-if="currentQuestion.score !== undefined" class="font-semibold">
             {{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}
           </p>
- <p :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
+          <p :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ currentQuestion.feedback }}
           </p>
         </div>

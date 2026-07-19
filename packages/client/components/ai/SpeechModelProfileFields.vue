@@ -77,7 +77,7 @@ function handleTtsModelChange(event: Event): void {
   <fieldset class="fieldset rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p3]">
     <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
     <SectionGrid grid-token="twoColumnSmGap2">
- <label class="label" for="speech-profile-stt-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+      <label class="label" for="speech-profile-stt-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.sttProviderLabel") }}
       </label>
       <select
@@ -97,7 +97,7 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
- <label class="label" for="speech-profile-tts-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+      <label class="label" for="speech-profile-tts-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.ttsProviderLabel") }}
       </label>
       <select
@@ -117,7 +117,7 @@ function handleTtsModelChange(event: Event): void {
         </option>
       </select>
 
- <label class="label" for="speech-profile-stt-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+      <label class="label" for="speech-profile-stt-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.sttModelLabel") }}
       </label>
       <input
@@ -137,7 +137,7 @@ function handleTtsModelChange(event: Event): void {
         />
       </datalist>
 
- <label class="label" for="speech-profile-tts-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+      <label class="label" for="speech-profile-tts-model" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.ttsModelLabel") }}
       </label>
       <input

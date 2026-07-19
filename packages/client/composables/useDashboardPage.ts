@@ -84,15 +84,25 @@ const useDashboardWelcomeHeading = (t: ReturnType<typeof useI18n>["t"], dashboar
   });
 
 const useDashboardProgress = (dashboard: DashboardRef) => ({
+  // Within-level % — must match the XP numerator/denominator shown in the card.
   levelProgress: computed(() => {
     const gamification = dashboard.value?.gamification;
     return gamification ? Math.round(getXPProgress(gamification.xp).progress * 100) : 0;
   }),
+  /** XP earned inside the current level band (not lifetime total). */
+  xpIntoLevel: computed(() => {
+    const gamification = dashboard.value?.gamification;
+    if (!gamification) return 0;
+    const { level } = getXPProgress(gamification.xp);
+    return Math.max(0, gamification.xp - level.minXP);
+  }),
+  /** XP span of the current level band (next.minXP - level.minXP). */
   xpTarget: computed(() => {
     const gamification = dashboard.value?.gamification;
     if (!gamification) return GAMIFICATION_XP_TARGET_FALLBACK;
-    const { nextLevel } = getXPProgress(gamification.xp);
-    return nextLevel ? nextLevel.minXP : gamification.xp;
+    const { level, nextLevel } = getXPProgress(gamification.xp);
+    if (!nextLevel) return Math.max(1, gamification.xp - level.minXP);
+    return Math.max(1, nextLevel.minXP - level.minXP);
   }),
 });
 
@@ -184,7 +194,7 @@ export function useDashboardPage() {
   const activeHeroPhrase = useDashboardHeroPhrase(t);
   const { dashboard, error, refresh, uiState } = useDashboardAsyncState(api, t);
   const welcomeHeading = useDashboardWelcomeHeading(t, dashboard);
-  const { levelProgress, xpTarget } = useDashboardProgress(dashboard);
+  const { levelProgress, xpIntoLevel, xpTarget } = useDashboardProgress(dashboard);
   const { nextPipelineStepLabel, pipelineSteps } = useDashboardPipeline(t, dashboard);
   const { dashboardQuickActions, primaryFlowLabel, primaryFlowRoute } = useDashboardFlowActions(
     t,
@@ -201,6 +211,7 @@ export function useDashboardPage() {
     welcomeHeading,
     activeHeroPhrase,
     levelProgress,
+    xpIntoLevel,
     xpTarget,
     pipelineSteps,
     nextPipelineStepLabel,

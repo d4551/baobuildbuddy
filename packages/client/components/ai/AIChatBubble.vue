@@ -60,7 +60,7 @@ const avatarLabel = computed(() =>
 );
 const chatBubbleClass = computed(() =>
   isAssistant.value
-    ? `border border-base-300 bg-base-200 text-base-content ${SHADOW_TOKEN_CLASS.sm}`
+    ? `border border-base-300 glass-subtle text-base-content ${SHADOW_TOKEN_CLASS.sm}`
     : `chat-bubble-primary ${SHADOW_TOKEN_CLASS.sm}`,
 );
 const messageWidthClass = computed(() => CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY[props.density]);

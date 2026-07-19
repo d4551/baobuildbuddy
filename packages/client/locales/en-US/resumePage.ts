@@ -18,6 +18,8 @@ const resumePage = {
     defaultBadge: "Default",
     editButton: "Edit",
     editButtonAria: "Edit resume {name}",
+    previewButton: "Preview",
+    previewButtonAria: "Preview resume {name}",
     deleteButton: "Delete",
     deleteButtonAria: "Delete resume {name}",
     backButton: "Back to Resumes",

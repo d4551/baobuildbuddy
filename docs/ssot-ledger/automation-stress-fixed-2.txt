@@ -1,0 +1,13 @@
+bun test v1.3.14 (0d9b296a)
+
+src/routes/automation.integration.test.ts:
+{"level":30,"time":1784489091564,"pid":18386,"hostname":"cursor","component":"email-delivery","details":{"recipientEmail":"recruiter@example.test","fromEmail":"mailer@example.test","messageId":"<019f7bd6-a1ea-7000-a2b3-2966ed668aca@example.test>"},"msg":"email delivered"}
+(pass) automation route integration > manual job-apply, scheduled websocket flow, email-response, and scheduler recovery all work end to end [9121.47ms]
+
+src/services/automation/job-apply-script.test.ts:
+(pass) job-apply script > uploads a real resume artifact and fills select, radio, and checkbox answers [5829.77ms]
+
+ 2 pass
+ 0 fail
+ 35 expect() calls
+Ran 2 tests across 2 files. [15.50s]

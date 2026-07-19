@@ -21,7 +21,7 @@ const { t } = useI18n();
 
 <template>
   <div 
-    class="stats stats-vertical sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? 'border border-base-300 bg-base-100 glass-card-enter glass-card-enter-0']"
+    class="stats stats-vertical sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? 'border border-base-300 glass-subtle glass-card-enter glass-card-enter-0']"
   >
     <div v-for="(stat, index) in stats" :key="index" class="stat">
       <div v-if="stat.figure" class="stat-figure" :class="[TYPOGRAPHY_SCALE_CLASS.xl4]" aria-hidden="true">

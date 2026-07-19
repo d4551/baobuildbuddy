@@ -3,7 +3,6 @@ import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { computed, type Ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
-  readApiData,
   type SkillsPathwaysBootstrapData,
   type SkillsPathwaysGamificationProgress,
   toGamificationProgress,
@@ -11,6 +10,7 @@ import {
 } from "~/composables/skills-pathways-page-data";
 import { createSkillsPathwaysPresentation } from "~/composables/skills-pathways-page-presentation";
 import { SKILLS_READINESS_MAX, SKILLS_READINESS_MIN } from "~/constants/skills";
+import { requireApiResponseData } from "~/utils/api-response";
 import { getErrorMessage } from "~/utils/errors";
 
 const useSkillsPathwaysBootstrap = (
@@ -24,8 +24,11 @@ const useSkillsPathwaysBootstrap = (
         api.skills.pathways.get(),
         api.skills.readiness.get(),
       ]);
-      const pathways = readApiData(pathwaysData, t("skillsPathwaysPage.errors.pathwaysLoadFailed"));
-      const readiness = readApiData(
+      const pathways = requireApiResponseData(
+        pathwaysData,
+        t("skillsPathwaysPage.errors.pathwaysLoadFailed"),
+      );
+      const readiness = requireApiResponseData(
         readinessData,
         t("skillsPathwaysPage.errors.readinessLoadFailed"),
       );
@@ -49,7 +52,10 @@ const useSkillsPathwaysGamification = (
     "skills-pathways-gamification-progress",
     async () => {
       const response = await api.gamification.progress.get();
-      const progress = readApiData(response, t("skillsPathwaysPage.errors.gamificationLoadFailed"));
+      const progress = requireApiResponseData(
+        response,
+        t("skillsPathwaysPage.errors.gamificationLoadFailed"),
+      );
       const normalized = toGamificationProgress(progress);
       if (!normalized) {
         throw new Error(t("skillsPathwaysPage.errors.gamificationLoadFailed"));

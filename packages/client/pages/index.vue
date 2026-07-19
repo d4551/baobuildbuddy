@@ -16,6 +16,7 @@ const {
   welcomeHeading,
   activeHeroPhrase,
   levelProgress,
+  xpIntoLevel,
   xpTarget,
   pipelineSteps,
   nextPipelineStepLabel,
@@ -78,6 +79,7 @@ useSeoMeta({
         v-if="dashboard?.gamification"
         :gamification="dashboard.gamification"
         :level-progress="levelProgress"
+        :xp-into-level="xpIntoLevel"
         :xp-target="xpTarget"
       />
 

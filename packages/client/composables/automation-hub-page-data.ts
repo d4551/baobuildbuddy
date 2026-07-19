@@ -3,7 +3,6 @@ import type {
   RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import type { DashboardStats } from "@bao/shared/types/search";
-import { isRecord } from "@bao/shared/utils/type-guards";
 import type { Ref } from "vue";
 import { computed } from "vue";
 import type {
@@ -11,26 +10,11 @@ import type {
   AutomationHubUiState,
 } from "~/composables/automation-hub-page-contracts";
 import { useAutomation } from "~/composables/useAutomation";
+import { requireApiResponseData } from "~/utils/api-response";
 import { getErrorMessage } from "~/utils/errors";
 
 const AUTOMATION_HUB_ASYNC_DATA_KEY = "automation-hub-stats";
 const AUTOMATION_HUB_CAPABILITIES_ASYNC_DATA_KEY = "automation-hub-capabilities";
-
-const readApiData = <TData>(
-  response: {
-    data: TData;
-    error?: unknown;
-  },
-  fallbackMessage: string,
-): TData => {
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(getErrorMessage(response.error, fallbackMessage));
-  }
-  return response.data;
-};
 
 const useAutomationHubStatsData = (t: AutomationHubTranslate) => {
   const api = useApi();
@@ -39,7 +23,11 @@ const useAutomationHubStatsData = (t: AutomationHubTranslate) => {
     AUTOMATION_HUB_ASYNC_DATA_KEY,
     async () => {
       const response = await api.stats.dashboard.get();
-      return readApiData(response, t("automation.hub.loadErrorFallback"));
+      return requireApiResponseData(
+        response,
+        t("automation.hub.loadErrorFallback"),
+        getErrorMessage,
+      );
     },
     {
       lazy: false,

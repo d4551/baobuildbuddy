@@ -1,0 +1,8 @@
+/opt/cursor/artifacts/baseline/build-verify.txt:324:verify:production-client passed (no .map under packages/client/.output/server|public).
+/opt/cursor/artifacts/baseline/verify-pages.txt:383:Verified 104 localized route renders with non-empty page title, heading, and main landmark.
+
+Phase 10 local convergence (2026-07-19):
+- build:verify EXIT 0
+- verify:pages EXIT 0 (104 localized routes)
+- rescan2: abs-symlink/stack green; mutations ABS/ELYSIA/SHADOW red-OK; Nuxt DUP_COUNT=0; client test 77/0 from clean .nuxt
+- two consecutive clean rescans of ACTIVE A1–A19: 0 new defects

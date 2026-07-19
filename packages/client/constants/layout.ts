@@ -33,7 +33,14 @@ export const TOAST_CONTAINER_DOM_ID = "toast-container";
  * Includes bottom padding for shell chrome (dock / FAB) on small viewports.
  */
 export const SHELL_MAIN_INNER_CLASS =
-  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8";
+  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-32 sm:px-6 lg:px-8 lg:pb-8";
+
+/**
+ * Fixed mobile primary dock chrome (daisyUI `dock` + glass-clear + safe-area).
+ * Desktop: hidden via `lg:hidden` (sidebar owns primary nav).
+ */
+export const SHELL_DOCK_CLASS =
+  "dock glass-clear fixed bottom-0 inset-x-0 z-30 border-t border-base-300 pb-[env(safe-area-inset-bottom)] lg:hidden";
 
 /** Root app drawer contract. */
 export const SHELL_DRAWER_CLASS = "min-h-screen lg:drawer-open";
@@ -133,7 +140,7 @@ export const PROSE_MEASURE_CENTER_CLASS = "mx-auto max-w-2xl text-secondary";
  * Shared hero surface for page-level headers that need elevated context.
  */
 export const PAGE_HERO_SECTION_CLASS =
-  "hero min-w-0 overflow-x-clip rounded-box border border-base-300 bg-base-200";
+  "hero min-w-0 overflow-x-clip rounded-box border border-base-300 glass-subtle";
 
 /** Aside width contract inside page hero headers. */
 export const PAGE_HERO_ASIDE_CLASS = "w-full min-w-0 max-w-full lg:max-w-2xl";
@@ -241,6 +248,12 @@ export const ACHIEVEMENT_ICON_BADGE_CLASS =
 
 /** Quick-action FAB position + action minimum width. */
 export const FAB_POSITION_CLASS = "left-6 bottom-24";
+
+/**
+ * Floating chat stack (above mobile dock). Right rail; desktop lowers to bottom-6.
+ */
+export const SHELL_FLOATING_CHAT_STACK_CLASS =
+  "fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6";
 export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
 
 /** Inline CTA chevron icon size (small directional arrow). */
@@ -273,6 +286,18 @@ export const FLUID_HEIGHT_CLASS = "h-full";
 
 /** Truncation block primitive (min-w-0 to enable flexbox text truncation). */
 export const TRUNCATE_FLEX_CHILD_CLASS = "min-w-0";
+
+/**
+ * Horizontal section-rail scroll tokens (settings / workspace navigators).
+ * Keep snap + touch pan on the SSOT rail so mobile tabs feel Apple-HIG native.
+ */
+export const SCROLL_SNAP_X_MANDATORY_CLASS = "snap-x snap-mandatory";
+export const SCROLL_SNAP_ALIGN_START_CLASS = "snap-start";
+export const SCROLL_TOUCH_PAN_X_CLASS = "touch-pan-x";
+export const SCROLL_SMOOTH_CLASS = "scroll-smooth";
+export const SCROLL_PADDING_INLINE_3_CLASS = "scroll-px-3";
+/** Hide dense labels on the smallest viewport; keep aria-label on the control. */
+export const LABEL_HIDE_BELOW_SM_CLASS = "max-sm:sr-only";
 
 /** Flex min-height zero (enables flex children to shrink to content). */
 export const MIN_HEIGHT_ZERO_CLASS = "min-h-0";
@@ -322,12 +347,12 @@ export {
   FLEX_GAP_TOKEN_CLASS,
   type FlexGapToken,
   FONT_WEIGHT_TOKEN_CLASS,
-  type FontWeightToken,
   FORM_WIDTH_10_CLASS,
   FORM_WIDTH_16_CLASS,
   FORM_WIDTH_20_CLASS,
   FORM_WIDTH_28_CLASS,
   FORM_WIDTH_32_CLASS,
+  type FontWeightToken,
   GLASS_CARD_ENTER_CLASS,
   GLASS_CARD_HOVER_CLASS,
   HEIGHT_TOKEN_CLASS,
@@ -335,26 +360,28 @@ export {
   LEADING_TOKEN_CLASS,
   type LeadingToken,
   MARGIN_TOKEN_CLASS,
-  type MarginToken,
   MAX_HEIGHT_72_CLASS,
   MAX_HEIGHT_96_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
-  type MaxHeightToken,
   MAX_W_2XL_CLASS,
   MAX_W_3XL_CLASS,
   MAX_W_64_CLASS,
   MAX_W_XS_CLASS,
+  type MarginToken,
+  type MaxHeightToken,
   MIN_H_36_CLASS,
   MIN_H_60_CLASS,
   MIN_H_80_CLASS,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
+  POINTER_EVENTS_TOKEN_CLASS,
+  type PointerEventsToken,
   PRINT_PADDING_RESET_CLASS,
   RADIUS_TOKEN_CLASS,
   type RadiusToken,
   SCROLL_MARGIN_TOKEN_CLASS,
-  type ScrollMarginToken,
   SCROLL_MARGIN_TOP_24_CLASS,
+  type ScrollMarginToken,
   SHADOW_TOKEN_CLASS,
   type ShadowToken,
   STACK_SPACE_Y_TOKEN_CLASS,

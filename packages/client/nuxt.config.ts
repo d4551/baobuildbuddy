@@ -181,7 +181,8 @@ export default defineNuxtConfig({
   modules: ["@nuxt/image", "@nuxt/test-utils/module"],
   compatibilityDate: NUXT_COMPATIBILITY_DATE,
   buildDir: ".nuxt",
-  devtools: { enabled: true },
+  // DevTools HUD collides with mobile dock; opt-in only via NUXT_DEVTOOLS=true.
+  devtools: { enabled: process.env.NUXT_DEVTOOLS === "true" },
   $development: {
     sourcemap: {
       client: false,

@@ -4,7 +4,6 @@ import {
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import { SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared/constants/interview";
-import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -12,11 +11,6 @@ import type {
   ScrapePendingAction,
   TargetRecord,
 } from "~/types/automation-scraper";
-
-export const DATE_FORMAT_OPTIONS = {
-  dateStyle: "medium",
-  timeStyle: "short",
-} as const satisfies Intl.DateTimeFormatOptions;
 
 export const RUN_STATE_BADGE_CLASS: Record<AutomationScraperRunState, string> = {
   idle: "badge-ghost",
@@ -34,34 +28,6 @@ export const isScrapeCapabilityCard = (
   capability: RpaCapabilityAuditEntry,
 ): capability is ScrapeCapabilityCard =>
   capability.category === "scrape" && capability.target !== null;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-export function resolveScheduledRunAt(run: RpaRunExecutionEnvelope): string {
-  const runInput = run.input;
-  if (!(runInput && isRecord(runInput))) {
-    return run.createdAt;
-  }
-
-  const scheduleValue = runInput.schedule;
-  if (!isRecord(scheduleValue)) {
-    return run.createdAt;
-  }
-
-  return typeof scheduleValue.runAt === "string" && scheduleValue.runAt.length > 0
-    ? scheduleValue.runAt
-    : run.createdAt;
-}
-
-export function toIsoTimestamp(dateTimeLocal: string): string | null {
-  const parsed = new Date(dateTimeLocal);
-  if (Number.isNaN(parsed.getTime()) || parsed.getTime() <= Date.now()) {
-    return null;
-  }
-
-  return parsed.toISOString();
-}
 
 type AutomationScraperBootstrapInput = {
   getRpaCapabilities: () => Promise<RpaCapabilityAuditReport>;

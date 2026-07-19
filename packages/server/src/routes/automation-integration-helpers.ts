@@ -111,7 +111,14 @@ export const requestJson = async <T>(
   }
   const body = parseJson(rawBody, schema);
   if (body === null) {
-    throw new Error("Failed to parse JSON response from " + path);
+    throw new Error(
+      "Failed to parse JSON response from " +
+        path +
+        " (status " +
+        String(response.status) +
+        "): " +
+        rawBody.slice(0, 400),
+    );
   }
   return { status: response.status, body };
 };

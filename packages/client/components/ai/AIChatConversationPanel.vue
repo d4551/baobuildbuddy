@@ -84,13 +84,13 @@ const updateInput = (event: Event): void => {
 </script>
 
 <template>
- <section class="card border border-base-300 bg-base-100" :class="[MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]">
+  <section class="card border border-base-300 bg-base-100" :class="[MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]">
     <div class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS]">
       <header class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px5, PADDING_TOKEN_CLASS.py5, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <div>
- <h1 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
+              <h1 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
                 {{ t("aiChatPage.title", { brand: resolvedBrand.name }) }}
               </h1>
               <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
@@ -128,8 +128,8 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
- <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
- <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
+          <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span class="badge badge-soft badge-info">
@@ -141,7 +141,7 @@ const updateInput = (event: Event): void => {
               </div>
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                 <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
- <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
+                <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("aiChatPage.emptyDescription") }}
                 </p>
               </div>
@@ -154,17 +154,11 @@ const updateInput = (event: Event): void => {
           </div>
         </div>
 
- <div v-else :class="[PADDING_TOKEN_CLASS.py1, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+        <div v-else :class="[PADDING_TOKEN_CLASS.py1, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <AIChatBubble
             v-for="(messageRow, index) in renderedMessages"
             :key="messageRow.key"
             :assistant-label="resolvedBrand.assistantName"
-            :context-chips="
-              index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
-                ? contextChips
-                : []
-            "
-            :context-chips-aria="t('floatingChat.contextChipsAria')"
             :is-latest-assistant-message="
               index === latestAssistantMessageIndex && messageRow.message.role === 'assistant'
             "
@@ -176,8 +170,6 @@ const updateInput = (event: Event): void => {
           <AIChatBubble
             v-if="streaming"
             :assistant-label="resolvedBrand.assistantName"
-            :context-chips="contextChips"
-            :context-chips-aria="t('floatingChat.contextChipsAria')"
             :is-latest-assistant-message="true"
             :is-streaming="true"
             :locale="locale"
@@ -198,7 +190,7 @@ const updateInput = (event: Event): void => {
               ref="aiChatComposer"
               :value="input"
               rows="3"
- class="textarea resize-y" 
+              class="textarea resize-y" 
               :placeholder="t('aiChatPage.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
               :disabled="loading"
               :aria-label="t('aiChatPage.inputAria')"

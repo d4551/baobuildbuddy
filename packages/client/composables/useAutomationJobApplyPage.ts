@@ -13,7 +13,7 @@ import {
   DATE_FORMAT_OPTIONS,
   resolveScheduledRunAt,
   toIsoTimestamp,
-} from "~/composables/automation-scraper-bootstrap";
+} from "~/composables/schedule-timestamp";
 import type { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";

@@ -127,6 +127,10 @@ export const RESPONSIVE_PADDING_SM_PX6_CLASS = "sm:px-6";
 
 /** Responsive width tokens. */
 export const RESPONSIVE_WIDTH_LG_W80_CLASS = "lg:w-80";
+/** Full-width control on mobile; intrinsic width from `sm` up (CTA rows). */
+export const RESPONSIVE_WIDTH_SM_AUTO_CLASS = "sm:w-auto";
+/** Stack actions vertically on mobile; row from `sm` up. */
+export const RESPONSIVE_FLEX_COL_SM_ROW_CLASS = "flex flex-col sm:flex-row";
 
 /** Responsive typography tokens. */
 export const RESPONSIVE_TEXT_MD_3XL_CLASS = "md:text-3xl";

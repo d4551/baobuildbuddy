@@ -8,6 +8,7 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  POINTER_EVENTS_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -208,16 +209,16 @@ const bootstrapErrorMessage = computed(() =>
             <time>{{ letter.updatedAtLabel }}</time>
           </div>
 
-          <div class="card-actions justify-end">
+          <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
             <button
-              class="btn btn-sm btn-outline relative z-20"
+              class="btn btn-sm btn-outline"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button
-              class="btn btn-sm btn-error btn-outline relative z-20"
+              class="btn btn-sm btn-error btn-outline"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

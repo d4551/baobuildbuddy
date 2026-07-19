@@ -86,47 +86,34 @@ export const collectAiProvenanceViolationsForContent = (
   const hasProvider = providerProvenancePattern.test(combined);
   const hasModel = modelProvenancePattern.test(combined);
 
-  if (!hasProvider) {
-    const isMockOrSimulationComponent =
-      filePath.includes("/InterviewChat.vue") ||
-      filePath.includes("/InterviewConfigModal.vue") ||
-      filePath.includes("/StudioSelector.vue") ||
-      filePath.includes("/AIChatBubble.vue");
-    if (!isMockOrSimulationComponent) {
-      violations.push({
-        filePath,
-        line: 1,
-        message: `AI surface renders AI content but does not surface the "provider" that produced it. Provenance is mandatory (see chatRouteResponseSchema). Display the provider in the annotation/overlay/report.`,
-      });
-    }
+  // Soften only for interview simulation chrome that deliberately uses local scripts
+  // (not live provider responses). AIChatBubble is a live provenance surface — not exempt.
+  const isSimulationChrome =
+    filePath.includes("/InterviewChat.vue") ||
+    filePath.includes("/InterviewConfigModal.vue") ||
+    filePath.includes("/StudioSelector.vue");
+
+  if (!hasProvider && !isSimulationChrome) {
+    violations.push({
+      filePath,
+      line: 1,
+      message: `AI surface renders AI content but does not surface the "provider" that produced it. Provenance is mandatory (see chatRouteResponseSchema). Display the provider in the annotation/overlay/report.`,
+    });
   }
 
-  if (!hasModel) {
-    const isMockOrSimulationComponent =
-      filePath.includes("/InterviewChat.vue") ||
-      filePath.includes("/InterviewConfigModal.vue") ||
-      filePath.includes("/StudioSelector.vue") ||
-      filePath.includes("/AIChatBubble.vue");
-    if (!isMockOrSimulationComponent) {
-      violations.push({
-        filePath,
-        line: 1,
-        message: `AI surface renders AI content but does not surface the "model" that produced it. Provenance is mandatory (see chatRouteResponseSchema). Display the model id in the annotation/overlay/report.`,
-      });
-    }
+  if (!hasModel && !isSimulationChrome) {
+    violations.push({
+      filePath,
+      line: 1,
+      message: `AI surface renders AI content but does not surface the "model" that produced it. Provenance is mandatory (see chatRouteResponseSchema). Display the model id in the annotation/overlay/report.`,
+    });
   }
 
   // Confidence is required on score-bearing surfaces (interview, skill-mapping).
   const isScoreSurface =
     SCORE_SURFACE_PATH_PATTERN.test(filePath) || SCORE_SURFACE_CONTENT_PATTERN.test(combined);
   const isComposable = filePath.includes("/composables/");
-  if (isScoreSurface && !isComposable && !confidencePattern.test(combined)) {
-    const isMockOrSimulationComponent =
-      filePath.includes("/InterviewChat.vue") ||
-      filePath.includes("/InterviewConfigModal.vue") ||
-      filePath.includes("/StudioSelector.vue") ||
-      filePath.includes("/AIChatBubble.vue");
-    if (isMockOrSimulationComponent) return violations;
+  if (isScoreSurface && !isComposable && !confidencePattern.test(combined) && !isSimulationChrome) {
     violations.push({
       filePath,
       line: 1,

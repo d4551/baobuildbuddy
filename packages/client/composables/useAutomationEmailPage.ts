@@ -12,8 +12,8 @@ import {
   EMAIL_TONE_OPTIONS,
   type EmailAutomationResultState,
   type EmailFormState,
-  resolveScheduledRunAt,
 } from "~/composables/automation-email-page-form";
+import { resolveScheduledRunAt } from "~/composables/schedule-timestamp";
 
 const useAutomationEmailSettingsState = (
   settings: ReturnType<typeof useSettings>["settings"],

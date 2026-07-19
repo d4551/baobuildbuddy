@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useFloatingChatWidget } from "~/composables/useFloatingChatWidget";
-import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, SHELL_FLOATING_CHAT_STACK_CLASS } from "~/constants/layout";
 
 const {
   AI_CHAT_PAGE_PATH: aiChatPagePath,
@@ -57,7 +57,7 @@ const {
   <Teleport to="body">
     <div 
       v-if="showWidget"
-      class="fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6" :class="[FLEX_GAP_TOKEN_CLASS.gap3]"
+      :class="[SHELL_FLOATING_CHAT_STACK_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]"
     >
       <FloatingChatPanel
         :ai-chat-page-path="aiChatPagePath"

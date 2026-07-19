@@ -18,15 +18,15 @@ const activeSection = defineModel<SettingsSectionId>("activeSection", {
     :build-route="APP_ROUTE_BUILDERS.settingsSection"
   >
     <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
-      <section
-        v-for="section in SETTINGS_SECTION_ITEMS"
-        :id="`settings-section-panel-${section.id}`"
-        :key="section.id"
-        :aria-hidden="activeSection !== section.id"
-        v-show="activeSection === section.id"
-      >
-        <slot :name="section.slotName" />
-      </section>
+      <!-- Mount only the active panel — keeps mobile DOM lean. -->
+      <template v-for="section in SETTINGS_SECTION_ITEMS" :key="section.id">
+        <section
+          v-if="activeSection === section.id"
+          :id="`settings-section-panel-${section.id}`"
+        >
+          <slot :name="section.slotName" />
+        </section>
+      </template>
     </div>
   </WorkspaceSectionNavigator>
 </template>

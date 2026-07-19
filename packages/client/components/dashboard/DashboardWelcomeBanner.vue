@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import {
+  RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
   RESPONSIVE_TEXT_MD_3XL_CLASS,
   RESPONSIVE_TEXT_XL_4XL_CLASS,
+  RESPONSIVE_WIDTH_SM_AUTO_CLASS,
 } from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -44,11 +47,30 @@ const { t } = useI18n();
           </Transition>
         </div>
       </div>
-      <div v-if="showSetupAction" class="card-actions relative flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1]">
-        <NuxtLink :to="primaryRoute" class="btn btn-primary">
+      <div
+        v-if="showSetupAction"
+        class="card-actions relative"
+        :class="[
+          FLUID_WIDTH_CLASS,
+          RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
+          MARGIN_TOKEN_CLASS.mt1,
+          FLEX_GAP_TOKEN_CLASS.gap2,
+        ]"
+      >
+        <NuxtLink
+          :to="primaryRoute"
+          class="btn btn-primary"
+          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS]"
+        >
           {{ primaryLabel }}
         </NuxtLink>
-        <NuxtLink :to="APP_ROUTES.setup" class="btn btn-ghost">
+        <!-- Avoid duplicate Complete Setup CTAs when primary already targets setup. -->
+        <NuxtLink
+          v-if="primaryRoute !== APP_ROUTES.setup"
+          :to="APP_ROUTES.setup"
+          class="btn btn-ghost"
+          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS]"
+        >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>
       </div>

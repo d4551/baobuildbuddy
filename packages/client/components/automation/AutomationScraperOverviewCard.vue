@@ -22,7 +22,7 @@ const { t } = useI18n();
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
- <p class="font-semibold uppercase text-primary" :class="[TRACKING_TOKEN_CLASS.widest, TYPOGRAPHY_SCALE_CLASS.xs]">
+        <p class="font-semibold uppercase text-primary" :class="[TRACKING_TOKEN_CLASS.widest, TYPOGRAPHY_SCALE_CLASS.xs]">
           {{ t("automation.scraper.overview.eyebrow") }}
         </p>
         <h2 class="card-title">{{ t("automation.scraper.overview.title") }}</h2>
