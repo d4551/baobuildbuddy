@@ -8,6 +8,9 @@ import { IGNORED_DIRECTORY_NAMES, reportViolations, type ValidationViolation } f
  * Relative targets and in-repo absolute build roots are evaluated separately.
  */
 const ABS_USER_HOME_TARGET_PATTERN = /^(?:\/Users\/|\/home\/)/u;
+const GIT_LS_FILES_LINE_BREAK_PATTERN = /\r?\n/u;
+const GIT_LS_FILES_SYMLINK_ENTRY_PATTERN =
+  /^(?<mode>\d{6})\s+\S+\s+\d+\s+(?<path>.+)$/u;
 
 export type AbsPathSymlinkViolation = {
   filePath: string;
@@ -69,11 +72,11 @@ export const collectTrackedSymlinkEntriesFromGitLsFiles = async (
   gitLsFilesSOutput: string,
   readWorkingTreeTarget: (filePath: string) => Promise<string | null>,
 ): Promise<Array<{ filePath: string; target: string }>> => {
-  const lines = gitLsFilesSOutput.split(/\r?\n/u).filter((line) => line.length > 0);
+  const lines = gitLsFilesSOutput.split(GIT_LS_FILES_LINE_BREAK_PATTERN).filter((line) => line.length > 0);
   const symlinkPaths = lines
     .map((line) => {
-      const match = /^(?<mode>\d{6})\s+\S+\s+\d+\s+(?<path>.+)$/u.exec(line);
-      if (!match || match.groups?.mode !== "120000") {
+      const match = GIT_LS_FILES_SYMLINK_ENTRY_PATTERN.exec(line);
+      if (match?.groups?.mode !== "120000") {
         return null;
       }
       return match.groups.path;

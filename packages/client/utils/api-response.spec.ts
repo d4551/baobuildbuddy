@@ -33,7 +33,7 @@ it("requireApiResponseData returns typed data and formats errors", () => {
   ).toThrow("boom");
 });
 
-it("readApiDataOrEmpty soft-fails to empty arrays", async () => {
+it("empty reader returns [] on error envelopes", async () => {
   await expect(readApiDataOrEmpty(Promise.resolve({ error: "nope" }))).resolves.toEqual([]);
   await expect(readApiDataOrEmpty(Promise.resolve({ data: [1, 2] }))).resolves.toEqual([1, 2]);
 });
