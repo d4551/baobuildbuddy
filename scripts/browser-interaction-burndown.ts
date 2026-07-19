@@ -221,7 +221,7 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
     if (!main) {
       return [];
     }
-    const controls = Array.from(main.querySelectorAll("button, a.btn"));
+    const controls = Array.from(main.querySelectorAll("button, a.btn, a[href]"));
     const labels: string[] = [];
     for (const control of controls) {
       if (!(control instanceof HTMLElement)) {
@@ -241,10 +241,10 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
         }
       }
       const label =
-        control.getAttribute("aria-label")?.trim() ||
+        control.getAttribute("aria-label")?.replace(/\s+/gu, " ").trim() ||
         control.textContent?.replace(/\s+/gu, " ").trim() ||
         "";
-      if (label.length > 0) {
+      if (label.length > 0 && label.length < 80) {
         labels.push(label);
       }
     }
@@ -263,22 +263,21 @@ const clickOneLabel = async (
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
   const clicked = await page.evaluate((targetLabel) => {
-    const controls = [...document.querySelectorAll("main button, main a.btn")];
+    const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
+    const controls = [...document.querySelectorAll("main button, main a.btn, main a[href]")];
     for (const control of controls) {
       if (!(control instanceof HTMLElement)) {
         continue;
       }
-      const resolved =
-        control.getAttribute("aria-label")?.trim() ||
-        control.textContent?.replace(/\s+/gu, " ").trim() ||
-        "";
-      if (resolved !== targetLabel) {
+      const aria = normalize(control.getAttribute("aria-label") ?? "");
+      const text = normalize(control.textContent ?? "");
+      if (aria !== targetLabel && text !== targetLabel) {
         continue;
       }
       if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
         continue;
       }
-      control.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      control.click();
       return true;
     }
     return false;
@@ -318,7 +317,8 @@ const clickVisibleControls = async (
   const labels = await listClickableControlLabels(page);
   await mapSequential(labels, async (label) => {
     await clickOneLabel(page, viewport, route, label, findings, consoleBucket, pageErrorBucket);
-    if (!page.url().includes(route) && route !== "/") {
+    const origin = `${CLIENT_BASE}${route}`;
+    if (page.url() !== origin) {
       await openRoute(page, route, consoleBucket, pageErrorBucket);
     }
   });
