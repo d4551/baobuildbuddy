@@ -11,6 +11,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -139,7 +140,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         class="alert alert-info alert-soft"
         :aria-label="t('settings.aiProviders.openaiV1Aria')"
       >
-        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.openaiV1Description") }}</p>
           <code class="glass-subtle block break-all rounded-box" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">

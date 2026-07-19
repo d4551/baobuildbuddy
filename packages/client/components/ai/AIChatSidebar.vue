@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 <template>
   <aside class="flex flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap4, MIN_HEIGHT_ZERO_CLASS]">
-    <section :class="SURFACE_GLASS_CARD_CLASS" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>
         <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -45,7 +45,7 @@ const { t } = useI18n();
       </div>
     </section>
 
-    <section :class="SURFACE_GLASS_CARD_CLASS" :class="[SHADOW_TOKEN_CLASS.sm]">
+    <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.promptsTitle") }}</h2>
         <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

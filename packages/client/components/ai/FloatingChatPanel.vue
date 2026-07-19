@@ -80,7 +80,7 @@ const draft = defineModel<string>("draft", { required: true });
   <div 
     v-if="isOpen"
     :id="chatPanelId"
-    :class="SURFACE_GLASS_CARD_CLASS" :class="[FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
+    :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
     <div class="card-body" :class="[FLUID_HEIGHT_CLASS, PADDING_TOKEN_CLASS.p0]">
       <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">

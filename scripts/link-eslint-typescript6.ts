@@ -24,6 +24,8 @@ const PACKAGE_PREFIXES = [
   "@typescript-eslint+utils@",
   "typescript-eslint@",
   "ts-api-utils@",
+  "eslint-plugin-vue@",
+  "vue-eslint-parser@",
 ] as const;
 
 const linkTypescript6 = (packageDir: string): void => {
@@ -53,4 +55,25 @@ for (const entry of readdirSync(BUN_STORE)) {
   linked += 1;
 }
 
-await writeOutput(`Linked typescript@6.0.3 into ${String(linked)} eslint/ts-api-utils package(s).`);
+// Workspace package node_modules may also host eslint-plugin-vue / parsers.
+const workspacePackageDirs = ["packages/client", "packages/server", "packages/shared", "packages/scraper"];
+for (const workspacePackage of workspacePackageDirs) {
+  for (const nestedName of [
+    "eslint-plugin-vue",
+    "vue-eslint-parser",
+    "typescript-eslint",
+    "ts-api-utils",
+  ]) {
+    const packageDir = join(ROOT, workspacePackage, "node_modules", nestedName);
+    if (!existsSync(packageDir)) continue;
+    // Workspace packages resolve typescript via the root bun store; use an absolute-relative link.
+    const nodeModulesDir = join(packageDir, "node_modules");
+    const linkPath = join(nodeModulesDir, "typescript");
+    mkdirSync(nodeModulesDir, { recursive: true });
+    rmSync(linkPath, { force: true });
+    symlinkSync(TS6_ABSOLUTE, linkPath);
+    linked += 1;
+  }
+}
+
+await writeOutput(`Linked typescript@6.0.3 into ${String(linked)} eslint peer package(s).`);
