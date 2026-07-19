@@ -4,11 +4,13 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_DESCRIPTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -53,8 +55,8 @@ function studioLocation(location: string): string {
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="avatar placeholder">
-              <div class="bg-primary text-primary-content w-12" :class="[RADIUS_TOKEN_CLASS.full]">
-                <span class="text-xl">{{ studioInitial(studio.name) }}</span>
+ <div class="bg-primary text-primary-content" :class="[WIDTH_TOKEN_CLASS.w12, RADIUS_TOKEN_CLASS.full]">
+                <span :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ studioInitial(studio.name) }}</span>
               </div>
             </div>
             <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
@@ -63,7 +65,7 @@ function studioLocation(location: string): string {
             </div>
           </div>
 
-          <p class="text-secondary min-h-14" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+ <p class="text-secondary" :class="[MIN_HEIGHT_DESCRIPTION_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ studioDescription(studio.description) }}
           </p>
 

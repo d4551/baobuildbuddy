@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -34,7 +35,7 @@ function emitValue(): void {
 </script>
 
 <template>
-  <div class="p-6" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+ <div :class="[PADDING_TOKEN_CLASS.p6, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("resumePage.personal.title") }}</h2>
     <SectionGrid grid-token="twoColumn">
       <fieldset class="fieldset">

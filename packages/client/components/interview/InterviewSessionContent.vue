@@ -9,6 +9,7 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -77,7 +78,7 @@ const { t } = useI18n();
       role="status"
       aria-live="polite"
     >
-      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg :class="[ICON_SIZE_CLASS['6']]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>

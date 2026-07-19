@@ -5,6 +5,7 @@ import type { AutomationHubCard } from "~/composables/automation-hub-page-contra
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -30,11 +31,11 @@ const { t } = useI18n();
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="t(card.titleKey)">
               <span
-                class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full]"
+ class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" 
               >
                 <component
                   :is="resolveAppIconComponent(card.iconName)"
-                  class="h-4 w-4"
+                  :class="[ICON_SIZE_CLASS['4']]"
                   aria-hidden="true"
                 />
                 <span class="sr-only">{{ t(card.titleKey) }}</span>

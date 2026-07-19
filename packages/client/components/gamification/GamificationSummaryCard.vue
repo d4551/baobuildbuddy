@@ -11,6 +11,8 @@ import {
 } from "~/constants/gamification";
 import {
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  HEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_STRONG_CLASS,
@@ -34,7 +36,7 @@ const { t } = useI18n();
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
-            <h2 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
+ <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">{{ t("gamificationPage.levelPrefix") }} {{ progress.level }}</h2>
             <p class="text-secondary">
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
@@ -43,7 +45,7 @@ const { t } = useI18n();
         </div>
 
         <progress
-          class="progress progress-primary h-4" :class="[FLUID_WIDTH_CLASS]"
+ class="progress progress-primary" 
           :value="levelProgress"
           :max="GAMIFICATION_PROGRESS_MAX"
           :aria-valuenow="levelProgress"

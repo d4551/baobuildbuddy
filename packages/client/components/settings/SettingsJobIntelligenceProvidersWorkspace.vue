@@ -49,7 +49,7 @@ const sourceCollectionCount = computed(
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
         :description="t('settings.jobIntelligence.providersDescription')"
@@ -82,19 +82,19 @@ const sourceCollectionCount = computed(
       </SettingsPanelHeader>
 
       <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summarySourcesDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summaryCollectionsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ sourceCollectionCount }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.summaryCollectionsDescription") }}</div>
         </div>
 
-        <div class="stat px-4 py-3">
+        <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.defaultsTitle") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ jobProviderForm.providerTimeoutMs }}</div>
           <div class="stat-desc">{{ t("settings.jobIntelligence.defaultsDescription") }}</div>
@@ -169,7 +169,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100 px-4 py-3" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+ <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3, FLEX_GAP_TOKEN_CLASS.gap4]">
                 <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>

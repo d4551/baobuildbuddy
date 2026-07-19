@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -33,7 +34,7 @@ const { t } = useI18n();
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body py-4">
+    <div class="card-body" :class="[PADDING_TOKEN_CLASS.py4]">
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.completion.title") }}</h3>
         <span class="badge badge-primary badge-outline">

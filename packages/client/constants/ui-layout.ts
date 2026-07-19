@@ -119,3 +119,18 @@ export const WORKSPACE_NAV_MAX_WIDTH_XL_CLASS = "xl:max-w-4xl";
 
 /** Hero page title responsive sizing. */
 export const HERO_TITLE_RESPONSIVE_CLASS = "sm:text-5xl";
+
+/** Dashboard welcome banner title responsive scale. */
+export const DASHBOARD_WELCOME_TITLE_RESPONSIVE_CLASS = "md:text-3xl xl:text-4xl";
+
+/** Chat panel horizontal padding at sm breakpoint. */
+export const CHAT_PANEL_PADDING_SM_PX6_CLASS = "sm:px-6";
+
+/** API docs endpoint navigator aside width at lg breakpoint. */
+export const API_DOCS_NAV_ASIDE_LG_CLASS = "lg:sticky lg:top-6 lg:w-80 lg:shrink-0";
+
+/** Dashboard onboarding card body padding at lg breakpoint. */
+export const DASHBOARD_ONBOARDING_BODY_LG_P8_CLASS = "lg:p-8";
+
+/** Brand settings card body padding (compact mobile, comfortable md+). */
+export const BRAND_CARD_BODY_RESPONSIVE_CLASS = "card-body p-4 md:p-6";

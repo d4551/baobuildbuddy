@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { FLUID_WIDTH_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+} from "~/constants/layout";
 import type { SetupStep } from "./setup-page-contracts";
 
 defineProps<{
@@ -11,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <ul class="steps steps-horizontal mb-8" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('setup.stepsAriaLabel')">
+ <ul class="steps steps-horizontal" :aria-label="t('setup.stepsAriaLabel')" :class="[MARGIN_TOKEN_CLASS.mb8, FLUID_WIDTH_CLASS]">
     <li class="step" :class="{ 'step-primary': currentStep >= 1 }" :data-content="currentStep > 1 ? '✓' : '1'">
       {{ t("setup.steps.profile") }}
     </li>

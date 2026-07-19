@@ -5,7 +5,10 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  MAX_HEIGHT_72_CLASS,
+  MAX_W_64_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -76,7 +79,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     :close-backdrop-label="t('interviewHub.config.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+ <h3 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("interviewHub.config.title") }}
     </h3>
     <p :id="descriptionId" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt1, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -104,7 +107,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
     </div>
 
-    <SectionGrid grid-token="twoColumnWide" extra-class="mt-6">
+    <SectionGrid grid-token="twoColumnWide" extra-:class="[MARGIN_TOKEN_CLASS.mt6]">
       <div v-if="selectedMode === 'job'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("interviewHub.config.searchJobsLegend") }}</legend>
@@ -124,7 +127,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         />
 
         <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <div class="max-h-72 overflow-x-auto rounded-box border border-base-300">
+          <div class="overflow-x-auto rounded-box border border-base-300" :class="[MAX_HEIGHT_72_CLASS]">
             <table class="table table-sm table-zebra" :aria-label="t('interviewHub.config.jobsTableAria')">
               <thead>
                 <tr>
@@ -137,7 +140,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               </thead>
               <tbody>
                 <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
-                  <td class="max-w-64 truncate">{{ job.title }}</td>
+                  <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
                   <td>{{ job.company }}</td>
                   <td class="text-right">
                     <button

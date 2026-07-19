@@ -31,11 +31,7 @@ export declare const createFailedRunUpdate: (errorMessage: string, execution?: {
             status: "error";
             message: string;
         }[];
-        errorEnvelope: {
-            code: "AUTOMATION_CANCELLED" | "AUTOMATION_RUNTIME_ERROR" | "AUTOMATION_TIMEOUT" | "NETWORK_ERROR" | "OUTPUT_PERSISTENCE_ERROR" | "OUTPUT_VALIDATION_ERROR" | "SCRIPT_OUTPUT_INVALID" | "SCRIPT_PROTOCOL_ERROR" | "UNKNOWN_ERROR";
-            message: string;
-            details?: JsonObject | undefined;
-        } | null;
+        errorEnvelope: ErrorEnvelope | null;
     };
     error: string;
     progress: number;

@@ -5,6 +5,7 @@ import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  MIN_HEIGHT_EDITOR_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -36,7 +37,7 @@ const populatedTaxonomyCount = computed(
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.taxonomyTitle')"
         :description="t('settings.jobIntelligence.taxonomyDescription')"
@@ -83,7 +84,7 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.keywordsJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+ class="textarea font-mono" 
               />
             </fieldset>
           </div>
@@ -103,7 +104,7 @@ const populatedTaxonomyCount = computed(
               <textarea
                 v-model="jobTaxonomyForm.studioRulesJson"
                 :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
-                class="textarea min-h-64 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+ class="textarea font-mono" 
               />
             </fieldset>
           </div>

@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
-import { SURFACE_GLASS_CARD_CLASS,
+import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  MIN_WIDTH_FORM_COL_CLASS,
+  MIN_WIDTH_SELECT_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -61,13 +65,13 @@ const emit = defineEmits<{
               <th scope="row" class="align-top">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                   <p class="font-medium">{{ section.label }}</p>
-                  <p class="leading-5 text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
+ <p class="text-muted" :class="[LEADING_TOKEN_CLASS.leading5, TYPOGRAPHY_SCALE_CLASS.xs]">{{ section.description }}</p>
                 </div>
               </th>
               <td class="align-top">
                 <select
                   v-model="aiRoutingDraft[section.id].provider"
-                  class="select select-sm min-w-40" :class="[FLUID_WIDTH_CLASS]"
+ class="select select-sm" 
                   :aria-label="t('settings.aiProviders.purposeProviderAria', { purpose: section.label })"
                 >
                   <option
@@ -85,7 +89,7 @@ const emit = defineEmits<{
                     v-model="aiRoutingDraft[section.id].model"
                     :list="`routing-model-options-${section.id}`"
                     type="text"
-                    class="input input-sm min-w-52" :class="[FLUID_WIDTH_CLASS]"
+ class="input input-sm" 
                     :placeholder="t('settings.aiProviders.purposeModelPlaceholder')"
                     :aria-label="t('settings.aiProviders.purposeModelAria', { purpose: section.label })"
                   />

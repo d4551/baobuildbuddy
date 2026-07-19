@@ -143,6 +143,23 @@ export const automationBrowserLaunchFailureToDetails = (
   ...(failure.browsersPath ? { browsersPath: failure.browsersPath } : {}),
 });
 
+export type ParseAutomationBrowserLaunchFailureDetailsResult =
+  | { readonly ok: true; readonly details: AutomationBrowserLaunchFailureDetails }
+  | { readonly ok: false };
+
+/**
+ * Boundary decoder: envelope `details` JSON → typed launch-failure payload.
+ */
+export const parseAutomationBrowserLaunchFailureDetails = (
+  details: JsonObject | undefined,
+): ParseAutomationBrowserLaunchFailureDetailsResult => {
+  const parsed = automationBrowserLaunchFailureDetailsSchema.safeParse(details);
+  if (!parsed.success) {
+    return { ok: false };
+  }
+  return { ok: true, details: parsed.data };
+};
+
 /**
  * Stable human-readable message that keeps failureMode in the envelope message.
  */

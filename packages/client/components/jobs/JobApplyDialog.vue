@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   open: boolean;
@@ -26,7 +31,7 @@ const emit = defineEmits<{
     :close-backdrop-label="t('jobDetail.closeButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="titleId" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
+ <h3 :id="titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ t("jobDetail.applyDialogTitle", { title: jobTitle }) }}
     </h3>
 

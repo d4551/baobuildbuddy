@@ -1,10 +1,20 @@
 <script setup lang="ts">
+import {
+  CHAT_PANEL_PADDING_SM_PX6_CLASS,
+} from "~/constants/ui-layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  LEADING_TOKEN_CLASS,
+  MAX_W_2XL_CLASS,
+  MIN_HEIGHT_CONTENT_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
+  PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -77,13 +87,13 @@ const updateInput = (event: Event): void => {
 </script>
 
 <template>
-  <section class="card min-h-0 border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.sm]">
-    <div class="flex min-h-0 flex-1 flex-col">
-      <header class="border-b border-base-300 px-5 py-5 sm:px-6">
+ <section class="card border border-base-300 bg-base-100" :class="[MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]">
+    <div class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS]">
+      <header class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px5, PADDING_TOKEN_CLASS.py5, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <div>
-              <h1 class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">
+ <h1 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
                 {{ t("aiChatPage.title", { brand: resolvedBrand.name }) }}
               </h1>
               <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
@@ -113,7 +123,7 @@ const updateInput = (event: Event): void => {
 
       <div
         ref="aiChatContainer"
-        class="min-h-0 flex-1 overflow-y-auto glass-subtle px-4 py-4 sm:px-6"
+        class="flex-1 overflow-y-auto glass-subtle" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]"
         role="log"
         aria-live="polite"
         aria-atomic="false"
@@ -121,8 +131,8 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex min- items-center justify-center py-8" :class="[FLUID_HEIGHT_CLASS]">
-          <div class="card max-w-2xl border border-base-300 bg-base-100" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+ <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
+ <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span class="badge badge-soft badge-info">
@@ -133,29 +143,21 @@ const updateInput = (event: Event): void => {
                 </span>
               </div>
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-                <h2 class="card-title text-xl">{{ t("aiChatPage.emptyTitle") }}</h2>
-                <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
+ <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("aiChatPage.emptyDescription") }}
                 </p>
               </div>
-              <ul class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" :aria-label="t('floatingChat.suggestionsAria')">
-                <li v-for="prompt in contextualPrompts" :key="prompt">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-soft"
-                    :aria-label="t('floatingChat.suggestionAria', { prompt })"
-                    :disabled="loading"
-                    @click="emit('prompt', prompt)"
-                  >
-                    {{ prompt }}
-                  </button>
-                </li>
-              </ul>
+              <ChatPromptChips
+                :prompts="contextualPrompts"
+                :loading="loading"
+                @prompt="emit('prompt', $event)"
+              />
             </div>
           </div>
         </div>
 
-        <div v-else class="py-1" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+ <div v-else :class="[PADDING_TOKEN_CLASS.py1, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <AIChatBubble
             v-for="(messageRow, index) in renderedMessages"
             :key="messageRow.key"
@@ -188,7 +190,7 @@ const updateInput = (event: Event): void => {
         </div>
       </div>
 
-      <div class="border-t border-base-300 bg-base-100 px-4 py-4 sm:px-6">
+      <div class="border-t border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
         <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="emit('send')">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <label class="sr-only" for="ai-chat-composer">
@@ -199,7 +201,7 @@ const updateInput = (event: Event): void => {
               ref="aiChatComposer"
               :value="input"
               rows="3"
-              class="textarea min-h-28 resize-y" :class="[FLUID_WIDTH_CLASS]"
+ class="textarea resize-y" 
               :placeholder="t('aiChatPage.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
               :disabled="loading"
               :aria-label="t('aiChatPage.inputAria')"
@@ -207,7 +209,7 @@ const updateInput = (event: Event): void => {
               @keydown="emit('keydown', $event)"
             />
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-              <div class="space-y-1">
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <p class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
                 </p>
@@ -226,7 +228,7 @@ const updateInput = (event: Event): void => {
                   :aria-label="t('aiChatPage.sendAria')"
                 >
                   <LoadingSpinner v-if="loading" size="sm" :label="t('aiChatPage.sendAria')" />
-                  <IconSend v-else class="h-5 w-5" />
+                  <IconSend v-else :class="[ICON_SIZE_CLASS['5']]" />
                   <span>{{ t("aiChatPage.sendButton") }}</span>
                 </button>
               </div>

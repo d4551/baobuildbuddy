@@ -60,7 +60,10 @@ export const sanitizeImportedSettings = <T>(value: T): JsonObject => {
     if (secretValue === "***REDACTED***") {
       delete settingsRecord[key];
     } else if (typeof secretValue === "string" && secretValue.length > 0) {
-      settingsRecord[key] = isEncryptionAvailable() ? encryptProviderKey(secretValue) : secretValue;
+      if (!isEncryptionAvailable()) {
+        throw new Error("BAO_ENCRYPTION_KEY must be set to encrypt provider keys");
+      }
+      settingsRecord[key] = encryptProviderKey(secretValue);
     }
   }
   delete settingsRecord.id;

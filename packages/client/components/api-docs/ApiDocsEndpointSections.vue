@@ -7,6 +7,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
+  SCROLL_MARGIN_TOP_24_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -37,7 +38,7 @@ const { t } = useI18n();
       :key="group.id"
       :class="SURFACE_GLASS_CARD_CLASS"
     >
-      <div class="card-body space-y-5">
+      <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
         <h2 class="card-title">{{ group.label }}</h2>
 
         <article
@@ -45,7 +46,7 @@ const { t } = useI18n();
           :id="endpoint.id"
           :key="endpoint.id"
           :ref="registerEndpointSectionRef(endpoint.id)"
-          class="border border-base-200 bg-base-100 scroll-mt-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4, RADIUS_TOKEN_CLASS.lg]"
+          class="border border-base-200 bg-base-100" :class="[SCROLL_MARGIN_TOP_24_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack4, PADDING_TOKEN_CLASS.p4, RADIUS_TOKEN_CLASS.lg]"
         >
           <header class="flex flex-wrap items-start justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2]">

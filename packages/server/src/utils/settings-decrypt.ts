@@ -18,8 +18,8 @@ interface DecryptedProviderKeys {
 
 function maybeDecrypt(value: string | null): string | null {
   if (!value) return null;
-  if (!isEncryptionAvailable()) return value;
   if (!value.startsWith("enc:")) return value;
+  if (!isEncryptionAvailable()) return null;
   return decryptProviderKey(value);
 }
 

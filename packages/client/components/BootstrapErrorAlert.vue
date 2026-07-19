@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  ICON_SIZE_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const props = withDefaults(
   defineProps<{
@@ -35,7 +39,7 @@ const hasRetry = computed(
 <template>
   <div :class="alertClass" role="alert">
     <svg
-      class="h-6 w-6 shrink-0"
+      class="shrink-0" :class="[ICON_SIZE_CLASS['6']]"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

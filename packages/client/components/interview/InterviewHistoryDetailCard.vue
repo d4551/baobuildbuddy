@@ -5,6 +5,8 @@ import CloseIcon from "~/components/ui/CloseIcon.vue";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -53,7 +55,7 @@ const { t } = useI18n();
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >
-            <CloseIcon class="h-4 w-4" />
+            <CloseIcon :class="[ICON_SIZE_CLASS['4']]" />
           </button>
         </div>
 
@@ -73,17 +75,17 @@ const { t } = useI18n();
             <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <UiRadialMeter
                 :value="selectedSession.score ?? 0"
-                size-class="h-16 w-16"
+                size-:class="[ICON_SIZE_CLASS['16']]"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.detailScoreAria', { score: selectedSession.score ?? 0 })"
               >
-                <span class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatScore(selectedSession.score) }}</span>
+ <span :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatScore(selectedSession.score) }}</span>
               </UiRadialMeter>
             </div>
           </div>
 
           <div>
-            <p class="mb-2 text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHistory.questionsLabel") }}</p>
+ <p class="text-muted" :class="[MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHistory.questionsLabel") }}</p>
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
               <div
                 v-for="(question, idx) in selectedSession.questions"
@@ -105,7 +107,7 @@ const { t } = useI18n();
                 </div>
                 <div class="collapse-content" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   <p class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1]">{{ question.question }}</p>
-                  <p class="mb-2 text-muted">{{ question.response }}</p>
+                  <p class="text-muted" :class="[MARGIN_TOKEN_CLASS.mb2]">{{ question.response }}</p>
                   <p class="text-secondary">{{ question.feedback }}</p>
                 </div>
               </div>

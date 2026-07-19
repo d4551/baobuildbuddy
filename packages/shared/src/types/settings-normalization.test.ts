@@ -80,9 +80,11 @@ describe("normalizeLocalModelEndpoint", () => {
     );
   });
 
-  test("preserves custom model endpoints", () => {
-    expect(normalizeLocalModelEndpoint("https://models.internal.example/v1")).toBe(
-      "https://models.internal.example/v1",
+  test("preserves custom loopback endpoints and rejects non-loopback SSRF targets", () => {
+    expect(normalizeLocalModelEndpoint("http://127.0.0.1:1234/v1")).toBe(
+      "http://127.0.0.1:1234/v1",
     );
+    expect(normalizeLocalModelEndpoint("https://models.internal.example/v1")).toBeNull();
+    expect(normalizeLocalModelEndpoint("http://169.254.169.254/latest")).toBeNull();
   });
 });

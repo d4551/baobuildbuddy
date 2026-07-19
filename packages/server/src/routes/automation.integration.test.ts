@@ -7,7 +7,6 @@ import {
   setDefaultTimeout,
   test,
 } from "bun:test";
-import "../test-support/automation/integration-runtime-flags";
 import { inArray } from "drizzle-orm";
 import type { App } from "../app";
 import { db } from "../db/client";

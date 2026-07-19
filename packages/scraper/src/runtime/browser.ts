@@ -4,7 +4,11 @@ import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults
 import { classifyAutomationBrowserLaunchFailure } from "@bao/shared/utils/automation-browser-launch-failure";
 import { settle } from "@bao/shared/utils/promise";
 import type { Browser, BrowserContext, Page } from "playwright";
-import { automationRuntimeConfig, sanitizePlaywrightBrowsersPathEnv } from "./config";
+import {
+  automationRuntimeConfig,
+  buildAutomationProcessEnv,
+  sanitizePlaywrightBrowsersPathEnv,
+} from "./config";
 
 /**
  * Browser context bundle returned by Bun-based automation scripts.
@@ -26,17 +30,16 @@ const createContextOptions = () => ({
   locale: DEFAULT_AUTOMATION_SETTINGS.speech.locale,
 });
 
-const readEffectiveBrowsersPath = (): string | undefined => {
-  const configured = process.env.PLAYWRIGHT_BROWSERS_PATH;
-  return typeof configured === "string" && configured.length > 0 ? configured : undefined;
-};
-
 const rejectLaunch = (
   reason: Error,
   stage: AutomationBrowserLaunchFailureDetails["stage"],
 ): LaunchAutomationBrowserResult => ({
   ok: false,
-  failure: classifyAutomationBrowserLaunchFailure(reason, stage, readEffectiveBrowsersPath()),
+  failure: classifyAutomationBrowserLaunchFailure(
+    reason,
+    stage,
+    buildAutomationProcessEnv().PLAYWRIGHT_BROWSERS_PATH,
+  ),
 });
 
 /**

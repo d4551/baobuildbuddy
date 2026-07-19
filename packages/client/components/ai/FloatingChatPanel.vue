@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
-import { SURFACE_GLASS_CARD_CLASS,
+import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
+  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_CHAT_CLASS,
+  MIN_H_60_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -44,7 +50,6 @@ defineProps<{
   streamingBubble: { role: string; content: string };
   supportsRecognition: boolean;
   supportsSynthesis: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
   ttsModelOptions: ReadonlyArray<string>;
   voiceErrorLabel: string;
   voiceSupportHintKey: string;
@@ -70,6 +75,7 @@ const emit = defineEmits<{
 }>();
 
 const draft = defineModel<string>("draft", { required: true });
+const { t } = useI18n();
 </script>
 
 <template>
@@ -78,7 +84,7 @@ const draft = defineModel<string>("draft", { required: true });
     :id="chatPanelId"
     :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
-    <div class="card-body p-0" :class="[FLUID_HEIGHT_CLASS]">
+ <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
       <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
         <div>
           <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.assistantName }}</h2>
@@ -112,25 +118,18 @@ const draft = defineModel<string>("draft", { required: true });
             {{ t("floatingChat.clearButton") }}
           </button>
           <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.closeAria')" @click="emit('close')">
-            <CloseIcon class="h-4 w-4" />
+            <CloseIcon :class="[ICON_SIZE_CLASS['4']]" />
           </button>
         </div>
       </header>
 
-      <div class="border-b border-base-300 px-3 py-2">
-        <ul class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" :aria-label="t('floatingChat.suggestionsAria')">
-          <li v-for="prompt in contextualPrompts" :key="prompt">
-            <button
-              type="button"
-              class="btn btn-xs btn-soft"
-              :aria-label="t('floatingChat.suggestionAria', { prompt })"
-              :disabled="loading"
-              @click="emit('prompt', prompt)"
-            >
-              {{ prompt }}
-            </button>
-          </li>
-        </ul>
+      <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
+        <ChatPromptChips
+          :prompts="contextualPrompts"
+          :loading="loading"
+          size="xs"
+          @prompt="emit('prompt', $event)"
+        />
       </div>
 
       <div
@@ -142,11 +141,11 @@ const draft = defineModel<string>("draft", { required: true });
         :aria-busy="loading || streaming"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex min-h-60 items-center justify-center" :class="[FLUID_HEIGHT_CLASS]">
+ <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_H_60_CLASS, FLUID_HEIGHT_CLASS]">
           <div class="card border border-base-300 glass-subtle" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
-              <p class="leading-6 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
+ <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
             </div>
           </div>
         </div>
@@ -184,7 +183,7 @@ const draft = defineModel<string>("draft", { required: true });
           <textarea
             v-model="draft"
             rows="3"
-            class="textarea min-h-24 resize-y" :class="[FLUID_WIDTH_CLASS]"
+ class="textarea resize-y" 
             :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
             :aria-label="t('floatingChat.inputAria')"
             :disabled="loading"
@@ -215,7 +214,7 @@ const draft = defineModel<string>("draft", { required: true });
               </ClientOnly>
               <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
                 <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
-                <IconSend v-else class="h-4 w-4" />
+                <IconSend v-else :class="[ICON_SIZE_CLASS['4']]" />
               </button>
             </div>
           </div>

@@ -10,6 +10,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { BRAND_CARD_BODY_RESPONSIVE_CLASS } from "~/constants/ui-layout";
 
 const props = defineProps<{
   hintIds: {
@@ -30,7 +31,7 @@ const brandForm = defineModel<{
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body md:p-6" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <div :class="[BRAND_CARD_BODY_RESPONSIVE_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.contentDescription") }}
       </p>

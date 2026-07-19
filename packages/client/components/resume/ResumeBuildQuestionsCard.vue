@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
@@ -63,7 +68,7 @@ const emit = defineEmits<{
 
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
-      <div class="card-actions mt-6 justify-between">
+      <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
         <button
           class="btn btn-ghost"
           :disabled="currentQuestionIndex === 0"

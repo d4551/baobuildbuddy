@@ -6,7 +6,9 @@ import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -130,7 +132,7 @@ const viewSession = (id: string): void => {
         </table>
       </div>
 
-      <div v-else class="overflow-x-auto py-2">
+      <div v-else class="overflow-x-auto" :class="[PADDING_TOKEN_CLASS.py2]">
         <ul class="timeline timeline-vertical timeline-compact" :class="[FLUID_WIDTH_CLASS]">
           <li v-for="(session, index) in filteredSessions" :key="session.id">
             <hr v-if="index !== 0" :class="props.getTimelineLineClass(session.score)" />
@@ -140,7 +142,7 @@ const viewSession = (id: string): void => {
             <div class="timeline-middle">
               <UiRadialMeter
                 :value="session.score ?? 0"
-                size-class="h-12 w-12"
+                size-:class="[ICON_SIZE_CLASS['12']]"
                 fill-class="stroke-primary"
                 :aria-label="t('interviewHistory.timelineScoreAria', { score: session.score ?? 0 })"
               >

@@ -4,11 +4,12 @@ import {
   automationBrowserLaunchFailureToDetails,
   classifyAutomationBrowserLaunchFailure,
   formatAutomationBrowserLaunchFailureMessage,
+  parseAutomationBrowserLaunchFailureDetails,
   sanitizeAutomationBrowserLaunchDiagnostic,
 } from "./automation-browser-launch-failure";
 import { CURSOR_SANDBOX_BROWSER_CACHE_MARKER } from "./playwright-browsers-path";
 
-describe("classifyAutomationBrowserLaunchFailure", () => {
+describe("browser launch failure classification", () => {
   test("classifies missing browser executable distinctly from SEGV", () => {
     const missing = classifyAutomationBrowserLaunchFailure(
       new Error("browserType.launch: Executable doesn't exist at /tmp/chromium"),
@@ -116,7 +117,7 @@ describe("classifyAutomationBrowserLaunchFailure", () => {
   });
 });
 
-describe("sanitizeAutomationBrowserLaunchDiagnostic", () => {
+describe("browser launch diagnostic sanitization", () => {
   test("redacts env-style secret assignments without dropping safe diagnostic text", () => {
     const scrubbed = sanitizeAutomationBrowserLaunchDiagnostic(
       "ENOENT PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright BAO_AUTH_SETUP_TOKEN=super-secret-value",
@@ -125,5 +126,27 @@ describe("sanitizeAutomationBrowserLaunchDiagnostic", () => {
     expect(scrubbed).toContain("PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright");
     expect(scrubbed).not.toContain("super-secret-value");
     expect(scrubbed).toContain("[REDACTED]");
+  });
+});
+
+describe("browser launch failure details parse", () => {
+  test("decodes typed details and rejects malformed envelopes", () => {
+    const classified = classifyAutomationBrowserLaunchFailure(
+      new Error("browserType.launch: Executable doesn't exist at /tmp/chromium"),
+      "launch",
+    );
+    expect(
+      parseAutomationBrowserLaunchFailureDetails(
+        automationBrowserLaunchFailureToDetails(classified),
+      ),
+    ).toEqual({
+      ok: true,
+      details: classified,
+    });
+    expect(
+      parseAutomationBrowserLaunchFailureDetails({ failureMode: "BROWSER_EXECUTABLE_MISSING" }),
+    ).toEqual({
+      ok: false,
+    });
   });
 });

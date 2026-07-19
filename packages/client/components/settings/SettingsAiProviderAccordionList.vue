@@ -4,6 +4,7 @@ import type { AIProviderType } from "@bao/shared/types/ai";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -49,7 +50,7 @@ const emit = defineEmits<{
       role="alert"
       class="alert alert-info alert-soft alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mb4]"
     >
-      <IconInfoCircle class="h-6 w-6 shrink-0 stroke-current" />
+      <IconInfoCircle class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS['6']]" />
       <div>
         <h3 class="font-semibold">{{ t("settings.aiProviders.ollamaTipTitle") }}</h3>
         <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -67,7 +68,7 @@ const emit = defineEmits<{
       class="collapse collapse-arrow border border-base-300 bg-base-100"
     >
       <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <AIProviderIcon :provider-id="provider.id" class="h-5 w-5 text-primary" />
+        <AIProviderIcon :provider-id="provider.id" class="text-primary" :class="[ICON_SIZE_CLASS['5']]" />
         {{ provider.label }}
         <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
           {{ t("settings.aiProviders.configuredBadge") }}

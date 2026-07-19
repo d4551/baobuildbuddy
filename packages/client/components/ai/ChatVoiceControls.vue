@@ -6,6 +6,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -177,7 +178,7 @@ function handleAutoSpeakChange(event: Event): void {
   </fieldset>
 
   <div v-if="!props.compact && props.supportsSynthesis" class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-    <label class="label cursor-pointer py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+ <label class="label cursor-pointer" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
       <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatCommon.voice.autoSpeakLabel") }}</span>
       <input
         :checked="props.autoSpeakReplies"
@@ -218,7 +219,7 @@ function handleAutoSpeakChange(event: Event): void {
 
   <SpeechModelProfileFields
     v-if="showAdvancedSpeechConfig"
-    class="mt-3"
+    :class="[MARGIN_TOKEN_CLASS.mt3]"
     :provider-options="props.speechProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"

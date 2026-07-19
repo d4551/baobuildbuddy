@@ -241,22 +241,31 @@ export const buildApiKeysUpdate = (body: {
   localModelName?: string;
   emailTransportPassword?: string;
 }): Partial<SettingsInsert> => {
-  const maybeEncrypt = (value: string): string =>
-    isEncryptionAvailable() ? encryptProviderKey(value) : value;
+  const secretWrites = [
+    body.geminiApiKey,
+    body.openaiApiKey,
+    body.claudeApiKey,
+    body.huggingfaceToken,
+    body.emailTransportPassword,
+  ].some((value) => typeof value === "string" && value.length > 0);
+
+  if (secretWrites && !isEncryptionAvailable()) {
+    throw new Error("BAO_ENCRYPTION_KEY must be set to encrypt provider keys");
+  }
 
   const update: Partial<SettingsInsert> = {};
   if (body.geminiApiKey !== undefined) {
-    update.geminiApiKey = body.geminiApiKey ? maybeEncrypt(body.geminiApiKey) : null;
+    update.geminiApiKey = body.geminiApiKey ? encryptProviderKey(body.geminiApiKey) : null;
   }
   if (body.openaiApiKey !== undefined) {
-    update.openaiApiKey = body.openaiApiKey ? maybeEncrypt(body.openaiApiKey) : null;
+    update.openaiApiKey = body.openaiApiKey ? encryptProviderKey(body.openaiApiKey) : null;
   }
   if (body.claudeApiKey !== undefined) {
-    update.claudeApiKey = body.claudeApiKey ? maybeEncrypt(body.claudeApiKey) : null;
+    update.claudeApiKey = body.claudeApiKey ? encryptProviderKey(body.claudeApiKey) : null;
   }
   if (body.huggingfaceToken !== undefined) {
     update.huggingfaceToken = body.huggingfaceToken
-      ? maybeEncrypt(body.huggingfaceToken)
+      ? encryptProviderKey(body.huggingfaceToken)
       : null;
   }
   if (body.localModelEndpoint !== undefined) {
@@ -268,7 +277,7 @@ export const buildApiKeysUpdate = (body: {
   if (body.emailTransportPassword !== undefined) {
     update.emailTransportPassword =
       body.emailTransportPassword.length > 0
-        ? maybeEncrypt(body.emailTransportPassword)
+        ? encryptProviderKey(body.emailTransportPassword)
         : null;
   }
   update.updatedAt = new Date().toISOString();

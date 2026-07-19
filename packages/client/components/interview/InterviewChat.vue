@@ -6,6 +6,9 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
+  MIN_H_80_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -161,9 +164,9 @@ watch(renderedMessages, async () => {
 
 <template>
   <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
-    <div class="card-body gap-0 p-0">
-      <div class="border-b border-base-300 px-6 py-5">
-        <div class="space-y-1">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap0, PADDING_TOKEN_CLASS.p0]">
+      <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]">
+        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
           <h2 id="interview-chat-workspace-title" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ t("interviewSession.responseWorkspaceTitle") }}
           </h2>
@@ -175,7 +178,7 @@ watch(renderedMessages, async () => {
 
       <div
         ref="chatHistoryRef"
-        class="min-h-80 flex-1 overflow-y-auto glass-subtle px-6 py-5" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
+ class="flex-1 overflow-y-auto glass-subtle" 
         role="log"
         :aria-label="t(props.responseAriaKey)"
         aria-live="polite"
@@ -192,7 +195,7 @@ watch(renderedMessages, async () => {
         />
       </div>
 
-      <div v-if="currentQuestion" class="border-t border-base-300 px-6 py-5">
+      <div v-if="currentQuestion" class="border-t border-base-300" :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]">
         <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="submitResponse">
           <fieldset class="fieldset">
             <legend class="fieldset-legend">
@@ -201,7 +204,7 @@ watch(renderedMessages, async () => {
             <textarea
               :id="responseTextareaId"
               v-model="currentResponse"
-              class="textarea min-h-40" :class="[FLUID_WIDTH_CLASS]"
+ class="textarea" 
               :placeholder="t(props.responsePlaceholderKey)"
               :aria-label="t(props.responseAriaKey)"
               :aria-describedby="responseHintId"
@@ -234,7 +237,7 @@ watch(renderedMessages, async () => {
         </form>
       </div>
 
-      <div v-else class="px-6 py-8">
+      <div v-else :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py8]">
         <div class="alert alert-success">
           <span>{{ completeMessage }}</span>
         </div>

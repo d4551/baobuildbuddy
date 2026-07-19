@@ -9,8 +9,7 @@ type AuthFailure = {
  *
  * The API key is hashed at creation and only the hash is stored in the
  * database. Verification re-hashes the provided bearer token and
- * compares it against the stored hash using constant-time comparison
- * via the hash equality check.
+ * compares it against the stored hash using `timingSafeEqual`.
  *
  * Keys are checked for revocation and expiry before hash comparison.
  */

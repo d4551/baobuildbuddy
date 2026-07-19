@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
@@ -99,7 +100,7 @@ const { t } = useI18n();
         </fieldset>
       </div>
 
-      <div class="mt-6 join">
+      <div class="join" :class="[MARGIN_TOKEN_CLASS.mt6]">
         <button
           class="btn btn-primary join-item"
           :disabled="isSubmitDisabled"

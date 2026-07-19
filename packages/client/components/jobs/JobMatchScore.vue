@@ -4,7 +4,10 @@ import { useScoreColor } from "~/composables/useScoreColor";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  FORM_WIDTH_20_CLASS,
   MARGIN_TOKEN_CLASS,
+  MAX_W_XS_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -37,7 +40,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 <template>
   <div
     v-if="compact"
-    class="w-20 shrink-0 text-right" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+ class="shrink-0 text-right" 
   >
     <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, scoreTextClass]">
       {{ score }}%
@@ -51,13 +54,13 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
   </div>
 
   <div v-else class="flex flex-col items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-    <div class="max-w-xs text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+ <div class="text-center" :class="[MAX_W_XS_CLASS, FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
       <div class="flex justify-center">
         <span class="badge badge-lg" :class="scoreBadgeClass">
           {{ score }}%
         </span>
       </div>
-      <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
+ <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3, scoreTextClass]">{{ score }}%</p>
       <progress
         class="progress" :class="[FLUID_WIDTH_CLASS, scoreProgressClass]"
         :value="score"

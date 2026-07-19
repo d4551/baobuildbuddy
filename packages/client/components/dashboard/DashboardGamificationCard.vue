@@ -14,6 +14,7 @@ import {
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -40,7 +41,7 @@ const { t } = useI18n();
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("dashboard.levelLabel") }} {{ gamification.level }}
               </p>
-              <p class="font-bold">
+              <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">
                 {{
                   t("xpBar.progressLabel", {
                     xp: gamification.xp,
@@ -69,12 +70,12 @@ const { t } = useI18n();
             fill-class="stroke-primary"
             :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
           >
-            <span class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ levelProgress }}%</span>
+ <span :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">{{ levelProgress }}%</span>
           </UiRadialMeter>
 
           <div v-if="gamification.currentStreak" class="text-center">
             <div :class="[TYPOGRAPHY_SCALE_CLASS.xl3]" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
-            <p class="font-bold" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ gamification.currentStreak }}</p>
+ <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl2]">{{ gamification.currentStreak }}</p>
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("dashboard.streakLabel") }}</p>
           </div>
         </div>

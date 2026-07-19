@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -46,7 +47,7 @@ const emit = defineEmits<{
         >
           <template #actions>
             <button class="btn btn-outline" :aria-label="t('jobDetail.interviewAria')" @click="emit('interview')">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg :class="[ICON_SIZE_CLASS['5']]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -54,7 +55,7 @@ const emit = defineEmits<{
             </button>
 
             <button class="btn btn-primary" :aria-label="t('jobDetail.applyAria')" @click="emit('apply')">
-              <IconDocumentText class="h-5 w-5" />
+              <IconDocumentText :class="[ICON_SIZE_CLASS['5']]" />
               {{ t("jobDetail.applyButton") }}
             </button>
 
@@ -64,7 +65,7 @@ const emit = defineEmits<{
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"
             >
-              <svg class="h-5 w-5" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24" aria-hidden="true">
+              <svg :class="[ICON_SIZE_CLASS['5']]" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               {{ isSaved ? t("jobDetail.savedButton") : t("jobDetail.saveButton") }}
@@ -83,7 +84,7 @@ const emit = defineEmits<{
 
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
           <span class="badge">
-            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg :class="[ICON_SIZE_CLASS['3'], MARGIN_TOKEN_CLASS.mr1]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -111,7 +112,7 @@ const emit = defineEmits<{
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.requirementsTitle") }}</h2>
         <ul class="list">
-          <li v-for="(requirement, index) in job.requirements" :key="index" class="list-row px-0 py-2">
+          <li v-for="(requirement, index) in job.requirements" :key="index" class="list-row" :class="[PADDING_TOKEN_CLASS.px0, PADDING_TOKEN_CLASS.py2]">
             {{ requirement }}
           </li>
         </ul>

@@ -7,6 +7,8 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -85,7 +87,7 @@ function updateFeaturedFlag(event: Event): void {
     :close-backdrop-label="t('portfolioPage.modal.closeBackdropButton')"
     @update:open="emit('update:open', $event)"
   >
-    <h3 :id="props.titleId" class="font-bold" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
+ <h3 :id="props.titleId" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">
       {{ props.editing ? t("portfolioPage.modal.editTitle") : t("portfolioPage.modal.addTitle") }}
     </h3>
 
@@ -147,8 +149,8 @@ function updateFeaturedFlag(event: Event): void {
       </fieldset>
 
       <div>
-        <span class="mb-2 block font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
-        <div class="mb-2 flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+ <span class="block font-medium" :class="[MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("portfolioPage.modal.technologiesLegend") }}</span>
+ <div class="flex" :class="[MARGIN_TOKEN_CLASS.mb2, FLEX_GAP_TOKEN_CLASS.gap2]">
           <input
             :value="props.newTech"
             type="text"
@@ -181,7 +183,7 @@ function updateFeaturedFlag(event: Event): void {
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
-              <CloseIcon class="h-3 w-3" />
+              <CloseIcon :class="[ICON_SIZE_CLASS['3']]" />
             </button>
           </div>
         </div>

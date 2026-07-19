@@ -1,3 +1,5 @@
+import { isControlPrimitiveOwner } from "./ui-control-primitive-owners";
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import {
   collectProjectFileEntries,
   getLineFromOffset,
@@ -8,27 +10,8 @@ import {
 const scanRoots = ["packages/client"] as const;
 const sourceExtensions = new Set([".vue"]);
 
-const SSOT_ALLOWLIST_PATHS = new Set<string>([
-  "packages/client/components/ui/LoadingSkeleton.vue",
-  "packages/client/components/ui/EmptyState.vue",
-  "packages/client/components/ui/PageScaffold.vue",
-  "packages/client/components/ui/SectionGrid.vue",
-  "packages/client/components/ui/AppModalFrame.vue",
-  "packages/client/components/ui/PageHeroHeader.vue",
-  "packages/client/components/ui/PageHeaderBlock.vue",
-  "packages/client/components/ui/BootstrapErrorAlert.vue",
-  "packages/client/components/ui/FilteredEmptyAlert.vue",
-  "packages/client/components/ui/AppPagination.vue",
-  "packages/client/components/ui/ToastContainer.vue",
-  "packages/client/components/ui/StatsRow.vue",
-  "packages/client/components/ui/WorkPipeline.vue",
-  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
-  "packages/client/components/ui/AppBreadcrumbs.vue",
-  "packages/client/components/ui/LoadingSpinner.vue",
-  "packages/client/components/ui/UiRadialMeter.vue",
-]);
-
-const isSsotPrimitive = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotPrimitive = (filePath: string): boolean =>
+  isUiSsotAuthority(filePath) || isControlPrimitiveOwner(filePath);
 
 const CARD_GLASS_LITERAL_PATTERN =
   /card\s+card-border\s+card-glass(?:\s+glass-(?:interactive|strong|modal))?/gu;

@@ -57,8 +57,8 @@ const activeDescription = computed<string>(() => {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section class="card card-border card-glass max- overflow-x-clip" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
-      <div class="card-body max- overflow-x-clip lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <section class="card card-border card-glass overflow-x-clip" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
+      <div class="card-body overflow-x-clip lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div
           v-if="activeSectionEntry"
           class="flex flex-col xl:flex-row xl:items-center xl:justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
@@ -93,10 +93,10 @@ const activeDescription = computed<string>(() => {
           </div>
 
           <nav
-            class="max- overflow-x-auto overscroll-x-contain xl:max-w-4xl" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
+            class="overflow-x-auto overscroll-x-contain xl:max-w-4xl" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max min- glass-subtle p-2 xl:" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div class="tabs tabs-box w-max min-w-0 glass-subtle p-2" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"

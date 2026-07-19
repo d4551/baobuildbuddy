@@ -3,7 +3,7 @@
  * Uses Bun-native APIs and node:crypto exclusively. No external dependencies.
  */
 
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from "node:crypto";
 import { config } from "../config/env";
 
 const ENCRYPTION_KEY_RAW = config.encryptionKey;
@@ -26,10 +26,15 @@ export function hashApiKey(rawKey: string): string {
 }
 
 /**
- * Compare a raw API key against a stored hash using SHA-256.
+ * Compare a raw API key against a stored hash using SHA-256 + timingSafeEqual.
  */
 export function verifyApiKey(rawKey: string, storedHash: string): boolean {
-  return hashApiKey(rawKey) === storedHash;
+  const computed = Buffer.from(hashApiKey(rawKey));
+  const expected = Buffer.from(storedHash);
+  if (computed.length !== expected.length) {
+    return false;
+  }
+  return timingSafeEqual(computed, expected);
 }
 
 /**

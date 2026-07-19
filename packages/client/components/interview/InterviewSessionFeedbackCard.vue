@@ -3,6 +3,7 @@ import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  LEADING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -41,7 +42,7 @@ const { t } = useI18n();
           <p v-if="currentQuestion.score !== undefined" class="font-semibold">
             {{ t("interviewSession.feedbackScore", { score: currentQuestion.score }) }}
           </p>
-          <p class="leading-6" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+ <p :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ currentQuestion.feedback }}
           </p>
         </div>

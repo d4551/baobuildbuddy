@@ -8,6 +8,7 @@ import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -140,11 +141,11 @@ const readyEntries = computed(() =>
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
-                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
+ class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" 
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
+                              :class="[ICON_SIZE_CLASS['4']]"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>
@@ -167,7 +168,7 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="space-y-1 text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+ <ul class="text-secondary" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TYPOGRAPHY_SCALE_CLASS.sm]">
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -212,11 +213,11 @@ const readyEntries = computed(() =>
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span class="tooltip tooltip-right" :data-tip="capabilityTypeLabel(capability)">
                           <span
-                            class="inline-flex h-8 w-8 items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[SHADOW_TOKEN_CLASS.sm, RADIUS_TOKEN_CLASS.full]"
+ class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" 
                           >
                             <component
                               :is="resolveAppIconComponent(capabilityIconName(capability))"
-                              class="h-4 w-4"
+                              :class="[ICON_SIZE_CLASS['4']]"
                               aria-hidden="true"
                             />
                             <span class="sr-only">{{ capabilityTypeLabel(capability) }}</span>

@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
@@ -69,7 +70,7 @@ const { t } = useI18n();
       </SectionGrid>
 
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <label class="label cursor-pointer justify-start py-0" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+ <label class="label cursor-pointer justify-start" :class="[PADDING_TOKEN_CLASS.py0, FLEX_GAP_TOKEN_CLASS.gap2]">
           <input
             v-model="remoteWork"
             type="checkbox"

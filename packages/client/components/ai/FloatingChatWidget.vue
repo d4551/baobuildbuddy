@@ -91,7 +91,6 @@ const {
         :streaming-bubble="streamingBubble"
         :supports-recognition="supportsRecognition"
         :supports-synthesis="supportsSynthesis"
-        :t="t"
         :tts-model-options="ttsModelOptions"
         :voice-error-label="voiceErrorLabel"
         :voice-support-hint-key="voiceSupportHintKey"

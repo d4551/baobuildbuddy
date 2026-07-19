@@ -3,6 +3,8 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLUID_WIDTH_CLASS,
+  MARGIN_TOKEN_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -78,7 +80,7 @@ function updateRequestBodyValue(event: Event): void {
   >
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <header :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-        <h2 :id="dialogTitleId" class="text-xl font-semibold">
+        <h2 :id="dialogTitleId" class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">
           {{ t("apiDocs.tester.title") }}
         </h2>
         <p
@@ -89,7 +91,7 @@ function updateRequestBodyValue(event: Event): void {
           <span :class="methodBadgeClass(selectedEndpoint.method)">
             {{ methodLabel(selectedEndpoint.method) }}
           </span>
-          <span class="ml-2">{{ selectedEndpoint.path }}</span>
+          <span :class="[MARGIN_TOKEN_CLASS.ml2]">{{ selectedEndpoint.path }}</span>
         </p>
       </header>
 
@@ -179,7 +181,7 @@ function updateRequestBodyValue(event: Event): void {
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
         <textarea
           :value="requestBodyValue"
-          class="textarea min-h-40 font-mono" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]"
+ class="textarea font-mono" 
           :placeholder="t('apiDocs.tester.bodyPlaceholder')"
           :aria-label="t('apiDocs.tester.requestBodyAria')"
           @input="updateRequestBodyValue"

@@ -7,6 +7,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
@@ -66,7 +67,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
 <template>
   <div class="flex flex-col" :class="[FLUID_WIDTH_CLASS, FLUID_HEIGHT_CLASS]">
     <div class="border-b border-base-300 is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4]">
-      <span class="flex items-center font-bold text-primary" :class="[FLEX_GAP_TOKEN_CLASS.gap2, TYPOGRAPHY_SCALE_CLASS.lg]">
+ <span class="flex items-center text-primary" :class="[FONT_WEIGHT_TOKEN_CLASS.bold, FLEX_GAP_TOKEN_CLASS.gap2, TYPOGRAPHY_SCALE_CLASS.lg]">
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0 ', RADIUS_TOKEN_CLASS.sm]" />
         <span>{{ resolvedBrand.name }}</span>
       </span>
@@ -84,7 +85,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             <span class="indicator">
               <span
                 v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-                class="indicator-item badge badge-warning badge-xs font-bold"
+                class="indicator-item badge badge-warning badge-xs" :class="[FONT_WEIGHT_TOKEN_CLASS.bold]"
                 role="status"
                 :aria-label="t('a11y.aiConfigIncompleteAria')"
                 :title="t('a11y.aiConfigIncompleteAria')"

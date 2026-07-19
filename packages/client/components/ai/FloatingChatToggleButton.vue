@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { SHADOW_TOKEN_CLASS } from "~/constants/layout";
+import {
+  ICON_SIZE_CLASS,
+  SHADOW_TOKEN_CLASS,
+} from "~/constants/layout";
 
 defineProps<{
   chatPanelId: string;
@@ -30,7 +33,7 @@ const emit = defineEmits<{
       :aria-controls="chatPanelId"
       @click="emit('toggle')"
     >
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg :class="[ICON_SIZE_CLASS['5']]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"

@@ -1,5 +1,6 @@
 import z from "zod";
 import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
+import type { JsonObject } from "../utils/json";
 import { jsonObjectSchema } from "./json.schema";
 
 /**
@@ -55,12 +56,23 @@ export const errorEnvelopeSchema = z.object({
 });
 
 /**
+ * Error `details` remain open JSON objects at runtime, with known diagnostic
+ * string fields narrowed for typed consumers (failureMode/causeMessage/stage).
+ */
+export type ErrorEnvelopeDetails = JsonObject & {
+  causeMessage?: string;
+  failureMode?: string;
+  stage?: string;
+  browsersPath?: string;
+};
+
+/**
  * Result payload from a strict validator without control-flow exceptions.
  */
 export interface ErrorEnvelopeResult {
   code: z.infer<typeof rpaRunErrorCodeSchema>;
   message: string;
-  details?: Record<string, unknown>;
+  details?: ErrorEnvelopeDetails;
 }
 
 /**
@@ -70,7 +82,11 @@ export const rpaErrorEnvelopeSchema = errorEnvelopeSchema.extend({
   source: z.string().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
 });
 
-export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;
+export type ErrorEnvelope = {
+  code: z.infer<typeof rpaRunErrorCodeSchema>;
+  message: string;
+  details?: ErrorEnvelopeDetails;
+};
 export type RpaRunErrorCode = z.infer<typeof rpaRunErrorCodeSchema>;
 export type AutomationBrowserLaunchFailureMode = z.infer<
   typeof automationBrowserLaunchFailureModeSchema

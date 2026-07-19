@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
-import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -58,7 +61,7 @@ function handleScheduledRunAtUpdate(payload: {
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack8]">
     <section v-if="readyCapabilities.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
         <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">

@@ -5,6 +5,8 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -119,7 +121,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body gap-6">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.brand.title')"
         :description="t('settings.brand.subtitle')"
@@ -139,7 +141,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
       <div role="alert" class="alert alert-info alert-soft">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 shrink-0 stroke-current"
+          class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS['6']]"
           fill="none"
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -157,7 +159,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </div>
       </div>
 
-      <SectionGrid grid-token="twoColumnWide" extra-class="items-start gap-6">
+      <SectionGrid grid-token="twoColumnWide" extra-class="items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
         <div class="xl:sticky xl:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <BrandPreviewCard :brand-draft="brandDraft" :theme-names="themeNames" />
           <BrandStatsCard
@@ -239,7 +241,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
             />
           </div>
 
-          <div class="card-actions justify-end pt-2">
+          <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
             <button
               class="btn btn-primary"
               :aria-label="t('settings.brand.saveAria')"

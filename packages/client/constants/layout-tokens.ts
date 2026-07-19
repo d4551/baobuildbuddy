@@ -39,6 +39,7 @@ export const MARGIN_TOKEN_CLASS = {
   mr1: "mr-1",
   mr2: "mr-2",
   mt0: "mt-0",
+  mt05: "mt-0.5",
   mt1: "mt-1",
   mt2: "mt-2",
   mt3: "mt-3",
@@ -142,6 +143,29 @@ export const FONT_WEIGHT_TOKEN_CLASS = {
 } as const;
 export type FontWeightToken = keyof typeof FONT_WEIGHT_TOKEN_CLASS;
 
+/** Line-height tokens for body copy and headings outside glass surfaces. */
+export const LEADING_TOKEN_CLASS = {
+  tight: "leading-tight",
+  snug: "leading-snug",
+  normal: "leading-normal",
+  relaxed: "leading-relaxed",
+  loose: "leading-loose",
+  leading5: "leading-5",
+  leading6: "leading-6",
+} as const;
+export type LeadingToken = keyof typeof LEADING_TOKEN_CLASS;
+
+/** Letter-spacing tokens for labels, badges, and uppercase copy. */
+export const TRACKING_TOKEN_CLASS = {
+  tighter: "tracking-tighter",
+  tight: "tracking-tight",
+  normal: "tracking-normal",
+  wide: "tracking-wide",
+  wider: "tracking-wider",
+  widest: "tracking-widest",
+} as const;
+export type TrackingToken = keyof typeof TRACKING_TOKEN_CLASS;
+
 /**
  * Glass card animation tokens. Consumed by UiGlassCard and CSS animations
  * in assets/css/main.css. Stagger index classes map to :nth-child-style
@@ -153,3 +177,72 @@ export const GLASS_CARD_ENTER_CLASS = "glass-card-enter";
 
 /** SVG stroke-width for decorative icons (24x24 viewBox). */
 export const SVG_STROKE_WIDTH_DEFAULT = 2;
+
+/**
+ * Canonical shadow tokens. These map to the .glass-* surface system in
+ * main.css. Inline `shadow-*` Tailwind utilities are forbidden outside
+ * SSOT; consume these constants instead.
+ */
+export const SHADOW_TOKEN_CLASS = {
+  none: "shadow-none",
+  sm: "shadow-sm",
+  md: "shadow-md",
+  lg: "shadow-lg",
+  xl: "shadow-xl",
+  inner: "shadow-inner",
+  printNone: "print:shadow-none",
+} as const;
+export type ShadowToken = keyof typeof SHADOW_TOKEN_CLASS;
+
+/**
+ * Canonical radius tokens. Inline `rounded-*` Tailwind utilities are
+ * forbidden outside SSOT; consume these constants instead.
+ */
+export const RADIUS_TOKEN_CLASS = {
+  sm: "rounded-sm",
+  md: "rounded-md",
+  lg: "rounded-lg",
+  xl: "rounded-xl",
+  "2xl": "rounded-2xl",
+  "3xl": "rounded-3xl",
+  full: "rounded-full",
+} as const;
+export type RadiusToken = keyof typeof RADIUS_TOKEN_CLASS;
+
+/** Common avatars / icon badges that need a circular surface. */
+export const CIRCULAR_BADGE_CLASS = RADIUS_TOKEN_CLASS.full;
+
+/** Form/panel helper widths. */
+export const FORM_WIDTH_10_CLASS = "w-10";
+export const FORM_WIDTH_16_CLASS = "w-16";
+export const FORM_WIDTH_20_CLASS = "w-20";
+export const FORM_WIDTH_28_CLASS = "w-28";
+export const FORM_WIDTH_32_CLASS = "w-32";
+
+/** Content height tokens. */
+export const CONTENT_H_28_CLASS = "h-28";
+export const CONTENT_H_40_CLASS = "h-40";
+export const CONTENT_H_48_CLASS = "h-48";
+export const CONTENT_H_64_CLASS = "h-64";
+export const CONTENT_H_72_CLASS = "h-72";
+
+/** Min-height extended tokens. */
+export const MIN_H_36_CLASS = "min-h-36";
+export const MIN_H_60_CLASS = "min-h-60";
+export const MIN_H_80_CLASS = "min-h-80";
+
+/** Scroll margin for in-page anchor targets (scroll-mt-24). */
+export const SCROLL_MARGIN_TOP_24_CLASS = "scroll-mt-24";
+
+/** Max-height tokens for scrollable panels. */
+export const MAX_HEIGHT_72_CLASS = "max-h-72";
+export const MAX_HEIGHT_96_CLASS = "max-h-96";
+
+/** Print media padding reset. */
+export const PRINT_PADDING_RESET_CLASS = "print:p-0";
+
+/** Max-width extended tokens. */
+export const MAX_W_2XL_CLASS = "max-w-2xl";
+export const MAX_W_3XL_CLASS = "max-w-3xl";
+export const MAX_W_64_CLASS = "max-w-64";
+export const MAX_W_XS_CLASS = "max-w-xs";

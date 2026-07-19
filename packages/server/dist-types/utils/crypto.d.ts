@@ -8,7 +8,7 @@
  */
 export declare function hashApiKey(rawKey: string): string;
 /**
- * Compare a raw API key against a stored hash using SHA-256.
+ * Compare a raw API key against a stored hash using SHA-256 + timingSafeEqual.
  */
 export declare function verifyApiKey(rawKey: string, storedHash: string): boolean;
 /**

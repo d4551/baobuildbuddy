@@ -3,9 +3,12 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  MAX_HEIGHT_96_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -219,14 +222,15 @@ function studioLocationLabel(location: string): string {
         </span>
       </span>
       <span v-else class="text-muted">{{ t("studioSelector.selectPlaceholder") }}</span>
-      <IconChevronDown class="h-5 w-5 shrink-0" />
+      <IconChevronDown class="shrink-0" :class="[ICON_SIZE_CLASS['5']]" />
     </button>
 
     <div
       v-if="isOpen"
-      class="dropdown-content z-10 max-h-96 overflow-auto rounded-box bg-base-100 p-2" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
+      class="dropdown-content z-10 overflow-auto rounded-box bg-base-100"
+      :class="[MAX_HEIGHT_96_CLASS, PADDING_TOKEN_CLASS.p2, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg]"
     >
-      <div class="p-2 sticky top-0 bg-base-100 z-10">
+      <div class="sticky top-0 bg-base-100 z-10" :class="[PADDING_TOKEN_CLASS.p2]">
         <input
           ref="studioSelectorSearchInput"
           v-model="searchQuery"
@@ -249,7 +253,7 @@ function studioLocationLabel(location: string): string {
       <ul
         :id="listboxId"
         role="listbox"
-        class="menu space-y-1" :class="[FLUID_WIDTH_CLASS]"
+ class="menu" 
         :aria-label="t('studioSelector.menuAria')"
       >
         <li v-for="(studio, index) in filteredStudios" :key="studio.id">
