@@ -41,9 +41,9 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 ### Gotchas
 
-1. **Client lint/typecheck self-bootstrap Nuxt + server types.** `packages/client` now prepares `.nuxt` and runs `packages/server` `build:types` automatically before client lint/typecheck, so clean clones and CI runners do not need a manual prep step.
+1. **Client lint/typecheck/test self-bootstrap Nuxt + server types.** `packages/client` prepares `.nuxt` and runs `packages/server` `build:types` automatically before client lint, typecheck, **and test**, so clean clones and CI runners do not need a manual prep step.
 
-2. **Standalone client checks are deterministic.** `bun run --cwd packages/client lint` and `bun run --cwd packages/client typecheck` both bootstrap the generated server declarations and Nuxt types they depend on.
+2. **Standalone client checks are deterministic.** `bun run --cwd packages/client lint`, `bun run --cwd packages/client typecheck`, and `bun run --cwd packages/client test` all bootstrap the generated server declarations and Nuxt types they depend on.
 
 3. **`NUXT_PUBLIC_I18N_SUPPORTED_LOCALES` must NOT be set as an env var.** Nuxt's env override replaces the parsed array with a raw string, breaking the i18n plugin. The `nuxt.config.ts` handles defaults.
 

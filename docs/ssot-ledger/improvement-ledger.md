@@ -2,16 +2,12 @@
 
 | Artifact | Baseline | New | Delta | SSOT bar | Gate |
 |----------|----------|-----|-------|----------|------|
-| API docs fetch | unauthenticated `$fetch` | Bearer via `requestApi` | auth parity | STACK-CONTRACT API client SSOT | `validate:no-client-fetch-drift` |
-| Screenshot dir | always `~/.bao/...` | follows `DB_PATH` | test isolation | path SSOT with DB | screenshot route tests |
-| Auth rotate/revoke | forked Bearer parse + hardcoded path | `authenticateApiKey` + `API_ENDPOINTS` | one auth brain | endpoint SSOT | lint + auth routes |
-| RPA spawn env | inherit polluted `PLAYWRIGHT_*` | `buildAutomationProcessEnv` + host-platform override | sandbox-safe child env | Playwright path SSOT `@bao/shared` | `playwright-browsers-path.test.ts` (10) + job-apply host |
-| Scraper dir override | stubbed nulls | Bun.env → `resolveScraperDirectory` | desktop wiring | paths SSOT (not `env.ts`) | `paths.test.ts` |
-| Automation host proof | 178/2 red under agent sandbox | 180/0 green @all-perms | +2 journeys | real Chromium launch | `test-pass4-allperms.txt` / `automation-tests-allperms.txt` |
-| Scraper browsers-path read | `process.env` in `browser.ts` | `buildAutomationProcessEnv()` via config SSOT | 0 direct-env viol | env adapter SSOT | `validate:no-direct-env-access` |
-| Launch-failure details decode | `String(JsonValue)` in tests | `parseAutomationBrowserLaunchFailureDetails` Result | typed boundary | error-envelope SSOT | `automation-browser-launch-failure.test.ts` |
-| ErrorEnvelope.details | `JsonValue` causeMessage | `ErrorEnvelopeDetails` string fields | eslint no-base-to-string 0 | typed diagnostic fields | `eslint-rpa-after-types.txt` |
-| Provider secret at-rest | plaintext if no encrypt key | fail-closed throw / no plaintext write | secrets never plain | crypto SSOT | `crypto.test.ts` + settings PUT |
-| API key verify | `===` on hashes | `timingSafeEqual` | constant-time | auth SSOT | `crypto.test.ts` / auth tests |
-| Local AI endpoint | any URL server-fetch | loopback allowlist only | SSRF deny non-loopback | `validateLocalAiEndpoint` | `local-ai-endpoint.test.ts` + normalize |
-| Avoidance: long camelCase describe titles | biome noSecrets false-positive | short human titles | lint green | biome security | `biome-after-describe.txt` |
+| Abs path symlink | tracked `/Users/.../dist` | removed + banned | tooling `rg` restored | no host paths in tree | `validate:no-abs-path-symlinks` |
+| Raw-token shadow test | wrong-path (primitive exempt) | consumer path | honest mutation | primitives exempt; consumers banned | `validate-no-raw-design-tokens.test.ts` |
+| Client vitest | DataCloneError sans `.nuxt` | self-bootstrap | order-independent | mirror lint/typecheck prep | `packages/client` `test` script |
+| Schedule helpers | 2 composable copies | 1 `schedule-timestamp.ts` | 0 Nuxt dup warnings | one export owner | `nuxt prepare` quiet + specs |
+| API envelope readers | forked `readApiData` | `requireApiResponseData` / `readApiDataOrEmpty` | typed SSOT | `utils/api-response.ts` | api-response.spec |
+| Stack alignment | npm latest advisory | installed pin assert | fails on Elysia 1.x | STACK-CONTRACT pins | `validate:stack-versions` |
+| Automation test env | bash-only private-host flag | preload SSOT | bare `bun test` green 3/3 | SSRF opt-in for fixtures | `test-setup.ts` |
+| vue/html-indent | 183 warnings | 0 | −183 | clean client eslint | client eslint |
+| Integration parse errors | opaque failure | status+body slice | faster RCA | typed test helper | helpers change |
