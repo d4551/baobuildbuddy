@@ -136,16 +136,17 @@ const configureLocalAiViaUi = async (
     await settle(preferred.selectOption("local"));
   }
 
-  const saveKeys = page.getByRole("button", { name: /Save API Keys/i }).first();
+  // Accessible name can omit visible label text; match on button text content.
+  const saveKeys = page.locator("button", { hasText: /Save API Keys/i }).first();
   await saveKeys.click({ timeout: 12_000 });
   await wait(page, 2_000);
 
-  const savePreferred = page.getByRole("button", { name: /Save chat default/i }).first();
+  const savePreferred = page.locator("button", { hasText: /Save chat default/i }).first();
   if ((await savePreferred.count()) > 0) {
     await settle(savePreferred.click({ timeout: 5_000 }));
     await wait(page, 1_000);
   }
-  const saveRouting = page.getByRole("button", { name: /Save routing/i }).first();
+  const saveRouting = page.locator("button", { hasText: /Save routing/i }).first();
   if ((await saveRouting.count()) > 0) {
     await settle(saveRouting.click({ timeout: 5_000 }));
     await wait(page, 1_000);
