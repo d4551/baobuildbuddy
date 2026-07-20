@@ -54,7 +54,7 @@ beforeAll(async () => {
     throw new Error("Failed to start automation integration app server");
   }
 
-  setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+  setIntegrationBaseUrls(`http://127.0.0.1:${String(port)}`, `ws://127.0.0.1:${String(port)}`);
 });
 
 beforeEach(async () => {
