@@ -156,7 +156,10 @@ const smokeRoute = async (
     reason = `pageerror: ${pageErrors[0] ?? "unknown"}`;
   } else if (
     viewportName === "mobile" &&
-    (route.startsWith("/ai/") || route.startsWith("/automation")) &&
+    (route === APP_ROUTES.ai ||
+      route.startsWith(`${APP_ROUTES.ai}/`) ||
+      route === APP_ROUTES.automation ||
+      route.startsWith(`${APP_ROUTES.automation}/`)) &&
     signals.dockActive.length === 0
   ) {
     reason = `dock orphan on ${route} — expected aria-current/dock-active`;

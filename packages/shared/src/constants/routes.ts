@@ -18,6 +18,8 @@ export const APP_ROUTES = {
   skillsPathways: "/skills/pathways",
   studios: "/studios",
   studiosAnalytics: "/studios/analytics",
+  /** Section root for AI surfaces (chat + dashboard wayfinding). */
+  ai: "/ai",
   aiChat: "/ai/chat",
   aiDashboard: "/ai/dashboard",
   automation: "/automation",

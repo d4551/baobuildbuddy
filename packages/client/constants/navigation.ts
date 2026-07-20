@@ -29,7 +29,7 @@ export interface NavigationItem {
   readonly includeInDock: boolean;
   /**
    * Extra path prefixes that light this dock item (section wayfinding).
-   * Example: ai-chat matches `/ai/dashboard` via `/ai`.
+   * Example: ai-chat matches APP_ROUTES.aiDashboard via APP_ROUTES.ai.
    */
   readonly dockMatchPrefixes?: readonly string[];
 }
@@ -128,7 +128,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     to: APP_ROUTES.aiChat,
     includeInSidebar: true,
     includeInDock: true,
-    dockMatchPrefixes: ["/ai"],
+    dockMatchPrefixes: [APP_ROUTES.ai],
   },
   {
     id: "automation",
