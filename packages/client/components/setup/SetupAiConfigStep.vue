@@ -6,8 +6,10 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SVG_SIZE_13,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -178,11 +180,22 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       </div>
     </details>
 
-    <div class="flex justify-between">
-      <button class="btn btn-ghost" :aria-label="t('setup.backToProfileAria')" @click="emit('back')">
+    <div class="flex justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <button
+        type="button"
+        class="btn btn-ghost"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="t('setup.backToProfileAria')"
+        @click="emit('back')"
+      >
         {{ t("setup.backButton") }}
       </button>
-      <button class="btn btn-primary" :aria-label="t('setup.nextToDoneAria')" @click="emit('next')">
+      <button
+        type="button"
+        :class="[PRIMARY_ACTION_CLASS]"
+        :aria-label="t('setup.nextToDoneAria')"
+        @click="emit('next')"
+      >
         {{ t("setup.nextButton") }}
       </button>
     </div>

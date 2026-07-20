@@ -42,8 +42,8 @@ const profileSaveStateLabel = computed(() => {
     <div class="card-body">
       <!-- Title owned by WorkspaceSectionNavigator — meta badge only. -->
       <SettingsPanelHeader>
-        <template #meta>
-          <span 
+        <template v-if="profileSaveStateLabel" #meta>
+          <span
             class="badge"
             :class="getSaveStateBadgeClass(profileSaveState)"
             role="status"

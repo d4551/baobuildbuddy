@@ -150,6 +150,7 @@ useSeoMeta({
         v-bind="{ ariaLabelKey: 'automation.hub.sections.aria' }"
         :build-route="APP_ROUTE_BUILDERS.automationHubSection"
         :badge-by-id="hubSectionBadgeById"
+        omit-active-heading-below-lg
       >
         <template v-if="activeSection === 'overview'">
           <StatsRow

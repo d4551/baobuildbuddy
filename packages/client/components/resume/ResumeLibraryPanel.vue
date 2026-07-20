@@ -5,7 +5,6 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
-  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -78,10 +77,11 @@ function requestDelete(resumeId?: string): void {
       </div>
     </section>
 
-    <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
-      <IconInfoCircle :class="[ICON_SIZE_CLASS[6]]"/>
-      <span>{{ t("resumePage.emptyState") }}</span>
-    </div>
+    <EmptyState
+      v-if="resumes.length === 0"
+      title-key="resumePage.emptyStateTitle"
+      description-key="resumePage.emptyState"
+    />
 
     <FilteredEmptyAlert
       v-else-if="filteredResumes.length === 0"

@@ -98,6 +98,7 @@
     "validate:no-abs-path-symlinks": "bun run scripts/validate-no-abs-path-symlinks.ts",
     "validate:layout-token-imports": "bun run scripts/validate-layout-token-imports.ts",
     "validate:mobile-dock-budget": "bun run scripts/validate-mobile-dock-budget.ts",
+    "validate:no-dual-chat-chrome": "bun run scripts/validate-no-dual-chat-chrome.ts",
     "proof:browser-smoke": "bun run scripts/browser-visual-smoke.ts",
     "proof:browser-burndown": "bun run scripts/browser-interaction-burndown.ts",
     "proof:browser-video": "bun run scripts/browser-record-visual-proof.ts",

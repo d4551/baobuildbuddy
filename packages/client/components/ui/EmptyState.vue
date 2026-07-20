@@ -52,7 +52,7 @@ const ctaAriaLabel = computed(() => {
     <div class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xl4]" v-if="icon" aria-hidden="true">
       {{ icon }}
     </div>
-    <IconDocumentText class="shrink-0 text-muted" :class="[ICON_SIZE_CLASS['8']]" v-else aria-hidden="true"/>
+    <IconDocumentText class="shrink-0 text-muted" :class="[ICON_SIZE_CLASS.lg]" v-else aria-hidden="true"/>
     <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.base]">
       {{ t(titleKey) }}
     </h3>

@@ -154,7 +154,7 @@ export const PAGE_HERO_CONTENT_BASE_CLASS =
 /**
  * Compact hero spacing used when the header does not carry a large aside surface.
  */
-export const PAGE_HERO_CONTENT_COMPACT_CLASS = `${PAGE_HERO_CONTENT_BASE_CLASS} gap-4`;
+export const PAGE_HERO_CONTENT_COMPACT_CLASS = `${PAGE_HERO_CONTENT_BASE_CLASS} gap-2 sm:gap-4`;
 
 /**
  * Comfortable hero spacing used when the header includes larger contextual content.
@@ -167,7 +167,7 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
  * not control layers — solid surface, no backdrop blur.
  */
 export const EMPTY_STATE_STACK_CLASS =
-  "flex flex-col items-center justify-center gap-3 rounded-box border border-dashed border-base-300 bg-base-100 px-4 py-6 text-center";
+  "flex flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 px-4 py-4 text-center sm:gap-3 sm:py-6";
 
 /** Canonical icon size tokens. Consumed by any component that sizes an icon
  * inside a control, badge, or stat surface so icon dimensions stay SSOT.

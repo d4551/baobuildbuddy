@@ -57,7 +57,7 @@ type RouteResult = {
 };
 
 const collectPageSignals = async (page: Page) =>
-  page.evaluate(() => {
+  page.evaluate((aiRoutePrefix: string) => {
     const collapse = (value: string): string =>
       value
         .split(" ")
@@ -126,6 +126,18 @@ const collectPageSignals = async (page: Page) =>
       },
     );
     const setupXpConflict = setupCtaVisible && levelLabelVisible;
+    const floatingChatVisible = [...document.querySelectorAll("button, a")].some((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        return false;
+      }
+      const aria = (el.getAttribute("aria-label") ?? "").toLowerCase();
+      return aria.includes("floating chat") || aria.includes("show floating chat");
+    });
+    const dockHasAiChat = [...document.querySelectorAll("nav.dock a")].some((a) => {
+      const href = a.getAttribute("href") ?? "";
+      return href === aiRoutePrefix || href.startsWith(`${aiRoutePrefix}/`);
+    });
     return {
       h1: h1?.textContent ? collapse(h1.textContent) : null,
       mainCount: mains.length,
@@ -134,8 +146,10 @@ const collectPageSignals = async (page: Page) =>
       tables,
       underTouch,
       setupXpConflict,
+      floatingChatVisible,
+      dockHasAiChat,
     };
-  });
+  }, APP_ROUTES.ai);
 
 const smokeRoute = async (
   page: Page,
@@ -197,6 +211,12 @@ const smokeRoute = async (
     )}px)`;
   } else if (route === APP_ROUTES.dashboard && signals.setupXpConflict) {
     reason = "dashboard Setup CTA vs Level/XP gamification contradiction";
+  } else if (
+    viewportName === "mobile" &&
+    signals.floatingChatVisible &&
+    signals.dockHasAiChat
+  ) {
+    reason = "dual chat chrome: floating FAB + dock AI Chat below lg";
   }
 
   page.off("console", onConsole);

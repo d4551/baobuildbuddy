@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AI_CHAT_PAGE_PATH } from "@bao/shared/constants/ai-chat";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   APP_DRAWER_ID,
@@ -22,7 +22,17 @@ const isDesktopViewport = ref(false);
 let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
 
-const showFloatingChatWidget = computed(() => !route.path.startsWith(AI_CHAT_PAGE_PATH));
+/**
+ * Floating chat is desktop-only. Below lg the dock owns AI Chat — dual chrome
+ * crowds the dock and fails Apple HIG primary-destination clarity.
+ */
+const showFloatingChatWidget = computed(() => {
+  const path = route.path;
+  if (path === APP_ROUTES.ai || path.startsWith(`${APP_ROUTES.ai}/`)) {
+    return false;
+  }
+  return isDesktopViewport.value;
+});
 
 useKeyboardShortcuts();
 

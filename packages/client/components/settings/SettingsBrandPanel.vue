@@ -122,8 +122,8 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader>
-        <template #meta>
-          <span 
+        <template v-if="brandSaveStateLabel" #meta>
+          <span
             class="badge"
             :class="getSaveStateBadgeClass(brandSaveState)"
             role="status"
