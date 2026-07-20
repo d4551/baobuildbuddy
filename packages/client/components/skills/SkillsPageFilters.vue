@@ -2,21 +2,17 @@
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import {
-
-  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+} from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
-} from "~/constants/layout";
+} from "~/constants/layout-tokens";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
-
-defineProps<{
-  categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
-  hasActiveFilters: boolean;
-}>();
 
 const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategory>(
   "categoryFilter",
@@ -24,13 +20,25 @@ const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategor
     required: true,
   },
 );
+
 const searchFilter = defineModel<string>("searchFilter", { required: true });
+
+defineProps<{
+  categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
+  hasActiveFilters: boolean;
+}>();
 
 const emit = defineEmits<{
   clear: [];
 }>();
 
+const isAllCategorySelected = computed(() => categoryFilter.value === SKILLS_FILTER_ALL_VALUE);
+
 const { t } = useI18n();
+
+function setAllCategoryFilter(): void {
+  categoryFilter.value = SKILLS_FILTER_ALL_VALUE;
+}
 </script>
 
 <template>
@@ -52,10 +60,10 @@ const { t } = useI18n();
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" role="radiogroup" :aria-label="t('skillsPage.filters.categoryGroupAria')">
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', categoryFilter === SKILLS_FILTER_ALL_VALUE ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', isAllCategorySelected ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
           :aria-label="t('skillsPage.filters.allAria')"
-          :aria-pressed="categoryFilter === SKILLS_FILTER_ALL_VALUE"
-          @click="categoryFilter = SKILLS_FILTER_ALL_VALUE"
+          :aria-pressed="isAllCategorySelected"
+          @click="setAllCategoryFilter"
         >
           {{ t("skillsPage.filters.allButton") }}
         </button>

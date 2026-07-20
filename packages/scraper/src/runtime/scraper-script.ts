@@ -31,7 +31,7 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
   const session = launchResult.session;
   const navigationResult = await settle(
     session.page.goto(inputResult.value.sourceUrl, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: automationRuntimeConfig.navigationTimeoutMs,
     }),
   );
@@ -41,7 +41,11 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
     return 1;
   }
 
-  await settle(session.page.waitForTimeout(automationRuntimeConfig.pageSettleDelayMs));
+  await settle(
+    session.page.waitForLoadState("domcontentloaded", {
+      timeout: automationRuntimeConfig.pageSettleDelayMs,
+    }),
+  );
 
   const rowsResult = await settle(extractor(session.page, inputResult.value.sourceUrl));
   await closeAutomationBrowser(session);

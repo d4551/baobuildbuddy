@@ -42,6 +42,17 @@ const STATIC_ROUTES = [
   ["settings", APP_ROUTES.settings],
 ] as const;
 
+const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
+  await page.locator("body").waitFor({ state: "visible", timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+};
+
 type RouteResult = {
   readonly slug: string;
   readonly route: string;
@@ -106,7 +117,7 @@ const collectPageSignals = async (page: Page) =>
           under: rect.height + 0.5 < 44,
         };
       })
-      .filter((row): row is { label: string; h: number; under: boolean } => row !== null && row.under);
+      .filter((row): row is { label: string; h: number; under: boolean } => row?.under);
     const setupCtaVisible = Array.from(document.querySelectorAll("a.btn, button.btn")).some((el) => {
       const rect = el.getBoundingClientRect();
       return (
@@ -175,7 +186,7 @@ const smokeRoute = async (
   let reason: string | null = null;
 
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-  await page.waitForTimeout(2_000);
+  await waitForPageReady(page, 2_000);
   const title = await page.title();
   const signals = await collectPageSignals(page);
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -256,7 +267,7 @@ const clickFirstNavLinks = async (page: Page, viewportName: string): Promise<Rou
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await page.waitForTimeout(1_500);
+  await waitForPageReady(page, 1_500);
 
   // Prefer sidebar / drawer links for primary discovery.
   const hrefs = await page.evaluate(() => {

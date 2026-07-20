@@ -97,7 +97,11 @@ const detectAndFollowHostedApplyPage = async (page: Page): Promise<void> => {
       timeout: automationRuntimeConfig.navigationTimeoutMs,
     }),
   );
-  await settle(page.waitForTimeout(automationRuntimeConfig.secondaryNavigationDelayMs));
+  await settle(
+    page.waitForLoadState("domcontentloaded", {
+      timeout: automationRuntimeConfig.secondaryNavigationDelayMs,
+    }),
+  );
 };
 
 const countFormFields = async (page: Page): Promise<number> => {
@@ -181,7 +185,11 @@ export const initializeApplicationPage = async (
     );
   }
 
-  await settle(state.session.page.waitForTimeout(automationRuntimeConfig.pageSettleDelayMs));
+  await settle(
+    state.session.page.waitForLoadState("domcontentloaded", {
+      timeout: automationRuntimeConfig.pageSettleDelayMs,
+    }),
+  );
   addStep(state.steps, "navigate", "ok", `Loaded ${state.payload.jobUrl}`);
   await captureScreenshot({
     page: state.session.page,

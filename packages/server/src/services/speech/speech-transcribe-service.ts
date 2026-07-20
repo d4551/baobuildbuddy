@@ -13,6 +13,7 @@ import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
 
 const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const TRAILING_SLASH_RE = /\/$/u;
 
 export type SpeechTranscribeInput = {
   readonly audioBase64: string;
@@ -67,7 +68,7 @@ const resolveTranscriptionUrl = (
 ): { readonly ok: true; readonly url: string } | { readonly ok: false; readonly error: string } => {
   const trimmed = endpoint.trim();
   if (provider === "openai") {
-    const base = trimmed.length > 0 ? trimmed.replace(/\/$/u, "") : "https://api.openai.com/v1";
+    const base = trimmed.length > 0 ? trimmed.replace(TRAILING_SLASH_RE, "") : "https://api.openai.com/v1";
     return { ok: true, url: `${base}/audio/transcriptions` };
   }
   if (provider === "huggingface") {
@@ -81,7 +82,7 @@ const resolveTranscriptionUrl = (
     if (!validated.ok) {
       return { ok: false, error: API_ERROR_SPEECH_STT_ENDPOINT_INVALID };
     }
-    const base = validated.endpoint.replace(/\/$/u, "");
+    const base = validated.endpoint.replace(TRAILING_SLASH_RE, "");
     const withV1 = base.endsWith("/v1") ? base : `${base}/v1`;
     return { ok: true, url: `${withV1}/audio/transcriptions` };
   }

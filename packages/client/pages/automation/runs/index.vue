@@ -1,4 +1,11 @@
+<script lang="ts">
+export default {
+  name: "AutomationRunsPage",
+};
+</script>
+
 <script setup lang="ts">
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -73,7 +80,12 @@ const query = computed(() => {
 });
 
 const { data: runs, status: runFetchStatus, error, refresh } = fetchRuns(query);
-watch(query, () => void refresh());
+watch(query, () => {
+  refresh().then(
+    () => undefined,
+    () => undefined,
+  );
+});
 const isLoading = computed(() => runFetchStatus.value === "pending");
 const errorMessage = computed(() =>
   error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",

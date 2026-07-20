@@ -22,7 +22,14 @@ const RE_BOARDS_LABEL = /Greenhouse boards JSON/i;
 const RE_JOB_INTELLIGENCE = /Job Intelligence/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.waitForTimeout(ms);
+  await page.locator("body").waitFor({ state: "visible", timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
 };
 
 const shot = async (page: Page, name: string): Promise<void> => {
@@ -47,13 +54,14 @@ const main = async (): Promise<void> => {
   await wait(page, 2_500);
   const jobIntelNav = page.getByRole("button", { name: RE_JOB_INTELLIGENCE }).first();
   if ((await jobIntelNav.count()) > 0) {
-    await jobIntelNav.click({ force: true });
+    await jobIntelNav.click();
     await wait(page, 800);
   }
 
   // Expand Greenhouse boards collapse
   const boardsSummary = page.getByText(RE_BOARDS_LABEL).first();
-  await boardsSummary.click({ force: true });
+  await boardsSummary.waitFor({ state: "visible", timeout: 10_000 });
+  await boardsSummary.click();
   await wait(page, 400);
   const boardsField = page.getByLabel(RE_BOARDS_LABEL);
   await boardsField.fill(
@@ -65,9 +73,8 @@ const main = async (): Promise<void> => {
       null,
       2,
     ),
-    { force: true },
   );
-  await page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first().click({ force: true });
+  await page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first().click();
   await wait(page, 2_500);
   await shot(page, "01-greenhouse-saved");
 
@@ -76,7 +83,7 @@ const main = async (): Promise<void> => {
     timeout: 90_000,
   });
   await wait(page, 1_500);
-  await page.getByRole("button", { name: RE_REFRESH_JOBS }).click({ force: true });
+  await page.getByRole("button", { name: RE_REFRESH_JOBS }).click();
   await wait(page, 25_000);
   await shot(page, "02-jobs-after-refresh");
 

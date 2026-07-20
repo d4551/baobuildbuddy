@@ -92,6 +92,17 @@ const slugify = (value: string): string => value.replace(NON_SLUG_RE, "_").slice
 
 const isIgnorableConsole = (text: string): boolean => APP_MANIFEST_ERROR_RE.test(text);
 
+const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
+  await page.locator("body").waitFor({ state: "visible", timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+};
+
 const captureFinding = async (
   page: Page,
   findings: Finding[],
@@ -122,7 +133,7 @@ const openRoute = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await page.waitForTimeout(600);
+  await waitForPageReady(page, 600);
 };
 
 const collectChromeSignals = async (page: Page) =>
@@ -378,7 +389,7 @@ const clickOneLabel = async (
       );
     }
   }
-  await page.waitForTimeout(180);
+  await waitForPageReady(page, 180);
   // Re-home after in-app navigation before the next evaluate/locator sweep.
   const origin = `${CLIENT_BASE}${route}`;
   if (!page.url().startsWith(origin)) {
@@ -443,7 +454,7 @@ const probeFirstTextInput = async (
       "warn",
     );
   }
-  await page.waitForTimeout(200);
+  await waitForPageReady(page, 200);
   if (pageErrorBucket.length > 0) {
     await captureFinding(
       page,

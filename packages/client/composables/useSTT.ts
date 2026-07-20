@@ -143,7 +143,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
       if (isListening.value) {
         return true;
       }
-      void createMicrophoneRecorder()
+      createMicrophoneRecorder()
         .then((created) => {
           recorder = created;
           created.start();
@@ -178,7 +178,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
         isListening.value = false;
         return;
       }
-      void activeRecorder
+      activeRecorder
         .stop()
         .then((blob) => transcribeAudioViaServer(blob))
         .then((result) => {

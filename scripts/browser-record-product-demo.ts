@@ -12,16 +12,48 @@
  */
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium, type Page } from "playwright";
+import { chromium, type Locator, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 const DEMO_VIEWPORT = { width: 1440, height: 900 } as const;
 const DEMO_CAPTURE_FPS = 12;
+const TRAILING_SLASH_RE = /\/$/u;
+const RE_BAO_DEMO_DETERMINISTIC = /bao-demo-deterministic/i;
+const RE_BUILD_DETERMINISTIC_CONTENT = /buildDeterministicContent/i;
+const RE_DETERMINISTIC_AI = /DETERMINISTIC_AI/i;
+const RE_GENERATE_QUESTIONS = /Generate Questions/i;
+const RE_QUESTION_PROGRESS = /Question\s+\d+\s+of\s+\d+/i;
+const RE_SYNTHESIZE_RESUME = /synthesize|generate resume|build resume|finish/i;
+const RE_NEXT = /^Next$/i;
+const RE_EDIT = /^Edit$/i;
+const RE_EXPORT = /Export/i;
+const RE_PDF = /PDF/i;
+const RE_ADD_PROJECT = /Add Project|Add Mapping|Add/i;
+const RE_TITLE = /title/i;
+const RE_DESCRIPTION_BIO = /description|bio/i;
+const RE_TECHNOLOGY = /technolog/i;
+const RE_ADD_TECHNOLOGY = /add technology|add/i;
+const RE_SAVE_CREATE_PROJECT = /Save|Create|Add Project/i;
+const RE_GENERATE_COVER_LETTER = /Generate Cover Letter|Generate/i;
+const RE_COMPANY = /company/i;
+const RE_POSITION_ROLE = /position|role/i;
+const RE_JOB_DESCRIPTION = /job description|description/i;
+const RE_GENERATE_CREATE_SUBMIT = /Generate|Create|Submit/i;
+const RE_SEND_SUBMIT = /send|submit/i;
+const RE_STUDIO_DRILL = /Studio Drill|Start Studio/i;
+const RE_OPEN_STUDIO_SELECTOR = /Open studio selector/i;
+const RE_RIOT_GAMES = /Riot Games/i;
+const RE_VOICE_MODE = /voice|microphone|enable voice/i;
+const RE_START_INTERVIEW_SESSION = /Start interview session/i;
+const RE_START_LISTENING = /Start listening|Start voice|Listen/i;
+const RE_START_LISTENING_ROLE = /start listening|start voice|listen/i;
+const RE_STOP_LISTENING = /Stop listening|Stop voice|Stop/i;
+const RE_SUBMIT_RESPONSE = /Submit|Send Response|Continue/i;
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
+  TRAILING_SLASH_RE,
   "",
 );
 const OUT =
@@ -30,22 +62,42 @@ const LOCAL_ENDPOINT = (
   process.env.LOCAL_MODEL_ENDPOINT ??
   process.env.PRODUCT_DEMO_LOCAL_ENDPOINT ??
   "http://127.0.0.1:11434/v1"
-).replace(/\/$/u, "");
+).replace(TRAILING_SLASH_RE, "");
 const WHISPER_ENDPOINT = (
   process.env.WHISPER_ENDPOINT ??
   process.env.PRODUCT_DEMO_WHISPER_ENDPOINT ??
   "http://127.0.0.1:8090/v1"
-).replace(/\/$/u, "");
+).replace(TRAILING_SLASH_RE, "");
 const FAKE_AUDIO_WAV =
   process.env.PRODUCT_DEMO_FAKE_AUDIO ??
   join(OUT, "fixtures", "interview-answer.wav");
 const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
-  /\/$/u,
+  TRAILING_SLASH_RE,
   "",
 );
 
 const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.waitForTimeout(ms);
+  await page.locator("body").waitFor({ state: "visible", timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
+};
+
+const waitForEnabled = async (
+  page: Page,
+  locator: Locator,
+  attempts: number,
+  pollMs: number,
+): Promise<void> => {
+  if (attempts <= 0 || !(await locator.isDisabled())) {
+    return;
+  }
+  await wait(page, pollMs);
+  return waitForEnabled(page, locator, attempts - 1, pollMs);
 };
 
 const shot = async (page: Page, name: string): Promise<void> => {
@@ -106,7 +158,11 @@ const assertLiveInference = async (): Promise<LiveModelProbe> => {
     throw new Error("Live AI probe failed: empty completion (refusing mock/empty provider).");
   }
   // Deterministic stub historically echoed canned resume/cover text — reject known markers.
-  const banned = [/bao-demo-deterministic/i, /buildDeterministicContent/i, /DETERMINISTIC_AI/i];
+  const banned = [
+    RE_BAO_DEMO_DETERMINISTIC,
+    RE_BUILD_DETERMINISTIC_CONTENT,
+    RE_DETERMINISTIC_AI,
+  ];
   if (banned.some((pattern) => pattern.test(sample))) {
     throw new Error("Live AI probe failed: response looks like a mock/deterministic stub.");
   }
@@ -193,6 +249,42 @@ const seedSpeechAndAiSettings = async (modelId: string): Promise<void> => {
   await writeOutput("seeded speech STT=local/whisper-tiny + local AI");
 };
 
+const completeResumeQuestionSteps = async (page: Page, step = 0): Promise<void> => {
+  if (step >= 10) {
+    return;
+  }
+
+  const visibleAnswer = page.locator("textarea:visible").first();
+  if ((await visibleAnswer.count()) === 0) {
+    return;
+  }
+  await visibleAnswer.fill(
+    `Alex Rivera, Gameplay Programmer — shipped combat pacing on a live co-op title (Unreal + TypeScript). Answer ${String(step + 1)}.`,
+  );
+  await wait(page, 400);
+
+  const synthesize = page
+    .locator("button", { hasText: RE_SYNTHESIZE_RESUME })
+    .filter({ hasNot: page.locator("[disabled]") })
+    .first();
+  if ((await synthesize.count()) > 0 && !(await synthesize.isDisabled())) {
+    await synthesize.click({ timeout: 10_000 });
+    return;
+  }
+
+  const next = page.locator("button", { hasText: RE_NEXT }).first();
+  if ((await next.count()) === 0) {
+    return;
+  }
+  await waitForEnabled(page, next, 20, 200);
+  if (await next.isDisabled()) {
+    return;
+  }
+  await next.click();
+  await wait(page, 600);
+  return completeResumeQuestionSteps(page, step + 1);
+};
+
 const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resumeBuild}`, {
     waitUntil: "domcontentloaded",
@@ -211,11 +303,9 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     await settle(studio.selectOption("epic-games"));
   }
 
-  const generate = page.locator("button", { hasText: /Generate Questions/i }).first();
+  const generate = page.locator("button", { hasText: RE_GENERATE_QUESTIONS }).first();
   await generate.waitFor({ state: "visible", timeout: 10_000 });
-  for (let attempt = 0; attempt < 20 && (await generate.isDisabled()); attempt += 1) {
-    await wait(page, 250);
-  }
+  await waitForEnabled(page, generate, 20, 250);
 
   const answerBox = page.locator("textarea:visible").first();
   let sawGenerateRequest = false;
@@ -251,49 +341,18 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     `resume generate HTTP ${String(generateResult.value.status())} in ${String(Date.now() - generateStarted)}ms`,
   );
   await page
-    .getByText(/Question\s+\d+\s+of\s+\d+/i)
+    .getByText(RE_QUESTION_PROGRESS)
     .first()
     .waitFor({ state: "visible", timeout: 30_000 });
   await answerBox.waitFor({ state: "visible", timeout: 15_000 });
   await shot(page, "03-resume-questions");
 
-  for (let step = 0; step < 10; step += 1) {
-    const visibleAnswer = page.locator("textarea:visible").first();
-    if ((await visibleAnswer.count()) === 0) {
-      break;
-    }
-    await visibleAnswer.fill(
-      `Alex Rivera, Gameplay Programmer — shipped combat pacing on a live co-op title (Unreal + TypeScript). Answer ${String(step + 1)}.`,
-    );
-    await wait(page, 400);
-
-    const synthesize = page
-      .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
-      .filter({ hasNot: page.locator("[disabled]") })
-      .first();
-    if ((await synthesize.count()) > 0 && !(await synthesize.isDisabled())) {
-      await synthesize.click({ timeout: 10_000 });
-      break;
-    }
-
-    const next = page.locator("button", { hasText: /^Next$/i }).first();
-    if ((await next.count()) === 0) {
-      break;
-    }
-    for (let attempt = 0; attempt < 20 && (await next.isDisabled()); attempt += 1) {
-      await wait(page, 200);
-    }
-    if (await next.isDisabled()) {
-      break;
-    }
-    await next.click();
-    await wait(page, 600);
-  }
+  await completeResumeQuestionSteps(page);
 
   // Wait for synthesis / completion UI
   await wait(page, 15_000);
   const lateSynth = page
-    .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
+    .locator("button", { hasText: RE_SYNTHESIZE_RESUME })
     .first();
   if ((await lateSynth.count()) > 0 && !(await lateSynth.isDisabled())) {
     await settle(lateSynth.click({ timeout: 10_000 }));
@@ -313,19 +372,19 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     timeout: 60_000,
   });
   await wait(page, 1_800);
-  const edit = page.getByRole("button", { name: /^Edit$/i }).first();
+  const edit = page.getByRole("button", { name: RE_EDIT }).first();
   if ((await edit.count()) > 0) {
     await edit.click();
     await wait(page, 1_200);
   }
-  const exportBtn = page.getByRole("button", { name: /Export/i }).first();
+  const exportBtn = page.getByRole("button", { name: RE_EXPORT }).first();
   if ((await exportBtn.count()) > 0) {
     await exportBtn.click();
     await wait(page, 400);
     const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
     await page
-      .getByRole("menuitem", { name: /PDF/i })
-      .or(page.getByRole("button", { name: /PDF/i }))
+      .getByRole("menuitem", { name: RE_PDF })
+      .or(page.getByRole("button", { name: RE_PDF }))
       .first()
       .click();
     const downloadResult = await settle(downloadPromise);
@@ -347,14 +406,14 @@ const demoPortfolio = async (page: Page): Promise<void> => {
   await wait(page, 1_800);
   await shot(page, "07-portfolio-empty-or-list");
 
-  const add = page.getByRole("button", { name: /Add Project|Add Mapping|Add/i }).first();
+  const add = page.getByRole("button", { name: RE_ADD_PROJECT }).first();
   await settle(add.click({ timeout: 8_000 }));
   await wait(page, 1_000);
 
-  const title = page.getByLabel(/title/i).or(page.locator('input[name*="title" i]')).first();
+  const title = page.getByLabel(RE_TITLE).or(page.locator('input[name*="title" i]')).first();
   await settle(title.fill("Combat Sandbox Prototype"));
   const description = page
-    .getByLabel(/description|bio/i)
+    .getByLabel(RE_DESCRIPTION_BIO)
     .or(page.locator("textarea"))
     .first();
   await settle(
@@ -362,14 +421,14 @@ const demoPortfolio = async (page: Page): Promise<void> => {
       "Encounter pacing lab for co-op readability — Unreal + TypeScript tooling, featured on portfolio.",
     ),
   );
-  const tech = page.getByLabel(/technolog/i).or(page.locator('input[placeholder*="tech" i]')).first();
+  const tech = page.getByLabel(RE_TECHNOLOGY).or(page.locator('input[placeholder*="tech" i]')).first();
   if ((await tech.count()) > 0) {
     await settle(tech.fill("Unreal Engine"));
-    const addTech = page.getByRole("button", { name: /add technology|add/i }).first();
+    const addTech = page.getByRole("button", { name: RE_ADD_TECHNOLOGY }).first();
     await settle(addTech.click());
   }
 
-  const save = page.getByRole("button", { name: /Save|Create|Add Project/i }).last();
+  const save = page.getByRole("button", { name: RE_SAVE_CREATE_PROJECT }).last();
   await settle(save.click({ timeout: 8_000 }));
   await wait(page, 2_500);
   await shot(page, "08-portfolio-project-added");
@@ -390,20 +449,20 @@ const demoCoverLetter = async (page: Page): Promise<void> => {
   await wait(page, 1_800);
   await shot(page, "10-cover-letter-hub");
 
-  const generate = page.locator("button", { hasText: /Generate Cover Letter|Generate/i }).first();
+  const generate = page.locator("button", { hasText: RE_GENERATE_COVER_LETTER }).first();
   await generate.click({ timeout: 10_000 });
   await wait(page, 1_200);
 
-  await page.getByLabel(/company/i).first().fill("Hitmarker Studios");
-  await page.getByLabel(/position|role/i).first().fill("Gameplay Programmer");
-  const jobDesc = page.getByLabel(/job description|description/i).first();
+  await page.getByLabel(RE_COMPANY).first().fill("Hitmarker Studios");
+  await page.getByLabel(RE_POSITION_ROLE).first().fill("Gameplay Programmer");
+  const jobDesc = page.getByLabel(RE_JOB_DESCRIPTION).first();
   if ((await jobDesc.count()) > 0) {
     await jobDesc.fill(
       "Looking for a gameplay programmer to own combat systems, work with design, and ship live updates.",
     );
   }
 
-  const submit = page.locator("button", { hasText: /Generate|Create|Submit/i }).last();
+  const submit = page.locator("button", { hasText: RE_GENERATE_CREATE_SUBMIT }).last();
   await submit.click({ timeout: 10_000 });
   await wait(page, 45_000);
   await shot(page, "11-cover-letter-generated");
@@ -428,7 +487,7 @@ const demoAiChat = async (page: Page): Promise<void> => {
   await input.fill(
     "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
   );
-  const send = page.locator("button", { hasText: /send|submit/i }).first();
+  const send = page.locator("button", { hasText: RE_SEND_SUBMIT }).first();
   await send.click({ timeout: 8_000 });
   await wait(page, 45_000);
   await shot(page, "14-ai-chat-response");
@@ -442,17 +501,17 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 2_000);
   await shot(page, "15-interview-hub");
 
-  const studio = page.locator("button", { hasText: /Studio Drill|Start Studio/i }).first();
+  const studio = page.locator("button", { hasText: RE_STUDIO_DRILL }).first();
   await studio.click({ timeout: 10_000 });
   await wait(page, 1_500);
   await shot(page, "16-interview-config");
 
   // StudioSelector is a custom combobox (not a native <select>).
-  const studioToggle = page.getByRole("button", { name: /Open studio selector/i }).first();
+  const studioToggle = page.getByRole("button", { name: RE_OPEN_STUDIO_SELECTOR }).first();
   await studioToggle.waitFor({ state: "visible", timeout: 10_000 });
   await studioToggle.click({ timeout: 8_000 });
   const studioOption = page
-    .getByRole("option", { name: /Riot Games/i })
+    .getByRole("option", { name: RE_RIOT_GAMES })
     .or(page.getByRole("option").nth(1))
     .first();
   await studioOption.waitFor({ state: "visible", timeout: 10_000 });
@@ -460,16 +519,14 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 800);
 
   // Enable voice mode when the config checkbox exists.
-  const voiceToggle = page.getByLabel(/voice|microphone|enable voice/i).first();
+  const voiceToggle = page.getByLabel(RE_VOICE_MODE).first();
   if ((await voiceToggle.count()) > 0) {
-    await settle(voiceToggle.check({ force: true }));
+    await settle(voiceToggle.check());
   }
 
-  const start = page.getByRole("button", { name: /Start interview session/i }).first();
+  const start = page.getByRole("button", { name: RE_START_INTERVIEW_SESSION }).first();
   await start.waitFor({ state: "visible", timeout: 10_000 });
-  for (let attempt = 0; attempt < 40 && (await start.isDisabled()); attempt += 1) {
-    await wait(page, 250);
-  }
+  await waitForEnabled(page, start, 40, 250);
   if (await start.isDisabled()) {
     throw new Error("Interview start stayed disabled after studio selection.");
   }
@@ -479,14 +536,14 @@ const demoInterview = async (page: Page): Promise<void> => {
 
   // Whisper STT via fake mic capture → MediaRecorder → /api/speech/transcribe.
   const micStart = page
-    .locator("button", { hasText: /Start listening|Start voice|Listen/i })
-    .or(page.getByRole("button", { name: /start listening|start voice|listen/i }))
+    .locator("button", { hasText: RE_START_LISTENING })
+    .or(page.getByRole("button", { name: RE_START_LISTENING_ROLE }))
     .first();
   if ((await micStart.count()) > 0) {
     await micStart.click({ timeout: 8_000 });
     await wait(page, 6_500);
     const micStop = page
-      .locator("button", { hasText: /Stop listening|Stop voice|Stop/i })
+      .locator("button", { hasText: RE_STOP_LISTENING })
       .first();
     if ((await micStop.count()) > 0) {
       await micStop.click({ timeout: 8_000 });
@@ -503,7 +560,7 @@ const demoInterview = async (page: Page): Promise<void> => {
     );
   }
   const submit = page
-    .locator("button", { hasText: /Submit|Send Response|Continue/i })
+    .locator("button", { hasText: RE_SUBMIT_RESPONSE })
     .first();
   await submit.click({ timeout: 8_000 });
   await wait(page, 45_000);

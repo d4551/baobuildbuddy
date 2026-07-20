@@ -32,7 +32,14 @@ const RE_NO_JOBS = /No jobs loaded yet/i;
 const RE_GREENHOUSE_BOARDS = /Greenhouse boards JSON/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.waitForTimeout(ms);
+  await page.locator("body").waitFor({ state: "visible", timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
 };
 
 const shot = async (page: Page, name: string): Promise<void> => {
@@ -97,7 +104,6 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   if ((await boards.count()) > 0) {
     await boards.fill(
       JSON.stringify([{ board: "discord", company: "Discord", enabled: true }], null, 2),
-      { force: true },
     );
   }
   await page.getByRole("button", { name: RE_SAVE }).last().click();

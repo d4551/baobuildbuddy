@@ -33,7 +33,14 @@ const OUT =
   process.env.PORTAL_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/portal-toggle-proof");
 
 const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.waitForTimeout(ms);
+  await page.locator("body").waitFor({ state: "visible", timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout: ms }).then(
+    () => undefined,
+    () => undefined,
+  );
 };
 
 const shot = async (page: Page, name: string): Promise<void> => {
@@ -69,7 +76,7 @@ const enablePortal = async (page: Page, namePattern: RegExp, label: string): Pro
     return;
   }
   if (!(await toggle.isChecked())) {
-    await toggle.click({ force: true });
+    await toggle.click();
     await wait(page, 200);
   }
   await writeOutput(`enabled ${label}=${String(await toggle.isChecked())}`);
@@ -100,7 +107,7 @@ const main = async (): Promise<void> => {
   await wait(page, 2_500);
   const jobIntelNav = page.getByRole("button", { name: RE_JOB_INTELLIGENCE }).first();
   if ((await jobIntelNav.count()) > 0) {
-    await jobIntelNav.click({ force: true });
+    await jobIntelNav.click();
     await wait(page, 800);
   }
   await shot(page, "01-settings-mobile-full");
@@ -115,7 +122,7 @@ const main = async (): Promise<void> => {
   await enablePortal(page, RE_ENABLE_REMOTE, "RemoteGameJobs");
 
   const saveProviders = page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first();
-  await saveProviders.click({ force: true });
+  await saveProviders.click();
   await wait(page, 2_500);
   await shot(page, "02-saved");
 

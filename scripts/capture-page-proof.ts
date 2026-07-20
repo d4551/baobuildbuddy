@@ -27,7 +27,10 @@ type PageInstance = {
     url: string,
     options: { readonly waitUntil: "domcontentloaded"; readonly timeout: number },
   ): Promise<void>;
-  waitForTimeout(timeoutMs: number): Promise<void>;
+  waitForLoadState(
+    state: "domcontentloaded" | "load",
+    options: { readonly timeout: number },
+  ): Promise<void>;
   title(): Promise<string>;
   evaluate<Result>(handler: () => Result): Promise<Result>;
   screenshot(options: ScreenshotOptions): Promise<Uint8Array>;
@@ -300,12 +303,16 @@ const waitForSettledIteration = async (page: PageInstance, waitedMs: number): Pr
     return;
   }
 
-  await page.waitForTimeout(DEFAULT_SETTLE_POLL_INTERVAL_MS);
+  await page.waitForLoadState("domcontentloaded", {
+    timeout: DEFAULT_SETTLE_POLL_INTERVAL_MS,
+  });
   return waitForSettledIteration(page, waitedMs + DEFAULT_SETTLE_POLL_INTERVAL_MS);
 };
 
 const waitForPageToSettle = async (page: PageInstance): Promise<void> => {
-  await page.waitForTimeout(DEFAULT_WAIT_AFTER_NAVIGATION_MS);
+  await page.waitForLoadState("load", {
+    timeout: DEFAULT_WAIT_AFTER_NAVIGATION_MS,
+  });
   return waitForSettledIteration(page, 0);
 };
 

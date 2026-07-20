@@ -6,20 +6,27 @@ import {
   NAVIGATION_ITEMS,
 } from "./navigation";
 
+const getNavigationItem = (id: string) => {
+  const navigationItem = NAVIGATION_ITEMS.find((item) => item.id === id);
+  expect(navigationItem).toBeDefined();
+  if (!navigationItem) {
+    throw new Error(`Expected navigation item ${id}`);
+  }
+  return navigationItem;
+};
+
 describe("dock section wayfinding", () => {
   it("activates ai-chat for AI section prefixes", () => {
-    const aiChat = NAVIGATION_ITEMS.find((item) => item.id === "ai-chat");
-    expect(aiChat).toBeTruthy();
-    expect(isDockRouteActive(APP_ROUTES.aiChat, aiChat!)).toBe(true);
-    expect(isDockRouteActive(APP_ROUTES.aiDashboard, aiChat!)).toBe(true);
+    const aiChat = getNavigationItem("ai-chat");
+    expect(isDockRouteActive(APP_ROUTES.aiChat, aiChat)).toBe(true);
+    expect(isDockRouteActive(APP_ROUTES.aiDashboard, aiChat)).toBe(true);
   });
 
   it("activates automation for nested run routes", () => {
-    const automation = NAVIGATION_ITEMS.find((item) => item.id === "automation");
-    expect(automation).toBeTruthy();
-    expect(isDockRouteActive(APP_ROUTES.automation, automation!)).toBe(true);
-    expect(isDockRouteActive(APP_ROUTES.automationRuns, automation!)).toBe(true);
-    expect(isDockRouteActive(APP_ROUTES.automationJobApply, automation!)).toBe(true);
+    const automation = getNavigationItem("automation");
+    expect(isDockRouteActive(APP_ROUTES.automation, automation)).toBe(true);
+    expect(isDockRouteActive(APP_ROUTES.automationRuns, automation)).toBe(true);
+    expect(isDockRouteActive(APP_ROUTES.automationJobApply, automation)).toBe(true);
   });
 
   it("keeps dock composition under Apple HIG cap with AI + Automation", () => {

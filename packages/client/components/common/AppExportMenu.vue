@@ -2,12 +2,14 @@
 import { useI18n } from "vue-i18n";
 import {
   ICON_SIZE_CLASS,
+} from "~/constants/layout";
+import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   WIDTH_TOKEN_CLASS,
-} from "~/constants/layout";
+} from "~/constants/layout-tokens";
 
 type ExportFormat = "pdf" | "docx";
 
@@ -91,22 +93,22 @@ function closeMenu(): void {
   activeFormatIndex.value = 0;
 }
 
-function toggleMenu(): void {
+async function toggleMenu(): Promise<void> {
   if (isOpen.value) {
     closeMenu();
     return;
   }
 
-  void openMenu();
+  await openMenu();
 }
 
-function handleTriggerClick(event: MouseEvent): void {
+async function handleTriggerClick(event: MouseEvent): Promise<void> {
   event.preventDefault();
   event.stopPropagation();
-  toggleMenu();
+  await toggleMenu();
 }
 
-function handleTriggerKeydown(event: KeyboardEvent): void {
+async function handleTriggerKeydown(event: KeyboardEvent): Promise<void> {
   if (event.key === "Escape") {
     event.preventDefault();
     closeMenu();
@@ -115,19 +117,19 @@ function handleTriggerKeydown(event: KeyboardEvent): void {
 
   if (event.key === "ArrowDown") {
     event.preventDefault();
-    void openMenu(0);
+    await openMenu(0);
     return;
   }
 
   if (event.key === "ArrowUp") {
     event.preventDefault();
-    void openMenu(exportFormats.length - 1);
+    await openMenu(exportFormats.length - 1);
     return;
   }
 
   if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
     event.preventDefault();
-    toggleMenu();
+    await toggleMenu();
   }
 }
 
@@ -207,11 +209,10 @@ function handleMenuFocusOut(event: FocusEvent): void {
   }
 }
 
-watch(isOpen, (nextOpen, previousOpen) => {
+watch(isOpen, async (nextOpen, previousOpen) => {
   if (previousOpen) {
-    void nextTick(() => {
-      trigger.value?.focus();
-    });
+    await nextTick();
+    trigger.value?.focus();
   }
 });
 

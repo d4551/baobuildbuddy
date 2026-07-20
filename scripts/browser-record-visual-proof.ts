@@ -4,7 +4,7 @@
  */
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium, type ConsoleMessage } from "playwright";
+import { chromium, type ConsoleMessage, type Page } from "playwright";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -36,6 +36,17 @@ const VIEWPORTS = [
 ] as const;
 
 const RE_BANNED_BUTTON_LABEL = /save|delete|submit|clear|remove|revoke|reset/i;
+
+const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
+  await page.locator("body").waitFor({ state: "visible", timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+  await page.waitForLoadState("domcontentloaded", { timeout }).then(
+    () => undefined,
+    () => undefined,
+  );
+};
 
 const mapSequential = async <TItem>(
   items: readonly TItem[],
@@ -82,13 +93,13 @@ const main = async (): Promise<void> => {
 
   await mapSequential(VIEWPORTS, async (viewport) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.waitForTimeout(400);
+    await waitForPageReady(page, 400);
     await mapSequential(ROUTES, async (route) => {
       await page.goto(`${CLIENT_BASE}${route.path}`, {
         waitUntil: "domcontentloaded",
         timeout: 60_000,
       });
-      await page.waitForTimeout(1_400);
+      await waitForPageReady(page, 1_400);
       // Theme proof once per viewport (label.swap — not the hidden checkbox alone).
       if (route.slug === "dashboard") {
         const beforeTheme = await page.evaluate(
@@ -97,7 +108,7 @@ const main = async (): Promise<void> => {
             document.documentElement.getAttribute("data-theme"),
         );
         await page.locator("label.swap").first().click({ timeout: 5_000 });
-        await page.waitForTimeout(500);
+        await waitForPageReady(page, 500);
         const afterTheme = await page.evaluate(
           () =>
             document.querySelector("[data-theme]")?.getAttribute("data-theme") ??
@@ -110,7 +121,7 @@ const main = async (): Promise<void> => {
         }
         // Flip back so subsequent pages stay on default light for visual consistency.
         await page.locator("label.swap").first().click({ timeout: 5_000 });
-        await page.waitForTimeout(300);
+        await waitForPageReady(page, 300);
       }
 
       // Safe interaction: skip Save/Delete/Submit/Clear destructive actions.
@@ -141,9 +152,9 @@ const main = async (): Promise<void> => {
         button.click();
         return true;
       }, RE_BANNED_BUTTON_LABEL.source);
-      await page.waitForTimeout(400);
+      await waitForPageReady(page, 400);
       await page.keyboard.press("Escape");
-      await page.waitForTimeout(200);
+      await waitForPageReady(page, 200);
 
       const hasDevtools = await page.evaluate(() => {
         const el = document.getElementById("nuxt-devtools-container");

@@ -50,8 +50,7 @@ type BrowserCheckResult = {
 type BrowserPage = {
   goto(url: string, options?: { waitUntil?: string }): Promise<void>;
   title(): Promise<string>;
-  waitForLoadState(state: "domcontentloaded" | "load" | "networkidle"): Promise<void>;
-  waitForTimeout(timeoutMs: number): Promise<void>;
+  waitForLoadState(state: "domcontentloaded" | "load"): Promise<void>;
   evaluate<T, TArg>(pageFunction: (arg: TArg) => Promise<T> | T, arg: TArg): Promise<T>;
   close(): Promise<void>;
 };
@@ -933,8 +932,7 @@ const runPlaywrightBrowserChecks = async (
       return withCleanup(
         async () => {
           await page.goto(VERIFY_FRONTEND_URL, { waitUntil: "domcontentloaded" });
-          await page.waitForLoadState("networkidle");
-          await page.waitForTimeout(1_000);
+          await page.waitForLoadState("load");
 
           const pageTitle = await page.title();
           const healthStatus = await readPlaywrightHealthStatus(page, apiBase);

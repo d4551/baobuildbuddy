@@ -221,7 +221,7 @@ const createStartListeningAction =
         if (state.isListening.value) {
           return true;
         }
-        void createMicrophoneRecorder()
+        createMicrophoneRecorder()
           .then((created) => {
             recorder = created;
             created.start();
@@ -254,7 +254,7 @@ const createStartListeningAction =
           state.isListening.value = false;
           return;
         }
-        void active
+        active
           .stop()
           .then((blob) => transcribeAudioViaServer(blob))
           .then((result) => {

@@ -2,7 +2,11 @@
 import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
-import { PADDING_TOKEN_CLASS, PRIMARY_ACTION_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout-tokens";
 
 type ConfirmDialogVariant = "default" | "danger";
 
@@ -67,21 +71,20 @@ function applyActionTabOrder(): void {
   confirmButtonRef.value.tabIndex = -1;
 }
 
-function setFocusOnOpen(): void {
-  void nextTick(() => {
-    applyActionTabOrder();
-    primaryActionRef.value?.focus();
-  });
+async function setFocusOnOpen(): Promise<void> {
+  await nextTick();
+  applyActionTabOrder();
+  primaryActionRef.value?.focus();
 }
 
 watch(
   () => props.open,
-  (isOpen) => {
+  async (isOpen) => {
     if (!isOpen) {
       return;
     }
 
-    setFocusOnOpen();
+    await setFocusOnOpen();
   },
   { immediate: true },
 );

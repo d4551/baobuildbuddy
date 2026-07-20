@@ -29,7 +29,11 @@ export const submitApplicationStep = async (
     await settle(state.session.page.keyboard.press("Enter"));
   }
   addStep(state.steps, "submit", "ok", submitted ? undefined : "Submitted via keyboard");
-  await settle(state.session.page.waitForTimeout(automationRuntimeConfig.postSubmitDelayMs));
+  await settle(
+    state.session.page.waitForLoadState("domcontentloaded", {
+      timeout: automationRuntimeConfig.postSubmitDelayMs,
+    }),
+  );
 };
 
 export const verifySubmissionStep = async (state: JobApplyExecutionState): Promise<void> => {
