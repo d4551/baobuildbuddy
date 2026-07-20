@@ -12,3 +12,14 @@ cb0fb7ea86d5cea5131fc51bb8b3d2b9b2755706b8bd2a82bfb564a8d6ed198b  packages/clien
 3f55182a9892be72055b3ca64534f099f44aaf65e249442dbaa0384a8f3de27d  packages/client/constants/ui-layout.ts
 ---
 route_pages=30
+
+# Tip ratchet 2026-07-20 post D40–D42
+tip=86c2ce7
+smoke_e=/opt/cursor/artifacts/tip-86c2ce7/smoke-e/report.json → 69/0
+burndown_e=/opt/cursor/artifacts/tip-86c2ce7/burndown-e/burndown-report.json → 57/0
+smoke_f=/opt/cursor/artifacts/tip-86c2ce7/smoke-f/report.json → 69/0
+burndown_f=/opt/cursor/artifacts/tip-86c2ce7/burndown-f/burndown-report.json → 57/0
+deep_320=/opt/cursor/artifacts/tip-86c2ce7/deep-320/measures.json
+streak_clipped=false overflow_x=0 locale_h=44 setup_next_h=44
+lint=green test=229/0
+consecutive_clean=E+F
