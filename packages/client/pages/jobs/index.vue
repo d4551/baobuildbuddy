@@ -42,6 +42,7 @@ const page = useJobsIndexPage();
       :description="t('jobsPage.seoDescription')"
     >
       <template #actions>
+        <!-- Configure above-fold when catalog empty; EmptyState omits duplicate primary. -->
         <NuxtLink
           v-if="page.isCatalogEmpty.value"
           :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
@@ -126,21 +127,9 @@ const page = useJobsIndexPage();
               ? 'jobsPage.emptyCatalogDescription'
               : 'jobsPage.emptyStateDescription'
           "
-          :cta-label-key="
-            page.isCatalogEmpty.value
-              ? 'jobsPage.configureProvidersButton'
-              : 'jobsPage.clearFiltersButton'
-          "
-          :cta-aria-key="
-            page.isCatalogEmpty.value
-              ? 'jobsPage.configureProvidersAria'
-              : 'jobsPage.clearFiltersAria'
-          "
-          :cta-to="
-            page.isCatalogEmpty.value
-              ? APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')
-              : ''
-          "
+          :cta-label-key="page.isCatalogEmpty.value ? '' : 'jobsPage.clearFiltersButton'"
+          :cta-aria-key="page.isCatalogEmpty.value ? '' : 'jobsPage.clearFiltersAria'"
+          :cta-to="''"
           @cta="page.clearFilters()"
         >
           <template v-if="page.isCatalogEmpty.value" #actions>
