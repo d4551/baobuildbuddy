@@ -15,7 +15,7 @@ import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
 const router = useRouter();
-const { getJob, saveJob, unsaveJob, applyToJob, savedJobs } = useJobs();
+const { getJob, saveJob, unsaveJob, applyToJob, savedJobs, fetchSavedJobs } = useJobs();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
@@ -55,7 +55,8 @@ const {
     if (!jobId.value) {
       return null;
     }
-    return getJob(jobId.value);
+    const [job] = await Promise.all([getJob(jobId.value), fetchSavedJobs()]);
+    return job;
   },
   {
     watch: [jobId],

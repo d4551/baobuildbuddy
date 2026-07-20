@@ -101,15 +101,20 @@ export interface OrderedProjectsRequest {
   orderedIds: string[];
 }
 
-export interface JobsQueryRequest {
-  query?: Record<string, string>;
-}
-
 export interface SkillsReadinessQueryRequest {
   query?: {
     jobId?: string;
   };
 }
+
+export type {
+  JobsApi,
+  JobsApplyRoute,
+  JobsQueryRequest,
+  JobsSaveRoute,
+  StudioAnalyticsApi,
+  StudiosApi,
+} from "./client-api-jobs-studios";
 
 export interface AuthApi {
   status: {
@@ -136,10 +141,6 @@ export interface UserApi {
   };
 }
 
-export interface StudioAnalyticsApi {
-  get(): ApiRequest<unknown>;
-}
-
 export interface SettingsApi extends SettingsWorkspaceBackupApi {
   get(): ApiRequest<unknown>;
   put(body: SettingsUpdateRequest): ApiRequest<{ success: boolean }>;
@@ -151,42 +152,6 @@ export interface SettingsApi extends SettingsWorkspaceBackupApi {
   };
   "test-api-key": {
     post(body: ProviderTestRequest): ApiRequest<ClientProviderTestResult>;
-  };
-}
-
-export interface JobsSaveRoute {
-  post(body: { jobId: string }): ApiRequest<unknown>;
-  (params: {
-    jobId: string;
-  }): {
-    delete(): ApiRequest<unknown>;
-  };
-}
-
-export interface JobsApplyRoute {
-  post(body: { jobId: string; notes?: string }): ApiRequest<unknown>;
-  (params: {
-    id: string;
-  }): {
-    put(body: { status: string }): ApiRequest<unknown>;
-  };
-}
-
-export interface JobsApi {
-  get(options?: JobsQueryRequest): ApiRequest<unknown>;
-  saved: {
-    get(): ApiRequest<unknown>;
-  };
-  save: JobsSaveRoute;
-  applications: {
-    get(): ApiRequest<unknown>;
-  };
-  apply: JobsApplyRoute;
-  refresh: {
-    post(): ApiRequest<unknown>;
-  };
-  recommendations: {
-    get(): ApiRequest<unknown>;
   };
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -17,7 +18,6 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
   isLoading: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
   isLiveRun: (run: RpaRunExecutionEnvelope) => boolean;
   formatRunType: (runType: RpaRunExecutionEnvelope["type"]) => string;
   formatRunStatus: (runStatus: RpaRunExecutionEnvelope["status"]) => string;
@@ -25,22 +25,25 @@ defineProps<{
   formatDate: (value: string) => string;
   resolveRowClass: (run: RpaRunExecutionEnvelope) => Record<string, boolean>;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <ResponsiveDataSurface>
+      <EmptyState
+        v-if="!isLoading && runs.length === 0"
+        title-key="automation.runs.emptyStateTitle"
+        description-key="automation.runs.emptyStateDescription"
+        cta-label-key="automation.runs.emptyStateCta"
+        cta-aria-key="automation.runs.emptyStateCtaAria"
+        :cta-to="APP_ROUTES.automation"
+      />
+
+      <ResponsiveDataSurface v-else>
         <template #cards>
-          <div
-            v-if="!isLoading && runs.length === 0"
-            class="text-center text-muted"
-            :class="[TYPOGRAPHY_SCALE_CLASS.sm, STACK_SPACE_Y_TOKEN_CLASS.stack2]"
-          >
-            {{ t("automation.runs.emptyState") }}
-          </div>
           <ul
-            v-else
             class="list-none"
             :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
             :aria-label="t('automation.runs.tableAriaLabel')"
@@ -143,11 +146,6 @@ defineProps<{
                   >
                     {{ t("automation.runs.openButton") }}
                   </NuxtLink>
-                </td>
-              </tr>
-              <tr v-if="!isLoading && runs.length === 0">
-                <td colspan="7" class="text-center text-muted">
-                  {{ t("automation.runs.emptyState") }}
                 </td>
               </tr>
             </tbody>

@@ -209,7 +209,6 @@ async function handleCompleteChallenge(challengeId: string) {
       <GamificationChallengesCard
         :challenges="hubData.challenges"
         :completing-challenge="completingChallenge"
-        :t="t"
         :get-challenge-goal="getChallengeGoal"
         :get-challenge-progress="getChallengeProgress"
         :can-claim-challenge="canClaimChallenge"

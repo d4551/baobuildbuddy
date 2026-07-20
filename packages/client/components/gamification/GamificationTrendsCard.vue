@@ -44,7 +44,7 @@ const { t } = useI18n();
 
       <SectionGrid grid-token="twoColumn">
         <div
-          class="rounded-box border border-base-300 bg-base-200"
+          class="rounded-box border border-base-300 bg-base-100"
           :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]"
         >
           <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -74,7 +74,7 @@ const { t } = useI18n();
         </div>
 
         <div
-          class="rounded-box border border-base-300 bg-base-200"
+          class="rounded-box border border-base-300 bg-base-100"
           :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]"
         >
           <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">

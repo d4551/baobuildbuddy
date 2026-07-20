@@ -249,7 +249,7 @@ const page = useJobsIndexPage();
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
-                      class="btn btn-primary"
+                      :class="[PRIMARY_ACTION_CLASS]"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"
                     >

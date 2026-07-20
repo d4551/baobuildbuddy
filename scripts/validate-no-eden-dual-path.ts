@@ -16,6 +16,8 @@ const allowedExtensions = new Set([".vue", ".ts"]);
 const EDEN_OWNED_ENDPOINT_PREFIXES = [
   "automation",
   "coverLetters",
+  "resumes",
+  "studios",
 ] as const;
 
 const REQUEST_API_EDEN_PATTERN = new RegExp(
@@ -24,43 +26,98 @@ const REQUEST_API_EDEN_PATTERN = new RegExp(
 );
 const BUILD_AUTOMATION_RUN_PATTERN = /buildAutomationRunEndpoint\s*\(/gu;
 const BUILD_COVER_LETTER_DETAIL_PATTERN = /buildCoverLetterDetailEndpoint\s*\(/gu;
+const BUILD_JOB_DETAIL_PATTERN = /buildJobDetailEndpoint\s*\(/gu;
+const BUILD_RESUME_DETAIL_PATTERN = /buildResumeDetailEndpoint\s*\(/gu;
+const BUILD_STUDIO_DETAIL_PATTERN = /buildStudioDetailEndpoint\s*\(/gu;
 const REQUEST_API_CALL_PATTERN = /requestApi\s*(?:<[^>]*>)?\s*\(/u;
 
 const isAllowedFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
   filePath.endsWith(".spec.ts") ||
   filePath.includes("/locales/") ||
-  // Binary export download still uses downloadApiFile + buildCoverLetterExportEndpoint.
-  filePath === "packages/client/composables/useCoverLetter.ts";
+  // Binary export download still uses downloadApiFile + build*ExportEndpoint.
+  filePath === "packages/client/composables/useCoverLetter.ts" ||
+  filePath === "packages/client/composables/useResume.ts";
 
 export const collectEdenDualPathViolationsForContent = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isAllowedFile(filePath) && !filePath.endsWith("useCoverLetter.ts")) {
+  if (
+    isAllowedFile(filePath) &&
+    !filePath.endsWith("useCoverLetter.ts") &&
+    !filePath.endsWith("useResume.ts")
+  ) {
     return [];
   }
   const violations: ValidationViolation[] = [];
 
-  // useCoverLetter: ban requestApi + detail builder; allow export download helper only.
-  if (filePath.endsWith("useCoverLetter.ts")) {
+  // useCoverLetter / useResume: ban requestApi + detail builders; allow export download helper only.
+  if (filePath.endsWith("useCoverLetter.ts") || filePath.endsWith("useResume.ts")) {
     if (REQUEST_API_CALL_PATTERN.test(content)) {
       violations.push({
         filePath,
         line: 1,
-        message:
-          "useCoverLetter must use Eden api.coverLetters.* for JSON CRUD — requestApi dual path banned.",
+        message: `${filePath.split("/").pop()} must use Eden api.*.* for JSON CRUD — requestApi dual path banned.`,
       });
     }
-    for (const match of content.matchAll(BUILD_COVER_LETTER_DETAIL_PATTERN)) {
+    if (filePath.endsWith("useCoverLetter.ts")) {
+      for (const match of content.matchAll(BUILD_COVER_LETTER_DETAIL_PATTERN)) {
+        violations.push({
+          filePath,
+          line: getLineFromOffset(content, match.index ?? 0),
+          message:
+            "useCoverLetter must resolve detail via Eden api.coverLetters({ id }) — buildCoverLetterDetailEndpoint dual path banned.",
+        });
+      }
+    }
+    if (filePath.endsWith("useResume.ts")) {
+      for (const match of content.matchAll(BUILD_RESUME_DETAIL_PATTERN)) {
+        violations.push({
+          filePath,
+          line: getLineFromOffset(content, match.index ?? 0),
+          message:
+            "useResume must resolve detail via Eden api.resumes({ id }) — buildResumeDetailEndpoint dual path banned.",
+        });
+      }
+    }
+    return violations;
+  }
+
+  if (filePath.endsWith("useJobs.ts")) {
+    if (REQUEST_API_CALL_PATTERN.test(content)) {
+      violations.push({
+        filePath,
+        line: 1,
+        message: "useJobs must use Eden api.jobs.* — requestApi dual path banned.",
+      });
+    }
+    for (const match of content.matchAll(BUILD_JOB_DETAIL_PATTERN)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
         message:
-          "useCoverLetter must resolve detail via Eden api.coverLetters({ id }) — buildCoverLetterDetailEndpoint dual path banned.",
+          "useJobs must resolve detail via Eden api.jobs({ id }) — buildJobDetailEndpoint dual path banned.",
       });
     }
-    return violations;
+  }
+
+  if (filePath.endsWith("useStudio.ts")) {
+    if (REQUEST_API_CALL_PATTERN.test(content)) {
+      violations.push({
+        filePath,
+        line: 1,
+        message: "useStudio must use Eden api.studios.* — requestApi dual path banned.",
+      });
+    }
+    for (const match of content.matchAll(BUILD_STUDIO_DETAIL_PATTERN)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(content, match.index ?? 0),
+        message:
+          "useStudio must resolve detail via Eden api.studios({ id }) — buildStudioDetailEndpoint dual path banned.",
+      });
+    }
   }
 
   for (const match of content.matchAll(REQUEST_API_EDEN_PATTERN)) {

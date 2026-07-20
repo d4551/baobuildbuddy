@@ -1,19 +1,15 @@
-import { API_ENDPOINTS, buildStudioDetailEndpoint } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import type { ClientApi } from "~/types/client-api";
 import { requireApiResponsePayload } from "~/utils/api-response";
 import { toGameStudio } from "./api-normalizer-studios";
-import {
-  type ClientApiRequestRuntime,
-  requestApi,
-  useClientApiRequestRuntime,
-} from "./api-request";
 import { requireValue, withLoadingState } from "./async-flow";
+import { useApi } from "./useApi";
 
 interface StudioContext {
+  api: ClientApi;
   t: ReturnType<typeof useI18n>["t"];
-  runtime: ClientApiRequestRuntime;
   loading: ReturnType<typeof useState<boolean>>;
   studios: ReturnType<typeof useState<GameStudio[]>>;
   currentStudio: ReturnType<typeof useState<GameStudio | null>>;
@@ -45,10 +41,7 @@ function createReadStudioActions(context: StudioContext) {
   const searchStudios = async (query?: Record<string, string>) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
-          method: "GET",
-          query: query || {},
-        }),
+        context.api.studios.get({ query: query || {} }),
         context.t("apiErrors.studios.searchFailed"),
       );
       context.studios.value = toStudioList(data);
@@ -57,9 +50,7 @@ function createReadStudioActions(context: StudioContext) {
   const getStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
-          method: "GET",
-        }),
+        context.api.studios({ id }).get(),
         context.t("apiErrors.studios.fetchFailed"),
       );
       const normalized = requireValue(
@@ -70,21 +61,9 @@ function createReadStudioActions(context: StudioContext) {
       return normalized;
     });
 
-  const getAnalytics = async () =>
-    withLoadingState(context.loading, async () => {
-      const data = await readApiData(
-        requestApi<unknown>(context.runtime, API_ENDPOINTS.studiosAnalytics, {
-          method: "GET",
-        }),
-        context.t("apiErrors.studios.fetchAnalyticsFailed"),
-      );
-      return data;
-    });
-
   return {
     searchStudios,
     getStudio,
-    getAnalytics,
   };
 }
 
@@ -95,10 +74,7 @@ function createWriteStudioActions(
   const createStudio = async (studioData: CreateStudioInput) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        requestApi<unknown>(context.runtime, API_ENDPOINTS.studios, {
-          method: "POST",
-          body: studioData,
-        }),
+        context.api.studios.post(studioData),
         context.t("apiErrors.studios.createFailed"),
       );
       const normalized = requireValue(
@@ -112,10 +88,7 @@ function createWriteStudioActions(
   const updateStudio = async (id: string, updates: UpdateStudioInput) =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
-        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
-          method: "PUT",
-          body: updates,
-        }),
+        context.api.studios({ id }).put(updates),
         context.t("apiErrors.studios.updateFailed"),
       );
       const normalized = requireValue(
@@ -130,9 +103,7 @@ function createWriteStudioActions(
   const deleteStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
       await readApiData(
-        requestApi<unknown>(context.runtime, buildStudioDetailEndpoint(id), {
-          method: "DELETE",
-        }),
+        context.api.studios({ id }).delete(),
         context.t("apiErrors.studios.deleteFailed"),
       );
       if (context.currentStudio.value?.id === id) {
@@ -149,12 +120,12 @@ function createWriteStudioActions(
 }
 
 /**
- * Interview studio discovery and analytics composable.
+ * Studio discovery composable — Eden fabric. Analytics page owns api.studios.analytics.
  */
 export function useStudio() {
   const context: StudioContext = {
+    api: useApi(),
     t: useI18n().t,
-    runtime: useClientApiRequestRuntime(),
     studios: useState<GameStudio[]>(STATE_KEYS.STUDIOS_LIST, () => []),
     currentStudio: useState<GameStudio | null>(STATE_KEYS.STUDIO_CURRENT, () => null),
     loading: useState(STATE_KEYS.STUDIO_LOADING, () => false),
@@ -172,7 +143,6 @@ export function useStudio() {
     fetchStudios: readActions.searchStudios,
     getStudio: readActions.getStudio,
     fetchStudioById: readActions.getStudio,
-    getAnalytics: readActions.getAnalytics,
     createStudio: writeActions.createStudio,
     updateStudio: writeActions.updateStudio,
     deleteStudio: writeActions.deleteStudio,

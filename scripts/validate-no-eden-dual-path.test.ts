@@ -25,4 +25,28 @@ describe("validate-no-eden-dual-path", () => {
     );
     expect(violations.length).toBe(1);
   });
+
+  test("requestApi resumes endpoint fails", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/other.ts",
+      `requestApi(runtime.api, API_ENDPOINTS.resumes, { method: "GET" });`,
+    );
+    expect(violations.length).toBe(1);
+  });
+
+  test("useJobs buildJobDetailEndpoint fails", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/useJobs.ts",
+      `requestApi(runtime, buildJobDetailEndpoint(id), { method: "GET" });`,
+    );
+    expect(violations.length).toBeGreaterThan(0);
+  });
+
+  test("useResume Eden path passes export helper", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/useResume.ts",
+      `await downloadApiFile(runtime, buildResumeExportEndpoint(id), { method: "POST" }, "resume.pdf");`,
+    );
+    expect(violations.length).toBe(0);
+  });
 });

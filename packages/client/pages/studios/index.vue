@@ -21,6 +21,14 @@ useSeoMeta({
   title: t("studiosIndex.seoTitle"),
   description: t("studiosIndex.seoDescription"),
 });
+
+const catalogEmpty = computed(
+  () =>
+    !bootstrapPending.value &&
+    !page.loading.value &&
+    !page.pageError.value &&
+    page.totalStudios.value === 0,
+);
 </script>
 
 <template>
@@ -42,35 +50,13 @@ useSeoMeta({
       @retry="refreshStudios"
     />
 
-    <!-- Filters before stats — search owns fold @320; stats hide below sm. -->
-    <StudiosIndexFiltersCard
-      v-model:search-query="page.searchQuery.value"
-      v-model:selected-type="page.filters.type"
-      v-model:selected-size="page.filters.size"
-      v-model:remote-work="page.filters.remoteWork"
-      :studio-type-options="page.studioTypeOptions.value"
-      :studio-size-options="page.studioSizeOptions.value"
-      @clear="page.clearFilters"
-    />
-
-    <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
-      <StatsRow
-        background-class="border border-base-300 bg-base-100"
-        :stats="[
-          { titleKey: 'studiosIndex.stats.totalTitle', value: page.totalStudios.value, valueClass: 'text-primary', descKey: 'studiosIndex.stats.totalDesc' },
-          { titleKey: 'studiosIndex.stats.filteredTitle', value: page.filteredStudios.value.length, valueClass: 'text-secondary', descKey: 'studiosIndex.stats.filteredDesc' },
-          { titleKey: 'studiosIndex.stats.remoteTitle', value: page.remoteFriendlyStudios.value, valueClass: 'text-accent', descKey: 'studiosIndex.stats.remoteDesc' },
-        ]"
-      />
-    </div>
-
     <LoadingSkeleton
-      v-if="(bootstrapPending || page.loading.value) && page.filteredStudios.value.length === 0"
+      v-else-if="(bootstrapPending || page.loading.value) && page.totalStudios.value === 0"
       :lines="6"
     />
 
     <EmptyState
-      v-else-if="page.filteredStudios.value.length === 0 && page.totalStudios.value === 0"
+      v-else-if="catalogEmpty"
       title-key="studiosIndex.emptyTitle"
       description-key="studiosIndex.emptyDescription"
       cta-label-key="studiosIndex.retryButton"
@@ -78,23 +64,47 @@ useSeoMeta({
       @cta="refreshStudios()"
     />
 
-    <EmptyState
-      v-else-if="page.filteredStudios.value.length === 0"
-      title-key="studiosIndex.emptyTitle"
-      description-key="studiosIndex.emptyDescription"
-      cta-label-key="studiosIndex.filters.clearButton"
-      cta-aria-key="studiosIndex.filters.clearAria"
-      @cta="page.clearFilters()"
-    />
+    <template v-else>
+      <!-- Filters before stats — search owns fold @320; stats hide below sm. -->
+      <StudiosIndexFiltersCard
+        v-model:search-query="page.searchQuery.value"
+        v-model:selected-type="page.filters.type"
+        v-model:selected-size="page.filters.size"
+        v-model:remote-work="page.filters.remoteWork"
+        :studio-type-options="page.studioTypeOptions.value"
+        :studio-size-options="page.studioSizeOptions.value"
+        @clear="page.clearFilters"
+      />
 
-    <StudiosIndexGrid
-      v-else
-      :studios="page.visibleStudios.value"
-      :has-additional-studios="page.hasAdditionalStudios.value"
-      @load-more="page.showMoreStudios"
-      @preview="page.openStudioPreview"
-      @view="page.viewStudio"
-    />
+      <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+        <StatsRow
+          background-class="border border-base-300 bg-base-100"
+          :stats="[
+            { titleKey: 'studiosIndex.stats.totalTitle', value: page.totalStudios.value, valueClass: 'text-primary', descKey: 'studiosIndex.stats.totalDesc' },
+            { titleKey: 'studiosIndex.stats.filteredTitle', value: page.filteredStudios.value.length, valueClass: 'text-secondary', descKey: 'studiosIndex.stats.filteredDesc' },
+            { titleKey: 'studiosIndex.stats.remoteTitle', value: page.remoteFriendlyStudios.value, valueClass: 'text-accent', descKey: 'studiosIndex.stats.remoteDesc' },
+          ]"
+        />
+      </div>
+
+      <EmptyState
+        v-if="page.filteredStudios.value.length === 0"
+        title-key="studiosIndex.emptyTitle"
+        description-key="studiosIndex.emptyDescription"
+        cta-label-key="studiosIndex.filters.clearButton"
+        cta-aria-key="studiosIndex.filters.clearAria"
+        @cta="page.clearFilters()"
+      />
+
+      <StudiosIndexGrid
+        v-else
+        :studios="page.visibleStudios.value"
+        :has-additional-studios="page.hasAdditionalStudios.value"
+        @load-more="page.showMoreStudios"
+        @preview="page.openStudioPreview"
+        @view="page.viewStudio"
+      />
+    </template>
 
     <StudiosPreviewModal
       v-model:open="page.showPreviewModal.value"

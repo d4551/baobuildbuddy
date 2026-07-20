@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { DailyChallenge } from "@bao/shared/types/gamification";
+import { useI18n } from "vue-i18n";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -16,7 +16,6 @@ import {
 defineProps<{
   challenges: readonly DailyChallenge[];
   completingChallenge: string | null;
-  t: (key: string, values?: Record<string, unknown>) => string;
   getChallengeGoal: (challenge: DailyChallenge) => number;
   getChallengeProgress: (challenge: DailyChallenge) => number;
   canClaimChallenge: (challenge: DailyChallenge) => boolean;
@@ -25,6 +24,8 @@ defineProps<{
 const emit = defineEmits<{
   claim: [challengeId: string];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>

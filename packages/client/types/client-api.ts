@@ -5,15 +5,14 @@ import type {
   CoverLettersApi,
   GamificationApi,
   InterviewApi,
-  JobsApi,
   PortfolioApi,
   ResumesApi,
   SettingsApi,
   SkillsApi,
   StatsApi,
-  StudioAnalyticsApi,
   UserApi,
 } from "./client-api-contracts";
+import type { JobsApi, StudiosApi } from "./client-api-jobs-studios";
 import type { AutomationApi, ScraperApi, SearchApi } from "./client-api-workspace";
 export type {
   AutomationApi,
@@ -35,9 +34,7 @@ export interface ClientApi {
   gamification: GamificationApi;
   skills: SkillsApi;
   stats: StatsApi;
-  studios: {
-    analytics: StudioAnalyticsApi;
-  };
+  studios: StudiosApi;
   automation: AutomationApi;
   search: SearchApi;
   scraper: ScraperApi;

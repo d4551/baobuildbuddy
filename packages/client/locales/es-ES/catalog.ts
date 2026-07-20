@@ -1913,6 +1913,11 @@ const catalog = {
       tableAriaLabel: "Historial de ejecuciones",
       emptyJobId: "N/D",
       emptyState: "No se encontraron ejecuciones.",
+      emptyStateTitle: "Aún no hay ejecuciones de automatización",
+      emptyStateDescription:
+        "Inicia un scraper, postulación o correo desde el hub para poblar el historial.",
+      emptyStateCta: "Abrir Hub de Automatización",
+      emptyStateCtaAria: "Abrir el hub de automatización para iniciar una ejecución",
       loadingLabel: "Cargando ejecuciones...",
       loadErrorTitle: "No se pueden cargar ejecuciones",
       loadErrorFallback: "No se pudo cargar el historial.",
