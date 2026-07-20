@@ -240,10 +240,10 @@ const listClickableControlLabels = async (page: Page): Promise<readonly string[]
           continue;
         }
       }
-      const label =
-        control.getAttribute("aria-label")?.replace(/\s+/gu, " ").trim() ||
-        control.textContent?.replace(/\s+/gu, " ").trim() ||
-        "";
+      const aria = control.getAttribute("aria-label")?.replace(/\s+/gu, " ").trim() ?? "";
+      const text = control.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+      // Prefer aria-label — card NuxtLinks concatenate nested copy into textContent.
+      const label = aria.length > 0 ? aria : text;
       if (label.length > 0 && label.length < 80) {
         labels.push(label);
       }
@@ -271,7 +271,8 @@ const clickOneLabel = async (
       }
       const aria = normalize(control.getAttribute("aria-label") ?? "");
       const text = normalize(control.textContent ?? "");
-      if (aria !== targetLabel && text !== targetLabel) {
+      const resolved = aria.length > 0 ? aria : text;
+      if (resolved !== targetLabel) {
         continue;
       }
       if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
