@@ -31,6 +31,8 @@ const BUILD_JOB_DETAIL_PATTERN = /buildJobDetailEndpoint\s*\(/gu;
 const BUILD_RESUME_DETAIL_PATTERN = /buildResumeDetailEndpoint\s*\(/gu;
 const BUILD_STUDIO_DETAIL_PATTERN = /buildStudioDetailEndpoint\s*\(/gu;
 const REQUEST_API_CALL_PATTERN = /requestApi\s*(?:<[^>]*>)?\s*\(/u;
+/** Eden maps `coverLetters` → `/api/coverLetters` (404); route is `/api/cover-letters`. */
+const CAMEL_COVER_LETTERS_API_PATTERN = /\bapi\.coverLetters\b/gu;
 
 const isAllowedFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
@@ -68,7 +70,15 @@ export const collectEdenDualPathViolationsForContent = (
           filePath,
           line: getLineFromOffset(content, match.index ?? 0),
           message:
-            "useCoverLetter must resolve detail via Eden api.coverLetters({ id }) — buildCoverLetterDetailEndpoint dual path banned.",
+            'useCoverLetter must resolve detail via Eden api["cover-letters"]({ id }) — buildCoverLetterDetailEndpoint dual path banned.',
+        });
+      }
+      for (const match of content.matchAll(CAMEL_COVER_LETTERS_API_PATTERN)) {
+        violations.push({
+          filePath,
+          line: getLineFromOffset(content, match.index ?? 0),
+          message:
+            'Eden cover-letters path is kebab-case — use api["cover-letters"], not api.coverLetters (404).',
         });
       }
     }
@@ -127,6 +137,14 @@ export const collectEdenDualPathViolationsForContent = (
       line: getLineFromOffset(content, match.index ?? 0),
       message:
         "Eden-owned HTTP must use useApi() branch — requestApi(API_ENDPOINTS.<owned>*) dual path banned.",
+    });
+  }
+  for (const match of content.matchAll(CAMEL_COVER_LETTERS_API_PATTERN)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message:
+        'Eden cover-letters path is kebab-case — use api["cover-letters"], not api.coverLetters (404).',
     });
   }
   for (const match of content.matchAll(BUILD_AUTOMATION_RUN_PATTERN)) {

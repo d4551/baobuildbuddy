@@ -11,8 +11,10 @@ import {
 
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
@@ -127,8 +129,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              class="btn btn-primary"
-              :class="{ 'btn-error': stt.isListening.value }"
+              :class="[PRIMARY_ACTION_CLASS, { 'btn-error': stt.isListening.value }]"
               :disabled="completionState !== 'ready' || !canUseVoice"
               :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
               :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"

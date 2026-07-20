@@ -12,6 +12,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
@@ -162,7 +163,7 @@ function updateFeaturedFlag(event: Event): void {
             @input="handleTechnologyInput"
             @keyup.enter="emit('addTechnology')"
           />
-          <button class="btn btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
+          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
             {{ t("portfolioPage.modal.addTechnologyButton") }}
           </button>
         </div>
@@ -207,7 +208,7 @@ function updateFeaturedFlag(event: Event): void {
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
       <button 
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :disabled="!props.projectForm.title || !props.projectForm.description"
         :aria-label="t('portfolioPage.modal.saveAria')"
         @click="emit('save')"

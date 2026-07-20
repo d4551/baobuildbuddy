@@ -11,6 +11,7 @@ import { settlePromise } from "~/composables/async-flow";
 import {
   ICON_SIZE_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
 import {
@@ -251,7 +252,7 @@ async function handleExport(format: "pdf" | "docx") {
         />
 
         <button
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!hasUnsavedChanges"
           :aria-label="t('coverLetterDetailPage.actions.saveAria')"
           @click="handleSave"

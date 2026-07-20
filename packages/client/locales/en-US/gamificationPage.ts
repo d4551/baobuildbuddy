@@ -15,6 +15,7 @@ const gamificationPage = {
     levelPrefix: "Level",
     xpSuffix: "XP",
     xpUntilLevelLabel: "XP until level",
+    xpMaxLevelLabel: "Max level reached — every action still earns XP",
     currentStreakTitle: "Current Streak",
     longestStreakTitle: "Longest Streak",
     achievementsTitle: "Achievements",

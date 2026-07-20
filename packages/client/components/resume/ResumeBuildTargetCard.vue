@@ -2,6 +2,7 @@
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -85,7 +86,7 @@ const emit = defineEmits<{
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!canProceedTarget"
           :aria-label="t('resumeBuildPage.target.generateAria')"
           @click="emit('generate')"

@@ -10,6 +10,7 @@ import {
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
@@ -119,7 +120,7 @@ function updateProjectForm(value: typeof projectForm): void {
           :button-label="t('portfolioPage.actions.exportButton')"
           :button-aria-label="t('portfolioPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-primary"
+          :summary-class="PRIMARY_ACTION_CLASS"
           @export="handleExport"
         />
       </template>

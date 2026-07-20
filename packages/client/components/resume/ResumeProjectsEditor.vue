@@ -6,6 +6,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
@@ -64,7 +65,7 @@ function removeProject(index: number): void {
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.projects.title") }}</h2>
       <button 
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.projects.addButtonAria')"
         @click="addProject"
       >

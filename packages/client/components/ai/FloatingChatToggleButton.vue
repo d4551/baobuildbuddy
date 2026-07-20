@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
@@ -29,7 +30,7 @@ const emit = defineEmits<{
     </span>
     <button
       type="button"
-      class="btn btn-primary btn-circle" :class="[SHADOW_TOKEN_CLASS.lg, TOUCH_TARGET_MIN_CLASS]"
+      :class="[PRIMARY_ACTION_CLASS, 'btn-circle', SHADOW_TOKEN_CLASS.lg, TOUCH_TARGET_MIN_CLASS]"
       :aria-label="isOpen ? t('floatingChat.hideAria') : t('floatingChat.showAria')"
       :aria-expanded="isOpen"
       :aria-controls="chatPanelId"

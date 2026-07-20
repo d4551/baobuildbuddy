@@ -234,7 +234,7 @@ const {
           {{ t("resumePage.createModal.cancelButton") }}
         </button>
         <button
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="creating || !newResumeName.trim()"
           :aria-label="t('resumePage.createModal.createAria')"
           @click="handleCreate"

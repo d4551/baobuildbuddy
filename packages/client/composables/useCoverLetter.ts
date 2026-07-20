@@ -108,7 +108,7 @@ const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.get(),
+    context.api["cover-letters"].get(),
     context.t("coverLetterPage.toasts.fetchFailed"),
   );
   context.loading.value = false;
@@ -125,7 +125,7 @@ async function getCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters({ id }).get(),
+    context.api["cover-letters"]({ id }).get(),
     context.t("coverLetterDetailPage.toasts.loadFailed"),
   );
   context.loading.value = false;
@@ -146,7 +146,7 @@ async function createCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.post(letterData),
+    context.api["cover-letters"].post(letterData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;
@@ -168,7 +168,7 @@ async function updateCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters({ id }).put(updates),
+    context.api["cover-letters"]({ id }).put(updates),
     context.t("coverLetterDetailPage.toasts.saveFailed"),
   );
   context.loading.value = false;
@@ -183,7 +183,7 @@ async function updateCoverLetter(
 
 async function deleteCoverLetter(context: CoverLetterContext, id: string): Promise<void> {
   context.loading.value = true;
-  const { error } = await context.api.coverLetters({ id }).delete();
+  const { error } = await context.api["cover-letters"]({ id }).delete();
   if (error) {
     context.loading.value = false;
     throw new Error(context.t("coverLetterDetailPage.toasts.saveFailed"));
@@ -202,7 +202,7 @@ async function generateCoverLetter(
 ): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
   const data = await readApiData(
-    context.api.coverLetters.generate.post(generationData),
+    context.api["cover-letters"].generate.post(generationData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;

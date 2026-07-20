@@ -27,7 +27,8 @@ export interface ClientApi {
   settings: SettingsApi;
   jobs: JobsApi;
   resumes: ResumesApi;
-  coverLetters: CoverLettersApi;
+  /** Eden path segment is kebab-case (`/api/cover-letters`); camelCase 404s. */
+  "cover-letters": CoverLettersApi;
   portfolio: PortfolioApi;
   interview: InterviewApi;
   ai: AiApi;
@@ -46,7 +47,7 @@ const REQUIRED_API_BRANCHES = [
   "settings",
   "jobs",
   "resumes",
-  "coverLetters",
+  "cover-letters",
   "portfolio",
   "interview",
   "ai",

@@ -116,7 +116,8 @@ export function useAutomationJobApplyBootstrap(input: {
 
   const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
     "automation-job-apply-cover-letters",
-    async () => toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api.coverLetters.get())),
+    async () =>
+      toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
     {
       default: () => [],
     },

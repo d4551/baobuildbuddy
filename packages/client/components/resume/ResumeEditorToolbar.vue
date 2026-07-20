@@ -4,6 +4,7 @@ import {
 
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
@@ -58,7 +59,7 @@ const { t } = useI18n();
         summary-:class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
         @export="emit('export', $event)"
       />
-      <button class="btn btn-primary" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
+      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
         {{ t("resumePage.saveButton") }}
       </button>
     </div>

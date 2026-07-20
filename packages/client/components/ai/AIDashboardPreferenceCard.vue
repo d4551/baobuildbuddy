@@ -4,6 +4,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -67,7 +68,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
 
       <div class="card-actions justify-end">
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!selectedProviderModel || !selectedModelValue || loading"
           :aria-label="t('aiDashboard.preference.saveAria')"
           @click="onSave"

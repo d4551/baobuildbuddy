@@ -57,4 +57,20 @@ describe("validate-no-eden-dual-path", () => {
     );
     expect(violations.length).toBe(0);
   });
+
+  test("api.coverLetters camelCase path fails", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/useCoverLetter.ts",
+      `await api.coverLetters.get();`,
+    );
+    expect(violations.some((v) => v.message.includes("cover-letters"))).toBe(true);
+  });
+
+  test('api["cover-letters"] kebab path passes', () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/useCoverLetter.ts",
+      `await api["cover-letters"].get();\nawait downloadApiFile(runtime, buildCoverLetterExportEndpoint(id), { method: "POST" }, "x.pdf");`,
+    );
+    expect(violations.length).toBe(0);
+  });
 });

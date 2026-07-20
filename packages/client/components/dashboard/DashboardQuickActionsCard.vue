@@ -5,6 +5,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -25,7 +26,7 @@ const { t } = useI18n();
           v-for="action in actions"
           :key="action.id"
           :to="action.to"
-          class="btn btn-primary btn-soft justify-start sm:justify-center"
+          :class="[PRIMARY_ACTION_CLASS, 'btn-soft', 'justify-start sm:justify-center']"
           :aria-label="t(action.labelKey)"
         >
           <svg :class="ICON_SIZE_CLASS['5']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

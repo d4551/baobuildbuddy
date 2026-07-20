@@ -7,6 +7,7 @@ import {
   MARGIN_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
@@ -49,7 +50,7 @@ const emit = defineEmits<{
           <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
-          <button class="btn btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
+          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
             {{ t("coverLetterDetailPage.editor.saveButton") }}
           </button>
         </div>

@@ -18,6 +18,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PROSE_MEASURE_CENTER_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -87,7 +88,7 @@ async function handleExport(format: "pdf" | "docx") {
           :button-label="t('portfolioPage.actions.exportButton')"
           :button-aria-label="t('portfolioPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-primary print:hidden"
+          :summary-class="`${PRIMARY_ACTION_CLASS} print:hidden`"
           @export="handleExport"
         />
       </template>
@@ -189,7 +190,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
@@ -238,7 +239,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}

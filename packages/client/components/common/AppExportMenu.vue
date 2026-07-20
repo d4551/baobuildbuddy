@@ -4,6 +4,7 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
@@ -19,7 +20,7 @@ interface AppExportMenuProps {
 
 const props = withDefaults(defineProps<AppExportMenuProps>(), {
   disabled: false,
-  summaryClass: "btn btn-primary",
+  summaryClass: PRIMARY_ACTION_CLASS,
 });
 
 const emit = defineEmits<{

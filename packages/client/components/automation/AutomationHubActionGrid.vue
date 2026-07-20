@@ -7,6 +7,7 @@ import {
   FLUID_HEIGHT_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS,
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -46,7 +47,7 @@ const { t } = useI18n();
           <NuxtLink 
             :to="card.to"
             class="btn btn-outline"
-            :class="{ 'btn-primary': primaryCardId === card.id }"
+            :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: primaryCardId === card.id }"
             :aria-label="t(card.buttonKey)"
           >
             {{ t(card.buttonKey) }}

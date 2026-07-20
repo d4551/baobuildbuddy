@@ -385,6 +385,7 @@ const catalog = {
     emptyStateCta: "Abrir Panel",
     levelPrefix: "Nivel",
     xpUntilLevelLabel: "XP hasta el nivel",
+    xpMaxLevelLabel: "Nivel máximo alcanzado — cada acción sigue sumando XP",
     currentStreakTitle: "Racha Actual",
     longestStreakTitle: "Racha Más Larga",
     achievementsTitle: "Logros",

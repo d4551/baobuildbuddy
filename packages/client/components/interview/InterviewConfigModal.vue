@@ -11,6 +11,8 @@ import {
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -93,7 +95,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       <button 
         type="button"
         class="btn join-item btn-outline"
-        :class="{ 'btn-primary': selectedMode === 'job' }"
+        :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'job' }"
         :aria-label="t('interviewHub.config.switchToJobAria')"
         @click="emit('update:selected-mode', 'job')"
       >
@@ -102,7 +104,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       <button 
         type="button"
         class="btn join-item btn-outline"
-        :class="{ 'btn-primary': selectedMode === 'studio' }"
+        :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'studio' }"
         :aria-label="t('interviewHub.config.switchToStudioAria')"
         @click="emit('update:selected-mode', 'studio')"
       >
@@ -157,7 +159,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                       :class="[
                         TOUCH_TARGET_MIN_CLASS,
                         FLUID_WIDTH_CLASS,
-                        { 'btn-primary': job.id === selectedJobId },
+                        { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId },
                       ]"
                       :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                       @click="emit('selectJob', job.id)"
@@ -190,7 +192,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                         <button
                           type="button"
                           class="btn btn-sm btn-ghost"
-                          :class="[TOUCH_TARGET_MIN_CLASS, { 'btn-primary': job.id === selectedJobId }]"
+                          :class="[TOUCH_TARGET_MIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId }]"
                           :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                           @click="emit('selectJob', job.id)"
                         >
@@ -283,7 +285,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         </button>
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('interviewHub.config.startAria')"
           :disabled="isStartDisabled"
           @click="emit('start')"

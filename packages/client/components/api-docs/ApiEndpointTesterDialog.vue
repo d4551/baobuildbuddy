@@ -7,6 +7,7 @@ import {
   MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -191,7 +192,7 @@ function updateRequestBodyValue(event: Event): void {
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="testerState === 'loading'"
           :aria-label="t('apiDocs.tester.send')"
           @click="emit('execute')"

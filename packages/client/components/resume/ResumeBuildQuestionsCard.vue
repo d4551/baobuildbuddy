@@ -3,6 +3,7 @@ import {
 
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -80,7 +81,7 @@ const emit = defineEmits<{
           {{ t("resumeBuildPage.questions.backButton") }}
         </button>
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!(answers[aiQuestions[currentQuestionIndex]?.id ?? ''] ?? '').trim()"
           :aria-label="t('resumeBuildPage.questions.nextAria')"
           @click="emit('next')"

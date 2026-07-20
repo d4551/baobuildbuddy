@@ -14,7 +14,9 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
@@ -49,7 +51,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
   <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
     <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
-      <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
+      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
         <IconPlus :class="[ICON_SIZE_CLASS[4]]"/>
         {{ t("portfolioPage.projects.addButton") }}
       </button>

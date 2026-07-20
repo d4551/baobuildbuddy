@@ -9,6 +9,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type {
@@ -113,7 +114,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
           </button>
           <NuxtLink 
             :to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
-            class="btn btn-primary"
+            :class="[PRIMARY_ACTION_CLASS]"
             :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"
           >
             {{ t("aiDashboard.providerCard.configureButton") }}

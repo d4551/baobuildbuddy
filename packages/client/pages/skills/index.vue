@@ -220,7 +220,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
             />
             <button
               type="button"
-              class="btn btn-primary join-item"
+              :class="[PRIMARY_ACTION_CLASS, 'join-item']"
               :aria-label="t('skillsPage.createModal.addApplicationAria')"
               @click="addApplication"
             >

@@ -8,6 +8,7 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
@@ -65,7 +66,7 @@ function removeSkill(index: number): void {
         @keyup.enter="addSkill"
       />
       <button 
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.skills.addButtonAria')"
         @click="addSkill"
       >

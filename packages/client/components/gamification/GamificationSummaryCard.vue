@@ -51,7 +51,12 @@ const { t } = useI18n();
         <progress class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, HEIGHT_TOKEN_CLASS.h4]" :value="levelProgress" :max="GAMIFICATION_PROGRESS_MAX" :aria-valuenow="levelProgress" :aria-valuemin="GAMIFICATION_PROGRESS_MIN" :aria-valuemax="GAMIFICATION_PROGRESS_MAX" :aria-label="t('gamificationPage.a11y.levelProgress')"></progress>
 
         <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">
-          {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
+          <template v-if="xpUntilNextLevel > 0">
+            {{ xpUntilNextLevel }} {{ t("gamificationPage.xpUntilLevelLabel") }} {{ progress.level + 1 }}
+          </template>
+          <template v-else>
+            {{ t("gamificationPage.xpMaxLevelLabel") }}
+          </template>
         </p>
       </div>
     </section>
