@@ -31,7 +31,7 @@ const BUILD_JOB_DETAIL_PATTERN = /buildJobDetailEndpoint\s*\(/gu;
 const BUILD_RESUME_DETAIL_PATTERN = /buildResumeDetailEndpoint\s*\(/gu;
 const BUILD_STUDIO_DETAIL_PATTERN = /buildStudioDetailEndpoint\s*\(/gu;
 const REQUEST_API_CALL_PATTERN = /requestApi\s*(?:<[^>]*>)?\s*\(/u;
-/** Eden maps `coverLetters` → `/api/coverLetters` (404); route is `/api/cover-letters`. */
+/** Eden maps `coverLetters` → camel path (404); route segment is `cover-letters`. */
 const CAMEL_COVER_LETTERS_API_PATTERN = /\bapi\.coverLetters\b/gu;
 
 const isAllowedFile = (filePath: string): boolean =>

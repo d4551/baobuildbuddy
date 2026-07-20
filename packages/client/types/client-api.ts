@@ -27,7 +27,7 @@ export interface ClientApi {
   settings: SettingsApi;
   jobs: JobsApi;
   resumes: ResumesApi;
-  /** Eden path segment is kebab-case (`/api/cover-letters`); camelCase 404s. */
+  /** Eden path segment is kebab-case (`cover-letters`); camelCase property 404s. */
   "cover-letters": CoverLettersApi;
   portfolio: PortfolioApi;
   interview: InterviewApi;
