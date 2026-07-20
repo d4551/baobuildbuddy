@@ -272,21 +272,27 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   }
 
   const answerBox = page.locator("textarea:visible").first();
+  const generateResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes("/resumes/from-questions/generate") &&
+      response.request().method() === "POST",
+    { timeout: 300_000 },
+  );
   await generate.click({ timeout: 10_000 });
   await writeOutput("clicked Generate Questions; waiting for AI question UI");
-  const questionsReady = await settle(
-    Promise.race([
-      answerBox.waitFor({ state: "visible", timeout: 300_000 }),
-      page
-        .getByText(/Question\s+\d+\s+of\s+\d+/i)
-        .first()
-        .waitFor({ state: "visible", timeout: 300_000 }),
-    ]),
-  );
-  if (questionsReady.status === "rejected") {
+  const generateResult = await settle(generateResponse);
+  if (generateResult.status === "rejected") {
     await shot(page, "03-resume-questions-timeout");
-    throw new Error("Resume guided build: AI questions never appeared after live generate.");
+    throw new Error("Resume guided build: generate request never completed.");
   }
+  await writeOutput(
+    `resume generate HTTP ${String(generateResult.value.status())} in-flight done`,
+  );
+  await page
+    .getByText(/Question\s+\d+\s+of\s+\d+/i)
+    .first()
+    .waitFor({ state: "visible", timeout: 30_000 });
+  await answerBox.waitFor({ state: "visible", timeout: 15_000 });
   await shot(page, "03-resume-questions");
 
   for (let step = 0; step < 10; step += 1) {
