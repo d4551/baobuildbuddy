@@ -109,7 +109,10 @@ const configureLocalAiViaUi = async (
   });
   await wait(page, 2_000);
 
-  const localDetails = page.locator("details.collapse").filter({ hasText: /Local/i }).first();
+  const localDetails = page
+    .locator("details")
+    .filter({ hasText: /Local Model/i })
+    .first();
   await localDetails.waitFor({ state: "attached", timeout: 15_000 });
   const localOpen = await localDetails.evaluate((el) => (el as HTMLDetailsElement).open);
   if (!localOpen) {
@@ -126,23 +129,23 @@ const configureLocalAiViaUi = async (
     await modelInput.fill(modelId);
   }
 
-  const preferred = page.getByLabel(/preferred provider|Select provider for Chat/i).first();
+  const preferred = page
+    .getByLabel(/preferred provider|Select provider for Chat|AI preferred/i)
+    .first();
   if ((await preferred.count()) > 0) {
     await settle(preferred.selectOption("local"));
   }
 
-  const saveKeys = page
-    .getByRole("button", { name: /Save provider|Save keys|^Save$/i })
-    .first();
-  await saveKeys.click({ timeout: 8_000 });
+  const saveKeys = page.getByRole("button", { name: /Save API Keys/i }).first();
+  await saveKeys.click({ timeout: 12_000 });
   await wait(page, 2_000);
 
-  const savePreferred = page.getByRole("button", { name: /preferred provider|chat by default/i }).first();
+  const savePreferred = page.getByRole("button", { name: /Save chat default/i }).first();
   if ((await savePreferred.count()) > 0) {
     await settle(savePreferred.click({ timeout: 5_000 }));
     await wait(page, 1_000);
   }
-  const saveRouting = page.getByRole("button", { name: /save routing|save ai routing/i }).first();
+  const saveRouting = page.getByRole("button", { name: /Save routing/i }).first();
   if ((await saveRouting.count()) > 0) {
     await settle(saveRouting.click({ timeout: 5_000 }));
     await wait(page, 1_000);
