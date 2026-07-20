@@ -17,4 +17,12 @@ describe("validate-no-eden-dual-path", () => {
     );
     expect(violations.length).toBe(0);
   });
+
+  test("requestApi coverLetters endpoint fails", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/other.ts",
+      `requestApi(runtime.api, API_ENDPOINTS.coverLetters, { method: "GET" });`,
+    );
+    expect(violations.length).toBe(1);
+  });
 });

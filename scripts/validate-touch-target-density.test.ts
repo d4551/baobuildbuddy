@@ -18,4 +18,12 @@ describe("validate-touch-target-density", () => {
     );
     expect(violations.length).toBe(0);
   });
+
+  test("bare btn-sm fails", () => {
+    const violations = collectTouchTargetDensityViolations(
+      "packages/client/pages/demo.vue",
+      `<button class="btn btn-sm btn-outline">x</button>`,
+    );
+    expect(violations.length).toBe(1);
+  });
 });

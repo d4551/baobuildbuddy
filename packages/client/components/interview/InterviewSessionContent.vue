@@ -8,11 +8,13 @@ import type {
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 type InterviewCompletionState =
@@ -84,7 +86,7 @@ const { t } = useI18n();
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button 
         type="button"
-        class="btn btn-success btn-sm"
+        class="btn btn-success btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
         @click="$emit('history')"
       >

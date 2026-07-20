@@ -11,6 +11,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -102,11 +103,13 @@ const {
         </button>
       </template>
       <template #aside>
-        <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('interviewHub.hero.stepsAria')">
-          <li class="step step-primary">{{ t("interviewHub.hero.steps.chooseContext") }}</li>
-          <li class="step" :class="showConfigModal ? 'step-primary' : ''">{{ t("interviewHub.hero.steps.configureSession") }}</li>
-          <li class="step">{{ t("interviewHub.hero.steps.practiceAndScore") }}</li>
-        </ul>
+        <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+          <ul class="steps steps-vertical lg:steps-horizontal" :class="[FLUID_WIDTH_CLASS]" :aria-label="t('interviewHub.hero.stepsAria')">
+            <li class="step step-primary">{{ t("interviewHub.hero.steps.chooseContext") }}</li>
+            <li class="step" :class="showConfigModal ? 'step-primary' : ''">{{ t("interviewHub.hero.steps.configureSession") }}</li>
+            <li class="step">{{ t("interviewHub.hero.steps.practiceAndScore") }}</li>
+          </ul>
+        </div>
       </template>
     </PageHeroHeader>
 
@@ -203,7 +206,7 @@ const {
                 <div :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHub.cards.selectedJobValue", { title: selectedJob.title, company: selectedJob.company }) }}</div>
               </div>
               <button
-                class="btn btn-sm btn-ghost"
+                class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :class="[POINTER_EVENTS_TOKEN_CLASS.auto]"
                 :aria-label="t('interviewHub.cards.changeJobAria')"
                 @click="openConfig('job')"

@@ -2,6 +2,7 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
+
   FLUID_WIDTH_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
@@ -9,7 +10,9 @@ import {
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -121,14 +124,16 @@ function updateProjectForm(value: typeof projectForm): void {
         />
       </template>
       <template v-if="!isPortfolioEmpty" #aside>
-        <StatsRow
-          :class="[MARGIN_TOKEN_CLASS.mt4]"
-          :stats="[
-            { titleKey: 'portfolioPage.stats.projectsTitle', value: projects.length, valueClass: 'text-primary', descKey: 'portfolioPage.stats.projectsDesc' },
-            { titleKey: 'portfolioPage.stats.featuredTitle', value: featuredProjectCount, valueClass: 'text-secondary', descKey: 'portfolioPage.stats.featuredDesc' },
-            { titleKey: 'portfolioPage.stats.profileTitle', value: hasMetadata ? t('portfolioPage.stats.profileReady') : t('portfolioPage.stats.profileMissing'), descKey: 'portfolioPage.stats.profileDesc' },
-          ]"
-        />
+        <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+          <StatsRow
+            :class="[MARGIN_TOKEN_CLASS.mt4]"
+            :stats="[
+              { titleKey: 'portfolioPage.stats.projectsTitle', value: projects.length, valueClass: 'text-primary', descKey: 'portfolioPage.stats.projectsDesc' },
+              { titleKey: 'portfolioPage.stats.featuredTitle', value: featuredProjectCount, valueClass: 'text-secondary', descKey: 'portfolioPage.stats.featuredDesc' },
+              { titleKey: 'portfolioPage.stats.profileTitle', value: hasMetadata ? t('portfolioPage.stats.profileReady') : t('portfolioPage.stats.profileMissing'), descKey: 'portfolioPage.stats.profileDesc' },
+            ]"
+          />
+        </div>
       </template>
     </PageHeroHeader>
 
@@ -190,7 +195,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button class="btn btn-sm btn-ghost" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

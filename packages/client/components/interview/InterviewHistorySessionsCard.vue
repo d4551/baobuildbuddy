@@ -64,7 +64,7 @@ const viewSession = (id: string): void => {
         <div class="flex flex-col sm:flex-row sm:items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="join">
             <button 
-              class="join-item btn btn-sm btn-ghost"
+              class="join-item btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
               :class="{ 'btn-active': historyView === 'table' }"
               :aria-label="t('interviewHistory.tableAriaLabel')"
               @click="selectHistoryView('table')"
@@ -72,7 +72,7 @@ const viewSession = (id: string): void => {
               {{ t("interviewHistory.viewModes.table") }}
             </button>
             <button 
-              class="join-item btn btn-sm btn-ghost"
+              class="join-item btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
               :class="{ 'btn-active': historyView === 'timeline' }"
               :aria-label="t('interviewHistory.timelineAriaLabel')"
               @click="selectHistoryView('timeline')"

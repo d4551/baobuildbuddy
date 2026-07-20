@@ -3,6 +3,7 @@ import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -12,6 +13,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { ApiEndpoint, ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
@@ -65,7 +67,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              class="btn btn-sm btn-outline"
+              class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="
                 t('apiDocs.endpoint.openTesterAria', {
                   method: methodLabel(endpoint.method),

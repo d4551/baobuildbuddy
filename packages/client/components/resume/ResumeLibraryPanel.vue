@@ -3,12 +3,14 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 interface ResumeLibraryPanelProps {
@@ -68,7 +70,7 @@ function requestDelete(resumeId?: string): void {
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
           <button 
-            class="btn btn-sm btn-ghost"
+            class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
           >
@@ -123,21 +125,21 @@ function requestDelete(resumeId?: string): void {
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
-                class="btn btn-sm btn-ghost"
+                class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
                 @click.stop
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
               <button 
-                class="btn btn-sm btn-outline"
+                class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
               <button 
-                class="btn btn-sm btn-error btn-outline"
+                class="btn btn-sm btn-error btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
               >

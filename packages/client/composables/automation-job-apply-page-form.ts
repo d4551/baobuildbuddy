@@ -1,7 +1,6 @@
-import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
+import { useClientApiRequestRuntime } from "~/composables/api-request";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 import { readApiDataOrEmpty } from "~/utils/api-response";
@@ -117,14 +116,7 @@ export function useAutomationJobApplyBootstrap(input: {
 
   const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
     "automation-job-apply-cover-letters",
-    async () =>
-      toCoverLetterSelectOptions(
-        await readApiDataOrEmpty(
-          requestApi<unknown>(input.runtime, API_ENDPOINTS.coverLetters, {
-            method: "GET",
-          }),
-        ),
-      ),
+    async () => toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api.coverLetters.get())),
     {
       default: () => [],
     },

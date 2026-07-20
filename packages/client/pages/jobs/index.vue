@@ -242,7 +242,7 @@ const page = useJobsIndexPage();
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
-                      class="btn btn-outline btn-sm"
+                      class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >

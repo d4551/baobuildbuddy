@@ -16,9 +16,10 @@ const emptyStateEvidencePatterns = [
   /<DashboardOnboardingCard\b/u,
 ] as const;
 const emptyStateRequirementPatterns = [/['"]empty['"]/u, /\bisEmpty\b/u] as const;
+/** Evidence = mounted primitives only — string `'loading'`/`'error'` alone is softening. */
 const requiredStatePatterns = {
-  loading: [/['"](?:loading|idle)['"]/u, /<LoadingSkeleton\b/u],
-  error: [/['"](?:error[^'"]*|unauthorized)['"]/u, /<BootstrapErrorAlert\b/u],
+  loading: [/<LoadingSkeleton\b/u],
+  error: [/<BootstrapErrorAlert\b/u],
 } as const;
 const successStatePattern = /['"]success['"]/u;
 const successFallbackPattern = /\bv-else(?:\s|>)/u;

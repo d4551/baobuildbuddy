@@ -1,10 +1,8 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import {
-  FONT_WEIGHT_TOKEN_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -36,12 +34,13 @@ const page = reactive(useAIDashboardPage());
     >
       <template #actions>
         <button
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"
           @click="page.fetchProviderStats"
         >
-          <LoadingSpinner size="xs" label="Loading" v-if="page.loading" />
+          <LoadingSpinner size="sm" :label="t('aiDashboard.preference.refreshButton')" v-if="page.loading" />
           <span>{{ t("aiDashboard.preference.refreshButton") }}</span>
         </button>
       </template>
@@ -76,21 +75,17 @@ const page = reactive(useAIDashboardPage());
         </template>
       </ClientOnly>
 
-      <div
+      <EmptyState
         v-if="page.providers.length === 0"
-        role="alert"
-        class="alert alert-warning alert-vertical sm:alert-horizontal"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.md, 'shrink-0', 'stroke-current']" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M12 9v2m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-        </svg>
-        <div>
-          <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("aiDashboard.alerts.noProvidersTitle") }}</h3>
-          <p :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiDashboard.alerts.noProvidersDescription") }}</p>
-        </div>
-      </div>
+        title-key="aiDashboard.alerts.noProvidersTitle"
+        description-key="aiDashboard.alerts.noProvidersDescription"
+        cta-label-key="aiDashboard.alerts.configureProvidersCta"
+        cta-aria-key="aiDashboard.alerts.configureProvidersAria"
+        :cta-to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
+      />
 
       <AIDashboardProviderGrid
+        v-else
         :providers="page.providers"
         :testing-provider="page.testingProvider"
         :test-results="page.testResults"

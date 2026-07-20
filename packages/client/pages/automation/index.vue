@@ -2,8 +2,10 @@
 import {
   FLEX_GAP_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -115,9 +117,10 @@ useSeoMeta({
       :description="t('automation.hub.pageDescription')"
     >
       <template #actions>
+        <!-- Hero keeps sole primary; overview card demotes to outline. -->
         <NuxtLink
           :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
         >
           {{ t(primaryCard?.buttonKey ?? "automation.hub.cards.scraper.button") }}
@@ -183,7 +186,8 @@ useSeoMeta({
                   <div class="card-actions justify-end">
                     <NuxtLink
                       :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
-                      class="btn btn-primary"
+                      class="btn btn-outline"
+                      :class="[TOUCH_TARGET_MIN_CLASS]"
                       :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
                     >
                       {{ t(primaryCard?.buttonKey ?? "automation.hub.cards.scraper.button") }}

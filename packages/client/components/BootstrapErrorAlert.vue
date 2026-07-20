@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
+
   ICON_SIZE_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 const props = withDefaults(
@@ -57,7 +59,7 @@ const hasRetry = computed(
     <button 
       v-if="hasRetry"
       type="button"
-      class="btn btn-sm btn-ghost shrink-0"
+      class="btn btn-sm btn-ghost shrink-0" :class="[TOUCH_TARGET_MIN_CLASS]"
       :aria-label="retryAriaLabel"
       @click="emit('retry')"
     >

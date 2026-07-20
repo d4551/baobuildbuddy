@@ -3,11 +3,13 @@ import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -45,7 +47,7 @@ function studioLocation(location: string): string {
   >
     <button 
       type="button"
-      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" :class="[TOUCH_TARGET_MIN_CLASS]"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >

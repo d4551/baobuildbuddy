@@ -3,6 +3,7 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -12,7 +13,9 @@ import {
   PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -95,14 +98,16 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         </button>
       </template>
       <template v-if="hasCoverLetters" #aside>
-        <StatsRow
-          :class="[MARGIN_TOKEN_CLASS.mt4]"
-          :stats="[
-            { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
-            { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
-            { titleKey: 'coverLetterPage.stats.templatesTitle', value: templateUsageCount, descKey: 'coverLetterPage.stats.templatesDesc' },
-          ]"
-        />
+        <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+          <StatsRow
+            :class="[MARGIN_TOKEN_CLASS.mt4]"
+            :stats="[
+              { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
+              { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
+              { titleKey: 'coverLetterPage.stats.templatesTitle', value: templateUsageCount, descKey: 'coverLetterPage.stats.templatesDesc' },
+            ]"
+          />
+        </div>
       </template>
     </PageHeroHeader>
 
@@ -159,7 +164,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
-          <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
+          <button class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
             {{ t("coverLetterPage.filters.clearButton") }}
           </button>
         </div>
@@ -222,14 +227,14 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
 
           <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
             <button
-              class="btn btn-sm btn-outline"
+              class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button
-              class="btn btn-sm btn-error btn-outline"
+              class="btn btn-sm btn-error btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

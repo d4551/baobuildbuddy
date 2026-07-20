@@ -2,6 +2,7 @@
 import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -9,6 +10,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -67,7 +69,7 @@ const emit = defineEmits<{
             <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <button 
                 type="button"
-                class="btn btn-success btn-sm"
+                class="btn btn-success btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :disabled="completingChallenge === challenge.id"
                 :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                 @click="emit('claim', challenge.id)"

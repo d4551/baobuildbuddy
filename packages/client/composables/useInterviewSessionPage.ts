@@ -17,6 +17,12 @@ export function useInterviewSessionPage() {
     activeSession: derived.activeSession,
     t: state.t,
   });
+
+  const submitViaWs = async (sessionId: string, content: string): Promise<boolean> => {
+    const feedback = await realtime.submitViaWs(sessionId, content);
+    return feedback !== null;
+  };
+
   const actions = createInterviewSessionActions({
     canComplete: derived.canComplete,
     canSubmit: derived.canSubmit,
@@ -26,14 +32,13 @@ export function useInterviewSessionPage() {
     currentSessionLoadId: state.currentSessionLoadId,
     getSession: state.getSession,
     isLastQuestion: derived.isLastQuestion,
-    mirrorEndSession: realtime.mirrorEndSession,
-    mirrorSubmitResponse: realtime.mirrorSubmitResponse,
     response: state.response,
     router: state.router,
     sessionId: derived.sessionId,
     sessionLoadError: state.sessionLoadError,
     stt: state.stt,
     stopTimer: timer.stopTimer,
+    submitViaWs,
     submitResponse: state.submitResponse,
     submitting: state.submitting,
     syncCompletedSessionTime: timer.syncCompletedSessionTime,

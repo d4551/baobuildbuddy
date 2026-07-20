@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -9,6 +10,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -166,7 +168,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTE_BUILDERS.settingsSection('emailDelivery')"
-              class="btn btn-link btn-sm" :class="[PADDING_TOKEN_CLASS.px0]"
+              class="btn btn-link btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, PADDING_TOKEN_CLASS.px0]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}

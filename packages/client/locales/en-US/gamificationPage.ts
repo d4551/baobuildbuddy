@@ -34,6 +34,22 @@ const gamificationPage = {
       challengeProgress: "Challenge progression",
     },
     achievementBadgeAria: "Achievement: {name}. {description}",
+    trends: {
+      title: "Progress trends",
+      description: "Weekly momentum and monthly career stats from live gamification fabric.",
+      weeklyTitle: "This week",
+      weeklyXp: "{xp} XP earned",
+      weeklyActions: "{count} actions logged",
+      weeklyChallenges: "{count} challenges completed",
+      weeklyEmpty: "No weekly activity yet — complete a challenge to start the trend.",
+      topCategory: "Top category: {category}",
+      monthlyTitle: "This month",
+      monthlyXp: "{xp} total XP",
+      monthlyLevels: "{count} levels gained",
+      monthlyAchievements: "{count} achievements unlocked",
+      monthlyStreak: "{days}-day streak",
+      monthlyEmpty: "No monthly stats yet — keep practicing to fill this view.",
+    },
   },
 } as const;
 

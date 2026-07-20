@@ -196,6 +196,16 @@ export interface CoverLettersApi {
   generate: {
     post(body: JsonRecord): ApiRequest<unknown>;
   };
+  (params: {
+    id: string;
+  }): {
+    get(): ApiRequest<unknown>;
+    put(body: JsonRecord): ApiRequest<unknown>;
+    delete(): ApiRequest<unknown>;
+    export: {
+      post(body: JsonRecord): ApiRequest<unknown>;
+    };
+  };
 }
 
 export interface ResumesRoute {

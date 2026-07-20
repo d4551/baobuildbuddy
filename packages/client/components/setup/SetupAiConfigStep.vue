@@ -97,7 +97,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"
+            class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors" :class="[TOUCH_TARGET_MIN_CLASS]"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
@@ -136,7 +136,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     </label>
 
     <button 
-      class="btn btn-outline btn-sm"
+      class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"

@@ -23,10 +23,28 @@ import {
 import { getErrorMessage } from "~/utils/errors";
 import type { ApiEnvelope } from "~/types/client-api-contracts";
 
+interface GamificationWeeklyTrend {
+  readonly challengesCompleted: number;
+  readonly xpEarned: number;
+  readonly actionsCount: number;
+  readonly topCategory: string;
+}
+
+interface GamificationMonthlyTrend {
+  readonly totalXP: number;
+  readonly levelsGained: number;
+  readonly achievementsUnlocked: number;
+  readonly challengesCompleted: number;
+  readonly actionsCount: number;
+  readonly streakDays: number;
+}
+
 interface GamificationHubData {
   readonly progress: UserGamificationData;
   readonly achievements: readonly Achievement[];
   readonly challenges: readonly DailyChallenge[];
+  readonly weekly: GamificationWeeklyTrend | null;
+  readonly monthly: GamificationMonthlyTrend | null;
 }
 
 type GamificationUiState = "idle" | "loading" | "error" | "empty" | "success";
@@ -150,11 +168,65 @@ async function handleCompleteChallenge(challengeId: string) {
   $toast.success(t("gamificationPage.challengeCompletionToast"));
 }
 
+function toWeeklyTrend(value: unknown): GamificationWeeklyTrend | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  if (
+    typeof row.challengesCompleted !== "number" ||
+    typeof row.xpEarned !== "number" ||
+    typeof row.actionsCount !== "number" ||
+    typeof row.topCategory !== "string"
+  ) {
+    return null;
+  }
+  return {
+    challengesCompleted: row.challengesCompleted,
+    xpEarned: row.xpEarned,
+    actionsCount: row.actionsCount,
+    topCategory: row.topCategory,
+  };
+}
+
+function toMonthlyTrend(value: unknown): GamificationMonthlyTrend | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  if (
+    typeof row.totalXP !== "number" ||
+    typeof row.levelsGained !== "number" ||
+    typeof row.achievementsUnlocked !== "number" ||
+    typeof row.challengesCompleted !== "number" ||
+    typeof row.actionsCount !== "number" ||
+    typeof row.streakDays !== "number"
+  ) {
+    return null;
+  }
+  return {
+    totalXP: row.totalXP,
+    levelsGained: row.levelsGained,
+    achievementsUnlocked: row.achievementsUnlocked,
+    challengesCompleted: row.challengesCompleted,
+    actionsCount: row.actionsCount,
+    streakDays: row.streakDays,
+  };
+}
+
+async function fetchOptionalTrend(
+  request: Promise<ApiEnvelope<unknown>>,
+): Promise<unknown | null> {
+  const response = await request;
+  if (response.error) {
+    return null;
+  }
+  return response.data;
+}
+
 async function fetchGamificationHubData(): Promise<GamificationHubData> {
-  const [progress, achievements, challengePayload] = await Promise.all([
+  const [progress, achievements, challengePayload, weeklyRaw, monthlyRaw] = await Promise.all([
     requestData(api.gamification.progress.get(), t("gamificationPage.loadErrorFallback")),
     requestData(api.gamification.achievements.get(), t("gamificationPage.loadErrorFallback")),
     requestData(api.gamification.challenges.get(), t("gamificationPage.loadErrorFallback")),
+    fetchOptionalTrend(api.gamification.weekly.get()),
+    fetchOptionalTrend(api.gamification.monthly.get()),
   ]);
 
   if (!progress || !achievements || !challengePayload) {
@@ -165,6 +237,8 @@ async function fetchGamificationHubData(): Promise<GamificationHubData> {
     progress,
     achievements,
     challenges: challengePayload.challenges,
+    weekly: toWeeklyTrend(weeklyRaw),
+    monthly: toMonthlyTrend(monthlyRaw),
   };
 }
 
@@ -232,6 +306,11 @@ async function requestData<T>(
         :get-challenge-progress="getChallengeProgress"
         :can-claim-challenge="canClaimChallenge"
         @claim="handleCompleteChallenge"
+      />
+
+      <GamificationTrendsCard
+        :weekly="hubData.weekly"
+        :monthly="hubData.monthly"
       />
 
       <GamificationAchievementsCard
