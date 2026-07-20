@@ -87,7 +87,7 @@ const { t } = useI18n();
             <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ experience.title }}</h3>
             <p class="text-base font-semibold">{{ experience.company }}</p>
           </div>
-          <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+          <div class="text-end" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             <p>{{ experience.startDate }} - {{ experience.endDate || t("resumePreview.present") }}</p>
             <p v-if="experience.location">{{ experience.location }}</p>
           </div>
@@ -115,7 +115,7 @@ const { t } = useI18n();
             <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ education.degree }}</h3>
             <p class="text-base">{{ education.school }}</p>
           </div>
-          <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+          <div class="text-end" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             <p>{{ education.year }}</p>
             <p v-if="education.gpa">{{ t("resumePreview.gpaLabel", { gpa: education.gpa }) }}</p>
           </div>

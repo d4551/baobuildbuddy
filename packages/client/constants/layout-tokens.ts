@@ -45,10 +45,10 @@ export type FlexGapToken = keyof typeof FLEX_GAP_TOKEN_CLASS;
 
 /** Common margin tokens. */
 export const MARGIN_TOKEN_CLASS = {
-  ml1: "ml-1",
-  ml2: "ml-2",
-  mr1: "mr-1",
-  mr2: "mr-2",
+  ms1: "ms-1",
+  ms2: "ms-2",
+  me1: "me-1",
+  me2: "me-2",
   mt0: "mt-0",
   mtHalf: "mt-0.5",
   mt05: "mt-0.5",
@@ -140,8 +140,8 @@ export const PADDING_TOKEN_CLASS = {
   py8: "py-8",
   py12: "py-12",
   pb4: "pb-4",
-  pr10: "pr-10",
-  pr14: "pr-14",
+  pe10: "pe-10",
+  pe14: "pe-14",
   pt2: "pt-2",
   pt4: "pt-4",
 } as const;

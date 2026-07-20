@@ -44,7 +44,7 @@ const sourceCollectionCount = computed(
 
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <details class="collapse collapse-arrow border border-base-300 bg-base-100">
-          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
+          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.greenhouseBoardsLabel") }}</span>
               <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
@@ -59,7 +59,7 @@ const sourceCollectionCount = computed(
         </details>
 
         <details class="collapse collapse-arrow border border-base-300 bg-base-100">
-          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
+          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.leverCompaniesLabel") }}</span>
               <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
@@ -74,7 +74,7 @@ const sourceCollectionCount = computed(
         </details>
 
         <details class="collapse collapse-arrow border border-base-300 bg-base-100">
-          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
+          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.companyBoardsLabel") }}</span>
               <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
@@ -89,7 +89,7 @@ const sourceCollectionCount = computed(
         </details>
 
         <details class="collapse collapse-arrow border border-base-300 bg-base-100">
-          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
+          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.companyTemplatesLabel") }}</span>
               <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
@@ -104,7 +104,7 @@ const sourceCollectionCount = computed(
         </details>
 
         <details class="collapse collapse-arrow border border-base-300 bg-base-100">
-          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
+          <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.gamingPortalsLabel") }}</span>
               <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>

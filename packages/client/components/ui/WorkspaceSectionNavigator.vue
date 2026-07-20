@@ -154,7 +154,7 @@ const activeDescription = computed<string>(() => {
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-left"
+                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-start"
                 :class="[
                   TOUCH_TARGET_MIN_CLASS,
                   FLEX_GAP_TOKEN_CLASS.gap3,

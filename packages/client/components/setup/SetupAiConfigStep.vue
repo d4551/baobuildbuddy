@@ -95,11 +95,11 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
         </p>
 
         <div class="group relative overflow-hidden rounded-box border border-base-200 bg-base-300 text-base-content" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mt2]">
-          <div class="overflow-x-auto whitespace-nowrap font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr14]">
-            <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
+          <div class="overflow-x-auto whitespace-nowrap font-mono" :class="[PADDING_TOKEN_CLASS.p3, TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pe14]">
+            <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.me2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors']"
+            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute end-1.5 top-1/2 -translate-y-1/2 transition-colors']"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"

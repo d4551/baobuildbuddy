@@ -132,7 +132,7 @@ const ariaLabel = computed(() => {
       {{ messageTitle }}
       <time 
         v-if="formattedTime"
-        class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.ml1]"
+        class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.ms1]"
         :datetime="props.message.timestamp ?? undefined"
       >
         {{ formattedTime }}

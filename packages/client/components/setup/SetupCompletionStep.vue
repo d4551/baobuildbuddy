@@ -61,7 +61,7 @@ function updateTextValue(
     <div 
       v-if="authBootstrapRequired && authSetupTokenConfigured"
       role="alert"
-      class="alert alert-info alert-vertical text-left sm:alert-horizontal"
+      class="alert alert-info alert-vertical text-start sm:alert-horizontal"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.setupTokenTitle") }}</h3>
@@ -72,7 +72,7 @@ function updateTextValue(
     <div 
       v-else-if="authBootstrapRequired"
       role="alert"
-      class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
+      class="alert alert-warning alert-vertical text-start sm:alert-horizontal"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
@@ -80,7 +80,7 @@ function updateTextValue(
       </div>
     </div>
 
-    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
+    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-start" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.setupTokenLegend") }}</span>
       <input 
         :value="authSetupToken"
@@ -92,7 +92,7 @@ function updateTextValue(
       />
     </label>
 
-    <label v-if="needsStoredApiKey" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
+    <label v-if="needsStoredApiKey" class="floating-label text-start" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.apiKeyLegend") }}</span>
       <input 
         :value="existingApiKey"

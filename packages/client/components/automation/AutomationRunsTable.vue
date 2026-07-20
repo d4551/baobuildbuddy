@@ -112,7 +112,7 @@ const { t } = useI18n();
                 <th scope="col">{{ t("automation.runs.columns.id") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.type") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.status") }}</th>
-                <th scope="col" class="text-right">{{ t("automation.runs.columns.progress") }}</th>
+                <th scope="col" class="text-end">{{ t("automation.runs.columns.progress") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.job") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.updated") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.actions") }}</th>
@@ -134,7 +134,7 @@ const { t } = useI18n();
                     </span>
                   </div>
                 </td>
-                <td class="text-right">{{ formatRunProgress(run) }}</td>
+                <td class="text-end">{{ formatRunProgress(run) }}</td>
                 <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>

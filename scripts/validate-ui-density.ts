@@ -59,7 +59,8 @@ const MIN_W_ZERO_PATTERN = /\bmin-w-0\b/u;
 const NAV_CONTEXT_CLASS_PATTERN =
   /\b(?:menu|navbar|tabs|breadcrumb|breadcrumbs|nav|sidebar|listbox|tablist)\b/u;
 // Hoisted: drawer-aware pattern (ml-auto/is-drawer-*) for cramped row allowance.
-const DRAWER_AWARE_CLASS_PATTERN = /\b(?:is-drawer-(?:open|close)|ml-auto|mr-auto)\b/u;
+const DRAWER_AWARE_CLASS_PATTERN =
+  /\b(?:is-drawer-(?:open|close)|ms-auto|me-auto|ml-auto|mr-auto)\b/u;
 // Hoisted: surrounding-template nav/menu container detection for cramped row allowance.
 const NAV_CONTAINER_LOOKBACK_PATTERN =
   /<(?:nav|ul|ol|aside|menu|tablist)\b[^>]*>(?:[\s\S]{0,400}?)<(?:div|span)\b[^>]*\b(?:flex|inline-flex)\b[^']*\bgap-1\b/iu;

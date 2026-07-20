@@ -120,7 +120,7 @@ function typeLabel(type: string): string {
           <li v-for="suggestion in suggestions" :key="`${suggestion.type}-${suggestion.text}`">
             <button
               type="button"
-              class="btn btn-ghost justify-start text-left"
+              class="btn btn-ghost justify-start text-start"
               :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('workspaceSearch.suggestionAria', { text: suggestion.text })"
               @click="applySuggestion(suggestion)"
@@ -161,7 +161,7 @@ function typeLabel(type: string): string {
           <li v-for="result in results" :key="`${result.type}-${result.id}`">
             <button
               type="button"
-              class="btn btn-ghost justify-start text-left"
+              class="btn btn-ghost justify-start text-start"
               :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('workspaceSearch.resultAria', { title: result.title })"
               @click="openResult(result)"

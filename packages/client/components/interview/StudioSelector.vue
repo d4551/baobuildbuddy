@@ -252,7 +252,7 @@ function studioLocationLabel(location: string): string {
             :id="optionId(studio.id)"
             type="button"
             role="option"
-            class="flex cursor-pointer flex-col items-start rounded-box text-left"
+            class="flex cursor-pointer flex-col items-start rounded-box text-start"
             :class="[
               FLEX_GAP_TOKEN_CLASS.gap1,
               PADDING_TOKEN_CLASS.px3,

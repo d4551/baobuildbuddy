@@ -43,8 +43,8 @@ const { t } = useI18n();
             </p>
             <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
               <li v-for="endpoint in group.endpoints" :key="endpoint.id">
-                <button class="btn btn-sm btn-ghost h-auto justify-start whitespace-normal text-left" type="button" :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: activeEndpointId === endpoint.id }, PADDING_TOKEN_CLASS.py2]" :aria-label=" t('apiDocs.endpoint.navigateAria', { method: methodLabel(endpoint.method), path: endpoint.path, }) " :aria-current="activeEndpointId === endpoint.id ? 'location' : undefined" @click="emit('navigate', endpoint.id)">
-                  <span :class="[methodBadgeClass(endpoint.method), MARGIN_TOKEN_CLASS.mr2]">
+                <button class="btn btn-sm btn-ghost h-auto justify-start whitespace-normal text-start" type="button" :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: activeEndpointId === endpoint.id }, PADDING_TOKEN_CLASS.py2]" :aria-label=" t('apiDocs.endpoint.navigateAria', { method: methodLabel(endpoint.method), path: endpoint.path, }) " :aria-current="activeEndpointId === endpoint.id ? 'location' : undefined" @click="emit('navigate', endpoint.id)">
+                  <span :class="[methodBadgeClass(endpoint.method), MARGIN_TOKEN_CLASS.me2]">
                     {{ methodLabel(endpoint.method) }}
                   </span>
                   <span class="break-all font-mono" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">{{ endpoint.path }}</span>

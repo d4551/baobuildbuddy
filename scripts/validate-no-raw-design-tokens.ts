@@ -19,7 +19,10 @@ const rawPalettePattern =
   /\b(?:bg|text|border|from|to|via|ring|stroke|fill)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/gu;
 const rawMonochromePalettePattern = /\b(?:bg|text|border|fill)-(?:white|black)\b/gu;
 const hexColorLiteralPattern = /#[0-9a-fA-F]{3,8}\b/gu;
-const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch)\s*\(/gu;
+const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color-mix)\s*\(/gu;
+const arbitraryTextPxPattern = /\btext-\[\d+px\]/gu;
+const arbitraryBgHexPattern = /\bbg-\[#[0-9a-fA-F]{3,8}\]/gu;
+const arbitraryZIndexPattern = /\bz-\[\d+\]/gu;
 
 const arbitraryTokenPattern =
   /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-h|rounded|shadow)-\[[^\]]+\]/gu;
@@ -221,6 +224,42 @@ const collectColorLiteralViolations = (
   return violations;
 };
 
+const collectArbitraryLiteralViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isSsotSourceFile(filePath)) return [];
+  const violations: ValidationViolation[] = [];
+  const patterns: Array<{ pattern: RegExp; message: (token: string) => string }> = [
+    {
+      pattern: arbitraryTextPxPattern,
+      message: (token) =>
+        `Arbitrary typography utility "${token}" is forbidden. Use shared typography scale tokens.`,
+    },
+    {
+      pattern: arbitraryBgHexPattern,
+      message: (token) =>
+        `Arbitrary background hex utility "${token}" is forbidden. Use daisyUI semantic bg-* tokens.`,
+    },
+    {
+      pattern: arbitraryZIndexPattern,
+      message: (token) =>
+        `Arbitrary stacking utility "${token}" is forbidden. Use Tailwind z-* scale tokens.`,
+    },
+  ];
+  for (const { pattern, message } of patterns) {
+    pattern.lastIndex = 0;
+    for (const match of content.matchAll(pattern)) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(content, match.index ?? 0),
+        message: message(match[0]),
+      });
+    }
+  }
+  return violations;
+};
+
 const scriptSizingLiteralPattern =
   /["'`]((?:h|w|min-h|min-w|max-h|max-w)-(?:xs|sm|md|lg|xl|\d{1,3})(?:\s+(?:h|w|min-h|min-w|max-h|max-w)-(?:xs|sm|md|lg|xl|\d{1,3}))+)["'`]/gu;
 
@@ -256,6 +295,7 @@ export const collectRawDesignTokenViolationsForContent = (
   const propDefaultViolations = collectDesignTokenPropDefaultViolations(filePath, content);
   const svgViolations = collectSvgNumericAttributeViolations(filePath, content);
   const colorViolations = collectColorLiteralViolations(filePath, content);
+  const arbitraryLiteralViolations = collectArbitraryLiteralViolations(filePath, content);
   const scriptSizingViolations = collectScriptSizingLiteralViolations(filePath, content);
   return [
     ...classViolations,
@@ -263,6 +303,7 @@ export const collectRawDesignTokenViolationsForContent = (
     ...propDefaultViolations,
     ...svgViolations,
     ...colorViolations,
+    ...arbitraryLiteralViolations,
     ...scriptSizingViolations,
   ];
 };

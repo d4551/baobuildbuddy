@@ -130,4 +130,23 @@ describe("collectRawDesignTokenViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("h-4 w-4"))).toBe(true);
   });
+
+  test("flags oklab( and color-mix( outside SSOT", () => {
+    const violations = collectRawDesignTokenViolationsForContent(
+      CONSUMER_PATH,
+      "const border = 'color-mix(in oklab, red 20%, transparent)'; const x = oklab(0.5 0.1 40);",
+    );
+    expect(violations.some((v) => v.message.includes("color-mix("))).toBe(true);
+    expect(violations.some((v) => v.message.includes("oklab("))).toBe(true);
+  });
+
+  test("flags arbitrary text-[Npx] / bg-[#...] / z-[N] outside SSOT", () => {
+    const violations = collectRawDesignTokenViolationsForContent(
+      CONSUMER_PATH,
+      '<template><div class="text-[13px] bg-[#ff00aa] z-[99]"></div></template>',
+    );
+    expect(violations.some((v) => v.message.includes("text-[13px]"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("bg-[#ff00aa]"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("z-[99]"))).toBe(true);
+  });
 });

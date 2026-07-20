@@ -38,7 +38,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 </script>
 
 <template>
-  <div class="shrink-0 text-right" v-if="compact" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, WIDTH_TOKEN_CLASS.w20]">
+  <div class="shrink-0 text-end" v-if="compact" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, WIDTH_TOKEN_CLASS.w20]">
     <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, scoreTextClass]">
       {{ score }}%
     </p>

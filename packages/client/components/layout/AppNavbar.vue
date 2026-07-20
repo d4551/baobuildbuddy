@@ -196,7 +196,7 @@ onUnmounted(() => {
           <li v-for="loc in availableLocales" :key="loc">
             <button 
               type="button"
-              class="text-left"
+              class="text-start"
               :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS, { active: locale === loc }]"
               :aria-label="t('a11y.localeOptionAria', { locale: getLocaleLabel(loc) })"
               :disabled="locale === loc"

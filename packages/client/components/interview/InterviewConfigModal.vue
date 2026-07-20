@@ -192,7 +192,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                     <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
                       <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
                       <td>{{ job.company }}</td>
-                      <td class="text-right">
+                      <td class="text-end">
                         <button
                           type="button"
                           class="btn btn-sm btn-ghost"

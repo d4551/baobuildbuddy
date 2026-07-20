@@ -96,7 +96,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
               </svg>
             </span>
             <span class="is-drawer-close:hidden">{{ resolveSidebarLabel(item) }}</span>
-            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ml-auto flex items-center text-muted" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+            <span v-if="shortcutByNavigationId.has(item.id)" class="is-drawer-close:hidden ms-auto flex items-center text-muted" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.prefix.toUpperCase() }}</kbd>
               <kbd class="kbd kbd-sm">{{ shortcutByNavigationId.get(item.id)?.key.toUpperCase() }}</kbd>
             </span>

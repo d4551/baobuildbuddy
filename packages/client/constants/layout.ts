@@ -109,7 +109,7 @@ export const SHELL_SIDEBAR_MENU_CLASS =
 
 /** Skip link contract for keyboard navigation. */
 export const SHELL_SKIP_LINK_CLASS =
-  "sr-only btn btn-primary btn-sm focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50";
+  "sr-only btn btn-primary btn-sm focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-50";
 
 /**
  * Centered auth / onboarding shell (semantic surfaces only).
@@ -253,13 +253,13 @@ export const ACHIEVEMENT_ICON_BADGE_CLASS =
   "flex h-12 w-12 items-center justify-center rounded-full";
 
 /** Quick-action FAB position + action minimum width. */
-export const FAB_POSITION_CLASS = "left-6 bottom-24";
+export const FAB_POSITION_CLASS = "start-6 bottom-24";
 
 /**
  * Floating chat stack (above mobile dock). Viewport-bounded inset-x on small screens.
  */
 export const SHELL_FLOATING_CHAT_STACK_CLASS =
-  "fixed inset-x-4 bottom-24 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end lg:inset-x-auto lg:bottom-6 lg:right-6 lg:max-w-none";
+  "fixed inset-x-4 bottom-24 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end lg:inset-x-auto lg:bottom-6 lg:end-6 lg:max-w-none";
 export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
 
 /** Inline CTA chevron icon size (small directional arrow). */

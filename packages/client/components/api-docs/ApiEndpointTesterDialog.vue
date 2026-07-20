@@ -92,7 +92,7 @@ function updateRequestBodyValue(event: Event): void {
           <span :class="methodBadgeClass(selectedEndpoint.method)">
             {{ methodLabel(selectedEndpoint.method) }}
           </span>
-          <span :class="[MARGIN_TOKEN_CLASS.ml2]">{{ selectedEndpoint.path }}</span>
+          <span :class="[MARGIN_TOKEN_CLASS.ms2]">{{ selectedEndpoint.path }}</span>
         </p>
       </header>
 

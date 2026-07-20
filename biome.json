@@ -18,7 +18,8 @@
       "!**/packages/desktop/src-tauri/target",
       "!**/packages/desktop/src-tauri/gen",
       "!**/packages/desktop/src-tauri/icons",
-      "!**/.omo"
+      "!**/.omo",
+      "!**/agentiflow"
     ]
   },
   "formatter": {
@@ -29,20 +30,102 @@
   },
   "linter": {
     "enabled": true,
+    "domains": {
+      "vue": "all",
+      "drizzle": "all",
+      "project": "recommended",
+      "test": "recommended",
+      "playwright": "all",
+      "types": "recommended",
+      "react": "none",
+      "reactNative": "none",
+      "qwik": "none",
+      "next": "none",
+      "solid": "none",
+      "svelte": "none",
+      "turborepo": "none"
+    },
     "rules": {
       "preset": "recommended",
+      "a11y": "error",
       "complexity": {
-        "noVoid": "error"
+        "recommended": true,
+        "noVoid": "error",
+        "noExcessiveCognitiveComplexity": "error",
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": {
+            "maxLines": 60
+          }
+        }
+      },
+      "correctness": {
+        "recommended": true,
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error"
       },
       "performance": {
+        "recommended": true,
         "noBarrelFile": "error",
         "noAwaitInLoops": "error",
-        "useTopLevelRegex": "error"
+        "useTopLevelRegex": "error",
+        "noAccumulatingSpread": "error"
       },
-      "security": "error",
+      "security": {
+        "recommended": true,
+        "noSecrets": {
+          "level": "error",
+          "options": {
+            "entropyThreshold": 55
+          }
+        },
+        "noDangerouslySetInnerHtml": "error",
+        "noGlobalEval": "error"
+      },
       "suspicious": {
+        "recommended": true,
         "noConsole": "error",
-        "noDebugger": "error"
+        "noDebugger": "error",
+        "noExplicitAny": "error",
+        "noSkippedTests": "error",
+        "noFocusedTests": "error",
+        "noExportsInTest": "error",
+        "noAlert": "error",
+        "noDocumentCookie": "error"
+      },
+      "style": {
+        "recommended": true,
+        "noNonNullAssertion": "error",
+        "useConst": "error",
+        "useTemplate": "error",
+        "useExportType": "error",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error",
+        "useNumberNamespace": "error",
+        "useShorthandFunctionType": "error",
+        "noUselessElse": "error",
+        "useDefaultParameterLast": "error",
+        "useExponentiationOperator": "error",
+        "useAsConstAssertion": "error",
+        "useEnumInitializers": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "useAwaitThenable": "error",
+        "noVueImportCompilerMacros": "error",
+        "noVueRefAsOperand": "error",
+        "useVueNextTickPromise": "error",
+        "noDrizzleDeleteWithoutWhere": "error",
+        "noDrizzleUpdateWithoutWhere": "error",
+        "noPlaywrightElementHandle": "error",
+        "noPlaywrightEval": "error",
+        "noPlaywrightForceOption": "error",
+        "noPlaywrightMissingAwait": "error",
+        "noPlaywrightNetworkidle": "error",
+        "noPlaywrightPagePause": "error",
+        "noPlaywrightUselessAwait": "error",
+        "noPlaywrightWaitForTimeout": "error"
       }
     }
   },
@@ -59,50 +142,29 @@
   },
   "overrides": [
     {
+      "includes": ["**/*.{ts,js,mjs,cjs}"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "error",
+            "noUnusedVariables": "error",
+            "noUnusedFunctionParameters": "error"
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/*.vue"],
       "linter": {
-        "enabled": false
-      }
-    },
-    {
-      "includes": ["**/packages/client/locales/**/*.ts"],
-      "linter": {
         "rules": {
-          "security": {
-            "noSecrets": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "**/packages/client/composables/useFocusTrap.ts",
-        "**/packages/client/constants/dashboard.ts"
-      ],
-      "linter": {
-        "rules": {
-          "security": {
-            "noSecrets": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["scripts/**/*.test.ts"],
-      "linter": {
-        "rules": {
-          "security": {
-            "noSecrets": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["packages/client/constants/layout.ts"],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noBarrelFile": "off"
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "style": {
+            "useVueMultiWordComponentNames": "error",
+            "useVueDefineMacrosOrder": "error"
           }
         }
       }

@@ -146,7 +146,7 @@ const { t } = useI18n();
                   </td>
                   <td>{{ job.location }}</td>
                   <td>{{ relativePostedDate(job.postedDate) }}</td>
-                  <td class="text-right">
+                  <td class="text-end">
                     <button
                       type="button"
                       :class="[PRIMARY_ACTION_CLASS]"
