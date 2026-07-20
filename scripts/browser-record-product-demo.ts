@@ -1,13 +1,13 @@
 /**
- * Headed product demo video — real local AI (OpenAI-compatible endpoint),
- * mock interview, stylized resume / portfolio / cover-letter generation.
+ * Headed product demo video — real local AI + Whisper STT, mock interview,
+ * stylized resume / portfolio / cover-letter generation.
  *
- * Requires a live inference server (llama.cpp / Ollama / etc.) at
- * LOCAL_MODEL_ENDPOINT (default http://127.0.0.1:11434/v1). Refuses to run
- * against mocks or deterministic stub providers.
+ * Requires:
+ * - Live OpenAI-compatible LLM at LOCAL_MODEL_ENDPOINT (default :11434/v1)
+ * - Live Whisper STT at WHISPER_ENDPOINT (default http://127.0.0.1:8090/v1)
+ * Refuses mocks / deterministic stub providers.
  *
- * Proof: Playwright recordVideo (headed, DISPLAY) → WebM + ffmpeg MP4.
- * Settings configured via Settings UI.
+ * Proof: Playwright recordVideo (headed, DISPLAY, fake mic WAV) → WebM/MP4.
  */
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -27,6 +27,18 @@ const LOCAL_ENDPOINT = (
   process.env.PRODUCT_DEMO_LOCAL_ENDPOINT ??
   "http://127.0.0.1:11434/v1"
 ).replace(/\/$/u, "");
+const WHISPER_ENDPOINT = (
+  process.env.WHISPER_ENDPOINT ??
+  process.env.PRODUCT_DEMO_WHISPER_ENDPOINT ??
+  "http://127.0.0.1:8090/v1"
+).replace(/\/$/u, "");
+const FAKE_AUDIO_WAV =
+  process.env.PRODUCT_DEMO_FAKE_AUDIO ??
+  join(OUT, "fixtures", "interview-answer.wav");
+const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
+  /\/$/u,
+  "",
+);
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
@@ -96,6 +108,98 @@ const assertLiveInference = async (): Promise<LiveModelProbe> => {
   }
   await writeOutput(`live AI ok endpoint=${LOCAL_ENDPOINT} model=${modelId} sample=${sample.slice(0, 120)}`);
   return { endpoint: LOCAL_ENDPOINT, modelId, sample };
+};
+
+type LiveWhisperProbe = {
+  endpoint: string;
+  text: string;
+};
+
+const assertLiveWhisper = async (): Promise<LiveWhisperProbe> => {
+  const wavPath = FAKE_AUDIO_WAV;
+  const wavFile = Bun.file(wavPath);
+  if (!(await wavFile.exists())) {
+    throw new Error(`Whisper fixture missing: ${wavPath}`);
+  }
+  const form = new FormData();
+  form.append("file", new File([await wavFile.arrayBuffer()], "interview-answer.wav", { type: "audio/wav" }));
+  form.append("model", "whisper-tiny");
+  const response = await fetch(`${WHISPER_ENDPOINT}/audio/transcriptions`, {
+    method: "POST",
+    body: form,
+    signal: AbortSignal.timeout(120_000),
+  });
+  if (!response.ok) {
+    throw new Error(`Live Whisper probe failed: ${String(response.status)}`);
+  }
+  const json = (await response.json()) as { text?: string };
+  const text = json.text?.trim() ?? "";
+  if (text.length < 8) {
+    throw new Error("Live Whisper probe failed: empty transcript");
+  }
+  await writeOutput(`live Whisper ok endpoint=${WHISPER_ENDPOINT} text=${text.slice(0, 120)}`);
+  return { endpoint: WHISPER_ENDPOINT, text };
+};
+
+const seedSpeechAndAiSettings = async (modelId: string): Promise<void> => {
+  const settingsResponse = await fetch(`${SERVER_BASE}/api/settings`);
+  const settings = (await settingsResponse.json()) as {
+    automationSettings?: {
+      speech?: {
+        locale?: string;
+        stt?: { provider?: string; model?: string; endpoint?: string };
+        tts?: Record<string, unknown>;
+      };
+    };
+  };
+  const speech = settings.automationSettings?.speech ?? {};
+  await fetch(`${SERVER_BASE}/api/settings/api-keys`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      localModelEndpoint: LOCAL_ENDPOINT,
+      localModelName: modelId,
+    }),
+  });
+  await fetch(`${SERVER_BASE}/api/settings`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      preferredProvider: "local",
+      preferredModel: modelId,
+      automationSettings: {
+        speech: {
+          locale: speech.locale ?? "en-US",
+          stt: {
+            provider: "local",
+            model: "whisper-tiny",
+            endpoint: WHISPER_ENDPOINT,
+          },
+          tts: speech.tts ?? {
+            provider: "browser",
+            model: "browser-default",
+            endpoint: "",
+            voice: "default",
+            format: "mp3",
+          },
+        },
+      },
+    }),
+  });
+  // Warm resume questions so UI demo is not the cold path.
+  await settle(
+    fetch(`${SERVER_BASE}/api/resumes/from-questions/generate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        targetRole: "Gameplay Programmer",
+        experienceLevel: "Mid",
+        studioId: "epic-games",
+      }),
+      signal: AbortSignal.timeout(180_000),
+    }),
+  );
+  await writeOutput("seeded speech STT=local/whisper-tiny + local AI + warmed resume questions");
 };
 
 const configureLocalAiViaUi = async (
@@ -405,6 +509,12 @@ const demoInterview = async (page: Page): Promise<void> => {
   if ((await studioSelect.count()) > 0) {
     await settle(studioSelect.selectOption({ index: 1 }));
   }
+  // Enable voice mode when the config checkbox exists.
+  const voiceToggle = page.getByLabel(/voice|microphone|enable voice/i).first();
+  if ((await voiceToggle.count()) > 0) {
+    await settle(voiceToggle.check({ force: true }));
+  }
+
   const start = page
     .locator("button", { hasText: /Start Interview|Start Session|Begin/i })
     .first();
@@ -412,10 +522,31 @@ const demoInterview = async (page: Page): Promise<void> => {
   await page.locator("textarea:visible").first().waitFor({ state: "visible", timeout: 90_000 });
   await shot(page, "17-interview-session");
 
+  // Whisper STT via fake mic capture → MediaRecorder → /api/speech/transcribe.
+  const micStart = page
+    .locator("button", { hasText: /Start listening|Start voice|Listen/i })
+    .or(page.getByRole("button", { name: /start listening|start voice|listen/i }))
+    .first();
+  if ((await micStart.count()) > 0) {
+    await micStart.click({ timeout: 8_000 });
+    await wait(page, 6_500);
+    const micStop = page
+      .locator("button", { hasText: /Stop listening|Stop voice|Stop/i })
+      .first();
+    if ((await micStop.count()) > 0) {
+      await micStop.click({ timeout: 8_000 });
+      await wait(page, 12_000);
+    }
+    await shot(page, "17b-interview-whisper-stt");
+  }
+
   const response = page.locator("textarea:visible").first();
-  await response.fill(
-    "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.",
-  );
+  const current = (await response.inputValue()).trim();
+  if (current.length < 12) {
+    await response.fill(
+      "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.",
+    );
+  }
   const submit = page
     .locator("button", { hasText: /Submit|Send Response|Continue/i })
     .first();
@@ -458,10 +589,18 @@ const main = async (): Promise<void> => {
   await mkdir(join(OUT, "raw-segments"), { recursive: true });
 
   const live = await assertLiveInference();
+  const whisper = await assertLiveWhisper();
+  await seedSpeechAndAiSettings(live.modelId);
 
   const browser = await chromium.launch({
     headless: false,
-    args: ["--disable-dev-shm-usage", "--window-size=1440,900"],
+    args: [
+      "--disable-dev-shm-usage",
+      "--window-size=1440,900",
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+      `--use-file-for-fake-audio-capture=${FAKE_AUDIO_WAV}`,
+    ],
   });
   const context = await browser.newContext({
     recordVideo: {
@@ -470,6 +609,7 @@ const main = async (): Promise<void> => {
     },
     viewport: { width: 1440, height: 900 },
     acceptDownloads: true,
+    permissions: ["microphone"],
   });
   const page = await context.newPage();
   const consoleErrors: string[] = [];
@@ -492,6 +632,7 @@ const main = async (): Promise<void> => {
     await shot(page, "00-dashboard");
 
     await configureLocalAiViaUi(page, live.endpoint, live.modelId);
+    await writeOutput(`whisper fixture configured endpoint=${whisper.endpoint}`);
     await demoResumeGuidedBuild(page);
     await demoPortfolio(page);
     await demoCoverLetter(page);
@@ -543,6 +684,8 @@ const main = async (): Promise<void> => {
     liveEndpoint: live.endpoint,
     liveModelId: live.modelId,
     liveSample: live.sample.slice(0, 240),
+    whisperEndpoint: whisper.endpoint,
+    whisperSample: whisper.text.slice(0, 240),
     mockUsed: false,
     tourError,
     stillCount,

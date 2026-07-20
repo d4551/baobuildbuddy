@@ -10,6 +10,11 @@ import {
   resolveSpeechRecognitionConstructor,
   resolveSpeechSynthesis,
 } from "../utils/speech";
+import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
+import { useSettings } from "./useSettings";
+
+type MicrophoneRecorder = Awaited<ReturnType<typeof createMicrophoneRecorder>>;
 
 type RecognitionErrorName = keyof typeof AI_CHAT_VOICE_RECOGNITION_ERROR_CODE_MAP;
 type SynthesisErrorName = keyof typeof AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP;
@@ -206,39 +211,89 @@ const createStopSpeakingAction = (state: SpeechState) => (): void => {
 };
 
 const createStartListeningAction =
-  (state: SpeechState) =>
-  (locale?: string): boolean => {
-    if (!state.recognition.value) {
-      state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition;
-      return false;
-    }
-    if (state.isListening.value) {
+  (state: SpeechState, getProvider: () => ReturnType<typeof resolveSpeechSttProvider>) => {
+    let recorder: MicrophoneRecorder | null = null;
+    const startListening = (locale?: string): boolean => {
+      state.error.value = null;
+      state.transcript.value = "";
+      state.interimTranscript.value = "";
+      if (shouldUseServerStt(getProvider())) {
+        if (state.isListening.value) {
+          return true;
+        }
+        void createMicrophoneRecorder()
+          .then((created) => {
+            recorder = created;
+            created.start();
+            state.isListening.value = true;
+          })
+          .catch(() => {
+            state.error.value = AI_CHAT_VOICE_ERROR_CODES.audioCapture;
+            state.isListening.value = false;
+          });
+        return true;
+      }
+      if (!state.recognition.value) {
+        state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition;
+        return false;
+      }
+      if (state.isListening.value) {
+        return true;
+      }
+      state.recognition.value.lang = resolveSpeechLocale(locale);
+      state.recognition.value.start();
+      state.isListening.value = true;
       return true;
-    }
+    };
 
-    state.error.value = null;
-    state.transcript.value = "";
-    state.interimTranscript.value = "";
-    state.recognition.value.lang = resolveSpeechLocale(locale);
-    state.recognition.value.start();
-    state.isListening.value = true;
-    return true;
+    const stopListening = (): void => {
+      if (shouldUseServerStt(getProvider())) {
+        const active = recorder;
+        recorder = null;
+        if (!active) {
+          state.isListening.value = false;
+          return;
+        }
+        void active
+          .stop()
+          .then((blob) => transcribeAudioViaServer(blob))
+          .then((result) => {
+            if (result.ok) {
+              state.transcript.value = result.text;
+              state.interimTranscript.value = "";
+            } else {
+              state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
+            }
+          })
+          .catch(() => {
+            state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
+          })
+          .finally(() => {
+            state.isListening.value = false;
+          });
+        return;
+      }
+      if (state.recognition.value) {
+        state.recognition.value.stop();
+      }
+      state.isListening.value = false;
+    };
+
+    return { startListening, stopListening };
   };
 
-const createStopListeningAction = (state: SpeechState) => (): void => {
-  if (state.recognition.value) {
-    state.recognition.value.stop();
-  }
-  state.isListening.value = false;
-};
-
-const createSpeechSupportState = (state: SpeechState) => {
+const createSpeechSupportState = (
+  state: SpeechState,
+  getProvider: () => ReturnType<typeof resolveSpeechSttProvider>,
+) => {
   const fullTranscript = computed(() => {
     const interim = state.interimTranscript.value;
     const combinedTranscript = state.transcript.value + (interim ? ` ${interim}` : "");
     return combinedTranscript.trim();
   });
-  const supportsRecognition = computed(() => resolveSpeechRecognitionConstructor() !== null);
+  const supportsRecognition = computed(
+    () => shouldUseServerStt(getProvider()) || resolveSpeechRecognitionConstructor() !== null,
+  );
   const supportsSynthesis = computed(
     () => (state.synthesis.value ?? resolveSpeechSynthesis()) !== null,
   );
@@ -256,16 +311,20 @@ const createSpeechSupportState = (state: SpeechState) => {
  * Uses browser-native SpeechSynthesis and SpeechRecognition.
  */
 export function useSpeech() {
+  const { settings: appSettings } = useSettings();
+  const getProvider = () =>
+    resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider);
   const state = createSpeechState();
   const loadVoices = createLoadVoicesAction(state);
   setupSpeechApis(state, loadVoices);
 
-  const speechSupport = createSpeechSupportState(state);
+  const speechSupport = createSpeechSupportState(state, getProvider);
+  const listeningActions = createStartListeningAction(state, getProvider);
   const actions = {
     speak: createSpeakAction(state),
     stopSpeaking: createStopSpeakingAction(state),
-    startListening: createStartListeningAction(state),
-    stopListening: createStopListeningAction(state),
+    startListening: listeningActions.startListening,
+    stopListening: listeningActions.stopListening,
     loadVoices,
   };
 
