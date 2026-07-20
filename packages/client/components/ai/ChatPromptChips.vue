@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";
+import { FLEX_GAP_TOKEN_CLASS, TOUCH_TARGET_MIN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 withDefaults(
   defineProps<{
     prompts: readonly string[];
     loading?: boolean;
-    size?: "xs" | "sm";
   }>(),
   {
     loading: false,
-    size: "sm",
   },
 );
 
@@ -27,7 +25,7 @@ const { t } = useI18n();
       <button
         type="button"
         class="btn btn-soft"
-        :class="size === 'xs' ? 'btn-xs' : 'btn-sm'"
+        :class="[TOUCH_TARGET_MIN_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
         :aria-label="t('floatingChat.suggestionAria', { prompt })"
         :disabled="loading"
         @click="emit('prompt', prompt)"

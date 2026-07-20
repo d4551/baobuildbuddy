@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { UserGamificationData } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
+import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   GAMIFICATION_ACHIEVEMENTS_ICON,
   GAMIFICATION_CURRENT_STREAK_ICON,
@@ -13,6 +14,7 @@ import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   HEIGHT_TOKEN_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_STRONG_CLASS,
@@ -41,7 +43,9 @@ const { t } = useI18n();
               {{ progress.xp }} / {{ xpTarget }} {{ t("gamificationPage.xpSuffix") }}
             </p>
           </div>
-          <div :class="[TYPOGRAPHY_SCALE_CLASS.xl6]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</div>
+          <div class="text-primary" aria-hidden="true">
+            <component :is="resolveAppIconComponent(GAMIFICATION_LEVEL_ICON)" :class="[ICON_SIZE_CLASS['12']]" />
+          </div>
         </div>
 
         <progress class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, HEIGHT_TOKEN_CLASS.h4]" :value="levelProgress" :max="GAMIFICATION_PROGRESS_MAX" :aria-valuenow="levelProgress" :aria-valuemin="GAMIFICATION_PROGRESS_MIN" :aria-valuemax="GAMIFICATION_PROGRESS_MAX" :aria-label="t('gamificationPage.a11y.levelProgress')"></progress>

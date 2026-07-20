@@ -12,11 +12,14 @@ const REQUIRED_TOKENS = [
   "SCROLL_SNAP_X_MANDATORY_CLASS",
   "SCROLL_SNAP_ALIGN_START_CLASS",
   "SCROLL_TOUCH_PAN_X_CLASS",
+  "SECTION_RAIL_LABEL_CLASS",
 ] as const;
 
 const BANNED_INLINE = /\bsnap-x\b|\btouch-pan-x\b/u;
 /** overflow-x-clip on the navigator card kills horizontal section-rail scroll @320. */
 const BANNED_OVERFLOW_CLIP = /\boverflow-x-clip\b/u;
+/** Papered discoverability fix: hiding labels @320 instead of truncating. */
+const BANNED_LABEL_HIDE = /\bhidden\b[^"']*\bsm:inline\b|\bmax-sm:sr-only\b/u;
 
 export const collectSectionRailScrollViolations = (content: string): string[] => {
   const violations: string[] = [];
@@ -34,6 +37,9 @@ export const collectSectionRailScrollViolations = (content: string): string[] =>
     }
     if (BANNED_OVERFLOW_CLIP.test(classValue)) {
       violations.push("overflow-x-clip banned on WorkspaceSectionNavigator (clips section rail)");
+    }
+    if (BANNED_LABEL_HIDE.test(classValue)) {
+      violations.push("section-rail labels must use SECTION_RAIL_LABEL_CLASS (not hidden/sr-only)");
     }
   }
   return violations;

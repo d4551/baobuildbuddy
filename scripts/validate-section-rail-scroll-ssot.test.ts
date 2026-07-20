@@ -1,12 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { collectSectionRailScrollViolations } from "./validate-section-rail-scroll-ssot";
 
+const VALID_IMPORT =
+  "SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TOUCH_PAN_X_CLASS, SECTION_RAIL_LABEL_CLASS";
+
 describe("validate-section-rail-scroll-ssot", () => {
   it("passes when SSOT tokens are present", () => {
     const content = `
-import { SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TOUCH_PAN_X_CLASS } from "~/constants/layout";
+import { ${VALID_IMPORT} } from "~/constants/layout";
 <nav :class="[SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_TOUCH_PAN_X_CLASS]">
-  <a :class="[SCROLL_SNAP_ALIGN_START_CLASS]">x</a>
+  <a :class="[SCROLL_SNAP_ALIGN_START_CLASS, SECTION_RAIL_LABEL_CLASS]">x</a>
 </nav>
 `;
     expect(collectSectionRailScrollViolations(content)).toEqual([]);
@@ -21,14 +24,25 @@ import { SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TO
 
   it("flags overflow-x-clip that would kill the section rail", () => {
     const content = `
-import { SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TOUCH_PAN_X_CLASS } from "~/constants/layout";
+import { ${VALID_IMPORT} } from "~/constants/layout";
 <section class="card overflow-x-clip">
   <nav :class="[SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_TOUCH_PAN_X_CLASS]">
-    <a :class="[SCROLL_SNAP_ALIGN_START_CLASS]">x</a>
+    <a :class="[SCROLL_SNAP_ALIGN_START_CLASS, SECTION_RAIL_LABEL_CLASS]">x</a>
   </nav>
 </section>
 `;
     const violations = collectSectionRailScrollViolations(content);
     expect(violations.some((value) => value.includes("overflow-x-clip"))).toBe(true);
+  });
+
+  it("flags papered label hide (hidden sm:inline)", () => {
+    const content = `
+import { ${VALID_IMPORT} } from "~/constants/layout";
+<nav :class="[SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_TOUCH_PAN_X_CLASS]">
+  <a :class="[SCROLL_SNAP_ALIGN_START_CLASS]"><span class="hidden sm:inline">Label</span></a>
+</nav>
+`;
+    const violations = collectSectionRailScrollViolations(content);
+    expect(violations.some((value) => value.includes("SECTION_RAIL_LABEL_CLASS"))).toBe(true);
   });
 });

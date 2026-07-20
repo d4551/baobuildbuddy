@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
+import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
@@ -18,6 +18,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
   resolvedBrand: { assistantName: string; name: string };
@@ -175,7 +176,14 @@ const updateInput = (event: Event): void => {
         </div>
       </div>
 
-      <div class="border-t border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
+      <div
+        :class="[
+          CHAT_COMPOSER_STICKY_CLASS,
+          PADDING_TOKEN_CLASS.px4,
+          PADDING_TOKEN_CLASS.py4,
+          CHAT_PANEL_PADDING_SM_PX6_CLASS,
+        ]"
+      >
         <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="emit('send')">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <label class="sr-only" for="ai-chat-composer">
@@ -206,6 +214,7 @@ const updateInput = (event: Event): void => {
                 <button
                   type="submit"
                   class="btn btn-primary"
+                  :class="[TOUCH_TARGET_MIN_CLASS]"
                   :disabled="!input.trim() || loading"
                   :aria-label="t('aiChatPage.sendAria')"
                 >

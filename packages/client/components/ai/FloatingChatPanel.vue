@@ -14,6 +14,7 @@ import {
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -84,10 +85,13 @@ const { t } = useI18n();
     :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
-      <header class="flex items-center justify-between border-b border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
-        <div>
+      <header
+        class="flex items-start justify-between border-b border-base-300"
+        :class="[PADDING_TOKEN_CLASS.p3, FLEX_GAP_TOKEN_CLASS.gap2]"
+      >
+        <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
           <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.assistantName }}</h2>
-          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
+          <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("floatingChat.subtitle") }}</p>
             <span class="badge badge-soft badge-info badge-xs" :aria-label="t('floatingChat.contextAria', { context: currentContextLabel })">
               {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
@@ -100,23 +104,55 @@ const { t } = useI18n();
               {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
             </span>
           </div>
-          <ul v-if="contextChips.length > 0" class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]" :aria-label="t('floatingChat.contextChipsAria')">
+          <ul
+            v-if="contextChips.length > 0"
+            class="flex flex-wrap"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]"
+            :aria-label="t('floatingChat.contextChipsAria')"
+          >
             <li v-for="chip in contextChips" :key="chip">
               <span class="badge badge-ghost badge-xs">{{ chip }}</span>
             </li>
           </ul>
         </div>
-        <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap1, TRUNCATE_FLEX_CHILD_CLASS]">
-          <NuxtLink :to="aiChatPagePath" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.expandAria')">
-            {{ t("floatingChat.expandButton") }}
+        <div class="flex shrink-0 items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+          <NuxtLink
+            :to="aiChatPagePath"
+            class="btn btn-ghost btn-square"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :aria-label="t('floatingChat.expandAria')"
+            :title="t('floatingChat.expandButton')"
+          >
+            <IconExternalLink :class="[ICON_SIZE_CLASS['4']]" aria-hidden="true" />
           </NuxtLink>
-          <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.voiceSettings.toggleAria')" :aria-expanded="isSpeechSettingsOpen" @click="emit('toggleSpeechSettings')">
-            {{ t("floatingChat.voiceSettings.toggleButton") }}
+          <button
+            type="button"
+            class="btn btn-ghost btn-square"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :aria-label="t('floatingChat.voiceSettings.toggleAria')"
+            :title="t('floatingChat.voiceSettings.toggleButton')"
+            :aria-expanded="isSpeechSettingsOpen"
+            @click="emit('toggleSpeechSettings')"
+          >
+            <IconSparkles :class="[ICON_SIZE_CLASS['4']]" aria-hidden="true" />
           </button>
-          <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.clearAria')" @click="emit('clear')">
-            {{ t("floatingChat.clearButton") }}
+          <button
+            type="button"
+            class="btn btn-ghost btn-square"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :aria-label="t('floatingChat.clearAria')"
+            :title="t('floatingChat.clearButton')"
+            @click="emit('clear')"
+          >
+            <IconRefresh :class="[ICON_SIZE_CLASS['4']]" aria-hidden="true" />
           </button>
-          <button type="button" class="btn btn-ghost btn-xs" :aria-label="t('floatingChat.closeAria')" @click="emit('close')">
+          <button
+            type="button"
+            class="btn btn-ghost btn-square"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :aria-label="t('floatingChat.closeAria')"
+            @click="emit('close')"
+          >
             <CloseIcon :class="[ICON_SIZE_CLASS['4']]" />
           </button>
         </div>
@@ -126,7 +162,6 @@ const { t } = useI18n();
         <ChatPromptChips
           :prompts="contextualPrompts"
           :loading="loading"
-          size="xs"
           @prompt="emit('prompt', $event)"
         />
       </div>

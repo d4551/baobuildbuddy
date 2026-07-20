@@ -33,7 +33,7 @@ export const TOAST_CONTAINER_DOM_ID = "toast-container";
  * Includes bottom padding for shell chrome (dock / FAB) on small viewports.
  */
 export const SHELL_MAIN_INNER_CLASS =
-  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-32 sm:px-6 lg:px-8 lg:pb-8";
+  "mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-4 py-6 pb-36 max-lg:pe-16 sm:px-6 lg:px-8 lg:pb-8";
 
 /**
  * Fixed mobile primary dock chrome (daisyUI `dock` + glass-clear + safe-area).
@@ -97,9 +97,9 @@ export const SURFACE_GLASS_CARD_ERROR_CLASS = "glass-error";
 export const SHELL_SIDEBAR_ASIDE_CLASS =
   "glass-subtle flex min-h-full flex-col items-start transition-[width,box-shadow,border-color] duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-close:w-14 is-drawer-open:w-64 border-r border-base-300";
 
-/** Shared sidebar menu layout classes. */
+/** Shared sidebar menu layout (no menu-sm — touch floor via TOUCH_TARGET_MIN_CLASS). */
 export const SHELL_SIDEBAR_MENU_CLASS =
-  "menu menu-sm flex min-h-0 w-full flex-1 flex-col gap-1 p-4";
+  "menu flex min-h-0 w-full flex-1 flex-col gap-1 p-4";
 
 /** Skip link contract for keyboard navigation. */
 export const SHELL_SKIP_LINK_CLASS =
@@ -167,7 +167,7 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
  * not control layers — solid surface, no backdrop blur.
  */
 export const EMPTY_STATE_STACK_CLASS =
-  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-10 text-center";
+  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-8 pb-12 text-center";
 
 /** Canonical icon size tokens. Consumed by any component that sizes an icon
  * inside a control, badge, or stat surface so icon dimensions stay SSOT.
@@ -250,10 +250,10 @@ export const ACHIEVEMENT_ICON_BADGE_CLASS =
 export const FAB_POSITION_CLASS = "left-6 bottom-24";
 
 /**
- * Floating chat stack (above mobile dock). Right rail; desktop lowers to bottom-6.
+ * Floating chat stack (above mobile dock). Viewport-bounded inset-x on small screens.
  */
 export const SHELL_FLOATING_CHAT_STACK_CLASS =
-  "fixed bottom-24 right-4 z-40 flex flex-col items-end lg:bottom-6 lg:right-6";
+  "fixed inset-x-4 bottom-24 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end lg:inset-x-auto lg:bottom-6 lg:right-6 lg:max-w-none";
 export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
 
 /** Inline CTA chevron icon size (small directional arrow). */
@@ -296,49 +296,26 @@ export const SCROLL_SNAP_ALIGN_START_CLASS = "snap-start";
 export const SCROLL_TOUCH_PAN_X_CLASS = "touch-pan-x";
 export const SCROLL_SMOOTH_CLASS = "scroll-smooth";
 export const SCROLL_PADDING_INLINE_3_CLASS = "scroll-px-3";
-/** Hide dense labels on the smallest viewport; keep aria-label on the control. */
+/** Icon-button label: visually hide below sm (SR keeps text). */
 export const LABEL_HIDE_BELOW_SM_CLASS = "max-sm:sr-only";
-
-/** Flex min-height zero (enables flex children to shrink to content). */
 export const MIN_HEIGHT_ZERO_CLASS = "min-h-0";
-
-/** Minimum height for card description areas (3.5rem = ~2 lines at text-sm). */
 export const MIN_HEIGHT_DESCRIPTION_CLASS = "min-h-14";
-
-/** Minimum widths for form/table columns. */
 export const MIN_WIDTH_FORM_COL_CLASS = "min-w-40";
 export const MIN_WIDTH_SELECT_CLASS = "min-w-52";
-
-/** Minimum height for scrollable content areas. */
 export const MIN_HEIGHT_SCROLL_CLASS = "min-h-40";
-
-/** Minimum height for taxonomy/schema editor panels. */
 export const MIN_HEIGHT_EDITOR_CLASS = "min-h-64";
-
-/** Minimum height for chat input panels. */
 export const MIN_HEIGHT_CHAT_CLASS = "min-h-24";
-
-/** Minimum height for content areas (7rem). */
 export const MIN_HEIGHT_CONTENT_CLASS = "min-h-28";
-
-/** Fixed height/min-height for content blocks (12rem). */
 export const HEIGHT_48_CLASS = "min-h-48";
-
-/** Fixed height for scrollable panels (24rem). */
 export const HEIGHT_96_CLASS = "h-96";
-
-/** Expanded sidebar width. */
 export const SIDEBAR_WIDE_WIDTH_CLASS = "w-80";
-
-/** Auth card max-width (matches AUTH_CARD_SHELL_CLASS). */
 export const AUTH_CARD_MAX_WIDTH_CLASS = "max-w-md";
-
-/** Error/empty page content max-width. */
 export const ERROR_PAGE_MAX_WIDTH_CLASS = "max-w-lg";
 
 /** Re-export extended tokens from layout-tokens (public API stays ~/constants/layout). */
 export {
   CIRCULAR_BADGE_CLASS,
+  SECTION_RAIL_LABEL_CLASS,
   CONTENT_H_28_CLASS,
   CONTENT_H_40_CLASS,
   CONTENT_H_48_CLASS,

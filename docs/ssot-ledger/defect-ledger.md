@@ -58,3 +58,18 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D40 | BROKEN UX | Dashboard streak label truncates "day stre…" @320 | FIXED | gamification card stacks @mobile; streak shrink-0 + nowrap |
 | D41 | SUBPAR | Locale menu rows 42px under menu-sm | FIXED | drop menu-sm; TOUCH_TARGET_MIN_CLASS = h-11 min-h-11 min-w-11 |
 | D42 | SUBPAR | Setup continue CTA 40px | FIXED | TOUCH_TARGET_MIN_CLASS on SetupProfileStep |
+
+## D43–D52 (2026-07-20 debug-loop-3) — design violations fixed@SSOT
+- D01 FAB�43–D52 (2026-07-20 debug-loop-3) — design violations fixed@SSOT
+- D01 FAB∩streak / streak under dock → SHELL_MAIN_INNER pe-16+pb-36; streak column lead; compact gamification
+- D02 floating panel left clip → stack inset-x-4 + max-w calc; panel max-w-full
+- D03 Send under dock → CHAT_COMPOSER_STICKY_CLASS + TOUCH_TARGET_MIN on Send
+- D04 empty under dock → denser EMPTY_STATE + shell pb
+- D05 btn-xs/sm chips/speech/floating → TOUCH_TARGET_MIN / icon-square header
+- D06 menu-sm sidebar → removed from SHELL_SIDEBAR_MENU_CLASS
+- D08 rail labels hidden → SECTION_RAIL_LABEL_CLASS truncate visible
+- D09 FAB� SHELL_SIDEBAR_MENU_CLASS
+- D08 rail labels hidden → SECTION_RAIL_LABEL_CLASS truncate visible
+- D09 FAB∩settings → pe-16 main inset
+- D10 emoji icons → AppIcon (IconSparkles/IconBolt)
+- Surface/Route chips clutter → entity+state only

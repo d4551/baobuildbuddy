@@ -270,6 +270,13 @@ export const TOUCH_TARGET_MIN_CLASS = "h-11 min-h-11 min-w-11";
 /** Per-item dock link: meets touch-target floor without forking dock chrome. */
 export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
 
+/**
+ * Section-rail tab label: visible + truncated @320 (scroll rail), full from sm+.
+ * Prefer this over display:none — discoverability without mid-word clip.
+ */
+export const SECTION_RAIL_LABEL_CLASS =
+  "max-w-20 shrink truncate text-xs font-medium sm:max-w-none sm:text-sm";
+
 /** Scroll margin for in-page anchor targets (scroll-mt-24). */
 export const SCROLL_MARGIN_TOP_24_CLASS = "scroll-mt-24";
 

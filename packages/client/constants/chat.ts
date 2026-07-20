@@ -24,10 +24,16 @@ export const CHAT_AVATAR_SIZE_CLASS_BY_DENSITY = {
 } as const satisfies Record<ChatDensity, string>;
 
 /**
- * Floating chat panel responsive dimensions.
+ * Floating chat panel responsive dimensions (viewport-bounded; stack supplies inset).
  */
 export const FLOATING_CHAT_PANEL_SIZE_CLASS =
-  "w-full max-w-md sm:max-w-lg md:max-w-xl h-96 max-h-screen";
+  "w-full max-w-full sm:max-w-lg md:max-w-xl h-96 max-h-[min(24rem,calc(100dvh-10rem))]";
+
+/**
+ * Full-page chat composer sticky band — clears mobile dock + safe-area.
+ */
+export const CHAT_COMPOSER_STICKY_CLASS =
+  "sticky bottom-20 z-20 border-t border-base-300 bg-base-100 lg:bottom-0";
 
 /**
  * Full-page chat viewport container dimensions.

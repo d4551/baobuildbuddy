@@ -8,14 +8,11 @@ import {
   DASHBOARD_GAMIFICATION_PROGRESS_MIN,
 } from "~/constants/dashboard-core";
 import {
-  GAMIFICATION_CURRENT_STREAK_ICON,
-  GAMIFICATION_LEVEL_ICON,
-} from "~/constants/gamification";
-import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -36,19 +33,19 @@ const { t } = useI18n();
 
 <template>
   <section :class="SURFACE_GLASS_CARD_CLASS">
-    <div class="card-body">
+    <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
       <div
         class="sm:items-center sm:justify-between"
-        :class="[RESPONSIVE_FLEX_COL_SM_ROW_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, FLEX_GAP_TOKEN_CLASS.gap6]"
+        :class="[RESPONSIVE_FLEX_COL_SM_ROW_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]"
       >
         <div class="flex-1" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, TRUNCATE_FLEX_CHILD_CLASS]">
-          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, TRUNCATE_FLEX_CHILD_CLASS]">
-            <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">{{ GAMIFICATION_LEVEL_ICON }}</span>
+          <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, TRUNCATE_FLEX_CHILD_CLASS]">
+            <IconSparkles class="text-primary" :class="[ICON_SIZE_CLASS['6']]" aria-hidden="true" />
             <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{ t("dashboard.levelLabel") }} {{ gamification.level }}
               </p>
-              <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">
+              <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{
                   t("xpBar.progressLabel", {
                     xp: xpIntoLevel,
@@ -69,22 +66,23 @@ const { t } = useI18n();
           ></progress>
         </div>
 
-        <div class="flex shrink-0 items-center justify-between sm:justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
+        <!-- Streak leads radial so FAB (end) cannot occlude primary streak chrome @320. -->
+        <div class="flex shrink-0 items-center justify-start sm:justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+          <div v-if="gamification.currentStreak" class="shrink-0 text-center whitespace-nowrap">
+            <IconBolt class="mx-auto text-warning" :class="[ICON_SIZE_CLASS['6']]" aria-hidden="true" />
+            <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ gamification.currentStreak }}</p>
+            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("dashboard.streakLabel") }}</p>
+          </div>
+
           <UiRadialMeter 
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
-            :size-class="ICON_SIZE_CLASS['20']"
+            :size-class="ICON_SIZE_CLASS['16']"
             fill-class="stroke-primary"
             :aria-label="t(DASHBOARD_A11Y_KEYS.levelProgressAria)"
           >
             <span :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">{{ levelProgress }}%</span>
           </UiRadialMeter>
-
-          <div v-if="gamification.currentStreak" class="shrink-0 text-center whitespace-nowrap">
-            <div :class="[TYPOGRAPHY_SCALE_CLASS.xl3]" aria-hidden="true">{{ GAMIFICATION_CURRENT_STREAK_ICON }}</div>
-            <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl2]">{{ gamification.currentStreak }}</p>
-            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("dashboard.streakLabel") }}</p>
-          </div>
         </div>
       </div>
     </div>

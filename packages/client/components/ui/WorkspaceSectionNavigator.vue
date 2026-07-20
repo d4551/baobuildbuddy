@@ -12,6 +12,7 @@ import {
   SCROLL_SNAP_ALIGN_START_CLASS,
   SCROLL_SNAP_X_MANDATORY_CLASS,
   SCROLL_TOUCH_PAN_X_CLASS,
+  SECTION_RAIL_LABEL_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -167,10 +168,7 @@ const activeDescription = computed<string>(() => {
                   </span>
                 </span>
 
-                <!-- Labels from sm+; @320 icon+aria-label only — avoids mid-word clip on scroll rail. -->
-                <span class="hidden shrink-0 font-medium whitespace-nowrap sm:inline">{{
-                  t(section.labelKey)
-                }}</span>
+                <span :class="[SECTION_RAIL_LABEL_CLASS]">{{ t(section.labelKey) }}</span>
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
