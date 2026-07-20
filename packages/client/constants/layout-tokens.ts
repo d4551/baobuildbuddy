@@ -265,7 +265,7 @@ export const MIN_H_80_CLASS = "min-h-80";
  * Use on primary interactive chrome (dock items, critical icon buttons).
  */
 /** Floor + fixed height so daisyUI menu/btn padding cannot shrink below 44px. */
-export const TOUCH_TARGET_MIN_CLASS = "h-11 min-h-11 min-w-11";
+export const TOUCH_TARGET_MIN_CLASS = "box-border h-11 min-h-11 min-w-11 py-0";
 
 /**
  * Primary actionable CTA — daisyUI primary + touch floor.

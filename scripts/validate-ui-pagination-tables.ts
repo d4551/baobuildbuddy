@@ -33,6 +33,7 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/ui/SectionGrid.vue",
   "packages/client/components/ui/WorkPipeline.vue",
   "packages/client/components/ui/StatsRow.vue",
+  "packages/client/components/ui/ResponsiveDataSurface.vue",
 ]);
 
 const isSsotPrimitive = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
@@ -56,6 +57,14 @@ const APP_PAGINATION_TAG_PATTERN = /<AppPagination\b/u;
 const TABLE_BASE_CLASS_PATTERN = /\bclass\s*=\s*["'][^"']*\btable\b[^"']*["']/u;
 // Hoisted: overflow-x-auto / overflow-x-scroll containment detection.
 const OVERFLOW_X_SCROLL_PATTERN = /\boverflow-x-(?:auto|scroll)\b/u;
+// Wide zebra tables (not table-sm) must ship a mobile card surface — not scroll-trap @320.
+const WIDE_ZEBRA_TABLE_PATTERN = /<table\b[^>]*class\s*=\s*["'][^"']*\btable-zebra\b[^"']*["'][^>]*>/u;
+const TABLE_SM_IN_TAG_PATTERN = /\btable-sm\b/u;
+const RESPONSIVE_DATA_SURFACE_PATTERN = /<ResponsiveDataSurface\b/u;
+const DUAL_SURFACE_TOKEN_PATTERN =
+  /VISIBILITY_SHOW_BELOW_LG_CLASS[\s\S]*VISIBILITY_HIDE_BELOW_LG_CLASS|VISIBILITY_HIDE_BELOW_LG_CLASS[\s\S]*VISIBILITY_SHOW_BELOW_LG_CLASS/u;
+const LEGACY_MD_DUAL_SURFACE_PATTERN =
+  /\b(?:hidden\s+md:block|md:block\b[\s\S]*\bmd:hidden|md:hidden\b[\s\S]*\b(?:hidden\s+)?md:block)/u;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -114,11 +123,30 @@ const collectTableViolations = (filePath: string, content: string): ValidationVi
   }
 
   if (tableWithoutOverflowScrollPattern.test(template)) {
-    if (!OVERFLOW_X_SCROLL_PATTERN.test(template)) {
+    if (!OVERFLOW_X_SCROLL_PATTERN.test(template) && !RESPONSIVE_DATA_SURFACE_PATTERN.test(template)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
         message: `<table class="table"> without an overflow-x-auto scroll container ancestor. Tables overflow on mobile without horizontal scroll containment.`,
+      });
+    }
+  }
+
+  WIDE_ZEBRA_TABLE_PATTERN.lastIndex = 0;
+  for (const match of template.matchAll(new RegExp(WIDE_ZEBRA_TABLE_PATTERN.source, "gu"))) {
+    const tableTag = match[0] ?? "";
+    if (TABLE_SM_IN_TAG_PATTERN.test(tableTag)) {
+      continue;
+    }
+    const hasDualSurface =
+      RESPONSIVE_DATA_SURFACE_PATTERN.test(content) ||
+      DUAL_SURFACE_TOKEN_PATTERN.test(content) ||
+      LEGACY_MD_DUAL_SURFACE_PATTERN.test(template);
+    if (!hasDualSurface) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(content, match.index ?? 0),
+        message: `Wide table-zebra without mobile card dual-surface. Wrap with <ResponsiveDataSurface> (cards + table slots) or VISIBILITY_SHOW_BELOW_LG_CLASS / VISIBILITY_HIDE_BELOW_LG_CLASS so @320 is not a horizontal UUID scroll trap.`,
       });
     }
   }

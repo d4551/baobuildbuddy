@@ -42,8 +42,16 @@ const page = useJobsIndexPage();
       :description="t('jobsPage.seoDescription')"
     >
       <template #actions>
-        <button
+        <NuxtLink
+          v-if="page.isCatalogEmpty.value"
+          :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
           :class="[PRIMARY_ACTION_CLASS]"
+          :aria-label="t('jobsPage.configureProvidersAria')"
+        >
+          {{ t("jobsPage.configureProvidersButton") }}
+        </NuxtLink>
+        <button
+          :class="page.isCatalogEmpty.value ? [TOUCH_TARGET_MIN_CLASS, 'btn btn-outline'] : [PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"

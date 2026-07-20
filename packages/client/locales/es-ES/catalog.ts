@@ -2690,7 +2690,7 @@ const catalog = {
     seoTitle: "Configuración y Perfil",
     seoDescription:
       "Administra tu perfil, proveedores de IA, preferencias de notificación y valores predeterminados de automatización.",
-    title: "Configuración y Perfil",
+    title: "Configuración",
     subtitle:
       "Centraliza tu identidad, comportamiento del asistente y valores por defecto de automatización.",
     saveState: {

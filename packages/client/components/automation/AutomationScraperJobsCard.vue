@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -34,7 +38,7 @@ const { t } = useI18n();
             {{ t("automation.scraper.stats.interviewEntryTitle") }}:
             {{ t("automation.scraper.stats.interviewEntryValue") }}
           </span>
-          <NuxtLink :to="jobsRoute" class="btn btn-ghost btn-sm">
+          <NuxtLink :to="jobsRoute" class="btn btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]">
             {{ t("automation.scraper.table.openBoardButton") }}
           </NuxtLink>
         </div>
@@ -46,68 +50,116 @@ const { t } = useI18n();
         <span>{{ t("automation.scraper.table.emptyState") }}</span>
       </div>
 
-      <div v-else class="overflow-x-auto rounded-box border border-base-300">
-        <table class="table table-zebra" :aria-label="t('automation.scraper.table.aria')">
-          <thead>
-            <tr>
-              <th scope="col">{{ t("automation.scraper.table.columns.role") }}</th>
-              <th scope="col">{{ t("automation.scraper.table.columns.company") }}</th>
-              <th scope="col">{{ t("automation.scraper.table.columns.location") }}</th>
-              <th scope="col">{{ t("automation.scraper.table.columns.posted") }}</th>
-              <th scope="col">
-                <span class="sr-only">{{ t("automation.scraper.table.actionsLabel") }}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
-              <td>
-                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-                  <div class="font-medium">{{ job.title }}</div>
-                  <p v-if="hasJobEnrichment(job)" class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                    <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
-                    {{ job.enrichment?.summary }}
-                  </p>
-                  <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                    <span v-if="job.remote" class="badge badge-ghost badge-sm">
-                      {{ t("jobCard.remoteBadge") }}
-                    </span>
-                    <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
-                      {{ t("jobCard.hybridBadge") }}
-                    </span>
-                    <span 
-                      v-for="focusArea in jobInterviewFocusAreas(job)"
-                      :key="`${job.id}-${focusArea}`"
-                      class="badge badge-warning badge-soft badge-sm"
+      <ResponsiveDataSurface v-else>
+        <template #cards>
+          <ul
+            class="list-none rounded-box border border-base-300 p-2"
+            :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
+            :aria-label="t('automation.scraper.table.aria')"
+          >
+            <li
+              v-for="job in topJobs"
+              :key="job.id"
+              class="rounded-box border border-base-300 bg-base-100 p-3"
+              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+            >
+              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
+                <p class="font-medium">{{ job.title }}</p>
+                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ job.company }}</p>
+                <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                  {{ job.location }} · {{ relativePostedDate(job.postedDate) }}
+                </p>
+              </div>
+              <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+                <span v-if="job.remote" class="badge badge-ghost badge-sm">
+                  {{ t("jobCard.remoteBadge") }}
+                </span>
+                <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
+                  {{ t("jobCard.hybridBadge") }}
+                </span>
+              </div>
+              <button
+                type="button"
+                :class="[PRIMARY_ACTION_CLASS, 'w-full']"
+                :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
+                @click="emit('interview', job.id)"
+              >
+                {{ t("automation.scraper.table.interviewButton") }}
+              </button>
+            </li>
+          </ul>
+        </template>
+
+        <template #table>
+          <div class="overflow-x-auto rounded-box border border-base-300">
+            <table class="table table-zebra" :aria-label="t('automation.scraper.table.aria')">
+              <thead>
+                <tr>
+                  <th scope="col">{{ t("automation.scraper.table.columns.role") }}</th>
+                  <th scope="col">{{ t("automation.scraper.table.columns.company") }}</th>
+                  <th scope="col">{{ t("automation.scraper.table.columns.location") }}</th>
+                  <th scope="col">{{ t("automation.scraper.table.columns.posted") }}</th>
+                  <th scope="col">
+                    <span class="sr-only">{{ t("automation.scraper.table.actionsLabel") }}</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="job in topJobs" :key="job.id" class="hover:bg-base-200">
+                  <td>
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                      <div class="font-medium">{{ job.title }}</div>
+                      <p
+                        v-if="hasJobEnrichment(job)"
+                        class="text-secondary"
+                        :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+                      >
+                        <span class="font-medium">{{ t("automation.scraper.table.personaSummaryLabel") }}</span>
+                        {{ job.enrichment?.summary }}
+                      </p>
+                      <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+                        <span v-if="job.remote" class="badge badge-ghost badge-sm">
+                          {{ t("jobCard.remoteBadge") }}
+                        </span>
+                        <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
+                          {{ t("jobCard.hybridBadge") }}
+                        </span>
+                        <span
+                          v-for="focusArea in jobInterviewFocusAreas(job)"
+                          :key="`${job.id}-${focusArea}`"
+                          class="badge badge-warning badge-soft badge-sm"
+                        >
+                          {{ focusArea }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                      <div class="font-medium">{{ job.company }}</div>
+                      <div v-if="job.source" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                        {{ job.source }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ job.location }}</td>
+                  <td>{{ relativePostedDate(job.postedDate) }}</td>
+                  <td class="text-right">
+                    <button
+                      type="button"
+                      :class="[PRIMARY_ACTION_CLASS]"
+                      :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
+                      @click="emit('interview', job.id)"
                     >
-                      {{ focusArea }}
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-                  <div class="font-medium">{{ job.company }}</div>
-                  <div v-if="job.source" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
-                    {{ job.source }}
-                  </div>
-                </div>
-              </td>
-              <td>{{ job.location }}</td>
-              <td>{{ relativePostedDate(job.postedDate) }}</td>
-              <td class="text-right">
-                <button 
-                  class="btn btn-primary"
-                  :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
-                  @click="emit('interview', job.id)"
-                >
-                  {{ t("automation.scraper.table.interviewButton") }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                      {{ t("automation.scraper.table.interviewButton") }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+      </ResponsiveDataSurface>
     </div>
   </div>
 </template>

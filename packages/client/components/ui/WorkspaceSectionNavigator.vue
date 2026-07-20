@@ -35,10 +35,16 @@ const props = withDefaults(
     buildRoute: (sectionId: string) => string;
     badgeById?: Readonly<Record<string, number | string>>;
     fallbackDescriptionKey?: string;
+    /**
+     * When true, active section H2 is sr-only below lg — rail tabs already own the label
+     * (kills Settings H1 + H2 + tab triple stack on mobile).
+     */
+    omitActiveHeadingBelowLg?: boolean;
   }>(),
   {
     badgeById: () => ({}),
     fallbackDescriptionKey: undefined,
+    omitActiveHeadingBelowLg: false,
   },
 );
 
@@ -111,7 +117,13 @@ const activeDescription = computed<string>(() => {
             </span>
 
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
-              <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+              <h2
+                class="font-semibold text-base-content"
+                :class="[
+                  TYPOGRAPHY_SCALE_CLASS.lg,
+                  omitActiveHeadingBelowLg ? 'max-lg:sr-only' : '',
+                ]"
+              >
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
               <p

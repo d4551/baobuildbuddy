@@ -227,7 +227,7 @@ export const SIDEBAR_WIDTH_LG_CLASS = "lg:w-64";
 
 /** Sidebar item surface inside the floating drawer (WCAG 2.5.5 / AAA 44px target). */
 export const SHELL_SIDEBAR_ITEM_CLASS =
-  "flex min-h-11 min-w-11 items-center gap-2 rounded-box px-2 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right";
+  "box-border flex h-11 min-h-11 min-w-11 items-center gap-2 rounded-box px-2 py-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right";
 
 /** Navbar dropdown (no menu-sm — keeps locale rows ≥44px). */
 export const SHELL_NAVBAR_DROPDOWN_CLASS =

@@ -150,3 +150,10 @@ export const DASHBOARD_ONBOARDING_BODY_LG_P8_CLASS = "lg:p-8";
 
 /** Brand settings card body padding (compact mobile, comfortable md+). */
 export const BRAND_CARD_BODY_RESPONSIVE_CLASS = "card-body p-4 md:p-6";
+
+/**
+ * Dual-surface data lists: card stack below lg, dense table from lg up.
+ * Wide zebra tables must pair both tokens (validate:ui-pagination-tables).
+ */
+export const VISIBILITY_SHOW_BELOW_LG_CLASS = "lg:hidden";
+export const VISIBILITY_HIDE_BELOW_LG_CLASS = "hidden lg:block";

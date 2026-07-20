@@ -56,12 +56,11 @@ const ctaAriaLabel = computed(() => {
     <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.base]">
       {{ t(titleKey) }}
     </h3>
-    <!-- CTAs before body copy so first paint @320 clears the dock. -->
+    <!-- Primary CTA first, then secondary actions — Configure/clear clears fold @320. -->
     <div
       class="flex w-full flex-col items-stretch sm:flex-row sm:flex-wrap sm:items-center sm:justify-center"
       :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
     >
-      <slot name="actions" />
       <NuxtLink
         :class="[PRIMARY_ACTION_CLASS]"
         v-if="hasCtaLink"
@@ -79,6 +78,7 @@ const ctaAriaLabel = computed(() => {
       >
         {{ t(ctaLabelKey) }}
       </button>
+      <slot name="actions" />
     </div>
     <p class="max-w-sm text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ t(descriptionKey) }}

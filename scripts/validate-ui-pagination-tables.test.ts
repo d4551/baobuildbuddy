@@ -43,4 +43,30 @@ describe("collectPaginationTableViolationsForContent", () => {
     );
     expect(violations).toHaveLength(0);
   });
+
+  test("flags wide table-zebra without mobile card dual-surface", () => {
+    const violations = collectPaginationTableViolationsForContent(
+      CONSUMER_PATH,
+      '<template><div class="overflow-x-auto"><table class="table table-zebra"><tbody><tr><td>x</td></tr></tbody></table></div></template>',
+    );
+    expect(violations.some((v) => v.message.includes("dual-surface"))).toBe(true);
+  });
+
+  test("allows wide table-zebra inside ResponsiveDataSurface", () => {
+    const violations = collectPaginationTableViolationsForContent(
+      CONSUMER_PATH,
+      `<script setup>
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
+</script>
+<template>
+  <ResponsiveDataSurface>
+    <template #cards><div>card</div></template>
+    <template #table>
+      <table class="table table-zebra"><tbody><tr><td>x</td></tr></tbody></table>
+    </template>
+  </ResponsiveDataSurface>
+</template>`,
+    );
+    expect(violations).toHaveLength(0);
+  });
 });

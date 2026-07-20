@@ -50,7 +50,6 @@ const { t } = useI18n();
         </p>
       </div>
       <div
-        v-if="showSetupAction"
         class="card-actions relative"
         :class="[
           FLUID_WIDTH_CLASS,
@@ -66,9 +65,9 @@ const { t } = useI18n();
         >
           {{ primaryLabel }}
         </NuxtLink>
-        <!-- Secondary setup path only when primary is not already setup. -->
+        <!-- Secondary setup only when profile incomplete and primary is not already setup. -->
         <NuxtLink
-          v-if="primaryRoute !== APP_ROUTES.setup"
+          v-if="showSetupAction && primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
           class="btn btn-outline"
           :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"

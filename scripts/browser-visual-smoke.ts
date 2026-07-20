@@ -60,10 +60,55 @@ const collectPageSignals = async (page: Page) =>
   page.evaluate(() => {
     const h1 = document.querySelector("h1");
     const mains = document.querySelectorAll("main");
+    const dockActive = Array.from(
+      document.querySelectorAll('nav.dock a[aria-current="page"], nav.dock a.dock-active'),
+    ).map((el) => ({
+      href: el.getAttribute("href"),
+      label: (el.getAttribute("aria-label") ?? el.textContent ?? "").replace(/\s+/gu, " ").trim(),
+    }));
+    const tables = Array.from(document.querySelectorAll("table.table")).map((table) => {
+      const rect = table.getBoundingClientRect();
+      return { width: rect.width, visible: rect.width > 0 && rect.height > 0 };
+    });
+    const underTouch = Array.from(
+      document.querySelectorAll("nav.dock a, .menu a.min-h-11, .menu a.h-11"),
+    )
+      .map((el) => {
+        const rect = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden") {
+          return null;
+        }
+        return {
+          label: (el.getAttribute("aria-label") ?? el.textContent ?? "").replace(/\s+/gu, " ").trim().slice(0, 40),
+          h: rect.height,
+          under: rect.height + 0.5 < 44,
+        };
+      })
+      .filter((row): row is { label: string; h: number; under: boolean } => row !== null && row.under);
+    const setupCtaVisible = Array.from(document.querySelectorAll("a.btn, button.btn")).some((el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 && /Complete Setup/i.test(el.textContent ?? "");
+    });
+    const levelLabelVisible = Array.from(document.querySelectorAll("p, span, h2, h3, div")).some(
+      (el) => {
+        if (el.childElementCount > 2) {
+          return false;
+        }
+        const rect = el.getBoundingClientRect();
+        const text = (el.textContent ?? "").replace(/\s+/gu, " ").trim();
+        return rect.width > 0 && rect.height > 0 && /^Level\s+\d+$/iu.test(text);
+      },
+    );
+    const setupXpConflict = setupCtaVisible && levelLabelVisible;
     return {
       h1: h1?.textContent?.replace(/\s+/gu, " ").trim() ?? null,
       mainCount: mains.length,
       bodySnippet: (document.body?.innerText ?? "").replace(/\s+/gu, " ").trim().slice(0, 240),
+      dockActive,
+      tables,
+      underTouch,
+      setupXpConflict,
     };
   });
 
@@ -104,6 +149,26 @@ const smokeRoute = async (
     reason = "empty title";
   } else if (pageErrors.length > 0) {
     reason = `pageerror: ${pageErrors[0] ?? "unknown"}`;
+  } else if (
+    viewportName === "mobile" &&
+    (route.startsWith("/ai/") || route.startsWith("/automation")) &&
+    signals.dockActive.length === 0
+  ) {
+    reason = `dock orphan on ${route} — expected aria-current/dock-active`;
+  } else if (
+    viewportName === "mobile" &&
+    route === APP_ROUTES.automationRuns &&
+    signals.tables.some((table) => table.visible && table.width > 360)
+  ) {
+    reason = `automation runs table still wide @320 (max visible ${String(
+      Math.max(0, ...signals.tables.filter((table) => table.visible).map((table) => table.width)),
+    )}px)`;
+  } else if (viewportName === "mobile" && signals.underTouch.length > 0) {
+    reason = `touch target under 44px: ${signals.underTouch[0]?.label ?? "unknown"} (${String(
+      signals.underTouch[0]?.h ?? 0,
+    )}px)`;
+  } else if (route === APP_ROUTES.dashboard && signals.setupXpConflict) {
+    reason = "dashboard Setup CTA vs Level/XP gamification contradiction";
   }
 
   page.off("console", onConsole);

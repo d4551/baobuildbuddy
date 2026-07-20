@@ -7,7 +7,7 @@ import {
   SHELL_DOCK_ITEM_CLASS,
 } from "~/constants/layout";
 import type { NavigationItem } from "~/constants/navigation";
-import { getDockNavigationItems, isRouteActive } from "~/constants/navigation";
+import { getDockNavigationItems, isDockRouteActive } from "~/constants/navigation";
 
 const route = useRoute();
 const dockItems = getDockNavigationItems();
@@ -16,7 +16,7 @@ const { t } = useI18n();
 const activeDockItemIds = computed(() => {
   const activeIds = new Set<string>();
   for (const item of dockItems) {
-    if (isRouteActive(route.path, item.to)) {
+    if (isDockRouteActive(route.path, item)) {
       activeIds.add(item.id);
     }
   }

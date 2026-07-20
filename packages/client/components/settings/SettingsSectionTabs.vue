@@ -15,6 +15,7 @@ const activeSection = defineModel<SettingsSectionId>("activeSection", {
     :active-section="activeSection"
     v-bind="{ ariaLabelKey: 'settings.title' }"
     :build-route="APP_ROUTE_BUILDERS.settingsSection"
+    omit-active-heading-below-lg
   >
     <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
       <!-- Mount only the active panel — keeps mobile DOM lean. -->

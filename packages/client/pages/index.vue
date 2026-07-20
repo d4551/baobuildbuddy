@@ -75,8 +75,9 @@ useSeoMeta({
         :show-setup-action="!dashboard?.profile?.name"
       />
 
+      <!-- XP celebration after profile identity exists — avoids Setup CTA vs Level 10 contradiction. -->
       <DashboardGamificationCard
-        v-if="dashboard?.gamification"
+        v-if="dashboard?.gamification && dashboard.profile?.name"
         :gamification="dashboard.gamification"
         :level-progress="levelProgress"
         :xp-into-level="xpIntoLevel"

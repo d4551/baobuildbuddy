@@ -3,13 +3,16 @@ import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -96,42 +99,83 @@ const viewSession = (id: string): void => {
         description-key="interviewHistory.emptyStateDescription"
       />
 
-      <div v-else-if="historyView === 'table'" class="overflow-x-auto">
-        <table class="table table-zebra" :aria-label="t('interviewHistory.tableAriaLabel')">
-          <thead>
-            <tr>
-              <th scope="col">{{ t("interviewHistory.columns.date") }}</th>
-              <th scope="col">{{ t("interviewHistory.columns.studio") }}</th>
-              <th scope="col">{{ t("interviewHistory.columns.role") }}</th>
-              <th scope="col">{{ t("interviewHistory.columns.score") }}</th>
-              <th scope="col">{{ t("interviewHistory.columns.duration") }}</th>
-              <th scope="col">{{ t("interviewHistory.columns.actions") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="session in filteredSessions" :key="session.id">
-              <td>{{ props.formatDate(session.createdAt) }}</td>
-              <td>{{ session.studioName }}</td>
-              <td>{{ session.role }}</td>
-              <td>
+      <ResponsiveDataSurface v-else-if="historyView === 'table'">
+        <template #cards>
+          <ul
+            class="list-none"
+            :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
+            :aria-label="t('interviewHistory.tableAriaLabel')"
+          >
+            <li
+              v-for="session in filteredSessions"
+              :key="session.id"
+              class="rounded-box border border-base-300 bg-base-100 p-3"
+              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+            >
+              <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+                <div>
+                  <p class="font-semibold">{{ session.studioName }}</p>
+                  <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
+                  <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                    {{ props.formatDate(session.createdAt) }} ·
+                    {{ props.formatDuration(session.duration ?? 0) }}
+                  </p>
+                </div>
                 <span class="badge" :class="props.scoreBadgeClass(session.score)">
                   {{ props.formatScore(session.score) }}
                 </span>
-              </td>
-              <td>{{ props.formatDuration(session.duration ?? 0) }}</td>
-              <td>
-                <button 
-                  class="btn btn-ghost btn-xs"
-                  :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
-                  @click="viewSession(session.id)"
-                >
-                  {{ t("interviewHistory.viewButton") }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost w-full"
+                :class="[TOUCH_TARGET_MIN_CLASS]"
+                :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
+                @click="viewSession(session.id)"
+              >
+                {{ t("interviewHistory.viewButton") }}
+              </button>
+            </li>
+          </ul>
+        </template>
+        <template #table>
+          <table class="table table-zebra" :aria-label="t('interviewHistory.tableAriaLabel')">
+            <thead>
+              <tr>
+                <th scope="col">{{ t("interviewHistory.columns.date") }}</th>
+                <th scope="col">{{ t("interviewHistory.columns.studio") }}</th>
+                <th scope="col">{{ t("interviewHistory.columns.role") }}</th>
+                <th scope="col">{{ t("interviewHistory.columns.score") }}</th>
+                <th scope="col">{{ t("interviewHistory.columns.duration") }}</th>
+                <th scope="col">{{ t("interviewHistory.columns.actions") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="session in filteredSessions" :key="session.id">
+                <td>{{ props.formatDate(session.createdAt) }}</td>
+                <td>{{ session.studioName }}</td>
+                <td>{{ session.role }}</td>
+                <td>
+                  <span class="badge" :class="props.scoreBadgeClass(session.score)">
+                    {{ props.formatScore(session.score) }}
+                  </span>
+                </td>
+                <td>{{ props.formatDuration(session.duration ?? 0) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-ghost"
+                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
+                    @click="viewSession(session.id)"
+                  >
+                    {{ t("interviewHistory.viewButton") }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+      </ResponsiveDataSurface>
 
       <div class="overflow-x-auto" :class="[PADDING_TOKEN_CLASS.py2]" v-else>
         <ul class="timeline timeline-vertical timeline-compact" :class="[FLUID_WIDTH_CLASS]">
