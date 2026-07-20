@@ -80,21 +80,51 @@ export interface AutomationApi {
   };
   runs: AutomationRunsApi;
   "job-apply": {
-    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    post(body: {
+      jobUrl: string;
+      resumeId: string;
+      coverLetterId?: string;
+      jobId?: string;
+      customAnswers?: Record<string, string>;
+      runAt?: string;
+    }): ApiRequest<unknown>;
     schedule: {
-      post(body: Record<string, unknown>): ApiRequest<unknown>;
+      post(body: {
+        jobUrl: string;
+        resumeId: string;
+        runAt: string;
+        coverLetterId?: string;
+        jobId?: string;
+        customAnswers?: Record<string, string>;
+      }): ApiRequest<unknown>;
     };
   };
   "email-response": {
-    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    post(body: {
+      subject: string;
+      message: string;
+      sender?: string;
+      tone?: string;
+      recipientEmail?: string;
+      deliverAfterGeneration?: boolean;
+      runAt?: string;
+    }): ApiRequest<unknown>;
     schedule: {
-      post(body: Record<string, unknown>): ApiRequest<unknown>;
+      post(body: {
+        subject: string;
+        message: string;
+        runAt: string;
+        sender?: string;
+        tone?: string;
+        recipientEmail?: string;
+        deliverAfterGeneration?: boolean;
+      }): ApiRequest<unknown>;
     };
   };
   scrape: {
-    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    post(body: { target: string }): ApiRequest<unknown>;
     schedule: {
-      post(body: Record<string, unknown>): ApiRequest<unknown>;
+      post(body: { target: string; runAt: string }): ApiRequest<unknown>;
     };
   };
 }
