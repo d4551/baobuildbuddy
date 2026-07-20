@@ -4,6 +4,8 @@ import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -53,15 +55,15 @@ const { t } = useI18n();
       <ResponsiveDataSurface v-else>
         <template #cards>
           <ul
-            class="list-none rounded-box border border-base-300 p-2"
-            :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
+            class="list-none rounded-box border border-base-300"
+            :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p2]"
             :aria-label="t('automation.scraper.table.aria')"
           >
             <li
               v-for="job in topJobs"
               :key="job.id"
-              class="rounded-box border border-base-300 bg-base-100 p-3"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+              class="rounded-box border border-base-300 bg-base-100"
+              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
                 <p class="font-medium">{{ job.title }}</p>
@@ -80,7 +82,7 @@ const { t } = useI18n();
               </div>
               <button
                 type="button"
-                :class="[PRIMARY_ACTION_CLASS, 'w-full']"
+                :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS]"
                 :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
                 @click="emit('interview', job.id)"
               >

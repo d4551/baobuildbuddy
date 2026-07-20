@@ -3,6 +3,8 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -46,8 +48,8 @@ defineProps<{
             <li
               v-for="run in runs"
               :key="run.id"
-              class="rounded-box border border-base-300 bg-base-100 p-3"
-              :class="[resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+              class="rounded-box border border-base-300 bg-base-100"
+              :class="[resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -91,7 +93,7 @@ defineProps<{
               </dl>
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                :class="[PRIMARY_ACTION_CLASS, 'w-full']"
+                :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS]"
                 :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
               >
                 {{ t("automation.runs.openButton") }}
@@ -115,7 +117,7 @@ defineProps<{
             </thead>
             <tbody>
               <tr v-for="run in runs" :key="run.id" :class="resolveRowClass(run)">
-                <th class="font-mono text-xs">{{ run.id }}</th>
+                <th class="font-mono" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ run.id }}</th>
                 <td>{{ formatRunType(run.type) }}</td>
                 <td>
                   <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

@@ -109,8 +109,8 @@ const viewSession = (id: string): void => {
             <li
               v-for="session in filteredSessions"
               :key="session.id"
-              class="rounded-box border border-base-300 bg-base-100 p-3"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+              class="rounded-box border border-base-300 bg-base-100"
+              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div>
@@ -127,8 +127,8 @@ const viewSession = (id: string): void => {
               </div>
               <button
                 type="button"
-                class="btn btn-ghost w-full"
-                :class="[TOUCH_TARGET_MIN_CLASS]"
+                class="btn btn-ghost"
+                :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
               >
