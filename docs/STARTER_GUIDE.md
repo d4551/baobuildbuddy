@@ -296,8 +296,10 @@ For more, see [README.md > Troubleshooting](../README.md#troubleshooting).
 | Topic                                | Guide                                                    |
 |--------------------------------------|----------------------------------------------------------|
 | Understand the system architecture   | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
+| Binding stack / UI SSOT              | [STACK-CONTRACT.md](./STACK-CONTRACT.md)                 |
 | Set up local AI with Ollama          | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
 | Learn the automation flows           | [Automation Guide](./AUTOMATION.md)                       |
+| Proof / screenshots                  | [Verification Runbook](./VERIFICATION_RUNBOOK.md)         |
 | Deep architecture reference          | [README.md](../README.md)                                 |
 
 ---
