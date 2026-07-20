@@ -56,10 +56,6 @@ type RouteResult = {
   readonly reason: string | null;
 };
 
-const WHITESPACE_RUN_PATTERN = /\s+/gu;
-
-const collapseWhitespace = (value: string): string => value.replace(WHITESPACE_RUN_PATTERN, " ").trim();
-
 const collectPageSignals = async (page: Page) =>
   page.evaluate(() => {
     const collapse = (value: string): string =>
