@@ -66,6 +66,12 @@ export const SURFACE_GLASS_CARD_STRONG_CLASS =
 export const SURFACE_GLASS_CARD_MODAL_CLASS = "card card-border card-glass-modal glass-interactive";
 
 /**
+ * Subtle glass material for sticky bars, nested lists, and soft panels (§3).
+ * Consumers must bind this token — raw `glass-subtle` class literals are banned.
+ */
+export const SURFACE_GLASS_SUBTLE_CLASS = "glass-subtle";
+
+/**
  * Glass-clear surface for media controls, decorative indicators, and floating
  * chips where the most transparent material is desired (§3).
  */

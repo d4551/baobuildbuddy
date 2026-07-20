@@ -25,7 +25,9 @@ import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 import { GAMIFICATION_XP_TARGET_FALLBACK } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
+import { settlePromise } from "./async-flow";
 import { fetchDashboardViewModel, isDashboardEmpty, toFlowStats } from "./dashboard-page-data";
+import { useGamification } from "./useGamification";
 
 type DashboardAsyncState = Awaited<ReturnType<typeof useDashboardAsyncState>>;
 type DashboardRef = DashboardAsyncState["dashboard"];
@@ -202,6 +204,25 @@ export function useDashboardPage() {
   );
   const statCards = useDashboardStatCards(t, dashboard);
   useDashboardErrorToast(error, t, $toast);
+  const { completeChallenge } = useGamification();
+  const claimingChallengeId = ref<string | null>(null);
+
+  const claimDailyChallenge = async (challengeId: string): Promise<void> => {
+    claimingChallengeId.value = challengeId;
+    const claimResult = await settlePromise(
+      completeChallenge(challengeId),
+      t("dashboard.claimChallengeErrorFallback"),
+    );
+    claimingChallengeId.value = null;
+    if (!claimResult.ok) {
+      $toast.error(
+        getErrorMessage(claimResult.error, t("dashboard.claimChallengeErrorFallback")),
+      );
+      return;
+    }
+    $toast.success(t("dashboard.claimChallengeToast"));
+    await refresh();
+  };
 
   return {
     resolvedBrand,
@@ -219,6 +240,8 @@ export function useDashboardPage() {
     primaryFlowLabel,
     dashboardQuickActions,
     statCards,
+    claimingChallengeId,
+    claimDailyChallenge,
     retryDashboardLoad: async () => refresh(),
     formatTimeAgo: (timestamp: Date) =>
       formatRelativeTime(timestamp, (key, params) => t(key, params ?? {}), {

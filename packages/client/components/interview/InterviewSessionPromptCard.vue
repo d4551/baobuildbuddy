@@ -10,6 +10,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -65,28 +66,28 @@ const promptExpectedMinutes = computed(() => {
         </p>
       </div>
 
-      <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p5]" v-if="currentQuestion">
+      <div class="rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p5]" v-if="currentQuestion">
         <p class="font-semibold text-base-content" :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.xl]">
           {{ currentQuestion.question }}
         </p>
       </div>
 
       <SectionGrid v-if="currentQuestion" grid-token="threeColumnMd">
-        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+        <div class="rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p4]">
           <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptTypeLabel") }}
           </p>
           <p class="text-base font-semibold text-base-content" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ promptType }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+        <div class="rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p4]">
           <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptDifficultyLabel") }}
           </p>
           <p class="text-base font-semibold text-base-content" :class="[MARGIN_TOKEN_CLASS.mt2]">{{ promptDifficulty }}</p>
         </div>
 
-        <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+        <div class="rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p4]">
           <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("interviewSession.promptExpectedDurationLabel") }}
           </p>

@@ -23,6 +23,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -189,7 +190,7 @@ const { t } = useI18n();
           class="flex items-center justify-center"
           :class="[MIN_HEIGHT_ZERO_CLASS, MIN_H_60_CLASS]"
         >
-          <div class="card border border-base-300 glass-subtle" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+          <div class="card border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
               <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>

@@ -2,7 +2,9 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_ACTION_CLASS,
+} from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
 
@@ -185,7 +187,7 @@ const profileSaveStateLabel = computed(() => {
 
       <div class="card-actions justify-end">
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.profile.saveAria')"
           :disabled="profileSaveState === 'saving'"
           @click="emit('save')"

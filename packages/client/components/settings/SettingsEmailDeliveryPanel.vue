@@ -8,6 +8,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -227,7 +228,7 @@ const { t } = useI18n();
           {{ t("settings.emailDelivery.savePasswordButton") }}
         </button>
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.emailDelivery.saveAria')"
           @click="emit('saveSettings')"
         >

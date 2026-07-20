@@ -34,6 +34,14 @@ describe("validate-no-eden-dual-path", () => {
     expect(violations.length).toBe(1);
   });
 
+  test("requestApi jobs endpoint fails", () => {
+    const violations = collectEdenDualPathViolationsForContent(
+      "packages/client/composables/other.ts",
+      `requestApi(runtime.api, API_ENDPOINTS.jobs, { method: "GET" });`,
+    );
+    expect(violations.length).toBe(1);
+  });
+
   test("useJobs buildJobDetailEndpoint fails", () => {
     const violations = collectEdenDualPathViolationsForContent(
       "packages/client/composables/useJobs.ts",

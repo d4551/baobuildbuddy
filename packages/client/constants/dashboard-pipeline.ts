@@ -265,10 +265,12 @@ export function resolveDashboardActivityActionLabelKey(
   action: string,
 ): DashboardActivityActionLabelKey | null {
   const normalized = action.trim().toLowerCase();
-  const entry = Object.entries(DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS).find(
-    ([key]) => key === normalized,
-  );
-  return entry ? (entry[1] as DashboardActivityActionLabelKey) : null;
+  for (const [key, labelKey] of Object.entries(DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS)) {
+    if (key === normalized) {
+      return labelKey;
+    }
+  }
+  return null;
 }
 
 export function getDashboardActivityPresentation(

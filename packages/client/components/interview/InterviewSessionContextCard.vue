@@ -6,6 +6,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -39,7 +40,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </p>
       </div>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
+      <details class="collapse collapse-arrow rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS]">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.targetTitle") }}
         </summary>
@@ -89,7 +90,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
         </div>
       </details>
 
-      <details class="collapse collapse-arrow rounded-box border border-base-300 glass-subtle">
+      <details class="collapse collapse-arrow rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS]">
         <summary class="collapse-title text-base font-semibold">
           {{ t("interviewSession.interviewerTitle") }}
         </summary>

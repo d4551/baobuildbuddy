@@ -15,6 +15,8 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -140,7 +142,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
           <p class="font-semibold">{{ t("settings.aiProviders.openaiV1Title") }}</p>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.openaiV1Description") }}</p>
-          <code class="glass-subtle block break-all rounded-box" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
+          <code class="block break-all rounded-box" :class="[SURFACE_GLASS_SUBTLE_CLASS, TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
             {{ openaiV1BaseUrl }}
           </code>
         </div>
@@ -252,7 +254,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 
             <div class="flex justify-end">
               <button 
-                class="btn btn-primary"
+                :class="[PRIMARY_ACTION_CLASS]"
                 :aria-label="t('settings.aiProviders.preferredProviderAria')"
                 @click="emit('savePreferredProvider')"
               >

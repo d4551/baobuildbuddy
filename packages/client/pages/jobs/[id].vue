@@ -177,7 +177,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
         :is-saved="isSaved"
         title-id="job-detail-title"
         :hero-description="jobHeroDescription"
-        :t="t"
         :job-experience-label="formatExperienceLabel"
         @save="handleSaveToggle"
         @apply="showApplyModal = true"
@@ -186,7 +185,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
 
       <JobDetailSidebar
         :job="job"
-        :t="t"
         :studio-type-label="formatStudioTypeLabel"
         :platform-label="formatPlatformLabel"
         :game-genre-label="formatGameGenreLabel"
@@ -199,7 +197,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
       v-model:application-notes="applicationNotes"
       :title-id="JOB_APPLY_DIALOG_TITLE_ID"
       :applying="applying"
-      :t="t"
       :job-title="job?.title"
       @submit="handleApply"
     />

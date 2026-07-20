@@ -15,6 +15,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
@@ -154,7 +155,7 @@ function handleScheduleInput(event: Event): void {
 
       <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="cardRunAria(capability.target)"
           :disabled="pendingAction !== null || !capability.configured"
           @click="emit('run', capability.target)"

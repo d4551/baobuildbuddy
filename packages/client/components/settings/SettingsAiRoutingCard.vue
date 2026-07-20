@@ -13,6 +13,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
@@ -48,7 +49,7 @@ const emit = defineEmits<{
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
-        <button class="btn btn-primary" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
+        <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
         </button>
       </div>

@@ -9,6 +9,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
@@ -233,7 +234,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 
           <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
             <button 
-              class="btn btn-primary"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"
               @click="emit('save')"

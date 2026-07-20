@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   DASHBOARD_A11Y_KEYS,
@@ -12,19 +13,33 @@ import {
   FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
-defineProps<{
+const props = defineProps<{
   dailyChallenge: DashboardChallengeViewModel | null;
   recentActivity: readonly DashboardActivity[];
+  claimingChallengeId: string | null;
   formatTimeAgo: (timestamp: Date) => string;
 }>();
 
+const emit = defineEmits<{
+  claim: [challengeId: string];
+}>();
+
 const { t } = useI18n();
+
+const canClaimChallenge = computed(() => {
+  const challenge = props.dailyChallenge;
+  if (!challenge || challenge.completed) {
+    return false;
+  }
+  return challenge.progress >= challenge.goal;
+});
 </script>
 
 <template>
@@ -32,7 +47,7 @@ const { t } = useI18n();
     <div v-if="dailyChallenge" :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
-        <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4]">
+        <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
             <span class="badge badge-primary">
@@ -40,7 +55,7 @@ const { t } = useI18n();
             </span>
           </div>
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <progress 
+            <progress
               class="progress flex-1"
               :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
               :value="dailyChallenge.progress"
@@ -54,6 +69,30 @@ const { t } = useI18n();
               {{ dailyChallenge.progress }} / {{ dailyChallenge.goal }}
             </span>
           </div>
+          <div v-if="canClaimChallenge" class="card-actions justify-end">
+            <button
+              type="button"
+              :class="[PRIMARY_ACTION_CLASS]"
+              :disabled="claimingChallengeId === dailyChallenge.id"
+              :aria-label="t('dashboard.claimChallengeAria', { name: dailyChallenge.name })"
+              @click="emit('claim', dailyChallenge.id)"
+            >
+              <LoadingSpinner
+                v-if="claimingChallengeId === dailyChallenge.id"
+                size="xs"
+                label="Loading"
+                aria-hidden="true"
+              />
+              {{ t("dashboard.claimChallengeLabel") }}
+            </button>
+          </div>
+          <p
+            v-else-if="dailyChallenge.completed"
+            class="text-success"
+            :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+          >
+            {{ t("dashboard.challengeCompletedLabel") }}
+          </p>
         </div>
       </div>
     </div>
@@ -61,14 +100,17 @@ const { t } = useI18n();
     <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
-        <ul class="list rounded-box border border-base-300 bg-base-100">
-          <li 
+        <ul
+          v-if="recentActivity.length > 0"
+          class="list rounded-box border border-base-300 bg-base-100"
+        >
+          <li
             v-for="(activity, index) in recentActivity"
             :key="`${activity.timestamp.toISOString()}-${index}`"
             class="list-row items-center"
           >
             <div :class="getDashboardActivityPresentation(activity.type).avatarClass">
-              <svg 
+              <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -88,14 +130,14 @@ const { t } = useI18n();
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ formatTimeAgo(activity.timestamp) }}</p>
             </div>
           </li>
-
-          <li 
-            v-if="recentActivity.length === 0"
-            class="list-row text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
-          >
-            {{ t(DASHBOARD_COPY_KEYS.recentActivityEmptyLabel) }}
-          </li>
         </ul>
+        <EmptyState
+          v-else
+          title-key="dashboard.recentActivityEmptyTitle"
+          description-key="dashboard.recentActivityEmptyDescription"
+          cta-label-key="dashboard.recentActivityEmptyCta"
+          :cta-to="APP_ROUTES.jobs"
+        />
       </div>
     </div>
   </SectionGrid>

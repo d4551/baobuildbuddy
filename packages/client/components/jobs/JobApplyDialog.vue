@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -10,7 +12,6 @@ defineProps<{
   open: boolean;
   titleId: string;
   applying: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
   jobTitle?: string;
 }>();
 
@@ -20,6 +21,8 @@ const emit = defineEmits<{
   "update:open": [value: boolean];
   submit: [];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -55,9 +58,9 @@ const emit = defineEmits<{
       >
         {{ t("jobDetail.cancelButton") }}
       </button>
-      <button 
+      <button
         type="button"
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('jobDetail.submitApplyAria')"
         :disabled="applying"
         @click="emit('submit')"

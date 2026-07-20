@@ -43,4 +43,12 @@ describe("collectGlassMaterialViolationsForContent", () => {
     );
     expect(violations).toHaveLength(0);
   });
+
+  test("flags raw glass-subtle class literal in consumers", () => {
+    const violations = collectGlassMaterialViolationsForContent(
+      CONSUMER_PATH,
+      '<template><div class="rounded-box glass-subtle p-4">x</div></template>',
+    );
+    expect(violations.some((v) => v.message.includes("SURFACE_GLASS_SUBTLE_CLASS"))).toBe(true);
+  });
 });

@@ -275,6 +275,15 @@ const catalog = {
     dailyChallengeTitle: "Desafío Diario",
     recentActivityTitle: "Actividad Reciente",
     recentActivityEmptyLabel: "Sin actividad reciente",
+    recentActivityEmptyTitle: "Aún no hay actividad reciente",
+    recentActivityEmptyDescription:
+      "Guarda un empleo, actualiza el tablero o completa un reto para iniciar tu feed de actividad.",
+    recentActivityEmptyCta: "Abrir Tablero de Empleos",
+    claimChallengeLabel: "Reclamar recompensa",
+    claimChallengeAria: "Reclamar recompensa del reto {name}",
+    challengeCompletedLabel: "Reto completado",
+    claimChallengeToast: "Reto completado",
+    claimChallengeErrorFallback: "Error al completar el reto",
     quickActionsTitle: "Acciones Rápidas",
     levelLabel: "Nivel",
     streakLabel: "días seguidos",
@@ -390,6 +399,9 @@ const catalog = {
     streakDaysSuffix: "días seguidos",
     longestStreakDesc: "récord personal",
     noChallengesLabel: "No hay desafíos diarios disponibles.",
+    noChallengesTitle: "No hay desafíos diarios disponibles",
+    noChallengesDescription:
+      "Completa la configuración y acciones de carrera desde el panel para desbloquear los retos de hoy.",
     a11y: {
       levelProgress: "Progresión de nivel",
       challengeProgress: "Progresión del desafío",

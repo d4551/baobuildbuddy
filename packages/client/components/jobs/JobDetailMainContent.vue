@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -25,7 +29,6 @@ defineProps<{
   isSaved: boolean;
   titleId: string;
   heroDescription: string;
-  t: (key: string, values?: Record<string, unknown>) => string;
   jobExperienceLabel: (experienceLevel: string) => string;
 }>();
 
@@ -34,6 +37,8 @@ const emit = defineEmits<{
   apply: [];
   interview: [];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -47,7 +52,12 @@ const emit = defineEmits<{
           density="comfortable"
         >
           <template #actions>
-            <button class="btn btn-outline" :aria-label="t('jobDetail.interviewAria')" @click="emit('interview')">
+            <button
+              class="btn btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS]"
+              :aria-label="t('jobDetail.interviewAria')"
+              @click="emit('interview')"
+            >
               <svg :class="[ICON_SIZE_CLASS[5]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -55,14 +65,18 @@ const emit = defineEmits<{
               {{ t("jobDetail.interviewButton") }}
             </button>
 
-            <button class="btn btn-primary" :aria-label="t('jobDetail.applyAria')" @click="emit('apply')">
+            <button
+              :class="[PRIMARY_ACTION_CLASS]"
+              :aria-label="t('jobDetail.applyAria')"
+              @click="emit('apply')"
+            >
               <IconDocumentText :class="[ICON_SIZE_CLASS[5]]"/>
               {{ t("jobDetail.applyButton") }}
             </button>
 
-            <button 
+            <button
               class="btn btn-outline"
-              :class="{ 'btn-success': isSaved }"
+              :class="[TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"
             >

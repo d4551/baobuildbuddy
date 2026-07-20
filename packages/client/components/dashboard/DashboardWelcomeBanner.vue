@@ -17,6 +17,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -60,8 +61,7 @@ const { t } = useI18n();
       >
         <NuxtLink
           :to="primaryRoute"
-          class="btn btn-primary"
-          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
+          :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS]"
         >
           {{ primaryLabel }}
         </NuxtLink>

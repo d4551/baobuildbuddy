@@ -5,6 +5,7 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SURFACE_GLASS_CARD_DISABLED_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -55,8 +56,8 @@ const { t } = useI18n();
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ challenge.description }}</p>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-        <button 
-          class="btn btn-primary"
+        <button
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="challenge.completed"
           :aria-label="t('dailyChallengeCard.completeAria', { title: challenge.title })"
           @click="emit('complete')"

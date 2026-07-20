@@ -12,6 +12,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -97,7 +98,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, 'glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors']"
+            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors']"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"

@@ -11,6 +11,8 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -145,7 +147,7 @@ useSeoMeta({
             <p class="validator-hint">{{ t("automation.email.messageHint") }}</p>
           </fieldset>
 
-          <div class="rounded-box border border-base-300 glass-subtle" :class="[PADDING_TOKEN_CLASS.p4]">
+          <div class="rounded-box border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p4]">
             <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <input
                 v-model="form.deliverAfterGeneration"
@@ -189,7 +191,7 @@ useSeoMeta({
 
         <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
           <button
-            class="btn btn-primary"
+            :class="[PRIMARY_ACTION_CLASS]"
             :disabled="pending || !canSubmit"
             :aria-label="t('automation.email.generateAria')"
             @click="submitEmailResponse"

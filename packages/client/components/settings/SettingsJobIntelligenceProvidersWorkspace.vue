@@ -8,8 +8,8 @@ import {
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm } from "./job-intelligence";
@@ -63,9 +63,8 @@ const sourceCollectionCount = computed(
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button 
-              class="btn btn-primary"
-              :class="[TOUCH_TARGET_MIN_CLASS]"
+            <button
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"
             >

@@ -10,8 +10,10 @@ import {
   MIN_H_80_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
@@ -176,7 +178,14 @@ watch(renderedMessages, async () => {
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto glass-subtle" ref="chatHistoryRef" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, MIN_H_80_CLASS, PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]" role="log" :aria-label="t(props.responseAriaKey)" aria-live="polite">
+      <div
+        ref="chatHistoryRef"
+        class="flex-1 overflow-y-auto"
+        :class="[SURFACE_GLASS_SUBTLE_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack4, MIN_H_80_CLASS, PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]"
+        role="log"
+        :aria-label="t(props.responseAriaKey)"
+        aria-live="polite"
+      >
         <AIChatBubble
           v-for="(messageRow, index) in renderedMessages"
           :key="messageRow.key"
@@ -207,7 +216,7 @@ watch(renderedMessages, async () => {
             </p>
             <button 
               type="submit"
-              class="btn btn-primary"
+              :class="PRIMARY_ACTION_CLASS"
               :aria-label="t(props.submitButtonAriaLabelKey)"
               :disabled="!canSubmit"
             >

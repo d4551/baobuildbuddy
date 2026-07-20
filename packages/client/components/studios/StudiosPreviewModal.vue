@@ -10,6 +10,7 @@ import {
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -96,7 +97,7 @@ function studioLocation(location: string): string {
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: studio.name })"
           @click="$emit('startInterview', studio.id)"
         >
@@ -131,7 +132,7 @@ function studioLocation(location: string): string {
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
           @click="$emit('close')"
         >

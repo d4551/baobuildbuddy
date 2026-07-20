@@ -18,6 +18,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 interface WorkspaceSectionItem {
@@ -148,7 +149,7 @@ const activeDescription = computed<string>(() => {
             ]"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max max-w-none glass-subtle p-2" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div class="tabs tabs-box w-max max-w-none p-2" :class="[SURFACE_GLASS_SUBTLE_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"

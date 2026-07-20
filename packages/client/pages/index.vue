@@ -26,6 +26,8 @@ const {
   statCards,
   retryDashboardLoad,
   formatTimeAgo,
+  claimingChallengeId,
+  claimDailyChallenge,
 } = useDashboardPage();
 
 const { t } = useI18n();
@@ -89,7 +91,9 @@ useSeoMeta({
       <DashboardChallengeActivityGrid
         :daily-challenge="dashboard?.dailyChallenge ?? null"
         :recent-activity="dashboard?.recentActivity ?? []"
+        :claiming-challenge-id="claimingChallengeId"
         :format-time-ago="formatTimeAgo"
+        @claim="claimDailyChallenge"
       />
 
       <DashboardQuickActionsCard :actions="dashboardQuickActions" />

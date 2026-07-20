@@ -19,6 +19,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 
@@ -127,7 +128,7 @@ const updateInput = (event: Event): void => {
 
       <div
         ref="aiChatContainer"
-        class="flex-1 overflow-y-auto glass-subtle" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]"
+        class="flex-1 overflow-y-auto" :class="[SURFACE_GLASS_SUBTLE_CLASS, MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]"
         role="log"
         aria-live="polite"
         aria-atomic="false"

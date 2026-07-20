@@ -11,6 +11,8 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
@@ -143,13 +145,12 @@ const activeFilterCount = computed(() => {
       </div>
     </div>
     <div
-      class="sticky bottom-0 border-t border-base-300 glass-subtle lg:hidden"
-      :class="[PADDING_TOKEN_CLASS.p3]"
+      class="sticky bottom-0 border-t border-base-300 lg:hidden"
+      :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p3]"
     >
       <button
         type="button"
-        class="btn btn-primary"
-        :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+        :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS]"
         :aria-label="t('jobsPage.applyFiltersAria')"
         @click="emit('apply')"
       >
