@@ -164,63 +164,69 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   await wait(page, 1_800);
   await shot(page, "02-resume-build-target");
 
-  const role = page.getByLabel(/role|target/i).or(page.locator("input").first());
-  await settle(role.fill("Gameplay Programmer"));
-  const experience = page.locator("select").first();
+  await page.getByLabel("Target role", { exact: true }).fill("Gameplay Programmer");
+  const experience = page.getByLabel("Experience level", { exact: true });
   if ((await experience.count()) > 0) {
-    await settle(experience.selectOption({ index: 2 }));
+    await settle(experience.selectOption("Mid"));
+  }
+  const studio = page.getByLabel("Studio selection", { exact: true });
+  if ((await studio.count()) > 0) {
+    await settle(studio.selectOption("epic-games"));
   }
 
-  const generate = page
-    .getByRole("button", { name: /generate.*question|start|continue|create/i })
-    .first();
+  const generate = page.locator("button", { hasText: /Generate Questions/i }).first();
+  await generate.waitFor({ state: "visible", timeout: 10_000 });
+  for (let attempt = 0; attempt < 20 && (await generate.isDisabled()); attempt += 1) {
+    await wait(page, 250);
+  }
   await generate.click({ timeout: 10_000 });
-  await wait(page, 8_000);
+
+  const answerBox = page.locator("textarea:visible").first();
+  await answerBox.waitFor({ state: "visible", timeout: 90_000 });
   await shot(page, "03-resume-questions");
 
-  const textareas = page.locator("textarea, input[type='text']");
-  const fieldCount = Math.min(await textareas.count(), 6);
-  for (let index = 0; index < fieldCount; index += 1) {
-    const field = textareas.nth(index);
-    const tag = await field.evaluate((el) => el.tagName.toLowerCase());
-    if (tag === "textarea" || (await field.isEditable())) {
-      await settle(
-        field.fill(
-          "Shipped combat pacing systems on a live co-op title using Unreal and TypeScript tooling.",
-        ),
-      );
-    }
-  }
-
-  const nextOrSynth = page
-    .getByRole("button", { name: /next|synthesize|generate resume|finish|submit|create resume/i })
-    .first();
-  await settle(nextOrSynth.click({ timeout: 10_000 }));
-  await wait(page, 2_000);
-  for (let step = 0; step < 8; step += 1) {
-    const answerBox = page.locator("textarea:visible").first();
-    if ((await answerBox.count()) > 0) {
-      await settle(
-        answerBox.fill(
-          `Demo answer ${String(step + 1)}: shipped player-facing systems with measurable retention impact.`,
-        ),
-      );
-    }
-    const next = page.getByRole("button", { name: /next|continue|submit answer/i }).first();
-    if ((await next.count()) === 0 || (await next.isDisabled())) {
+  for (let step = 0; step < 10; step += 1) {
+    const visibleAnswer = page.locator("textarea:visible").first();
+    if ((await visibleAnswer.count()) === 0) {
       break;
     }
-    await settle(next.click());
-    await wait(page, 800);
+    await visibleAnswer.fill(
+      `Alex Rivera, Gameplay Programmer — shipped combat pacing on a live co-op title (Unreal + TypeScript). Answer ${String(step + 1)}.`,
+    );
+    await wait(page, 400);
+
+    const synthesize = page
+      .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
+      .filter({ hasNot: page.locator("[disabled]") })
+      .first();
+    if ((await synthesize.count()) > 0 && !(await synthesize.isDisabled())) {
+      await synthesize.click({ timeout: 10_000 });
+      break;
+    }
+
+    const next = page.locator("button", { hasText: /^Next$/i }).first();
+    if ((await next.count()) === 0) {
+      break;
+    }
+    for (let attempt = 0; attempt < 20 && (await next.isDisabled()); attempt += 1) {
+      await wait(page, 200);
+    }
+    if (await next.isDisabled()) {
+      break;
+    }
+    await next.click();
+    await wait(page, 600);
   }
 
-  const synthesize = page
-    .getByRole("button", { name: /synthesize|generate resume|build resume|finish/i })
+  // Wait for synthesis / completion UI
+  await wait(page, 15_000);
+  const lateSynth = page
+    .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
     .first();
-  if ((await synthesize.count()) > 0) {
-    await synthesize.click({ timeout: 10_000 });
+  if ((await lateSynth.count()) > 0 && !(await lateSynth.isDisabled())) {
+    await settle(lateSynth.click({ timeout: 10_000 }));
+    await wait(page, 15_000);
   }
-  await wait(page, 12_000);
   await shot(page, "04-resume-synthesized");
 
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resumePreview}`, {
@@ -312,29 +318,22 @@ const demoCoverLetter = async (page: Page): Promise<void> => {
   await wait(page, 1_800);
   await shot(page, "10-cover-letter-hub");
 
-  const generate = page
-    .getByRole("button", { name: /Generate Cover Letter|Generate/i })
-    .first();
+  const generate = page.locator("button", { hasText: /Generate Cover Letter|Generate/i }).first();
   await generate.click({ timeout: 10_000 });
-  await wait(page, 1_000);
+  await wait(page, 1_200);
 
-  await settle(page.getByLabel(/company/i).first().fill("Hitmarker Studios"));
-  await settle(page.getByLabel(/position|role/i).first().fill("Gameplay Programmer"));
+  await page.getByLabel(/company/i).first().fill("Hitmarker Studios");
+  await page.getByLabel(/position|role/i).first().fill("Gameplay Programmer");
   const jobDesc = page.getByLabel(/job description|description/i).first();
   if ((await jobDesc.count()) > 0) {
-    await settle(
-      jobDesc.fill(
-        "Looking for a gameplay programmer to own combat systems, work with design, and ship live updates.",
-      ),
+    await jobDesc.fill(
+      "Looking for a gameplay programmer to own combat systems, work with design, and ship live updates.",
     );
   }
 
-  const submit = page
-    .getByRole("button", { name: /Generate|Create|Submit/i })
-    .filter({ hasNot: page.locator("[disabled]") })
-    .last();
+  const submit = page.locator("button", { hasText: /Generate|Create|Submit/i }).last();
   await submit.click({ timeout: 10_000 });
-  await wait(page, 20_000);
+  await wait(page, 45_000);
   await shot(page, "11-cover-letter-generated");
 
   const card = page.locator("main a.card, main .card a, main a[href*='cover-letter']").first();
@@ -353,18 +352,13 @@ const demoAiChat = async (page: Page): Promise<void> => {
   await wait(page, 2_000);
   await shot(page, "13-ai-chat");
 
-  const input = page
-    .getByLabel(/message|chat|ask/i)
-    .or(page.locator("textarea"))
-    .first();
-  await settle(
-    input.fill(
-      "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
-    ),
+  const input = page.locator("main textarea").first();
+  await input.fill(
+    "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
   );
-  const send = page.getByRole("button", { name: /send|submit/i }).first();
-  await settle(send.click({ timeout: 8_000 }));
-  await wait(page, 20_000);
+  const send = page.locator("button", { hasText: /send|submit/i }).first();
+  await send.click({ timeout: 8_000 });
+  await wait(page, 45_000);
   await shot(page, "14-ai-chat-response");
 };
 
@@ -376,7 +370,7 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 2_000);
   await shot(page, "15-interview-hub");
 
-  const studio = page.getByRole("button", { name: /Studio Drill|Start Studio/i }).first();
+  const studio = page.locator("button", { hasText: /Studio Drill|Start Studio/i }).first();
   await studio.click({ timeout: 10_000 });
   await wait(page, 1_500);
   await shot(page, "16-interview-config");
@@ -385,23 +379,23 @@ const demoInterview = async (page: Page): Promise<void> => {
   if ((await studioSelect.count()) > 0) {
     await settle(studioSelect.selectOption({ index: 1 }));
   }
-  const start = page.getByRole("button", { name: /Start Interview|Start Session|Begin/i }).first();
-  await settle(start.click({ timeout: 12_000 }));
-  await wait(page, 20_000);
+  const start = page
+    .locator("button", { hasText: /Start Interview|Start Session|Begin/i })
+    .first();
+  await start.click({ timeout: 12_000 });
+  await page.locator("textarea:visible").first().waitFor({ state: "visible", timeout: 90_000 });
   await shot(page, "17-interview-session");
 
   const response = page.locator("textarea:visible").first();
-  if ((await response.count()) > 0) {
-    await settle(
-      response.fill(
-        "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.",
-      ),
-    );
-    const submit = page.getByRole("button", { name: /Submit|Send Response|Continue/i }).first();
-    await settle(submit.click({ timeout: 8_000 }));
-    await wait(page, 20_000);
-    await shot(page, "18-interview-feedback");
-  }
+  await response.fill(
+    "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.",
+  );
+  const submit = page
+    .locator("button", { hasText: /Submit|Send Response|Continue/i })
+    .first();
+  await submit.click({ timeout: 8_000 });
+  await wait(page, 45_000);
+  await shot(page, "18-interview-feedback");
 };
 
 const encodeMp4 = async (webmPath: string): Promise<string | null> => {
