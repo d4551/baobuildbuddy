@@ -276,6 +276,12 @@ export const PRIMARY_BUTTON_VARIANT_CLASS = "btn-primary";
  */
 export const PRIMARY_ACTION_CLASS = `btn ${PRIMARY_BUTTON_VARIANT_CLASS} h-11 min-h-11`;
 
+/**
+ * Secondary / outline CTA — same touch floor as primary without competing for hero primary.
+ * Use for quick-action grids and demoted hub cards when a page already owns PRIMARY_ACTION_CLASS.
+ */
+export const OUTLINE_ACTION_CLASS = "btn btn-outline h-11 min-h-11";
+
 /** Per-item dock link: meets touch-target floor without forking dock chrome. */
 export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
 

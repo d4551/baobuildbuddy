@@ -223,6 +223,7 @@ function updateProjectForm(value: typeof projectForm): void {
         :project-page-aria="projectPageAria"
         :can-move="canMove"
         @open-add="openAddModal"
+        @clear-filters="clearFilters"
         @edit="openEditModal"
         @delete="requestDeleteProject"
         @move="moveProject"

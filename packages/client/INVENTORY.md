@@ -109,7 +109,6 @@ Reusable design-system components shared across all features:
 | `SectionGrid.vue` | Token-driven responsive grid layouts |
 | `WorkPipeline.vue` | Horizontal step pipeline (dashboard flow) |
 | `EmptyState.vue` | Empty-state column with optional CTA (link/button) |
-| `FilteredEmptyAlert.vue` | Alert variant for filtered empty states |
 | `LoadingSkeleton.vue` | Skeleton loaders (stats, lines, variants) |
 | `BootstrapErrorAlert.vue` | Error alert with retry action |
 | `ConfirmDialog.vue` | Confirmation dialog (delete confirmations, etc.) |

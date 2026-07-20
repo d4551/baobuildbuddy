@@ -106,7 +106,7 @@ export function useAutomationJobApplyBootstrap(input: {
   api: ReturnType<typeof useApi>;
   runtime: ReturnType<typeof useClientApiRequestRuntime>;
 }) {
-  const { data: resumesData } = useAsyncData<ResumeSelectOption[]>(
+  const { data: resumesData, status: resumesStatus } = useAsyncData<ResumeSelectOption[]>(
     "automation-job-apply-resumes",
     async () => toResumeSelectOptions(await readApiDataOrEmpty(input.api.resumes.get())),
     {
@@ -114,16 +114,26 @@ export function useAutomationJobApplyBootstrap(input: {
     },
   );
 
-  const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
-    "automation-job-apply-cover-letters",
-    async () =>
-      toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
-    {
-      default: () => [],
-    },
+  const { data: coverLettersData, status: coverLettersStatus } =
+    useAsyncData<CoverLetterSelectOption[]>(
+      "automation-job-apply-cover-letters",
+      async () =>
+        toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
+      {
+        default: () => [],
+      },
+    );
+
+  const bootstrapPending = computed(
+    () =>
+      resumesStatus.value === "pending" ||
+      resumesStatus.value === "idle" ||
+      coverLettersStatus.value === "pending" ||
+      coverLettersStatus.value === "idle",
   );
 
   return {
+    bootstrapPending,
     coverLettersData,
     resumesData,
   };

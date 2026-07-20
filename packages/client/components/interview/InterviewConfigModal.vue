@@ -126,9 +126,13 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           />
         </fieldset>
 
-        <FilteredEmptyAlert
+        <EmptyState
           v-if="searchedJobs.length === 0"
-          message-key="interviewHub.config.noJobsState"
+          title-key="interviewHub.config.noJobsTitle"
+          description-key="interviewHub.config.noJobsState"
+          cta-label-key="interviewHub.config.clearJobSearchButton"
+          cta-aria-key="interviewHub.config.clearJobSearchAria"
+          @cta="emit('update:job-search-term', '')"
         />
 
         <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">

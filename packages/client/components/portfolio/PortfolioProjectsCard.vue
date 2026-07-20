@@ -35,6 +35,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   openAdd: [];
+  clearFilters: [];
   edit: [project: PortfolioProject];
   delete: [projectId: string | undefined];
   move: [projectId: string | undefined, direction: ProjectDirection];
@@ -57,14 +58,22 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
       </button>
     </div>
 
-    <div v-if="props.allProjectsLength === 0" class="alert alert-soft" role="status">
-      <IconInfoCircle :class="[ICON_SIZE_CLASS[6]]"/>
-      <span>{{ t("portfolioPage.projects.emptyState") }}</span>
-    </div>
+    <EmptyState
+      v-if="props.allProjectsLength === 0"
+      title-key="portfolioPage.projects.emptyTitle"
+      description-key="portfolioPage.projects.emptyState"
+      cta-label-key="portfolioPage.projects.addButton"
+      cta-aria-key="portfolioPage.projects.addAria"
+      @cta="emit('openAdd')"
+    />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="props.filteredProjectsLength === 0"
-      message-key="portfolioPage.projects.filteredEmptyState"
+      title-key="portfolioPage.projects.filteredEmptyTitle"
+      description-key="portfolioPage.projects.filteredEmptyState"
+      cta-label-key="portfolioPage.filters.clearButton"
+      cta-aria-key="portfolioPage.filters.clearAria"
+      @cta="emit('clearFilters')"
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">

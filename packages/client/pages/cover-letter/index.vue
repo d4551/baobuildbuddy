@@ -192,9 +192,13 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
       @cta="showGenerateModal = true"
     />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="coverLetterCards.length === 0"
-      message-key="coverLetterPage.filteredEmptyState"
+      title-key="coverLetterPage.filteredEmptyTitle"
+      description-key="coverLetterPage.filteredEmptyState"
+      cta-label-key="coverLetterPage.filters.clearButton"
+      cta-aria-key="coverLetterPage.filters.clearAria"
+      @cta="clearFilters"
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">

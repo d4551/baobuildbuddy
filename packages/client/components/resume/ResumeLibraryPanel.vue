@@ -89,9 +89,13 @@ function requestDelete(resumeId?: string): void {
       @cta="emit('createResume')"
     />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="filteredResumes.length === 0"
-      message-key="resumePage.filteredEmptyState"
+      title-key="resumePage.filteredEmptyTitle"
+      description-key="resumePage.filteredEmptyState"
+      cta-label-key="resumePage.filters.clearButton"
+      cta-aria-key="resumePage.filters.clearAria"
+      @cta="emit('clearFilters')"
     />
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">

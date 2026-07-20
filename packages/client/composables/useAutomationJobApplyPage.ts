@@ -248,6 +248,7 @@ export function useAutomationJobApplyPage() {
 
   return {
     activeRunId: state.activeRunId,
+    bootstrapPending: bootstrap.bootstrapPending,
     coverLetterId: form.coverLetterId,
     coverLettersData: bootstrap.coverLettersData,
     hasActiveRun: state.hasActiveRun,

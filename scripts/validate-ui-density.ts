@@ -34,7 +34,6 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/ui/PageHeroHeader.vue",
   "packages/client/components/ui/PageHeaderBlock.vue",
   "packages/client/components/ui/BootstrapErrorAlert.vue",
-  "packages/client/components/ui/FilteredEmptyAlert.vue",
 ]);
 
 const isSsotPrimitive = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);

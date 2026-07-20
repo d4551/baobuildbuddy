@@ -141,9 +141,8 @@ const useDashboardFlowActions = (t: ReturnType<typeof useI18n>["t"], dashboard: 
   const { nextStepLabel, primaryAction, recommendedActions } = useFlowEngine(flowInput);
 
   return {
-    dashboardQuickActions: computed(() =>
-      [primaryAction.value, ...recommendedActions.value].slice(0, 4),
-    ),
+    // Hero owns primaryAction — quick actions are secondary only (no dual primary).
+    dashboardQuickActions: computed(() => recommendedActions.value.slice(0, 4)),
     primaryFlowLabel: computed(() => t(nextStepLabel.value)),
     primaryFlowRoute: computed(() => primaryAction.value.to),
   };

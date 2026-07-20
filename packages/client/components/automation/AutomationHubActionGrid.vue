@@ -7,7 +7,7 @@ import {
   FLUID_HEIGHT_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  PRIMARY_BUTTON_VARIANT_CLASS,
+  OUTLINE_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -44,10 +44,9 @@ const { t } = useI18n();
         </div>
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t(card.descriptionKey) }}</p>
         <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-          <NuxtLink 
+          <NuxtLink
             :to="card.to"
-            class="btn btn-outline"
-            :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: primaryCardId === card.id }"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t(card.buttonKey)"
           >
             {{ t(card.buttonKey) }}

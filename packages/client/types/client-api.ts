@@ -3,6 +3,7 @@ import type {
   AiApi,
   AuthApi,
   CoverLettersApi,
+  DocsApi,
   GamificationApi,
   InterviewApi,
   PortfolioApi,
@@ -39,6 +40,7 @@ export interface ClientApi {
   automation: AutomationApi;
   search: SearchApi;
   scraper: ScraperApi;
+  docs: DocsApi;
 }
 
 const REQUIRED_API_BRANCHES = [
@@ -58,6 +60,7 @@ const REQUIRED_API_BRANCHES = [
   "automation",
   "search",
   "scraper",
+  "docs",
 ] as const satisfies readonly (keyof ClientApi)[];
 
 const isRouteGroup = (value: unknown): value is object =>

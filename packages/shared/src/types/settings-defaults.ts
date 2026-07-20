@@ -45,7 +45,7 @@ const TEAMTAILOR_API_QUERY = ["?filter", "[company]=", "{token}"].join("");
 
 /**
  * Default runtime job-provider settings.
- * External boards are disabled until the user opts in via Settings.
+ * Hitmarker API + portal are on by default (primary working feed); other boards stay opt-in.
  */
 export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
   providerTimeoutMs: 5_000,
@@ -53,7 +53,7 @@ export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
   gamingBoardResultLimit: 50,
   unknownLocationLabel: "Unknown location",
   unknownCompanyLabel: "Unknown company",
-  hitmarkerEnabled: false,
+  hitmarkerEnabled: true,
   hitmarkerApiBaseUrl: "https://api.hitmarker.net/v1/jobs",
   hitmarkerDefaultQuery: "game",
   hitmarkerDefaultLocation: "Remote",
@@ -97,7 +97,7 @@ export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
       name: "Hitmarker",
       source: "hitmarker",
       fallbackUrl: "https://hitmarker.net/jobs",
-      enabled: false,
+      enabled: true,
     },
     {
       id: "grackle",

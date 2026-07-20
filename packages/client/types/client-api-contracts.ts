@@ -173,6 +173,16 @@ export interface CoverLettersApi {
   };
 }
 
+/** OpenAPI docs Eden branch (`docs.api.json`). */
+export interface DocsApi {
+  api: {
+    get(): ApiRequest<unknown>;
+    json: {
+      get(): ApiRequest<unknown>;
+    };
+  };
+}
+
 export interface ResumesRoute {
   get(): ApiRequest<unknown>;
   post(body: JsonRecord): ApiRequest<unknown>;

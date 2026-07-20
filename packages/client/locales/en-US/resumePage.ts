@@ -15,6 +15,7 @@ const resumePage = {
     bootstrapError: "Could not load resumes or dashboard data.",
     bootstrapRetry: "Retry",
     bootstrapRetryAria: "Retry loading the resume workspace",
+    filteredEmptyTitle: "No resumes match this search",
     filteredEmptyState: "No resumes match your active search.",
     defaultBadge: "Default",
     editButton: "Edit",

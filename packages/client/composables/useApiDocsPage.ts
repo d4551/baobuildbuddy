@@ -26,8 +26,6 @@ const createApiDocsPageState = (input: {
 }) => {
   const docsData = useApiDocsPageData({
     t: input.t,
-    apiBase: input.runtime.apiBase,
-    requestUrl: input.runtime.requestUrl,
   });
   const navigation = useApiDocsPageNavigation({
     route: input.runtime.route,

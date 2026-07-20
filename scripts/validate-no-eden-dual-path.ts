@@ -19,6 +19,7 @@ const EDEN_OWNED_ENDPOINT_PREFIXES = [
   "resumes",
   "studios",
   "jobs",
+  "apiDocs",
 ] as const;
 
 const REQUEST_API_EDEN_PATTERN = new RegExp(
