@@ -179,10 +179,36 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   for (let attempt = 0; attempt < 20 && (await generate.isDisabled()); attempt += 1) {
     await wait(page, 250);
   }
-  await generate.click({ timeout: 10_000 });
 
   const answerBox = page.locator("textarea:visible").first();
-  await answerBox.waitFor({ state: "visible", timeout: 90_000 });
+  let questionsReady = false;
+  for (let attempt = 0; attempt < 2 && !questionsReady; attempt += 1) {
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/resumes/from-questions/generate") &&
+        response.request().method() === "POST",
+      { timeout: 180_000 },
+    );
+    await generate.click({ timeout: 10_000 });
+    const responseResult = await settle(responsePromise);
+    if (responseResult.status === "rejected") {
+      await writeError(`resume questions request missing (attempt ${String(attempt + 1)})`);
+      await shot(page, `03-resume-questions-timeout-${String(attempt + 1)}`);
+      continue;
+    }
+    const bodyText = await responseResult.value.text();
+    await writeOutput(
+      `resume questions HTTP ${String(responseResult.value.status())} body=${bodyText.slice(0, 180)}`,
+    );
+    const waitResult = await settle(answerBox.waitFor({ state: "visible", timeout: 30_000 }));
+    questionsReady = waitResult.status === "fulfilled";
+    if (!questionsReady) {
+      await shot(page, `03-resume-questions-missing-${String(attempt + 1)}`);
+    }
+  }
+  if (!questionsReady) {
+    throw new Error("Resume guided build: AI questions never appeared after live generate.");
+  }
   await shot(page, "03-resume-questions");
 
   for (let step = 0; step < 10; step += 1) {
@@ -456,26 +482,33 @@ const main = async (): Promise<void> => {
     consoleErrors.push(`PAGE:${error.message.slice(0, 240)}`);
   });
 
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await wait(page, 2_000);
-  await shot(page, "00-dashboard");
+  let tourError: string | null = null;
+  try {
+    await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await wait(page, 2_000);
+    await shot(page, "00-dashboard");
 
-  await configureLocalAiViaUi(page, live.endpoint, live.modelId);
-  await demoResumeGuidedBuild(page);
-  await demoPortfolio(page);
-  await demoCoverLetter(page);
-  await demoAiChat(page);
-  await demoInterview(page);
+    await configureLocalAiViaUi(page, live.endpoint, live.modelId);
+    await demoResumeGuidedBuild(page);
+    await demoPortfolio(page);
+    await demoCoverLetter(page);
+    await demoAiChat(page);
+    await demoInterview(page);
 
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await wait(page, 2_000);
-  await shot(page, "19-dashboard-complete");
+    await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await wait(page, 2_000);
+    await shot(page, "19-dashboard-complete");
+  } catch (error) {
+    tourError = error instanceof Error ? error.message : String(error);
+    await writeError(`product demo tour failed: ${tourError}`);
+    await settle(shot(page, "99-tour-failed"));
+  }
 
   const video = page.video();
   await context.close();
@@ -511,6 +544,7 @@ const main = async (): Promise<void> => {
     liveModelId: live.modelId,
     liveSample: live.sample.slice(0, 240),
     mockUsed: false,
+    tourError,
     stillCount,
     webmPath,
     webmBytes,
@@ -522,11 +556,11 @@ const main = async (): Promise<void> => {
   };
   await Bun.write(join(OUT, "demo-report.json"), JSON.stringify(report, null, 2));
   await writeOutput(
-    `browser-record-product-demo: stills=${String(stillCount)} webm=${webmPath ?? "none"} (${String(webmBytes)}) mp4=${mp4Path ?? "none"} (${String(mp4Bytes)}) errors=${String(consoleErrors.length)} live=${live.modelId}`,
+    `browser-record-product-demo: stills=${String(stillCount)} webm=${webmPath ?? "none"} (${String(webmBytes)}) mp4=${mp4Path ?? "none"} (${String(mp4Bytes)}) errors=${String(consoleErrors.length)} live=${live.modelId} tourError=${tourError ?? "none"}`,
   );
 
-  if (!webmPath || webmBytes < 50_000) {
-    await writeError("Product demo video missing or too small.");
+  if (!webmPath || webmBytes < 50_000 || tourError) {
+    await writeError("Product demo incomplete (missing/small video or tour error).");
     process.exitCode = 1;
   }
 };
