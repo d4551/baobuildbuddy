@@ -113,6 +113,24 @@ function createRunMutations(runtime: AutomationRuntime) {
   };
 }
 
+async function getVerifyContext(
+  runtime: AutomationRuntime,
+): Promise<{ resumeId: string } | null> {
+  const result = await settle(
+    requestApi<{ resumeId: string }>(runtime.api, API_ENDPOINTS.automationVerifyContext, {
+      method: "GET",
+    }),
+  );
+  if (result.status !== "fulfilled") {
+    return null;
+  }
+  const payload = result.value;
+  if (payload && typeof payload.resumeId === "string" && payload.resumeId.length > 0) {
+    return { resumeId: payload.resumeId };
+  }
+  return null;
+}
+
 function createRunQueries(runtime: AutomationRuntime) {
   const authHeaders = buildClientApiHeaders();
   const runsEndpoint = resolveApiEndpoint(
@@ -170,22 +188,6 @@ function createRunQueries(runtime: AutomationRuntime) {
       method: "GET",
     });
 
-  const getVerifyContext = async (): Promise<{ resumeId: string } | null> => {
-    const result = await settle(
-      requestApi<{ resumeId: string }>(runtime.api, API_ENDPOINTS.automationVerifyContext, {
-        method: "GET",
-      }),
-    );
-    if (result.status !== "fulfilled") {
-      return null;
-    }
-    const payload = result.value;
-    if (payload && typeof payload.resumeId === "string" && payload.resumeId.length > 0) {
-      return { resumeId: payload.resumeId };
-    }
-    return null;
-  };
-
   return {
     fetchRuns,
     fetchRun,
@@ -193,7 +195,7 @@ function createRunQueries(runtime: AutomationRuntime) {
     getRuns,
     fetchRpaCapabilities,
     getRpaCapabilities,
-    getVerifyContext,
+    getVerifyContext: () => getVerifyContext(runtime),
   };
 }
 

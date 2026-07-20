@@ -15,6 +15,15 @@ const sourceExtensions = [".vue"] as const;
 const EMPTY_STATE_BLOCK_PATTERN = /<EmptyState\b[\s\S]*?(?:\/>|<\/EmptyState>)/gu;
 const CATALOG_TITLE_PATTERN =
   /title-key="[^"]*(emptyStateTitle|emptyTitle|notFoundTitle|emptyState\.title|emptyCatalogTitle)[^"]*"/u;
+const STATIC_CTA_LABEL_PATTERN = /cta-label-key\s*=\s*"([^"]*)"/u;
+const BOUND_CTA_LABEL_PATTERN = /:cta-label-key\s*=/u;
+const BOUND_EMPTY_CTA_LABEL_PATTERN = /:cta-label-key\s*=\s*["'][\s\S]*?:\s*['"]\s*['"]/u;
+const BOUND_EMPTY_CTA_TERNARY_PATTERN = /:cta-label-key\s*=\s*["'][\s\S]*?\?\s*['"]\s*['"]/u;
+const STATIC_CTA_TO_PATTERN = /cta-to\s*=\s*"([^"]+)"/u;
+const STATIC_EMPTY_CTA_TO_PATTERN = /cta-to\s*=\s*""/u;
+const BOUND_CTA_TO_PATTERN = /:cta-to\s*=/u;
+const BOUND_EMPTY_CTA_TO_PATTERN = /:cta-to\s*=\s*""/u;
+const CTA_EMIT_PATTERN = /@cta\s*=/u;
 
 const SKIP_FILES = [
   "packages/client/components/layout/WorkspaceOmniSearch.vue",
@@ -27,47 +36,23 @@ const SKIP_FILES = [
 ] as const;
 
 const hasStaticCtaLabel = (block: string): boolean => {
-  const staticMatch = block.match(/cta-label-key\s*=\s*"([^"]*)"/u);
+  const staticMatch = block.match(STATIC_CTA_LABEL_PATTERN);
   if (staticMatch) {
     return (staticMatch[1] ?? "").trim().length > 0;
   }
-  // Dynamic binding must not be an empty string literal.
-  if (/:cta-label-key\s*=\s*""/u.test(block) || /:cta-label-key\s*=\s*''/u.test(block)) {
+  if (!BOUND_CTA_LABEL_PATTERN.test(block)) {
     return false;
   }
-  if (/:cta-label-key\s*=/u.test(block)) {
-    // Ternary with empty branch is a softening — reject.
-    if (/:cta-label-key\s*=\s*"[^"]*'\s*:\s*''/u.test(block)) {
-      return false;
-    }
-    if (/:\s*''\s*[`"]/u.test(block) && /cta-label-key/u.test(block)) {
-      // Heuristic covered by emptyCatalog special-case removal; allow non-empty dynamics.
-    }
-    const emptyTernary =
-      /:cta-label-key\s*=\s*"([^"]*)"/u.test(block) === false &&
-      /:cta-label-key\s*=\s*['`][\s\S]*\?\s*['`][^'`]*(?:configure|create|generate|clear|add|retry|browse)[^'`]*['`]\s*:\s*['`]['`]/iu.test(
-        block,
-      );
-    if (emptyTernary) {
-      return false;
-    }
-    // Softening: any `? ''` / `: ''` in the bound expression.
-    if (/:cta-label-key\s*=\s*["'][^"']*['"]\s*:\s*['"]\s*['"]/u.test(block)) {
-      return false;
-    }
-    if (/:cta-label-key\s*=\s*["`][\s\S]*:\s*['"]\s*['"]/u.test(block)) {
-      return false;
-    }
-    return true;
+  if (BOUND_EMPTY_CTA_LABEL_PATTERN.test(block) || BOUND_EMPTY_CTA_TERNARY_PATTERN.test(block)) {
+    return false;
   }
-  return false;
+  return true;
 };
 
 const hasCtaAction = (block: string): boolean => {
-  const hasToStatic = /cta-to\s*=\s*"([^"]+)"/u.test(block) && !/cta-to\s*=\s*""/u.test(block);
-  const hasToBound = /:cta-to\s*=/u.test(block) && !/:cta-to\s*=\s*""/u.test(block);
-  // Bound cta-to with ternary empty branch for filtered-empty is OK when non-empty branch has route.
-  const hasEmit = /@cta\s*=/u.test(block);
+  const hasToStatic = STATIC_CTA_TO_PATTERN.test(block) && !STATIC_EMPTY_CTA_TO_PATTERN.test(block);
+  const hasToBound = BOUND_CTA_TO_PATTERN.test(block) && !BOUND_EMPTY_CTA_TO_PATTERN.test(block);
+  const hasEmit = CTA_EMIT_PATTERN.test(block);
   return hasToStatic || hasToBound || hasEmit;
 };
 
@@ -97,8 +82,7 @@ const collectViolationsForContent = (
       violations.push({
         filePath,
         line: 1,
-        message:
-          "Catalog EmptyState has label but no action — wire cta-to or @cta.",
+        message: "Catalog EmptyState has label but no action — wire cta-to or @cta.",
       });
     }
   }
