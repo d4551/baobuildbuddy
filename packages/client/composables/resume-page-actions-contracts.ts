@@ -7,6 +7,7 @@ export type ResumePageActionsInput = {
   aiEnhance: (resumeId: string) => Promise<Partial<ResumeData>>;
   aiEnhancementStepLabels: Ref<readonly string[]>;
   aiScore: (resumeId: string, prompt: string) => Promise<unknown>;
+  analyzeResume: (resumeId: string) => Promise<unknown>;
   awardForAction: (action: "resumeSave" | "resumeEnhance") => Promise<{
     awarded: boolean;
     amount: number;

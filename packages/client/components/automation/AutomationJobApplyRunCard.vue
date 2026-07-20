@@ -3,12 +3,17 @@ import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
@@ -147,14 +152,14 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
         <NuxtLink 
           :to="runDetailRoute(activeRunId)"
-          class="btn btn-sm btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
           :aria-label="t('automation.jobApply.openRunDetailAria', { id: activeRunId })"
         >
           {{ t("automation.jobApply.openRunDetailLink") }}
         </NuxtLink>
         <button 
           type="button"
-          class="btn btn-sm btn-ghost"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
           :disabled="isStreamLoading"
           :aria-label="t('automation.jobApply.stream.retryAria')"
           @click="emit('retry')"
@@ -163,7 +168,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </button>
         <button 
           type="button"
-          class="btn btn-sm btn-ghost"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
           :aria-label="t('automation.jobApply.stream.cancelAria')"
           @click="emit('cancel')"
         >
@@ -183,31 +188,63 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 
       <section :class="[MARGIN_TOKEN_CLASS.mt4]" :aria-label="t('automation.jobApply.stream.eventsAria')">
         <h3 class="font-semibold">{{ t("automation.jobApply.stream.eventsTitle") }}</h3>
-        <div class="overflow-x-auto" :class="[MARGIN_TOKEN_CLASS.mt2]">
-          <table class="table table-zebra table-sm" :aria-label="t('automation.jobApply.stream.eventsAria')">
-            <thead>
-              <tr>
-                <th scope="col">{{ t("automation.jobApply.stream.events.columns.timestamp") }}</th>
-                <th scope="col">{{ t("automation.jobApply.stream.events.columns.stage") }}</th>
-                <th scope="col">{{ t("automation.jobApply.stream.events.columns.status") }}</th>
-                <th scope="col">{{ t("automation.jobApply.stream.events.columns.message") }}</th>
-              </tr>
-            </thead>
-            <tbody aria-live="polite">
-              <tr v-for="event in eventRows" :key="`${event.runId}-${event.sequence}`">
-                <td>{{ toLocalizedDateTime(event.timestamp) }}</td>
-                <td>{{ resolveStreamEventStageLabel(event) }}</td>
-                <td>{{ resolveStreamEventStatusLabel(event) }}</td>
-                <td>{{ resolveStreamEventMessage(event) }}</td>
-              </tr>
-              <tr v-if="eventRows.length === 0">
-                <td colspan="4" class="text-center text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                  {{ t("automation.jobApply.stream.events.empty") }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <p
+          v-if="eventRows.length === 0"
+          class="text-center text-muted"
+          :class="[TYPOGRAPHY_SCALE_CLASS.sm, MARGIN_TOKEN_CLASS.mt2]"
+        >
+          {{ t("automation.jobApply.stream.events.empty") }}
+        </p>
+        <ResponsiveDataSurface v-else :class="[MARGIN_TOKEN_CLASS.mt2]">
+          <template #cards>
+            <ul
+              class="list-none"
+              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
+              :aria-label="t('automation.jobApply.stream.eventsAria')"
+              aria-live="polite"
+            >
+              <li
+                v-for="event in eventRows"
+                :key="`${event.runId}-${event.sequence}`"
+                class="rounded-box border border-base-300 bg-base-100"
+                :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              >
+                <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+                  <div>
+                    <p class="font-semibold">{{ resolveStreamEventStageLabel(event) }}</p>
+                    <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                      {{ toLocalizedDateTime(event.timestamp) }}
+                    </p>
+                  </div>
+                  <span class="badge badge-sm badge-outline">
+                    {{ resolveStreamEventStatusLabel(event) }}
+                  </span>
+                </div>
+                <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolveStreamEventMessage(event) }}</p>
+              </li>
+            </ul>
+          </template>
+          <template #table>
+            <table class="table table-zebra table-sm" :aria-label="t('automation.jobApply.stream.eventsAria')">
+              <thead>
+                <tr>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.timestamp") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.stage") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.status") }}</th>
+                  <th scope="col">{{ t("automation.jobApply.stream.events.columns.message") }}</th>
+                </tr>
+              </thead>
+              <tbody aria-live="polite">
+                <tr v-for="event in eventRows" :key="`${event.runId}-${event.sequence}`">
+                  <td>{{ toLocalizedDateTime(event.timestamp) }}</td>
+                  <td>{{ resolveStreamEventStageLabel(event) }}</td>
+                  <td>{{ resolveStreamEventStatusLabel(event) }}</td>
+                  <td>{{ resolveStreamEventMessage(event) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+        </ResponsiveDataSurface>
       </section>
     </div>
   </div>

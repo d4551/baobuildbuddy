@@ -2,6 +2,7 @@
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_DESCRIPTION_CLASS,
@@ -11,6 +12,8 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -79,14 +82,14 @@ function studioLocation(location: string): string {
 
           <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt1]">
             <button 
-              class="btn btn-ghost btn-sm"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
               :aria-label="t('studiosIndex.card.previewAria', { studio: studio.name })"
               @click="$emit('preview', studio.id)"
             >
               {{ t("studiosIndex.card.previewButton") }}
             </button>
             <button 
-              class="btn btn-primary btn-sm"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('studiosIndex.card.viewAria', { studio: studio.name })"
               @click="$emit('view', studio.id)"
             >

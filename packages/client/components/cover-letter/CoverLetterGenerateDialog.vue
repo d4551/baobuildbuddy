@@ -8,6 +8,7 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -142,7 +143,7 @@ defineEmits<{
         {{ $t("coverLetterPage.generate.cancelButton") }}
       </button>
       <button 
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :disabled="generating || !form.company || !form.position"
         :aria-label="$t('coverLetterPage.generate.submitAria')"
         @click="$emit('generate')"

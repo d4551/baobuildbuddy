@@ -8,6 +8,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type ProviderField =
@@ -137,7 +138,7 @@ const emit = defineEmits<{
     </details>
 
     <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button class="btn btn-primary" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
+      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
         {{ t("settings.aiProviders.saveButton") }}
       </button>
     </div>

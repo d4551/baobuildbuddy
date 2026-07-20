@@ -251,6 +251,8 @@ This split keeps one package from trying to do everything.
 | Topic                              | Guide                                            |
 |------------------------------------|--------------------------------------------------|
 | Full technical reference           | [README.md](../README.md)                        |
+| Stack contract (what this repo is) | [STACK-CONTRACT.md](./STACK-CONTRACT.md)         |
 | Local AI setup                     | [Local AI Setup](./LOCAL_AI_SETUP.md)             |
 | First-time setup                   | [Starter Guide](./STARTER_GUIDE.md)              |
 | Automation details                 | [Automation Guide](./AUTOMATION.md)               |
+| Proof / screenshots                | [Verification Runbook](./VERIFICATION_RUNBOOK.md) |

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
@@ -110,5 +111,7 @@ const { t } = useI18n();
     v-else
     title-key="skillsPathwaysPage.readiness.emptyStateTitle"
     description-key="skillsPathwaysPage.readiness.emptyStateDescription"
+    cta-label-key="nav.skills"
+    :cta-to="APP_ROUTES.skills"
   />
 </template>

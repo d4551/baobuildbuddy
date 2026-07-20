@@ -14,7 +14,10 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -32,6 +35,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   openAdd: [];
+  clearFilters: [];
   edit: [project: PortfolioProject];
   delete: [projectId: string | undefined];
   move: [projectId: string | undefined, direction: ProjectDirection];
@@ -48,20 +52,28 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
   <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
     <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
-      <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
+      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
         <IconPlus :class="[ICON_SIZE_CLASS[4]]"/>
         {{ t("portfolioPage.projects.addButton") }}
       </button>
     </div>
 
-    <div v-if="props.allProjectsLength === 0" class="alert alert-soft" role="status">
-      <IconInfoCircle :class="[ICON_SIZE_CLASS[6]]"/>
-      <span>{{ t("portfolioPage.projects.emptyState") }}</span>
-    </div>
+    <EmptyState
+      v-if="props.allProjectsLength === 0"
+      title-key="portfolioPage.projects.emptyTitle"
+      description-key="portfolioPage.projects.emptyState"
+      cta-label-key="portfolioPage.projects.addButton"
+      cta-aria-key="portfolioPage.projects.addAria"
+      @cta="emit('openAdd')"
+    />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="props.filteredProjectsLength === 0"
-      message-key="portfolioPage.projects.filteredEmptyState"
+      title-key="portfolioPage.projects.filteredEmptyTitle"
+      description-key="portfolioPage.projects.filteredEmptyState"
+      cta-label-key="portfolioPage.filters.clearButton"
+      cta-aria-key="portfolioPage.filters.clearAria"
+      @cta="emit('clearFilters')"
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">
@@ -125,7 +137,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
           <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="join">
               <button 
-                class="btn join-item btn-xs btn-ghost"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
                 :disabled="!props.canMove(project.id, 'up') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
                 @click="emit('move', project.id, 'up')"
@@ -133,7 +145,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 {{ t("portfolioPage.projects.moveUpButton") }}
               </button>
               <button 
-                class="btn join-item btn-xs btn-ghost"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
                 :disabled="!props.canMove(project.id, 'down') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
                 @click="emit('move', project.id, 'down')"
@@ -144,14 +156,14 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <button 
-                class="btn btn-xs btn-outline"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
                 :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"
                 @click="emit('edit', project)"
               >
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
               <button 
-                class="btn btn-xs btn-error btn-outline"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"
               >

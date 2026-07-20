@@ -7,13 +7,17 @@ definePageMeta({
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { getXPProgress } from "@bao/shared/constants/xp-levels";
-import type {
-  Achievement,
-  DailyChallenge,
-  UserGamificationData,
-} from "@bao/shared/types/gamification";
+import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import {
+  fetchOptionalTrend,
+  type GamificationHubData,
+  isGamificationEmpty,
+  requestGamificationData,
+  toMonthlyTrend,
+  toWeeklyTrend,
+} from "~/composables/gamification-hub-data";
 import {
   GAMIFICATION_ASYNC_DATA_KEY,
   GAMIFICATION_DEFAULT_CHALLENGE_GOAL,
@@ -21,13 +25,6 @@ import {
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
 import { getErrorMessage } from "~/utils/errors";
-import type { ApiEnvelope } from "~/types/client-api-contracts";
-
-interface GamificationHubData {
-  readonly progress: UserGamificationData;
-  readonly achievements: readonly Achievement[];
-  readonly challenges: readonly DailyChallenge[];
-}
 
 type GamificationUiState = "idle" | "loading" | "error" | "empty" | "success";
 
@@ -41,6 +38,29 @@ useSeoMeta({
   title: t("gamificationPage.seoTitle", { brand: resolvedBrand.value.name }),
   description: t("gamificationPage.seoDescription"),
 });
+
+async function fetchGamificationHubData(): Promise<GamificationHubData> {
+  const fallback = t("gamificationPage.loadErrorFallback");
+  const [progress, achievements, challengePayload, weeklyRaw, monthlyRaw] = await Promise.all([
+    requestGamificationData(api.gamification.progress.get(), fallback),
+    requestGamificationData(api.gamification.achievements.get(), fallback),
+    requestGamificationData(api.gamification.challenges.get(), fallback),
+    fetchOptionalTrend(api.gamification.weekly.get()),
+    fetchOptionalTrend(api.gamification.monthly.get()),
+  ]);
+
+  if (!progress || !achievements || !challengePayload) {
+    throw new Error(fallback);
+  }
+
+  return {
+    progress,
+    achievements,
+    challenges: challengePayload.challenges,
+    weekly: toWeeklyTrend(weeklyRaw),
+    monthly: toMonthlyTrend(monthlyRaw),
+  };
+}
 
 const { data, status, error, refresh } = await useAsyncData<GamificationHubData>(
   GAMIFICATION_ASYNC_DATA_KEY,
@@ -61,13 +81,12 @@ const uiState = computed<GamificationUiState>(() => {
   return "success";
 });
 
-const unlockedAchievements = computed(() => {
-  return hubData.value?.achievements.filter((achievement) => achievement.unlocked) ?? [];
-});
-
-const lockedAchievements = computed(() => {
-  return hubData.value?.achievements.filter((achievement) => !achievement.unlocked) ?? [];
-});
+const unlockedAchievements = computed(
+  () => hubData.value?.achievements.filter((achievement) => achievement.unlocked) ?? [],
+);
+const lockedAchievements = computed(
+  () => hubData.value?.achievements.filter((achievement) => !achievement.unlocked) ?? [],
+);
 
 const levelProgress = computed(() => {
   const progress = hubData.value?.progress;
@@ -96,14 +115,6 @@ watch(error, (nextError) => {
   }
 });
 
-function isGamificationEmpty(payload: GamificationHubData): boolean {
-  return (
-    payload.progress.xp === 0 &&
-    payload.achievements.length === 0 &&
-    payload.challenges.length === 0
-  );
-}
-
 function getChallengeGoal(challenge: DailyChallenge): number {
   if (typeof challenge.goal === "number" && challenge.goal > 0) {
     return challenge.goal;
@@ -130,7 +141,7 @@ async function handleCompleteChallenge(challengeId: string) {
   completingChallenge.value = challengeId;
   const completionResult = await settlePromise(
     (async () => {
-      await requestData(
+      await requestGamificationData(
         api.gamification.challenges({ id: challengeId }).complete.post(),
         t("gamificationPage.challengeCompleteErrorFallback"),
       );
@@ -148,35 +159,6 @@ async function handleCompleteChallenge(challengeId: string) {
   }
 
   $toast.success(t("gamificationPage.challengeCompletionToast"));
-}
-
-async function fetchGamificationHubData(): Promise<GamificationHubData> {
-  const [progress, achievements, challengePayload] = await Promise.all([
-    requestData(api.gamification.progress.get(), t("gamificationPage.loadErrorFallback")),
-    requestData(api.gamification.achievements.get(), t("gamificationPage.loadErrorFallback")),
-    requestData(api.gamification.challenges.get(), t("gamificationPage.loadErrorFallback")),
-  ]);
-
-  if (!progress || !achievements || !challengePayload) {
-    throw new Error(t("gamificationPage.loadErrorFallback"));
-  }
-
-  return {
-    progress,
-    achievements,
-    challenges: challengePayload.challenges,
-  };
-}
-
-async function requestData<T>(
-  request: Promise<ApiEnvelope<T>>,
-  fallbackMessage: string,
-): Promise<T> {
-  const response = await request;
-  if (response.error) {
-    throw new Error(getErrorMessage(response.error, fallbackMessage));
-  }
-  return response.data as T;
 }
 </script>
 
@@ -227,17 +209,20 @@ async function requestData<T>(
       <GamificationChallengesCard
         :challenges="hubData.challenges"
         :completing-challenge="completingChallenge"
-        :t="t"
         :get-challenge-goal="getChallengeGoal"
         :get-challenge-progress="getChallengeProgress"
         :can-claim-challenge="canClaimChallenge"
         @claim="handleCompleteChallenge"
       />
 
+      <GamificationTrendsCard
+        :weekly="hubData.weekly"
+        :monthly="hubData.monthly"
+      />
+
       <GamificationAchievementsCard
         :unlocked-achievements="unlockedAchievements"
         :locked-achievements="lockedAchievements"
-        :t="t"
       />
     </div>
   </PageScaffold>

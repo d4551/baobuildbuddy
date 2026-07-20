@@ -9,7 +9,10 @@ import {
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
@@ -66,7 +69,12 @@ const activeFilterCount = computed(() => {
             {{ t("jobsPage.filtersActiveCount", { count: activeFilterCount }) }}
           </span>
         </div>
-        <button class="btn btn-ghost btn-xs" :aria-label="t('jobsPage.clearFiltersAria')" @click="emit('clear')">
+        <button
+          class="btn btn-ghost"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :aria-label="t('jobsPage.clearFiltersAria')"
+          @click="emit('clear')"
+        >
           {{ t("jobsPage.clearFiltersButton") }}
         </button>
       </div>
@@ -137,13 +145,12 @@ const activeFilterCount = computed(() => {
       </div>
     </div>
     <div
-      class="sticky bottom-0 border-t border-base-300 bg-base-100/90 backdrop-blur lg:hidden"
-      :class="[PADDING_TOKEN_CLASS.p3]"
+      class="sticky bottom-0 border-t border-base-300 lg:hidden"
+      :class="[SURFACE_GLASS_SUBTLE_CLASS, PADDING_TOKEN_CLASS.p3]"
     >
       <button
         type="button"
-        class="btn btn-primary btn-sm"
-        :class="[FLUID_WIDTH_CLASS]"
+        :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS]"
         :aria-label="t('jobsPage.applyFiltersAria')"
         @click="emit('apply')"
       >

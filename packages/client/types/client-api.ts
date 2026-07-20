@@ -3,17 +3,24 @@ import type {
   AiApi,
   AuthApi,
   CoverLettersApi,
+  DocsApi,
   GamificationApi,
   InterviewApi,
-  JobsApi,
   PortfolioApi,
   ResumesApi,
   SettingsApi,
   SkillsApi,
   StatsApi,
-  StudioAnalyticsApi,
   UserApi,
 } from "./client-api-contracts";
+import type { JobsApi, StudiosApi } from "./client-api-jobs-studios";
+import type { AutomationApi, ScraperApi, SearchApi } from "./client-api-workspace";
+export type {
+  AutomationApi,
+  ScraperApi,
+  SearchApi,
+  SettingsWorkspaceExportPayload,
+} from "./client-api-workspace";
 
 export interface ClientApi {
   auth: AuthApi;
@@ -21,19 +28,19 @@ export interface ClientApi {
   settings: SettingsApi;
   jobs: JobsApi;
   resumes: ResumesApi;
-  coverLetters: CoverLettersApi;
+  /** Eden path segment is kebab-case (`cover-letters`); camelCase property 404s. */
+  "cover-letters": CoverLettersApi;
   portfolio: PortfolioApi;
   interview: InterviewApi;
   ai: AiApi;
   gamification: GamificationApi;
   skills: SkillsApi;
   stats: StatsApi;
-  studios: {
-    analytics: StudioAnalyticsApi;
-  };
-  automation: object;
-  search: object;
-  scraper: object;
+  studios: StudiosApi;
+  automation: AutomationApi;
+  search: SearchApi;
+  scraper: ScraperApi;
+  docs: DocsApi;
 }
 
 const REQUIRED_API_BRANCHES = [
@@ -42,7 +49,7 @@ const REQUIRED_API_BRANCHES = [
   "settings",
   "jobs",
   "resumes",
-  "coverLetters",
+  "cover-letters",
   "portfolio",
   "interview",
   "ai",
@@ -53,6 +60,7 @@ const REQUIRED_API_BRANCHES = [
   "automation",
   "search",
   "scraper",
+  "docs",
 ] as const satisfies readonly (keyof ClientApi)[];
 
 const isRouteGroup = (value: unknown): value is object =>

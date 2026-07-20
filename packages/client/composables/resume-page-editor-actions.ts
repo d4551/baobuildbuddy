@@ -25,7 +25,7 @@ type ResumeEnhanceActionInput = Pick<
 
 type ResumeScoreActionInput = Pick<
   ResumePageActionsInput,
-  "aiScore" | "scoring" | "selectedResumeId"
+  "aiScore" | "analyzeResume" | "scoring" | "selectedResumeId"
 >;
 
 type ResumeSaveActionInput = Pick<
@@ -147,6 +147,7 @@ export function useResumeEditorActions(
     ResumePageActionsInput,
     | "aiEnhance"
     | "aiScore"
+    | "analyzeResume"
     | "enhancing"
     | "formData"
     | "scoring"
@@ -226,6 +227,10 @@ function createResumeScoreAction(input: ResumeScoreActionInput, feedback: Resume
       return;
     }
 
+    await settlePromise(
+      input.analyzeResume(input.selectedResumeId.value),
+      feedback.t("apiErrors.ai.analyzeResumeFailed"),
+    );
     feedback.$toast.success(feedback.t("resumePage.toasts.resumeScored"));
   };
 }

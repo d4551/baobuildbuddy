@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -9,6 +10,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRACKING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -50,7 +52,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-start">
-        <NuxtLink :to="runsRoute" class="btn btn-outline btn-sm">
+        <NuxtLink :to="runsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </div>

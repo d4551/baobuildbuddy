@@ -260,6 +260,38 @@ export const MIN_H_36_CLASS = "min-h-36";
 export const MIN_H_60_CLASS = "min-h-60";
 export const MIN_H_80_CLASS = "min-h-80";
 
+/**
+ * Apple HIG / WCAG touch-target floor (44×44 CSS px).
+ * Use on primary interactive chrome (dock items, critical icon buttons).
+ */
+/** Floor + fixed height so daisyUI menu/btn padding cannot shrink below 44px. */
+export const TOUCH_TARGET_MIN_CLASS = "box-border h-11 min-h-11 min-w-11 py-0";
+
+/** daisyUI primary color variant (segmented controls, selected ghost/outline buttons). */
+export const PRIMARY_BUTTON_VARIANT_CLASS = "btn-primary";
+
+/**
+ * Primary actionable CTA — daisyUI primary + touch floor.
+ * Ban pairing `btn-primary` with `btn-sm`/`btn-xs` (validate:primary-action-density).
+ */
+export const PRIMARY_ACTION_CLASS = `btn ${PRIMARY_BUTTON_VARIANT_CLASS} h-11 min-h-11`;
+
+/**
+ * Secondary / outline CTA — same touch floor as primary without competing for hero primary.
+ * Use for quick-action grids and demoted hub cards when a page already owns PRIMARY_ACTION_CLASS.
+ */
+export const OUTLINE_ACTION_CLASS = "btn btn-outline h-11 min-h-11";
+
+/** Per-item dock link: meets touch-target floor without forking dock chrome. */
+export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
+
+/**
+ * Section-rail tab label: visible + truncated @320 (scroll rail), full from sm+.
+ * Prefer this over display:none — discoverability without mid-word clip.
+ */
+export const SECTION_RAIL_LABEL_CLASS =
+  "max-w-20 shrink truncate text-xs font-medium sm:max-w-none sm:text-sm";
+
 /** Scroll margin for in-page anchor targets (scroll-mt-24). */
 export const SCROLL_MARGIN_TOP_24_CLASS = "scroll-mt-24";
 
@@ -273,5 +305,6 @@ export const PRINT_PADDING_RESET_CLASS = "print:p-0";
 /** Max-width extended tokens. */
 export const MAX_W_2XL_CLASS = "max-w-2xl";
 export const MAX_W_3XL_CLASS = "max-w-3xl";
+export const MAX_W_40_CLASS = "max-w-40";
 export const MAX_W_64_CLASS = "max-w-64";
 export const MAX_W_XS_CLASS = "max-w-xs";

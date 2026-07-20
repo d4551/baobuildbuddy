@@ -5,8 +5,11 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -61,7 +64,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const iconClass = computed(() => (props.compact ? "h-4 w-4" : "h-5 w-5"));
+const iconClass = computed(() => (props.compact ? ICON_SIZE_CLASS["4"] : ICON_SIZE_CLASS.sm));
 const showAdvancedSpeechConfig = computed(
   () =>
     !props.compact &&
@@ -96,7 +99,7 @@ function handleAutoSpeakChange(event: Event): void {
   <button
     v-if="props.supportsRecognition"
     class="btn btn-ghost"
-    :class="{ 'join-item': props.joinItem, 'btn-warning': props.isListening }"
+    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
     :title="
       props.isListening
         ? t('aiChatCommon.voice.stopTitle')
@@ -139,7 +142,7 @@ function handleAutoSpeakChange(event: Event): void {
   <button
     v-if="props.supportsSynthesis"
     class="btn btn-ghost"
-    :class="{ 'join-item': props.joinItem }"
+    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
     :aria-label="t('aiChatCommon.voice.replayAria')"
     :title="t('aiChatCommon.voice.replayTitle')"
     :disabled="!props.canReplayAssistant || props.loading"

@@ -221,6 +221,29 @@ const collectColorLiteralViolations = (
   return violations;
 };
 
+const scriptSizingLiteralPattern =
+  /["'`]((?:h|w|min-h|min-w|max-h|max-w)-(?:xs|sm|md|lg|xl|\d{1,3})(?:\s+(?:h|w|min-h|min-w|max-h|max-w)-(?:xs|sm|md|lg|xl|\d{1,3}))+)["'`]/gu;
+
+const collectScriptSizingLiteralViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isSsotSourceFile(filePath) || isIconPrimitive(filePath)) return [];
+  if (filePath.endsWith(".test.ts") || filePath.endsWith(".spec.ts")) return [];
+  if (!(filePath.endsWith(".vue") || filePath.endsWith(".ts"))) return [];
+  const violations: ValidationViolation[] = [];
+  scriptSizingLiteralPattern.lastIndex = 0;
+  for (const match of content.matchAll(scriptSizingLiteralPattern)) {
+    const token = match[1] ?? match[0];
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Script sizing literal "${token}" is forbidden. Use ICON_SIZE_CLASS / layout size tokens.`,
+    });
+  }
+  return violations;
+};
+
 export const collectRawDesignTokenViolationsForContent = (
   filePath: string,
   content: string,
@@ -233,12 +256,14 @@ export const collectRawDesignTokenViolationsForContent = (
   const propDefaultViolations = collectDesignTokenPropDefaultViolations(filePath, content);
   const svgViolations = collectSvgNumericAttributeViolations(filePath, content);
   const colorViolations = collectColorLiteralViolations(filePath, content);
+  const scriptSizingViolations = collectScriptSizingLiteralViolations(filePath, content);
   return [
     ...classViolations,
     ...responsiveViolations,
     ...propDefaultViolations,
     ...svgViolations,
     ...colorViolations,
+    ...scriptSizingViolations,
   ];
 };
 

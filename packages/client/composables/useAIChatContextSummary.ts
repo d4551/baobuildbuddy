@@ -24,24 +24,6 @@ const ENTITY_TYPE_LABEL_KEY_BY_TYPE: Record<AIChatContextEntityType, string> = {
   studio: "floatingChat.entityTypes.studio",
 };
 
-const SOURCE_LABEL_KEY_BY_TYPE = {
-  "chat-page": "floatingChat.sources.chatPage",
-  "floating-widget": "floatingChat.sources.floatingWidget",
-} as const;
-
-const LEADING_ROUTE_SLASHES_PATTERN = /^\/+/;
-const ROUTE_SEGMENT_SEPARATOR_PATTERN = /[-_/]+/g;
-const ROUTE_WHITESPACE_PATTERN = /\s+/g;
-
-const humanizeRouteLabel = (routeName: string | undefined, routePath: string): string => {
-  const source = routeName && routeName.trim().length > 0 ? routeName : routePath;
-  return source
-    .replace(LEADING_ROUTE_SLASHES_PATTERN, "")
-    .replace(ROUTE_SEGMENT_SEPARATOR_PATTERN, " ")
-    .replace(ROUTE_WHITESPACE_PATTERN, " ")
-    .trim();
-};
-
 const buildStateChips = (context: AIChatContext, t: Translator): string[] => {
   const chips: string[] = [];
 
@@ -84,37 +66,20 @@ const createFocusedEntityLabel = (context: ComputedRef<AIChatContext>) =>
     return entity.label || entity.id;
   });
 
-const createSourceLabel = (context: ComputedRef<AIChatContext>, t: Translator) =>
-  computed(() => t(SOURCE_LABEL_KEY_BY_TYPE[context.value.source]));
-
 interface ContextChipBuilderInput {
   context: ComputedRef<AIChatContext>;
-  currentContextLabel: ComputedRef<string>;
   focusedEntityLabel: ComputedRef<string>;
-  routeLabel: ComputedRef<string>;
-  sourceLabel: ComputedRef<string>;
   t: Translator;
 }
 
-const createContextChips = ({
-  context,
-  currentContextLabel,
-  focusedEntityLabel,
-  routeLabel,
-  sourceLabel,
-  t,
-}: ContextChipBuilderInput) =>
+/**
+ * User-facing chips only (entity + state). Surface/Route/Scope telemetry belongs
+ * in aria labels / headers — not badge clutter on the floating panel.
+ */
+const createContextChips = ({ context, focusedEntityLabel, t }: ContextChipBuilderInput) =>
   computed(() => {
-    const chips = [
-      t("floatingChat.domainChip", {
-        context: currentContextLabel.value,
-      }),
-      t("floatingChat.sourceChip", {
-        source: sourceLabel.value,
-      }),
-    ];
+    const chips: string[] = [];
     const entity = context.value.entity;
-
     if (entity) {
       chips.push(
         t("floatingChat.entityChip", {
@@ -122,10 +87,6 @@ const createContextChips = ({
           entity: focusedEntityLabel.value,
         }),
       );
-    }
-
-    if (routeLabel.value.length > 0) {
-      chips.push(t("floatingChat.routeBadge", { route: routeLabel.value }));
     }
 
     chips.push(...buildStateChips(context.value, t));
@@ -169,16 +130,9 @@ const createContextualPrompts = (
 export function useAIChatContextSummary(context: ComputedRef<AIChatContext>, t: Translator) {
   const currentContextLabel = createCurrentContextLabel(context, t);
   const focusedEntityLabel = createFocusedEntityLabel(context);
-  const routeLabel = computed(() =>
-    humanizeRouteLabel(context.value.route.name, context.value.route.path),
-  );
-  const sourceLabel = createSourceLabel(context, t);
   const contextChips = createContextChips({
     context,
-    currentContextLabel,
     focusedEntityLabel,
-    routeLabel,
-    sourceLabel,
     t,
   });
   const contextualPrompts = createContextualPrompts(

@@ -34,9 +34,9 @@ export const GAMIFICATION_PROGRESS_MAX = 100;
 export const GAMIFICATION_XP_TARGET_FALLBACK = 100;
 
 /**
- * Shared iconography used by the gamification page header and stat cards.
+ * Shared iconography — AppIcon registry names (no emoji literals in surfaces).
  */
-export const GAMIFICATION_LEVEL_ICON = "🎮";
-export const GAMIFICATION_CURRENT_STREAK_ICON = "🔥";
-export const GAMIFICATION_LONGEST_STREAK_ICON = "⭐";
-export const GAMIFICATION_ACHIEVEMENTS_ICON = "🏆";
+export const GAMIFICATION_LEVEL_ICON = "IconSparkles" as const;
+export const GAMIFICATION_CURRENT_STREAK_ICON = "IconBolt" as const;
+export const GAMIFICATION_LONGEST_STREAK_ICON = "IconCheckCircle" as const;
+export const GAMIFICATION_ACHIEVEMENTS_ICON = "IconBolt" as const;

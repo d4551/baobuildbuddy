@@ -7,6 +7,7 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
@@ -15,6 +16,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import {
   resolveAutomationCapabilityAction,
@@ -80,7 +82,7 @@ const readyEntries = computed(() =>
         </div>
         <NuxtLink 
           :to="APP_ROUTES.automationScraper"
-          class="btn btn-outline btn-sm"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
           :aria-label="t('automation.hub.audit.openScraperAria')"
         >
           {{ t("automation.hub.audit.openScraperButton") }}
@@ -128,6 +130,9 @@ const readyEntries = computed(() =>
                 v-if="needsAttentionEntries.length === 0"
                 title-key="automation.hub.audit.groups.attentionEmptyTitle"
                 description-key="automation.hub.audit.groups.attentionEmptyDescription"
+                cta-label-key="automation.hub.audit.groups.attentionEmptyCta"
+                cta-aria-key="automation.hub.audit.groups.attentionEmptyCtaAria"
+                :cta-to="APP_ROUTES.automationScraper"
               />
 
               <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -174,7 +179,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      class="btn btn-outline btn-sm"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}
@@ -227,7 +232,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      class="btn btn-ghost btn-sm"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}

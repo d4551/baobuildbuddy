@@ -1,0 +1,25 @@
+# Baseline ratchet 2026-07-20T02:33:05Z
+commit=d6377fc8a098b237278f5dfdd69782fb9041f625
+branch=cursor/ui-responsive-visual-burndown-6a75
+a2167f98cdc0a9f1970234d4c6738261af3c027adb8d6943113540b3db9b3acc  package.json
+740a398d017b9a4bef9536d19a12ea943abde63794d24d4cfeb936ef3b728c83  bun.lock
+5f3404b5e46e90f57f4c95e6d652b60bd5ea3195831012c7504a4fbca3b61514  biome.json
+2906634138332dcb266a1a3e16769bc5ae06686b4b2bb53a785cc8b1efd626a8  eslint.config.mjs
+f5e544b257d24686b270dea7bfa1c0d4a1e98054d257d1524f9c13591fc49cf2  scripts/browser-visual-smoke.ts
+94aa80a72b48d4854d936c86ee7d9c8c183562ed2ca9bcb781eb7533287eb43a  scripts/browser-interaction-burndown.ts
+cb0fb7ea86d5cea5131fc51bb8b3d2b9b2755706b8bd2a82bfb564a8d6ed198b  packages/client/assets/css/main.css
+8ee09ac2ddb342baf626693641d6ea076212b1acc4e6b50b83fa63e86112ed05  packages/client/constants/layout.ts
+3f55182a9892be72055b3ca64534f099f44aaf65e249442dbaa0384a8f3de27d  packages/client/constants/ui-layout.ts
+---
+route_pages=30
+
+# Tip ratchet 2026-07-20 post D40–D42
+tip=86c2ce7
+smoke_e=/opt/cursor/artifacts/tip-86c2ce7/smoke-e/report.json → 69/0
+burndown_e=/opt/cursor/artifacts/tip-86c2ce7/burndown-e/burndown-report.json → 57/0
+smoke_f=/opt/cursor/artifacts/tip-86c2ce7/smoke-f/report.json → 69/0
+burndown_f=/opt/cursor/artifacts/tip-86c2ce7/burndown-f/burndown-report.json → 57/0
+deep_320=/opt/cursor/artifacts/tip-86c2ce7/deep-320/measures.json
+streak_clipped=false overflow_x=0 locale_h=44 setup_next_h=44
+lint=green test=229/0
+consecutive_clean=E+F

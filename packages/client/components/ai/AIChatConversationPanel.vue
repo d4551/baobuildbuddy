@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
+import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
@@ -9,13 +9,19 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
+import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
   resolvedBrand: { assistantName: string; name: string };
@@ -95,7 +101,8 @@ const updateInput = (event: Event): void => {
               </h1>
               <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
             </div>
-            <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+            <!-- Below xl the sidebar is hidden; header owns context chips. At xl+ sidebar owns them. -->
+            <div class="flex flex-wrap items-center xl:hidden" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span class="badge badge-soft badge-info">
                 {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
               </span>
@@ -109,7 +116,8 @@ const updateInput = (event: Event): void => {
           </div>
           <button
             type="button"
-            class="btn btn-ghost btn-sm self-start"
+            class="btn btn-ghost self-start"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('aiChatPage.clearAria')"
             @click="emit('clear')"
           >
@@ -120,7 +128,7 @@ const updateInput = (event: Event): void => {
 
       <div
         ref="aiChatContainer"
-        class="flex-1 overflow-y-auto glass-subtle" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]"
+        class="flex-1 overflow-y-auto" :class="[SURFACE_GLASS_SUBTLE_CLASS, MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]"
         role="log"
         aria-live="polite"
         aria-atomic="false"
@@ -131,14 +139,6 @@ const updateInput = (event: Event): void => {
         <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
           <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-              <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <span class="badge badge-soft badge-info">
-                  {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
-                </span>
-                <span v-if="focusedEntityLabel" class="badge badge-soft badge-primary">
-                  {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
-                </span>
-              </div>
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                 <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
                 <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -179,7 +179,14 @@ const updateInput = (event: Event): void => {
         </div>
       </div>
 
-      <div class="border-t border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py4, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
+      <div
+        :class="[
+          CHAT_COMPOSER_STICKY_CLASS,
+          PADDING_TOKEN_CLASS.px4,
+          PADDING_TOKEN_CLASS.py4,
+          CHAT_PANEL_PADDING_SM_PX6_CLASS,
+        ]"
+      >
         <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" @submit.prevent="emit('send')">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <label class="sr-only" for="ai-chat-composer">
@@ -199,10 +206,7 @@ const updateInput = (event: Event): void => {
             />
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-                <p class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                  {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
-                </p>
-                <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                <p class="break-words text-secondary" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ t("aiChatPage.composerHint") }}
                 </p>
               </div>
@@ -212,7 +216,7 @@ const updateInput = (event: Event): void => {
                 </p>
                 <button
                   type="submit"
-                  class="btn btn-primary"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :disabled="!input.trim() || loading"
                   :aria-label="t('aiChatPage.sendAria')"
                 >
@@ -225,13 +229,11 @@ const updateInput = (event: Event): void => {
           </div>
 
           <ClientOnly>
+            <!-- Compact: mic/replay only — speech profiles stay out of first viewport (conversation-first). -->
             <ChatVoiceControls
+              compact
               :selected-voice-id="selectedVoiceId"
               :auto-speak-replies="autoSpeakReplies"
-              :stt-provider="speechConfig.sttProvider"
-              :stt-model="speechConfig.sttModel"
-              :tts-provider="speechConfig.ttsProvider"
-              :tts-model="speechConfig.ttsModel"
               :loading="loading"
               :supports-recognition="supportsRecognition"
               :supports-synthesis="supportsSynthesis"
@@ -239,23 +241,36 @@ const updateInput = (event: Event): void => {
               :is-listening="isVoiceListening"
               :is-speaking="isVoiceSpeaking"
               :voices="availableVoices"
-              :speech-provider-options="speechProviderOptions"
-              :stt-model-options="sttModelOptions"
-              :tts-model-options="ttsModelOptions"
-              :speech-config-saving="speechConfigSaving"
               :support-hint-key="voiceSupportHintKey"
               :error-label="voiceErrorLabel"
               @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
               @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
-              @update:stt-provider="emit('update:sttProvider', $event)"
-              @update:stt-model="emit('update:sttModel', $event)"
-              @update:tts-provider="emit('update:ttsProvider', $event)"
-              @update:tts-model="emit('update:ttsModel', $event)"
-              @save-speech-settings="emit('saveSpeech')"
               @toggle-listening="emit('toggleListening')"
               @replay-assistant="emit('replayAssistant')"
             />
           </ClientOnly>
+          <details class="collapse collapse-arrow border border-base-300 bg-base-100" :class="[MARGIN_TOKEN_CLASS.mt2]">
+            <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, TOUCH_TARGET_MIN_CLASS]">
+              {{ t("aiChatPage.voiceSettings.legend") }}
+            </summary>
+            <div class="collapse-content" :class="[PADDING_TOKEN_CLASS.pb4]">
+              <SpeechModelProfileFields
+                :provider-options="speechProviderOptions"
+                :stt-provider="speechConfig.sttProvider"
+                :stt-model="speechConfig.sttModel"
+                :tts-provider="speechConfig.ttsProvider"
+                :tts-model="speechConfig.ttsModel"
+                :stt-model-options="sttModelOptions"
+                :tts-model-options="ttsModelOptions"
+                :saving="speechConfigSaving"
+                @update:stt-provider="emit('update:sttProvider', $event)"
+                @update:stt-model="emit('update:sttModel', $event)"
+                @update:tts-provider="emit('update:ttsProvider', $event)"
+                @update:tts-model="emit('update:ttsModel', $event)"
+                @save="emit('saveSpeech')"
+              />
+            </div>
+          </details>
 
           <p v-if="isSpeechConfigDirty" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
             {{ t("aiChatPage.voiceSettings.unsavedHint") }}

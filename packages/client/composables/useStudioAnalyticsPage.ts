@@ -83,7 +83,7 @@ function mapAnalyticsResponse(data: unknown): StudioAnalytics | null {
 }
 
 function createStudioAnalyticsMetrics(
-  analytics: Ref<StudioAnalytics | null>,
+  analytics: Ref<StudioAnalytics | null> | ComputedRef<StudioAnalytics | null>,
 ): StudioAnalyticsMetrics {
   const totalStudios = computed(() => analytics.value?.totalStudios ?? 0);
   const remoteWorkStudios = computed(() => analytics.value?.remoteWorkStudios ?? 0);
@@ -116,17 +116,6 @@ function getMaxCount(items: readonly AnalyticsTechnology[]): number {
   return Math.max(1, ...items.map((item) => item.count));
 }
 
-function showClientErrorToast(
-  toast: {
-    error: (message: string) => void;
-  },
-  message: string,
-): void {
-  if (import.meta.client) {
-    toast.error(message);
-  }
-}
-
 async function loadStudioAnalyticsData(
   api: ReturnType<typeof useApi>,
   loadFailedMessage: string,
@@ -153,33 +142,40 @@ async function loadStudioAnalyticsData(
   };
 }
 
+/**
+ * Studio analytics page state. Payload must flow through `useAsyncData` `data`
+ * so SSR HTML and client hydration share one owner (no orphan `ref(null)`).
+ */
 export function useStudioAnalyticsPage() {
   const { $toast } = useNuxtApp();
   const api = useApi();
   const { t } = useI18n();
-
-  const analytics = ref<StudioAnalytics | null>(null);
-  const pageError = ref<string | null>(null);
   const loadFailedMessage = t("studioAnalytics.errors.loadFailed");
-  const metrics = createStudioAnalyticsMetrics(analytics);
 
-  const fetchAnalytics = async () => {
-    pageError.value = null;
-    const result = await loadStudioAnalyticsData(api, loadFailedMessage);
-    analytics.value = result.data;
-    pageError.value = result.errorMessage;
-    if (result.errorMessage) {
-      showClientErrorToast($toast, result.errorMessage);
-    }
-  };
-
-  const { pending: loading, refresh: refreshAnalytics } = useAsyncData(
+  const {
+    data: analyticsPayload,
+    pending: loading,
+    refresh: refreshAnalytics,
+    error: asyncError,
+  } = useAsyncData(
     "studio-analytics",
     async () => {
-      await fetchAnalytics();
-      return analytics.value;
+      const result = await loadStudioAnalyticsData(api, loadFailedMessage);
+      if (result.errorMessage && import.meta.client) {
+        $toast.error(result.errorMessage);
+      }
+      return result;
     },
+    { lazy: false, server: true },
   );
+
+  const analytics = computed(() => analyticsPayload.value?.data ?? null);
+  const pageError = computed(
+    () =>
+      analyticsPayload.value?.errorMessage ??
+      (asyncError.value ? getErrorMessage(asyncError.value, loadFailedMessage) : null),
+  );
+  const metrics = createStudioAnalyticsMetrics(analytics);
 
   return {
     analytics,

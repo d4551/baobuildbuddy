@@ -46,6 +46,7 @@ const AI_SURFACE_PATH_PATTERN =
 const SCORE_SURFACE_PATH_PATTERN = /\b(?:interview|skill|confidence|score|match)\b/iu;
 // Hoisted: confidence/score term detection in combined template+script.
 const SCORE_SURFACE_CONTENT_PATTERN = /\b(?:confidence|score|interviewScore|skillConfidence)\b/iu;
+const NAVIGATE_TO_PATTERN = /\bnavigateTo\b/u;
 
 const extractTemplateBlocks = (content: string): string => {
   const templateStart = content.indexOf("<template>");
@@ -77,6 +78,11 @@ export const collectAiProvenanceViolationsForContent = (
   const script = extractScriptBlocks(content);
   const combined = `${template}\n${script}`;
   if (combined.length === 0) return [];
+
+  // Section-root redirect (APP_ROUTES.ai → aiChat) references aiChat but renders nothing.
+  if (filePath.endsWith("pages/ai/index.vue") && NAVIGATE_TO_PATTERN.test(script)) {
+    return [];
+  }
 
   // Does this surface render AI content?
   const rendersAiContent = aiContentRenderPattern.test(combined);

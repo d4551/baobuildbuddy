@@ -123,6 +123,7 @@ export const useFloatingChatWidgetLifecycle = (options: {
 export const createFloatingChatWidgetDerivedState = (options: {
   messages: ReturnType<typeof useAI>["messages"];
   streaming: ReturnType<typeof useAI>["streaming"];
+  streamingContent: ReturnType<typeof useAI>["streamingContent"];
   route: ReturnType<typeof useRoute>;
   buildCurrentContext: ReturnType<typeof useAI>["buildCurrentContext"];
   t: ReturnType<typeof useI18n>["t"];
@@ -149,7 +150,9 @@ export const createFloatingChatWidgetDerivedState = (options: {
   const latestAssistantMessageIndex = computed(() =>
     resolveLatestAssistantMessageIndex(options.messages.value),
   );
-  const streamingBubble = computed(() => createStreamingAssistantMessage("floatingWidget"));
+  const streamingBubble = computed(() =>
+    createStreamingAssistantMessage("floatingWidget", options.streamingContent.value),
+  );
   const { contextChips, contextualPrompts, currentContextLabel, focusedEntityLabel } =
     useAIChatContextSummary(chatContext, options.t);
   const hasConversation = computed(

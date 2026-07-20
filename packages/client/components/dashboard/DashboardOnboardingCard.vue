@@ -10,9 +10,11 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -59,10 +61,14 @@ const { t } = useI18n();
           </div>
 
           <div class="card-actions flex-wrap">
-            <NuxtLink :to="primaryRoute" class="btn btn-primary">
+            <NuxtLink :to="primaryRoute" :class="[PRIMARY_ACTION_CLASS]">
               {{ primaryLabel }}
             </NuxtLink>
-            <NuxtLink :to="APP_ROUTES.jobs" class="btn btn-soft btn-primary">
+            <NuxtLink
+              :to="APP_ROUTES.jobs"
+              class="btn btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS]"
+            >
               {{ t("dashboard.quickActions.actions.browseJobs") }}
             </NuxtLink>
           </div>

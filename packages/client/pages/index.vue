@@ -26,6 +26,8 @@ const {
   statCards,
   retryDashboardLoad,
   formatTimeAgo,
+  claimingChallengeId,
+  claimDailyChallenge,
 } = useDashboardPage();
 
 const { t } = useI18n();
@@ -75,8 +77,9 @@ useSeoMeta({
         :show-setup-action="!dashboard?.profile?.name"
       />
 
+      <!-- XP celebration after profile identity exists — avoids Setup CTA vs Level 10 contradiction. -->
       <DashboardGamificationCard
-        v-if="dashboard?.gamification"
+        v-if="dashboard?.gamification && dashboard.profile?.name"
         :gamification="dashboard.gamification"
         :level-progress="levelProgress"
         :xp-into-level="xpIntoLevel"
@@ -88,7 +91,9 @@ useSeoMeta({
       <DashboardChallengeActivityGrid
         :daily-challenge="dashboard?.dailyChallenge ?? null"
         :recent-activity="dashboard?.recentActivity ?? []"
+        :claiming-challenge-id="claimingChallengeId"
         :format-time-ago="formatTimeAgo"
+        @claim="claimDailyChallenge"
       />
 
       <DashboardQuickActionsCard :actions="dashboardQuickActions" />

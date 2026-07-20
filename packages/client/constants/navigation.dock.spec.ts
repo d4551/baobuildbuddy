@@ -22,6 +22,8 @@ describe("mobile dock navigation SSOT", () => {
     expect(ids).toContain("dashboard");
     expect(ids).toContain("jobs");
     expect(ids).toContain("settings");
+    expect(ids).toContain("ai-chat");
+    expect(ids).toContain("automation");
     expect(ids).not.toContain("apiDocs");
   });
 });

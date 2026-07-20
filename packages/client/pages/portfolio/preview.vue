@@ -18,6 +18,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PROSE_MEASURE_CENTER_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -87,7 +88,7 @@ async function handleExport(format: "pdf" | "docx") {
           :button-label="t('portfolioPage.actions.exportButton')"
           :button-aria-label="t('portfolioPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-primary print:hidden"
+          :summary-class="`${PRIMARY_ACTION_CLASS} print:hidden`"
           @export="handleExport"
         />
       </template>
@@ -121,7 +122,11 @@ async function handleExport(format: "pdf" | "docx") {
             </h2>
             <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
           </div>
-          <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+          <div
+            v-if="portfolio.metadata?.email || portfolio.metadata?.website"
+            class="flex flex-wrap justify-center"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap4]"
+          >
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"
@@ -185,7 +190,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary btn-sm"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
@@ -234,7 +239,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary btn-sm"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}

@@ -11,10 +11,22 @@ import { toUserProfile } from "~/composables/api-normalizer-user";
 import { requireValue } from "~/composables/async-flow";
 import { DASHBOARD_ACTIVITY_FALLBACK_KEY, DASHBOARD_ERROR_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_RECENT_ACTIVITY_LIMIT } from "~/constants/dashboard-core";
-import { resolveDashboardActivityType } from "~/constants/dashboard-pipeline";
+import {
+  resolveDashboardActivityActionLabelKey,
+  resolveDashboardActivityType,
+} from "~/constants/dashboard-pipeline";
 import { getErrorMessage } from "~/utils/errors";
 
 type TranslateFn = (key: string, values?: Record<string, unknown>) => string;
+
+function resolveActivityDescription(action: string, t: TranslateFn): string {
+  const actionLabelKey = resolveDashboardActivityActionLabelKey(action);
+  if (actionLabelKey) {
+    return t(`dashboard.activityActions.${actionLabelKey}`);
+  }
+  const activityType = resolveDashboardActivityType(action);
+  return t(`dashboard.activityTypes.${activityType}`);
+}
 
 function mapDailyChallenge(challenge: DailyChallenge): DashboardChallengeViewModel {
   const goal = typeof challenge.goal === "number" && challenge.goal > 0 ? challenge.goal : 1;
@@ -74,7 +86,7 @@ function getRecentActivity(
 
       return {
         type: resolveDashboardActivityType(action),
-        description: action,
+        description: resolveActivityDescription(action, t),
         timestamp,
       };
     })

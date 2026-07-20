@@ -18,7 +18,7 @@ export type StackVersionPin = {
 export const STACK_VERSION_PINS: readonly StackVersionPin[] = [
   {
     packageName: "elysia",
-    requiredInstalled: "2.0.0-exp.45",
+    requiredInstalled: "2.0.0-exp.46",
     requiredPrefix: "2.0.0-exp.",
     resolveFromPackage: "packages/server",
   },

@@ -1,6 +1,6 @@
 const settingstitle = {
   settings: {
-    title: "Settings & Profile",
+    title: "Settings",
   },
 } as const;
 

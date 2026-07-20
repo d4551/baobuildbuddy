@@ -2,7 +2,7 @@
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, PRIMARY_ACTION_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 const props = defineProps<{
   portfolioForm: PortfolioMetadata;
@@ -87,7 +87,7 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button class="btn btn-primary" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">
+        <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">
           {{ t("portfolioPage.profile.saveButton") }}
         </button>
       </div>

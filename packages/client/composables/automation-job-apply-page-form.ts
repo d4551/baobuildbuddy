@@ -1,7 +1,6 @@
-import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { requestApi, useClientApiRequestRuntime } from "~/composables/api-request";
+import { useClientApiRequestRuntime } from "~/composables/api-request";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 import { readApiDataOrEmpty } from "~/utils/api-response";
@@ -48,7 +47,7 @@ export function useAutomationJobApplyDependencies() {
   const { t, locale, fallbackLocale } = useI18n();
   const api = useApi();
   const runtime = useClientApiRequestRuntime();
-  const { triggerJobApply, scheduleJobApply } = useAutomation();
+  const { getVerifyContext, triggerJobApply, scheduleJobApply } = useAutomation();
   const runStream = useAutomationRunStream({
     fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
   });
@@ -56,6 +55,7 @@ export function useAutomationJobApplyDependencies() {
   return {
     api,
     fallbackLocale,
+    getVerifyContext,
     locale,
     runStream,
     runtime,
@@ -106,7 +106,7 @@ export function useAutomationJobApplyBootstrap(input: {
   api: ReturnType<typeof useApi>;
   runtime: ReturnType<typeof useClientApiRequestRuntime>;
 }) {
-  const { data: resumesData } = useAsyncData<ResumeSelectOption[]>(
+  const { data: resumesData, status: resumesStatus } = useAsyncData<ResumeSelectOption[]>(
     "automation-job-apply-resumes",
     async () => toResumeSelectOptions(await readApiDataOrEmpty(input.api.resumes.get())),
     {
@@ -114,22 +114,26 @@ export function useAutomationJobApplyBootstrap(input: {
     },
   );
 
-  const { data: coverLettersData } = useAsyncData<CoverLetterSelectOption[]>(
-    "automation-job-apply-cover-letters",
-    async () =>
-      toCoverLetterSelectOptions(
-        await readApiDataOrEmpty(
-          requestApi<unknown>(input.runtime, API_ENDPOINTS.coverLetters, {
-            method: "GET",
-          }),
-        ),
-      ),
-    {
-      default: () => [],
-    },
+  const { data: coverLettersData, status: coverLettersStatus } =
+    useAsyncData<CoverLetterSelectOption[]>(
+      "automation-job-apply-cover-letters",
+      async () =>
+        toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
+      {
+        default: () => [],
+      },
+    );
+
+  const bootstrapPending = computed(
+    () =>
+      resumesStatus.value === "pending" ||
+      resumesStatus.value === "idle" ||
+      coverLettersStatus.value === "pending" ||
+      coverLettersStatus.value === "idle",
   );
 
   return {
+    bootstrapPending,
     coverLettersData,
     resumesData,
   };

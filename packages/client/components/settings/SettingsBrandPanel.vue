@@ -8,7 +8,9 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
@@ -121,12 +123,9 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-      <SettingsPanelHeader
-        :title="t('settings.brand.title')"
-        :description="t('settings.brand.subtitle')"
-      >
-        <template #meta>
-          <span 
+      <SettingsPanelHeader>
+        <template v-if="brandSaveStateLabel" #meta>
+          <span
             class="badge"
             :class="getSaveStateBadgeClass(brandSaveState)"
             role="status"
@@ -236,7 +235,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 
           <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
             <button 
-              class="btn btn-primary"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"
               @click="emit('save')"

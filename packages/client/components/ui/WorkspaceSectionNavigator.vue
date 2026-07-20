@@ -12,10 +12,13 @@ import {
   SCROLL_SNAP_ALIGN_START_CLASS,
   SCROLL_SNAP_X_MANDATORY_CLASS,
   SCROLL_TOUCH_PAN_X_CLASS,
+  SECTION_RAIL_LABEL_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 interface WorkspaceSectionItem {
@@ -33,10 +36,16 @@ const props = withDefaults(
     buildRoute: (sectionId: string) => string;
     badgeById?: Readonly<Record<string, number | string>>;
     fallbackDescriptionKey?: string;
+    /**
+     * When true, active section H2 is sr-only below lg — rail tabs already own the label
+     * (kills Settings H1 + H2 + tab triple stack on mobile).
+     */
+    omitActiveHeadingBelowLg?: boolean;
   }>(),
   {
     badgeById: () => ({}),
     fallbackDescriptionKey: undefined,
+    omitActiveHeadingBelowLg: false,
   },
 );
 
@@ -85,11 +94,12 @@ const activeDescription = computed<string>(() => {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section class="card card-border card-glass overflow-x-clip" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
-      <div class="card-body overflow-x-clip lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <!-- No overflow-x-clip here: section rail must scroll horizontally @320. -->
+    <section class="card card-border card-glass" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
+      <div class="card-body lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div
           v-if="activeSectionEntry"
-          class="flex flex-col xl:flex-row xl:items-center xl:justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
+          class="flex flex-col" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
         >
           <div class="flex items-start" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <span
@@ -108,7 +118,13 @@ const activeDescription = computed<string>(() => {
             </span>
 
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
-              <h2 class="font-semibold text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+              <h2
+                class="font-semibold text-base-content"
+                :class="[
+                  TYPOGRAPHY_SCALE_CLASS.lg,
+                  omitActiveHeadingBelowLg ? 'max-lg:sr-only' : '',
+                ]"
+              >
                 {{ t(activeSectionEntry.labelKey) }}
               </h2>
               <p
@@ -122,7 +138,7 @@ const activeDescription = computed<string>(() => {
 
           <nav
             ref="sectionRailRef"
-            class="overflow-x-auto overscroll-x-contain xl:max-w-4xl"
+            class="overflow-x-auto overscroll-x-contain"
             :class="[
               FLUID_WIDTH_CLASS,
               TRUNCATE_FLEX_CHILD_CLASS,
@@ -133,18 +149,20 @@ const activeDescription = computed<string>(() => {
             ]"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max min-w-0 glass-subtle p-2" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div class="tabs tabs-box w-max max-w-none p-2" :class="[SURFACE_GLASS_SUBTLE_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto min-h-0 grow justify-start rounded-box px-3 py-2 text-left xl:grow-0"
+                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-left"
                 :class="[
+                  TOUCH_TARGET_MIN_CLASS,
                   FLEX_GAP_TOKEN_CLASS.gap3,
                   SCROLL_SNAP_ALIGN_START_CLASS,
                   activeSection === section.id ? 'tab-active' : '',
                 ]"
                 :aria-current="activeSection === section.id ? 'page' : undefined"
+                :aria-label="t(section.labelKey)"
               >
                 <span
                   class="tooltip tooltip-bottom shrink-0"
@@ -163,11 +181,11 @@ const activeDescription = computed<string>(() => {
                   </span>
                 </span>
 
-                <span class="font-medium" :class="[TRUNCATE_FLEX_CHILD_CLASS]">{{ t(section.labelKey) }}</span>
+                <span :class="[SECTION_RAIL_LABEL_CLASS]">{{ t(section.labelKey) }}</span>
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
-                  class="badge badge-ghost badge-xs"
+                  class="badge badge-ghost badge-xs shrink-0"
                   aria-hidden="true"
                 >
                   {{ badgeById[section.id] }}

@@ -3,15 +3,19 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -65,6 +69,7 @@ const bootstrapErrorMessage = computed(() =>
     ? getErrorMessage(bootstrapError.value, t("coverLetterPage.toasts.fetchFailed"))
     : "",
 );
+const hasCoverLetters = computed(() => coverLetters.length > 0);
 </script>
 
 <template>
@@ -76,12 +81,15 @@ const bootstrapErrorMessage = computed(() =>
     <PageHeroHeader
       title-id="cover-letter-page-title"
       :title="t('coverLetterPage.title')"
-      :description="t('coverLetterPage.subtitle')"
+      :description="hasCoverLetters ? t('coverLetterPage.subtitle') : ''"
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>
+        <!-- Empty catalog: EmptyState owns Generate. -->
         <button
-          class="btn btn-primary"
+          v-if="hasCoverLetters"
+          type="button"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('coverLetterPage.generateButtonAria')"
           @click="showGenerateModal = true"
         >
@@ -89,19 +97,24 @@ const bootstrapErrorMessage = computed(() =>
           {{ t("coverLetterPage.generateButton") }}
         </button>
       </template>
-      <template #aside>
-        <StatsRow
-          :class="[MARGIN_TOKEN_CLASS.mt4]"
-          :stats="[
-            { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
-            { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
-            { titleKey: 'coverLetterPage.stats.templatesTitle', value: templateUsageCount, descKey: 'coverLetterPage.stats.templatesDesc' },
-          ]"
-        />
+      <template v-if="hasCoverLetters" #aside>
+        <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+          <StatsRow
+            :class="[MARGIN_TOKEN_CLASS.mt4]"
+            :stats="[
+              { titleKey: 'coverLetterPage.stats.totalTitle', value: coverLetters.length, valueClass: 'text-primary', descKey: 'coverLetterPage.stats.totalDesc' },
+              { titleKey: 'coverLetterPage.stats.filteredTitle', value: filteredCoverLetters.length, valueClass: 'text-secondary', descKey: 'coverLetterPage.stats.filteredDesc' },
+              { titleKey: 'coverLetterPage.stats.templatesTitle', value: templateUsageCount, descKey: 'coverLetterPage.stats.templatesDesc' },
+            ]"
+          />
+        </div>
       </template>
     </PageHeroHeader>
 
-    <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
+    <section
+      v-if="hasCoverLetters || hasFiltersApplied"
+      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
+    >
       <div class="card-body">
         <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
@@ -151,7 +164,7 @@ const bootstrapErrorMessage = computed(() =>
         </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
-          <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
+          <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
             {{ t("coverLetterPage.filters.clearButton") }}
           </button>
         </div>
@@ -174,11 +187,18 @@ const bootstrapErrorMessage = computed(() =>
       v-else-if="coverLetters.length === 0"
       title-key="coverLetterPage.emptyStateTitle"
       description-key="coverLetterPage.emptyStateDescription"
+      cta-label-key="coverLetterPage.generateButton"
+      cta-aria-key="coverLetterPage.generateButtonAria"
+      @cta="showGenerateModal = true"
     />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="coverLetterCards.length === 0"
-      message-key="coverLetterPage.filteredEmptyState"
+      title-key="coverLetterPage.filteredEmptyTitle"
+      description-key="coverLetterPage.filteredEmptyState"
+      cta-label-key="coverLetterPage.filters.clearButton"
+      cta-aria-key="coverLetterPage.filters.clearAria"
+      @cta="clearFilters"
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">
@@ -211,14 +231,14 @@ const bootstrapErrorMessage = computed(() =>
 
           <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
             <button
-              class="btn btn-sm btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button
-              class="btn btn-sm btn-error btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

@@ -9,8 +9,9 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
-import { countConfiguredGamingPortals, parseGamingPortalsJson } from "~/utils/gaming-portals-form";
+import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
@@ -29,13 +30,7 @@ const { t } = useI18n();
 
 const providerSaveStateLabelKey = computed(() => getSaveStateLabelKey(props.providerSaveState));
 
-const configuredSourceCount = computed(
-  () =>
-    Number(jobProviderForm.value.hitmarkerEnabled) +
-    Number(jobProviderForm.value.greenhouseApiBaseUrl.trim().length > 0) +
-    Number(jobProviderForm.value.leverApiBaseUrl.trim().length > 0) +
-    countConfiguredGamingPortals(parseGamingPortalsJson(jobProviderForm.value.gamingPortalsJson)),
-);
+const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
 const sourceCollectionCount = computed(
   () =>
@@ -59,7 +54,7 @@ const sourceCollectionCount = computed(
         <template #meta>
           <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
-              {{ configuredSourceCount }}/3
+              {{ configuredSourceCount }}
             </span>
             <span 
               v-if="providerSaveStateLabelKey"
@@ -68,8 +63,8 @@ const sourceCollectionCount = computed(
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button 
-              class="btn btn-primary btn-sm"
+            <button
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"
             >

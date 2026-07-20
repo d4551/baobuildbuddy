@@ -117,4 +117,17 @@ describe("collectRawDesignTokenViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes('width="12"'))).toBe(true);
   });
+
+  test("flags script sizing literals outside SSOT", () => {
+    const violations = collectRawDesignTokenViolationsForContent(
+      "packages/client/components/ai/ChatVoiceControls.vue",
+      [
+        '<script setup lang="ts">',
+        'const iconClass = computed(() => (props.compact ? "h-4 w-4" : "h-5 w-5"));',
+        "</script>",
+        "<template><span /></template>",
+      ].join("\n"),
+    );
+    expect(violations.some((v) => v.message.includes("h-4 w-4"))).toBe(true);
+  });
 });

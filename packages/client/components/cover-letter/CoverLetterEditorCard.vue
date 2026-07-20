@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -44,10 +47,10 @@ const emit = defineEmits<{
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
         <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
+          <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
-          <button class="btn btn-sm btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
+          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
             {{ t("coverLetterDetailPage.editor.saveButton") }}
           </button>
         </div>

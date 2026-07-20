@@ -287,7 +287,6 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       v-else
       :runs="sortedRuns"
       :is-loading="isLoading"
-      :t="t"
       :is-live-run="isLiveRun"
       :format-run-type="formatRunType"
       :format-run-status="formatRunStatus"

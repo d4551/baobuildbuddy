@@ -19,6 +19,8 @@ import {
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
   STACK_SPACING_SM_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -37,11 +39,22 @@ const page = useJobsIndexPage();
     <PageHeroHeader
       title-id="jobs-page-title"
       :title="t('jobsPage.title')"
-      :description="t('jobsPage.seoDescription')"
+      :description="page.isCatalogEmpty.value ? '' : t('jobsPage.seoDescription')"
     >
-      <template #actions>
+      <template v-if="!page.isCatalogEmpty.value" #actions>
         <button
-          class="btn btn-primary"
+          type="button"
+          class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :aria-label="t('jobsPage.aiMatchAria')"
+          :disabled="page.matching.value"
+          @click="page.handleAiMatch()"
+        >
+          <LoadingSpinner v-if="page.matching.value" size="sm" :label="t('jobsPage.aiMatchButton')" />
+          <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
+        </button>
+        <button
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"
@@ -53,23 +66,52 @@ const page = useJobsIndexPage();
       </template>
     </PageHeroHeader>
 
-    <UiSearchFilterBar
-      v-model="page.searchQuery.value"
-      :placeholder="t('jobsPage.searchPlaceholder')"
-      :aria-label="t('jobsPage.searchAria')"
-      :button-aria-label="t('jobsPage.searchButtonAria')"
-      :show-mobile-filter-toggle="true"
-      :mobile-toggle-aria-label="t('jobsPage.toggleFiltersAria')"
-      :mobile-toggle-text="t('jobsPage.toggleFiltersButton')"
-      :extra-class="SECTION_GAP_BOTTOM_CLASS"
-      @search="page.handleSearch()"
-      @toggle-filters="page.showFilters.value = !page.showFilters.value"
+    <section
+      v-if="page.recommendations.value.length > 0"
+      :class="[SECTION_GAP_BOTTOM_CLASS]"
+      :aria-label="t('jobsPage.recommendationsAria')"
     >
-      <template #search-text>{{ t("jobsPage.searchButton") }}</template>
-    </UiSearchFilterBar>
+      <h2 :class="[CARD_TITLE_LG_CLASS, SECTION_GAP_BOTTOM_CLASS]">
+        {{ t("jobsPage.recommendationsTitle") }}
+      </h2>
+      <SectionGrid grid-token="twoColumn">
+        <UiGlassCard
+          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          :key="`rec-${job.id}`"
+          :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
+          :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
+          :stagger-index="Math.min(index, 11)"
+        >
+          <div class="card-body relative z-10">
+            <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
+            <p :class="BODY_TEXT_SM_CLASS">{{ job.company }}</p>
+          </div>
+        </UiGlassCard>
+      </SectionGrid>
+    </section>
+
+    <template v-if="!page.isCatalogEmpty.value">
+      <UiSearchFilterBar
+        v-model="page.searchQuery.value"
+        :placeholder="t('jobsPage.searchPlaceholder')"
+        :aria-label="t('jobsPage.searchAria')"
+        :button-aria-label="t('jobsPage.searchButtonAria')"
+        :show-mobile-filter-toggle="true"
+        :mobile-toggle-aria-label="t('jobsPage.toggleFiltersAria')"
+        :mobile-toggle-text="t('jobsPage.toggleFiltersButton')"
+        :extra-class="SECTION_GAP_BOTTOM_CLASS"
+        @search="page.handleSearch()"
+        @toggle-filters="page.showFilters.value = !page.showFilters.value"
+      >
+        <template #search-text>{{ t("jobsPage.searchButton") }}</template>
+      </UiSearchFilterBar>
+    </template>
 
     <SectionGrid grid-token="sidebar">
-      <div :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]">
+      <div
+        v-if="!page.isCatalogEmpty.value"
+        :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]"
+      >
         <JobsPageFiltersCard
           v-model:location="page.localFilters.location"
           v-model:remote="page.localFilters.remote"
@@ -117,20 +159,34 @@ const page = useJobsIndexPage();
               : 'jobsPage.emptyStateDescription'
           "
           :cta-label-key="
-            page.isCatalogEmpty.value ? 'jobsPage.refreshButton' : 'jobsPage.clearFiltersButton'
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersButton'
+              : 'jobsPage.clearFiltersButton'
           "
-          @cta="
-            page.isCatalogEmpty.value ? page.handleRefresh() : page.clearFilters()
+          :cta-aria-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersAria'
+              : 'jobsPage.clearFiltersAria'
           "
+          :cta-to="
+            page.isCatalogEmpty.value
+              ? APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')
+              : ''
+          "
+          @cta="page.clearFilters()"
         >
           <template v-if="page.isCatalogEmpty.value" #actions>
-            <NuxtLink
-              :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
-              class="btn btn-outline btn-sm"
-              :aria-label="t('jobsPage.configureProvidersAria')"
+            <button
+              type="button"
+              class="btn btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+              :aria-label="t('jobsPage.refreshAria')"
+              :disabled="page.refreshing.value"
+              @click="page.handleRefresh()"
             >
-              {{ t("jobsPage.configureProvidersButton") }}
-            </NuxtLink>
+              <LoadingSpinner v-if="page.refreshing.value" size="sm" :label="t('jobsPage.refreshButton')" />
+              <span v-else>{{ t("jobsPage.refreshButton") }}</span>
+            </button>
           </template>
         </EmptyState>
 
@@ -186,14 +242,14 @@ const page = useJobsIndexPage();
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
-                      class="btn btn-outline btn-sm"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
-                      class="btn btn-primary btn-sm"
+                      :class="[PRIMARY_ACTION_CLASS]"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"
                     >

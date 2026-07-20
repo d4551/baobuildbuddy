@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -11,6 +12,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 defineProps<{
@@ -52,7 +54,7 @@ const { t } = useI18n();
           <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("interviewHistory.detailsTitle") }}</h3>
           <button 
             type="button"
-            class="btn btn-ghost btn-xs btn-circle"
+            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >
@@ -125,6 +127,9 @@ const { t } = useI18n();
         <EmptyState
           title-key="interviewHistory.selectPromptTitle"
           description-key="interviewHistory.selectPromptDescription"
+          cta-label-key="interviewHistory.selectPromptCta"
+          cta-aria-key="interviewHistory.selectPromptCtaAria"
+          :cta-to="APP_ROUTES.interview"
         />
       </div>
     </div>

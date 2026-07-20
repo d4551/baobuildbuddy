@@ -3,10 +3,13 @@ definePageMeta({
   middleware: ["auth"],
 });
 
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const page = useAutomationJobApplyPage();
+
+const hasResumes = computed(() => (page.resumesData.value?.length ?? 0) > 0);
 
 useSeoMeta({
   title: t("automation.jobApply.title"),
@@ -22,7 +25,19 @@ useSeoMeta({
       :description="t('automation.hub.cards.jobApply.description')"
     />
 
+    <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="5" />
+
+    <EmptyState
+      v-else-if="!hasResumes"
+      title-key="automation.jobApply.emptyResumesTitle"
+      description-key="automation.jobApply.emptyResumesDescription"
+      cta-label-key="automation.jobApply.emptyResumesCta"
+      cta-aria-key="automation.jobApply.emptyResumesCtaAria"
+      :cta-to="APP_ROUTES.resume"
+    />
+
     <AutomationJobApplyFormCard
+      v-else
       v-model:job-url="page.jobUrl.value"
       v-model:resume-id="page.resumeId.value"
       v-model:cover-letter-id="page.coverLetterId.value"

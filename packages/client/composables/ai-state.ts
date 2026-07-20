@@ -12,6 +12,7 @@ export interface AIStateRefs {
   messages: ReturnType<typeof useState<ChatMessage[]>>;
   sessionId: ReturnType<typeof useState<string>>;
   streaming: ReturnType<typeof useState<boolean>>;
+  streamingContent: ReturnType<typeof useState<string>>;
   loading: ReturnType<typeof useState<boolean>>;
   resumes: ReturnType<typeof useState<ResumeData[]>>;
   jobs: ReturnType<typeof useState<Job[]>>;
@@ -31,6 +32,7 @@ export function initializeAIState(
     messages,
     sessionId: useState<string>(STATE_KEYS.AI_SESSION_ID, () => generateId()),
     streaming: useState(STATE_KEYS.AI_STREAMING, () => false),
+    streamingContent: useState(STATE_KEYS.AI_STREAMING_CONTENT, () => ""),
     loading: useState(STATE_KEYS.AI_LOADING, () => false),
     resumes: useState<ResumeData[]>(STATE_KEYS.RESUME_LIST, () => []),
     jobs: useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []),

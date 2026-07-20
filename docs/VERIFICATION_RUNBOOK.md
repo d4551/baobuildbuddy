@@ -8,15 +8,16 @@ Stack truth: [STACK-CONTRACT.md](./STACK-CONTRACT.md).
 
 1. The workspace formats, lints, type-checks, tests, and builds cleanly.
 2. The Nuxt SSR app renders every routed page with current screenshots and a per-route report.
-3. Resume, cover-letter, and portfolio exports generate as styled PDF and DOCX files.
-4. Runtime automation and desktop verification pass.
-5. Tauri 2 release artifacts can be generated on the matching host platform and verified from staged output.
+3. Multi-viewport Playwright smoke and interactive burndown pass against a live IPv4 client (`127.0.0.1`).
+4. Resume, cover-letter, and portfolio exports generate as styled PDF and DOCX files.
+5. Runtime automation and desktop verification pass.
+6. Tauri 2 release artifacts can be generated on the matching host platform and verified from staged output.
 
 ## Before you start
 
 Required tools:
 
-- Bun `1.3.11`
+- Bun `1.3.14` (root `packageManager` / `engines`; confirm with `bun run validate:stack-versions`)
 - Rust toolchain for desktop builds
 - Playwright Chromium via `bun run automation:browsers:install`
 
@@ -24,11 +25,13 @@ Recommended environment:
 
 - `BAO_DISABLE_AUTH=true` for local proof runs
 - local AI endpoint configured if you want grounded AI generation in the same pass
+- client reachable on **IPv4** `http://127.0.0.1:3001` (`bun run dev` / `dev-stack` default; avoid bare `--host localhost` for Playwright)
 
 Proof-run hygiene:
 
 - keep scratch helpers and one-off proof scripts outside the repo, preferably under `/tmp`
 - do not leave repo-local proof helpers, ad hoc audit markdown, or temporary screenshots checked into the worktree at the end of the pass
+- UI visual proof is Playwright-only (`proof:browser-smoke` / `proof:browser-burndown`); curl is for API health checks, not page proof
 
 ## Step 1: Clear stale local ports
 
@@ -42,7 +45,7 @@ If Docker or another process owns `3000`, switch the proof run to `3400/3401`.
 
 ## Step 2: Start a clean stack
 
-Default ports:
+Default ports (Nuxt binds `127.0.0.1:3001` via `scripts/dev-stack.ts`):
 
 ```bash
 BAO_DISABLE_AUTH=true bun run dev
@@ -54,7 +57,11 @@ Alternate proof ports:
 BAO_DISABLE_AUTH=true bun run dev -- --server-port 3400 --client-port 3401
 ```
 
-Keep that terminal open for the rest of the run.
+Keep that terminal open for the rest of the run. Confirm the UI answers on IPv4 before screenshot passes:
+
+```bash
+curl -fsS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3001/
+```
 
 If a dev-only Nuxt route hangs or a screenshot pass needs a stable SSR surface, run the proof pass against a built production client instead of the dev server:
 
@@ -130,6 +137,23 @@ Review rule:
   4. do async states look intentional: loading, empty, error, or success rather than a half-rendered surface?
   5. does the page still look like the same product family as the rest of the app?
 - if any screenshot fails those questions, fix the page and rerun the proof set before treating the run as complete
+
+## Step 5b: Multi-viewport browser smoke + interactive burndown
+
+With the same stack still running, prove responsive UI (viewport order **mobile → tablet → desktop**):
+
+```bash
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown
+```
+
+Expected result:
+
+- `proof:browser-smoke` — 0 capture failures across the static route × viewport matrix
+- `proof:browser-burndown` — 0 findings; `fiveq-ledger.json` complete for every page × viewport
+- human review still uses [PAGE_VERIFICATION_GUIDE.md](./PAGE_VERIFICATION_GUIDE.md) for product-intent checks
+
+Alternate ports: point `PAGE_PROOF_CLIENT_BASE` (and API base if needed) at the same host/port pair used in Step 2.
 
 Fast zero-flag check:
 
@@ -291,6 +315,7 @@ Keep these together for each proof pass:
 - `/tmp/bao-page-proof-YYYY-MM-DD/report.json`
 - `/tmp/bao-page-proof-YYYY-MM-DD/report.md`
 - per-page screenshots
+- browser smoke / burndown report JSON (`burndown-report.json`, `fiveq-ledger.json` when using `proof:browser-burndown`)
 - exported PDF and DOCX files
 - PDF first-page screenshots
 - Quick Look DOCX thumbnails
@@ -302,8 +327,11 @@ The run is not complete if any of these are true:
 
 - any quality gate fails
 - `verify:pages` fails
+- `proof:browser-smoke` reports capture failures
+- `proof:browser-burndown` reports findings or an incomplete 5Q ledger
 - `verify:desktop-runtime` fails
 - the screenshot report includes alerts or error keywords that are not reviewed and explained
 - a screenshot proves the wrong page
 - export previews and downloaded files do not match
 - a desktop artifact is claimed from the wrong host platform
+- the client was only reachable on IPv6/`localhost` while proof tools dialed `127.0.0.1`

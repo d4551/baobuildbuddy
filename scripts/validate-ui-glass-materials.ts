@@ -132,6 +132,17 @@ export const collectGlassMaterialViolationsForContent = (
     });
   }
 
+  // Softening ban: consumers must bind SURFACE_GLASS_SUBTLE_CLASS, not raw glass-subtle.
+  const rawSubtlePattern = /\bglass-subtle\b/gu;
+  for (const match of content.matchAll(rawSubtlePattern)) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message:
+        "Raw glass-subtle class literal bypasses SURFACE_GLASS_SUBTLE_CLASS. Import SURFACE_GLASS_SUBTLE_CLASS from ~/constants/layout and bind via :class.",
+    });
+  }
+
   return violations;
 };
 

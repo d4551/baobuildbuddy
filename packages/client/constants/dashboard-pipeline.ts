@@ -242,6 +242,37 @@ export function resolveDashboardActivityType(action: string): DashboardActivityT
   );
 }
 
+/** Known gamification action keys → i18n leaf under dashboard.activityActions. */
+export const DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS = {
+  pipeline_scraper_studios: "pipelineScraperStudios",
+  pipeline_scraper_jobs: "pipelineScraperJobs",
+  skills_ai_analysis_completed: "skillsAiAnalysisCompleted",
+  skills_discovery_completed: "skillsDiscoveryCompleted",
+  job_saved: "jobSaved",
+  job_applied: "jobApplied",
+  interview_session_completed: "interviewSessionCompleted",
+  resume_updated: "resumeUpdated",
+  cover_letter_generated: "coverLetterGenerated",
+  portfolio_project_added: "portfolioProjectAdded",
+  challenge_completed: "challengeCompleted",
+  automation_run_completed: "automationRunCompleted",
+} as const satisfies Record<string, string>;
+
+export type DashboardActivityActionLabelKey =
+  (typeof DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS)[keyof typeof DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS];
+
+export function resolveDashboardActivityActionLabelKey(
+  action: string,
+): DashboardActivityActionLabelKey | null {
+  const normalized = action.trim().toLowerCase();
+  for (const [key, labelKey] of Object.entries(DASHBOARD_ACTIVITY_ACTION_LABEL_KEYS)) {
+    if (key === normalized) {
+      return labelKey;
+    }
+  }
+  return null;
+}
+
 export function getDashboardActivityPresentation(
   activityType: DashboardActivityType,
 ): DashboardActivityPresentation {

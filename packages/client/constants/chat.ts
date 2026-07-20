@@ -24,10 +24,27 @@ export const CHAT_AVATAR_SIZE_CLASS_BY_DENSITY = {
 } as const satisfies Record<ChatDensity, string>;
 
 /**
- * Floating chat panel responsive dimensions.
+ * Floating chat panel — flex column so composer stays in-panel above the dock.
+ * Height is viewport-bounded (not fixed h-96 which clips Send @320).
  */
 export const FLOATING_CHAT_PANEL_SIZE_CLASS =
-  "w-full max-w-md sm:max-w-lg md:max-w-xl h-96 max-h-screen";
+  "flex h-[min(28rem,calc(100dvh-9rem))] max-h-[calc(100dvh-9rem)] w-full max-w-full flex-col overflow-hidden sm:max-w-lg md:max-w-xl";
+
+/** Floating panel body: column flex with min-h-0 so message log scrolls. */
+export const FLOATING_CHAT_PANEL_BODY_CLASS =
+  "card-body flex min-h-0 flex-1 flex-col overflow-hidden p-0";
+
+/** Floating panel message log — takes remaining height; scrolls independently. */
+export const FLOATING_CHAT_PANEL_LOG_CLASS = "min-h-0 flex-1 overflow-y-auto";
+
+/** Floating panel composer — never shrinks out of the panel. */
+export const FLOATING_CHAT_PANEL_COMPOSER_CLASS = "shrink-0 border-t border-base-300";
+
+/**
+ * Full-page chat composer sticky band — clears mobile dock + safe-area.
+ */
+export const CHAT_COMPOSER_STICKY_CLASS =
+  "sticky bottom-20 z-20 border-t border-base-300 bg-base-100 lg:bottom-0";
 
 /**
  * Full-page chat viewport container dimensions.

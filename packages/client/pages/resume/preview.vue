@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS } from "~/constants/layout";
+import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, PRIMARY_ACTION_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -125,7 +125,7 @@ function handlePrint() {
           :button-label="t('resumePage.exportButton')"
           :button-aria-label="t('resumePage.exportButtonAria')"
           :disabled="loading"
-          summary-class="btn btn-primary print:hidden"
+          :summary-class="`${PRIMARY_ACTION_CLASS} print:hidden`"
           @export="handleExport"
         />
       </template>

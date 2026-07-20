@@ -6,7 +6,10 @@ import {
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -102,11 +105,18 @@ function updateTextValue(
     </label>
 
     <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-      <button class="btn btn-ghost" :aria-label="t('setup.backToAiConfigAria')" @click="emit('back')">
+      <button
+        type="button"
+        class="btn btn-ghost"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="t('setup.backToAiConfigAria')"
+        @click="emit('back')"
+      >
         {{ t("setup.backButton") }}
       </button>
-      <button 
-        class="btn btn-primary"
+      <button
+        type="button"
+        :class="[PRIMARY_ACTION_CLASS]"
         :disabled="saving"
         :aria-label="t('setup.launchAria')"
         @click="emit('complete')"

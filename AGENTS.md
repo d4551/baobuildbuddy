@@ -20,11 +20,14 @@ BaoBuildBuddy is a Bun-first monorepo (5 workspace packages) for game-industry c
 
 ### Key commands
 
-- **Dev:** `bun run dev` (starts server + client in parallel)
+- **Dev:** `bun run dev` (starts server + client via `scripts/dev-stack.ts`; Nuxt host defaults to **`127.0.0.1`** so Playwright can reach the UI)
 - **Lint:** `bun run lint` (all validators + biome + eslint + typecheck)
 - **Test:** `bun run test` (server bun:test + scraper bun:test + client vitest)
 - **Build:** `bun run build` (optional stricter check: `bun run build:verify` runs the web build then `verify:production-client` to ensure Nitro SSR output ships without `.map` leakage)
 - **DB setup:** `bun run db:generate && bun run db:push`
+- **Browser UI proof (Playwright only; not curl):** with stack up, `PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke` then `bun run proof:browser-burndown` (viewport order mobile → tablet → desktop)
+- **SSR HTML check:** `bun run verify:pages`
+- **Stack pins:** `bun run validate:stack-versions` (binding); `audit:stack-versions` is advisory npm-latest only
 
 ### Local AI setup
 
@@ -32,10 +35,10 @@ The app auto-detects models from local inference servers. Install Ollama and pul
 
 ```bash
 ollama serve &
-ollama pull qwen2.5:0.5b
+ollama pull llama3.2   # or any model, e.g. qwen2.5:0.5b for a tiny smoke test
 ```
 
-Then configure via Settings UI or API: set `localModelEndpoint` to `http://localhost:11434/v1`. The model name is auto-detected from the server -- no hardcoded defaults.
+Then configure via Settings UI or API: set `localModelEndpoint` to `http://localhost:11434/v1` (or `http://127.0.0.1:11434/v1`). The model name is auto-detected from the server -- no hardcoded defaults.
 
 Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can be added via **Settings > AI Providers** in the UI.
 
@@ -83,4 +86,10 @@ Cloud provider keys (HuggingFace, OpenAI, Gemini, Claude) are optional and can b
 
 17. **Desktop release verify:** `bun run verify:desktop-releases -- --release` on macOS enforces **`xcrun stapler validate`** (stapled/notarized DMG). Checkouts with an unstapled DMG under `packages/desktop/releases` should run **`bun run verify:desktop-releases`** without `--release` for full payload + checksum checks. CI keeps `--release` after a proper notarized build.
 
-18. **External “full-stack audit” prompts** often assume **Prisma + htmx**. This repo does **not** use those. Treat [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) as binding; map playbook items to **Drizzle + Nuxt/Vue** (see the htmx→Nuxt table there). Do not start a framework migration unless the product owner explicitly requests it.
+18. **External “full-stack audit” prompts** often assume **Prisma + htmx** or **`.bao` archive compile as UI SSOT**. This repo does **not** use those. Treat [`docs/STACK-CONTRACT.md`](docs/STACK-CONTRACT.md) as binding (see also [`docs/ssot-ledger/contract-escalation-2026-07-20.md`](docs/ssot-ledger/contract-escalation-2026-07-20.md)); map playbook items to **Drizzle + Nuxt/Vue** and TS/CSS token SSOT. Do not start a framework or `.bao` migration unless the product owner explicitly requests it.
+
+19. **Nuxt `--host localhost` can bind IPv6-only** (`[::1]:3001`), which makes `http://127.0.0.1:3001` unreachable for Playwright. Prefer `bun run dev` / `dev-stack` (IPv4 default) or pass `--host 127.0.0.1`.
+
+20. **UI visual proof ≠ API curl.** Use `proof:browser-smoke` / `proof:browser-burndown` (and human review via `docs/PAGE_VERIFICATION_GUIDE.md`). Curl is fine for `/api/health` and similar API checks only.
+
+21. **Workspace Bun pin** is `packageManager` / engines in root `package.json` (currently `bun@1.3.14`).

@@ -18,6 +18,13 @@ import type {
 } from "@bao/shared/types/settings-contracts";
 import type { UserProfile } from "@bao/shared/types/user";
 import type { ClientProviderTestResult } from "~/utils/ai-control-plane";
+import type { SettingsWorkspaceBackupApi } from "./client-api-workspace";
+
+export type {
+  SearchApi,
+  SettingsWorkspaceBackupApi,
+  SettingsWorkspaceExportPayload,
+} from "./client-api-workspace";
 
 type ApiError = unknown;
 
@@ -94,22 +101,36 @@ export interface OrderedProjectsRequest {
   orderedIds: string[];
 }
 
-export interface JobsQueryRequest {
-  query?: Record<string, string>;
-}
-
 export interface SkillsReadinessQueryRequest {
   query?: {
     jobId?: string;
   };
 }
 
+export type {
+  JobsApi,
+  JobsApplyRoute,
+  JobsQueryRequest,
+  JobsSaveRoute,
+  StudioAnalyticsApi,
+  StudiosApi,
+} from "./client-api-jobs-studios";
+
 export interface AuthApi {
   status: {
     get(): ApiRequest<AuthStatusResponse>;
   };
+  configured: {
+    get(): ApiRequest<{ configured: boolean }>;
+  };
   init: {
     post(body?: AuthInitRequest): ApiRequest<AuthInitResponse>;
+  };
+  rotate: {
+    post(): ApiRequest<{ configured: boolean; apiKey?: string; message?: string }>;
+  };
+  revoke: {
+    post(): ApiRequest<{ configured: boolean; message?: string }>;
   };
 }
 
@@ -120,11 +141,7 @@ export interface UserApi {
   };
 }
 
-export interface StudioAnalyticsApi {
-  get(): ApiRequest<unknown>;
-}
-
-export interface SettingsApi {
+export interface SettingsApi extends SettingsWorkspaceBackupApi {
   get(): ApiRequest<unknown>;
   put(body: SettingsUpdateRequest): ApiRequest<{ success: boolean }>;
   "api-keys": {
@@ -138,47 +155,31 @@ export interface SettingsApi {
   };
 }
 
-export interface JobsSaveRoute {
-  post(body: { jobId: string }): ApiRequest<unknown>;
-  (params: {
-    jobId: string;
-  }): {
-    delete(): ApiRequest<unknown>;
-  };
-}
-
-export interface JobsApplyRoute {
-  post(body: { jobId: string; notes?: string }): ApiRequest<unknown>;
-  (params: {
-    id: string;
-  }): {
-    put(body: { status: string }): ApiRequest<unknown>;
-  };
-}
-
-export interface JobsApi {
-  get(options?: JobsQueryRequest): ApiRequest<unknown>;
-  saved: {
-    get(): ApiRequest<unknown>;
-  };
-  save: JobsSaveRoute;
-  applications: {
-    get(): ApiRequest<unknown>;
-  };
-  apply: JobsApplyRoute;
-  refresh: {
-    post(): ApiRequest<unknown>;
-  };
-  recommendations: {
-    get(): ApiRequest<unknown>;
-  };
-}
-
 export interface CoverLettersApi {
   get(): ApiRequest<unknown>;
   post(body: JsonRecord): ApiRequest<unknown>;
   generate: {
     post(body: JsonRecord): ApiRequest<unknown>;
+  };
+  (params: {
+    id: string;
+  }): {
+    get(): ApiRequest<unknown>;
+    put(body: JsonRecord): ApiRequest<unknown>;
+    delete(): ApiRequest<unknown>;
+    export: {
+      post(body: JsonRecord): ApiRequest<unknown>;
+    };
+  };
+}
+
+/** OpenAPI docs Eden branch (`docs.api.json`). */
+export interface DocsApi {
+  api: {
+    get(): ApiRequest<unknown>;
+    json: {
+      get(): ApiRequest<unknown>;
+    };
   };
 }
 
@@ -286,6 +287,15 @@ export interface AiApi {
   };
   "match-jobs": {
     post(body: { resumeId?: string; skills?: string[] }): ApiRequest<unknown>;
+  };
+  "automation-action": {
+    post(body: {
+      action: string;
+      jobUrl: string;
+      resumeId: string;
+      coverLetterId?: string;
+      jobId?: string;
+    }): ApiRequest<{ runId?: string; status?: string; message?: string; error?: string }>;
   };
   models: {
     get(): ApiRequest<unknown>;

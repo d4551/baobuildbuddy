@@ -3,13 +3,14 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
-  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 interface ResumeLibraryPanelProps {
@@ -31,6 +32,7 @@ const searchQuery = defineModel<string>("searchQuery", { required: true });
 
 const emit = defineEmits<{
   clearFilters: [];
+  createResume: [];
   selectResume: [resumeId: string];
   requestDelete: [resumeId: string];
   "update:currentPage": [page: number];
@@ -68,7 +70,7 @@ function requestDelete(resumeId?: string): void {
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
           <button 
-            class="btn btn-sm btn-ghost"
+            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
           >
@@ -78,14 +80,22 @@ function requestDelete(resumeId?: string): void {
       </div>
     </section>
 
-    <div v-if="resumes.length === 0" class="alert alert-info alert-soft">
-      <IconInfoCircle :class="[ICON_SIZE_CLASS[6]]"/>
-      <span>{{ t("resumePage.emptyState") }}</span>
-    </div>
+    <EmptyState
+      v-if="resumes.length === 0"
+      title-key="resumePage.emptyStateTitle"
+      description-key="resumePage.emptyState"
+      cta-label-key="resumePage.createButton"
+      cta-aria-key="resumePage.createButtonAria"
+      @cta="emit('createResume')"
+    />
 
-    <FilteredEmptyAlert
+    <EmptyState
       v-else-if="filteredResumes.length === 0"
-      message-key="resumePage.filteredEmptyState"
+      title-key="resumePage.filteredEmptyTitle"
+      description-key="resumePage.filteredEmptyState"
+      cta-label-key="resumePage.filters.clearButton"
+      cta-aria-key="resumePage.filters.clearAria"
+      @cta="emit('clearFilters')"
     />
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">
@@ -119,21 +129,21 @@ function requestDelete(resumeId?: string): void {
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
-                class="btn btn-sm btn-ghost"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
                 :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
                 @click.stop
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
               <button 
-                class="btn btn-sm btn-outline"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
               <button 
-                class="btn btn-sm btn-error btn-outline"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
               >

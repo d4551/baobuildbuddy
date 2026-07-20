@@ -2,6 +2,11 @@ const automationjobApply = {
   automation: {
     jobApply: {
       title: "Job Application Automation",
+      emptyResumesTitle: "Resume required",
+      emptyResumesDescription:
+        "Create a resume before running job-apply automation. The run needs a selected resume.",
+      emptyResumesCta: "Open Resume Builder",
+      emptyResumesCtaAria: "Open resume builder to create a resume for job apply",
       jobUrlLegend: "Job URL",
       jobUrlPlaceholder: "https://example.com/jobs/123",
       jobUrlAria: "Job posting URL",

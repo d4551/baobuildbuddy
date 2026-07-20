@@ -78,6 +78,8 @@ const apiErrors = {
       invalidPayload: "Invalid settings payload",
       loadFailed: "Failed to load settings",
       missingResponse: "Missing settings response",
+      exportFailed: "Failed to export workspace data",
+      importFailed: "Failed to import workspace data",
     },
     user: {
       fetchProfileFailed: "Failed to fetch profile",

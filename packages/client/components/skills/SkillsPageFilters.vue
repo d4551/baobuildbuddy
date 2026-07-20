@@ -2,10 +2,14 @@
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 
@@ -48,8 +52,7 @@ const { t } = useI18n();
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" role="radiogroup" :aria-label="t('skillsPage.filters.categoryGroupAria')">
         <button 
           type="button"
-          class="btn btn-sm btn-ghost"
-          :class="categoryFilter === SKILLS_FILTER_ALL_VALUE ? 'btn-primary' : 'btn-ghost'"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', categoryFilter === SKILLS_FILTER_ALL_VALUE ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
           :aria-label="t('skillsPage.filters.allAria')"
           :aria-pressed="categoryFilter === SKILLS_FILTER_ALL_VALUE"
           @click="categoryFilter = SKILLS_FILTER_ALL_VALUE"
@@ -60,8 +63,7 @@ const { t } = useI18n();
           v-for="categoryOption in categoryOptions"
           :key="categoryOption.value"
           type="button"
-          class="btn btn-sm btn-ghost"
-          :class="categoryFilter === categoryOption.value ? 'btn-primary' : 'btn-ghost'"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', categoryFilter === categoryOption.value ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
           :aria-label="t('skillsPage.filters.categoryAria', { category: categoryOption.label })"
           :aria-pressed="categoryFilter === categoryOption.value"
           @click="categoryFilter = categoryOption.value"
@@ -72,7 +74,7 @@ const { t } = useI18n();
 
       <div class="flex justify-end">
         <button 
-          class="btn btn-ghost btn-sm"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
           :disabled="!hasActiveFilters"
           :aria-label="t('skillsPage.filters.clearAria')"
           @click.prevent="emit('clear')"

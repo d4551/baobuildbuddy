@@ -15,6 +15,7 @@ const gamificationPage = {
     levelPrefix: "Level",
     xpSuffix: "XP",
     xpUntilLevelLabel: "XP until level",
+    xpMaxLevelLabel: "Max level reached — every action still earns XP",
     currentStreakTitle: "Current Streak",
     longestStreakTitle: "Longest Streak",
     achievementsTitle: "Achievements",
@@ -29,11 +30,30 @@ const gamificationPage = {
     streakDaysSuffix: "days in a row",
     longestStreakDesc: "personal best",
     noChallengesLabel: "No daily challenges available.",
+    noChallengesTitle: "No daily challenges available",
+    noChallengesDescription:
+      "Complete setup and career actions from the dashboard to unlock today's challenge set.",
     a11y: {
       levelProgress: "Level progression",
       challengeProgress: "Challenge progression",
     },
     achievementBadgeAria: "Achievement: {name}. {description}",
+    trends: {
+      title: "Progress trends",
+      description: "Weekly momentum and monthly career stats from live gamification fabric.",
+      weeklyTitle: "This week",
+      weeklyXp: "{xp} XP earned",
+      weeklyActions: "{count} actions logged",
+      weeklyChallenges: "{count} challenges completed",
+      weeklyEmpty: "No weekly activity yet — complete a challenge to start the trend.",
+      topCategory: "Top category: {category}",
+      monthlyTitle: "This month",
+      monthlyXp: "{xp} total XP",
+      monthlyLevels: "{count} levels gained",
+      monthlyAchievements: "{count} achievements unlocked",
+      monthlyStreak: "{days}-day streak",
+      monthlyEmpty: "No monthly stats yet — keep practicing to fill this view.",
+    },
   },
 } as const;
 

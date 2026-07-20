@@ -6,10 +6,14 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SVG_SIZE_13,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -95,7 +99,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            class="glass-subtle btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors"
+            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors']"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
@@ -134,7 +138,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     </label>
 
     <button 
-      class="btn btn-outline btn-sm"
+      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"
@@ -178,11 +182,22 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       </div>
     </details>
 
-    <div class="flex justify-between">
-      <button class="btn btn-ghost" :aria-label="t('setup.backToProfileAria')" @click="emit('back')">
+    <div class="flex justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <button
+        type="button"
+        class="btn btn-ghost"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="t('setup.backToProfileAria')"
+        @click="emit('back')"
+      >
         {{ t("setup.backButton") }}
       </button>
-      <button class="btn btn-primary" :aria-label="t('setup.nextToDoneAria')" @click="emit('next')">
+      <button
+        type="button"
+        :class="[PRIMARY_ACTION_CLASS]"
+        :aria-label="t('setup.nextToDoneAria')"
+        @click="emit('next')"
+      >
         {{ t("setup.nextButton") }}
       </button>
     </div>

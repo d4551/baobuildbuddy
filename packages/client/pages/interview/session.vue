@@ -3,6 +3,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -65,8 +66,11 @@ useSeoMeta({
 
     <EmptyState
       v-else
-      :title-key="'interviewSession.notFound'"
-      :description-key="'interviewSession.notFound'"
+      title-key="interviewSession.notFoundTitle"
+      description-key="interviewSession.notFoundDescription"
+      cta-label-key="interviewSession.emptyStateCta"
+      cta-aria-key="interviewSession.emptyStateCtaAria"
+      :cta-to="APP_ROUTES.interview"
     />
   </PageScaffold>
 </template>

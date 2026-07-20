@@ -15,7 +15,7 @@ import { formatDateWithLocale } from "~/utils/locale-format";
 
 const route = useRoute();
 const router = useRouter();
-const { getJob, saveJob, unsaveJob, applyToJob, savedJobs } = useJobs();
+const { getJob, saveJob, unsaveJob, applyToJob, savedJobs, fetchSavedJobs } = useJobs();
 const { $toast } = useNuxtApp();
 const { t, locale, fallbackLocale } = useI18n();
 
@@ -55,7 +55,8 @@ const {
     if (!jobId.value) {
       return null;
     }
-    return getJob(jobId.value);
+    const [job] = await Promise.all([getJob(jobId.value), fetchSavedJobs()]);
+    return job;
   },
   {
     watch: [jobId],
@@ -176,7 +177,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
         :is-saved="isSaved"
         title-id="job-detail-title"
         :hero-description="jobHeroDescription"
-        :t="t"
         :job-experience-label="formatExperienceLabel"
         @save="handleSaveToggle"
         @apply="showApplyModal = true"
@@ -185,7 +185,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
 
       <JobDetailSidebar
         :job="job"
-        :t="t"
         :studio-type-label="formatStudioTypeLabel"
         :platform-label="formatPlatformLabel"
         :game-genre-label="formatGameGenreLabel"
@@ -198,7 +197,6 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
       v-model:application-notes="applicationNotes"
       :title-id="JOB_APPLY_DIALOG_TITLE_ID"
       :applying="applying"
-      :t="t"
       :job-title="job?.title"
       @submit="handleApply"
     />

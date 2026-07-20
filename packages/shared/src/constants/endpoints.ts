@@ -93,6 +93,8 @@ export const API_ENDPOINTS = {
   aiModels: `${API_ENDPOINT_PREFIX}/ai/models`,
   aiUsage: `${API_ENDPOINT_PREFIX}/ai/usage`,
   aiAutomationAction: `${API_ENDPOINT_PREFIX}/ai/automation-action`,
+  speechBase: `${API_ENDPOINT_PREFIX}/speech`,
+  speechTranscribe: `${API_ENDPOINT_PREFIX}/speech/transcribe`,
   scraperBase: `${API_ENDPOINT_PREFIX}/scraper`,
   scraperStudios: `${API_ENDPOINT_PREFIX}/scraper/studios`,
   scraperJobsBase: `${API_ENDPOINT_PREFIX}/scraper/jobs`,

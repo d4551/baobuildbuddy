@@ -9,6 +9,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   QUICK_ACTION_MENU_ID,
 } from "~/constants/layout";
 
@@ -180,7 +181,7 @@ onUnmounted(() => {
   >
     <button 
       ref="quickActionToggle"
-      class="btn btn-lg btn-circle btn-primary"
+      :class="[PRIMARY_ACTION_CLASS, 'btn-lg', 'btn-circle']"
       :aria-label="isOpen ? t('quickFab.collapseAria') : t('quickFab.expandAria')"
       :aria-expanded="isOpen"
       :aria-controls="quickActionMenuId"
@@ -217,7 +218,7 @@ onUnmounted(() => {
           :key="action.id"
           :to="action.to"
           :id="`quick-action-${index}`"
-          :class="['btn btn-lg btn-primary justify-between transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)]', FAB_ACTION_MIN_WIDTH_CLASS]"
+          :class="[PRIMARY_ACTION_CLASS, 'btn-lg', 'justify-between transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)]', FAB_ACTION_MIN_WIDTH_CLASS]"
           role="menuitem"
           :tabindex="index === activeActionIndex ? 0 : -1"
           :aria-label="t(action.labelKey)"

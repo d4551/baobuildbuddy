@@ -10,6 +10,8 @@ const interviewHistory = {
     emptyStateTitle: "No interview sessions found",
     emptyStateDescription:
       "Start a new interview from a scraped job or studio drill to populate your practice history.",
+    emptyStateCta: "Start Interview",
+    emptyStateCtaAria: "Open interview hub to start a practice session",
     tableAriaLabel: "Interview sessions",
     timelineAriaLabel: "Interview sessions timeline view",
     viewButton: "View",
@@ -32,6 +34,8 @@ const interviewHistory = {
     selectPromptTitle: "Choose a session",
     selectPromptDescription:
       "Open any interview run from the list to inspect scores, answers, and AI feedback.",
+    selectPromptCta: "Start interview",
+    selectPromptCtaAria: "Start a new interview session",
     fetchErrorFallback: "Failed to load interview sessions",
     sessionNotFound: "Session not found",
     detailLoadErrorFallback: "Failed to load session details",

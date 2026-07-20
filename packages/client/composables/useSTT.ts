@@ -1,13 +1,18 @@
 import type { VoiceSettings } from "@bao/shared/types/interview";
+import type { SpeechProviderOption } from "@bao/shared/constants/settings";
 import type { Ref } from "vue";
 import { computed, onMounted, readonly, ref } from "#imports";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
+import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import { useSettings } from "./useSettings";
 
 interface RecognitionUpdate {
   finalTranscript: string;
   interimTranscript: string;
   confidence: number;
 }
+
+type MicrophoneRecorder = Awaited<ReturnType<typeof createMicrophoneRecorder>>;
 
 function processRecognitionResults(event: SpeechRecognitionEvent): RecognitionUpdate {
   let finalTranscript = "";
@@ -50,66 +55,108 @@ function createRecognitionInstance(
   return recognition;
 }
 
-function registerRecognitionCallbacks(
-  recognition: SpeechRecognition,
-  state: {
-    transcript: ReturnType<typeof ref<string>>;
-    interimTranscript: ReturnType<typeof ref<string>>;
-    confidence: ReturnType<typeof ref<number>>;
-    isListening: ReturnType<typeof ref<boolean>>;
-    error: ReturnType<typeof ref<string | null>>;
-  },
-): void {
-  recognition.onresult = (event: SpeechRecognitionEvent) => {
-    const update = processRecognitionResults(event);
-    if (update.finalTranscript.length > 0) {
-      state.transcript.value += update.finalTranscript;
-    }
-    state.interimTranscript.value = update.interimTranscript;
-    if (update.confidence > 0) {
-      state.confidence.value = update.confidence;
-    }
-  };
-  recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-    state.error.value = `${event.error}: ${event.message ?? ""}`;
-  };
-  recognition.onend = () => {
-    state.isListening.value = false;
-  };
-}
-
 function toFullTranscript(transcript: string, interimTranscript: string): string {
   const combined = transcript + (interimTranscript ? ` ${interimTranscript}` : "");
   return combined.trim();
 }
 
+const resolveConfiguredSttProvider = (
+  settingsSpeechProvider: string | undefined,
+): SpeechProviderOption => {
+  if (
+    settingsSpeechProvider === "local" ||
+    settingsSpeechProvider === "openai" ||
+    settingsSpeechProvider === "huggingface" ||
+    settingsSpeechProvider === "custom" ||
+    settingsSpeechProvider === "browser"
+  ) {
+    return settingsSpeechProvider;
+  }
+  return "browser";
+};
+
 /**
- * Web Speech API Speech-to-Text composable.
- * Supports VoiceSettings: microphoneId (when available), language.
+ * Speech-to-text composable.
+ * Uses Whisper/server STT when automationSettings.speech.stt.provider is not browser;
+ * otherwise falls back to Web Speech API.
  */
 export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
+  const { settings: appSettings } = useSettings();
   const transcript = ref("");
   const interimTranscript = ref("");
   const isListening = ref(false);
   const confidence = ref(0);
   const error = ref<string | null>(null);
   let recognition: SpeechRecognition | null = null;
-  const state = { transcript, interimTranscript, confidence, isListening, error };
+  let recorder: MicrophoneRecorder | null = null;
+  let useServerStt = false;
+
+  const sttProvider = computed(() =>
+    resolveConfiguredSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
+  );
 
   onMounted(() => {
+    useServerStt = sttProvider.value !== "browser";
+    if (useServerStt) {
+      return;
+    }
     recognition = createRecognitionInstance(settings);
     if (!recognition) {
       return;
     }
-    registerRecognitionCallbacks(recognition, state);
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const update = processRecognitionResults(event);
+      if (update.finalTranscript.length > 0) {
+        transcript.value += update.finalTranscript;
+      }
+      interimTranscript.value = update.interimTranscript;
+      if (update.confidence > 0) {
+        confidence.value = update.confidence;
+      }
+    };
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      error.value = `${event.error}: ${event.message ?? ""}`;
+    };
+    recognition.onend = () => {
+      isListening.value = false;
+    };
   });
 
   const fullTranscript = computed(() =>
     toFullTranscript(transcript.value, interimTranscript.value),
   );
-  const isSupported = computed(() => resolveSpeechRecognitionConstructor() !== null);
+  const isSupported = computed(
+    () =>
+      sttProvider.value !== "browser" ||
+      resolveSpeechRecognitionConstructor() !== null ||
+      typeof navigator !== "undefined",
+  );
 
   const startListening = (locale?: string): boolean => {
+    error.value = null;
+    transcript.value = "";
+    interimTranscript.value = "";
+    confidence.value = 0;
+    useServerStt = sttProvider.value !== "browser";
+
+    if (useServerStt) {
+      if (isListening.value) {
+        return true;
+      }
+      void createMicrophoneRecorder()
+        .then((created) => {
+          recorder = created;
+          created.start();
+          isListening.value = true;
+        })
+        .catch((startError: unknown) => {
+          error.value =
+            startError instanceof Error ? startError.message : "Failed to start microphone";
+          isListening.value = false;
+        });
+      return true;
+    }
+
     if (!recognition) {
       error.value = "Speech recognition not supported in this browser";
       return false;
@@ -117,11 +164,6 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
     if (isListening.value) {
       return true;
     }
-
-    error.value = null;
-    transcript.value = "";
-    interimTranscript.value = "";
-    confidence.value = 0;
     recognition.lang = resolveSpeechLocale(locale ?? settings?.value?.language);
     recognition.start();
     isListening.value = true;
@@ -129,6 +171,34 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   };
 
   const stopListening = (): void => {
+    if (useServerStt) {
+      const activeRecorder = recorder;
+      recorder = null;
+      if (!activeRecorder) {
+        isListening.value = false;
+        return;
+      }
+      void activeRecorder
+        .stop()
+        .then((blob) => transcribeAudioViaServer(blob))
+        .then((result) => {
+          if (result.ok) {
+            transcript.value = result.text;
+            interimTranscript.value = "";
+            confidence.value = 1;
+          } else {
+            error.value = result.error;
+          }
+        })
+        .catch((stopError: unknown) => {
+          error.value =
+            stopError instanceof Error ? stopError.message : "Failed to transcribe audio";
+        })
+        .finally(() => {
+          isListening.value = false;
+        });
+      return;
+    }
     recognition?.stop();
     isListening.value = false;
   };

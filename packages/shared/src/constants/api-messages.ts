@@ -16,6 +16,7 @@ export const API_MESSAGE_INTERVIEW_COMPLETED = "Interview completed";
 export const API_MESSAGE_AI_NO_JOBS_FOR_MATCHING = "No jobs available for matching";
 export const API_MESSAGE_JOB_MATCHING_COMPLETE = "Job matching complete";
 export const API_MESSAGE_RESUME_ANALYSIS_COMPLETE = "Resume analysis complete";
+export const API_MESSAGE_SPEECH_TRANSCRIBED = "Speech transcribed successfully";
 export const API_MESSAGE_COVER_LETTER_GENERATED = "Cover letter generated successfully";
 export const API_MESSAGE_COVER_LETTER_GENERATED_SAVED = "Cover letter generated and saved";
 export const API_MESSAGE_COVER_LETTER_GENERATED_ONLY = "Cover letter generated";

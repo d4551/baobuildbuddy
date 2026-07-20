@@ -14,7 +14,12 @@ const jobsPage = {
     configureProvidersAria: "Open Settings to configure job providers",
     refreshButton: "Refresh Jobs",
     refreshAria: "Refresh job feed",
-    searchPlaceholder: "Search jobs by title, company, or keywords...",
+    aiMatchButton: "AI Match",
+    aiMatchAria: "Match jobs to your primary resume with AI",
+    recommendationsTitle: "Recommended for you",
+    recommendationsAria: "AI-recommended jobs",
+    openRecommendationAria: "Open recommended job {title} at {company}",
+    searchPlaceholder: "Search jobs…",
     searchAria: "Search jobs by title, company, or keywords",
     clearSearchAria: "Clear job search input",
     searchButton: "Search",
@@ -130,6 +135,8 @@ const jobsPage = {
     pageAria: "Go to page {page}",
     toasts: {
       searchReward: "Search progress recorded (+{xp} XP)",
+      matchNeedsResume: "Create a resume before running AI job matching.",
+      matchComplete: "AI job matching complete. Recommendations updated.",
     },
     date: {
       unknown: "Unknown",

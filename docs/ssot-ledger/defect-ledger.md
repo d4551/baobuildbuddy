@@ -34,3 +34,39 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | Dup Nuxt auto-imports | twin exports across composables | prepare warning silence + schedule/api SSOT |
 | Stack audit lied Elysia 1.4.29 | `npm view` latest ≠ override | `validate:stack-versions` |
 | Integration 401/disallowed host on bare `bun test` | env only in package.json bash wrapper | `src/test-setup.ts` preload |
+
+| D20 | BROKEN JOURNEY | Nuxt `--host localhost` IPv6-only; Playwright/`127.0.0.1` unreachable | FIXED | `dev-stack` defaults `LOOPBACK_HOST_IPV4`; smoke `CLIENT_BASE` IPv4; tests updated |
+| D21 | DUPLICATED | Settings page subtitle repeated via `fallback-description-key` | FIXED | removed fallback; section `descriptionKey` for profile/preferences (i18n×4) |
+| D22 | DUPLICATED | AI chat context chips stacked (panel+sidebar) below xl; header+aside at xl | FIXED | aside `hidden xl:flex`; header chips `xl:hidden` |
+| D23 | SUBPAR | Mobile dock/tab targets &lt;44px; jobs placeholder truncates @320 | FIXED | `TOUCH_TARGET_MIN_CLASS` / `SHELL_DOCK_ITEM_CLASS`; short placeholder + full aria |
+| D24 | BROKEN UX | Mobile navbar section label truncates to "A…"/"In…" @320 | FIXED | hide label below `sm`; logo+aria brand; page h1 owns section; `MAX_W_40_CLASS` for sm+ |
+| D25 | DUPLICATED | Scraper providers description in navigator + CapabilityGrid | FIXED | grid intro removed; navigator SSOT; burndown chrome-copy gate |
+| D26 | GAPPED | Interactive burndown desktop-only / 3-click / no 5Q | FIXED | canonical `browser-interaction-burndown.ts` mobile→tablet→desktop + 5Q ledger |
+| D27 | BROKEN UX | Section rail tab labels clip mid-word @320 (Prefe/Re…) | FIXED | remove overflow-x-clip; shrink-0 rail; icon-only labels below sm; aria-label retained |
+| D28 | DUPLICATED | Settings panel h2 repeats WorkspaceSectionNavigator title | FIXED | panel headers meta-only / removed under navigator |
+| D29 | SUBPAR | Chat-page Scope/Surface/Route chips + long composer hint @320 | FIXED | chips only on floating-widget; short composerHint en/es |
+| D30 | BROKEN | /studios/analytics hydration mismatch (orphan ref vs useAsyncData) | FIXED | analytics payload via useAsyncData data; SSR=client |
+| D31 | BROKEN | FloatingChatToggleButton SVG_STROKE_WIDTH_DEFAULT unbound | FIXED | import from layout SSOT |
+| D32 | SUBPAR | Sidebar/navbar targets 42px < WCAG 2.5.5 44px | FIXED | SHELL_SIDEBAR_ITEM_CLASS + TOUCH_TARGET_MIN_CLASS on menu |
+| D33 | SUBPAR | Empty contact flex on portfolio preview | FIXED | v-if email\|website |
+| D34 | SUBPAR | Chrome controls &lt;44px (sidebar collapse, theme, FAB, clear chat, jobs filter clear/apply) | FIXED | `TOUCH_TARGET_MIN_CLASS`; smoke measure ≥44 |
+| D35 | DUPLICATED | AI chat subtitle ↔ default greeting copy | FIXED | en/es greeting no longer repeats subtitle |
+| D36 | VIOLATING | Jobs filter sticky bar raw `backdrop-blur` + `bg-base-100/90` | FIXED | `glass-subtle` SSOT |
+| D37 | LYING | Job Intelligence active-sources `4/3` badge; panel vs workspace count drift | FIXED | `countActiveJobProviderSources` SSOT; badge shows live count |
+| D38 | SUBPAR | Jobs empty CTA aria `"Refresh Jobs"` ≠ header `"Refresh job feed"` → burndown warn after first click | FIXED | EmptyState `ctaAriaKey` + jobs uses `refreshAria`/`clearFiltersAria` |
+| D39 | SUBPAR | Burndown warn `control not found` for empty-state CTAs unmounted after Refresh | FIXED | skip stale labels when no longer listed |
+| D40 | BROKEN UX | Dashboard streak label truncates "day stre…" @320 | FIXED | gamification card stacks @mobile; streak shrink-0 + nowrap |
+| D41 | SUBPAR | Locale menu rows 42px under menu-sm | FIXED | drop menu-sm; TOUCH_TARGET_MIN_CLASS = h-11 min-h-11 min-w-11 |
+| D42 | SUBPAR | Setup continue CTA 40px | FIXED | TOUCH_TARGET_MIN_CLASS on SetupProfileStep |
+
+| D43 | BROKEN UX | FAB occludes streak; streak under dock @320 | FIXED | SHELL_MAIN_INNER pe-16+pb-36; streak leads radial; compact gamification |
+| D44 | BROKEN UX | Floating chat panel clips left @320 | FIXED | stack inset-x-4 + max-w calc; panel max-w-full |
+| D45 | BROKEN UX | AI chat Send under dock @320 | FIXED | CHAT_COMPOSER_STICKY_CLASS + TOUCH_TARGET_MIN on Send |
+| D46 | SUBPAR | Empty-state copy intersects dock | FIXED | denser EMPTY_STATE + shell pb-36 |
+| D47 | SUBPAR | btn-xs/sm shrink actionable targets | FIXED | TOUCH_TARGET_MIN on chips/speech; icon-square floating header |
+| D48 | VIOLATING | SHELL_SIDEBAR_MENU_CLASS still menu-sm | FIXED | remove menu-sm; item tokens own touch floor |
+| D49 | PAPERED | Section rail labels hidden sm:inline @320 | FIXED | SECTION_RAIL_LABEL_CLASS truncate visible |
+| D50 | SUBPAR | FAB overlaps settings form @320 | FIXED | max-lg pe-16 on SHELL_MAIN_INNER |
+| D51 | SUBPAR | Emoji as gamification icons | FIXED | AppIcon IconSparkles/IconBolt/IconCheckCircle |
+| D52 | SUBPAR | Surface/Route telemetry chips on floating panel | FIXED | entity+state chips only |
+

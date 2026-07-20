@@ -5,6 +5,7 @@ import {
   APP_MAIN_CONTENT_ID,
   ERROR_PAGE_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHELL_SKIP_LINK_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -38,7 +39,7 @@ const message = computed(() => {
           <span>{{ t("errorPage.statusLabel") }}: {{ error.statusCode || 500 }}</span>
         </div>
         <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <NuxtLink :to="APP_ROUTES.dashboard" class="btn btn-primary" :aria-label="t('errorPage.backToDashboardButton')">
+          <NuxtLink :to="APP_ROUTES.dashboard" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('errorPage.backToDashboardButton')">
             {{ t("errorPage.backToDashboardButton") }}
           </NuxtLink>
           <button class="btn btn-ghost" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">

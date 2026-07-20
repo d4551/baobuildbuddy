@@ -7,6 +7,7 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -163,7 +164,7 @@ function handleTtsModelChange(event: Event): void {
       </p>
       <button
         type="button"
-        class="btn btn-primary btn-xs"
+        :class="[PRIMARY_ACTION_CLASS]"
         :disabled="props.saving"
         :aria-label="t('aiChatPage.voiceSettings.saveAria')"
         @click="emit('save')"

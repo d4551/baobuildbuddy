@@ -50,6 +50,8 @@ Not sure where to start? Choose the guide that matches your goal:
 | Install a desktop app (no dev setup)      | [Non-Technical Install](#non-technical-install)                |
 | Read the full technical reference         | Keep reading this file                                         |
 | Resolve conflicting “audit” stack claims  | [Stack contract](docs/STACK-CONTRACT.md) (Drizzle + Nuxt, not Prisma + htmx) |
+| Browser visual / interactive UI proof     | [Verification Runbook](docs/VERIFICATION_RUNBOOK.md) + [Page Verification Guide](docs/PAGE_VERIFICATION_GUIDE.md) |
+| SSOT defect / improvement ledgers         | [docs/ssot-ledger/](docs/ssot-ledger/) |
 
 ### The building blocks
 
@@ -94,7 +96,7 @@ Not sure where to start? Choose the guide that matches your goal:
 
 | Required        | Purpose                               |
 |-----------------|---------------------------------------|
-| Bun (>=1.3.11)  | Runtime, package manager, test runner |
+| Bun (>=1.3.14)  | Runtime, package manager, test runner |
 | Git             | Source control                        |
 
 Optional: Rust + Cargo (for desktop builds), `curl`/`jq` (for diagnostics), at least one AI provider key.
@@ -103,7 +105,7 @@ Check your Bun version against the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.11"
+# -> "bun@1.3.14"
 ```
 
 ### Automated setup (recommended)
@@ -150,17 +152,17 @@ bun run db:push
 bun run dev
 ```
 
-This starts the API server (port 3000) and Nuxt client (port 3001) together via `scripts/dev-stack.ts`.
+This starts the API server (port 3000) and Nuxt client (port 3001) together via `scripts/dev-stack.ts`. The stack defaults the Nuxt host to **IPv4 loopback** (`127.0.0.1`) so Playwright and other tools that dial `127.0.0.1:3001` are not blocked by an IPv6-only `localhost` bind.
 
 Verify everything is working:
 
 ```bash
-curl -fsS http://localhost:3000/api/health
-curl -fsS http://localhost:3000/api/auth/status
-curl -fsS http://localhost:3000/api/jobs?limit=1 | head
+curl -fsS http://127.0.0.1:3000/api/health
+curl -fsS http://127.0.0.1:3000/api/auth/status
+curl -fsS "http://127.0.0.1:3000/api/jobs?limit=1" | head
 ```
 
-Then open `http://localhost:3001` in your browser.
+Then open `http://127.0.0.1:3001` (or `http://localhost:3001` when your OS resolves localhost to the same stack) in your browser.
 
 ---
 
@@ -184,12 +186,14 @@ For the full beginner walkthrough, see [docs/LOCAL_AI_SETUP.md](docs/LOCAL_AI_SE
 For the current step-by-step proof flow covering:
 
 - format, lint, test, and build gates
-- full routed page screenshots with a report
+- SSR route HTML checks (`verify:pages`)
+- multi-viewport browser smoke (`proof:browser-smoke`) and interactive burndown (`proof:browser-burndown`)
+- full routed page screenshots with a report (`proof:pages`)
 - export verification for resume / cover letter / portfolio
 - desktop runtime verification
 - Tauri 2 host-matching release generation plus staged multi-platform verification
 
-use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md).
+use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md) and the route checklist in [docs/PAGE_VERIFICATION_GUIDE.md](docs/PAGE_VERIFICATION_GUIDE.md).
 
 ---
 
@@ -452,8 +456,8 @@ bun run dev
 ```
 
 Starts server + client via `scripts/dev-stack.ts`:
-- API server on `PORT` (default 3000)
-- Nuxt client on port 3001
+- API server on `PORT` (default 3000), bound for local access
+- Nuxt client on port 3001, host default **`127.0.0.1`** (IPv4 loopback; see Troubleshooting if Playwright cannot reach the UI)
 
 ### Split terminals
 
@@ -467,15 +471,21 @@ Terminal 2:
 bun run dev:client
 ```
 
+When starting the client alone, prefer an explicit IPv4 host if you will drive the UI with Playwright:
+
+```bash
+bun run --cwd packages/client dev -- --host 127.0.0.1 --port 3001
+```
+
 ### Default endpoints
 
 | Endpoint             | Default URL                              | Config key               |
 |----------------------|------------------------------------------|--------------------------|
-| API server           | `http://localhost:3000`                   | `PORT`                  |
-| Client UI            | `http://localhost:3001`                   | client `nuxt dev`       |
-| Chat WebSocket       | `ws://localhost:3000/api/ws/chat`         | `NUXT_PUBLIC_WS_BASE`   |
-| Interview WebSocket  | `ws://localhost:3000/api/ws/interview`    | `NUXT_PUBLIC_WS_BASE`   |
-| Automation WebSocket | `ws://localhost:3000/api/ws/automation`   | `NUXT_PUBLIC_WS_BASE`   |
+| API server           | `http://127.0.0.1:3000`                   | `PORT`                  |
+| Client UI            | `http://127.0.0.1:3001`                   | `dev-stack` / Nuxt `--host` |
+| Chat WebSocket       | `ws://127.0.0.1:3000/api/ws/chat`         | `NUXT_PUBLIC_WS_BASE`   |
+| Interview WebSocket  | `ws://127.0.0.1:3000/api/ws/interview`    | `NUXT_PUBLIC_WS_BASE`   |
+| Automation WebSocket | `ws://127.0.0.1:3000/api/ws/automation`   | `NUXT_PUBLIC_WS_BASE`   |
 
 ### All available scripts
 
@@ -503,6 +513,10 @@ bun run dev:client
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
 | Release refresh (all staged OSes) | `bun run release:refresh:all-os`                | Assemble staged release artifacts + checksums       |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
+| Browser visual smoke        | `bun run proof:browser-smoke`                          | Playwright screenshots @ mobile/tablet/desktop      |
+| Browser interaction burndown| `bun run proof:browser-burndown`                       | Click/fill probe + 5Q ledger per route × viewport   |
+| Page screenshot proof       | `bun run proof:pages`                                  | Full routed-page PNG bundle + report                |
+| Validate stack pins         | `bun run validate:stack-versions`                      | Assert installed Elysia/Eden/etc. match workspace pins |
 | Server type contract        | `bun run --cwd packages/server build:types`            | Generate dist-types for client typecheck            |
 | Validate ARIA               | `bun run validate:aria`                                | Interactive labeling + dialog semantics             |
 | Validate layout tokens      | `bun run validate:ui-layout-tokens`                    | Block hardcoded width/grid literals                 |
@@ -912,10 +926,15 @@ Migrations live in `packages/server/src/db/migrations/`. Seed data in `packages/
     |   +-- validate-no-try-catch.ts    Repository no-try/catch policy validator
     |   +-- validate-ui-accessibility.ts WCAG + hardcoded-color drift validator
     +-- docs/
+    |   +-- STACK-CONTRACT.md           Binding stack + UI SSOT contract
     |   +-- ELI5_SYSTEM_WALKTHROUGH.md  Plain-English system overview
     |   +-- STARTER_GUIDE.md            First-time setup guide
     |   +-- LOCAL_AI_SETUP.md           Local AI with Ollama
     |   +-- AUTOMATION.md               Automation contracts and runtime
+    |   +-- VERIFICATION_RUNBOOK.md     Lint/test/build + browser + export proof
+    |   +-- PAGE_VERIFICATION_GUIDE.md  Route-by-route screenshot / 5Q checklist
+    |   +-- feature-trace-matrix.md     Route-to-service-to-UI traceability
+    |   +-- ssot-ledger/                Defect / improvement / baseline ledgers
     |   +-- RAILWAY.md                  Railway deployment guide
     +-- .env.example
     +-- package.json
@@ -1004,6 +1023,18 @@ bun run validate:ui
 bun run verify:pages
 ```
 
+With the stack running (`bun run dev`), run Playwright visual proof against IPv4 loopback (not curl-as-UI):
+
+```bash
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown
+```
+
+- `proof:browser-smoke` — viewport matrix **mobile (320) → tablet (768) → desktop (1440)**; one screenshot per static app route; fails on console/page errors and shell regressions.
+- `proof:browser-burndown` — same viewport order; clicks labeled controls, probes textboxes, writes `fiveq-ledger.json` + `burndown-report.json`.
+
+Route-by-route human review checklist: [docs/PAGE_VERIFICATION_GUIDE.md](docs/PAGE_VERIFICATION_GUIDE.md).
+
 The UI validation pipeline enforces:
 
 - WCAG AA color contrast for daisyUI theme pairs
@@ -1033,13 +1064,14 @@ flowchart LR
 
 ### Stack version contract
 
-Context7 verification: `bun run audit:official-llms` fetches and validates `llms.txt` from official sources (Elysia, Nuxt, Bun, daisyUI). Each source is checked for required markers to ensure AI assistants receive up-to-date docs.
+Context7 verification: `bun run audit:official-llms` fetches and validates `llms.txt` from official sources (Elysia, Nuxt, Bun, daisyUI). Each source is checked for required markers to ensure AI assistants receive up-to-date docs. When Context7 MCP quota is unavailable, use that script plus the official `llms.txt` URLs as the safe equivalent.
 
-Verify stack alignment:
+Verify stack alignment (binding pin check is **`validate:stack-versions`**, not `npm view` latest):
 
 ```bash
 bun run ci:alignment
-bun run audit:stack-versions
+bun run validate:stack-versions
+bun run audit:stack-versions   # advisory: prints npm-latest vs workspace; does not gate CI alone
 bun run verify:bun-baseline
 bun run validate:alignment
 ```
@@ -1089,6 +1121,9 @@ bun run release:refresh:all-os
 | `bun run build:desktop`         | Current-host desktop packaging succeeds              |
 | `bun run verify:desktop-runtime`| Packaged runtime executes deterministic automation proof |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
+| `bun run proof:browser-smoke`   | Multi-viewport screenshots; 0 capture failures       |
+| `bun run proof:browser-burndown`| Interactive matrix; 0 findings; 5Q ledger complete   |
+| `bun run validate:stack-versions` | Installed package versions match workspace pins    |
 | `bun run ci:alignment`          | Frozen-lockfile install + alignment gate passes      |
 | `bun run validate:alignment`    | Bun + daisyUI alignment passes                       |
 
@@ -1268,9 +1303,18 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 | Check                   | Fix                                                                    |
 |-------------------------|------------------------------------------------------------------------|
 | API base configured?    | Verify `NUXT_PUBLIC_API_BASE` in `.env`                                |
-| Proxy configured?       | Set `NUXT_PUBLIC_API_PROXY` or ensure `localhost:${PORT}` is reachable |
+| Proxy configured?       | Set `NUXT_PUBLIC_API_PROXY` or ensure `127.0.0.1:${PORT}` is reachable |
 | CORS issue?             | Add client origin to `CORS_ORIGINS`                                    |
-| Server running?         | `curl http://localhost:3000/api/health`                                |
+| Server running?         | `curl http://127.0.0.1:3000/api/health`                                |
+
+### Playwright / browser proof cannot open the UI
+
+| Check | Fix |
+|-------|-----|
+| Nuxt bound IPv6-only? | Prefer `bun run dev` (`dev-stack` defaults client host to `127.0.0.1`). Avoid bare `--host localhost` if tools dial IPv4. |
+| Wrong client base? | Set `PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001` for `proof:browser-smoke` / `proof:browser-burndown`. |
+| Chromium missing? | `bun run automation:browsers:install` (or `bunx playwright install chromium`). |
+| Curl used as UI proof? | Curl proves API only. UI proof requires Playwright screenshots / burndown (see Verification Runbook). |
 
 ### WebSocket handshake fails
 
@@ -1337,7 +1381,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - [ ] `bun run lint` passes
 - [ ] `bun run test` passes
 - [ ] `bun run db:generate` + `bun run db:push` complete
-- [ ] `bun run dev` starts both server and client
+- [ ] `bun run dev` starts both server and client (client reachable at `http://127.0.0.1:3001`)
 - [ ] `/api/health` returns healthy status
 - [ ] `/api/auth/status` responds
 - [ ] `/api/jobs` returns job list
@@ -1346,6 +1390,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - [ ] `/api/ws/interview` WebSocket handshake succeeds
 - [ ] `/api/ws/automation` WebSocket handshake succeeds
 - [ ] AI provider responds (local or cloud)
+- [ ] `bun run verify:pages` passes
+- [ ] `PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke` reports 0 failures
+- [ ] `PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown` reports 0 findings
 - [ ] `bun run scripts/validate-ascii-geometry.ts README.md` passes
 ```text
   +============================================================+
@@ -1383,8 +1430,13 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 | [First-Time Setup Guide](docs/STARTER_GUIDE.md)                        | Step-by-step first install                |
 | [Local AI Setup Guide](docs/LOCAL_AI_SETUP.md)                         | Ollama setup for local AI                 |
 | [Automation Guide](docs/AUTOMATION.md)                                 | RPA contracts and runtime behavior        |
+| [Verification Runbook](docs/VERIFICATION_RUNBOOK.md)                   | Lint/test/build + browser + export + desktop proof |
+| [Page Verification Guide](docs/PAGE_VERIFICATION_GUIDE.md)             | Route-by-route screenshot / 5Q checklist  |
 | [Railway Deployment Guide](docs/RAILWAY.md)                            | Deploy to Railway                         |
 | [Feature Trace Matrix](docs/feature-trace-matrix.md)                   | Route-to-service-to-UI traceability       |
-| [Stack contract](docs/STACK-CONTRACT.md)                               | Canonical stack (Drizzle, Nuxt, Eden) vs misleading audit prompts |
+| [Stack contract](docs/STACK-CONTRACT.md)                               | Canonical SSOT + stack (Drizzle, Nuxt, Eden); wins over `.bao`-archive playbooks |
+| [SSOT ledgers](docs/ssot-ledger/)                                      | Defect / improvement / baseline / contract-escalation evidence |
+| [Routing audit](docs/ROUTING_AUDIT.md)                                 | Elysia 2 route registration notes         |
 | [Job Board Service Layer](packages/server/src/services/jobs/README.md) | Job aggregation API reference             |
 | [Server routes](packages/server/src/routes)                            | API route modules                         |
+| [AGENTS.md](AGENTS.md)                                                 | Cursor Cloud / agent operating notes      |

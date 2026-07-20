@@ -9,6 +9,7 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 
@@ -70,7 +71,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
             @keydown="onSearchKeydown"
           />
           <button 
-            class="btn btn-primary join-item"
+            :class="[PRIMARY_ACTION_CLASS, 'join-item']"
             :aria-label="buttonAriaLabel"
             @click="emit('search')"
           >

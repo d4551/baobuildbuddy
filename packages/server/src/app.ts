@@ -31,6 +31,7 @@ import { scraperRoutes } from "./routes/scraper.routes";
 import { searchRoutes } from "./routes/search.routes";
 import { settingsRoutes } from "./routes/settings.routes";
 import { skillMappingRoutes } from "./routes/skill-mapping.routes";
+import { speechRoutes } from "./routes/speech.routes";
 import { statsRoutes } from "./routes/stats.routes";
 import { studioRoutes } from "./routes/studio.routes";
 import { userRoutes } from "./routes/user.routes";
@@ -60,6 +61,7 @@ const OPENAPI_TAGS = [
   { name: "Studios", description: "Studio directory CRUD and analytics endpoints." },
   { name: "Scraper", description: "Manual scraper trigger endpoints." },
   { name: "AI", description: "AI chat, analysis, matching, and provider introspection endpoints." },
+  { name: "Speech", description: "Speech-to-text transcription via Whisper and other STT providers." },
   { name: "Gamification", description: "XP, achievements, challenges, and streak endpoints." },
   { name: "Skill Mapping", description: "Transferable skill analysis and CRUD endpoints." },
   { name: "Search", description: "Global search and autocomplete endpoints." },
@@ -167,6 +169,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   .use(studioRoutes)
   .use(scraperRoutes)
   .use(aiRoutes)
+  .use(speechRoutes)
   .use(gamificationRoutes)
   .use(skillMappingRoutes)
   .use(searchRoutes)

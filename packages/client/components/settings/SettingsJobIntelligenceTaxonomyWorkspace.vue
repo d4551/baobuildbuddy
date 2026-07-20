@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MIN_HEIGHT_EDITOR_CLASS,
@@ -9,6 +10,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -55,7 +57,7 @@ const populatedTaxonomyCount = computed(
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
             <button 
-              class="btn btn-secondary btn-sm"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-secondary btn-sm']"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"
             >

@@ -13,6 +13,7 @@ export const createAIChatPageDerivedState = (input: {
   readonly messages: Readonly<Ref<readonly ChatMessage[]>>;
   readonly loading: Readonly<Ref<boolean>>;
   readonly streaming: Readonly<Ref<boolean>>;
+  readonly streamingContent: Readonly<Ref<string>>;
   readonly voiceErrorMessageKey: Readonly<Ref<string>>;
   readonly buildCurrentContext: ReturnType<typeof useAI>["buildCurrentContext"];
 }) => {
@@ -36,7 +37,9 @@ export const createAIChatPageDerivedState = (input: {
   const latestAssistantMessageIndex = computed(() =>
     resolveLatestAssistantMessageIndex([...input.messages.value]),
   );
-  const streamingBubble = computed(() => createStreamingAssistantMessage("chatPage"));
+  const streamingBubble = computed(() =>
+    createStreamingAssistantMessage("chatPage", input.streamingContent.value),
+  );
   const chatContext = computed(() => input.buildCurrentContext("chat-page"));
   const hasConversation = computed(
     () => renderedMessages.value.length > 0 || input.streaming.value,

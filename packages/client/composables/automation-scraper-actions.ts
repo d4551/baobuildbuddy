@@ -1,14 +1,35 @@
-import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
+import {
+  isAutomationJobScrapeTarget,
+  automationScrapeTargetToPortalId,
+  type AutomationScrapeTarget,
+} from "@bao/shared/constants/automation";
 import type { Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import type { Router } from "vue-router";
 import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
 import { toIsoTimestamp } from "~/composables/schedule-timestamp";
+import { useApi } from "~/composables/useApi";
 import type { AutomationRunEnvelope, ScrapePendingAction } from "~/types/automation-scraper";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { isFailedScrapeRun, readScrapeOutputErrors } from "~/utils/scrape-run-output";
+
+async function syncDirectScraperCatalog(target: AutomationScrapeTarget): Promise<void> {
+  const api = useApi();
+  if (target === "studios") {
+    await api.scraper.studios.post();
+    return;
+  }
+  if (!isAutomationJobScrapeTarget(target)) {
+    return;
+  }
+  const portalId = automationScrapeTargetToPortalId(target);
+  const portalRoute = api.scraper.jobs[portalId];
+  if (portalRoute && typeof portalRoute.post === "function") {
+    await portalRoute.post();
+  }
+}
 
 type AutomationScraperActionsInput = {
   awardForAction: (action: "scraperStudios" | "scraperJobs") => Promise<{
@@ -106,6 +127,8 @@ function createRunScrapeTarget(
     }
 
     const completedRun = runResult.value;
+    // Dual fabric: RPA run + Eden scraper portal sync for catalog freshness.
+    await settlePromise(syncDirectScraperCatalog(target), t(failureKey));
     await refreshManualRunArtifacts({
       refreshCapabilityAudit: input.refreshCapabilityAudit,
       refreshScraperJobs: input.refreshScraperJobs,

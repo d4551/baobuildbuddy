@@ -4,12 +4,11 @@
  * Feature-tree consumers (ai/, interview/, pages/, …) must never be exempted.
  */
 
-const UI_PRIMITIVE_PREFIX = "packages/client/components/ui/";
 const ICON_PRIMITIVE_PREFIX = "packages/client/components/icons/";
 
 /**
  * Exact-path owners for validators that exempt a closed primitive set.
- * Keep this list minimal — prefer prefix checks via `isControlPrimitiveOwner`.
+ * Softening ban: no blanket `components/ui/` prefix — every primitive is listed.
  */
 export const CONTROL_PRIMITIVE_OWNERS = new Set<string>([
   "packages/client/components/ui/LoadingSkeleton.vue",
@@ -20,7 +19,6 @@ export const CONTROL_PRIMITIVE_OWNERS = new Set<string>([
   "packages/client/components/ui/PageHeroHeader.vue",
   "packages/client/components/ui/PageHeaderBlock.vue",
   "packages/client/components/ui/BootstrapErrorAlert.vue",
-  "packages/client/components/ui/FilteredEmptyAlert.vue",
   "packages/client/components/ui/AppPagination.vue",
   "packages/client/components/ui/ToastContainer.vue",
   "packages/client/components/ui/StatsRow.vue",
@@ -34,12 +32,12 @@ export const CONTROL_PRIMITIVE_OWNERS = new Set<string>([
   "packages/client/components/ui/QuickActionFab.vue",
   "packages/client/components/ui/AIProviderIcon.vue",
   "packages/client/components/ui/CloseIcon.vue",
+  "packages/client/components/ui/ResponsiveDataSurface.vue",
+  "packages/client/components/ui/WorkspaceSectionNavigator.vue",
 ]);
 
 export const isControlPrimitiveOwner = (filePath: string): boolean =>
-  CONTROL_PRIMITIVE_OWNERS.has(filePath) ||
-  filePath.startsWith(UI_PRIMITIVE_PREFIX) ||
-  filePath.startsWith(ICON_PRIMITIVE_PREFIX);
+  CONTROL_PRIMITIVE_OWNERS.has(filePath) || filePath.startsWith(ICON_PRIMITIVE_PREFIX);
 
 /** True when a path is a forbidden consumer exemption target. */
 export const isForbiddenConsumerExemptionPath = (filePath: string): boolean => {

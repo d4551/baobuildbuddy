@@ -34,7 +34,7 @@ One command starts both:
 bun run dev
 ```
 
-This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended path.
+This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended path. The client host defaults to **`127.0.0.1`** (IPv4) so browser automation tools that dial IPv4 can reach the UI.
 
 ---
 
@@ -44,7 +44,7 @@ This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended pa
 
 | Tool                     | macOS (Homebrew)                               | Ubuntu / Debian                                      | Windows (winget)                    |
 |--------------------------|------------------------------------------------|------------------------------------------------------|-------------------------------------|
-| Bun (`bun@1.3.11`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
+| Bun (`bun@1.3.14`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
 | Git                      | `brew install git`                             | `sudo apt-get update && sudo apt-get install -y git`  | `winget install --id Git.Git -e`    |
 | Rust (for desktop builds)| `brew install rustup-init && rustup-init`      | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
@@ -70,7 +70,7 @@ Check the Bun version matches the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.11"
+# -> "bun@1.3.14"
 ```
 
 ---
@@ -199,18 +199,25 @@ bun run dev:client
 From a terminal:
 
 ```bash
-curl -fsS http://localhost:3000/api/health
-curl -fsS http://localhost:3000/api/auth/status
-curl -fsS http://localhost:3000/api/jobs?limit=1
+curl -fsS http://127.0.0.1:3000/api/health
+curl -fsS http://127.0.0.1:3000/api/auth/status
+curl -fsS "http://127.0.0.1:3000/api/jobs?limit=1"
 ```
 
-Then open `http://localhost:3001` in your browser and confirm:
+Then open `http://127.0.0.1:3001` in your browser and confirm:
 
-1. Home page loads without errors.
-2. Settings page is reachable.
+1. Home page (dashboard) loads without errors.
+2. Settings page is reachable; section rail scrolls on narrow viewports.
 3. An API-backed feature returns data (jobs or resumes).
 4. Dashboard quick actions reflect your pipeline status.
 5. Browser dev tools show no hard errors.
+
+Optional Playwright UI proof (stack must still be running; IPv4 client base):
+
+```bash
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown
+```
 
 ---
 
@@ -273,6 +280,7 @@ Requires Rust toolchain (`rustc` + `cargo`).
 | Problem                              | Fix                                                              |
 |--------------------------------------|------------------------------------------------------------------|
 | Server starts but UI can't connect   | Check `NUXT_PUBLIC_API_BASE` / `NUXT_PUBLIC_WS_BASE`            |
+| Playwright can't reach `:3001`       | Prefer `bun run dev` (IPv4 `127.0.0.1`); avoid bare `--host localhost` |
 | Port conflict                        | Change `PORT` in `.env`                                          |
 | Playwright browser missing           | Run `bun run automation:browsers:install`                        |
 | `curl` health checks fail            | Confirm server shows `Listening on ...` and no startup errors    |
@@ -288,8 +296,10 @@ For more, see [README.md > Troubleshooting](../README.md#troubleshooting).
 | Topic                                | Guide                                                    |
 |--------------------------------------|----------------------------------------------------------|
 | Understand the system architecture   | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md)  |
+| Binding stack / UI SSOT              | [STACK-CONTRACT.md](./STACK-CONTRACT.md)                 |
 | Set up local AI with Ollama          | [Local AI Setup Guide](./LOCAL_AI_SETUP.md)               |
 | Learn the automation flows           | [Automation Guide](./AUTOMATION.md)                       |
+| Proof / screenshots                  | [Verification Runbook](./VERIFICATION_RUNBOOK.md)         |
 | Deep architecture reference          | [README.md](../README.md)                                 |
 
 ---

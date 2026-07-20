@@ -1,4 +1,4 @@
-import { onUnmounted } from "vue";
+import { onUnmounted, watch } from "vue";
 import { createInterviewSessionActions } from "~/composables/interview-session-actions";
 import {
   buildInterviewSessionViewModel,
@@ -7,14 +7,22 @@ import {
   registerInterviewSessionWatchers,
 } from "~/composables/interview-session-page-state";
 import { createInterviewSessionTimer } from "~/composables/interview-session-timer";
+import { useInterviewRealtime } from "~/composables/useInterviewRealtime";
 
 export function useInterviewSessionPage() {
   const state = createInterviewSessionState();
   const derived = createInterviewSessionDerivedState(state);
+  const realtime = useInterviewRealtime();
   const timer = createInterviewSessionTimer({
     activeSession: derived.activeSession,
     t: state.t,
   });
+
+  const submitViaWs = async (sessionId: string, content: string): Promise<boolean> => {
+    const feedback = await realtime.submitViaWs(sessionId, content);
+    return feedback !== null;
+  };
+
   const actions = createInterviewSessionActions({
     canComplete: derived.canComplete,
     canSubmit: derived.canSubmit,
@@ -30,6 +38,7 @@ export function useInterviewSessionPage() {
     sessionLoadError: state.sessionLoadError,
     stt: state.stt,
     stopTimer: timer.stopTimer,
+    submitViaWs,
     submitResponse: state.submitResponse,
     submitting: state.submitting,
     syncCompletedSessionTime: timer.syncCompletedSessionTime,
@@ -47,10 +56,21 @@ export function useInterviewSessionPage() {
     tts: state.tts,
   });
 
+  watch(
+    derived.sessionId,
+    (sessionId) => {
+      if (sessionId) {
+        realtime.connect();
+      }
+    },
+    { immediate: true },
+  );
+
   onUnmounted(() => {
     timer.stopTimer();
     state.tts.cancel();
     state.stt.stopListening();
+    realtime.disconnect();
   });
   return buildInterviewSessionViewModel({ actions, derived, state, timer });
 }

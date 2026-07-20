@@ -8,6 +8,8 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -64,7 +66,7 @@ function removeSkill(index: number): void {
         @keyup.enter="addSkill"
       />
       <button 
-        class="btn btn-sm btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.skills.addButtonAria')"
         @click="addSkill"
       >
@@ -80,7 +82,7 @@ function removeSkill(index: number): void {
         {{ skill }}
         <button 
           type="button"
-          class="btn btn-ghost btn-xs btn-circle"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >

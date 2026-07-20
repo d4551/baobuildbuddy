@@ -25,6 +25,11 @@ export const API_ERROR_ANALYZE_RESUME = "Failed to analyze resume";
 export const API_ERROR_GENERATE_COVER_LETTER = "Failed to generate cover letter";
 export const API_ERROR_MATCH_JOBS = "Failed to match jobs";
 export const API_ERROR_GENERATE_AI_RESPONSE = "Failed to generate AI response";
+export const API_ERROR_SPEECH_TRANSCRIBE = "Failed to transcribe speech audio";
+export const API_ERROR_SPEECH_STT_NOT_CONFIGURED =
+  "Speech-to-text provider is not configured for server transcription";
+export const API_ERROR_SPEECH_STT_ENDPOINT_INVALID =
+  "Speech-to-text endpoint is missing or not allowed";
 export const API_ERROR_START_INTERVIEW = "Failed to start interview session";
 export const API_ERROR_GENERATE_RESPONSE = "Failed to generate response";
 export const API_ERROR_GENERATE_EMAIL_RESPONSE = "Failed to generate email response";

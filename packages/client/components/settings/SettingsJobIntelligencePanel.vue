@@ -11,6 +11,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -29,12 +30,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const configuredSourceCount = computed(
-  () =>
-    Number(jobProviderForm.value.hitmarkerEnabled) +
-    Number(jobProviderForm.value.greenhouseApiBaseUrl.trim().length > 0) +
-    Number(jobProviderForm.value.leverApiBaseUrl.trim().length > 0),
-);
+const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
 const sourceCollectionCount = computed(
   () =>
@@ -58,11 +54,7 @@ const taxonomyAssetCount = computed(
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-        <SettingsPanelHeader
-          :title="t('settings.jobIntelligence.title')"
-          :description="t('settings.jobIntelligence.subtitle')"
-        />
-
+        <SettingsPanelHeader />
         <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
           <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>

@@ -25,7 +25,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside class="flex flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
+  <!-- chatSplit stacks below xl; hide aside there so context/prompts aren't duplicated -->
+  <aside class="hidden flex-col xl:flex" :class="[MIN_HEIGHT_ZERO_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]">
     <section :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.sm]">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title text-base">{{ t("aiChatPage.contextPanelTitle") }}</h2>

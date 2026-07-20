@@ -27,6 +27,11 @@ export interface NavigationItem {
   readonly includeInSidebar: boolean;
   /** Whether this item appears in the mobile dock navigation. */
   readonly includeInDock: boolean;
+  /**
+   * Extra path prefixes that light this dock item (section wayfinding).
+   * Example: ai-chat matches APP_ROUTES.aiDashboard via APP_ROUTES.ai.
+   */
+  readonly dockMatchPrefixes?: readonly string[];
 }
 
 /**
@@ -58,7 +63,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
     to: APP_ROUTES.resume,
     includeInSidebar: true,
-    includeInDock: true,
+    // Resume remains sidebar + FAB quick actions; dock prioritizes AI/Automation wayfinding.
+    includeInDock: false,
   },
   {
     id: "cover-letter",
@@ -85,7 +91,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
     to: APP_ROUTES.interview,
     includeInSidebar: true,
-    includeInDock: true,
+    // Interview stays sidebar/FAB — dock slots reserved for AI + Automation wayfinding.
+    includeInDock: false,
   },
   {
     id: "skills",
@@ -120,7 +127,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z",
     to: APP_ROUTES.aiChat,
     includeInSidebar: true,
-    includeInDock: false,
+    includeInDock: true,
+    dockMatchPrefixes: [APP_ROUTES.ai],
   },
   {
     id: "automation",
@@ -129,7 +137,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
       "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
     to: APP_ROUTES.automation,
     includeInSidebar: true,
-    includeInDock: false,
+    includeInDock: true,
   },
   {
     id: "apiDocs",
@@ -243,6 +251,30 @@ export function isRouteActive(currentPath: string, targetPath: string): boolean 
   }
 
   return true;
+}
+
+/**
+ * Dock / section wayfinding: exact/parent match on `to`, plus optional prefix aliases.
+ */
+export function isDockRouteActive(currentPath: string, item: NavigationItem): boolean {
+  if (isRouteActive(currentPath, item.to)) {
+    return true;
+  }
+  const prefixes = item.dockMatchPrefixes;
+  if (!prefixes || prefixes.length === 0) {
+    return false;
+  }
+  const normalizedCurrentPath = normalizeRoutePath(currentPath);
+  return prefixes.some((prefix) => {
+    const normalizedPrefix = normalizeRoutePath(prefix);
+    if (normalizedPrefix === "/") {
+      return normalizedCurrentPath === "/";
+    }
+    return (
+      normalizedCurrentPath === normalizedPrefix ||
+      normalizedCurrentPath.startsWith(`${normalizedPrefix}/`)
+    );
+  });
 }
 
 /**

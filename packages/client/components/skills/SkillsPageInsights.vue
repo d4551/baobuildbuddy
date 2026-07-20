@@ -5,8 +5,10 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -53,7 +55,7 @@ const { t } = useI18n();
             </p>
           </div>
 
-          <ul class="list rounded-box glass-subtle">
+          <ul class="list rounded-box" :class="[SURFACE_GLASS_SUBTLE_CLASS]">
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
               <span class="list-col-grow"></span>
@@ -72,9 +74,9 @@ const { t } = useI18n();
           </ul>
 
           <div class="card-actions justify-end">
-            <NuxtLink 
+            <NuxtLink
               :to="APP_ROUTES.skillsPathways"
-              class="btn btn-primary btn-sm"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
             >
               {{ t("skillsPage.insights.pathwaysButton") }}
@@ -94,7 +96,8 @@ const { t } = useI18n();
 
           <ul
             v-if="topMappings.length > 0"
-            class="list rounded-box glass-subtle"
+            class="list rounded-box"
+            :class="[SURFACE_GLASS_SUBTLE_CLASS]"
             :aria-label="t('skillsPage.insights.topMappingsAria')"
           >
             <li 
@@ -114,6 +117,9 @@ const { t } = useI18n();
             v-else
             title-key="skillsPage.insights.topMappingsEmptyTitle"
             description-key="skillsPage.insights.topMappingsEmptyDescription"
+            cta-label-key="skillsPage.insights.topMappingsEmptyCta"
+            cta-aria-key="skillsPage.insights.topMappingsEmptyCtaAria"
+            :cta-to="APP_ROUTES.skillsPathways"
           />
         </div>
       </article>

@@ -12,8 +12,10 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import {
   SKILLS_CONFIDENCE_MAX,
@@ -96,7 +98,9 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
         <button
+          v-if="hasMappings"
           class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
           :disabled="analyzing"
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"
@@ -106,7 +110,8 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>
         <button
-          class="btn btn-primary"
+          v-if="hasMappings"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('skillsPage.actions.addMappingAria')"
           @click="showAddModal = true"
         >
@@ -128,20 +133,24 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <SkillsPageInsights :mapping-metrics="mappingMetrics" :top-mappings="topMappings" />
+      <template v-if="hasMappings">
+        <SkillsPageInsights :mapping-metrics="mappingMetrics" :top-mappings="topMappings" />
 
-      <SkillsPageFilters
-        v-model:category-filter="categoryFilter"
-        v-model:search-filter="searchFilter"
-        :category-options="categoryOptions"
-        :has-active-filters="hasActiveFilters"
-        @clear="clearFilters"
-      />
+        <SkillsPageFilters
+          v-model:category-filter="categoryFilter"
+          v-model:search-filter="searchFilter"
+          :category-options="categoryOptions"
+          :has-active-filters="hasActiveFilters"
+          @clear="clearFilters"
+        />
+      </template>
 
       <SkillsPageMappings
         :has-mappings="hasMappings"
         :filtered-mappings="filteredMappings"
         @delete="requestDeleteMapping"
+        @add="showAddModal = true"
+        @clear-filters="clearFilters"
       />
     </div>
 
@@ -211,7 +220,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
             />
             <button
               type="button"
-              class="btn btn-sm btn-primary join-item"
+              :class="[PRIMARY_ACTION_CLASS, 'join-item']"
               :aria-label="t('skillsPage.createModal.addApplicationAria')"
               @click="addApplication"
             >
@@ -227,7 +236,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
               {{ application }}
               <button
                 type="button"
-                class="btn btn-ghost btn-xs btn-circle"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
                 :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                 @click="removeApplication(index)"
               >
@@ -261,7 +270,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           {{ t("skillsPage.createModal.cancelButton") }}
         </button>
         <button
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="loading || !newMapping.gameExpression.trim() || !newMapping.transferableSkill.trim()"
           :aria-label="t('skillsPage.createModal.createAria')"
           @click="handleAddMapping"

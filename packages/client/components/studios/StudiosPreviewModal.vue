@@ -3,11 +3,14 @@ import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -45,7 +48,7 @@ function studioLocation(location: string): string {
   >
     <button 
       type="button"
-      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-circle btn-ghost absolute right-2 top-2']"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
@@ -94,7 +97,7 @@ function studioLocation(location: string): string {
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.startInterviewAria', { studio: studio.name })"
           @click="$emit('startInterview', studio.id)"
         >
@@ -129,7 +132,7 @@ function studioLocation(location: string): string {
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
           @click="$emit('close')"
         >

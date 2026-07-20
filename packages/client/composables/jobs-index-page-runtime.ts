@@ -3,26 +3,36 @@ import type { JobsFilterState } from "~/composables/jobs-index-page-contracts";
 import { createJobsFilterState } from "~/composables/jobs-index-page-contracts";
 
 export const createJobsPageRuntime = () => {
-  const { jobs, loading, searchJobs, refreshJobs } = useJobs();
+  const { jobs, loading, searchJobs, refreshJobs, recommendations, fetchRecommendations } =
+    useJobs();
   const router = useRouter();
   const { t } = useI18n();
   const { $toast } = useNuxtApp();
   const { awardForAction } = usePipelineGamification();
+  const { matchJobs } = useAI();
+  const { resumes, fetchResumes } = useResume();
 
   const searchQuery = ref("");
   const localFilters = createJobsFilterState();
   const currentPage = ref(1);
   const refreshing = ref(false);
+  const matching = ref(false);
   const showFilters = ref(false);
 
   return {
     awardForAction,
     currentPage,
+    fetchRecommendations,
+    fetchResumes,
     jobs,
     loading,
     localFilters,
+    matchJobs,
+    matching,
+    recommendations,
     refreshing,
     refreshJobs,
+    resumes,
     router,
     searchJobs,
     searchQuery,

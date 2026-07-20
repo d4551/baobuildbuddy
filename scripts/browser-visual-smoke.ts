@@ -8,14 +8,14 @@ import { chromium, type ConsoleMessage, type Page } from "playwright";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
+const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
   "",
 );
 const OUT_DIR =
   process.env.BROWSER_SMOKE_OUT ?? join("/opt/cursor/artifacts/baseline/browser-smoke");
 const VIEWPORTS = [
-  { name: "mobile", width: 390, height: 844 },
+  { name: "mobile", width: 320, height: 720 },
   { name: "tablet", width: 768, height: 1024 },
   { name: "desktop", width: 1440, height: 900 },
 ] as const;
@@ -57,15 +57,99 @@ type RouteResult = {
 };
 
 const collectPageSignals = async (page: Page) =>
-  page.evaluate(() => {
+  page.evaluate((aiRoutePrefix: string) => {
+    const collapse = (value: string): string =>
+      value
+        .split(" ")
+        .flatMap((part) => part.split("\t"))
+        .flatMap((part) => part.split("\n"))
+        .flatMap((part) => part.split("\r"))
+        .filter((part) => part.length > 0)
+        .join(" ")
+        .trim();
+    const isLevelLabel = (value: string): boolean => {
+      if (!value.startsWith("Level ")) {
+        return false;
+      }
+      const digits = value.slice("Level ".length);
+      return digits.length > 0 && [...digits].every((char) => char >= "0" && char <= "9");
+    };
     const h1 = document.querySelector("h1");
     const mains = document.querySelectorAll("main");
+    const dockActive = Array.from(
+      document.querySelectorAll('nav.dock a[aria-current="page"], nav.dock a.dock-active'),
+    ).map((el) => ({
+      href: el.getAttribute("href"),
+      label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? ""),
+    }));
+    const tables = Array.from(document.querySelectorAll("table.table")).map((table) => {
+      const rect = table.getBoundingClientRect();
+      return { width: rect.width, visible: rect.width > 0 && rect.height > 0 };
+    });
+    const underTouch = Array.from(
+      document.querySelectorAll("nav.dock a, .menu a.min-h-11, .menu a.h-11, .menu button.min-h-11"),
+    )
+      .map((el) => {
+        const rect = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden" || style.display === "none") {
+          return null;
+        }
+        // Closed dropdown/details content is not an active touch target — skip.
+        const details = el.closest("details");
+        if (details && !details.open) {
+          return null;
+        }
+        return {
+          label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? "").slice(0, 40),
+          h: rect.height,
+          under: rect.height + 0.5 < 44,
+        };
+      })
+      .filter((row): row is { label: string; h: number; under: boolean } => row !== null && row.under);
+    const setupCtaVisible = Array.from(document.querySelectorAll("a.btn, button.btn")).some((el) => {
+      const rect = el.getBoundingClientRect();
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        collapse(el.textContent ?? "").toLowerCase().includes("complete setup")
+      );
+    });
+    const levelLabelVisible = Array.from(document.querySelectorAll("p, span, h2, h3, div")).some(
+      (el) => {
+        if (el.childElementCount > 2) {
+          return false;
+        }
+        const rect = el.getBoundingClientRect();
+        const text = collapse(el.textContent ?? "");
+        return rect.width > 0 && rect.height > 0 && isLevelLabel(text);
+      },
+    );
+    const setupXpConflict = setupCtaVisible && levelLabelVisible;
+    const floatingChatVisible = [...document.querySelectorAll("button, a")].some((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        return false;
+      }
+      const aria = (el.getAttribute("aria-label") ?? "").toLowerCase();
+      return aria.includes("floating chat") || aria.includes("show floating chat");
+    });
+    const dockHasAiChat = [...document.querySelectorAll("nav.dock a")].some((a) => {
+      const href = a.getAttribute("href") ?? "";
+      return href === aiRoutePrefix || href.startsWith(`${aiRoutePrefix}/`);
+    });
     return {
-      h1: h1?.textContent?.replace(/\s+/gu, " ").trim() ?? null,
+      h1: h1?.textContent ? collapse(h1.textContent) : null,
       mainCount: mains.length,
-      bodySnippet: (document.body?.innerText ?? "").replace(/\s+/gu, " ").trim().slice(0, 240),
+      bodySnippet: collapse(document.body?.innerText ?? "").slice(0, 240),
+      dockActive,
+      tables,
+      underTouch,
+      setupXpConflict,
+      floatingChatVisible,
+      dockHasAiChat,
     };
-  });
+  }, APP_ROUTES.ai);
 
 const smokeRoute = async (
   page: Page,
@@ -104,6 +188,35 @@ const smokeRoute = async (
     reason = "empty title";
   } else if (pageErrors.length > 0) {
     reason = `pageerror: ${pageErrors[0] ?? "unknown"}`;
+  } else if (
+    viewportName === "mobile" &&
+    (route === APP_ROUTES.ai ||
+      route.startsWith(`${APP_ROUTES.ai}/`) ||
+      route === APP_ROUTES.automation ||
+      route.startsWith(`${APP_ROUTES.automation}/`)) &&
+    signals.dockActive.length === 0
+  ) {
+    reason = `dock orphan on ${route} — expected aria-current/dock-active`;
+  } else if (
+    viewportName === "mobile" &&
+    route === APP_ROUTES.automationRuns &&
+    signals.tables.some((table) => table.visible && table.width > 360)
+  ) {
+    reason = `automation runs table still wide @320 (max visible ${String(
+      Math.max(0, ...signals.tables.filter((table) => table.visible).map((table) => table.width)),
+    )}px)`;
+  } else if (viewportName === "mobile" && signals.underTouch.length > 0) {
+    reason = `touch target under 44px: ${signals.underTouch[0]?.label ?? "unknown"} (${String(
+      signals.underTouch[0]?.h ?? 0,
+    )}px)`;
+  } else if (route === APP_ROUTES.dashboard && signals.setupXpConflict) {
+    reason = "dashboard Setup CTA vs Level/XP gamification contradiction";
+  } else if (
+    viewportName === "mobile" &&
+    signals.floatingChatVisible &&
+    signals.dockHasAiChat
+  ) {
+    reason = "dual chat chrome: floating FAB + dock AI Chat below lg";
   }
 
   page.off("console", onConsole);

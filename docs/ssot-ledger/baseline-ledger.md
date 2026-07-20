@@ -1,0 +1,13 @@
+# Baseline ledger 2026-07-19T22:39:56Z
+commit=f93efc6079e64f03ec89b7f9b491d66628e9b9d8
+branch=cursor/ui-responsive-visual-burndown-6a75
+a2167f98cdc0a9f1970234d4c6738261af3c027adb8d6943113540b3db9b3acc  package.json
+740a398d017b9a4bef9536d19a12ea943abde63794d24d4cfeb936ef3b728c83  bun.lock
+5f3404b5e46e90f57f4c95e6d652b60bd5ea3195831012c7504a4fbca3b61514  biome.json
+2906634138332dcb266a1a3e16769bc5ae06686b4b2bb53a785cc8b1efd626a8  eslint.config.mjs
+5c457b54ebd0886b43d0460c41331882e144375ab7192f20229489b397051a3b  scripts/browser-visual-smoke.ts
+cb0fb7ea86d5cea5131fc51bb8b3d2b9b2755706b8bd2a82bfb564a8d6ed198b  packages/client/assets/css/main.css
+94363a25d912eaee442d3f4d5dba796497289ce3c6fa3022ef2f563eb33b51e0  packages/client/constants/layout.ts
+3f55182a9892be72055b3ca64534f099f44aaf65e249442dbaa0384a8f3de27d  packages/client/constants/ui-layout.ts
+---
+route_pages=30

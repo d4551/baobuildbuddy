@@ -1,8 +1,4 @@
-import {
-  API_ENDPOINTS,
-  buildCoverLetterDetailEndpoint,
-  buildCoverLetterExportEndpoint,
-} from "@bao/shared/constants/endpoints";
+import { buildCoverLetterExportEndpoint } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { isRecord } from "@bao/shared/utils/type-guards";
@@ -11,9 +7,10 @@ import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
   type ClientApiRequestRuntime,
   downloadApiFile,
-  requestApi,
   useClientApiRequestRuntime,
 } from "./api-request";
+import { useApi } from "./useApi";
+import type { ClientApi } from "~/types/client-api";
 
 interface CreateCoverLetterInput {
   company: string;
@@ -45,6 +42,7 @@ export type GenerateCoverLetterResult =
     };
 
 interface CoverLetterContext {
+  api: ClientApi;
   runtime: ClientApiRequestRuntime;
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: ReturnType<typeof useI18n>["t"];
@@ -110,9 +108,7 @@ const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
   const data = await readApiData(
-    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
-      method: "GET",
-    }),
+    context.api["cover-letters"].get(),
     context.t("coverLetterPage.toasts.fetchFailed"),
   );
   context.loading.value = false;
@@ -129,9 +125,7 @@ async function getCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
-      method: "GET",
-    }),
+    context.api["cover-letters"]({ id }).get(),
     context.t("coverLetterDetailPage.toasts.loadFailed"),
   );
   context.loading.value = false;
@@ -152,10 +146,7 @@ async function createCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLetters, {
-      method: "POST",
-      body: letterData,
-    }),
+    context.api["cover-letters"].post(letterData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;
@@ -177,10 +168,7 @@ async function updateCoverLetter(
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
   const data = await readApiData(
-    requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
-      method: "PUT",
-      body: updates,
-    }),
+    context.api["cover-letters"]({ id }).put(updates),
     context.t("coverLetterDetailPage.toasts.saveFailed"),
   );
   context.loading.value = false;
@@ -195,9 +183,11 @@ async function updateCoverLetter(
 
 async function deleteCoverLetter(context: CoverLetterContext, id: string): Promise<void> {
   context.loading.value = true;
-  await requestApi<unknown>(context.runtime, buildCoverLetterDetailEndpoint(id), {
-    method: "DELETE",
-  });
+  const { error } = await context.api["cover-letters"]({ id }).delete();
+  if (error) {
+    context.loading.value = false;
+    throw new Error(context.t("coverLetterDetailPage.toasts.saveFailed"));
+  }
   context.loading.value = false;
 
   if (context.currentLetter.value?.id === id) {
@@ -212,10 +202,7 @@ async function generateCoverLetter(
 ): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
   const data = await readApiData(
-    requestApi<unknown>(context.runtime, API_ENDPOINTS.coverLettersGenerate, {
-      method: "POST",
-      body: generationData,
-    }),
+    context.api["cover-letters"].generate.post(generationData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
   context.loading.value = false;
@@ -232,6 +219,7 @@ async function exportDocument(
   format?: string,
 ): Promise<void> {
   context.loading.value = true;
+  // Binary download stays on downloadApiFile (Eden Treaty JSON envelope unsuitable for blobs).
   await downloadApiFile(
     context.runtime,
     buildCoverLetterExportEndpoint(id),
@@ -245,10 +233,11 @@ async function exportDocument(
 }
 
 /**
- * Cover letter management composable.
+ * Cover letter management composable — Eden Treaty for JSON CRUD/generate.
  */
 export function useCoverLetter() {
   const context: CoverLetterContext = {
+    api: useApi(),
     runtime: useClientApiRequestRuntime(),
     toast: useNuxtApp().$toast,
     t: useI18n().t,

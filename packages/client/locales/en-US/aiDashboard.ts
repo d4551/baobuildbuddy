@@ -53,6 +53,8 @@ const aiDashboard = {
       noProvidersTitle: "No providers detected",
       noProvidersDescription:
         "Configure at least one AI provider in Settings to enable chat and generation features.",
+      configureProvidersCta: "Open AI Providers",
+      configureProvidersAria: "Open Settings AI Providers to configure credentials",
       testSuccessTitle: "Connectivity OK",
       testErrorTitle: "Connectivity failed",
     },

@@ -2,7 +2,7 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
-  FLEX_GAP_TOKEN_CLASS,
+
   FLUID_WIDTH_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
@@ -10,7 +10,10 @@ import {
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -77,6 +80,7 @@ const bootstrapErrorMessage = computed(() =>
 
 const hasPortfolioContent = computed(() => hasMetadata.value || projects.value.length > 0);
 const isPortfolioEmpty = computed(() => !hasPortfolioContent.value);
+const showEmptyProfileEditor = ref(false);
 
 function updatePortfolioForm(value: typeof portfolioForm): void {
   Object.assign(portfolioForm, value);
@@ -96,10 +100,10 @@ function updateProjectForm(value: typeof projectForm): void {
     <PageHeroHeader
       title-id="portfolio-page-title"
       :title="t('portfolioPage.title')"
-      :description="t('portfolioPage.subtitle')"
+      :description="isPortfolioEmpty ? '' : t('portfolioPage.subtitle')"
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
-      <template #actions>
+      <template v-if="!isPortfolioEmpty" #actions>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
           class="btn btn-outline"
@@ -116,19 +120,21 @@ function updateProjectForm(value: typeof projectForm): void {
           :button-label="t('portfolioPage.actions.exportButton')"
           :button-aria-label="t('portfolioPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-primary"
+          :summary-class="PRIMARY_ACTION_CLASS"
           @export="handleExport"
         />
       </template>
-      <template #aside>
-        <StatsRow
-          :class="[MARGIN_TOKEN_CLASS.mt4]"
-          :stats="[
-            { titleKey: 'portfolioPage.stats.projectsTitle', value: projects.length, valueClass: 'text-primary', descKey: 'portfolioPage.stats.projectsDesc' },
-            { titleKey: 'portfolioPage.stats.featuredTitle', value: featuredProjectCount, valueClass: 'text-secondary', descKey: 'portfolioPage.stats.featuredDesc' },
-            { titleKey: 'portfolioPage.stats.profileTitle', value: hasMetadata ? t('portfolioPage.stats.profileReady') : t('portfolioPage.stats.profileMissing'), descKey: 'portfolioPage.stats.profileDesc' },
-          ]"
-        />
+      <template v-if="!isPortfolioEmpty" #aside>
+        <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+          <StatsRow
+            :class="[MARGIN_TOKEN_CLASS.mt4]"
+            :stats="[
+              { titleKey: 'portfolioPage.stats.projectsTitle', value: projects.length, valueClass: 'text-primary', descKey: 'portfolioPage.stats.projectsDesc' },
+              { titleKey: 'portfolioPage.stats.featuredTitle', value: featuredProjectCount, valueClass: 'text-secondary', descKey: 'portfolioPage.stats.featuredDesc' },
+              { titleKey: 'portfolioPage.stats.profileTitle', value: hasMetadata ? t('portfolioPage.stats.profileReady') : t('portfolioPage.stats.profileMissing'), descKey: 'portfolioPage.stats.profileDesc' },
+            ]"
+          />
+        </div>
       </template>
     </PageHeroHeader>
 
@@ -147,18 +153,34 @@ function updateProjectForm(value: typeof projectForm): void {
         <EmptyState
           title-key="portfolioPage.emptyState.title"
           description-key="portfolioPage.emptyState.description"
+          cta-label-key="portfolioPage.projects.addButton"
+          cta-aria-key="portfolioPage.projects.addAria"
+          @cta="openAddModal"
+        >
+          <template #actions>
+            <button
+              type="button"
+              class="btn btn-outline"
+              :class="[FLUID_WIDTH_CLASS]"
+              :aria-label="t('portfolioPage.emptyState.profileButton')"
+              @click="showEmptyProfileEditor = !showEmptyProfileEditor"
+            >
+              {{ t("portfolioPage.emptyState.profileButton") }}
+            </button>
+          </template>
+        </EmptyState>
+        <PortfolioProfileCard
+          v-if="showEmptyProfileEditor"
+          :portfolio-form="portfolioForm"
+          @update:portfolio-form="updatePortfolioForm"
+          @save="handleSavePortfolio"
         />
-        <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-          <a href="#portfolio-profile-card" class="btn btn-outline">
-            {{ t("portfolioPage.emptyState.profileButton") }}
-          </a>
-          <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="openAddModal">
-            {{ t("portfolioPage.projects.addButton") }}
-          </button>
-        </div>
       </div>
 
-      <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
+      <section
+        v-if="!isPortfolioEmpty"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
+      >
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">
@@ -174,7 +196,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button class="btn btn-sm btn-ghost" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>
@@ -182,12 +204,14 @@ function updateProjectForm(value: typeof projectForm): void {
       </section>
 
       <PortfolioProfileCard
+        v-if="!isPortfolioEmpty"
         :portfolio-form="portfolioForm"
         @update:portfolio-form="updatePortfolioForm"
         @save="handleSavePortfolio"
       />
 
       <PortfolioProjectsCard
+        v-if="!isPortfolioEmpty"
         :all-projects-length="projects.length"
         :filtered-projects-length="filteredProjects.length"
         :paginated-projects="projectPagination.items.value"
@@ -199,6 +223,7 @@ function updateProjectForm(value: typeof projectForm): void {
         :project-page-aria="projectPageAria"
         :can-move="canMove"
         @open-add="openAddModal"
+        @clear-filters="clearFilters"
         @edit="openEditModal"
         @delete="requestDeleteProject"
         @move="moveProject"

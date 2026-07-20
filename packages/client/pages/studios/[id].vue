@@ -11,6 +11,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -131,7 +132,7 @@ function studioDetailLocation(location: string | undefined): string {
       >
         <template #actions>
           <button
-            class="btn btn-primary"
+            :class="[PRIMARY_ACTION_CLASS]"
             :disabled="!studio"
             :aria-label="t('studioDetail.practiceInterviewAria')"
             @click="startPracticeInterview"
@@ -220,7 +221,8 @@ function studioDetailLocation(location: string | undefined): string {
       v-else-if="!studio"
       title-key="studioDetail.emptyTitle"
       description-key="studioDetail.emptyDescription"
-      cta-label-key="studioDetail.retryButton"
+      cta-label-key="studioDetail.browseDirectoryButton"
+      cta-aria-key="studioDetail.browseDirectoryAria"
       :cta-to="APP_ROUTES.studios"
     />
 

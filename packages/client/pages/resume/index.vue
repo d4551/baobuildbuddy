@@ -6,7 +6,9 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -80,18 +82,25 @@ const {
     <PageHeroHeader
       title-id="resume-page-title"
       :title="t('resumePage.title')"
-      :description="t('resumePage.subtitle')"
+      :description="resumes.length > 0 || selectedResumeId ? t('resumePage.subtitle') : ''"
     >
       <template #actions>
+        <!-- Empty library: EmptyState owns Create; hero keeps Guided only. -->
         <button
-          class="btn btn-primary btn-sm"
+          v-if="resumes.length > 0 || selectedResumeId"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('resumePage.createButtonAria')"
           @click="showCreateModal = true"
         >
           <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("resumePage.createButton") }}
         </button>
-        <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
+        <NuxtLink
+          :to="APP_ROUTES.resumeBuild"
+          class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :aria-label="t('resumePage.guidedButtonAria')"
+        >
           {{ t("resumePage.guidedButton") }}
         </NuxtLink>
       </template>
@@ -125,6 +134,7 @@ const {
       :template-label="resumeTemplateLabel"
       :page-aria="resumePageAria"
       @clear-filters="clearResumeFilters"
+      @create-resume="showCreateModal = true"
       @select-resume="selectedResumeId = $event"
       @request-delete="requestDeleteResume"
       @update:current-page="resumePagination.goToPage"
@@ -224,7 +234,7 @@ const {
           {{ t("resumePage.createModal.cancelButton") }}
         </button>
         <button
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="creating || !newResumeName.trim()"
           :aria-label="t('resumePage.createModal.createAria')"
           @click="handleCreate"

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import {
+
   FLEX_GAP_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 type PageAriaResolver = (page: number) => string;
@@ -153,7 +155,7 @@ watch(
       <nav class="join" :aria-label="navigationAria">
         <button 
           type="button"
-          class="join-item btn btn-sm btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
           :aria-label="previousAria"
           :disabled="!canGoPrevious"
           @keydown="handleNavigationKeydown"
@@ -167,8 +169,7 @@ watch(
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
-          class="join-item btn btn-sm btn-ghost"
-          :class="{ 'btn-active': page === currentPage }"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': page === currentPage }]"
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
           :tabindex="page === currentPage ? 0 : -1"
@@ -182,7 +183,7 @@ watch(
 
         <button 
           type="button"
-          class="join-item btn btn-sm btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
           :aria-label="nextAria"
           :disabled="!canGoNext"
           @keydown="handleNavigationKeydown"

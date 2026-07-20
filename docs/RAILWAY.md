@@ -2,6 +2,8 @@
 
 Deploy BaoBuildBuddy to [Railway](https://railway.app/) with a two-service setup.
 
+Stack truth: [STACK-CONTRACT.md](./STACK-CONTRACT.md). Runtime pin: Bun `1.3.14` (root `packageManager` / `engines`).
+
 ---
 
 ## Overview

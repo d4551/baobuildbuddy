@@ -9,6 +9,7 @@ const coverLetterPage = {
     emptyState: "No cover letters yet. Generate your first one to get started.",
     emptyStateTitle: "No cover letters yet",
     emptyStateDescription: "Generate your first one to get started.",
+    filteredEmptyTitle: "No cover letters match these filters",
     filteredEmptyState: "No cover letters match your active filters.",
     stats: {
       totalTitle: "Total Letters",

@@ -43,6 +43,8 @@ const studioDetail = {
     emptyTitle: "Studio unavailable",
     emptyDescription:
       "This studio profile is no longer available. Return to the directory and choose another studio context.",
+    browseDirectoryButton: "Browse studios",
+    browseDirectoryAria: "Return to the studio directory",
     errors: {
       invalidStudioId: "Invalid studio identifier.",
       notFound: "Studio not found.",

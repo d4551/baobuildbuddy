@@ -56,6 +56,10 @@ describe("initializeDatabase", () => {
     }
 
     expect(parsedAutomationSettings.data.jobProviders).toBeDefined();
-    expect(parsedAutomationSettings.data.jobProviders?.hitmarkerEnabled).toBe(false);
+    expect(parsedAutomationSettings.data.jobProviders?.hitmarkerEnabled).toBe(true);
+    const hitmarkerPortal = parsedAutomationSettings.data.jobProviders?.gamingPortals?.find(
+      (portal) => portal.id === "hitmarker",
+    );
+    expect(hitmarkerPortal?.enabled).toBe(true);
   });
 });

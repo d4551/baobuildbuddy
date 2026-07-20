@@ -12,8 +12,9 @@ describe("createDevStackRuntime", () => {
     expect(runtime.serverPort).toBe(3100);
     expect(runtime.clientPort).toBe(3101);
     expect(runtime.serverEnv.PORT).toBe("3100");
-    expect(runtime.clientEnv.NUXT_PUBLIC_API_BASE).toBe("http://localhost:3100");
-    expect(runtime.clientEnv.NUXT_PUBLIC_WS_BASE).toBe("http://localhost:3100");
+    expect(runtime.clientHost).toBe("127.0.0.1");
+    expect(runtime.clientEnv.NUXT_PUBLIC_API_BASE).toBe("http://127.0.0.1:3100");
+    expect(runtime.clientEnv.NUXT_PUBLIC_WS_BASE).toBe("http://127.0.0.1:3100");
   });
 
   test("supports inline CLI flags", () => {
@@ -21,19 +22,21 @@ describe("createDevStackRuntime", () => {
 
     expect(runtime.serverPort).toBe(3200);
     expect(runtime.clientPort).toBe(3201);
+    expect(runtime.clientHost).toBe("127.0.0.1");
   });
 
   test("falls back to environment values when CLI flags are absent", () => {
     const runtime = createDevStackRuntime([], {
       SERVER_PORT: "3300",
       CLIENT_PORT: "3301",
-      NUXT_HOST: "127.0.0.1",
+      NUXT_HOST: "0.0.0.0",
       HOST: "0.0.0.0",
     });
 
     expect(runtime.serverPort).toBe(3300);
     expect(runtime.clientPort).toBe(3301);
-    expect(runtime.clientHost).toBe("127.0.0.1");
+    expect(runtime.clientHost).toBe("0.0.0.0");
     expect(runtime.serverEnv.CORS_ORIGINS).toContain("http://localhost:3301");
+    expect(runtime.clientEnv.NUXT_PUBLIC_API_BASE).toBe("http://127.0.0.1:3300");
   });
 });

@@ -54,11 +54,14 @@ export function createChatMessage(params: {
 }
 
 /** Create a stable streaming placeholder bubble for a given chat context. */
-export function createStreamingAssistantMessage(context: ChatStreamingContext): ChatMessage {
+export function createStreamingAssistantMessage(
+  context: ChatStreamingContext,
+  content = "",
+): ChatMessage {
   return createChatMessage({
     role: "assistant",
     id: AI_CHAT_STREAMING_MESSAGE_IDS[context],
-    content: "",
+    content,
   });
 }
 

@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { DailyChallenge } from "@bao/shared/types/gamification";
+import { useI18n } from "vue-i18n";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -14,7 +17,6 @@ import {
 defineProps<{
   challenges: readonly DailyChallenge[];
   completingChallenge: string | null;
-  t: (key: string, values?: Record<string, unknown>) => string;
   getChallengeGoal: (challenge: DailyChallenge) => number;
   getChallengeProgress: (challenge: DailyChallenge) => number;
   canClaimChallenge: (challenge: DailyChallenge) => boolean;
@@ -23,6 +25,8 @@ defineProps<{
 const emit = defineEmits<{
   claim: [challengeId: string];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -65,9 +69,9 @@ const emit = defineEmits<{
             </div>
 
             <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-              <button 
+              <button
                 type="button"
-                class="btn btn-success btn-sm"
+                :class="[PRIMARY_ACTION_CLASS, 'btn-success']"
                 :disabled="completingChallenge === challenge.id"
                 :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                 @click="emit('claim', challenge.id)"
@@ -85,7 +89,13 @@ const emit = defineEmits<{
         </article>
       </div>
 
-      <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("gamificationPage.noChallengesLabel") }}</p>
+      <EmptyState
+        v-else
+        title-key="gamificationPage.noChallengesTitle"
+        description-key="gamificationPage.noChallengesDescription"
+        cta-label-key="gamificationPage.emptyStateCta"
+        :cta-to="APP_ROUTES.dashboard"
+      />
     </div>
   </section>
 </template>

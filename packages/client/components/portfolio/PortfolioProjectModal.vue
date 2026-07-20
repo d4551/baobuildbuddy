@@ -12,6 +12,8 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 type PortfolioProjectForm = {
@@ -161,7 +163,7 @@ function updateFeaturedFlag(event: Event): void {
             @input="handleTechnologyInput"
             @keyup.enter="emit('addTechnology')"
           />
-          <button class="btn btn-sm btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
+          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
             {{ t("portfolioPage.modal.addTechnologyButton") }}
           </button>
         </div>
@@ -179,7 +181,7 @@ function updateFeaturedFlag(event: Event): void {
             {{ tech }}
             <button 
               type="button"
-              class="btn btn-ghost btn-xs btn-circle"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
@@ -206,7 +208,7 @@ function updateFeaturedFlag(event: Event): void {
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
       <button 
-        class="btn btn-primary"
+        :class="[PRIMARY_ACTION_CLASS]"
         :disabled="!props.projectForm.title || !props.projectForm.description"
         :aria-label="t('portfolioPage.modal.saveAria')"
         @click="emit('save')"

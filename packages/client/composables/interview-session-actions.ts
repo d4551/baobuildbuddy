@@ -36,6 +36,8 @@ type InterviewSessionActionsInput = {
   sessionLoadError: Ref<string>;
   stt: ReturnType<typeof useSTT>;
   stopTimer: () => void;
+  /** WS-first submit; returns true when WS path handled the write. */
+  submitViaWs?: (sessionId: string, content: string) => Promise<boolean>;
   submitResponse: ReturnType<typeof useInterview>["submitResponse"];
   submitting: Ref<boolean>;
   syncCompletedSessionTime: (session: TimedInterviewSession) => void;
@@ -151,6 +153,7 @@ function createInterviewCompletionAction(
       return;
     }
 
+    // HTTP complete is sole path — never also WS end_session (double-complete ban).
     input.toast.success(input.t("interviewSession.toasts.completed"));
     await goToHistory();
   };
@@ -180,30 +183,45 @@ function createInterviewSubmissionAction(input: {
     }
 
     input.actions.submitting.value = true;
-    const submitResult = await settlePromise(
-      input.actions.submitResponse(input.actions.sessionId.value, {
-        questionIndex: input.actions.currentQuestionIndex.value,
-        response: responseText,
-      }),
-      input.actions.t("interviewSession.errors.submitFailed"),
-    );
-    input.actions.submitting.value = false;
+    // WS-or-HTTP single path — never both (mirroring after HTTP double-wrote answers).
+    const wsHandled = input.actions.submitViaWs
+      ? await input.actions.submitViaWs(input.actions.sessionId.value, responseText)
+      : false;
 
-    if (!submitResult.ok) {
-      input.actions.toast.error(
-        getErrorMessage(
-          submitResult.error,
-          input.actions.t("interviewSession.errors.submitFailed"),
-        ),
+    let completedViaHttp = false;
+    if (!wsHandled) {
+      const submitResult = await settlePromise(
+        input.actions.submitResponse(input.actions.sessionId.value, {
+          questionIndex: input.actions.currentQuestionIndex.value,
+          response: responseText,
+        }),
+        input.actions.t("interviewSession.errors.submitFailed"),
       );
-      return;
+      if (!submitResult.ok) {
+        input.actions.submitting.value = false;
+        input.actions.toast.error(
+          getErrorMessage(
+            submitResult.error,
+            input.actions.t("interviewSession.errors.submitFailed"),
+          ),
+        );
+        return;
+      }
+      completedViaHttp = submitResult.value?.status === "completed";
+    } else {
+      // Refresh HTTP session so UI picks up AI analysis written by WS path.
+      await settlePromise(
+        input.actions.getSession(input.actions.sessionId.value),
+        input.actions.t("interviewSession.errors.submitFailed"),
+      );
     }
+    input.actions.submitting.value = false;
 
     input.actions.stt.stopListening();
     input.actions.response.value = "";
     input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));
 
-    if (submitResult.value?.status === "completed") {
+    if (completedViaHttp) {
       input.actions.toast.success(input.actions.t("interviewSession.toasts.completed"));
       await input.goToHistory();
       return;

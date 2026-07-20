@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { Achievement } from "@bao/shared/types/gamification";
+import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { MARGIN_TOKEN_CLASS, SHADOW_TOKEN_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 defineProps<{
   unlockedAchievements: readonly Achievement[];
   lockedAchievements: readonly Achievement[];
-  t: (key: string, values?: Record<string, unknown>) => string;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { SURFACE_GLASS_CARD_CLASS,
+import { useI18n } from "vue-i18n";
+import {
+  SURFACE_GLASS_CARD_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -14,12 +16,13 @@ defineProps<{
     platforms?: string[];
     gameGenres?: string[];
   };
-  t: (key: string, values?: Record<string, unknown>) => string;
   studioTypeLabel: (studioType: string) => string;
   platformLabel: (platform: string) => string;
   gameGenreLabel: (genre: string) => string;
   formatDate: (date: string) => string;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>

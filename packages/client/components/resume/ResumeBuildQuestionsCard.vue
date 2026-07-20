@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import {
+
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -35,7 +38,7 @@ const emit = defineEmits<{
           }}
         </h2>
         <button 
-          class="btn btn-ghost btn-sm"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
         >
@@ -78,7 +81,7 @@ const emit = defineEmits<{
           {{ t("resumeBuildPage.questions.backButton") }}
         </button>
         <button 
-          class="btn btn-primary"
+          :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!(answers[aiQuestions[currentQuestionIndex]?.id ?? ''] ?? '').trim()"
           :aria-label="t('resumeBuildPage.questions.nextAria')"
           @click="emit('next')"
