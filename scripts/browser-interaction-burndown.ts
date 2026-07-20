@@ -6,7 +6,7 @@
  */
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium, type ConsoleMessage, type Page } from "playwright";
+import { type ConsoleMessage, chromium, type Page } from "playwright";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -17,7 +17,6 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:300
 );
 const OUT_DIR =
   process.env.BROWSER_BURNOUT_OUT ?? join("/opt/cursor/artifacts/interactive-burndown");
-const CLICK_TIMEOUT_MS = 1_500;
 const MAX_CLICKS_PER_ROUTE = 4;
 
 const VIEWPORTS = [
@@ -86,10 +85,12 @@ const mapSequential = async <TItem, TResult>(
   return [head, ...(await mapSequential(items, mapper, index + 1))];
 };
 
-const slugify = (value: string): string => value.replace(/[^\w-]+/gu, "_").slice(0, 80);
+const NON_SLUG_RE = /[^\w-]+/gu;
+const APP_MANIFEST_ERROR_RE = /Error fetching app manifest/iu;
 
-const isIgnorableConsole = (text: string): boolean =>
-  /Error fetching app manifest/iu.test(text);
+const slugify = (value: string): string => value.replace(NON_SLUG_RE, "_").slice(0, 80);
+
+const isIgnorableConsole = (text: string): boolean => APP_MANIFEST_ERROR_RE.test(text);
 
 const captureFinding = async (
   page: Page,
@@ -126,16 +127,46 @@ const openRoute = async (
 
 const collectChromeSignals = async (page: Page) =>
   page.evaluate(() => {
+    const collapseWs = (value: string): string => {
+      let out = "";
+      let prevSpace = false;
+      for (const ch of value) {
+        const isSpace = ch === " " || ch === "\n" || ch === "\t" || ch === "\r";
+        if (isSpace) {
+          if (!prevSpace) {
+            out += " ";
+          }
+          prevSpace = true;
+          continue;
+        }
+        out += ch;
+        prevSpace = false;
+      }
+      return out.trim();
+    };
+    const isAsciiLetter = (ch: string): boolean => {
+      const code = ch.charCodeAt(0);
+      return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    };
+    const isNavbarEllipsisGut = (text: string): boolean => {
+      if (text.length === 2) {
+        return isAsciiLetter(text[0] ?? "") && text[1] === "…";
+      }
+      if (text.length === 4) {
+        return isAsciiLetter(text[0] ?? "") && text.slice(1) === "...";
+      }
+      return false;
+    };
     const overflowX =
       Math.max(document.documentElement.scrollWidth, document.body?.scrollWidth ?? 0) -
       window.innerWidth;
     const truncatedChrome = [...document.querySelectorAll(".navbar *")]
       .map((el) => (el.textContent ?? "").trim())
-      .some((text) => /^(?:[A-Za-z]\.\.\.|[A-Za-z]…)$/u.test(text));
+      .some((text) => isNavbarEllipsisGut(text));
     const duplicateChromeCopy = (() => {
       const texts = [...document.querySelectorAll("p")]
         .filter((el) => !el.closest(".grid, .stats, [role='log']"))
-        .map((el) => (el.textContent ?? "").replace(/\s+/gu, " ").trim())
+        .map((el) => collapseWs(el.textContent ?? ""))
         .filter((text) => text.length > 40);
       const counts = new Map<string, number>();
       for (const text of texts) {
@@ -145,7 +176,10 @@ const collectChromeSignals = async (page: Page) =>
     })();
     const rawGlass = [...document.querySelectorAll("*")].some((el) => {
       const style = getComputedStyle(el);
-      const filter = style.backdropFilter || style.webkitBackdropFilter || "";
+      const filter =
+        style.getPropertyValue("backdrop-filter") ||
+        style.getPropertyValue("-webkit-backdrop-filter") ||
+        "";
       if (!filter || filter === "none") {
         return false;
       }
@@ -153,13 +187,13 @@ const collectChromeSignals = async (page: Page) =>
     });
     return {
       mains: document.querySelectorAll("main").length,
-      h1: document.querySelector("h1")?.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+      h1: collapseWs(document.querySelector("h1")?.textContent ?? ""),
       title: document.title.trim(),
       overflowX,
       truncatedChrome,
       duplicateChromeCopy,
       rawGlass,
-      bodyLen: (document.body?.innerText ?? "").replace(/\s+/gu, " ").trim().length,
+      bodyLen: collapseWs(document.body?.innerText ?? "").length,
     };
   });
 
@@ -197,7 +231,14 @@ const probeRouteShell = async (
     );
   }
   if (shell.truncatedChrome) {
-    await captureFinding(page, findings, viewport, route, "truncated-chrome", "navbar ellipsis gut");
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "truncated-chrome",
+      "navbar ellipsis gut",
+    );
   }
   if (shell.duplicateChromeCopy.length > 0) {
     await captureFinding(
@@ -412,9 +453,19 @@ const burnRoute = async (
   await mkdir(join(OUT_DIR, viewport), { recursive: true });
   await page.screenshot({ path: screenshot, fullPage: false });
 
-  const loadErrors = [...pageErrorBucket, ...consoleBucket.filter((line) => !isIgnorableConsole(line))];
+  const loadErrors = [
+    ...pageErrorBucket,
+    ...consoleBucket.filter((line) => !isIgnorableConsole(line)),
+  ];
   if (loadErrors.some((line) => line.includes("500") || line.includes("TypeError"))) {
-    await captureFinding(page, findings, viewport, route, "load", loadErrors.slice(0, 4).join(" | "));
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "load",
+      loadErrors.slice(0, 4).join(" | "),
+    );
   }
 
   const shell = await probeRouteShell(page, viewport, route, findings);
