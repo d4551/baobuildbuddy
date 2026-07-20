@@ -132,7 +132,6 @@ const {
       :template-label="resumeTemplateLabel"
       :page-aria="resumePageAria"
       @clear-filters="clearResumeFilters"
-      @create="showCreateModal = true"
       @select-resume="selectedResumeId = $event"
       @request-delete="requestDeleteResume"
       @update:current-page="resumePagination.goToPage"

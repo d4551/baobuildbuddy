@@ -78,13 +78,12 @@ function requestDelete(resumeId?: string): void {
       </div>
     </section>
 
+    <!-- Hero owns Create when library empty — omit duplicate EmptyState primary. -->
     <EmptyState
       v-if="resumes.length === 0"
       title-key="resumePage.emptyStateTitle"
       description-key="resumePage.emptyState"
-      cta-label-key="resumePage.createButton"
-      cta-aria-key="resumePage.createButtonAria"
-      @cta="emit('create')"
+      cta-label-key=""
     />
 
     <FilteredEmptyAlert

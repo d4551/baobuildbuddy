@@ -89,7 +89,7 @@ const bootstrapErrorMessage = computed(() =>
           {{ t("coverLetterPage.generateButton") }}
         </button>
       </template>
-      <template #aside>
+      <template v-if="coverLetters.length > 0" #aside>
         <StatsRow
           :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
@@ -101,7 +101,10 @@ const bootstrapErrorMessage = computed(() =>
       </template>
     </PageHeroHeader>
 
-    <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
+    <section
+      v-if="coverLetters.length > 0 || hasFiltersApplied"
+      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
+    >
       <div class="card-body">
         <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
@@ -170,13 +173,12 @@ const bootstrapErrorMessage = computed(() =>
       @retry="refreshCoverLetterBootstrap"
     />
 
+    <!-- Hero owns Generate when catalog empty — omit duplicate EmptyState primary. -->
     <EmptyState
       v-else-if="coverLetters.length === 0"
       title-key="coverLetterPage.emptyStateTitle"
       description-key="coverLetterPage.emptyStateDescription"
-      cta-label-key="coverLetterPage.generateButton"
-      cta-aria-key="coverLetterPage.generateButtonAria"
-      @cta="showGenerateModal = true"
+      cta-label-key=""
     />
 
     <FilteredEmptyAlert
