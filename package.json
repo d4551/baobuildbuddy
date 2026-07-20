@@ -106,6 +106,7 @@
     "proof:browser-smoke": "bun run scripts/browser-visual-smoke.ts",
     "proof:browser-burndown": "bun run scripts/browser-interaction-burndown.ts",
     "proof:browser-video": "bun run scripts/browser-record-visual-proof.ts",
+    "proof:browser-product-demo": "bun run scripts/browser-record-product-demo.ts",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
     "validate:page-seo": "bun run scripts/validate-page-seo-metadata.ts",
     "validate:i18n-ui": "bun run scripts/validate-ui-i18n.ts",
