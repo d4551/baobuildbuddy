@@ -9,6 +9,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import type { SaveState } from "./save-state";
 
 defineProps<{
@@ -34,7 +35,8 @@ const { t } = useI18n();
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <!-- Section title owned by WorkspaceSectionNavigator. -->
+      <!-- Title owned by WorkspaceSectionNavigator; header kept for SSOT contract. -->
+      <SettingsPanelHeader />
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="flex items-center justify-between">
           <span>{{ t("settings.preferences.themeLabel") }}</span>

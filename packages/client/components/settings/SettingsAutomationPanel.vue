@@ -8,6 +8,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
@@ -27,7 +28,7 @@ const { t } = useI18n();
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <!-- Section title/description owned by WorkspaceSectionNavigator. -->
+      <SettingsPanelHeader />
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="flex items-center justify-between">
           <div>

@@ -12,6 +12,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
+import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 defineProps<{
   providerSaveState: SaveState;
@@ -57,7 +58,7 @@ const taxonomyAssetCount = computed(
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-        <!-- Section title/description owned by WorkspaceSectionNavigator. -->
+        <SettingsPanelHeader />
         <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
           <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>

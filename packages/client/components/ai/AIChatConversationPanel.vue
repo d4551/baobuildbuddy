@@ -14,6 +14,7 @@ import {
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -192,7 +193,7 @@ const updateInput = (event: Event): void => {
             />
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-                <p class="min-w-0 break-words text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                <p class="break-words text-secondary" :class="[TRUNCATE_FLEX_CHILD_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ t("aiChatPage.composerHint") }}
                 </p>
               </div>
