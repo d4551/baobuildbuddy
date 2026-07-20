@@ -20,3 +20,5 @@
 | I6 | Section rail clip gate | baseline: no overflow-x-clip ban | new: class-literal ban + mutation red→green | Δ: gate fails on inject | SSOT: validate-section-rail-scroll-ssot | gate: scripts/validate-section-rail-scroll-ssot.test.ts |
 | I7 | Studio analytics hydration | baseline: mismatch console error | new: 0 hydration errors | Δ: errors 1→0 | SSOT: useAsyncData data owner | gate: browser analytics-verify.json |
 | I8 | Touch targets drawer/menu | baseline: 42px h | new: min-h-11 (≥44) | Δ: +2px to AAA bar | SSOT: SHELL_SIDEBAR_ITEM_CLASS / TOUCH_TARGET_MIN_CLASS | gate: mobile-deep post-fix |
+| I9 | Job source count SSOT | baseline: panel≠workspace; badge `n/3` | new: `countActiveJobProviderSources` | Δ: truthful enabled+configured count | SSOT: utils/job-provider-source-count.ts | gate: vitest + JI screenshot |
+| I10 | Burndown stale clicks | baseline: warn after empty-state unmount | new: skip if label delisted | Δ: 3 warns→0 | SSOT: browser-interaction-burndown | gate: loop-4 burndown 0 findings |
