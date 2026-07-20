@@ -56,15 +56,35 @@ type RouteResult = {
   readonly reason: string | null;
 };
 
+const WHITESPACE_RUN_PATTERN = /\s+/gu;
+
+const collapseWhitespace = (value: string): string => value.replace(WHITESPACE_RUN_PATTERN, " ").trim();
+
 const collectPageSignals = async (page: Page) =>
   page.evaluate(() => {
+    const collapse = (value: string): string =>
+      value
+        .split(" ")
+        .flatMap((part) => part.split("\t"))
+        .flatMap((part) => part.split("\n"))
+        .flatMap((part) => part.split("\r"))
+        .filter((part) => part.length > 0)
+        .join(" ")
+        .trim();
+    const isLevelLabel = (value: string): boolean => {
+      if (!value.startsWith("Level ")) {
+        return false;
+      }
+      const digits = value.slice("Level ".length);
+      return digits.length > 0 && [...digits].every((char) => char >= "0" && char <= "9");
+    };
     const h1 = document.querySelector("h1");
     const mains = document.querySelectorAll("main");
     const dockActive = Array.from(
       document.querySelectorAll('nav.dock a[aria-current="page"], nav.dock a.dock-active'),
     ).map((el) => ({
       href: el.getAttribute("href"),
-      label: (el.getAttribute("aria-label") ?? el.textContent ?? "").replace(/\s+/gu, " ").trim(),
+      label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? ""),
     }));
     const tables = Array.from(document.querySelectorAll("table.table")).map((table) => {
       const rect = table.getBoundingClientRect();
@@ -85,7 +105,7 @@ const collectPageSignals = async (page: Page) =>
           return null;
         }
         return {
-          label: (el.getAttribute("aria-label") ?? el.textContent ?? "").replace(/\s+/gu, " ").trim().slice(0, 40),
+          label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? "").slice(0, 40),
           h: rect.height,
           under: rect.height + 0.5 < 44,
         };
@@ -93,7 +113,11 @@ const collectPageSignals = async (page: Page) =>
       .filter((row): row is { label: string; h: number; under: boolean } => row !== null && row.under);
     const setupCtaVisible = Array.from(document.querySelectorAll("a.btn, button.btn")).some((el) => {
       const rect = el.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0 && /Complete Setup/i.test(el.textContent ?? "");
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        collapse(el.textContent ?? "").toLowerCase().includes("complete setup")
+      );
     });
     const levelLabelVisible = Array.from(document.querySelectorAll("p, span, h2, h3, div")).some(
       (el) => {
@@ -101,15 +125,15 @@ const collectPageSignals = async (page: Page) =>
           return false;
         }
         const rect = el.getBoundingClientRect();
-        const text = (el.textContent ?? "").replace(/\s+/gu, " ").trim();
-        return rect.width > 0 && rect.height > 0 && /^Level\s+\d+$/iu.test(text);
+        const text = collapse(el.textContent ?? "");
+        return rect.width > 0 && rect.height > 0 && isLevelLabel(text);
       },
     );
     const setupXpConflict = setupCtaVisible && levelLabelVisible;
     return {
-      h1: h1?.textContent?.replace(/\s+/gu, " ").trim() ?? null,
+      h1: h1?.textContent ? collapse(h1.textContent) : null,
       mainCount: mains.length,
-      bodySnippet: (document.body?.innerText ?? "").replace(/\s+/gu, " ").trim().slice(0, 240),
+      bodySnippet: collapse(document.body?.innerText ?? "").slice(0, 240),
       dockActive,
       tables,
       underTouch,
