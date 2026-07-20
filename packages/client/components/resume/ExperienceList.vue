@@ -66,7 +66,7 @@ function removeExperience(index: number): void {
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
       <button 
-        class="btn btn-sm btn-primary"
+        class="btn btn-primary"
         :aria-label="t('resumePage.experience.addButtonAria')"
         @click="addExperience"
       >

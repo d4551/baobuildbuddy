@@ -97,7 +97,7 @@ const { t } = useI18n();
               <td>{{ relativePostedDate(job.postedDate) }}</td>
               <td class="text-right">
                 <button 
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary"
                   :aria-label="t('automation.scraper.table.interviewAria', { title: job.title, company: job.company })"
                   @click="emit('interview', job.id)"
                 >

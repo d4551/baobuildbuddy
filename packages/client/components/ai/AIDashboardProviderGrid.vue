@@ -111,7 +111,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
           </button>
           <NuxtLink 
             :to="APP_ROUTE_BUILDERS.settingsSection('aiProviders')"
-            class="btn btn-primary btn-sm"
+            class="btn btn-primary"
             :aria-label="t('aiDashboard.providerCard.configureAria', { provider: providerLabel(provider.id) })"
           >
             {{ t("aiDashboard.providerCard.configureButton") }}

@@ -9,9 +9,11 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -213,8 +215,7 @@ const updateInput = (event: Event): void => {
                 </p>
                 <button
                   type="submit"
-                  class="btn btn-primary"
-                  :class="[TOUCH_TARGET_MIN_CLASS]"
+                  :class="[PRIMARY_ACTION_CLASS]"
                   :disabled="!input.trim() || loading"
                   :aria-label="t('aiChatPage.sendAria')"
                 >
@@ -227,13 +228,11 @@ const updateInput = (event: Event): void => {
           </div>
 
           <ClientOnly>
+            <!-- Compact: mic/replay only — speech profiles stay out of first viewport (conversation-first). -->
             <ChatVoiceControls
+              compact
               :selected-voice-id="selectedVoiceId"
               :auto-speak-replies="autoSpeakReplies"
-              :stt-provider="speechConfig.sttProvider"
-              :stt-model="speechConfig.sttModel"
-              :tts-provider="speechConfig.ttsProvider"
-              :tts-model="speechConfig.ttsModel"
               :loading="loading"
               :supports-recognition="supportsRecognition"
               :supports-synthesis="supportsSynthesis"
@@ -241,23 +240,36 @@ const updateInput = (event: Event): void => {
               :is-listening="isVoiceListening"
               :is-speaking="isVoiceSpeaking"
               :voices="availableVoices"
-              :speech-provider-options="speechProviderOptions"
-              :stt-model-options="sttModelOptions"
-              :tts-model-options="ttsModelOptions"
-              :speech-config-saving="speechConfigSaving"
               :support-hint-key="voiceSupportHintKey"
               :error-label="voiceErrorLabel"
               @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
               @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
-              @update:stt-provider="emit('update:sttProvider', $event)"
-              @update:stt-model="emit('update:sttModel', $event)"
-              @update:tts-provider="emit('update:ttsProvider', $event)"
-              @update:tts-model="emit('update:ttsModel', $event)"
-              @save-speech-settings="emit('saveSpeech')"
               @toggle-listening="emit('toggleListening')"
               @replay-assistant="emit('replayAssistant')"
             />
           </ClientOnly>
+          <details class="collapse collapse-arrow border border-base-300 bg-base-100" :class="[MARGIN_TOKEN_CLASS.mt2]">
+            <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, TOUCH_TARGET_MIN_CLASS]">
+              {{ t("aiChatPage.voiceSettings.legend") }}
+            </summary>
+            <div class="collapse-content" :class="[PADDING_TOKEN_CLASS.pb4]">
+              <SpeechModelProfileFields
+                :provider-options="speechProviderOptions"
+                :stt-provider="speechConfig.sttProvider"
+                :stt-model="speechConfig.sttModel"
+                :tts-provider="speechConfig.ttsProvider"
+                :tts-model="speechConfig.ttsModel"
+                :stt-model-options="sttModelOptions"
+                :tts-model-options="ttsModelOptions"
+                :saving="speechConfigSaving"
+                @update:stt-provider="emit('update:sttProvider', $event)"
+                @update:stt-model="emit('update:sttModel', $event)"
+                @update:tts-provider="emit('update:ttsProvider', $event)"
+                @update:tts-model="emit('update:ttsModel', $event)"
+                @save="emit('saveSpeech')"
+              />
+            </div>
+          </details>
 
           <p v-if="isSpeechConfigDirty" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
             {{ t("aiChatPage.voiceSettings.unsavedHint") }}

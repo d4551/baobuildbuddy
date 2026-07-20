@@ -47,7 +47,7 @@ const emit = defineEmits<{
           <button class="btn btn-sm btn-ghost" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
-          <button class="btn btn-sm btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
+          <button class="btn btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
             {{ t("coverLetterDetailPage.editor.saveButton") }}
           </button>
         </div>

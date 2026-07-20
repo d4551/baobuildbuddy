@@ -31,14 +31,20 @@ describe("shell chrome SSOT (dock/FAB/touch)", () => {
     expect(MAX_W_MD_TOKEN_PATTERN.test(FLOATING_CHAT_PANEL_SIZE_CLASS)).toBe(false);
   });
 
+  it("uses flex column floating panel (composer stays in-panel)", () => {
+    expect(FLOATING_CHAT_PANEL_SIZE_CLASS.includes("flex-col")).toBe(true);
+    expect(FLOATING_CHAT_PANEL_SIZE_CLASS.includes("overflow-hidden")).toBe(true);
+    expect(FLOATING_CHAT_PANEL_SIZE_CLASS.includes("h-96")).toBe(false);
+  });
+
   it("sticks full-page chat composer above the mobile dock", () => {
     expect(CHAT_COMPOSER_STICKY_CLASS.includes("sticky")).toBe(true);
     expect(CHAT_COMPOSER_STICKY_CLASS.includes("bottom-20")).toBe(true);
   });
 
   it("keeps empty-state density compact so shell padding clears dock", () => {
-    expect(EMPTY_STATE_STACK_CLASS.includes("pb-12")).toBe(true);
-    expect(EMPTY_STATE_STACK_CLASS.includes("py-8")).toBe(true);
+    expect(EMPTY_STATE_STACK_CLASS.includes("py-6")).toBe(true);
+    expect(EMPTY_STATE_STACK_CLASS.includes("gap-3")).toBe(true);
   });
 
   it("exposes truncated visible section-rail labels", () => {

@@ -86,7 +86,7 @@ function studioLocation(location: string): string {
               {{ t("studiosIndex.card.previewButton") }}
             </button>
             <button 
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary"
               :aria-label="t('studiosIndex.card.viewAria', { studio: studio.name })"
               @click="$emit('view', studio.id)"
             >

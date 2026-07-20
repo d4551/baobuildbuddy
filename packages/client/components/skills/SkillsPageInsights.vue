@@ -74,7 +74,7 @@ const { t } = useI18n();
           <div class="card-actions justify-end">
             <NuxtLink 
               :to="APP_ROUTES.skillsPathways"
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary"
               :aria-label="t('skillsPage.insights.pathwaysButtonAria')"
             >
               {{ t("skillsPage.insights.pathwaysButton") }}

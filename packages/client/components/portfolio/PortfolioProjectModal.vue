@@ -161,7 +161,7 @@ function updateFeaturedFlag(event: Event): void {
             @input="handleTechnologyInput"
             @keyup.enter="emit('addTechnology')"
           />
-          <button class="btn btn-sm btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
+          <button class="btn btn-primary" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
             {{ t("portfolioPage.modal.addTechnologyButton") }}
           </button>
         </div>

@@ -267,6 +267,12 @@ export const MIN_H_80_CLASS = "min-h-80";
 /** Floor + fixed height so daisyUI menu/btn padding cannot shrink below 44px. */
 export const TOUCH_TARGET_MIN_CLASS = "h-11 min-h-11 min-w-11";
 
+/**
+ * Primary actionable CTA — daisyUI primary + touch floor.
+ * Ban pairing `btn-primary` with `btn-sm`/`btn-xs` (validate:primary-action-density).
+ */
+export const PRIMARY_ACTION_CLASS = "btn btn-primary h-11 min-h-11";
+
 /** Per-item dock link: meets touch-target floor without forking dock chrome. */
 export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";
 

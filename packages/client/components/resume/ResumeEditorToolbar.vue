@@ -56,7 +56,7 @@ const { t } = useI18n();
         summary-class="btn btn-sm btn-outline"
         @export="emit('export', $event)"
       />
-      <button class="btn btn-sm btn-primary" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
+      <button class="btn btn-primary" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
         {{ t("resumePage.saveButton") }}
       </button>
     </div>

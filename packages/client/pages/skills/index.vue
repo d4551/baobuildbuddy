@@ -211,7 +211,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
             />
             <button
               type="button"
-              class="btn btn-sm btn-primary join-item"
+              class="btn btn-primary join-item"
               :aria-label="t('skillsPage.createModal.addApplicationAria')"
               @click="addApplication"
             >

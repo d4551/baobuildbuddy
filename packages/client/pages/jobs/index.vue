@@ -19,6 +19,7 @@ import {
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
   STACK_SPACING_SM_CLASS,
+  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
@@ -42,8 +43,7 @@ const page = useJobsIndexPage();
     >
       <template #actions>
         <button
-          class="btn btn-primary"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"
@@ -119,24 +119,33 @@ const page = useJobsIndexPage();
               : 'jobsPage.emptyStateDescription'
           "
           :cta-label-key="
-            page.isCatalogEmpty.value ? 'jobsPage.refreshButton' : 'jobsPage.clearFiltersButton'
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersButton'
+              : 'jobsPage.clearFiltersButton'
           "
           :cta-aria-key="
-            page.isCatalogEmpty.value ? 'jobsPage.refreshAria' : 'jobsPage.clearFiltersAria'
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersAria'
+              : 'jobsPage.clearFiltersAria'
           "
-          @cta="
-            page.isCatalogEmpty.value ? page.handleRefresh() : page.clearFilters()
+          :cta-to="
+            page.isCatalogEmpty.value
+              ? APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')
+              : ''
           "
+          @cta="page.clearFilters()"
         >
           <template v-if="page.isCatalogEmpty.value" #actions>
-            <NuxtLink
-              :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
+            <button
+              type="button"
               class="btn btn-outline"
-              :class="[TOUCH_TARGET_MIN_CLASS]"
-              :aria-label="t('jobsPage.configureProvidersAria')"
+              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+              :aria-label="t('jobsPage.refreshAria')"
+              :disabled="page.refreshing.value"
+              @click="page.handleRefresh()"
             >
-              {{ t("jobsPage.configureProvidersButton") }}
-            </NuxtLink>
+              {{ t("jobsPage.refreshButton") }}
+            </button>
           </template>
         </EmptyState>
 
@@ -199,7 +208,7 @@ const page = useJobsIndexPage();
                       {{ t("jobsPage.interviewButton") }}
                     </button>
                     <button
-                      class="btn btn-primary btn-sm"
+                      class="btn btn-primary"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"
                     >

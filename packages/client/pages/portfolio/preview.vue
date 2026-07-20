@@ -189,7 +189,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.projects.openProjectButton") }}
@@ -238,7 +238,7 @@ async function handleExport(format: "pdf" | "docx") {
                   :href="project.liveUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary"
                   :aria-label="t('portfolioPage.projects.openProjectAria', { title: project.title })"
                 >
                   {{ t("portfolioPage.preview.viewButton") }}

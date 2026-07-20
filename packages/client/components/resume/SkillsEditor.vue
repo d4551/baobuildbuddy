@@ -64,7 +64,7 @@ function removeSkill(index: number): void {
         @keyup.enter="addSkill"
       />
       <button 
-        class="btn btn-sm btn-primary"
+        class="btn btn-primary"
         :aria-label="t('resumePage.skills.addButtonAria')"
         @click="addSkill"
       >

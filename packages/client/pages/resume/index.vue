@@ -6,7 +6,9 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -84,14 +86,19 @@ const {
     >
       <template #actions>
         <button
-          class="btn btn-primary btn-sm"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('resumePage.createButtonAria')"
           @click="showCreateModal = true"
         >
           <IconPlus :class="ICON_SIZE_CLASS['4']" />
           {{ t("resumePage.createButton") }}
         </button>
-        <NuxtLink :to="APP_ROUTES.resumeBuild" class="btn btn-outline btn-sm" :aria-label="t('resumePage.guidedButtonAria')">
+        <NuxtLink
+          :to="APP_ROUTES.resumeBuild"
+          class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :aria-label="t('resumePage.guidedButtonAria')"
+        >
           {{ t("resumePage.guidedButton") }}
         </NuxtLink>
       </template>

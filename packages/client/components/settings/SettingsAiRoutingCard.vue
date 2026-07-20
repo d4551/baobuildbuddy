@@ -47,7 +47,7 @@ const emit = defineEmits<{
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
-        <button class="btn btn-primary btn-sm" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
+        <button class="btn btn-primary" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
         </button>
       </div>

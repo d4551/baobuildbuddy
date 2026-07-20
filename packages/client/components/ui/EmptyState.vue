@@ -4,8 +4,7 @@ import {
   EMPTY_STATE_STACK_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
-  MARGIN_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -53,34 +52,36 @@ const ctaAriaLabel = computed(() => {
     <div class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xl4]" v-if="icon" aria-hidden="true">
       {{ icon }}
     </div>
-    <IconDocumentText class="shrink-0 text-muted" :class="[ICON_SIZE_CLASS[16]]" v-else aria-hidden="true"/>
-    <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
+    <IconDocumentText class="shrink-0 text-muted" :class="[ICON_SIZE_CLASS['8']]" v-else aria-hidden="true"/>
+    <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.base]">
       {{ t(titleKey) }}
     </h3>
-    <p class="max-w-sm text-muted">
+    <!-- CTAs before body copy so first paint @320 clears the dock. -->
+    <div
+      class="flex w-full flex-col items-stretch sm:flex-row sm:flex-wrap sm:items-center sm:justify-center"
+      :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+    >
+      <slot name="actions" />
+      <NuxtLink
+        :class="[PRIMARY_ACTION_CLASS]"
+        v-if="hasCtaLink"
+        :to="ctaTo"
+        :aria-label="ctaAriaLabel"
+      >
+        {{ t(ctaLabelKey) }}
+      </NuxtLink>
+      <button
+        :class="[PRIMARY_ACTION_CLASS]"
+        v-else-if="hasCtaButton"
+        type="button"
+        :aria-label="ctaAriaLabel"
+        @click="emit('cta')"
+      >
+        {{ t(ctaLabelKey) }}
+      </button>
+    </div>
+    <p class="max-w-sm text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
       {{ t(descriptionKey) }}
     </p>
-    <NuxtLink
-      class="btn btn-primary"
-      :class="[MARGIN_TOKEN_CLASS.mt2, TOUCH_TARGET_MIN_CLASS]"
-      v-if="hasCtaLink"
-      :to="ctaTo"
-      :aria-label="ctaAriaLabel"
-    >
-      {{ t(ctaLabelKey) }}
-    </NuxtLink>
-    <button
-      class="btn btn-primary"
-      :class="[MARGIN_TOKEN_CLASS.mt2, TOUCH_TARGET_MIN_CLASS]"
-      v-else-if="hasCtaButton"
-      type="button"
-      :aria-label="ctaAriaLabel"
-      @click="emit('cta')"
-    >
-      {{ t(ctaLabelKey) }}
-    </button>
-    <div class="flex flex-wrap items-center justify-center" :class="[MARGIN_TOKEN_CLASS.mt2, FLEX_GAP_TOKEN_CLASS.gap2]" v-if="$slots.actions">
-      <slot name="actions" />
-    </div>
   </div>
 </template>

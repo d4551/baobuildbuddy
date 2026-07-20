@@ -28,3 +28,8 @@
 | I14 | Floating chat viewport | panel left=-44 | left=16 w=288 | shell-chrome.spec |
 | I15 | Section rail labels | hidden@320 | truncate visible SECTION_RAIL_LABEL | validate-section-rail-scroll |
 | I16 | menu-sm paper | menu-sm+min-h-11 | menu-sm removed | shell-chrome.spec |
+| I17 | Floating chat send | composer clipped h-96 | flex-col panel; Send inPanel+aboveDock | shell-chrome.spec + measure |
+| I18 | Primary density | btn-primary+btn-sm | PRIMARY_ACTION_CLASS + validate:primary-action-density | gate |
+| I19 | Jobs empty CTAs | under dock | CTAs before copy; Configure primary | measure underDock=false |
+| I20 | AI chat settings-first | STT forms first paint | compact voice + collapse profiles | screenshot |
+| I21 | Page header density | text-2xl always | text-xl sm:text-2xl | PAGE_HEADER_* SSOT |

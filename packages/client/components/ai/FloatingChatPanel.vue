@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { FLOATING_CHAT_PANEL_SIZE_CLASS } from "~/constants/chat";
+import {
+  FLOATING_CHAT_PANEL_BODY_CLASS,
+  FLOATING_CHAT_PANEL_COMPOSER_CLASS,
+  FLOATING_CHAT_PANEL_LOG_CLASS,
+  FLOATING_CHAT_PANEL_SIZE_CLASS,
+} from "~/constants/chat";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_H_60_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -82,11 +88,11 @@ const { t } = useI18n();
   <div
     v-if="isOpen"
     :id="chatPanelId"
-    :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
+    :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
   >
-    <div class="card-body" :class="[PADDING_TOKEN_CLASS.p0, FLUID_HEIGHT_CLASS]">
+    <div :class="[FLOATING_CHAT_PANEL_BODY_CLASS]">
       <header
-        class="flex items-start justify-between border-b border-base-300"
+        class="flex shrink-0 items-start justify-between border-b border-base-300"
         :class="[PADDING_TOKEN_CLASS.p3, FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
@@ -158,7 +164,10 @@ const { t } = useI18n();
         </div>
       </header>
 
-      <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]">
+      <div
+        class="shrink-0 border-b border-base-300"
+        :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]"
+      >
         <ChatPromptChips
           :prompts="contextualPrompts"
           :loading="loading"
@@ -167,7 +176,7 @@ const { t } = useI18n();
       </div>
 
       <div
-        class="flex-1 overflow-y-auto" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
+        :class="[FLOATING_CHAT_PANEL_LOG_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
         role="log"
         aria-live="polite"
         aria-atomic="false"
@@ -175,7 +184,11 @@ const { t } = useI18n();
         :aria-busy="loading || streaming"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_H_60_CLASS, FLUID_HEIGHT_CLASS]">
+        <div
+          v-if="!hasConversation"
+          class="flex items-center justify-center"
+          :class="[MIN_HEIGHT_ZERO_CLASS, MIN_H_60_CLASS]"
+        >
           <div class="card border border-base-300 glass-subtle" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
@@ -208,45 +221,47 @@ const { t } = useI18n();
         </template>
       </div>
 
-      <div class="border-t border-base-300" :class="[PADDING_TOKEN_CLASS.p3]">
-        <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]" @submit.prevent="emit('send')">
+      <div :class="[FLOATING_CHAT_PANEL_COMPOSER_CLASS, PADDING_TOKEN_CLASS.p3]">
+        <form :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]" @submit.prevent="emit('send')">
           <textarea
             v-model="draft"
-            rows="3"
-            class="textarea resize-y" 
+            rows="2"
+            class="textarea resize-none"
             :placeholder="t('floatingChat.inputPlaceholder', { assistant: resolvedBrand.assistantName })"
             :aria-label="t('floatingChat.inputAria')"
             :disabled="loading"
             @keydown="emit('draftKeydown', $event)"
           />
-          <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("floatingChat.composerHint") }}</p>
-            <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <ClientOnly>
-                <ChatVoiceControls
-                  :selected-voice-id="selectedVoiceId"
-                  :auto-speak-replies="autoSpeakReplies"
-                  compact
-                  :loading="loading"
-                  :supports-recognition="supportsRecognition"
-                  :supports-synthesis="supportsSynthesis"
-                  :can-replay-assistant="canReplayAssistant"
-                  :is-listening="isVoiceListening"
-                  :is-speaking="isVoiceSpeaking"
-                  :voices="availableVoices"
-                  :support-hint-key="voiceSupportHintKey"
-                  :error-label="voiceErrorLabel"
-                  @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
-                  @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
-                  @toggle-listening="emit('toggleListening')"
-                  @replay-assistant="emit('replayAssistant')"
-                />
-              </ClientOnly>
-              <button type="submit" class="btn btn-primary" :aria-label="t('floatingChat.sendAria')" :disabled="!draft.trim() || loading">
-                <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
-                <IconSend v-else :class="[ICON_SIZE_CLASS['4']]" />
-              </button>
-            </div>
+          <div class="flex items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+            <ClientOnly>
+              <ChatVoiceControls
+                :selected-voice-id="selectedVoiceId"
+                :auto-speak-replies="autoSpeakReplies"
+                compact
+                :loading="loading"
+                :supports-recognition="supportsRecognition"
+                :supports-synthesis="supportsSynthesis"
+                :can-replay-assistant="canReplayAssistant"
+                :is-listening="isVoiceListening"
+                :is-speaking="isVoiceSpeaking"
+                :voices="availableVoices"
+                :support-hint-key="voiceSupportHintKey"
+                :error-label="voiceErrorLabel"
+                @update:selected-voice-id="emit('update:selectedVoiceId', $event)"
+                @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
+                @toggle-listening="emit('toggleListening')"
+                @replay-assistant="emit('replayAssistant')"
+              />
+            </ClientOnly>
+            <button
+              type="submit"
+              :class="[PRIMARY_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
+              :aria-label="t('floatingChat.sendAria')"
+              :disabled="!draft.trim() || loading"
+            >
+              <LoadingSpinner v-if="loading" size="xs" :label="t('floatingChat.sendAria')" />
+              <IconSend v-else :class="[ICON_SIZE_CLASS['4']]" />
+            </button>
           </div>
         </form>
         <p v-if="voiceSupportHintKey" class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]" role="status" aria-live="polite">

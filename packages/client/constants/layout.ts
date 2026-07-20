@@ -122,13 +122,13 @@ export const AUTH_CARD_SHELL_CLASS = "card w-full max-w-md bg-base-100 shadow-lg
  * Page header shell (title + description + optional actions row).
  */
 export const PAGE_HEADER_OUTER_CLASS =
-  "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4";
+  "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4";
 
-/** Primary page title (`h1` / `h2` in PageHeaderBlock). */
-export const PAGE_HEADER_TITLE_CLASS = "text-2xl font-bold";
+/** Primary page title (`h1` / `h2` in PageHeaderBlock) — compact @320, full from sm. */
+export const PAGE_HEADER_TITLE_CLASS = "text-xl font-bold sm:text-2xl";
 
 /** Default subtitle under the page title. */
-export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-muted";
+export const PAGE_HEADER_DESCRIPTION_CLASS = "mt-1 text-sm text-muted sm:text-base";
 
 /** Measured page subtitle used by hero headers that need a readable line length. */
 export const PAGE_HEADER_DESCRIPTION_MEASURE_CLASS = "max-w-2xl text-secondary";
@@ -167,7 +167,7 @@ export const PAGE_HERO_CONTENT_COMFORTABLE_CLASS = `${PAGE_HERO_CONTENT_BASE_CLA
  * not control layers — solid surface, no backdrop blur.
  */
 export const EMPTY_STATE_STACK_CLASS =
-  "flex flex-col items-center justify-center gap-4 rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-8 pb-12 text-center";
+  "flex flex-col items-center justify-center gap-3 rounded-box border border-dashed border-base-300 bg-base-100 px-4 py-6 text-center";
 
 /** Canonical icon size tokens. Consumed by any component that sizes an icon
  * inside a control, badge, or stat surface so icon dimensions stay SSOT.
@@ -351,6 +351,7 @@ export {
   MIN_H_60_CLASS,
   MIN_H_80_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHELL_DOCK_ITEM_CLASS,
   PADDING_TOKEN_CLASS,
   type PaddingToken,
