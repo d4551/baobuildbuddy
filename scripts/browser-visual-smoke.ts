@@ -71,12 +71,17 @@ const collectPageSignals = async (page: Page) =>
       return { width: rect.width, visible: rect.width > 0 && rect.height > 0 };
     });
     const underTouch = Array.from(
-      document.querySelectorAll("nav.dock a, .menu a.min-h-11, .menu a.h-11"),
+      document.querySelectorAll("nav.dock a, .menu a.min-h-11, .menu a.h-11, .menu button.min-h-11"),
     )
       .map((el) => {
         const rect = el.getBoundingClientRect();
         const style = getComputedStyle(el);
-        if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden") {
+        if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden" || style.display === "none") {
+          return null;
+        }
+        // Closed dropdown/details content is not an active touch target — skip.
+        const details = el.closest("details");
+        if (details && !details.open) {
           return null;
         }
         return {

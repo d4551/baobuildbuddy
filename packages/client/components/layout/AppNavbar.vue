@@ -181,6 +181,7 @@ onUnmounted(() => {
               :to="APP_ROUTES.settings"
               class="flex items-center"
               :class="[FLEX_GAP_TOKEN_CLASS.gap2, TOUCH_TARGET_MIN_CLASS]"
+              :aria-label="t('nav.settings')"
               @click="closeUserMenu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" :class="[ICON_SIZE_CLASS.sm, 'shrink-0']" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
