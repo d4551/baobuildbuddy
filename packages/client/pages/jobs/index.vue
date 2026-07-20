@@ -39,7 +39,7 @@ const page = useJobsIndexPage();
     <PageHeroHeader
       title-id="jobs-page-title"
       :title="t('jobsPage.title')"
-      :description="t('jobsPage.seoDescription')"
+      :description="page.isCatalogEmpty.value ? '' : t('jobsPage.seoDescription')"
     >
       <template #actions>
         <!-- Empty catalog: EmptyState owns Configure; hero keeps one Refresh only. -->
