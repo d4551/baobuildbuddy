@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -62,7 +63,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const iconClass = computed(() => (props.compact ? "h-4 w-4" : "h-5 w-5"));
+const iconClass = computed(() => (props.compact ? ICON_SIZE_CLASS["4"] : ICON_SIZE_CLASS.sm));
 const showAdvancedSpeechConfig = computed(
   () =>
     !props.compact &&

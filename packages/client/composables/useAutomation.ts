@@ -4,11 +4,7 @@ import type {
   AutomationScrapeTarget,
   RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
-import {
-  API_ENDPOINTS,
-  buildAutomationRunEndpoint,
-  WS_ENDPOINTS,
-} from "@bao/shared/constants/endpoints";
+import { WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import type {
   EmailResponseRequest,
   EmailResponseResult,
@@ -22,15 +18,12 @@ import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import type { AsyncData } from "nuxt/app";
 import type { FetchError } from "ofetch";
-import type { MaybeRef } from "vue";
-import { useFetch, useRuntimeConfig } from "#imports";
-import {
-  buildClientApiHeaders,
-  type ClientApiRequestRuntime,
-  requestApi,
-  useClientApiRequestRuntime,
-} from "~/composables/api-request";
-import { resolveApiEndpoint, resolveWebSocketEndpoint } from "~/utils/endpoints";
+import { type MaybeRef, toValue } from "vue";
+import { useAsyncData, useRuntimeConfig } from "#imports";
+import { assertApiResponse } from "~/composables/async-flow";
+import { useClientApiRequestRuntime } from "~/composables/api-request";
+import { useApi } from "~/composables/useApi";
+import { resolveWebSocketEndpoint } from "~/utils/endpoints";
 
 interface JobApplyBody {
   jobUrl: string;
@@ -62,11 +55,6 @@ interface FetchRunsParams {
   status?: AutomationRunStatus;
 }
 
-interface AutomationRuntime {
-  api: ClientApiRequestRuntime;
-  wsBase: string;
-}
-
 type RunListAsyncData = AsyncData<RpaRunExecutionEnvelope[] | undefined, FetchError | undefined>;
 type RunAsyncData = AsyncData<RpaRunExecutionEnvelope | undefined, FetchError | undefined>;
 type CapabilityAuditAsyncData = AsyncData<
@@ -74,138 +62,120 @@ type CapabilityAuditAsyncData = AsyncData<
   FetchError | undefined
 >;
 
-function createPostMutation(runtime: AutomationRuntime) {
-  return <TResponse>(endpoint: string, body: object): Promise<TResponse> =>
-    requestApi<TResponse>(runtime.api, endpoint, {
-      method: "POST",
-      body,
-    });
+function asRunEnvelope(data: unknown): RpaRunExecutionEnvelope {
+  return data as RpaRunExecutionEnvelope;
 }
 
-function createRunMutations(runtime: AutomationRuntime) {
-  const postMutation = createPostMutation(runtime);
+function asRunEnvelopeList(data: unknown): RpaRunExecutionEnvelope[] {
+  return Array.isArray(data) ? (data as RpaRunExecutionEnvelope[]) : [];
+}
 
-  const triggerJobApply = (body: JobApplyBody) =>
-    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationJobApply, body);
+function asCapabilityReport(data: unknown): RpaCapabilityAuditReport {
+  return data as RpaCapabilityAuditReport;
+}
 
-  const scheduleJobApply = (body: ScheduleJobApplyBody) =>
-    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationJobApplySchedule, body);
+/**
+ * Automation feature composable — Eden Treaty for HTTP; WS for live run events.
+ */
+export function useAutomation() {
+  const api = useApi();
+  const config = useRuntimeConfig();
+  const runtime = useClientApiRequestRuntime();
+  const wsBase = String(config.public.wsBase || config.public.apiBase || "/");
 
-  const triggerEmailResponse = (body: EmailResponseRequest) =>
-    postMutation<EmailResponseResult>(API_ENDPOINTS.automationEmailResponse, body);
-
-  const scheduleEmailResponse = (body: ScheduleEmailResponseBody) =>
-    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationEmailResponseSchedule, body);
-
-  const triggerScrape = (body: RunScrapeBody) =>
-    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationScrape, body);
-
-  const scheduleScrape = (body: ScheduleScrapeBody) =>
-    postMutation<RpaRunExecutionEnvelope>(API_ENDPOINTS.automationScrapeSchedule, body);
-
-  return {
-    triggerJobApply,
-    scheduleJobApply,
-    triggerEmailResponse,
-    scheduleEmailResponse,
-    triggerScrape,
-    scheduleScrape,
+  const triggerJobApply = async (body: JobApplyBody): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation["job-apply"].post(body);
+    assertApiResponse(error, "Job apply trigger failed");
+    return asRunEnvelope(data);
   };
-}
 
-async function getVerifyContext(
-  runtime: AutomationRuntime,
-): Promise<{ resumeId: string } | null> {
-  const result = await settle(
-    requestApi<{ resumeId: string }>(runtime.api, API_ENDPOINTS.automationVerifyContext, {
-      method: "GET",
-    }),
-  );
-  if (result.status !== "fulfilled") {
-    return null;
-  }
-  const payload = result.value;
-  if (payload && typeof payload.resumeId === "string" && payload.resumeId.length > 0) {
-    return { resumeId: payload.resumeId };
-  }
-  return null;
-}
+  const scheduleJobApply = async (body: ScheduleJobApplyBody): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation["job-apply"].schedule.post(body);
+    assertApiResponse(error, "Job apply schedule failed");
+    return asRunEnvelope(data);
+  };
 
-function createRunQueries(runtime: AutomationRuntime) {
-  const authHeaders = buildClientApiHeaders();
-  const runsEndpoint = resolveApiEndpoint(
-    runtime.api.apiBase,
-    runtime.api.requestUrl,
-    API_ENDPOINTS.automationRuns,
-  );
+  const triggerEmailResponse = async (body: EmailResponseRequest): Promise<EmailResponseResult> => {
+    const { data, error } = await api.automation["email-response"].post(body);
+    assertApiResponse(error, "Email response trigger failed");
+    return data as EmailResponseResult;
+  };
 
-  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}): RunListAsyncData =>
-    useFetch<RpaRunExecutionEnvelope[]>(runsEndpoint, {
-      query: params,
-      headers: authHeaders,
-    });
+  const scheduleEmailResponse = async (
+    body: ScheduleEmailResponseBody,
+  ): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation["email-response"].schedule.post(body);
+    assertApiResponse(error, "Email response schedule failed");
+    return asRunEnvelope(data);
+  };
 
-  const fetchRun = (id: string): RunAsyncData =>
-    useFetch<RpaRunExecutionEnvelope>(
-      resolveApiEndpoint(
-        runtime.api.apiBase,
-        runtime.api.requestUrl,
-        buildAutomationRunEndpoint(id),
-      ),
-      {
-        headers: authHeaders,
-      },
-    );
+  const triggerScrape = async (body: RunScrapeBody): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation.scrape.post(body);
+    assertApiResponse(error, "Scrape trigger failed");
+    return asRunEnvelope(data);
+  };
 
-  const getRun = (id: string): Promise<RpaRunExecutionEnvelope> =>
-    requestApi<RpaRunExecutionEnvelope>(runtime.api, buildAutomationRunEndpoint(id), {
-      method: "GET",
-    });
+  const scheduleScrape = async (body: ScheduleScrapeBody): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation.scrape.schedule.post(body);
+    assertApiResponse(error, "Scrape schedule failed");
+    return asRunEnvelope(data);
+  };
 
-  const getRuns = (params: FetchRunsParams = {}): Promise<RpaRunExecutionEnvelope[]> =>
-    requestApi<RpaRunExecutionEnvelope[]>(runtime.api, API_ENDPOINTS.automationRuns, {
-      method: "GET",
+  const getVerifyContext = async (): Promise<{ resumeId: string } | null> => {
+    const result = await settle(api.automation.verify.context.get());
+    if (result.status !== "fulfilled") {
+      return null;
+    }
+    const { data, error } = result.value;
+    if (error || !data || typeof data.resumeId !== "string" || data.resumeId.length === 0) {
+      return null;
+    }
+    return { resumeId: data.resumeId };
+  };
+
+  const getRun = async (id: string): Promise<RpaRunExecutionEnvelope> => {
+    const { data, error } = await api.automation.runs({ id }).get();
+    assertApiResponse(error, "Automation run fetch failed");
+    return asRunEnvelope(data);
+  };
+
+  const getRuns = async (params: FetchRunsParams = {}): Promise<RpaRunExecutionEnvelope[]> => {
+    const { data, error } = await api.automation.runs.get({
       query: {
         type: params.type,
         status: params.status,
       },
     });
+    assertApiResponse(error, "Automation runs fetch failed");
+    return asRunEnvelopeList(data);
+  };
+
+  const getRpaCapabilities = async (): Promise<RpaCapabilityAuditReport> => {
+    const { data, error } = await api.automation.capabilities.get();
+    assertApiResponse(error, "RPA capabilities fetch failed");
+    return asCapabilityReport(data);
+  };
+
+  const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}): RunListAsyncData =>
+    useAsyncData(
+      "automation-runs-list",
+      async () => {
+        const resolved = toValue(params);
+        return getRuns(resolved);
+      },
+      {
+        watch: [() => toValue(params)],
+      },
+    ) as RunListAsyncData;
+
+  const fetchRun = (id: string): RunAsyncData =>
+    useAsyncData(`automation-run-${id}`, async () => getRun(id)) as RunAsyncData;
 
   const fetchRpaCapabilities = (): CapabilityAuditAsyncData =>
-    useFetch<RpaCapabilityAuditReport>(
-      resolveApiEndpoint(
-        runtime.api.apiBase,
-        runtime.api.requestUrl,
-        API_ENDPOINTS.automationCapabilities,
-      ),
-      {
-        headers: authHeaders,
-      },
-    );
+    useAsyncData("automation-rpa-capabilities", async () => getRpaCapabilities()) as CapabilityAuditAsyncData;
 
-  const getRpaCapabilities = (): Promise<RpaCapabilityAuditReport> =>
-    requestApi<RpaCapabilityAuditReport>(runtime.api, API_ENDPOINTS.automationCapabilities, {
-      method: "GET",
-    });
-
-  return {
-    fetchRuns,
-    fetchRun,
-    getRun,
-    getRuns,
-    fetchRpaCapabilities,
-    getRpaCapabilities,
-    getVerifyContext: () => getVerifyContext(runtime),
-  };
-}
-
-function createRunSubscription(runtime: AutomationRuntime) {
-  return (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
-    const wsUrl = resolveWebSocketEndpoint(
-      runtime.wsBase,
-      runtime.api.requestUrl,
-      WS_ENDPOINTS.automation,
-    );
+  const subscribeToRun = (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
+    const wsUrl = resolveWebSocketEndpoint(wsBase, runtime.requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -240,21 +210,21 @@ function createRunSubscription(runtime: AutomationRuntime) {
       ws.close();
     };
   };
-}
-
-/**
- * Automation feature composable using shared run/event contracts.
- */
-export function useAutomation() {
-  const config = useRuntimeConfig();
-  const runtime: AutomationRuntime = {
-    api: useClientApiRequestRuntime(),
-    wsBase: String(config.public.wsBase || config.public.apiBase || "/"),
-  };
 
   return {
-    ...createRunMutations(runtime),
-    ...createRunQueries(runtime),
-    subscribeToRun: createRunSubscription(runtime),
+    triggerJobApply,
+    scheduleJobApply,
+    triggerEmailResponse,
+    scheduleEmailResponse,
+    triggerScrape,
+    scheduleScrape,
+    fetchRuns,
+    fetchRun,
+    getRun,
+    getRuns,
+    fetchRpaCapabilities,
+    getRpaCapabilities,
+    getVerifyContext,
+    subscribeToRun,
   };
 }

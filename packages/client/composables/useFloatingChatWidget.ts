@@ -18,6 +18,7 @@ const createFloatingChatWidgetBehaviorState = (
   const derivedState = createFloatingChatWidgetDerivedState({
     messages: coreState.ai.messages,
     streaming: coreState.ai.streaming,
+    streamingContent: coreState.ai.streamingContent,
     route: coreState.route,
     buildCurrentContext: coreState.ai.buildCurrentContext,
     t: coreState.t,

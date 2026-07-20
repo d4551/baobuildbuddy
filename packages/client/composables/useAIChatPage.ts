@@ -8,7 +8,15 @@ import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 const createAIChatPageCoreState = () => {
   const { t, locale } = useI18n();
   const { resolvedBrand } = useBrand();
-  const { messages, loading, streaming, sendMessage, clearMessages, buildCurrentContext } = useAI();
+  const {
+    messages,
+    loading,
+    streaming,
+    streamingContent,
+    sendMessage,
+    clearMessages,
+    buildCurrentContext,
+  } = useAI();
   const { $toast } = useNuxtApp();
   const speech = useSpeechModelProfiles({ locale });
   const input = ref("");
@@ -22,6 +30,7 @@ const createAIChatPageCoreState = () => {
     messages,
     loading,
     streaming,
+    streamingContent,
     sendMessage,
     clearMessages,
     buildCurrentContext,
@@ -56,6 +65,7 @@ const createAIChatPageState = (core: ReturnType<typeof createAIChatPageCoreState
     messages: core.messages,
     loading: core.loading,
     streaming: core.streaming,
+    streamingContent: core.streamingContent,
     voiceErrorMessageKey: voice.errorMessageKey,
     buildCurrentContext: core.buildCurrentContext,
   });

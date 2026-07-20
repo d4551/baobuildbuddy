@@ -3,6 +3,7 @@ import type { AIChatContext, AIChatContextSource, ChatMessage } from "@bao/share
 import { generateId } from "@bao/shared/utils/validation";
 import type { ComposerTranslation } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
+import { useChatRealtime } from "~/composables/useChatRealtime";
 import { parseJobApplyAutomationAction } from "~/utils/ai-automation-action";
 import { createChatMessage } from "~/utils/chat";
 
@@ -25,6 +26,7 @@ interface ChatActionInput {
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   loading: ReturnType<typeof useState<boolean>>;
   streaming: ReturnType<typeof useState<boolean>>;
+  streamingContent: ReturnType<typeof useState<string>>;
   messages: ReturnType<typeof useState<ChatMessage[]>>;
   sessionId: ReturnType<typeof useState<string>>;
   buildAssistantGreetingMessage: () => ChatMessage;
@@ -61,19 +63,36 @@ function parseAIChatResponse(data: unknown): AIChatResponse {
   return response;
 }
 
-async function requestAIChatResponse(
+function pushUserMessage(input: ChatActionInput, content: string): void {
+  input.messages.value.push(
+    createChatMessage({
+      role: "user",
+      content,
+      sessionId: input.sessionId.value,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+}
+
+function pushAssistantMessage(input: ChatActionInput, response: AIChatResponse): void {
+  input.messages.value.push(
+    createChatMessage({
+      role: "assistant",
+      content: response.message || input.unableToProcessFallback(),
+      id: response.id,
+      sessionId: response.sessionId ?? input.sessionId.value,
+      timestamp: response.timestamp ?? new Date().toISOString(),
+      provider: response.provider,
+      model: response.model,
+    }),
+  );
+}
+
+async function requestAIChatResponseHttp(
   input: ChatActionInput,
   content: string,
   source?: AIChatContextSource,
 ): Promise<AIChatResponse> {
-  const userMessage = createChatMessage({
-    role: "user",
-    content,
-    sessionId: input.sessionId.value,
-    timestamp: new Date().toISOString(),
-  });
-  input.messages.value.push(userMessage);
-
   const { data, error } = await input.api.ai.chat.post({
     message: content,
     sessionId: input.sessionId.value,
@@ -85,18 +104,40 @@ async function requestAIChatResponse(
   if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
     input.sessionId.value = response.sessionId;
   }
+  pushAssistantMessage(input, response);
+  return response;
+}
 
-  const assistantMessage = createChatMessage({
-    role: "assistant",
-    content: response.message || input.unableToProcessFallback(),
-    id: response.id,
-    sessionId: response.sessionId ?? input.sessionId.value,
-    timestamp: response.timestamp ?? new Date().toISOString(),
-    provider: response.provider,
-    model: response.model,
-  });
-  input.messages.value.push(assistantMessage);
-
+async function requestAIChatResponseRealtime(
+  input: ChatActionInput,
+  content: string,
+  chatRealtime: ReturnType<typeof useChatRealtime>,
+): Promise<AIChatResponse | null> {
+  input.streamingContent.value = "";
+  const streamResult = await settlePromise(
+    chatRealtime.sendStreamingMessage({
+      content,
+      sessionId: input.sessionId.value,
+      onChunk: (chunk) => {
+        input.streamingContent.value += chunk;
+      },
+      onSessionId: (sessionId) => {
+        input.sessionId.value = sessionId;
+      },
+    }),
+    input.t("aiChatCommon.requestErrorToast"),
+  );
+  if (!streamResult.ok) {
+    return null;
+  }
+  const fullText = streamResult.value.fullText.trim();
+  const response: AIChatResponse = {
+    message: fullText.length > 0 ? fullText : input.unableToProcessFallback(),
+    sessionId: streamResult.value.sessionId,
+    timestamp: new Date().toISOString(),
+  };
+  input.sessionId.value = streamResult.value.sessionId;
+  pushAssistantMessage(input, response);
   return response;
 }
 
@@ -133,15 +174,39 @@ async function executeDetectedAutomationAction(
 }
 
 export function createChatActions(input: ChatActionInput) {
+  const chatRealtime = useChatRealtime();
+
   const sendMessage = async (content: string, options: SendMessageOptions = {}) => {
+    pushUserMessage(input, content);
     input.streaming.value = true;
-    const sendResult = await settlePromise(
-      withLoadingState(input.loading, () => requestAIChatResponse(input, content, options.source)),
+    input.streamingContent.value = "";
+
+    const realtimeResult = await settlePromise(
+      withLoadingState(input.loading, () =>
+        requestAIChatResponseRealtime(input, content, chatRealtime),
+      ),
       input.t("aiChatCommon.requestErrorToast"),
     );
-    input.streaming.value = false;
 
-    if (!sendResult.ok) {
+    let response: AIChatResponse | null = null;
+    if (realtimeResult.ok && realtimeResult.value) {
+      response = realtimeResult.value;
+    } else {
+      const httpResult = await settlePromise(
+        withLoadingState(input.loading, () =>
+          requestAIChatResponseHttp(input, content, options.source),
+        ),
+        input.t("aiChatCommon.requestErrorToast"),
+      );
+      if (httpResult.ok) {
+        response = httpResult.value;
+      }
+    }
+
+    input.streaming.value = false;
+    input.streamingContent.value = "";
+
+    if (!response) {
       input.toast.error(input.t("aiChatCommon.requestErrorToast"));
       input.messages.value.push(
         createChatMessage({
@@ -155,15 +220,16 @@ export function createChatActions(input: ChatActionInput) {
     }
 
     await settlePromise(
-      executeDetectedAutomationAction(input, sendResult.value),
+      executeDetectedAutomationAction(input, response),
       input.t("aiChatCommon.automationActionFailed"),
     );
-    return sendResult.value;
+    return response;
   };
 
   const clearMessages = (): void => {
     input.sessionId.value = generateId();
     input.messages.value = [input.buildAssistantGreetingMessage()];
+    input.streamingContent.value = "";
   };
 
   return {

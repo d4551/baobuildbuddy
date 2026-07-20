@@ -13,6 +13,7 @@ import {
   TOAST_CONTAINER_DOM_ID,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
@@ -76,7 +77,7 @@ function resolveIconPath(type: ToastType): string {
 
         <button 
           type="button"
-          class="btn btn-ghost btn-circle btn-xs"
+          class="btn btn-ghost btn-circle btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >

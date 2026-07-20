@@ -14,6 +14,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 import {
   SKILLS_CONFIDENCE_MAX,
@@ -229,7 +230,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
               {{ application }}
               <button
                 type="button"
-                class="btn btn-ghost btn-xs btn-circle"
+                class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
                 :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                 @click="removeApplication(index)"
               >

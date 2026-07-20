@@ -198,7 +198,7 @@ const viewSession = (id: string): void => {
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatDuration(session.duration ?? 0) }}</p>
               <button 
-                class="btn btn-ghost btn-xs" :class="[MARGIN_TOKEN_CLASS.mt2]"
+                class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, MARGIN_TOKEN_CLASS.mt2]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
               >

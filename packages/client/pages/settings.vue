@@ -138,12 +138,13 @@ watch(
       <SettingsSectionTabs v-model:active-section="activeSection">
         <template #profile>
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+            <!-- Auth first — rotate/revoke must clear fold before long profile form. -->
+            <SettingsAuthAccessCard />
             <SettingsProfilePanel
               v-model:profile-form="profileForm"
               :profile-save-state="profileSaveState"
               @save="handleSaveProfile"
             />
-            <SettingsAuthAccessCard />
           </div>
         </template>
 

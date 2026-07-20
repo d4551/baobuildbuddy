@@ -66,7 +66,7 @@ describe("validate-empty-state-ctas", () => {
     expect(violations.length).toBe(0);
   });
 
-  test("chat EmptyState skip still allowed", () => {
+  test("chat EmptyState without CTA fails — SKIP_FILES softening banned", () => {
     const violations = collectEmptyStateCtaViolationsForContent(
       "packages/client/components/ai/AIChatConversationPanel.vue",
       `<EmptyState
@@ -74,6 +74,6 @@ describe("validate-empty-state-ctas", () => {
       description-key="ai.emptyDesc"
     />`,
     );
-    expect(violations.length).toBe(0);
+    expect(violations.length).toBe(1);
   });
 });

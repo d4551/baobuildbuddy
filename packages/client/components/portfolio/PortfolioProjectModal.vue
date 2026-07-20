@@ -12,6 +12,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 type PortfolioProjectForm = {
@@ -179,7 +180,7 @@ function updateFeaturedFlag(event: Event): void {
             {{ tech }}
             <button 
               type="button"
-              class="btn btn-ghost btn-xs btn-circle"
+              class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >

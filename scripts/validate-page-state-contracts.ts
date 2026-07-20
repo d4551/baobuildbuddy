@@ -10,7 +10,11 @@ const pageStateComponentSignalPatterns = [
   /<BootstrapErrorAlert\b/u,
   /<EmptyState\b/u,
 ] as const;
-const emptyStateEvidencePatterns = [/['"]empty['"]/u, /<EmptyState\b/u] as const;
+/** Evidence = mounted empty primitive only — string `'empty'` alone is softening. */
+const emptyStateEvidencePatterns = [
+  /<EmptyState\b/u,
+  /<DashboardOnboardingCard\b/u,
+] as const;
 const emptyStateRequirementPatterns = [/['"]empty['"]/u, /\bisEmpty\b/u] as const;
 const requiredStatePatterns = {
   loading: [/['"](?:loading|idle)['"]/u, /<LoadingSkeleton\b/u],

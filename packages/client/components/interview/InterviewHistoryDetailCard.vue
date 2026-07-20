@@ -12,6 +12,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 defineProps<{
@@ -53,7 +54,7 @@ const { t } = useI18n();
           <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("interviewHistory.detailsTitle") }}</h3>
           <button 
             type="button"
-            class="btn btn-ghost btn-xs btn-circle"
+            class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >

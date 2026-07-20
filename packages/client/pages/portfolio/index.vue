@@ -76,6 +76,7 @@ const bootstrapErrorMessage = computed(() =>
 
 const hasPortfolioContent = computed(() => hasMetadata.value || projects.value.length > 0);
 const isPortfolioEmpty = computed(() => !hasPortfolioContent.value);
+const showEmptyProfileEditor = ref(false);
 
 function updatePortfolioForm(value: typeof portfolioForm): void {
   Object.assign(portfolioForm, value);
@@ -151,16 +152,23 @@ function updateProjectForm(value: typeof projectForm): void {
           @cta="openAddModal"
         >
           <template #actions>
-            <a
-              href="#portfolio-profile-card"
+            <button
+              type="button"
               class="btn btn-outline"
               :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('portfolioPage.emptyState.profileButton')"
+              @click="showEmptyProfileEditor = !showEmptyProfileEditor"
             >
               {{ t("portfolioPage.emptyState.profileButton") }}
-            </a>
+            </button>
           </template>
         </EmptyState>
+        <PortfolioProfileCard
+          v-if="showEmptyProfileEditor"
+          :portfolio-form="portfolioForm"
+          @update:portfolio-form="updatePortfolioForm"
+          @save="handleSavePortfolio"
+        />
       </div>
 
       <section
@@ -189,8 +197,8 @@ function updateProjectForm(value: typeof projectForm): void {
         </div>
       </section>
 
-      <!-- Profile stays when empty — EmptyState secondary anchors here. -->
       <PortfolioProfileCard
+        v-if="!isPortfolioEmpty"
         :portfolio-form="portfolioForm"
         @update:portfolio-form="updatePortfolioForm"
         @save="handleSavePortfolio"

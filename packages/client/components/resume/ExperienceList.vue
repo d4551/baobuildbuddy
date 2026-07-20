@@ -7,6 +7,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -85,7 +86,7 @@ function removeExperience(index: number): void {
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
             <button 
-              class="btn btn-error btn-xs"
+              class="btn btn-error btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"
             >

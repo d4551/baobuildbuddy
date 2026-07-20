@@ -60,6 +60,15 @@ export interface AutomationVerifyContextPayload {
   resumeId: string;
 }
 
+export interface AutomationRunsApi {
+  get(options?: {
+    query?: { type?: string; status?: string };
+  }): ApiRequest<unknown>;
+  (params: { id: string }): {
+    get(): ApiRequest<unknown>;
+  };
+}
+
 export interface AutomationApi {
   verify: {
     context: {
@@ -69,10 +78,24 @@ export interface AutomationApi {
   capabilities: {
     get(): ApiRequest<unknown>;
   };
-  runs: {
-    get(options?: {
-      query?: { type?: string; status?: string };
-    }): ApiRequest<unknown>;
+  runs: AutomationRunsApi;
+  "job-apply": {
+    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    schedule: {
+      post(body: Record<string, unknown>): ApiRequest<unknown>;
+    };
+  };
+  "email-response": {
+    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    schedule: {
+      post(body: Record<string, unknown>): ApiRequest<unknown>;
+    };
+  };
+  scrape: {
+    post(body: Record<string, unknown>): ApiRequest<unknown>;
+    schedule: {
+      post(body: Record<string, unknown>): ApiRequest<unknown>;
+    };
   };
 }
 

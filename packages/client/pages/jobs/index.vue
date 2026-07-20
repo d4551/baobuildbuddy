@@ -41,10 +41,8 @@ const page = useJobsIndexPage();
       :title="t('jobsPage.title')"
       :description="page.isCatalogEmpty.value ? '' : t('jobsPage.seoDescription')"
     >
-      <template #actions>
-        <!-- Empty catalog: EmptyState owns Configure; hero keeps one Refresh only. -->
+      <template v-if="!page.isCatalogEmpty.value" #actions>
         <button
-          v-if="!page.isCatalogEmpty.value"
           type="button"
           class="btn btn-outline"
           :class="[TOUCH_TARGET_MIN_CLASS]"
@@ -56,7 +54,7 @@ const page = useJobsIndexPage();
           <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
         </button>
         <button
-          :class="page.isCatalogEmpty.value ? [TOUCH_TARGET_MIN_CLASS, 'btn btn-outline'] : [PRIMARY_ACTION_CLASS]"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"
@@ -176,7 +174,21 @@ const page = useJobsIndexPage();
               : ''
           "
           @cta="page.clearFilters()"
-        />
+        >
+          <template v-if="page.isCatalogEmpty.value" #actions>
+            <button
+              type="button"
+              class="btn btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+              :aria-label="t('jobsPage.refreshAria')"
+              :disabled="page.refreshing.value"
+              @click="page.handleRefresh()"
+            >
+              <LoadingSpinner v-if="page.refreshing.value" size="sm" :label="t('jobsPage.refreshButton')" />
+              <span v-else>{{ t("jobsPage.refreshButton") }}</span>
+            </button>
+          </template>
+        </EmptyState>
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" :extra-class="SECTION_GAP_BOTTOM_CLASS">

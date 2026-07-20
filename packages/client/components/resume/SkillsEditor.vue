@@ -8,6 +8,7 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -80,7 +81,7 @@ function removeSkill(index: number): void {
         {{ skill }}
         <button 
           type="button"
-          class="btn btn-ghost btn-xs btn-circle"
+          class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >

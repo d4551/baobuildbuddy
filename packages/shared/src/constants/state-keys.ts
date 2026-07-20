@@ -47,6 +47,7 @@ export const STATE_KEYS = {
   // AI
   AI_MESSAGES: "ai-messages",
   AI_STREAMING: "ai-streaming",
+  AI_STREAMING_CONTENT: "ai-streaming-content",
   AI_LOADING: "ai-loading",
   AI_SESSION_ID: "ai-session-id",
   AI_FLOW_STATE: "ai-flow-state",
