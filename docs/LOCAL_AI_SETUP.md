@@ -5,10 +5,10 @@ This guide helps you run AI features on your own computer using Ollama, without 
 **The shortest version:**
 
 1. Install Ollama from [ollama.com/download](https://ollama.com/download/).
-2. Download a model: `ollama pull llama3.2`
+2. Download a model (any; examples: `ollama pull llama3.2` or a small test model like `qwen2.5:0.5b`).
 3. Open BaoBuildBuddy > **Settings > AI Providers**.
-4. Set the endpoint to `http://localhost:11434/v1`, leave the model blank for auto-detect, then test and save.
-5. If the test fails, BaoBuildBuddy now returns the exact local failure mode instead of a generic error.
+4. Set the endpoint to `http://localhost:11434/v1` (or `http://127.0.0.1:11434/v1`), leave the model blank for auto-detect, then test and save.
+5. If the test fails, BaoBuildBuddy returns the exact local failure mode instead of a generic error.
 
 ---
 

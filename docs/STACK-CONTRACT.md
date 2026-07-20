@@ -78,11 +78,22 @@ Binding detail: see **BINDING: product SSOT** above. Consumers import constants;
 bun run lint
 bun run test
 bun run build
+bun run validate:stack-versions
 ```
 
-Optional: `bun run dev` for interactive smoke (server + client).
+Optional interactive stack: `bun run dev` (server + client; Nuxt on `127.0.0.1:3001` by default).
+
+Browser UI proof (Playwright; requires running client):
+
+```bash
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown
+```
+
+Contract-escalation note for parent `.bao`-archive playbooks: [`ssot-ledger/contract-escalation-2026-07-20.md`](./ssot-ledger/contract-escalation-2026-07-20.md).
 
 ## Agent tooling
 
 - **daisyUI:** Prefer project MCP **daisyUI-Snippets** when the server is enabled; otherwise [daisyUI llms.txt](https://daisyui.com/llms.txt) and repo script `validate:daisyui-contracts`.
-- **Context7:** Use when quota allows for library-specific questions.
+- **Context7:** Use when quota allows for library-specific questions; if MCP quota is exceeded, use `bun run audit:official-llms` + official `llms.txt` URLs as the safe equivalent.
+- **brutalise / parent fabric scanners:** May reject `/workspace` as outside allowed roots. Do not invent `.bao` archives to satisfy them; rely on this contract’s validators (`bun run lint`) and browser proof scripts.

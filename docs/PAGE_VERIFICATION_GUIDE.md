@@ -32,9 +32,18 @@ That output directory contains:
 - `report.md`
 - one screenshot per routed page
 
+For responsive UI proof against a live stack on default ports:
+
+```bash
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-burndown
+```
+
+Viewport order is always **mobile (320) → tablet (768) → desktop (1440)**. Prefer `127.0.0.1` over `localhost` so Playwright is not blocked by an IPv6-only Nuxt bind.
+
 ## Five questions for every screenshot
 
-Ask the same five questions for every page:
+Ask the same five questions for every page (and every viewport in the smoke/burndown matrix):
 
 1. Does the route render the intended page, not a fallback or setup gate?
 2. Is the layout using the shared shell, container, cards, and spacing tokens rather than a one-off width or ad-hoc spacing pattern?
@@ -42,7 +51,9 @@ Ask the same five questions for every page:
 4. Do async states look intentional rather than half-rendered?
 5. Does the page still look like the same product family as the rest of the app?
 
-If any screenshot fails those questions, fix the page and rerun `proof:pages` before treating the verification pass as complete.
+Also watch for mobile-specific regressions: truncated search placeholders, mid-word section-rail clipping, duplicate section titles under `WorkspaceSectionNavigator`, and control targets below 44px (`TOUCH_TARGET_MIN_CLASS`).
+
+If any screenshot fails those questions, fix the page and rerun `proof:pages` / browser smoke before treating the verification pass as complete.
 
 ## Recommended walkthrough order
 
@@ -75,7 +86,7 @@ The `Screenshot file` column is the filename created inside the `proof:pages` ou
 | Job Detail | `/jobs/:id` | `jobs-detail.png` | Job content, studio info, and action rail render as one coherent detail surface. |
 | Studio Directory | `/studios` | `studios-index.png` | Grid/list entries align cleanly and do not collapse unevenly. |
 | Studio Detail | `/studios/:id` | `studios-detail.png` | Studio overview, hiring context, and related content render without clipped cards. |
-| Studio Analytics | `/studios/analytics` | `studios-analytics.png` | Analytics cards use the shared stat/card patterns and keep chart/text spacing intact. |
+| Studio Analytics | `/studios/analytics` | `studios-analytics.png` | Analytics hydrate via `useStudioAnalyticsPage` + `useAsyncData` (not an orphan ref); cards use shared stat patterns with intact chart/text spacing. |
 
 ### Resume, cover letter, and portfolio
 
@@ -103,11 +114,11 @@ The `Screenshot file` column is the filename created inside the `proof:pages` ou
 
 | Page | Route | Screenshot file | What success looks like |
 |------|-------|-----------------|-------------------------|
-| AI Chat | `/ai/chat` | `ai-chat.png` | Chat surface renders with stable transcript spacing and grounded context chips. |
+| AI Chat | `/ai/chat` | `ai-chat.png` | Chat surface renders with stable transcript spacing; context scope lives in the xl sidebar (no duplicate Scope/Surface/Route chips in the narrow header). |
 | AI Dashboard | `/ai/dashboard` | `ai-dashboard.png` | AI routing/status cards render without hidden controls or stale state blocks. |
 | Automation Hub | `/automation` | `automation-index.png` | Capability cards and actions render as a single operational surface, not a scattered report. |
 | Job Application Automation | `/automation/job-apply` | `automation-job-apply.png` | Apply flow shows a clear form/action hierarchy and grounded source selections. |
-| Scraper Operations Hub | `/automation/scraper` | `automation-scraper.png` | Provider cards, stats, and recent-job table align without clipped metadata or collapsed controls. |
+| Scraper Operations Hub | `/automation/scraper` | `automation-scraper.png` | Provider cards, stats, and recent-job table align without clipped metadata; capability intro copy is not duplicated under `WorkspaceSectionNavigator`. |
 | Email Response Automation | `/automation/email` | `automation-email.png` | Email composition, generation, and send controls are visible and ordered logically. |
 | Automation Runs | `/automation/runs` | `automation-runs.png` | Run history table/list remains readable and action buttons stay aligned. |
 | Automation Run Detail | `/automation/runs/:id` | `automation-run-detail.png` | Step log, artifacts, and screenshots render as one coherent detail page. |
@@ -118,7 +129,7 @@ The `Screenshot file` column is the filename created inside the `proof:pages` ou
 |------|-------|-----------------|-------------------------|
 | API Reference | `/docs/api` | `docs-api.png` | API docs surface renders correctly inside the shared shell without iframe-style overflow. |
 | Gamification Hub | `/gamification` | `gamification.png` | Progress and achievements retain consistent card/stat spacing. |
-| Settings & Profile | `/settings` | `settings.png` | The selected settings section renders inside the shared scaffold with no clipped rail items or broken form rows. |
+| Settings & Profile | `/settings` | `settings.png` | Section titles are owned by `WorkspaceSectionNavigator` (panels do not repeat h2 titles); rail scrolls horizontally on narrow viewports without mid-word clipping; form rows stay intact. |
 
 ## Step-by-step operator flow
 
@@ -140,9 +151,10 @@ Use this path when you want to verify the product end-to-end rather than route b
     - resume: compact and scan-first
     - cover letter: formal letter layout
     - portfolio: showcase presentation
-14. Run `bun run verify:desktop-runtime`.
-15. Run `bun run verify:desktop-releases -- --targets macos,windows,linux-arm64` for the staged artifact set or the host-specific release commands for a fresh build.
-16. Only mark desktop regeneration complete for a target when that target's native build actually ran on a matching host or CI runner.
+14. Run `PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run proof:browser-smoke` then `proof:browser-burndown` (mobile → tablet → desktop).
+15. Run `bun run verify:desktop-runtime`.
+16. Run `bun run verify:desktop-releases -- --targets macos,windows,linux-arm64` for the staged artifact set or the host-specific release commands for a fresh build.
+17. Only mark desktop regeneration complete for a target when that target's native build actually ran on a matching host or CI runner.
 
 ## Export-family checks
 

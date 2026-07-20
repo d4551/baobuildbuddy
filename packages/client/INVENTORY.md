@@ -14,10 +14,10 @@ packages/client/
 ├── app.vue                  # Root app shell — settings bootstrap, brand i18n overrides, SEO head
 ├── error.vue                # Global error page (status code + reset/clear-error actions)
 ├── pages/                   # 30 file-route pages (Nuxt file-based routing)
-├── components/              # ~178 .vue / .ts files across 16 feature subdirectories
-├── composables/             # ~146 composables + supporting modules + specs
+├── components/              # ~161 .vue files across feature subdirectories (+ supporting .ts)
+├── composables/             # ~161 composable modules + specs
 ├── constants/               # ~20 typed constant / copy-key / registry files + specs
-├── utils/                   # ~15 pure utility modules
+├── utils/                   # ~30 pure utility modules
 ├── types/                   # Client-side type definitions (Eden contracts, automation, i18n)
 ├── layouts/                 # default.vue (authenticated shell), auth-shell.vue (setup/auth)
 ├── middleware/auth.ts       # Route guard redirecting unauthenticated users to setup
@@ -96,9 +96,9 @@ feature-specific components. SEO meta is wired via `useSeoMeta` with i18n keys.
 
 ---
 
-## 4. Components (~178 files across 16 subdirectories)
+## 4. Components (~161 `.vue` files across feature subdirectories)
 
-### `components/ui/` — Shared UI Primitives (37 files)
+### `components/ui/` — Shared UI Primitives (22 `.vue` files)
 Reusable design-system components shared across all features:
 
 | Component | Role |
@@ -121,14 +121,14 @@ Reusable design-system components shared across all features:
 | `UiRadialMeter.vue` | Radial dial meter (readiness scores) |
 | `AIProviderIcon.vue` | AI provider icon renderer |
 | `QuickActionFab.vue` | Floating action button speed dial |
-| `WorkspaceSectionNavigator.vue` | Section navigator with scroll-spy |
+| `WorkspaceSectionNavigator.vue` | Section navigator with scroll-spy + scroll-snap SSOT (`validate:section-rail-scroll`; no `overflow-x-clip` on the navigator) |
 | `CloseIcon.vue`, icons | Inline SVG icon set |
 
 ### `components/layout/` (3 files)
 `AppNavbar.vue`, `AppSidebar.vue`, `AppDock.vue` — navigation chrome driven by
-`NAVIGATION_ITEMS` registry with sidebar/dock inclusion flags.
+`NAVIGATION_ITEMS` registry with sidebar/dock inclusion flags. Menu/dock items use `TOUCH_TARGET_MIN_CLASS` (`min-h-11` / ≥44px).
 
-### `components/icons/` (21 files)
+### `components/icons/` (17 `.vue` files + registry)
 Inline SVG icon components (`IconSearch`, `IconBolt`, `IconTrash`, etc.) +
 `icon-registry.ts` mapping.
 
@@ -216,7 +216,7 @@ Settings panel ecosystem: `SettingsProfilePanel`, `SettingsPreferencesPanel`,
 
 ---
 
-## 5. Composables (~146 files)
+## 5. Composables (~161 modules)
 
 Composables are the heart of the client architecture. Pages are thin — they call a
 `use<Feature>Page()` composable that aggregates state, actions, derived values, and
@@ -366,7 +366,7 @@ All UI copy is i18n-keyed; constants hold translation keys, not display strings.
 
 ---
 
-## 7. Utils (~15 pure modules)
+## 7. Utils (~30 pure modules)
 
 | File | Role |
 |---|---|

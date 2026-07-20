@@ -2,7 +2,9 @@
 
 BaoBuildBuddy runs browser automation through the Bun/TypeScript workspace package at `packages/scraper`. The server keeps process isolation with `Bun.spawn`.
 
-For a plain-English overview, see [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md).
+Stack truth: [STACK-CONTRACT.md](./STACK-CONTRACT.md). Plain-English overview: [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md).
+
+Job **board APIs** (Greenhouse, Lever) are ingested by `JobAggregator` providers in `packages/server` — they are **not** Playwright scraper scripts. Playwright portal scrapers are listed in the script registry below.
 
 ---
 
@@ -178,6 +180,9 @@ No Python venv or `PYTHON_BINARY` configuration is required.
 | `AUTOMATION_PAGE_SETTLE_DELAY_MS`       | Post-navigation settle delay               | `2000`    |
 | `AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS` | Apply-link redirect settle delay        | `2000`    |
 | `AUTOMATION_POST_SUBMIT_DELAY_MS`       | Post-submit verification delay             | `3000`    |
+| `BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS`    | Opt-in private/loopback hosts for job-apply URL validation (SSRF gate) | unset/deny |
+
+Do **not** set `BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS=true` in production. Polluted `PLAYWRIGHT_BROWSERS_PATH` (Cursor sandbox marker or missing dir) is resolved by `@bao/shared/utils/playwright-browsers-path` (server `config/paths.ts` and scraper `runtime/config.ts` are the only `process.env` adapters).
 
 ---
 
@@ -233,4 +238,5 @@ Automation pages use the same SSR-first layout/token model as the rest of the ap
 |------------------------------------|--------------------------------------------------|
 | Plain-English system overview      | [ELI5 System Walkthrough](./ELI5_SYSTEM_WALKTHROUGH.md) |
 | Local AI setup                     | [Local AI Setup](./LOCAL_AI_SETUP.md)             |
+| Verification / browser proof       | [Verification Runbook](./VERIFICATION_RUNBOOK.md) |
 | Full technical reference           | [README.md](../README.md)                        |

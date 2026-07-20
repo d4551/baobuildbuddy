@@ -13,6 +13,8 @@ This matrix is the current route-to-service/UI/test traceability reference for t
 | Page width / spacing | `packages/client/components/ui/PageScaffold.vue` + `packages/client/constants/ui-layout.ts` | Canonical `UiWidthToken` / `UiSpacingToken` (validators forbid ad-hoc widths on core pages) |
 | Section grids | `packages/client/components/ui/SectionGrid.vue` | `UiGridToken` including `bento` (gap-6 dashboard grids) |
 | Headers / empty / loading | `PageHeaderBlock`, `EmptyState`, `LoadingSkeleton`, `AppPagination`, `ConfirmDialog`, `ToastContainer` | DRY patterns for list and form pages |
+| Section rails (settings / workspace) | `WorkspaceSectionNavigator.vue` + `SECTION_RAIL_*` / scroll-snap tokens in `constants/layout.ts` | Horizontal section tabs; `overflow-x-clip` banned on the navigator (`validate:section-rail-scroll`); icon-only labels below `sm` |
+| Touch targets | `TOUCH_TARGET_MIN_CLASS` (`min-h-11 min-w-11`) in `constants/layout-tokens.ts` | Dock, sidebar, navbar menus, section-rail tabs |
 | App version (shell) | `APP_SEMVER` in `@bao/shared` (`packages/shared/src/constants/app-version.ts`) | Sidebar footer via `layout.shell.*` i18n keys |
 
 ## Client pages (feature entry)
@@ -25,7 +27,7 @@ This matrix is the current route-to-service/UI/test traceability reference for t
 | Resume | `packages/client/pages/resume/index.vue`, `build.vue`, `preview.vue` |
 | Cover letter | `packages/client/pages/cover-letter/index.vue`, `[id].vue` |
 | Portfolio | `packages/client/pages/portfolio/index.vue`, `preview.vue` |
-| Studios | `packages/client/pages/studios/index.vue`, `[id].vue`, `analytics.vue` |
+| Studios | `packages/client/pages/studios/index.vue`, `[id].vue`, `analytics.vue` (`useStudioAnalyticsPage`) |
 | Interview | `packages/client/pages/interview/index.vue`, `session.vue`, `history.vue` |
 | Skills | `packages/client/pages/skills/index.vue`, `pathways.vue` |
 | Automation | `packages/client/pages/automation/index.vue`, `email.vue`, `job-apply.vue`, `scraper.vue`, `runs/index.vue`, `runs/[id].vue` |
@@ -48,7 +50,7 @@ The server and tests use `node:fs`, `node:path`, and related modules where Bun p
 | `/api/search` (`search.routes.ts`) | `searchService` | aggregated from jobs/studios/skills/resumes tables | search UX is embedded in multiple pages (jobs/jobs/[id]/studios/interview/ai entry surfaces) | `packages/server/src/routes/core-routes.test.ts` |
 | `/api/user` (`user.routes.ts`) | direct profile repository usage | `userProfile` | profile controls on `packages/client/pages/settings.vue` and user-related setup forms | `packages/server/src/routes/core-routes.test.ts` |
 | `/api/jobs` (`jobs.routes.ts`) | `JobAggregator`, `AIService`, `gamificationService` | `jobs`, `savedJobs`, `applications`, `settings` | `packages/client/pages/jobs/index.vue`, `packages/client/pages/jobs/[id].vue` | `packages/server/src/routes/jobs.test.ts` |
-| `/api/studios` (`studio.routes.ts`) | direct repository access + optional `AIService` integrations | `studios`, `savedJobs` | `packages/client/pages/studios/index.vue`, `packages/client/pages/studios/[id].vue` | `packages/server/src/routes/studio.test.ts` |
+| `/api/studios` (`studio.routes.ts`) | direct repository access + optional `AIService` integrations | `studios`, `savedJobs` | `packages/client/pages/studios/index.vue`, `packages/client/pages/studios/[id].vue`, `packages/client/pages/studios/analytics.vue` (`useStudioAnalyticsPage` → `useAsyncData`) | `packages/server/src/routes/studio.test.ts` |
 | `/api/resumes` (`resume.routes.ts`) | `resumeService`, `cvQuestionnaireService`, `AIService`, `exportService`, `gamificationService` | `resumes`, `settings`, AI chat/prompt inputs | `packages/client/pages/resume/index.vue`, `packages/client/pages/resume/build.vue`, `packages/client/pages/resume/preview.vue` | `packages/server/src/routes/resume.test.ts` |
 | `/api/portfolio` (`portfolio.routes.ts`) | `portfolioService`, `exportService`, `gamificationService` | `portfolios`, `portfolio_projects` | `packages/client/pages/portfolio/index.vue`, `packages/client/pages/portfolio/preview.vue` | `packages/server/src/routes/portfolio.test.ts` |
 | `/api/cover-letters` (`cover-letter.routes.ts`) | direct repository ops, `AIService`, `exportService` | `coverLetters`, `resumes`, `settings`, `userProfile` | `packages/client/pages/cover-letter/index.vue`, `packages/client/pages/cover-letter/[id].vue` | `packages/server/src/routes/cover-letter.test.ts` |
