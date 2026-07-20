@@ -138,7 +138,7 @@ onUnmounted(() => {
       <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-      <label class="swap swap-rotate btn btn-ghost btn-circle">
+      <label class="swap swap-rotate btn btn-ghost btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]">
         <input 
           type="checkbox"
           class="theme-controller"
@@ -162,6 +162,7 @@ onUnmounted(() => {
       <details ref="userMenu" class="dropdown dropdown-end" @toggle="syncUserMenuState">
         <summary 
           class="btn btn-ghost btn-circle"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('a11y.userMenu')"
           :aria-controls="userMenuId"
           :aria-expanded="isUserMenuOpen"

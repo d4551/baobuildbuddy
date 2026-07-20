@@ -2,7 +2,7 @@ const aiChatCommon = {
   aiChatCommon: {
     youLabel: "You",
     defaultGreeting:
-      "Hi, I’m {assistant}, your hiring copilot for game industry roles. What are we moving forward today?",
+      "Hi, I’m {assistant}. What are we moving forward on today—resume, interviews, or job search?",
     unableToProcessFallback: "I'm sorry, I couldn't process that request.",
     requestErrorFallback: "I hit an error processing that request. Please try again.",
     requestErrorToast: "Chat request failed. Please try again.",

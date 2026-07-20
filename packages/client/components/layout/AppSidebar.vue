@@ -15,6 +15,7 @@ import {
   RADIUS_TOKEN_CLASS,
   SHELL_SIDEBAR_ITEM_CLASS,
   SHELL_SIDEBAR_MENU_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -104,7 +105,8 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         <li class="mt-auto" :class="[PADDING_TOKEN_CLASS.pt4]">
           <button 
             type="button"
-            class="btn btn-ghost btn-sm justify-start is-drawer-close:btn-square" :class="[FLUID_WIDTH_CLASS]"
+            class="btn btn-ghost justify-start is-drawer-close:btn-square"
+            :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('a11y.toggleSidebarNavigation')"
             :aria-controls="APP_DRAWER_ID"
             :aria-expanded="isDrawerOpen"

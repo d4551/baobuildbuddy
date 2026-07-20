@@ -14,6 +14,7 @@ import {
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -111,7 +112,8 @@ const updateInput = (event: Event): void => {
           </div>
           <button
             type="button"
-            class="btn btn-ghost btn-sm self-start"
+            class="btn btn-ghost self-start"
+            :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('aiChatPage.clearAria')"
             @click="emit('clear')"
           >

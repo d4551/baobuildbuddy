@@ -49,3 +49,9 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D31 | BROKEN | FloatingChatToggleButton SVG_STROKE_WIDTH_DEFAULT unbound | FIXED | import from layout SSOT |
 | D32 | SUBPAR | Sidebar/navbar targets 42px < WCAG 2.5.5 44px | FIXED | SHELL_SIDEBAR_ITEM_CLASS + TOUCH_TARGET_MIN_CLASS on menu |
 | D33 | SUBPAR | Empty contact flex on portfolio preview | FIXED | v-if email\|website |
+| D34 | SUBPAR | Chrome controls &lt;44px (sidebar collapse, theme, FAB, clear chat, jobs filter clear/apply) | FIXED | `TOUCH_TARGET_MIN_CLASS`; smoke measure ≥44 |
+| D35 | DUPLICATED | AI chat subtitle ↔ default greeting copy | FIXED | en/es greeting no longer repeats subtitle |
+| D36 | VIOLATING | Jobs filter sticky bar raw `backdrop-blur` + `bg-base-100/90` | FIXED | `glass-subtle` SSOT |
+| D37 | LYING | Job Intelligence active-sources `4/3` badge; panel vs workspace count drift | FIXED | `countActiveJobProviderSources` SSOT; badge shows live count |
+| D38 | SUBPAR | Jobs empty CTA aria `"Refresh Jobs"` ≠ header `"Refresh job feed"` → burndown warn after first click | FIXED | EmptyState `ctaAriaKey` + jobs uses `refreshAria`/`clearFiltersAria` |
+| D39 | SUBPAR | Burndown warn `control not found` for empty-state CTAs unmounted after Refresh | FIXED | skip stale labels when no longer listed |

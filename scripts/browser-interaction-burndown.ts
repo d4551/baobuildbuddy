@@ -345,15 +345,19 @@ const clickOneLabel = async (
     return false;
   }, label);
   if (!clicked) {
-    await captureFinding(
-      page,
-      findings,
-      viewport,
-      route,
-      `click-${slugify(label)}`,
-      "control not found",
-      "warn",
-    );
+    // Prior clicks (refresh/filter) often unmount empty-state CTAs; skip stale labels.
+    const stillListed = (await listClickableControlLabels(page)).includes(label);
+    if (stillListed) {
+      await captureFinding(
+        page,
+        findings,
+        viewport,
+        route,
+        `click-${slugify(label)}`,
+        "control not found",
+        "warn",
+      );
+    }
   }
   await page.waitForTimeout(180);
   if (pageErrorBucket.length > 0) {

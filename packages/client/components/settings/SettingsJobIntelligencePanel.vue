@@ -11,6 +11,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -29,12 +30,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const configuredSourceCount = computed(
-  () =>
-    Number(jobProviderForm.value.hitmarkerEnabled) +
-    Number(jobProviderForm.value.greenhouseApiBaseUrl.trim().length > 0) +
-    Number(jobProviderForm.value.leverApiBaseUrl.trim().length > 0),
-);
+const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
 const sourceCollectionCount = computed(
   () =>

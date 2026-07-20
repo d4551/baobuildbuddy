@@ -3156,7 +3156,7 @@ const catalog = {
   aiChatCommon: {
     youLabel: "Tú",
     defaultGreeting:
-      "¡Hola! Soy {brand}, tu asistente de carrera con IA para la industria del juego. ¿En qué puedo ayudarte hoy?",
+      "¡Hola! Soy {brand}. ¿En qué avanzamos hoy: currículum, entrevistas o búsqueda de empleo?",
     unableToProcessFallback: "Lo siento, no pude procesar esa solicitud.",
     requestErrorFallback: "Ocurrió un error al procesar la solicitud. Inténtalo de nuevo.",
     requestErrorToast: "Error en la solicitud del chat. Inténtalo de nuevo.",

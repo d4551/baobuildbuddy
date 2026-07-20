@@ -15,7 +15,7 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:300
 const OUT_DIR =
   process.env.BROWSER_SMOKE_OUT ?? join("/opt/cursor/artifacts/baseline/browser-smoke");
 const VIEWPORTS = [
-  { name: "mobile", width: 390, height: 844 },
+  { name: "mobile", width: 320, height: 720 },
   { name: "tablet", width: 768, height: 1024 },
   { name: "desktop", width: 1440, height: 900 },
 ] as const;

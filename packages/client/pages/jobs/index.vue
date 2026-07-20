@@ -19,6 +19,7 @@ import {
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
   STACK_SPACING_SM_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -42,6 +43,7 @@ const page = useJobsIndexPage();
       <template #actions>
         <button
           class="btn btn-primary"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
           @click="page.handleRefresh()"
@@ -119,6 +121,9 @@ const page = useJobsIndexPage();
           :cta-label-key="
             page.isCatalogEmpty.value ? 'jobsPage.refreshButton' : 'jobsPage.clearFiltersButton'
           "
+          :cta-aria-key="
+            page.isCatalogEmpty.value ? 'jobsPage.refreshAria' : 'jobsPage.clearFiltersAria'
+          "
           @cta="
             page.isCatalogEmpty.value ? page.handleRefresh() : page.clearFilters()
           "
@@ -126,7 +131,8 @@ const page = useJobsIndexPage();
           <template v-if="page.isCatalogEmpty.value" #actions>
             <NuxtLink
               :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
-              class="btn btn-outline btn-sm"
+              class="btn btn-outline"
+              :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('jobsPage.configureProvidersAria')"
             >
               {{ t("jobsPage.configureProvidersButton") }}

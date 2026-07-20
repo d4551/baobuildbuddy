@@ -5,6 +5,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -16,6 +17,8 @@ const props = withDefaults(
     descriptionKey: string;
     /** Optional translation key for primary CTA button label */
     ctaLabelKey?: string;
+    /** Optional aria-label key (defaults to ctaLabelKey when omitted) */
+    ctaAriaKey?: string;
     /** Optional route path for CTA button (link mode) */
     ctaTo?: string;
     /** Optional icon (emoji or icon name). Default: document icon SVG path */
@@ -23,6 +26,7 @@ const props = withDefaults(
   }>(),
   {
     ctaLabelKey: "",
+    ctaAriaKey: "",
     ctaTo: "",
     icon: "",
   },
@@ -37,6 +41,11 @@ const { t } = useI18n();
 const hasCtaLabel = computed(() => (props.ctaLabelKey ?? "").trim().length > 0);
 const hasCtaLink = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").trim().length > 0);
 const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").trim().length === 0);
+const ctaAriaLabel = computed(() => {
+  const ariaKey = (props.ctaAriaKey ?? "").trim();
+  const labelKey = (props.ctaLabelKey ?? "").trim();
+  return t(ariaKey.length > 0 ? ariaKey : labelKey);
+});
 </script>
 
 <template>
@@ -51,10 +60,23 @@ const hasCtaButton = computed(() => hasCtaLabel.value && (props.ctaTo ?? "").tri
     <p class="max-w-sm text-muted">
       {{ t(descriptionKey) }}
     </p>
-    <NuxtLink class="btn btn-primary" :class="[MARGIN_TOKEN_CLASS.mt2]" v-if="hasCtaLink" :to="ctaTo" :aria-label="t(ctaLabelKey)">
+    <NuxtLink
+      class="btn btn-primary"
+      :class="[MARGIN_TOKEN_CLASS.mt2, TOUCH_TARGET_MIN_CLASS]"
+      v-if="hasCtaLink"
+      :to="ctaTo"
+      :aria-label="ctaAriaLabel"
+    >
       {{ t(ctaLabelKey) }}
     </NuxtLink>
-    <button class="btn btn-primary" :class="[MARGIN_TOKEN_CLASS.mt2]" v-else-if="hasCtaButton" type="button" :aria-label="t(ctaLabelKey)" @click="emit('cta')">
+    <button
+      class="btn btn-primary"
+      :class="[MARGIN_TOKEN_CLASS.mt2, TOUCH_TARGET_MIN_CLASS]"
+      v-else-if="hasCtaButton"
+      type="button"
+      :aria-label="ctaAriaLabel"
+      @click="emit('cta')"
+    >
       {{ t(ctaLabelKey) }}
     </button>
     <div class="flex flex-wrap items-center justify-center" :class="[MARGIN_TOKEN_CLASS.mt2, FLEX_GAP_TOKEN_CLASS.gap2]" v-if="$slots.actions">
