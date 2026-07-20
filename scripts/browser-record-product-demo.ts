@@ -186,20 +186,7 @@ const seedSpeechAndAiSettings = async (modelId: string): Promise<void> => {
       },
     }),
   });
-  // Warm resume questions so UI demo is not the cold path.
-  await settle(
-    fetch(`${SERVER_BASE}/api/resumes/from-questions/generate`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        targetRole: "Gameplay Programmer",
-        experienceLevel: "Mid",
-        studioId: "epic-games",
-      }),
-      signal: AbortSignal.timeout(180_000),
-    }),
-  );
-  await writeOutput("seeded speech STT=local/whisper-tiny + local AI + warmed resume questions");
+  await writeOutput("seeded speech STT=local/whisper-tiny + local AI");
 };
 
 const configureLocalAiViaUi = async (
@@ -285,32 +272,19 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   }
 
   const answerBox = page.locator("textarea:visible").first();
-  let questionsReady = false;
-  for (let attempt = 0; attempt < 2 && !questionsReady; attempt += 1) {
-    const responsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/resumes/from-questions/generate") &&
-        response.request().method() === "POST",
-      { timeout: 180_000 },
-    );
-    await generate.click({ timeout: 10_000 });
-    const responseResult = await settle(responsePromise);
-    if (responseResult.status === "rejected") {
-      await writeError(`resume questions request missing (attempt ${String(attempt + 1)})`);
-      await shot(page, `03-resume-questions-timeout-${String(attempt + 1)}`);
-      continue;
-    }
-    const bodyText = await responseResult.value.text();
-    await writeOutput(
-      `resume questions HTTP ${String(responseResult.value.status())} body=${bodyText.slice(0, 180)}`,
-    );
-    const waitResult = await settle(answerBox.waitFor({ state: "visible", timeout: 30_000 }));
-    questionsReady = waitResult.status === "fulfilled";
-    if (!questionsReady) {
-      await shot(page, `03-resume-questions-missing-${String(attempt + 1)}`);
-    }
-  }
-  if (!questionsReady) {
+  await generate.click({ timeout: 10_000 });
+  await writeOutput("clicked Generate Questions; waiting for AI question UI");
+  const questionsReady = await settle(
+    Promise.race([
+      answerBox.waitFor({ state: "visible", timeout: 300_000 }),
+      page
+        .getByText(/Question\s+\d+\s+of\s+\d+/i)
+        .first()
+        .waitFor({ state: "visible", timeout: 300_000 }),
+    ]),
+  );
+  if (questionsReady.status === "rejected") {
+    await shot(page, "03-resume-questions-timeout");
     throw new Error("Resume guided build: AI questions never appeared after live generate.");
   }
   await shot(page, "03-resume-questions");
