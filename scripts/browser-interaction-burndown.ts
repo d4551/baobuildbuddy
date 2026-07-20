@@ -336,30 +336,31 @@ const clickOneLabel = async (
 ): Promise<void> => {
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
-  // Locator click survives SPA navigations; page.evaluate dies when context is destroyed.
-  const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
-  const target = normalize(label);
-  const controls = page.locator("main button, main a.btn, main a[href]");
-  const count = await controls.count();
-  let clicked = false;
-  for (let index = 0; index < count; index += 1) {
-    const control = controls.nth(index);
-    const aria = normalize((await control.getAttribute("aria-label")) ?? "");
-    const text = normalize((await control.innerText().catch(() => "")) ?? "");
-    const resolved = aria.length > 0 ? aria : text;
-    if (resolved !== target) {
-      continue;
-    }
-    const disabled =
-      (await control.getAttribute("disabled")) !== null ||
-      (await control.getAttribute("aria-disabled")) === "true";
-    if (disabled) {
-      continue;
-    }
-    const clickResult = await settle(control.click({ timeout: 2500 }));
-    clicked = clickResult.status === "fulfilled";
-    break;
-  }
+  // settle(evaluate) survives SPA navigations that destroy the prior execution context.
+  const clickResult = await settle(
+    page.evaluate((targetLabel) => {
+      const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
+      const controls = [...document.querySelectorAll("main button, main a.btn, main a[href]")];
+      for (const control of controls) {
+        if (!(control instanceof HTMLElement)) {
+          continue;
+        }
+        const aria = normalize(control.getAttribute("aria-label") ?? "");
+        const text = normalize(control.textContent ?? "");
+        const resolved = aria.length > 0 ? aria : text;
+        if (resolved !== targetLabel) {
+          continue;
+        }
+        if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
+          continue;
+        }
+        control.click();
+        return true;
+      }
+      return false;
+    }, label),
+  );
+  const clicked = clickResult.status === "fulfilled" && clickResult.value;
   if (!clicked) {
     // Prior clicks (refresh/filter) often unmount empty-state CTAs; skip stale labels.
     const stillListedResult = await settle(listClickableControlLabels(page));

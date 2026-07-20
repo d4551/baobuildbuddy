@@ -18,6 +18,13 @@ import type {
 } from "@bao/shared/types/settings-contracts";
 import type { UserProfile } from "@bao/shared/types/user";
 import type { ClientProviderTestResult } from "~/utils/ai-control-plane";
+import type { SettingsWorkspaceBackupApi } from "./client-api-workspace";
+
+export type {
+  SearchApi,
+  SettingsWorkspaceBackupApi,
+  SettingsWorkspaceExportPayload,
+} from "./client-api-workspace";
 
 type ApiError = unknown;
 
@@ -124,24 +131,7 @@ export interface StudioAnalyticsApi {
   get(): ApiRequest<unknown>;
 }
 
-export interface SettingsWorkspaceExportPayload {
-  version: string;
-  exportedAt: string;
-  profile?: unknown;
-  settings?: unknown;
-  resumes?: unknown[];
-  coverLetters?: unknown[];
-  portfolio?: unknown;
-  portfolioProjects?: unknown[];
-  interviewSessions?: unknown[];
-  gamification?: unknown;
-  skillMappings?: unknown[];
-  savedJobs?: unknown[];
-  applications?: unknown[];
-  chatHistory?: unknown[];
-}
-
-export interface SettingsApi {
+export interface SettingsApi extends SettingsWorkspaceBackupApi {
   get(): ApiRequest<unknown>;
   put(body: SettingsUpdateRequest): ApiRequest<{ success: boolean }>;
   "api-keys": {
@@ -152,35 +142,6 @@ export interface SettingsApi {
   };
   "test-api-key": {
     post(body: ProviderTestRequest): ApiRequest<ClientProviderTestResult>;
-  };
-  export: {
-    get(): ApiRequest<SettingsWorkspaceExportPayload>;
-  };
-  import: {
-    post(body: SettingsWorkspaceExportPayload): ApiRequest<{ success: boolean }>;
-  };
-}
-
-export interface SearchApi {
-  get(options?: {
-    query?: { q?: string; types?: string };
-  }): ApiRequest<{
-    query: string;
-    results: Array<{
-      type: string;
-      id: string;
-      title: string;
-      subtitle: string;
-      snippet: string;
-      relevance: number;
-    }>;
-    counts: Record<string, number>;
-    totalTime: number;
-  }>;
-  autocomplete: {
-    get(options?: {
-      query?: { prefix?: string };
-    }): ApiRequest<Array<{ text: string; type: string }>>;
   };
 }
 

@@ -6,6 +6,7 @@ import {
   ICON_SIZE_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
@@ -116,7 +117,7 @@ function typeLabel(type: string): string {
               @click="openResult(result)"
             >
               <span class="badge badge-soft badge-sm shrink-0">{{ typeLabel(result.type) }}</span>
-              <span class="min-w-0 flex-1 truncate">
+              <span class="flex-1 truncate" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
                 <span class="font-medium">{{ result.title }}</span>
                 <span v-if="result.subtitle" class="text-secondary block truncate" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
                   {{ result.subtitle }}

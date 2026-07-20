@@ -11,7 +11,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import type { SettingsWorkspaceExportPayload } from "~/types/client-api-contracts";
+import type { SettingsWorkspaceExportPayload } from "~/types/client-api-workspace";
 import { getErrorMessage } from "~/utils/errors";
 
 const emit = defineEmits<{

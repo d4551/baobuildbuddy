@@ -16,6 +16,7 @@ const EMPTY_STATE_BLOCK_PATTERN = /<EmptyState\b[\s\S]*?(?:\/>|<\/EmptyState>)/g
 const CTA_PATTERN = /cta-label-key\s*=/u;
 const CATALOG_TITLE_PATTERN =
   /title-key="[^"]*(emptyStateTitle|emptyTitle|notFoundTitle|emptyState\.title)[^"]*"/u;
+const EMPTY_CATALOG_TITLE_PATTERN = /emptyCatalogTitle/u;
 
 const SKIP_FILES = [
   "packages/client/components/layout/WorkspaceOmniSearch.vue",
@@ -44,7 +45,7 @@ const collectViolationsForContent = (
       continue;
     }
     // Jobs catalog empty intentionally omits CTA (hero Configure owns primary).
-    if (/emptyCatalogTitle/u.test(block)) {
+    if (EMPTY_CATALOG_TITLE_PATTERN.test(block)) {
       continue;
     }
     violations.push({

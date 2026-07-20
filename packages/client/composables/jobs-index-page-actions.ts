@@ -89,7 +89,7 @@ export const createJobsPageActions = (input: {
   matching: Ref<boolean>;
   matchJobs: (resumeId: string) => Promise<unknown>;
   fetchResumes: () => Promise<void>;
-  resumes: Ref<ReadonlyArray<{ id: string }>> | Readonly<Ref<ReadonlyArray<{ id: string }>>>;
+  resumes: { readonly value: ReadonlyArray<{ readonly id?: string }> };
   fetchRecommendations: () => Promise<void>;
 }) => {
   const searchCriteria = createJobsSearchCriteria(input);

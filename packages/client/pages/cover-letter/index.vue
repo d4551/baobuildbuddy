@@ -65,6 +65,7 @@ const bootstrapErrorMessage = computed(() =>
     ? getErrorMessage(bootstrapError.value, t("coverLetterPage.toasts.fetchFailed"))
     : "",
 );
+const hasCoverLetters = computed(() => coverLetters.length > 0);
 </script>
 
 <template>
@@ -89,7 +90,7 @@ const bootstrapErrorMessage = computed(() =>
           {{ t("coverLetterPage.generateButton") }}
         </button>
       </template>
-      <template v-if="coverLetters.length > 0" #aside>
+      <template v-if="hasCoverLetters" #aside>
         <StatsRow
           :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
@@ -102,7 +103,7 @@ const bootstrapErrorMessage = computed(() =>
     </PageHeroHeader>
 
     <section
-      v-if="coverLetters.length > 0 || hasFiltersApplied"
+      v-if="hasCoverLetters || hasFiltersApplied"
       :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
     >
       <div class="card-body">

@@ -8,13 +8,14 @@ import type {
   JobsApi,
   PortfolioApi,
   ResumesApi,
-  SearchApi,
   SettingsApi,
   SkillsApi,
   StatsApi,
   StudioAnalyticsApi,
   UserApi,
 } from "./client-api-contracts";
+import type { SearchApi } from "./client-api-workspace";
+export type { SearchApi, SettingsWorkspaceExportPayload } from "./client-api-workspace";
 
 export interface ClientApi {
   auth: AuthApi;

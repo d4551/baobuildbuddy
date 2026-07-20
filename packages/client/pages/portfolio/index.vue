@@ -2,7 +2,6 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
-  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,

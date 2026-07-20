@@ -328,7 +328,7 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-        { rel: "alternate icon", href: "/favicon.svg" },
+        { rel: "shortcut icon", href: "/favicon.svg" },
       ],
       htmlAttrs: {
         lang: clientEnv.i18nDefaultLocale || DEFAULT_I18N_LOCALE,

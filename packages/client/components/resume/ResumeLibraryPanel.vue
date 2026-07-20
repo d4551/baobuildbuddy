@@ -30,7 +30,6 @@ const searchQuery = defineModel<string>("searchQuery", { required: true });
 
 const emit = defineEmits<{
   clearFilters: [];
-  create: [];
   selectResume: [resumeId: string];
   requestDelete: [resumeId: string];
   "update:currentPage": [page: number];
