@@ -1,6 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
+const AI_CHAT_DOCK_ID_THEN_FLAG_PATTERN = /id:\s*["']ai-chat["'][\s\S]*?includeInDock:\s*true/u;
+const AI_CHAT_DOCK_FLAG_THEN_ID_PATTERN = /includeInDock:\s*true[\s\S]*?id:\s*["']ai-chat["']/u;
+
 /**
  * Dual-chat chrome gate: when mobile dock owns AI Chat, floating chat must be
  * gated to desktop (isDesktopViewport) and never on /ai/*.
@@ -16,8 +19,7 @@ export const collectDualChatChromeViolations = async (): Promise<ValidationViola
   ]);
 
   const dockHasAiChat =
-    /id:\s*["']ai-chat["'][\s\S]*?includeInDock:\s*true/u.test(nav) ||
-    /includeInDock:\s*true[\s\S]*?id:\s*["']ai-chat["']/u.test(nav);
+    AI_CHAT_DOCK_ID_THEN_FLAG_PATTERN.test(nav) || AI_CHAT_DOCK_FLAG_THEN_ID_PATTERN.test(nav);
 
   if (!dockHasAiChat) {
     return violations;
