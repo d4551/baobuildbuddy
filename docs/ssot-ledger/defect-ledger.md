@@ -59,17 +59,14 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D41 | SUBPAR | Locale menu rows 42px under menu-sm | FIXED | drop menu-sm; TOUCH_TARGET_MIN_CLASS = h-11 min-h-11 min-w-11 |
 | D42 | SUBPAR | Setup continue CTA 40px | FIXED | TOUCH_TARGET_MIN_CLASS on SetupProfileStep |
 
-## D43–D52 (2026-07-20 debug-loop-3) — design violations fixed@SSOT
-- D01 FAB�43–D52 (2026-07-20 debug-loop-3) — design violations fixed@SSOT
-- D01 FAB∩streak / streak under dock → SHELL_MAIN_INNER pe-16+pb-36; streak column lead; compact gamification
-- D02 floating panel left clip → stack inset-x-4 + max-w calc; panel max-w-full
-- D03 Send under dock → CHAT_COMPOSER_STICKY_CLASS + TOUCH_TARGET_MIN on Send
-- D04 empty under dock → denser EMPTY_STATE + shell pb
-- D05 btn-xs/sm chips/speech/floating → TOUCH_TARGET_MIN / icon-square header
-- D06 menu-sm sidebar → removed from SHELL_SIDEBAR_MENU_CLASS
-- D08 rail labels hidden → SECTION_RAIL_LABEL_CLASS truncate visible
-- D09 FAB� SHELL_SIDEBAR_MENU_CLASS
-- D08 rail labels hidden → SECTION_RAIL_LABEL_CLASS truncate visible
-- D09 FAB∩settings → pe-16 main inset
-- D10 emoji icons → AppIcon (IconSparkles/IconBolt)
-- Surface/Route chips clutter → entity+state only
+| D43 | BROKEN UX | FAB occludes streak; streak under dock @320 | FIXED | SHELL_MAIN_INNER pe-16+pb-36; streak leads radial; compact gamification |
+| D44 | BROKEN UX | Floating chat panel clips left @320 | FIXED | stack inset-x-4 + max-w calc; panel max-w-full |
+| D45 | BROKEN UX | AI chat Send under dock @320 | FIXED | CHAT_COMPOSER_STICKY_CLASS + TOUCH_TARGET_MIN on Send |
+| D46 | SUBPAR | Empty-state copy intersects dock | FIXED | denser EMPTY_STATE + shell pb-36 |
+| D47 | SUBPAR | btn-xs/sm shrink actionable targets | FIXED | TOUCH_TARGET_MIN on chips/speech; icon-square floating header |
+| D48 | VIOLATING | SHELL_SIDEBAR_MENU_CLASS still menu-sm | FIXED | remove menu-sm; item tokens own touch floor |
+| D49 | PAPERED | Section rail labels hidden sm:inline @320 | FIXED | SECTION_RAIL_LABEL_CLASS truncate visible |
+| D50 | SUBPAR | FAB overlaps settings form @320 | FIXED | max-lg pe-16 on SHELL_MAIN_INNER |
+| D51 | SUBPAR | Emoji as gamification icons | FIXED | AppIcon IconSparkles/IconBolt/IconCheckCircle |
+| D52 | SUBPAR | Surface/Route telemetry chips on floating panel | FIXED | entity+state chips only |
+

@@ -163,14 +163,23 @@ const collectChromeSignals = async (page: Page) =>
     const truncatedChrome = [...document.querySelectorAll(".navbar *")]
       .map((el) => (el.textContent ?? "").trim())
       .some((text) => isNavbarEllipsisGut(text));
+    // Mid-word hard-clip only. Intentional SSOT truncate (`truncate` / ellipsis)
+    // via SECTION_RAIL_LABEL_CLASS is allowed — discoverability without hide.
     const clippedSectionTabs = [...document.querySelectorAll(".tabs .tab")].some((el) => {
       const label =
-        el.querySelector("span.font-medium, span.whitespace-nowrap") ??
+        el.querySelector("span.truncate, span.font-medium, span.whitespace-nowrap") ??
         (el instanceof HTMLElement ? el : null);
       if (!(label instanceof HTMLElement)) {
         return false;
       }
-      return label.scrollWidth > label.clientWidth + 1;
+      if (label.scrollWidth <= label.clientWidth + 1) {
+        return false;
+      }
+      const className = label.className?.toString?.() ?? "";
+      const style = getComputedStyle(label);
+      const intentionalTruncate =
+        className.includes("truncate") || style.textOverflow === "ellipsis";
+      return !intentionalTruncate;
     });
     const duplicateChromeCopy = (() => {
       const texts = [...document.querySelectorAll("p")]

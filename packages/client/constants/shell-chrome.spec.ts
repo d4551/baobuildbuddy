@@ -8,6 +8,8 @@ import {
   SHELL_SIDEBAR_MENU_CLASS,
 } from "./layout";
 
+const MAX_W_MD_TOKEN_PATTERN = /\bmax-w-md\b/u;
+
 describe("shell chrome SSOT (dock/FAB/touch)", () => {
   it("reserves FAB end-inset and taller dock clearance on main rail", () => {
     expect(SHELL_MAIN_INNER_CLASS.includes("pe-16")).toBe(true);
@@ -26,7 +28,7 @@ describe("shell chrome SSOT (dock/FAB/touch)", () => {
 
   it("keeps floating panel width inside the stack (no max-w-md hang)", () => {
     expect(FLOATING_CHAT_PANEL_SIZE_CLASS.includes("max-w-full")).toBe(true);
-    expect(/\bmax-w-md\b/u.test(FLOATING_CHAT_PANEL_SIZE_CLASS)).toBe(false);
+    expect(MAX_W_MD_TOKEN_PATTERN.test(FLOATING_CHAT_PANEL_SIZE_CLASS)).toBe(false);
   });
 
   it("sticks full-page chat composer above the mobile dock", () => {

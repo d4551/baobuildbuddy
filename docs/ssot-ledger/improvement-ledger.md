@@ -24,3 +24,7 @@
 | I10 | Burndown stale clicks | baseline: warn after empty-state unmount | new: skip if label delisted | Δ: 3 warns→0 | SSOT: browser-interaction-burndown | gate: loop-4 burndown 0 findings |
 | I11 | Touch floor hardened | baseline: min-h-11 alone →42px under menu-sm | new: h-11 + no menu-sm | Δ: locale 42→44 | SSOT: TOUCH_TARGET_MIN_CLASS + SHELL_NAVBAR_DROPDOWN | gate: live measure + lint |
 | I12 | Gamification @320 | baseline: streak clip | new: col stack + shrink-0 label | Δ: clipped→full "day streak" | SSOT: DashboardGamificationCard | gate: deep-a + pass-c/d |
+| I13 | FAB/dock collision | first-paint streak under FAB/dock | streak clear + pe-16/pb-36 | shell-chrome.spec + burndown |
+| I14 | Floating chat viewport | panel left=-44 | left=16 w=288 | shell-chrome.spec |
+| I15 | Section rail labels | hidden@320 | truncate visible SECTION_RAIL_LABEL | validate-section-rail-scroll |
+| I16 | menu-sm paper | menu-sm+min-h-11 | menu-sm removed | shell-chrome.spec |
