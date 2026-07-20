@@ -605,8 +605,17 @@ const main = async (): Promise<void> => {
     await wait(page, 2_000);
     await shot(page, "00-dashboard");
 
-    await configureLocalAiViaUi(page, live.endpoint, live.modelId);
-    await writeOutput(`whisper fixture configured endpoint=${whisper.endpoint}`);
+    // Settings already seeded via API (LLM + Whisper). Visit UI for visual proof only —
+    // avoid Save/Test actions that flood /v1/models while resume generation needs the GPU/CPU.
+    await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("aiProviders")}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60_000,
+    });
+    await wait(page, 2_000);
+    await shot(page, "01-ai-providers-configured");
+    await writeOutput(
+      `settings shown; live LLM=${live.modelId} whisper=${whisper.endpoint}`,
+    );
     await demoResumeGuidedBuild(page);
     await demoPortfolio(page);
     await demoCoverLetter(page);
