@@ -78,7 +78,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
     <PageHeroHeader
       title-id="cover-letter-page-title"
       :title="t('coverLetterPage.title')"
-      :description="t('coverLetterPage.subtitle')"
+      :description="hasCoverLetters ? t('coverLetterPage.subtitle') : ''"
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>

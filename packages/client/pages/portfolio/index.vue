@@ -95,7 +95,7 @@ function updateProjectForm(value: typeof projectForm): void {
     <PageHeroHeader
       title-id="portfolio-page-title"
       :title="t('portfolioPage.title')"
-      :description="t('portfolioPage.subtitle')"
+      :description="isPortfolioEmpty ? '' : t('portfolioPage.subtitle')"
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template v-if="!isPortfolioEmpty" #actions>

@@ -82,7 +82,7 @@ const {
     <PageHeroHeader
       title-id="resume-page-title"
       :title="t('resumePage.title')"
-      :description="t('resumePage.subtitle')"
+      :description="resumes.length > 0 || selectedResumeId ? t('resumePage.subtitle') : ''"
     >
       <template #actions>
         <!-- Empty library: EmptyState owns Create; hero keeps Guided only. -->
