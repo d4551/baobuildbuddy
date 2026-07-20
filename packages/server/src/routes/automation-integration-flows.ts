@@ -33,7 +33,7 @@ export const startManualJobApplyRun = async (
     }),
   });
   if (response.status !== 200) {
-    throw new Error("Manual automation run failed to start: status " + String(response.status));
+    throw new Error(`Manual automation run failed to start: status ${String(response.status)}`);
   }
 
   return response.body;
@@ -71,7 +71,7 @@ export const startScheduledJobApplyRun = async (
     }),
   });
   if (response.status !== 200) {
-    throw new Error("Scheduled automation run failed to start: status " + String(response.status));
+    throw new Error(`Scheduled automation run failed to start: status ${String(response.status)}`);
   }
 
   return response.body;
@@ -139,7 +139,7 @@ export const verifyEmailResponseFlow = async (): Promise<void> => {
     }),
   });
   if (response.status !== 200) {
-    throw new Error("Email automation failed: status " + String(response.status));
+    throw new Error(`Email automation failed: status ${String(response.status)}`);
   }
 
   expect(response.body.status).toBe("success");

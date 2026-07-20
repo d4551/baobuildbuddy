@@ -1,0 +1,3975 @@
+packages/client/components/ui/AppPagination.vue:76:17 lint/complexity/useIndexOf  FIXABLE  ━━━━━━━━━━
+
+  i Prefer Array#indexOf() over Array#findIndex() when looking for the index of an item.
+  
+    75 │ function getPageIndex(page: number): number {
+  > 76 │   const index = normalizedPageNumbers.value.findIndex((item) => item === page);
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │   return index >= 0 ? index : 0;
+    78 │ }
+  
+  i This callback only tests for equality against a single value. This value can be passed directly to indexOf() instead.
+  
+  i Unsafe fix: Replace Array#findIndex() with Array#indexOf()
+  
+     73  73 │   
+     74  74 │   function getPageIndex(page: number): number {
+     75     │ - ··const·index·=·normalizedPageNumbers.value.findIndex((item)·=>·item·===·page);
+         75 │ + ··const·index·=·normalizedPageNumbers.value.indexOf(page);
+     76  76 │     return index >= 0 ? index : 0;
+     77  77 │   }
+  
+
+packages/client/pages/automation/runs/index.vue:2:16 lint/style/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━
+
+  i Using the Options API is not allowed.
+  
+    1 │ <script lang="ts">
+  > 2 │ export default {
+      │                ^
+  > 3 │   name: "AutomationRunsPage",
+  > 4 │ };
+      │ ^
+    5 │ </script>
+    6 │ 
+  
+  i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
+  
+  i Use <script setup> or defineComponent with a function signature to use the Composition API instead.
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:10:28 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     8 │ if (runtimeBun) {
+     9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     8  8 │   if (runtimeBun) {
+     9  9 │     runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+    10    │ - ··delete·runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+       10 │ + ··delete·runtimeBun["env"].BAO_ENABLE_AUTOMATION_VERIFY;
+    11 11 │   }
+    12 12 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:3:18 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    1 │ const runtimeProcess = globalThis.process;
+    2 │ if (runtimeProcess) {
+  > 3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+      │                  ^^^^^
+    4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    5 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     1  1 │   const runtimeProcess = globalThis.process;
+     2  2 │   if (runtimeProcess) {
+     3    │ - ··runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        3 │ + ··runtimeProcess.env["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+     4  4 │     delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:3:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    1 │ const runtimeProcess = globalThis.process;
+    2 │ if (runtimeProcess) {
+  > 3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    5 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     1  1 │   const runtimeProcess = globalThis.process;
+     2  2 │   if (runtimeProcess) {
+     3    │ - ··runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        3 │ + ··runtimeProcess["env"].BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS·=·"true";
+     4  4 │     delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:4:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    2 │ if (runtimeProcess) {
+    3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+      │                         ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     2  2 │   if (runtimeProcess) {
+     3  3 │     runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+     4    │ - ··delete·runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+        4 │ + ··delete·runtimeProcess.env["BAO_ENABLE_AUTOMATION_VERIFY"];
+     5  5 │   }
+     6  6 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:4:32 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    2 │ if (runtimeProcess) {
+    3 │   runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 4 │   delete runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     2  2 │   if (runtimeProcess) {
+     3  3 │     runtimeProcess["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+     4    │ - ··delete·runtimeProcess["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+        4 │ + ··delete·runtimeProcess["env"].BAO_ENABLE_AUTOMATION_VERIFY;
+     5  5 │   }
+     6  6 │   
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:9:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     7 │ const runtimeBun = globalThis.Bun;
+     8 │ if (runtimeBun) {
+   > 9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+       │              ^^^^^
+    10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     7  7 │   const runtimeBun = globalThis.Bun;
+     8  8 │   if (runtimeBun) {
+     9    │ - ··runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        9 │ + ··runtimeBun.env["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+    10 10 │     delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 11 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:9:21 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     7 │ const runtimeBun = globalThis.Bun;
+     8 │ if (runtimeBun) {
+   > 9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 │ }
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     7  7 │   const runtimeBun = globalThis.Bun;
+     8  8 │   if (runtimeBun) {
+     9    │ - ··runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"]·=·"true";
+        9 │ + ··runtimeBun["env"].BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS·=·"true";
+    10 10 │     delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 11 │   }
+  
+
+packages/server/src/test-support/automation/integration-runtime-flags.ts:10:21 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     8 │ if (runtimeBun) {
+     9 │   runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+  > 10 │   delete runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+       │                     ^^^^^
+    11 │ }
+    12 │ 
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     8  8 │   if (runtimeBun) {
+     9  9 │     runtimeBun["env"]["BAO_ALLOW_AUTOMATION_PRIVATE_HOSTS"] = "true";
+    10    │ - ··delete·runtimeBun["env"]["BAO_ENABLE_AUTOMATION_VERIFY"];
+       10 │ + ··delete·runtimeBun.env["BAO_ENABLE_AUTOMATION_VERIFY"];
+    11 11 │   }
+    12 12 │   
+  
+
+packages/client/assets/css/main.css:659:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 0)
+  
+    657 │     --motion-slow: 1ms;
+    658 │   }
+  > 659 │   *,
+        │   ^
+    660 │   *::before,
+    661 │   *::after {
+  
+  i This selector specificity is (0, 1, 0)
+  
+    513 │ /* Prevent nested backdrop roots inside glass (§10). Children must not
+    514 │  * establish their own backdrop-filter sampling context. */
+  > 515 │ .glass > *,
+        │ ^^^^^^^^^^
+    516 │ .card.card-glass > *,
+    517 │ .glass-subtle > *,
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+packages/client/components/ai/AIDashboardPreferenceCard.vue:24:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    23 │ const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { required: true });
+  > 24 │ const selectedModelValue = defineModel<string>("selectedModel", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ </script>
+    26 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     9  9 │   } from "~/constants/layout";
+    10 10 │   import type { ProviderConfig } from "~/types/ai-dashboard";
+       11 │ + const·selectedModelValue·=·defineModel<string>("selectedModel",·{·required:·true·});
+       12 │ + 
+    11 13 │   
+    12 14 │   defineProps<{
+    ····· │ 
+    20 22 │   }>();
+    21 23 │   
+    22    │ - const·selectedProviderModel·=·defineModel<AIProviderType>("selectedProvider",·{·required:·true·});
+    23    │ - const·selectedModelValue·=·defineModel<string>("selectedModel",·{·required:·true·});
+       24 │ + const·selectedProviderModel·=·defineModel<AIProviderType>("selectedProvider",·{·required:·true·});
+    24 25 │   
+  
+
+packages/client/components/ai/FloatingChatPanel.vue:84:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    82 │ }>();
+    83 │ 
+  > 84 │ const draft = defineModel<string>("draft", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ const { t } = useI18n();
+    86 │ </script>
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    26 26 │   } from "~/constants/layout";
+    27 27 │   
+       28 │ + const·draft·=·defineModel<string>("draft",·{·required:·true·});
+       29 │ + 
+       30 │ + 
+    28 31 │   defineProps<{
+    29 32 │     aiChatPagePath: string;
+    ····· │ 
+    79 82 │     "update:ttsModel": [value: string];
+    80 83 │     draftKeydown: [event: KeyboardEvent];
+    81    │ - }>();
+    82    │ - 
+    83    │ - const·draft·=·defineModel<string>("draft",·{·required:·true·});
+       84 │ + }>();
+    84 85 │   const { t } = useI18n();
+    85 86 │   
+  
+
+packages/client/components/automation/AutomationJobApplyFormCard.vue:30:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    28 │ const coverLetterId = defineModel<string>("coverLetterId", { required: true });
+    29 │ const jobId = defineModel<string>("jobId", { required: true });
+  > 30 │ const runAt = defineModel<string>("runAt", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     9  9 │   } from "~/constants/layout";
+    10 10 │   import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
+       11 │ + const·runAt·=·defineModel<string>("runAt",·{·required:·true·});
+       12 │ + 
+    11 13 │   
+    12 14 │   defineProps<{
+    ····· │ 
+    26 28 │   const resumeId = defineModel<string>("resumeId", { required: true });
+    27 29 │   const coverLetterId = defineModel<string>("coverLetterId", { required: true });
+    28    │ - const·jobId·=·defineModel<string>("jobId",·{·required:·true·});
+    29    │ - const·runAt·=·defineModel<string>("runAt",·{·required:·true·});
+       30 │ + const·jobId·=·defineModel<string>("jobId",·{·required:·true·});
+    30 31 │   
+    31 32 │   const { t } = useI18n();
+  
+
+packages/client/components/automation/AutomationJobApplyRunCard.vue:36:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    34 │ }>();
+    35 │ 
+  > 36 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 37 │   cancel: [];
+  > 38 │   retry: [];
+  > 39 │ }>();
+       │ ^^^^
+    40 │ 
+    41 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     16  16 │   } from "~/constants/layout";
+     17  17 │   
+     18     │ - const·[RUN_STATUS_PENDING,·RUN_STATUS_RUNNING,·RUN_STATUS_SUCCESS,·RUN_STATUS_ERROR]·=
+         18 │ + const·emit·=·defineEmits<{
+         19 │ + ··cancel:·[];
+         20 │ + ··retry:·[];
+         21 │ + }>();
+         22 │ + 
+         23 │ + 
+         24 │ + const·[RUN_STATUS_PENDING,·RUN_STATUS_RUNNING,·RUN_STATUS_SUCCESS,·RUN_STATUS_ERROR]·=
+     19  25 │     AUTOMATION_RUN_STATUSES;
+     20  26 │   const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
+    ······· │ 
+     30  36 │     streamErrorMessage: string;
+     31  37 │     streamState: AutomationRunUiState;
+     32     │ - ··toLocalizedDateTime:·(value:·string)·=>·string;
+     33     │ - }>();
+     34     │ - 
+     35     │ - const·emit·=·defineEmits<{
+     36     │ - ··cancel:·[];
+     37     │ - ··retry:·[];
+         38 │ + ··toLocalizedDateTime:·(value:·string)·=>·string;
+     38  39 │   }>();
+     39  40 │   
+  
+
+packages/client/components/automation/AutomationRunsFilters.vue:9:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+     8 │ const typeFilter = defineModel<string>("typeFilter", { required: true });
+   > 9 │ const statusFilter = defineModel<string>("statusFilter", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+      1 │ + const·statusFilter·=·defineModel<string>("statusFilter",·{·required:·true·});
+    1 2 │   defineProps<{
+    2 3 │     typeOptions: ReadonlyArray<{ value: string; label: string }>;
+    ··· │ 
+    5 6 │   }>();
+    6 7 │   
+    7   │ - const·typeFilter·=·defineModel<string>("typeFilter",·{·required:·true·});
+    8   │ - const·statusFilter·=·defineModel<string>("statusFilter",·{·required:·true·});
+      8 │ + const·typeFilter·=·defineModel<string>("typeFilter",·{·required:·true·});
+    9 9 │   
+  
+
+packages/client/components/cover-letter/CoverLetterDetailFormCard.vue:16:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    14 │ }>();
+    15 │ 
+  > 16 │ const formData = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 17 │   company: string;
+  > 18 │   position: string;
+  > 19 │   template: CoverLetterTemplate;
+  > 20 │   contentText: string;
+  > 21 │ }>("formData", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ </script>
+    23 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     8  8 │   import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
+     9  9 │   
+    10    │ - defineProps<{
+    11    │ - ··templateLabel:·(template:·CoverLetterTemplate)·=>·string;
+    12    │ - ··t:·(key:·string,·values?:·Record<string,·unknown>)·=>·string;
+    13    │ - }>();
+    14    │ - 
+    15 10 │   const formData = defineModel<{
+    16 11 │     company: string;
+    ····· │ 
+    18 13 │     template: CoverLetterTemplate;
+    19 14 │     contentText: string;
+    20    │ - }>("formData",·{·required:·true·});
+       15 │ + }>("formData",·{·required:·true·});
+       16 │ + 
+       17 │ + 
+       18 │ + defineProps<{
+       19 │ + ··templateLabel:·(template:·CoverLetterTemplate)·=>·string;
+       20 │ + ··t:·(key:·string,·values?:·Record<string,·unknown>)·=>·string;
+       21 │ + }>();
+    21 22 │   
+  
+
+packages/client/components/cover-letter/CoverLetterEditorCard.vue:21:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    19 │ const contentText = defineModel<string>("contentText", { required: true });
+    20 │ 
+  > 21 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 22 │   clear: [];
+  > 23 │   save: [];
+  > 24 │ }>();
+       │ ^^^^
+    25 │ </script>
+    26 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    11 11 │   } from "~/constants/layout";
+    12 12 │   
+       13 │ + const·emit·=·defineEmits<{
+       14 │ + ··clear:·[];
+       15 │ + ··save:·[];
+       16 │ + }>();
+       17 │ + 
+       18 │ + 
+    13 19 │   defineProps<{
+    14 20 │     contentCharacterCount: number;
+    ····· │ 
+    16 22 │   }>();
+    17 23 │   
+    18    │ - const·contentText·=·defineModel<string>("contentText",·{·required:·true·});
+    19    │ - 
+    20    │ - const·emit·=·defineEmits<{
+    21    │ - ··clear:·[];
+    22    │ - ··save:·[];
+    23    │ - }>();
+       24 │ + const·contentText·=·defineModel<string>("contentText",·{·required:·true·});
+    24 25 │   
+  
+
+packages/client/components/interview/InterviewChat.vue:70:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    68 │ const { t, locale } = useI18n();
+    69 │ const responseIdSeed = Math.random().toString(36).slice(2, 10);
+  > 70 │ const currentResponse = defineModel<string>("response", { default: "" });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ const responseTextareaId = `interview-chat-response-${responseIdSeed}`;
+    72 │ const responseHintId = `interview-chat-submit-hint-${responseIdSeed}`;
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     26  26 │     text: string;
+     27  27 │   }
+         28 │ + const·currentResponse·=·defineModel<string>("response",·{·default:·""·});
+         29 │ + 
+     28  30 │   
+     29  31 │   const props = withDefaults(
+    ······· │ 
+     66  68 │   }>();
+     67  69 │   const { t, locale } = useI18n();
+     68     │ - const·responseIdSeed·=·Math.random().toString(36).slice(2,·10);
+     69     │ - const·currentResponse·=·defineModel<string>("response",·{·default:·""·});
+         70 │ + const·responseIdSeed·=·Math.random().toString(36).slice(2,·10);
+     70  71 │   const responseTextareaId = `interview-chat-response-${responseIdSeed}`;
+     71  72 │   const responseHintId = `interview-chat-submit-hint-${responseIdSeed}`;
+  
+
+packages/client/components/interview/InterviewChat.vue:94:33 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    92 │   props.questions.forEach((question) => {
+    93 │     messages.push({
+  > 94 │       id: `interview-question-${question.id}`,
+       │                                 ^^^^^^^^
+    95 │       role: "assistant",
+    96 │       content: question.text,
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/components/interview/InterviewChat.vue:96:16 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    94 │       id: `interview-question-${question.id}`,
+    95 │       role: "assistant",
+  > 96 │       content: question.text,
+       │                ^^^^^^^^
+    97 │     });
+    98 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/components/interview/InterviewChat.vue:99:53 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+     97 │     });
+     98 │ 
+   > 99 │     const response = responseByQuestionId.value.get(question.id);
+        │                                                     ^^^^^^^^
+    100 │     if (response) {
+    101 │       messages.push({
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/components/interview/InterviewChat.vue:102:35 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    100 │     if (response) {
+    101 │       messages.push({
+  > 102 │         id: `interview-response-${question.id}`,
+        │                                   ^^^^^^^^
+    103 │         role: "user",
+    104 │         content: response,
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/components/jobs/JobApplyDialog.vue:20:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    18 │ const applicationNotes = defineModel<string>("applicationNotes", { required: true });
+    19 │ 
+  > 20 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 21 │   "update:open": [value: boolean];
+  > 22 │   submit: [];
+  > 23 │ }>();
+       │ ^^^^
+    24 │ 
+    25 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     8  8 │   } from "~/constants/layout";
+     9  9 │   
+       10 │ + const·emit·=·defineEmits<{
+       11 │ + ··"update:open":·[value:·boolean];
+       12 │ + ··submit:·[];
+       13 │ + }>();
+       14 │ + 
+       15 │ + 
+    10 16 │   defineProps<{
+    11 17 │     open: boolean;
+    ····· │ 
+    15 21 │   }>();
+    16 22 │   
+    17    │ - const·applicationNotes·=·defineModel<string>("applicationNotes",·{·required:·true·});
+    18    │ - 
+    19    │ - const·emit·=·defineEmits<{
+    20    │ - ··"update:open":·[value:·boolean];
+    21    │ - ··submit:·[];
+    22    │ - }>();
+       23 │ + const·applicationNotes·=·defineModel<string>("applicationNotes",·{·required:·true·});
+    23 24 │   
+    24 25 │   const { t } = useI18n();
+  
+
+packages/client/components/jobs/JobsPageFiltersCard.vue:43:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    41 │ const studioType = defineModel<FilterSelection<StudioType>>("studioType", { required: true });
+    42 │ const platform = defineModel<FilterSelection<Platform>>("platform", { required: true });
+  > 43 │ const genre = defineModel<FilterSelection<GameGenre>>("genre", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    16 16 │   
+    17 17 │   type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
+       18 │ + const·genre·=·defineModel<FilterSelection<GameGenre>>("genre",·{·required:·true·});
+       19 │ + 
+    18 20 │   
+    19 21 │   defineProps<{
+    ····· │ 
+    39 41 │   });
+    40 42 │   const studioType = defineModel<FilterSelection<StudioType>>("studioType", { required: true });
+    41    │ - const·platform·=·defineModel<FilterSelection<Platform>>("platform",·{·required:·true·});
+    42    │ - const·genre·=·defineModel<FilterSelection<GameGenre>>("genre",·{·required:·true·});
+       43 │ + const·platform·=·defineModel<FilterSelection<Platform>>("platform",·{·required:·true·});
+    43 44 │   
+    44 45 │   const { t } = useI18n();
+  
+
+packages/client/components/resume/ResumeBuildQuestionsCard.vue:21:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    19 │ const answers = defineModel<Record<string, string>>("answers", { required: true });
+    20 │ 
+  > 21 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 22 │   previous: [];
+  > 23 │   next: [];
+  > 24 │   changeTarget: [];
+  > 25 │ }>();
+       │ ^^^^
+    26 │ </script>
+    27 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     9  9 │   } from "~/constants/layout";
+    10 10 │   
+       11 │ + const·emit·=·defineEmits<{
+       12 │ + ··previous:·[];
+       13 │ + ··next:·[];
+       14 │ + ··changeTarget:·[];
+       15 │ + }>();
+       16 │ + 
+       17 │ + 
+    11 18 │   defineProps<{
+    12 19 │     aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
+    ····· │ 
+    16 23 │   }>();
+    17 24 │   
+    18    │ - const·answers·=·defineModel<Record<string,·string>>("answers",·{·required:·true·});
+    19    │ - 
+    20    │ - const·emit·=·defineEmits<{
+    21    │ - ··previous:·[];
+    22    │ - ··next:·[];
+    23    │ - ··changeTarget:·[];
+    24    │ - }>();
+       25 │ + const·answers·=·defineModel<Record<string,·string>>("answers",·{·required:·true·});
+    25 26 │   
+  
+
+packages/client/components/resume/ResumeBuildTargetCard.vue:23:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    21 │ const experienceLevel = defineModel<string>("experienceLevel", { required: true });
+    22 │ 
+  > 23 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 24 │   generate: [];
+  > 25 │ }>();
+       │ ^^^^
+    26 │ </script>
+    27 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     7  7 │   } from "~/constants/layout";
+     8  8 │   
+        9 │ + const·emit·=·defineEmits<{
+       10 │ + ··generate:·[];
+       11 │ + }>();
+       12 │ + 
+       13 │ + 
+     9 14 │   defineProps<{
+    10 15 │     studios: ReadonlyArray<{ id: string; name: string }>;
+    ····· │ 
+    18 23 │   const studioName = defineModel<string>("studioName", { required: true });
+    19 24 │   const studioId = defineModel<string>("studioId", { required: true });
+    20    │ - const·experienceLevel·=·defineModel<string>("experienceLevel",·{·required:·true·});
+    21    │ - 
+    22    │ - const·emit·=·defineEmits<{
+    23    │ - ··generate:·[];
+    24    │ - }>();
+       25 │ + const·experienceLevel·=·defineModel<string>("experienceLevel",·{·required:·true·});
+    25 26 │   
+  
+
+packages/client/components/resume/ResumeLibraryPanel.vue:33:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    31 │ const searchQuery = defineModel<string>("searchQuery", { required: true });
+    32 │ 
+  > 33 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 34 │   clearFilters: [];
+        ...
+  > 38 │   "update:currentPage": [page: number];
+  > 39 │ }>();
+       │ ^^^^
+    40 │ 
+    41 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    26 26 │   }
+    27 27 │   
+    28    │ - defineProps<ResumeLibraryPanelProps>();
+    29    │ - 
+    30    │ - const·searchQuery·=·defineModel<string>("searchQuery",·{·required:·true·});
+    31    │ - 
+    32 28 │   const emit = defineEmits<{
+    33 29 │     clearFilters: [];
+    ····· │ 
+    38 34 │   }>();
+    39 35 │   
+       36 │ + 
+       37 │ + defineProps<ResumeLibraryPanelProps>();
+       38 │ + 
+       39 │ + const·searchQuery·=·defineModel<string>("searchQuery",·{·required:·true·});
+       40 │ + 
+    40 41 │   const { t } = useI18n();
+    41 42 │   
+  
+
+packages/client/components/resume/ResumeTabList.vue:14:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    12 │ const props = defineProps<ResumeTabListProps>();
+    13 │ 
+  > 14 │ const activeTab = defineModel<string>("activeTab", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ const tabRefs = ref<(HTMLButtonElement | null)[]>([]);
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     9  9 │   }
+    10 10 │   
+    11    │ - const·props·=·defineProps<ResumeTabListProps>();
+    12    │ - 
+    13    │ - const·activeTab·=·defineModel<string>("activeTab",·{·required:·true·});
+       11 │ + const·activeTab·=·defineModel<string>("activeTab",·{·required:·true·});
+    14 12 │   
+       13 │ + 
+       14 │ + const·props·=·defineProps<ResumeTabListProps>();
+       15 │ + 
+    15 16 │   const tabRefs = ref<(HTMLButtonElement | null)[]>([]);
+    16 17 │   
+  
+
+packages/client/components/resume/ResumeTabList.vue:34:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 16 detected (max: 15).
+  
+    32 │ }
+    33 │ 
+  > 34 │ function handleTabKeydown(event: KeyboardEvent, index: number): void {
+       │          ^^^^^^^^^^^^^^^^
+    35 │   const lastTabIndex = props.tabs.length - 1;
+    36 │   if (event.key === "ArrowRight") {
+  
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+  
+
+packages/client/components/settings/SettingsAIProvidersPanel.vue:59:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    57 │ const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
+    58 │ 
+  > 59 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 60 │   savePreferredProvider: [];
+  > 61 │   saveRouting: [];
+  > 62 │   testProvider: [providerId: AIProviderType];
+  > 63 │   saveKeys: [];
+  > 64 │ }>();
+       │ ^^^^
+    65 │ 
+    66 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     30  30 │   type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
+     31  31 │   
+     32     │ - const·props·=·defineProps<{
+         32 │ + const·emit·=·defineEmits<{
+         33 │ + ··savePreferredProvider:·[];
+         34 │ + ··saveRouting:·[];
+         35 │ + ··testProvider:·[providerId:·AIProviderType];
+         36 │ + ··saveKeys:·[];
+         37 │ + }>();
+         38 │ + 
+         39 │ + 
+         40 │ + const·props·=·defineProps<{
+     33  41 │     providerInputs: ReadonlyArray<{
+     34  42 │       id: AIProviderType;
+    ······· │ 
+     54  62 │   });
+     55  63 │   const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
+     56     │ - const·apiKeys·=·defineModel<Record<ProviderField,·string>>("apiKeys",·{·required:·true·});
+     57     │ - 
+     58     │ - const·emit·=·defineEmits<{
+     59     │ - ··savePreferredProvider:·[];
+     60     │ - ··saveRouting:·[];
+     61     │ - ··testProvider:·[providerId:·AIProviderType];
+     62     │ - ··saveKeys:·[];
+     63     │ - }>();
+         64 │ + const·apiKeys·=·defineModel<Record<ProviderField,·string>>("apiKeys",·{·required:·true·});
+     64  65 │   
+     65  66 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsAiProviderAccordionList.vue:41:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    39 │ const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
+    40 │ 
+  > 41 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 42 │   testProvider: [providerId: AIProviderType];
+  > 43 │   saveKeys: [];
+  > 44 │ }>();
+       │ ^^^^
+    45 │ </script>
+    46 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    19 19 │     | "huggingfaceToken";
+    20 20 │   
+       21 │ + const·emit·=·defineEmits<{
+       22 │ + ··testProvider:·[providerId:·AIProviderType];
+       23 │ + ··saveKeys:·[];
+       24 │ + }>();
+       25 │ + 
+       26 │ + 
+    21 27 │   defineProps<{
+    22 28 │     providerInputs: ReadonlyArray<{
+    ····· │ 
+    36 42 │   }>();
+    37 43 │   
+    38    │ - const·apiKeys·=·defineModel<Record<ProviderField,·string>>("apiKeys",·{·required:·true·});
+    39    │ - 
+    40    │ - const·emit·=·defineEmits<{
+    41    │ - ··testProvider:·[providerId:·AIProviderType];
+    42    │ - ··saveKeys:·[];
+    43    │ - }>();
+       44 │ + const·apiKeys·=·defineModel<Record<ProviderField,·string>>("apiKeys",·{·required:·true·});
+    44 45 │   
+  
+
+packages/client/components/settings/SettingsAiRoutingCard.vue:39:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    37 │ const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
+    38 │ 
+  > 39 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 40 │   save: [];
+  > 41 │ }>();
+       │ ^^^^
+    42 │ </script>
+    43 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    18 18 │   type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
+    19 19 │   
+       20 │ + const·emit·=·defineEmits<{
+       21 │ + ··save:·[];
+       22 │ + }>();
+       23 │ + 
+       24 │ + 
+    20 25 │   defineProps<{
+    21 26 │     providerInputs: ReadonlyArray<{
+    ····· │ 
+    34 39 │   }>();
+    35 40 │   
+    36    │ - const·aiRoutingDraft·=·defineModel<AIRoutingDraft>("aiRoutingDraft",·{·required:·true·});
+    37    │ - 
+    38    │ - const·emit·=·defineEmits<{
+    39    │ - ··save:·[];
+    40    │ - }>();
+       41 │ + const·aiRoutingDraft·=·defineModel<AIRoutingDraft>("aiRoutingDraft",·{·required:·true·});
+    41 42 │   
+  
+
+packages/client/components/settings/SettingsAutomationPanel.vue:22:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    20 │ });
+    21 │ 
+  > 22 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 23 │   save: [];
+  > 24 │ }>();
+       │ ^^^^
+    25 │ 
+    26 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    11 11 │   import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+    12 12 │   
+       13 │ + const·emit·=·defineEmits<{
+       14 │ + ··save:·[];
+       15 │ + }>();
+       16 │ + 
+       17 │ + 
+    13 18 │   defineProps<{
+    14 19 │     automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
+    ····· │ 
+    17 22 │   const automationForm = defineModel<AutomationSettings>("automationForm", {
+    18 23 │     required: true,
+    19    │ - });
+    20    │ - 
+    21    │ - const·emit·=·defineEmits<{
+    22    │ - ··save:·[];
+    23    │ - }>();
+       24 │ + });
+    24 25 │   
+    25 26 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsBrandPanel.vue:59:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    57 │   default: "identity",
+    58 │ });
+  > 59 │ const brandForm = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 60 │   name: string;
+        ...
+  > 74 │   contentOverridesJson: string;
+  > 75 │ }>("brandForm", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ const brandSaveStateLabel = computed(() => {
+    77 │   const key = getSaveStateLabelKey(props.brandSaveState);
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     23  23 │   
+     24  24 │   type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
+         25 │ + const·brandForm·=·defineModel<{
+         26 │ + ··name:·string;
+         27 │ + ··assistantName:·string;
+         28 │ + ··apiName:·string;
+         29 │ + ··logoPath:·string;
+         30 │ + ··faviconPath:·string;
+         31 │ + ··fontStylesheetUrl:·string;
+         32 │ + ··displayFontFamily:·string;
+         33 │ + ··bodyFontFamily:·string;
+         34 │ + ··monoFontFamily:·string;
+         35 │ + ··tagline:·string;
+         36 │ + ··defaultTitle:·string;
+         37 │ + ··defaultDescription:·string;
+         38 │ + ··lightThemeJson:·string;
+         39 │ + ··darkThemeJson:·string;
+         40 │ + ··contentOverridesJson:·string;
+         41 │ + }>("brandForm",·{·required:·true·});
+         42 │ + 
+     25  43 │   
+     26  44 │   const BRAND_EDITOR_PANELS = [
+    ······· │ 
+     55  73 │   const brandEditorPanel = defineModel<BrandEditorPanel>("activePanel", {
+     56  74 │     default: "identity",
+     57     │ - });
+     58     │ - const·brandForm·=·defineModel<{
+     59     │ - ··name:·string;
+     60     │ - ··assistantName:·string;
+     61     │ - ··apiName:·string;
+     62     │ - ··logoPath:·string;
+     63     │ - ··faviconPath:·string;
+     64     │ - ··fontStylesheetUrl:·string;
+     65     │ - ··displayFontFamily:·string;
+     66     │ - ··bodyFontFamily:·string;
+     67     │ - ··monoFontFamily:·string;
+     68     │ - ··tagline:·string;
+     69     │ - ··defaultTitle:·string;
+     70     │ - ··defaultDescription:·string;
+     71     │ - ··lightThemeJson:·string;
+     72     │ - ··darkThemeJson:·string;
+     73     │ - ··contentOverridesJson:·string;
+     74     │ - }>("brandForm",·{·required:·true·});
+         75 │ + });
+     75  76 │   const brandSaveStateLabel = computed(() => {
+     76  77 │     const key = getSaveStateLabelKey(props.brandSaveState);
+  
+
+packages/client/components/settings/SettingsEmailDeliveryPanel.vue:30:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    28 │ });
+    29 │ 
+  > 30 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 31 │   saveSettings: [];
+  > 32 │   savePassword: [];
+  > 33 │   clearPassword: [];
+  > 34 │ }>();
+       │ ^^^^
+    35 │ 
+    36 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    12 12 │   import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+    13 13 │   
+       14 │ + const·emit·=·defineEmits<{
+       15 │ + ··saveSettings:·[];
+       16 │ + ··savePassword:·[];
+       17 │ + ··clearPassword:·[];
+       18 │ + }>();
+       19 │ + 
+       20 │ + 
+    14 21 │   defineProps<{
+    15 22 │     emailDeliveryConfigured: boolean;
+    ····· │ 
+    25 32 │   const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
+    26 33 │     required: true,
+    27    │ - });
+    28    │ - 
+    29    │ - const·emit·=·defineEmits<{
+    30    │ - ··saveSettings:·[];
+    31    │ - ··savePassword:·[];
+    32    │ - ··clearPassword:·[];
+    33    │ - }>();
+       34 │ + });
+    34 35 │   
+    35 36 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsJobIntelligencePanel.vue:26:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    24 │ const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+    25 │ 
+  > 26 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 27 │   saveProviders: [];
+  > 28 │   saveTaxonomy: [];
+  > 29 │ }>();
+       │ ^^^^
+    30 │ 
+    31 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    15 15 │   import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+    16 16 │   
+       17 │ + const·emit·=·defineEmits<{
+       18 │ + ··saveProviders:·[];
+       19 │ + ··saveTaxonomy:·[];
+       20 │ + }>();
+       21 │ + 
+       22 │ + 
+    17 23 │   defineProps<{
+    18 24 │     providerSaveState: SaveState;
+    ····· │ 
+    21 27 │   
+    22 28 │   const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+    23    │ - const·jobTaxonomyForm·=·defineModel<JobTaxonomyForm>("jobTaxonomyForm",·{·required:·true·});
+    24    │ - 
+    25    │ - const·emit·=·defineEmits<{
+    26    │ - ··saveProviders:·[];
+    27    │ - ··saveTaxonomy:·[];
+    28    │ - }>();
+       29 │ + const·jobTaxonomyForm·=·defineModel<JobTaxonomyForm>("jobTaxonomyForm",·{·required:·true·});
+    29 30 │   
+    30 31 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsJobIntelligencePanel.vue:43:25 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    41 │       jobProviderForm.value.companyBoardApiTemplatesJson,
+    42 │       jobProviderForm.value.gamingPortalsJson,
+  > 43 │     ].filter((value) => value.trim().length > 0).length,
+       │                         ^^^^^
+    44 │ );
+    45 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/components/settings/SettingsJobIntelligenceProvidersWorkspace.vue:25:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    23 │ const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+    24 │ 
+  > 25 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 26 │   save: [];
+  > 27 │ }>();
+       │ ^^^^
+    28 │ 
+    29 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    16 16 │   import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
+    17 17 │   
+    18    │ - const·props·=·defineProps<{
+       18 │ + const·emit·=·defineEmits<{
+       19 │ + ··save:·[];
+       20 │ + }>();
+       21 │ + 
+       22 │ + 
+       23 │ + const·props·=·defineProps<{
+    19 24 │     providerSaveState: SaveState;
+    20 25 │   }>();
+    21 26 │   
+    22    │ - const·jobProviderForm·=·defineModel<JobProviderForm>("jobProviderForm",·{·required:·true·});
+    23    │ - 
+    24    │ - const·emit·=·defineEmits<{
+    25    │ - ··save:·[];
+    26    │ - }>();
+       27 │ + const·jobProviderForm·=·defineModel<JobProviderForm>("jobProviderForm",·{·required:·true·});
+    27 28 │   
+    28 29 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsJobIntelligenceTaxonomyWorkspace.vue:25:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    23 │ const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+    24 │ 
+  > 25 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 26 │   save: [];
+  > 27 │ }>();
+       │ ^^^^
+    28 │ 
+    29 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    16 16 │   import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
+    17 17 │   
+    18    │ - const·props·=·defineProps<{
+       18 │ + const·emit·=·defineEmits<{
+       19 │ + ··save:·[];
+       20 │ + }>();
+       21 │ + 
+       22 │ + 
+       23 │ + const·props·=·defineProps<{
+    19 24 │     taxonomySaveState: SaveState;
+    20 25 │   }>();
+    21 26 │   
+    22    │ - const·jobTaxonomyForm·=·defineModel<JobTaxonomyForm>("jobTaxonomyForm",·{·required:·true·});
+    23    │ - 
+    24    │ - const·emit·=·defineEmits<{
+    25    │ - ··save:·[];
+    26    │ - }>();
+       27 │ + const·jobTaxonomyForm·=·defineModel<JobTaxonomyForm>("jobTaxonomyForm",·{·required:·true·});
+    27 28 │   
+    28 29 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsPreferencesPanel.vue:28:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    26 │ });
+    27 │ 
+  > 28 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 29 │   save: [];
+  > 30 │   toggleTheme: [];
+  > 31 │ }>();
+       │ ^^^^
+    32 │ 
+    33 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+    13 13 │   import type { SaveState } from "./save-state";
+    14 14 │   
+       15 │ + const·emit·=·defineEmits<{
+       16 │ + ··save:·[];
+       17 │ + ··toggleTheme:·[];
+       18 │ + }>();
+       19 │ + 
+       20 │ + 
+    15 21 │   defineProps<{
+    16 22 │     theme: string;
+    ····· │ 
+    23 29 │   const notificationForm = defineModel<NotificationPreferences>("notificationForm", {
+    24 30 │     required: true,
+    25    │ - });
+    26    │ - 
+    27    │ - const·emit·=·defineEmits<{
+    28    │ - ··save:·[];
+    29    │ - ··toggleTheme:·[];
+    30    │ - }>();
+       31 │ + });
+    31 32 │   
+    32 33 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/SettingsProfilePanel.vue:31:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineEmits macro is out of order.
+  
+    29 │ }>("profileForm", { required: true });
+    30 │ 
+  > 31 │ const emit = defineEmits<{
+       │       ^^^^^^^^^^^^^^^^^^^^
+  > 32 │   save: [];
+  > 33 │ }>();
+       │ ^^^^
+    34 │ 
+    35 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineEmits.
+  
+     8  8 │   import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
+     9  9 │   
+    10    │ - const·props·=·defineProps<{
+       10 │ + const·emit·=·defineEmits<{
+       11 │ + ··save:·[];
+       12 │ + }>();
+       13 │ + 
+       14 │ + 
+       15 │ + const·props·=·defineProps<{
+    11 16 │     profileSaveState: SaveState;
+    12 17 │   }>();
+    ····· │ 
+    26 31 │     technicalSkillsText: string;
+    27 32 │     softSkillsText: string;
+    28    │ - }>("profileForm",·{·required:·true·});
+    29    │ - 
+    30    │ - const·emit·=·defineEmits<{
+    31    │ - ··save:·[];
+    32    │ - }>();
+       33 │ + }>("profileForm",·{·required:·true·});
+    33 34 │   
+    34 35 │   const { t } = useI18n();
+  
+
+packages/client/components/settings/brand/BrandContentTab.vue:27:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    25 │ const { t } = useI18n();
+    26 │ 
+  > 27 │ const brandForm = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 28 │   defaultTitle: string;
+  > 29 │   defaultDescription: string;
+  > 30 │   contentOverridesJson: string;
+  > 31 │ }>("brandForm", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ </script>
+    33 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    14 14 │   } from "~/constants/layout";
+    15 15 │   
+    16    │ - const·props·=·defineProps<{
+       16 │ + const·brandForm·=·defineModel<{
+       17 │ + ··defaultTitle:·string;
+       18 │ + ··defaultDescription:·string;
+       19 │ + ··contentOverridesJson:·string;
+       20 │ + }>("brandForm",·{·required:·true·});
+       21 │ + 
+       22 │ + 
+       23 │ + const·props·=·defineProps<{
+    17 24 │     hintIds: {
+    18 25 │       contentOverrides: string;
+    ····· │ 
+    22 29 │   const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+    23 30 │   
+    24    │ - const·{·t·}·=·useI18n();
+    25    │ - 
+    26    │ - const·brandForm·=·defineModel<{
+    27    │ - ··defaultTitle:·string;
+    28    │ - ··defaultDescription:·string;
+    29    │ - ··contentOverridesJson:·string;
+    30    │ - }>("brandForm",·{·required:·true·});
+       31 │ + const·{·t·}·=·useI18n();
+    31 32 │   
+  
+
+packages/client/components/settings/brand/BrandIdentityTab.vue:26:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    24 │ const { t } = useI18n();
+    25 │ 
+  > 26 │ const brandForm = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │   name: string;
+        ...
+  > 32 │   faviconPath: string;
+  > 33 │ }>("brandForm", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ </script>
+    35 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    14 14 │   } from "~/constants/layout";
+    15 15 │   
+    16    │ - const·BRAND_HINT_IDS·=·{
+       16 │ + const·brandForm·=·defineModel<{
+       17 │ + ··name:·string;
+       18 │ + ··assistantName:·string;
+       19 │ + ··apiName:·string;
+       20 │ + ··tagline:·string;
+       21 │ + ··logoPath:·string;
+       22 │ + ··faviconPath:·string;
+       23 │ + }>("brandForm",·{·required:·true·});
+       24 │ + 
+       25 │ + 
+       26 │ + const·BRAND_HINT_IDS·=·{
+    17 27 │     logoPath: "settings-brand-logo-path-hint",
+    18 28 │     faviconPath: "settings-brand-favicon-path-hint",
+    ····· │ 
+    21 31 │   const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+    22 32 │   
+    23    │ - const·{·t·}·=·useI18n();
+    24    │ - 
+    25    │ - const·brandForm·=·defineModel<{
+    26    │ - ··name:·string;
+    27    │ - ··assistantName:·string;
+    28    │ - ··apiName:·string;
+    29    │ - ··tagline:·string;
+    30    │ - ··logoPath:·string;
+    31    │ - ··faviconPath:·string;
+    32    │ - }>("brandForm",·{·required:·true·});
+       33 │ + const·{·t·}·=·useI18n();
+    33 34 │   
+  
+
+packages/client/components/settings/brand/BrandThemesTab.vue:28:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    26 │ const { t } = useI18n();
+    27 │ 
+  > 28 │ const brandForm = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │   lightThemeJson: string;
+  > 30 │   darkThemeJson: string;
+  > 31 │ }>("brandForm", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ </script>
+    33 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    14 14 │   } from "~/constants/layout";
+    15 15 │   
+    16    │ - const·props·=·defineProps<{
+       16 │ + const·brandForm·=·defineModel<{
+       17 │ + ··lightThemeJson:·string;
+       18 │ + ··darkThemeJson:·string;
+       19 │ + }>("brandForm",·{·required:·true·});
+       20 │ + 
+       21 │ + 
+       22 │ + const·props·=·defineProps<{
+    17 23 │     hintIds: {
+    18 24 │       lightTheme: string;
+    ····· │ 
+    23 29 │   const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+    24 30 │   
+    25    │ - const·{·t·}·=·useI18n();
+    26    │ - 
+    27    │ - const·brandForm·=·defineModel<{
+    28    │ - ··lightThemeJson:·string;
+    29    │ - ··darkThemeJson:·string;
+    30    │ - }>("brandForm",·{·required:·true·});
+       31 │ + const·{·t·}·=·useI18n();
+    31 32 │   
+  
+
+packages/client/components/settings/brand/BrandTypographyTab.vue:25:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    23 │ const { t } = useI18n();
+    24 │ 
+  > 25 │ const brandForm = defineModel<{
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │   fontStylesheetUrl: string;
+  > 27 │   displayFontFamily: string;
+  > 28 │   bodyFontFamily: string;
+  > 29 │   monoFontFamily: string;
+  > 30 │ }>("brandForm", { required: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ </script>
+    32 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    14 14 │   } from "~/constants/layout";
+    15 15 │   
+    16    │ - const·BRAND_HINT_IDS·=·{
+       16 │ + const·brandForm·=·defineModel<{
+       17 │ + ··fontStylesheetUrl:·string;
+       18 │ + ··displayFontFamily:·string;
+       19 │ + ··bodyFontFamily:·string;
+       20 │ + ··monoFontFamily:·string;
+       21 │ + }>("brandForm",·{·required:·true·});
+       22 │ + 
+       23 │ + 
+       24 │ + const·BRAND_HINT_IDS·=·{
+    17 25 │     fontStylesheet: "settings-brand-font-stylesheet-hint",
+    18 26 │   } as const;
+    ····· │ 
+    20 28 │   const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+    21 29 │   
+    22    │ - const·{·t·}·=·useI18n();
+    23    │ - 
+    24    │ - const·brandForm·=·defineModel<{
+    25    │ - ··fontStylesheetUrl:·string;
+    26    │ - ··displayFontFamily:·string;
+    27    │ - ··bodyFontFamily:·string;
+    28    │ - ··monoFontFamily:·string;
+    29    │ - }>("brandForm",·{·required:·true·});
+       30 │ + const·{·t·}·=·useI18n();
+    30 31 │   
+  
+
+packages/client/components/studios/StudiosIndexFiltersCard.vue:25:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    23 │ const selectedType = defineModel<string>("selectedType", { required: true });
+    24 │ const selectedSize = defineModel<string>("selectedSize", { required: true });
+  > 25 │ const remoteWork = defineModel<boolean>("remoteWork", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ const { t } = useI18n();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+     9  9 │   } from "~/constants/layout";
+    10 10 │   import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+       11 │ + const·remoteWork·=·defineModel<boolean>("remoteWork",·{·required:·true·});
+       12 │ + 
+    11 13 │   
+    12 14 │   defineProps<{
+    ····· │ 
+    21 23 │   const searchQuery = defineModel<string>("searchQuery", { required: true });
+    22 24 │   const selectedType = defineModel<string>("selectedType", { required: true });
+    23    │ - const·selectedSize·=·defineModel<string>("selectedSize",·{·required:·true·});
+    24    │ - const·remoteWork·=·defineModel<boolean>("remoteWork",·{·required:·true·});
+       25 │ + const·selectedSize·=·defineModel<string>("selectedSize",·{·required:·true·});
+    25 26 │   
+    26 27 │   const { t } = useI18n();
+  
+
+packages/client/components/studios/StudiosPreviewModal.vue:28:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineModel macro is out of order.
+  
+    26 │ }>();
+    27 │ 
+  > 28 │ const open = defineModel<boolean>("open", { required: true });
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ const { t } = useI18n();
+    30 │ 
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineModel.
+  
+    14 14 │   import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+    15 15 │   
+       16 │ + const·open·=·defineModel<boolean>("open",·{·required:·true·});
+       17 │ + 
+       18 │ + 
+    16 19 │   defineProps<{
+    17 20 │     studio: GameStudio | null;
+    ····· │ 
+    23 26 │     openDetail: [id: string];
+    24 27 │     startInterview: [id: string];
+    25    │ - }>();
+    26    │ - 
+    27    │ - const·open·=·defineModel<boolean>("open",·{·required:·true·});
+       28 │ + }>();
+    28 29 │   const { t } = useI18n();
+    29 30 │   
+  
+
+packages/client/components/ui/AIProviderIcon.vue:48:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━
+
+  × defineProps macro is out of order.
+  
+    46 │ };
+    47 │ 
+  > 48 │ const props = withDefaults(
+       │       ^^^^^^^^^^^^^^^^^^^^^
+  > 49 │   defineProps<{
+        ...
+  > 55 │   },
+  > 56 │ );
+       │ ^
+    57 │ 
+    58 │ const iconPaths = computed(() => AI_PROVIDER_ICON_PATHS[props.providerId]);
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineProps.
+  
+     6  6 │   };
+     7  7 │   
+     8    │ - const·AI_PROVIDER_ICON_PATHS:·Record<AIProviderType,·readonly·IconPath[]>·=·{
+        8 │ + const·props·=·withDefaults(
+        9 │ + ··defineProps<{
+       10 │ + ····providerId:·AIProviderType;
+       11 │ + ····class?:·string;
+       12 │ + ··}>(),
+       13 │ + ··{
+       14 │ + ····class:·"",
+       15 │ + ··},
+       16 │ + );
+       17 │ + 
+       18 │ + 
+       19 │ + const·AI_PROVIDER_ICON_PATHS:·Record<AIProviderType,·readonly·IconPath[]>·=·{
+     9 20 │     local: [
+    10 21 │       {
+    ····· │ 
+    43 54 │       { d: "M16.8 7.4 18 5.7" },
+    44 55 │     ],
+    45    │ - };
+    46    │ - 
+    47    │ - const·props·=·withDefaults(
+    48    │ - ··defineProps<{
+    49    │ - ····providerId:·AIProviderType;
+    50    │ - ····class?:·string;
+    51    │ - ··}>(),
+    52    │ - ··{
+    53    │ - ····class:·"",
+    54    │ - ··},
+    55    │ - );
+       56 │ + };
+    56 57 │   
+    57 58 │   const iconPaths = computed(() => AI_PROVIDER_ICON_PATHS[props.providerId]);
+  
+
+packages/client/composables/api-docs-page-data.ts:43:51 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    41 │   );
+    42 │   const endpointCount = computed(() =>
+  > 43 │     endpointGroups.value.reduce((count, group) => count + group.endpoints.length, 0),
+       │                                                   ^^^^^
+    44 │   );
+    45 │   const docsUiState = computed<ApiDocsUiState>(() => {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/api-docs-page-data.ts:43:59 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    41 │   );
+    42 │   const endpointCount = computed(() =>
+  > 43 │     endpointGroups.value.reduce((count, group) => count + group.endpoints.length, 0),
+       │                                                           ^^^^^
+    44 │   );
+    45 │   const docsUiState = computed<ApiDocsUiState>(() => {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/api-request.ts:126:3 lint/style/useDefaultParameterLast  FIXABLE  ━━━━━━━━━━
+
+  × This default parameter should follow the last required parameter or should be a required parameter.
+  
+    124 │   runtime: ClientApiRequestRuntime,
+    125 │   endpoint: string,
+  > 126 │   options: ClientApiRequestOptions = {},
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │   fallbackFilename: string,
+    128 │ ): Promise<void> {
+  
+  i The last required parameter is here:
+  
+    125 │   endpoint: string,
+    126 │   options: ClientApiRequestOptions = {},
+  > 127 │   fallbackFilename: string,
+        │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ ): Promise<void> {
+    129 │   const body = createRequestBody(options.body);
+  
+  i A default parameter that precedes a required parameter cannot be omitted at call site.
+  
+  i Unsafe fix: Turn the parameter into a required parameter.
+  
+    126 │ ··options:·ClientApiRequestOptions·=·{},
+        │                                   ----- 
+
+packages/client/composables/automation-hub-page-presentation.ts:94:46 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    92 │     }
+    93 │ 
+  > 94 │     return orderedCards.value.find((card) => card.id === currentPrimaryCardId) ?? null;
+       │                                              ^^^^
+    95 │   });
+    96 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/interview-realtime-socket.ts:64:32 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 20 detected (max: 15).
+  
+    62 │       input.connected.value = true;
+    63 │     };
+  > 64 │     socket.onmessage = (event) => {
+       │                                ^^^
+    65 │       if (typeof event.data !== "string") {
+    66 │         return;
+  
+  i Please refactor this function to reduce its complexity score from 20 to the max allowed complexity 15.
+  
+
+packages/client/composables/interview-realtime-socket.ts:47:8 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (67). Maximum allowed is 60.
+  
+     45 │  * Low-level interview WS socket with response_feedback capture.
+     46 │  */
+   > 47 │ export function createInterviewRealtimeSocket(input: {
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 48 │   wsBase: string;
+         ...
+  > 139 │   };
+  > 140 │ }
+        │ ^
+    141 │ 
+    142 │ export async function submitInterviewResponseViaWs(
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/client/composables/interview-session-actions.ts:167:25 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 17 detected (max: 15).
+  
+    165 │   handleCompleteInterview: () => Promise<void>;
+    166 │ }) {
+  > 167 │   return async function handleSubmitResponse(submittedResponse?: string) {
+        │                         ^^^^^^^^^^^^^^^^^^^^
+    168 │     if (!(input.actions.canSubmit.value && input.actions.sessionId.value)) {
+    169 │       return;
+  
+  i Please refactor this function to reduce its complexity score from 17 to the max allowed complexity 15.
+  
+
+packages/client/composables/jobs-index-page-derived.ts:72:60 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    70 │   const totalPages = computed(() => Math.ceil(input.totalJobs.value / input.pageSize));
+    71 │   const pageNumbers = computed(() =>
+  > 72 │     Array.from({ length: totalPages.value }, (_, index) => index + 1),
+       │                                                            ^^^^^
+    73 │   );
+    74 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/settings-page/options.ts:22:11 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    20 │   const providerInputs = computed<ProviderInputConfig[]>(() =>
+    21 │     AI_PROVIDER_CATALOG.map((provider) => ({
+  > 22 │       id: provider.id,
+       │           ^^^^^^^^
+    23 │       label: t(provider.nameKey),
+    24 │       description: t(provider.descriptionKey),
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/settings-page/options.ts:23:16 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    21 │     AI_PROVIDER_CATALOG.map((provider) => ({
+    22 │       id: provider.id,
+  > 23 │       label: t(provider.nameKey),
+       │                ^^^^^^^^
+    24 │       description: t(provider.descriptionKey),
+    25 │       field: providerFieldById[provider.id],
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/settings-page/options.ts:24:22 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    22 │       id: provider.id,
+    23 │       label: t(provider.nameKey),
+  > 24 │       description: t(provider.descriptionKey),
+       │                      ^^^^^^^^
+    25 │       field: providerFieldById[provider.id],
+    26 │     })),
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/settings-page/options.ts:25:32 lint/nursery/noVueRefAsOperand ━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    23 │       label: t(provider.nameKey),
+    24 │       description: t(provider.descriptionKey),
+  > 25 │       field: providerFieldById[provider.id],
+       │                                ^^^^^^^^
+    26 │     })),
+    27 │   );
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/usePagination.ts:33:60 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    31 │   );
+    32 │   const pageNumbers = computed(() =>
+  > 33 │     Array.from({ length: totalPages.value }, (_, index) => index + FIRST_PAGE),
+       │                                                            ^^^^^
+    34 │   );
+    35 │   const itemsForCurrentPage = computed(() => {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/composables/useSTT.ts:83:8 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━
+
+  × This function has too many lines (109). Maximum allowed is 60.
+  
+     81 │  * otherwise falls back to Web Speech API.
+     82 │  */
+   > 83 │ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 84 │   const { settings: appSettings } = useSettings();
+         ...
+  > 215 │     isSupported: readonly(isSupported),
+  > 216 │   };
+  > 217 │ }
+        │ ^
+    218 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/client/composables/useScoreColor.ts:9:33 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━
+
+  × Use Number.NaN instead of the equivalent global.
+  
+     8 │ function resolveScoreLevel(score: number | undefined): ScoreLevel {
+   > 9 │   if (!Number.isFinite(score ?? NaN)) return "unknown";
+       │                                 ^^^
+    10 │   const s = score ?? 0;
+    11 │   if (s >= SCORE_PASS_THRESHOLD) return "pass";
+  
+  i ES2015 moved some globals into the Number namespace for consistency.
+  
+  i Safe fix: Use Number.NaN instead.
+  
+     7  7 │   
+     8  8 │   function resolveScoreLevel(score: number | undefined): ScoreLevel {
+     9    │ - ··if·(!Number.isFinite(score·??·NaN))·return·"unknown";
+        9 │ + ··if·(!Number.isFinite(score·??·Number.NaN))·return·"unknown";
+    10 10 │     const s = score ?? 0;
+    11 11 │     if (s >= SCORE_PASS_THRESHOLD) return "pass";
+  
+
+packages/client/composables/useSkillMapping.ts:263:7 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    261 │         context.t("apiErrors.skills.createMappingFailed"),
+    262 │       );
+  > 263 │       await fetchMappings();
+        │       ^^^^^^^^^^^^^^^^^^^^^^
+    264 │     });
+    265 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    263 │ ······await·await·fetchMappings();
+        │             ++++++                
+
+packages/client/composables/useSkillMapping.ts:272:7 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    270 │         context.t("apiErrors.skills.updateMappingFailed"),
+    271 │       );
+  > 272 │       await fetchMappings();
+        │       ^^^^^^^^^^^^^^^^^^^^^^
+    273 │     });
+    274 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    272 │ ······await·await·fetchMappings();
+        │             ++++++                
+
+packages/client/composables/useSkillMapping.ts:279:7 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    277 │       const { error } = await context.api.skills.mappings({ id }).delete();
+    278 │       assertApiResponse(error, context.t("apiErrors.skills.deleteMappingFailed"));
+  > 279 │       await fetchMappings();
+        │       ^^^^^^^^^^^^^^^^^^^^^^
+    280 │     });
+    281 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    279 │ ······await·await·fetchMappings();
+        │             ++++++                
+
+packages/client/constants/layout.ts:322:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+    321 │ /** Re-export extended tokens from layout-tokens (public API stays ~/constants/layout). */
+  > 322 │ export {
+        │ ^^^^^^^^
+  > 323 │   CIRCULAR_BADGE_CLASS,
+         ...
+  > 383 │   WIDTH_TOKEN_CLASS,
+  > 384 │   type WidthToken,
+  > 385 │ } from "./layout-tokens";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    386 │ 
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+packages/client/error.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "error" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import {
+        ...
+  > 25 │   return props.error.statusMessage || props.error.message || t("errorPage.fallbackMessage");
+  > 26 │ });
+       │ ^^^
+    27 │ </script>
+    28 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/layouts/default.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "default" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import {
+        ...
+  > 83 │   desktopMediaQueryList = null;
+  > 84 │ });
+       │ ^^^
+    85 │ </script>
+    86 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/ai/chat.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "chat" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { useI18n } from "vue-i18n";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 
+   > 4 │ definePageMeta({
+        ...
+  > 52 │   description: t("aiChatPage.seoDescription"),
+  > 53 │ });
+       │ ^^^
+    54 │ </script>
+    55 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/ai/dashboard.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "dashboard" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import {
+   > 4 │   STACK_SPACE_Y_TOKEN_CLASS,
+        ...
+  > 23 │ 
+  > 24 │ const page = reactive(useAIDashboardPage());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ </script>
+    26 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/ai/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ 
+        ...
+  > 14 │ 
+  > 15 │ await navigateTo(APP_ROUTES.aiChat, { replace: true });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ </script>
+    17 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/automation/email.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━
+
+  × This Component's name "email" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import {
+       │ ^^^^^^^^
+   > 3 │ 
+   > 4 │   FLEX_GAP_TOKEN_CLASS,
+        ...
+  > 47 │   description: t("automation.email.pageDescription"),
+  > 48 │ });
+       │ ^^^
+    49 │ </script>
+    50 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/automation/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import {
+        │ ^^^^^^^^
+    > 3 │   FLEX_GAP_TOKEN_CLASS,
+    > 4 │   PADDING_TOKEN_CLASS,
+         ...
+  > 108 │   description: t("automation.hub.pageDescription"),
+  > 109 │ });
+        │ ^^^
+    110 │ </script>
+    111 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/automation/index.vue:88:49 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    86 │ const readinessIssueCount = computed(() =>
+    87 │   capabilityEntries.value
+  > 88 │     ? capabilityEntries.value.filter((entry) => entry.issues.length > 0).length
+       │                                                 ^^^^^
+    89 │     : 0,
+    90 │ );
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+packages/client/pages/automation/runs/[id].vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━
+
+  × This Component's name "[id]" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 
+   > 4 │ definePageMeta({
+        ...
+  > 37 │   description: t("automation.hub.cards.runHistory.description"),
+  > 38 │ });
+       │ ^^^
+    39 │ </script>
+    40 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/automation/scraper.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━
+
+  × This Component's name "scraper" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    > 3 │ import { computed, ref, watch } from "vue";
+    > 4 │ import { useI18n } from "vue-i18n";
+         ...
+   > 98 │   scheduledRunAt[target] = value;
+   > 99 │ }
+        │ ^
+    100 │ </script>
+    101 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/cover-letter/[id].vue:77:12 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    75 │   return formData.contentText
+    76 │     .trim()
+  > 77 │     .split(/\n{2,}/)
+       │            ^^^^^^^^
+    78 │     .map((section) => section.trim())
+    79 │     .filter((section) => section.length > 0).length;
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+packages/client/pages/cover-letter/[id].vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━
+
+  × This Component's name "[id]" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import {
+        │ ^^^^^^^^
+    > 3 │   COVER_LETTER_DEFAULT_TEMPLATE,
+    > 4 │   type CoverLetterTemplate,
+         ...
+  > 219 │   $toast.success(t("coverLetterDetailPage.toasts.exported"));
+  > 220 │ }
+        │ ^
+    221 │ </script>
+    222 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/cover-letter/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
+        ...
+  > 71 │ );
+  > 72 │ const hasCoverLetters = computed(() => coverLetters.length > 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ </script>
+    74 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/docs/api.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "api" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { useI18n } from "vue-i18n";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { definePageMeta, useSeoMeta } from "#imports";
+   > 4 │ 
+        ...
+  > 37 │   API_TESTER_DIALOG_DESCRIPTION_ID,
+  > 38 │ } = useApiDocsPage(t);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    39 │ </script>
+    40 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/gamification.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "gamification" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    > 3 │ 
+    > 4 │ definePageMeta({
+         ...
+  > 161 │   $toast.success(t("gamificationPage.challengeCompletionToast"));
+  > 162 │ }
+        │ ^
+    163 │ </script>
+    164 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 
+   > 4 │ definePageMeta({
+        ...
+  > 37 │   description: t(DASHBOARD_COPY_KEYS.seoDescription),
+  > 38 │ });
+       │ ^^^
+    39 │ </script>
+    40 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/interview/history.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━
+
+  × This Component's name "history" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+   > 4 │ 
+        ...
+  > 42 │   description: t("interviewHub.seoDescription"),
+  > 43 │ });
+       │ ^^^
+    44 │ </script>
+    45 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/interview/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { useI18n } from "vue-i18n";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import {
+   > 4 │   FLEX_GAP_TOKEN_CLASS,
+        ...
+  > 75 │   selectJobById,
+  > 76 │ } = useInterviewHubPage();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ </script>
+    78 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/interview/session.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━
+
+  × This Component's name "session" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ definePageMeta({
+       │ ^^^^^^^^^^^^^^^^
+   > 3 │   middleware: ["auth"],
+   > 4 │ });
+        ...
+  > 14 │   description: t("interviewHub.seoDescription"),
+  > 15 │ });
+       │ ^^^
+    16 │ </script>
+    17 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/jobs/[id].vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "[id]" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import { MARGIN_TOKEN_CLASS } from "~/constants/layout";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    > 3 │ 
+    > 4 │ definePageMeta({
+         ...
+  > 136 │ const formatPlatformLabel = (value: string): string => platformLabel(t, value);
+  > 137 │ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value);
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    138 │ </script>
+    139 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/jobs/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ definePageMeta({
+       │ ^^^^^^^^^^^^^^^^
+   > 3 │   middleware: ["auth"],
+   > 4 │ });
+        ...
+  > 33 │ });
+  > 34 │ const page = useJobsIndexPage();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ </script>
+    36 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/portfolio/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import {
+        ...
+  > 90 │   Object.assign(projectForm, value);
+  > 91 │ }
+       │ ^
+    92 │ </script>
+    93 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/portfolio/preview.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━
+
+  × This Component's name "preview" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ definePageMeta({
+       │ ^^^^^^^^^^^^^^^^
+   > 3 │   middleware: ["auth"],
+   > 4 │ });
+        ...
+  > 61 │   await exportPortfolio(format);
+  > 62 │ }
+       │ ^
+    63 │ </script>
+    64 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/resume/build.vue:114:24 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    112 │   aiQuestions.value = questions;
+    113 │   currentQuestionIndex.value = 0;
+  > 114 │   Object.keys(answers).forEach((k) => delete answers[k]);
+        │                        ^^^^^^^
+    115 │   questions.forEach((q) => (answers[q.id] = ""));
+    116 │   phase.value = "questions";
+  
+  i Either remove this return or remove the returned value.
+  
+    112 │   aiQuestions.value = questions;
+    113 │   currentQuestionIndex.value = 0;
+  > 114 │   Object.keys(answers).forEach((k) => delete answers[k]);
+        │                                       ^^^^^^^^^^^^^^^^^
+    115 │   questions.forEach((q) => (answers[q.id] = ""));
+    116 │   phase.value = "questions";
+  
+
+packages/client/pages/resume/build.vue:115:13 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method should not return a value.
+  
+    113 │   currentQuestionIndex.value = 0;
+    114 │   Object.keys(answers).forEach((k) => delete answers[k]);
+  > 115 │   questions.forEach((q) => (answers[q.id] = ""));
+        │             ^^^^^^^
+    116 │   phase.value = "questions";
+    117 │ }
+  
+  i Either remove this return or remove the returned value.
+  
+    113 │   currentQuestionIndex.value = 0;
+    114 │   Object.keys(answers).forEach((k) => delete answers[k]);
+  > 115 │   questions.forEach((q) => (answers[q.id] = ""));
+        │                            ^^^^^^^^^^^^^^^^^^^^
+    116 │   phase.value = "questions";
+    117 │ }
+  
+
+packages/client/pages/resume/build.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "build" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    > 3 │ 
+    > 4 │ definePageMeta({
+         ...
+  > 177 │   errorMessage.value = "";
+  > 178 │ }
+        │ ^
+    179 │ </script>
+    180 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/resume/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import {
+        ...
+  > 76 │   updateSkills,
+  > 77 │ } = useResumePage();
+       │ ^^^^^^^^^^^^^^^^^^^^
+    78 │ </script>
+    79 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/resume/preview.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━
+
+  × This Component's name "preview" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, PRIMARY_ACTION_CLASS } from "~/constants/layout";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 
+   > 4 │ definePageMeta({
+        ...
+  > 87 │   window.print();
+  > 88 │ }
+       │ ^
+    89 │ </script>
+    90 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/settings.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "settings" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    > 3 │ 
+    > 4 │ definePageMeta({
+         ...
+  > 108 │   { immediate: true },
+  > 109 │ );
+        │ ^^
+    110 │ </script>
+    111 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/setup.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "setup" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { useI18n } from "vue-i18n";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import {
+   > 4 │   FLUID_WIDTH_CLASS,
+        ...
+  > 48 │   description: t("setup.seoDescription"),
+  > 49 │ });
+       │ ^^^
+    50 │ </script>
+    51 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/skills/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import SkillsPageFilters from "~/components/skills/SkillsPageFilters.vue";
+        ...
+  > 73 │   },
+  > 74 │ );
+       │ ^^
+    75 │ </script>
+    76 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/skills/pathways.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━
+
+  × This Component's name "pathways" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import { APP_ROUTES } from "@bao/shared/constants/routes";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ import { useI18n } from "vue-i18n";
+   > 4 │ import { definePageMeta, useSeoMeta } from "#imports";
+        ...
+  > 17 │   description: t("skillsPathwaysPage.seoDescription"),
+  > 18 │ });
+       │ ^^^
+    19 │ </script>
+    20 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/studios/[id].vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━
+
+  × This Component's name "[id]" only contains one word.
+  
+      1 │ <script setup lang="ts">
+    > 2 │ import {
+        │ ^^^^^^^^
+    > 3 │   FLEX_GAP_TOKEN_CLASS,
+    > 4 │   FLUID_WIDTH_CLASS,
+         ...
+  > 114 │   return location?.trim() || t("studioDetail.unknownLocation");
+  > 115 │ }
+        │ ^
+    116 │ </script>
+    117 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/studios/analytics.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━
+
+  × This Component's name "analytics" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ import {
+       │ ^^^^^^^^
+   > 3 │   FLEX_GAP_TOKEN_CLASS,
+   > 4 │   FLUID_WIDTH_CLASS,
+        ...
+  > 39 │   description: t("studiosIndex.seoDescription"),
+  > 40 │ });
+       │ ^^^
+    41 │ </script>
+    42 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/pages/studios/index.vue:2:1 lint/style/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━
+
+  × This Component's name "index" only contains one word.
+  
+     1 │ <script setup lang="ts">
+   > 2 │ definePageMeta({
+       │ ^^^^^^^^^^^^^^^^
+   > 3 │   middleware: ["auth"],
+   > 4 │ });
+        ...
+  > 30 │     page.totalStudios.value === 0,
+  > 31 │ );
+       │ ^^
+    32 │ </script>
+    33 │ 
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+  i The component name was inferred from the file name.
+  
+
+packages/client/tests/bao-ssot-compliance.spec.ts:90:53 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (68). Maximum allowed is 60.
+  
+     88 │ // ── Token coverage ────────────────────────────────────────────────────
+     89 │ 
+   > 90 │ describe("Layout SSOT — Layout token declarations", () => {
+        │                                                     ^^^^^^^
+   > 91 │   it("layout.ts declares shell and page tokens", () => {
+         ...
+  > 165 │   });
+  > 166 │ });
+        │ ^
+    167 │ 
+    168 │ // ── Icon registry ─────────────────────────────────────────────────────
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/scraper/src/job-apply/verify-run.ts:84:36 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (70). Maximum allowed is 60.
+  
+     82 │  * Posts multipart form fields to the job fixture submit URL without Playwright.
+     83 │  */
+   > 84 │ export const emitVerificationRun = async (): Promise<number> => {
+        │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 85 │   const inputResult = await parseScriptInput(jobApplyScriptEnvelopeSchema);
+         ...
+  > 164 │   emitter.emitResult(result);
+  > 165 │   return 0;
+  > 166 │ };
+        │ ^
+    167 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/server/src/routes/automation-integration-flows.ts:36:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    34 │   });
+    35 │   if (response.status !== 200) {
+  > 36 │     throw new Error("Manual automation run failed to start: status " + String(response.status));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │   }
+    38 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     34  34 │     });
+     35  35 │     if (response.status !== 200) {
+     36     │ - ····throw·new·Error("Manual·automation·run·failed·to·start:·status·"·+·String(response.status));
+         36 │ + ····throw·new·Error(`Manual·automation·run·failed·to·start:·status·${String(response.status)}`);
+     37  37 │     }
+     38  38 │   
+  
+
+packages/server/src/routes/automation-integration-flows.ts:74:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    72 │   });
+    73 │   if (response.status !== 200) {
+  > 74 │     throw new Error("Scheduled automation run failed to start: status " + String(response.status));
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │   }
+    76 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     72  72 │     });
+     73  73 │     if (response.status !== 200) {
+     74     │ - ····throw·new·Error("Scheduled·automation·run·failed·to·start:·status·"·+·String(response.status));
+         74 │ + ····throw·new·Error(`Scheduled·automation·run·failed·to·start:·status·${String(response.status)}`);
+     75  75 │     }
+     76  76 │   
+  
+
+packages/server/src/routes/automation-integration-flows.ts:142:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    140 │   });
+    141 │   if (response.status !== 200) {
+  > 142 │     throw new Error("Email automation failed: status " + String(response.status));
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    143 │   }
+    144 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    140 140 │     });
+    141 141 │     if (response.status !== 200) {
+    142     │ - ····throw·new·Error("Email·automation·failed:·status·"·+·String(response.status));
+        142 │ + ····throw·new·Error(`Email·automation·failed:·status·${String(response.status)}`);
+    143 143 │     }
+    144 144 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:143:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    141 │   const response = await requestJson(path, emailResponseBodySchema, init);
+    142 │   if (response.body === null) {
+  > 143 │     throw new Error("Empty email response body from " + path);
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    144 │   }
+    145 │   return { status: response.status, body: response.body };
+  
+  i Unsafe fix: Use a template literal.
+  
+    141 141 │     const response = await requestJson(path, emailResponseBodySchema, init);
+    142 142 │     if (response.body === null) {
+    143     │ - ····throw·new·Error("Empty·email·response·body·from·"·+·path);
+        143 │ + ····throw·new·Error(`Empty·email·response·body·from·${path}`);
+    144 144 │     }
+    145 145 │     return { status: response.status, body: response.body };
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:223:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    221 │       return run?.status === "success" || run?.status === "error";
+    222 │     },
+  > 223 │     "Timed out waiting for automation run " + runId + " to complete",
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    224 │   );
+    225 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    221 221 │         return run?.status === "success" || run?.status === "error";
+    222 222 │       },
+    223     │ - ····"Timed·out·waiting·for·automation·run·"·+·runId·+·"·to·complete",
+        223 │ + ····`Timed·out·waiting·for·automation·run·${runId}·to·complete`,
+    224 224 │     );
+    225 225 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:227:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    226 │   if (!lastRun) {
+  > 227 │     throw new Error("Automation run " + runId + " did not produce a terminal state.");
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    228 │   }
+    229 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    225 225 │   
+    226 226 │     if (!lastRun) {
+    227     │ - ····throw·new·Error("Automation·run·"·+·runId·+·"·did·not·produce·a·terminal·state.");
+        227 │ + ····throw·new·Error(`Automation·run·${runId}·did·not·produce·a·terminal·state.`);
+    228 228 │     }
+    229 229 │   
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:264:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    262 │     await waitForCondition(
+    263 │       () => Promise.resolve(terminalEvent !== null),
+  > 264 │       "Timed out waiting for websocket events for run " + runId,
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    265 │       Date.now() + RUN_TIMEOUT_MS,
+    266 │     );
+  
+  i Unsafe fix: Use a template literal.
+  
+    262 262 │       await waitForCondition(
+    263 263 │         () => Promise.resolve(terminalEvent !== null),
+    264     │ - ······"Timed·out·waiting·for·websocket·events·for·run·"·+·runId,
+        264 │ + ······`Timed·out·waiting·for·websocket·events·for·run·${runId}`,
+    265 265 │         Date.now() + RUN_TIMEOUT_MS,
+    266 266 │       );
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:268:23 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    266 │     );
+    267 │     if (!terminalEvent) {
+  > 268 │       throw new Error("Automation websocket did not emit a terminal event for run " + runId);
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    269 │     }
+    270 │     return terminalEvent;
+  
+  i Unsafe fix: Use a template literal.
+  
+    266 266 │       );
+    267 267 │       if (!terminalEvent) {
+    268     │ - ······throw·new·Error("Automation·websocket·did·not·emit·a·terminal·event·for·run·"·+·runId);
+        268 │ + ······throw·new·Error(`Automation·websocket·did·not·emit·a·terminal·event·for·run·${runId}`);
+    269 269 │       }
+    270 270 │       return terminalEvent;
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:109:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    107 │   if (!responseContentType.includes("application/json")) {
+    108 │     throw new Error(
+  > 109 │       "Expected JSON response from " + path + ", got content-type " + responseContentType,
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │     );
+    111 │   }
+  
+  i Unsafe fix: Use a template literal.
+  
+    107 107 │     if (!responseContentType.includes("application/json")) {
+    108 108 │       throw new Error(
+    109     │ - ······"Expected·JSON·response·from·"·+·path·+·",·got·content-type·"·+·responseContentType,
+        109 │ + ······`Expected·JSON·response·from·${path},·got·content-type·${responseContentType}`,
+    110 110 │       );
+    111 111 │     }
+  
+
+packages/server/src/routes/automation-integration-helpers.ts:132:21 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    130 │   const response = await requestJson(path, rpaRunExecutionEnvelopeSchema, init);
+    131 │   if (response.body === null) {
+  > 132 │     throw new Error("Empty execution envelope from " + path);
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │   }
+    134 │   return { status: response.status, body: response.body };
+  
+  i Unsafe fix: Use a template literal.
+  
+    130 130 │     const response = await requestJson(path, rpaRunExecutionEnvelopeSchema, init);
+    131 131 │     if (response.body === null) {
+    132     │ - ····throw·new·Error("Empty·execution·envelope·from·"·+·path);
+        132 │ + ····throw·new·Error(`Empty·execution·envelope·from·${path}`);
+    133 133 │     }
+    134 134 │     return { status: response.status, body: response.body };
+  
+
+packages/server/src/routes/automation.integration.test.ts:57:26 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    55 │   }
+    56 │ 
+  > 57 │   setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ });
+    59 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     55  55 │     }
+     56  56 │   
+     57     │ - ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·"ws://127.0.0.1:"·+·String(port));
+         57 │ + ··setIntegrationBaseUrls(`http://127.0.0.1:${String(port)}`,·"ws://127.0.0.1:"·+·String(port));
+     58  58 │   });
+     59  59 │   
+  
+
+packages/server/src/routes/automation.integration.test.ts:57:62 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    55 │   }
+    56 │ 
+  > 57 │   setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+       │                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ });
+    59 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     55  55 │     }
+     56  56 │   
+     57     │ - ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·"ws://127.0.0.1:"·+·String(port));
+         57 │ + ··setIntegrationBaseUrls("http://127.0.0.1:"·+·String(port),·`ws://127.0.0.1:${String(port)}`);
+     58  58 │   });
+     59  59 │   
+  
+
+packages/server/src/routes/openai-v1-route-support.ts:138:45 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (69). Maximum allowed is 60.
+  
+    136 │ };
+    137 │ 
+  > 138 │ export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
+        │                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 139 │   const models = await listOpenAIV1Models();
+         ...
+  > 217 │   });
+  > 218 │ };
+        │ ^
+    219 │ 
+    220 │ export const createOpenAIV1ChatCompletionStream = async (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/server/src/routes/openai-v1.test.ts:83:30 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (79). Maximum allowed is 60.
+  
+     81 │ });
+     82 │ 
+   > 83 │ describe("openai v1 routes", () => {
+        │                              ^^^^^^^
+   > 84 │   test("GET /v1/models returns OpenAI list envelope", async () => {
+         ...
+  > 173 │     expect(text.includes("[DONE]")).toBe(true);
+  > 174 │   });
+  > 175 │ });
+        │ ^
+    176 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/server/src/routes/openapi-tags.test.ts:91:79 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 21 detected (max: 15).
+  
+    90 │ describe("openapi tags", () => {
+  > 91 │   test("generated OpenAPI spec tags every documented API operation", async () => {
+       │                                                                               ^^^
+    92 │     const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, { Authorization: `Bearer ${TEST_AUTH_KEY}` });
+    93 │     expect(response.status).toBe(200);
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+packages/server/src/routes/settings-route-update-support.ts:243:29 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    241 │   localModelName?: string;
+    242 │   emailTransportPassword?: string;
+  > 243 │ }): Partial<SettingsInsert> => {
+        │                             ^^^
+    244 │   const secretWrites = [
+    245 │     body.geminiApiKey,
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+packages/shared/src/utils/automation-browser-launch-failure.test.ts:12:51 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (99). Maximum allowed is 60.
+  
+     10 │ import { CURSOR_SANDBOX_BROWSER_CACHE_MARKER } from "./playwright-browsers-path";
+     11 │ 
+   > 12 │ describe("browser launch failure classification", () => {
+        │                                                   ^^^^^^^
+   > 13 │   test("classifies missing browser executable distinctly from SEGV", () => {
+         ...
+  > 117 │   });
+  > 118 │ });
+        │ ^
+    119 │ 
+    120 │ describe("browser launch diagnostic sanitization", () => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+packages/shared/src/utils/error-helpers.ts:22:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 21 detected (max: 15).
+  
+    20 │  * @param fallback - Fallback when no message can be extracted. Defaults to API_ERROR_UNKNOWN.
+    21 │  */
+  > 22 │ export function toErrorMessage<T>(error: T, fallback?: string): string {
+       │                 ^^^^^^^^^^^^^^
+    23 │   if (error instanceof Error) {
+    24 │     const message = toMessage(error.message);
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+packages/shared/src/utils/playwright-browsers-path.test.ts:19:51 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (61). Maximum allowed is 60.
+  
+     17 │     existing.has(browsersPath);
+     18 │ 
+   > 19 │ describe("playwright browsers path sanitization", () => {
+        │                                                   ^^^^^^^
+   > 20 │   test("detects cursor-sandbox browser caches as polluted", () => {
+         ...
+  > 108 │     expect(env.PLAYWRIGHT_HOST_PLATFORM_OVERRIDE).toBeUndefined();
+  > 109 │   });
+  > 110 │ });
+        │ ^
+    111 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-greenhouse-jobs-proof.ts:39:14 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (64). Maximum allowed is 60.
+  
+     37 │ };
+     38 │ 
+   > 39 │ const main = async (): Promise<void> => {
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 40 │   await mkdir(join(OUT, "stills"), { recursive: true });
+         ...
+  > 112 │   }
+  > 113 │ };
+        │ ^
+    114 │ 
+    115 │ await main();
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-interaction-burndown.ts:140:17 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (71). Maximum allowed is 60.
+  
+    139 │ const collectChromeSignals = async (page: Page) =>
+  > 140 │   page.evaluate(() => {
+        │                 ^^^^^^^
+  > 141 │     const collapseWs = (value: string): string => {
+         ...
+  > 227 │     };
+  > 228 │   });
+        │   ^
+    229 │ 
+    230 │ const probeRouteShell = async (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-interaction-burndown.ts:301:39 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 31 detected (max: 15).
+  
+    299 │ const listClickableControlLabels = async (page: Page): Promise<readonly string[]> => {
+    300 │   const evaluated = await settle(
+  > 301 │     page.evaluate((maxClicks: number) => {
+        │                                       ^^^
+    302 │       const main = document.querySelector("main");
+    303 │       if (!main) {
+  
+  i Please refactor this function to reduce its complexity score from 31 to the max allowed complexity 15.
+  
+
+scripts/browser-interaction-burndown.ts:352:33 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 17 detected (max: 15).
+  
+    350 │   // settle(evaluate) survives SPA navigations that destroy the prior execution context.
+    351 │   const clickResult = await settle(
+  > 352 │     page.evaluate((targetLabel) => {
+        │                                 ^^^
+    353 │       const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
+    354 │       const controls = [...document.querySelectorAll("main button, main a.btn, main a[href]")];
+  
+  i Please refactor this function to reduce its complexity score from 17 to the max allowed complexity 15.
+  
+
+scripts/browser-interaction-burndown.ts:139:30 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (72). Maximum allowed is 60.
+  
+    137 │ };
+    138 │ 
+  > 139 │ const collectChromeSignals = async (page: Page) =>
+        │                              ^^^^^^^^^^^^^^^^^^^^^
+  > 140 │   page.evaluate(() => {
+         ...
+  > 227 │     };
+  > 228 │   });
+        │   ^^
+    229 │ 
+    230 │ const probeRouteShell = async (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-portal-toggle-scrape-proof.ts:85:14 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (94). Maximum allowed is 60.
+  
+     83 │ };
+     84 │ 
+   > 85 │ const main = async (): Promise<void> => {
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 86 │   await mkdir(join(OUT, "stills"), { recursive: true });
+         ...
+  > 193 │   }
+  > 194 │ };
+        │ ^
+    195 │ 
+    196 │ await main();
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-product-demo.ts:288:31 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (97). Maximum allowed is 60.
+  
+    286 │ };
+    287 │ 
+  > 288 │ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 289 │   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resumeBuild}`, {
+         ...
+  > 398 │   return true;
+  > 399 │ };
+        │ ^
+    400 │ 
+    401 │ const demoPortfolio = async (page: Page): Promise<void> => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-product-demo.ts:496:23 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (65). Maximum allowed is 60.
+  
+    494 │ };
+    495 │ 
+  > 496 │ const demoInterview = async (page: Page): Promise<void> => {
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 497 │   await page.goto(`${CLIENT_BASE}${APP_ROUTES.interview}`, {
+         ...
+  > 567 │   await shot(page, "18-interview-feedback");
+  > 568 │ };
+        │ ^
+    569 │ 
+    570 │ type DisplayRecorder = {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-product-demo.ts:574:30 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (79). Maximum allowed is 60.
+  
+    572 │ };
+    573 │ 
+  > 574 │ const startDisplayRecorder = async (): Promise<DisplayRecorder> => {
+        │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 575 │   const display = process.env.DISPLAY ?? ":1";
+         ...
+  > 664 │   };
+  > 665 │ };
+        │ ^
+    666 │ 
+    667 │ const main = async (): Promise<void> => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-product-demo.ts:667:14 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (103). Maximum allowed is 60.
+  
+    665 │ };
+    666 │ 
+  > 667 │ const main = async (): Promise<void> => {
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 668 │   await mkdir(join(OUT, "stills"), { recursive: true });
+         ...
+  > 783 │   }
+  > 784 │ };
+        │ ^
+    785 │ 
+    786 │ await main();
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-visual-proof.ts:134:85 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    132 │         }
+    133 │         const banned = new RegExp(bannedSource, "i");
+  > 134 │         const button = Array.from(main.querySelectorAll("button")).find((candidate) => {
+        │                                                                                     ^^^
+    135 │           if (!(candidate instanceof HTMLButtonElement)) {
+    136 │             return false;
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+scripts/browser-record-visual-proof.ts:64:14 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━
+
+  × This function has too many lines (136). Maximum allowed is 60.
+  
+     62 │ };
+     63 │ 
+   > 64 │ const main = async (): Promise<void> => {
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 65 │   await mkdir(OUT_DIR, { recursive: true });
+         ...
+  > 227 │   }
+  > 228 │ };
+        │ ^
+    229 │ 
+    230 │ await main();
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-visual-proof.ts:94:34 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━
+
+  × This function has too many lines (69). Maximum allowed is 60.
+  
+     92 │   });
+     93 │ 
+   > 94 │   await mapSequential(VIEWPORTS, async (viewport) => {
+        │                                  ^^^^^^^^^^^^^^^^^^^^^
+   > 95 │     await page.setViewportSize({ width: viewport.width, height: viewport.height });
+         ...
+  > 178 │     });
+  > 179 │   });
+        │   ^
+    180 │ 
+    181 │   const video = page.video();
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-record-visual-proof.ts:97:33 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━
+
+  × This function has too many lines (66). Maximum allowed is 60.
+  
+     95 │     await page.setViewportSize({ width: viewport.width, height: viewport.height });
+     96 │     await waitForPageReady(page, 400);
+   > 97 │     await mapSequential(ROUTES, async (route) => {
+        │                                 ^^^^^^^^^^^^^^^^^^
+   > 98 │       await page.goto(`${CLIENT_BASE}${route.path}`, {
+         ...
+  > 177 │       );
+  > 178 │     });
+        │     ^
+    179 │   });
+    180 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-visual-smoke.ts:170:25 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    168 │   route: string,
+    169 │   viewportName: string,
+  > 170 │ ): Promise<RouteResult> => {
+        │                         ^^^
+    171 │   const consoleErrors: string[] = [];
+    172 │   const pageErrors: string[] = [];
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+scripts/browser-visual-smoke.ts:70:28 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━
+
+  × This function has too many lines (77). Maximum allowed is 60.
+  
+     68 │ };
+     69 │ 
+   > 70 │ const collectPageSignals = async (page: Page) =>
+        │                            ^^^^^^^^^^^^^^^^^^^^^
+   > 71 │   page.evaluate((aiRoutePrefix: string) => {
+         ...
+  > 162 │     };
+  > 163 │   }, APP_ROUTES.ai);
+        │   ^^^^^^^^^^^^^^^^^
+    164 │ 
+    165 │ const smokeRoute = async (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-visual-smoke.ts:71:17 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━
+
+  × This function has too many lines (76). Maximum allowed is 60.
+  
+     70 │ const collectPageSignals = async (page: Page) =>
+   > 71 │   page.evaluate((aiRoutePrefix: string) => {
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 72 │     const collapse = (value: string): string =>
+         ...
+  > 162 │     };
+  > 163 │   }, APP_ROUTES.ai);
+        │   ^
+    164 │ 
+    165 │ const smokeRoute = async (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/browser-visual-smoke.ts:165:20 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━
+
+  × This function has too many lines (65). Maximum allowed is 60.
+  
+    163 │   }, APP_ROUTES.ai);
+    164 │ 
+  > 165 │ const smokeRoute = async (
+        │                    ^^^^^^^
+  > 166 │   page: Page,
+         ...
+  > 248 │   };
+  > 249 │ };
+        │ ^
+    250 │ 
+    251 │ const mapSequential = async <TItem, TResult>(
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ai-annotation-provenance.test.ts:8:53 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (75). Maximum allowed is 60.
+  
+     6 │ const NON_AI_PAGE = "packages/client/pages/settings.vue";
+     7 │ 
+   > 8 │ describe("collectAiProvenanceViolationsForContent", () => {
+       │                                                     ^^^^^^^
+   > 9 │   test("flags AI surface rendering aiMessage without provider", () => {
+        ...
+  > 88 │     expect(violations).toHaveLength(0);
+  > 89 │   });
+  > 90 │ });
+       │ ^
+    91 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-biome-no-softenings.test.ts:7:55 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (101). Maximum allowed is 60.
+  
+      5 │ const VALID_BIOME = readFileSync(new URL("../biome.json", import.meta.url), "utf8");
+      6 │ 
+    > 7 │ describe("collectBiomeSofteningViolationsForContent", () => {
+        │                                                       ^^^^^^^
+    > 8 │   test("accepts the repo biome.json without softenings", () => {
+         ...
+  > 129 │     expect(violations.some((v) => v.message.includes("linter.enabled=false"))).toBe(true);
+  > 130 │   });
+  > 131 │ });
+        │ ^
+    132 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-biome-no-softenings.ts:33:9 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 21 detected (max: 15).
+  
+    31 │   violations: ValidationViolation[],
+    32 │   allowOffRules: Set<string>,
+  > 33 │ ): void => {
+       │         ^^^
+    34 │   if (!isRecord(rules)) {
+    35 │     return;
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+scripts/validate-biome-no-softenings.ts:72:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 37 detected (max: 15).
+  
+    70 │ export const collectBiomeSofteningViolationsForContent = (
+    71 │   content: string,
+  > 72 │ ): ValidationViolation[] => {
+       │                          ^^^
+    73 │   const violations: ValidationViolation[] = [];
+    74 │   const config = JSON.parse(content) as JsonValue;
+  
+  i Please refactor this function to reduce its complexity score from 37 to the max allowed complexity 15.
+  
+
+scripts/validate-biome-no-softenings.ts:70:58 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (108). Maximum allowed is 60.
+  
+     68 │ };
+     69 │ 
+   > 70 │ export const collectBiomeSofteningViolationsForContent = (
+        │                                                          ^
+   > 71 │   content: string,
+         ...
+  > 213 │   return violations;
+  > 214 │ };
+        │ ^
+    215 │ 
+    216 │ const collectViolations = (): ValidationViolation[] => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-daisyui-contracts.ts:196:93 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 17 detected (max: 15).
+  
+    194 │ };
+    195 │ 
+  > 196 │ const collectFileLevelPartViolations = (filePath: string, fileContent: string): Violation[] => {
+        │                                                                                             ^^^
+    197 │   const firstLineByClass = new Map<string, number>();
+    198 │   const classTokens = new Set<string>();
+  
+  i Please refactor this function to reduce its complexity score from 17 to the max allowed complexity 15.
+  
+
+scripts/validate-no-dead-vue-components.test.ts:4:57 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (134). Maximum allowed is 60.
+  
+      2 │ import { collectDeadVueComponentViolationsForContent } from "./validate-no-dead-vue-components";
+      3 │ 
+    > 4 │ describe("collectDeadVueComponentViolationsForContent", () => {
+        │                                                         ^^^^^^^
+    > 5 │   test("flags Vue components with no template or import consumer", () => {
+         ...
+  > 160 │     expect(violations).toHaveLength(1);
+  > 161 │   });
+  > 162 │ });
+        │ ^
+    163 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-no-eden-dual-path.test.ts:4:40 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (69). Maximum allowed is 60.
+  
+     2 │ import { collectEdenDualPathViolationsForContent } from "./validate-no-eden-dual-path";
+     3 │ 
+   > 4 │ describe("validate-no-eden-dual-path", () => {
+       │                                        ^^^^^^^
+   > 5 │   test("requestApi automation endpoint fails", () => {
+        ...
+  > 82 │     expect(violations.length).toBe(1);
+  > 83 │   });
+  > 84 │ });
+       │ ^
+    85 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-no-eden-dual-path.ts:49:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 42 detected (max: 15).
+  
+    47 │   filePath: string,
+    48 │   content: string,
+  > 49 │ ): ValidationViolation[] => {
+       │                          ^^^
+    50 │   if (
+    51 │     isAllowedFile(filePath) &&
+  
+  i Please refactor this function to reduce its complexity score from 42 to the max allowed complexity 15.
+  
+
+scripts/validate-no-eden-dual-path.ts:46:56 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━
+
+  × This function has too many lines (83). Maximum allowed is 60.
+  
+     44 │   filePath === "packages/client/composables/useResume.ts";
+     45 │ 
+   > 46 │ export const collectEdenDualPathViolationsForContent = (
+        │                                                        ^
+   > 47 │   filePath: string,
+         ...
+  > 161 │   return violations;
+  > 162 │ };
+        │ ^
+    163 │ 
+    164 │ const collectViolations = async (): Promise<ValidationViolation[]> => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-no-inline-styles.test.ts:6:52 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (77). Maximum allowed is 60.
+  
+     4 │ const CONSUMER_PATH = "packages/client/components/dashboard/ExampleWidget.vue";
+     5 │ 
+   > 6 │ describe("collectInlineStyleViolationsForContent", () => {
+       │                                                    ^^^^^^^
+   > 7 │   test("flags real inline style attribute on element", () => {
+        ...
+  > 91 │     expect(violations.length).toBeGreaterThan(0);
+  > 92 │   });
+  > 93 │ });
+       │ ^
+    94 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-no-raw-design-tokens.test.ts:9:55 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (126). Maximum allowed is 60.
+  
+      7 │ const CONSUMER_PATH = "packages/client/pages/index.vue";
+      8 │ 
+    > 9 │ describe("collectRawDesignTokenViolationsForContent", () => {
+        │                                                       ^^^^^^^
+   > 10 │   test("flags inline Tailwind spacing utility tokens in vue templates", () => {
+         ...
+  > 150 │     expect(violations.some((v) => v.message.includes("z-[99]"))).toBe(true);
+  > 151 │   });
+  > 152 │ });
+        │ ^
+    153 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ui-aria-labels.test.ts:6:50 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━
+
+  × This function has too many lines (73). Maximum allowed is 60.
+  
+     4 │ const CONSUMER_PATH = "packages/client/components/example/ExampleWidget.vue";
+     5 │ 
+   > 6 │ describe("collectAriaLabelViolationsForContent", () => {
+       │                                                  ^^^^^^^
+   > 7 │   test("flags icon-only buttons without aria-label", () => {
+        ...
+  > 88 │     );
+  > 89 │   });
+  > 90 │ });
+       │ ^
+    91 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ui-canonical-primitives.test.ts:7:61 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (80). Maximum allowed is 60.
+  
+     5 │ const COMPONENT_PATH = "packages/client/components/example/ExampleWidget.vue";
+     6 │ 
+   > 7 │ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
+       │                                                             ^^^^^^^
+   > 8 │   test("flags inline card card-border card-glass literals without SURFACE_GLASS_CARD_CLASS import", () => {
+        ...
+  > 94 │     expect(violations.some((v) => v.message.includes("EmptyState"))).toBe(true);
+  > 95 │   });
+  > 96 │ });
+       │ ^
+    97 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ui-control-dedup.ts:67:25 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 22 detected (max: 15).
+  
+    65 │   filePath: string,
+    66 │   content: string,
+  > 67 │ ): ControlFingerprint[] => {
+       │                         ^^^
+    68 │   const template = extractTemplateBlocks(content);
+    69 │   if (template.length === 0) return [];
+  
+  i Please refactor this function to reduce its complexity score from 22 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-density.ts:82:93 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 21 detected (max: 15).
+  
+    80 │ };
+    81 │ 
+  > 82 │ const collectDensityViolations = (filePath: string, content: string): ValidationViolation[] => {
+       │                                                                                             ^^^
+    83 │   if (isSsotPrimitive(filePath)) return [];
+    84 │   const template = extractTemplateBlocks(content);
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-glass-materials.ts:79:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    77 │   filePath: string,
+    78 │   content: string,
+  > 79 │ ): ValidationViolation[] => {
+       │                          ^^^
+    80 │   if (isSsotSourceFile(filePath)) return [];
+    81 │   const template = extractTemplateBlocks(content);
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-pagination-tables.ts:108:91 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 23 detected (max: 15).
+  
+    106 │ };
+    107 │ 
+  > 108 │ const collectTableViolations = (filePath: string, content: string): ValidationViolation[] => {
+        │                                                                                           ^^^
+    109 │   if (isSsotPrimitive(filePath)) return [];
+    110 │   const template = extractTemplateBlocks(content);
+  
+  i Please refactor this function to reduce its complexity score from 23 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-responsive-overflow.ts:70:94 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+    68 │ };
+    69 │ 
+  > 70 │ const collectOverflowViolations = (filePath: string, content: string): ValidationViolation[] => {
+       │                                                                                              ^^^
+    71 │   if (isSsotSourceFile(filePath)) return [];
+    72 │   const template = extractTemplateBlocks(content);
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-responsive-overflow.ts:70:35 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━
+
+  × This function has too many lines (65). Maximum allowed is 60.
+  
+     68 │ };
+     69 │ 
+   > 70 │ const collectOverflowViolations = (filePath: string, content: string): ValidationViolation[] => {
+        │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 71 │   if (isSsotSourceFile(filePath)) return [];
+         ...
+  > 145 │   return violations;
+  > 146 │ };
+        │ ^
+    147 │ 
+    148 │ export const collectResponsiveOverflowViolationsForContent = (
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ui-ssot-authority.ts:32:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 26 detected (max: 15).
+  
+    30 │   filePath: string,
+    31 │   content: string,
+  > 32 │ ): ValidationViolation[] => {
+       │                          ^^^
+    33 │   if (!VALIDATOR_FILE_PATTERN.test(filePath)) return [];
+    34 │   if (
+  
+  i Please refactor this function to reduce its complexity score from 26 to the max allowed complexity 15.
+  
+
+scripts/validate-ui-stubs-noops.test.ts:8:49 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━
+
+  × This function has too many lines (165). Maximum allowed is 60.
+  
+      6 │ const debtTodoToken = ["TO", "DO"].join("");
+      7 │ 
+    > 8 │ describe("collectStubNoopViolationsForContent", () => {
+        │                                                 ^^^^^^^
+    > 9 │   test("flags inert @click empty-string handler", () => {
+         ...
+  > 191 │     expect(violations.filter((v) => v.message.includes("Dead CTA"))).toHaveLength(0);
+  > 192 │   });
+  > 193 │ });
+        │ ^
+    194 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+scripts/validate-ui-stubs-noops.ts:145:97 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━
+
+  × Excessive complexity of 22 detected (max: 15).
+  
+    143 │ };
+    144 │ 
+  > 145 │ const collectDeadControlViolations = (filePath: string, content: string): ValidationViolation[] => {
+        │                                                                                                 ^^^
+    146 │   const template = extractTemplateBlocks(content);
+    147 │   if (template.length === 0) return [];
+  
+  i Please refactor this function to reduce its complexity score from 22 to the max allowed complexity 15.
+  
+
+Checked 1167 files in 21s. No fixes applied.
+Found 154 errors.
+Found 1 warning.
+Found 10 infos.
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+error: "biome" exited with code 1

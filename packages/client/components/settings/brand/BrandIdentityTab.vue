@@ -14,15 +14,6 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-const BRAND_HINT_IDS = {
-  logoPath: "settings-brand-logo-path-hint",
-  faviconPath: "settings-brand-favicon-path-hint",
-} as const;
-
-const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
-
-const { t } = useI18n();
-
 const brandForm = defineModel<{
   name: string;
   assistantName: string;
@@ -31,6 +22,16 @@ const brandForm = defineModel<{
   logoPath: string;
   faviconPath: string;
 }>("brandForm", { required: true });
+
+
+const BRAND_HINT_IDS = {
+  logoPath: "settings-brand-logo-path-hint",
+  faviconPath: "settings-brand-favicon-path-hint",
+} as const;
+
+const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+
+const { t } = useI18n();
 </script>
 
 <template>

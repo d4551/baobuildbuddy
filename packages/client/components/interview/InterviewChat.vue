@@ -26,6 +26,8 @@ interface Response {
   questionId: string;
   text: string;
 }
+const currentResponse = defineModel<string>("response", { default: "" });
+
 
 const props = withDefaults(
   defineProps<{
@@ -67,7 +69,6 @@ const emit = defineEmits<{
 }>();
 const { t, locale } = useI18n();
 const responseIdSeed = Math.random().toString(36).slice(2, 10);
-const currentResponse = defineModel<string>("response", { default: "" });
 const responseTextareaId = `interview-chat-response-${responseIdSeed}`;
 const responseHintId = `interview-chat-submit-hint-${responseIdSeed}`;
 const completeMessage = computed(() => t(props.completeMessageKey));

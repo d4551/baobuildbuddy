@@ -8,17 +8,18 @@ import {
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
-defineProps<{
-  templateLabel: (template: CoverLetterTemplate) => string;
-  t: (key: string, values?: Record<string, unknown>) => string;
-}>();
-
 const formData = defineModel<{
   company: string;
   position: string;
   template: CoverLetterTemplate;
   contentText: string;
 }>("formData", { required: true });
+
+
+defineProps<{
+  templateLabel: (template: CoverLetterTemplate) => string;
+  t: (key: string, values?: Record<string, unknown>) => string;
+}>();
 </script>
 
 <template>

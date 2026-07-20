@@ -17,6 +17,21 @@ import {
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 
+const location = defineModel<string>("location", { required: true });
+
+const remote = defineModel<boolean>("remote", { required: true });
+
+const experienceLevel = defineModel<FilterSelection<JobExperienceLevel>>("experienceLevel", {
+  required: true,
+});
+
+const studioType = defineModel<FilterSelection<StudioType>>("studioType", { required: true });
+
+const platform = defineModel<FilterSelection<Platform>>("platform", { required: true });
+
+const genre = defineModel<FilterSelection<GameGenre>>("genre", { required: true });
+
+
 defineProps<{
   experienceOptions: JobExperienceLevel[];
   experienceOptionLabel: (value: FilterSelection<JobExperienceLevel>) => string;
@@ -32,15 +47,6 @@ const emit = defineEmits<{
   clear: [];
   apply: [];
 }>();
-
-const location = defineModel<string>("location", { required: true });
-const remote = defineModel<boolean>("remote", { required: true });
-const experienceLevel = defineModel<FilterSelection<JobExperienceLevel>>("experienceLevel", {
-  required: true,
-});
-const studioType = defineModel<FilterSelection<StudioType>>("studioType", { required: true });
-const platform = defineModel<FilterSelection<Platform>>("platform", { required: true });
-const genre = defineModel<FilterSelection<GameGenre>>("genre", { required: true });
 
 const { t } = useI18n();
 

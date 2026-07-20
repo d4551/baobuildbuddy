@@ -14,6 +14,13 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const brandForm = defineModel<{
+  defaultTitle: string;
+  defaultDescription: string;
+  contentOverridesJson: string;
+}>("brandForm", { required: true });
+
+
 const props = defineProps<{
   hintIds: {
     contentOverrides: string;
@@ -23,12 +30,6 @@ const props = defineProps<{
 const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
-
-const brandForm = defineModel<{
-  defaultTitle: string;
-  defaultDescription: string;
-  contentOverridesJson: string;
-}>("brandForm", { required: true });
 </script>
 
 <template>

@@ -260,7 +260,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
         context.api.skills.mappings.post(mappingData),
         context.t("apiErrors.skills.createMappingFailed"),
       );
-      await fetchMappings();
+      await await fetchMappings();
     });
 
   const updateMapping = async (id: string, updates: UpdateMappingInput) =>
@@ -269,14 +269,14 @@ function createSkillMappingActions(context: SkillMappingContext) {
         context.api.skills.mappings({ id }).put(updates),
         context.t("apiErrors.skills.updateMappingFailed"),
       );
-      await fetchMappings();
+      await await fetchMappings();
     });
 
   const deleteMapping = async (id: string) =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.skills.mappings({ id }).delete();
       assertApiResponse(error, context.t("apiErrors.skills.deleteMappingFailed"));
-      await fetchMappings();
+      await await fetchMappings();
     });
 
   return {

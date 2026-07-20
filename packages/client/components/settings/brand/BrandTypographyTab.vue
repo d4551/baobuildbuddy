@@ -14,6 +14,14 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const brandForm = defineModel<{
+  fontStylesheetUrl: string;
+  displayFontFamily: string;
+  bodyFontFamily: string;
+  monoFontFamily: string;
+}>("brandForm", { required: true });
+
+
 const BRAND_HINT_IDS = {
   fontStylesheet: "settings-brand-font-stylesheet-hint",
 } as const;
@@ -21,13 +29,6 @@ const BRAND_HINT_IDS = {
 const brandFieldsetClass = `fieldset min-w-0 rounded-box border border-base-300 bg-base-100 ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
-
-const brandForm = defineModel<{
-  fontStylesheetUrl: string;
-  displayFontFamily: string;
-  bodyFontFamily: string;
-  monoFontFamily: string;
-}>("brandForm", { required: true });
 </script>
 
 <template>

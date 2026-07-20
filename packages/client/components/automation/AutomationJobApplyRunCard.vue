@@ -16,13 +16,6 @@ import {
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
-const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
-  AUTOMATION_RUN_STATUSES;
-const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
-  RUN_STATUS_SUCCESS,
-  RUN_STATUS_ERROR,
-]);
-
 const props = defineProps<{
   activeRunId: string;
   eventRows: RpaRunEvent[];
@@ -33,10 +26,19 @@ const props = defineProps<{
   toLocalizedDateTime: (value: string) => string;
 }>();
 
+
 const emit = defineEmits<{
   cancel: [];
   retry: [];
 }>();
+
+
+const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
+  AUTOMATION_RUN_STATUSES;
+const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
+  RUN_STATUS_SUCCESS,
+  RUN_STATUS_ERROR,
+]);
 
 const { t } = useI18n();
 

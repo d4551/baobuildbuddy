@@ -9,6 +9,8 @@ import {
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
+const runAt = defineModel<string>("runAt", { required: true });
+
 
 defineProps<{
   coverLetters: CoverLetterSelectOption[];
@@ -27,7 +29,6 @@ const jobUrl = defineModel<string>("jobUrl", { required: true });
 const resumeId = defineModel<string>("resumeId", { required: true });
 const coverLetterId = defineModel<string>("coverLetterId", { required: true });
 const jobId = defineModel<string>("jobId", { required: true });
-const runAt = defineModel<string>("runAt", { required: true });
 
 const { t } = useI18n();
 </script>

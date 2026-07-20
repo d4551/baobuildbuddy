@@ -1,0 +1,16 @@
+  34 lint/complexity/noExcessiveLinesPerFunction
+  32 lint/style/useVueDefineMacrosOrder
+  31 lint/style/useVueMultiWordComponentNames
+  21 lint/complexity/noExcessiveCognitiveComplexity
+  15 lint/nursery/noVueRefAsOperand
+  12 lint/style/useTemplate
+   8 lint/complexity/useLiteralKeys
+   3 lint/nursery/noFloatingPromises
+   2 lint/suspicious/useIterableCallbackReturn
+   1 lint/style/useNumberNamespace
+   1 lint/style/useDefaultParameterLast
+   1 lint/style/noVueOptionsApi
+   1 lint/style/noDescendingSpecificity
+   1 lint/performance/useTopLevelRegex
+   1 lint/performance/noBarrelFile
+   1 lint/complexity/useIndexOf

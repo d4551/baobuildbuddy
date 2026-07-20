@@ -9,6 +9,8 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { ProviderConfig } from "~/types/ai-dashboard";
+const selectedModelValue = defineModel<string>("selectedModel", { required: true });
+
 
 defineProps<{
   loading: boolean;
@@ -21,7 +23,6 @@ defineProps<{
 }>();
 
 const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { required: true });
-const selectedModelValue = defineModel<string>("selectedModel", { required: true });
 </script>
 
 <template>

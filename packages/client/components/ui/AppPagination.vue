@@ -73,7 +73,7 @@ function getPageButtons(): HTMLButtonElement[] {
 }
 
 function getPageIndex(page: number): number {
-  const index = normalizedPageNumbers.value.findIndex((item) => item === page);
+  const index = normalizedPageNumbers.value.indexOf(page);
   return index >= 0 ? index : 0;
 }
 

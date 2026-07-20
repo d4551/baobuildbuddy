@@ -9,9 +9,10 @@ interface ResumeTabListProps {
   readonly tabAriaLabel: (tab: string) => string;
 }
 
-const props = defineProps<ResumeTabListProps>();
-
 const activeTab = defineModel<string>("activeTab", { required: true });
+
+
+const props = defineProps<ResumeTabListProps>();
 
 const tabRefs = ref<(HTMLButtonElement | null)[]>([]);
 

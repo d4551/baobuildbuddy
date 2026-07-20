@@ -9,6 +9,8 @@ import {
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
+const remoteWork = defineModel<boolean>("remoteWork", { required: true });
+
 
 defineProps<{
   studioSizeOptions: string[];
@@ -22,7 +24,6 @@ defineEmits<{
 const searchQuery = defineModel<string>("searchQuery", { required: true });
 const selectedType = defineModel<string>("selectedType", { required: true });
 const selectedSize = defineModel<string>("selectedSize", { required: true });
-const remoteWork = defineModel<boolean>("remoteWork", { required: true });
 
 const { t } = useI18n();
 </script>

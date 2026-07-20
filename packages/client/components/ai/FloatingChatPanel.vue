@@ -26,6 +26,9 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
+const draft = defineModel<string>("draft", { required: true });
+
+
 defineProps<{
   aiChatPagePath: string;
   autoSpeakReplies: boolean;
@@ -80,8 +83,6 @@ const emit = defineEmits<{
   "update:ttsModel": [value: string];
   draftKeydown: [event: KeyboardEvent];
 }>();
-
-const draft = defineModel<string>("draft", { required: true });
 const { t } = useI18n();
 </script>
 
