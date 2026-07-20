@@ -151,6 +151,22 @@ const collectTableViolations = (filePath: string, content: string): ValidationVi
     }
   }
 
+  // Overflow-only escapes miss dense table-sm / multi-column surfaces @320.
+  // 3+ header cells ⇒ require ResponsiveDataSurface (card + table dual surface).
+  const thCount = (template.match(/<th\b/gu) ?? []).length;
+  if (
+    thCount >= 3 &&
+    tableWithoutOverflowScrollPattern.test(template) &&
+    !RESPONSIVE_DATA_SURFACE_PATTERN.test(content) &&
+    !DUAL_SURFACE_TOKEN_PATTERN.test(content)
+  ) {
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
+      message: `Multi-column table (${thCount} <th>) uses overflow-only escape. Wrap with <ResponsiveDataSurface> so mobile gets a card stack, not a horizontal scroll trap.`,
+    });
+  }
+
   return violations;
 };
 

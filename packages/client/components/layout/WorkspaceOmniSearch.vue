@@ -17,7 +17,18 @@ import {
 const WORKSPACE_SEARCH_DIALOG_TITLE_ID = "workspace-omni-search-title";
 
 const { t } = useI18n();
-const { clear, loading, open, query, results, search } = useWorkspaceSearch();
+const {
+  applySuggestion,
+  clear,
+  loading,
+  open,
+  query,
+  results,
+  scheduleAutocomplete,
+  suggesting,
+  suggestions,
+  search,
+} = useWorkspaceSearch();
 const router = useRouter();
 
 async function submitSearch(): Promise<void> {
@@ -33,6 +44,10 @@ async function openResult(result: (typeof results.value)[number]): Promise<void>
 function closeSearch(): void {
   open.value = false;
   clear();
+}
+
+function onQueryInput(): void {
+  scheduleAutocomplete(query.value);
 }
 
 function typeLabel(type: string): string {
@@ -82,6 +97,7 @@ function typeLabel(type: string): string {
             :placeholder="t('workspaceSearch.placeholder')"
             :aria-label="t('workspaceSearch.inputAria')"
             autocomplete="off"
+            @input="onQueryInput"
           />
           <button
             type="submit"
@@ -95,6 +111,33 @@ function typeLabel(type: string): string {
           </button>
         </form>
 
+        <ul
+          v-if="suggestions.length > 0 && results.length === 0"
+          :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]"
+          :aria-label="t('workspaceSearch.suggestionsAria')"
+        >
+          <li v-for="suggestion in suggestions" :key="`${suggestion.type}-${suggestion.text}`">
+            <button
+              type="button"
+              class="btn btn-ghost justify-start text-left"
+              :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+              :aria-label="t('workspaceSearch.suggestionAria', { text: suggestion.text })"
+              @click="applySuggestion(suggestion)"
+            >
+              <span class="badge badge-soft badge-sm shrink-0">{{ typeLabel(suggestion.type) }}</span>
+              <span class="truncate" :class="[TRUNCATE_FLEX_CHILD_CLASS]">{{ suggestion.text }}</span>
+            </button>
+          </li>
+        </ul>
+
+        <p
+          v-else-if="suggesting && query.trim().length >= 2 && results.length === 0"
+          class="text-secondary"
+          :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+        >
+          {{ t("workspaceSearch.submitButton") }}…
+        </p>
+
         <EmptyState
           v-if="query.trim().length < 2"
           title-key="workspaceSearch.emptyTitle"
@@ -102,12 +145,12 @@ function typeLabel(type: string): string {
         />
 
         <EmptyState
-          v-else-if="!loading && results.length === 0"
+          v-else-if="!loading && !suggesting && results.length === 0 && suggestions.length === 0"
           title-key="workspaceSearch.noResultsTitle"
           description-key="workspaceSearch.noResultsDescription"
         />
 
-        <ul v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]" :aria-label="t('workspaceSearch.title')">
+        <ul v-else-if="results.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]" :aria-label="t('workspaceSearch.title')">
           <li v-for="result in results" :key="`${result.type}-${result.id}`">
             <button
               type="button"

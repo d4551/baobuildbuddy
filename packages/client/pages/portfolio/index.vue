@@ -98,7 +98,7 @@ function updateProjectForm(value: typeof projectForm): void {
       :description="t('portfolioPage.subtitle')"
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
-      <template #actions>
+      <template v-if="!isPortfolioEmpty" #actions>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
           class="btn btn-outline"
@@ -119,7 +119,7 @@ function updateProjectForm(value: typeof projectForm): void {
           @export="handleExport"
         />
       </template>
-      <template #aside>
+      <template v-if="!isPortfolioEmpty" #aside>
         <StatsRow
           :class="[MARGIN_TOKEN_CLASS.mt4]"
           :stats="[
@@ -163,7 +163,10 @@ function updateProjectForm(value: typeof projectForm): void {
         </EmptyState>
       </div>
 
-      <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
+      <section
+        v-if="!isPortfolioEmpty"
+        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
+      >
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">

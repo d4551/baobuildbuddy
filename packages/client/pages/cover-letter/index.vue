@@ -9,6 +9,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -81,8 +82,11 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template #actions>
+        <!-- Empty catalog: EmptyState owns Generate. -->
         <button
-          class="btn btn-primary"
+          v-if="hasCoverLetters"
+          type="button"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('coverLetterPage.generateButtonAria')"
           @click="showGenerateModal = true"
         >
@@ -174,12 +178,13 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
       @retry="refreshCoverLetterBootstrap"
     />
 
-    <!-- Hero owns Generate when catalog empty — omit duplicate EmptyState primary. -->
     <EmptyState
       v-else-if="coverLetters.length === 0"
       title-key="coverLetterPage.emptyStateTitle"
       description-key="coverLetterPage.emptyStateDescription"
-      cta-label-key=""
+      cta-label-key="coverLetterPage.generateButton"
+      cta-aria-key="coverLetterPage.generateButtonAria"
+      @cta="showGenerateModal = true"
     />
 
     <FilteredEmptyAlert

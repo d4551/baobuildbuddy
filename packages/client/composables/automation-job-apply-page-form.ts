@@ -48,7 +48,7 @@ export function useAutomationJobApplyDependencies() {
   const { t, locale, fallbackLocale } = useI18n();
   const api = useApi();
   const runtime = useClientApiRequestRuntime();
-  const { triggerJobApply, scheduleJobApply } = useAutomation();
+  const { getVerifyContext, triggerJobApply, scheduleJobApply } = useAutomation();
   const runStream = useAutomationRunStream({
     fallbackMessage: t("automation.jobApply.stream.startErrorFallback"),
   });
@@ -56,6 +56,7 @@ export function useAutomationJobApplyDependencies() {
   return {
     api,
     fallbackLocale,
+    getVerifyContext,
     locale,
     runStream,
     runtime,

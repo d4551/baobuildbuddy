@@ -19,6 +19,7 @@ import {
   rpaRunEventSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
 import { safeParseJson } from "@bao/shared/utils/json";
+import { settle } from "@bao/shared/utils/promise";
 import type { AsyncData } from "nuxt/app";
 import type { FetchError } from "ofetch";
 import type { MaybeRef } from "vue";
@@ -169,6 +170,22 @@ function createRunQueries(runtime: AutomationRuntime) {
       method: "GET",
     });
 
+  const getVerifyContext = async (): Promise<{ resumeId: string } | null> => {
+    const result = await settle(
+      requestApi<{ resumeId: string }>(runtime.api, API_ENDPOINTS.automationVerifyContext, {
+        method: "GET",
+      }),
+    );
+    if (result.status !== "fulfilled") {
+      return null;
+    }
+    const payload = result.value;
+    if (payload && typeof payload.resumeId === "string" && payload.resumeId.length > 0) {
+      return { resumeId: payload.resumeId };
+    }
+    return null;
+  };
+
   return {
     fetchRuns,
     fetchRun,
@@ -176,6 +193,7 @@ function createRunQueries(runtime: AutomationRuntime) {
     getRuns,
     fetchRpaCapabilities,
     getRpaCapabilities,
+    getVerifyContext,
   };
 }
 

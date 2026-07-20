@@ -14,8 +14,13 @@ import type {
   StudioAnalyticsApi,
   UserApi,
 } from "./client-api-contracts";
-import type { SearchApi } from "./client-api-workspace";
-export type { SearchApi, SettingsWorkspaceExportPayload } from "./client-api-workspace";
+import type { AutomationApi, ScraperApi, SearchApi } from "./client-api-workspace";
+export type {
+  AutomationApi,
+  ScraperApi,
+  SearchApi,
+  SettingsWorkspaceExportPayload,
+} from "./client-api-workspace";
 
 export interface ClientApi {
   auth: AuthApi;
@@ -33,9 +38,9 @@ export interface ClientApi {
   studios: {
     analytics: StudioAnalyticsApi;
   };
-  automation: object;
+  automation: AutomationApi;
   search: SearchApi;
-  scraper: object;
+  scraper: ScraperApi;
 }
 
 const REQUIRED_API_BRANCHES = [

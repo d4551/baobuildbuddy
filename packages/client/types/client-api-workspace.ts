@@ -55,3 +55,42 @@ export interface SearchApi {
     }): ApiRequest<Array<{ text: string; type: string }>>;
   };
 }
+
+export interface AutomationVerifyContextPayload {
+  resumeId: string;
+}
+
+export interface AutomationApi {
+  verify: {
+    context: {
+      get(): ApiRequest<AutomationVerifyContextPayload>;
+    };
+  };
+  capabilities: {
+    get(): ApiRequest<unknown>;
+  };
+  runs: {
+    get(options?: {
+      query?: { type?: string; status?: string };
+    }): ApiRequest<unknown>;
+  };
+}
+
+export interface ScraperApi {
+  studios: {
+    post(body?: Record<string, never>): ApiRequest<{
+      success: boolean;
+      message?: string;
+      count?: number;
+    }>;
+  };
+  jobs: {
+    [portalId: string]: {
+      post(body?: Record<string, never>): ApiRequest<{
+        success: boolean;
+        message?: string;
+        count?: number;
+      }>;
+    };
+  };
+}

@@ -1,6 +1,6 @@
 /**
- * Fail catalog EmptyState mounts that omit a primary CTA.
- * Softening ban: list emptiness must offer a next action (cta-label-key).
+ * Fail catalog EmptyState mounts that omit a wired primary CTA.
+ * Softening ban: empty `cta-label-key=""` / missing cta-to|@cta are violations.
  * Scoped to pages + list panels — chat/prompt empties may omit CTA.
  */
 import {
@@ -13,10 +13,8 @@ const scanRoots = ["packages/client/pages", "packages/client/components"] as con
 const sourceExtensions = [".vue"] as const;
 
 const EMPTY_STATE_BLOCK_PATTERN = /<EmptyState\b[\s\S]*?(?:\/>|<\/EmptyState>)/gu;
-const CTA_PATTERN = /cta-label-key\s*=/u;
 const CATALOG_TITLE_PATTERN =
-  /title-key="[^"]*(emptyStateTitle|emptyTitle|notFoundTitle|emptyState\.title)[^"]*"/u;
-const EMPTY_CATALOG_TITLE_PATTERN = /emptyCatalogTitle/u;
+  /title-key="[^"]*(emptyStateTitle|emptyTitle|notFoundTitle|emptyState\.title|emptyCatalogTitle)[^"]*"/u;
 
 const SKIP_FILES = [
   "packages/client/components/layout/WorkspaceOmniSearch.vue",
@@ -27,6 +25,51 @@ const SKIP_FILES = [
   "packages/client/components/automation/AutomationHubAuditCard.vue",
   "packages/client/components/dashboard/DashboardOnboardingCard.vue",
 ] as const;
+
+const hasStaticCtaLabel = (block: string): boolean => {
+  const staticMatch = block.match(/cta-label-key\s*=\s*"([^"]*)"/u);
+  if (staticMatch) {
+    return (staticMatch[1] ?? "").trim().length > 0;
+  }
+  // Dynamic binding must not be an empty string literal.
+  if (/:cta-label-key\s*=\s*""/u.test(block) || /:cta-label-key\s*=\s*''/u.test(block)) {
+    return false;
+  }
+  if (/:cta-label-key\s*=/u.test(block)) {
+    // Ternary with empty branch is a softening — reject.
+    if (/:cta-label-key\s*=\s*"[^"]*'\s*:\s*''/u.test(block)) {
+      return false;
+    }
+    if (/:\s*''\s*[`"]/u.test(block) && /cta-label-key/u.test(block)) {
+      // Heuristic covered by emptyCatalog special-case removal; allow non-empty dynamics.
+    }
+    const emptyTernary =
+      /:cta-label-key\s*=\s*"([^"]*)"/u.test(block) === false &&
+      /:cta-label-key\s*=\s*['`][\s\S]*\?\s*['`][^'`]*(?:configure|create|generate|clear|add|retry|browse)[^'`]*['`]\s*:\s*['`]['`]/iu.test(
+        block,
+      );
+    if (emptyTernary) {
+      return false;
+    }
+    // Softening: any `? ''` / `: ''` in the bound expression.
+    if (/:cta-label-key\s*=\s*["'][^"']*['"]\s*:\s*['"]\s*['"]/u.test(block)) {
+      return false;
+    }
+    if (/:cta-label-key\s*=\s*["`][\s\S]*:\s*['"]\s*['"]/u.test(block)) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+};
+
+const hasCtaAction = (block: string): boolean => {
+  const hasToStatic = /cta-to\s*=\s*"([^"]+)"/u.test(block) && !/cta-to\s*=\s*""/u.test(block);
+  const hasToBound = /:cta-to\s*=/u.test(block) && !/:cta-to\s*=\s*""/u.test(block);
+  // Bound cta-to with ternary empty branch for filtered-empty is OK when non-empty branch has route.
+  const hasEmit = /@cta\s*=/u.test(block);
+  return hasToStatic || hasToBound || hasEmit;
+};
 
 const collectViolationsForContent = (
   filePath: string,
@@ -41,19 +84,23 @@ const collectViolationsForContent = (
     if (!CATALOG_TITLE_PATTERN.test(block)) {
       continue;
     }
-    if (CTA_PATTERN.test(block)) {
+    if (!hasStaticCtaLabel(block)) {
+      violations.push({
+        filePath,
+        line: 1,
+        message:
+          "Catalog EmptyState missing non-empty cta-label-key (empty string softening banned).",
+      });
       continue;
     }
-    // Jobs catalog empty intentionally omits CTA (hero Configure owns primary).
-    if (EMPTY_CATALOG_TITLE_PATTERN.test(block)) {
-      continue;
+    if (!hasCtaAction(block)) {
+      violations.push({
+        filePath,
+        line: 1,
+        message:
+          "Catalog EmptyState has label but no action — wire cta-to or @cta.",
+      });
     }
-    violations.push({
-      filePath,
-      line: 1,
-      message:
-        "Catalog EmptyState is missing cta-label-key. Wire a primary next action (cta-to or @cta).",
-    });
   }
   return violations;
 };
@@ -72,6 +119,6 @@ if (import.meta.main) {
   await reportViolations(
     "Empty-state CTA SSOT",
     await collectViolations(),
-    "Wire cta-label-key (+ cta-to or @cta) on every catalog EmptyState.",
+    "Wire non-empty cta-label-key (+ cta-to or @cta) on every catalog EmptyState.",
   );
 }

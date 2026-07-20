@@ -157,3 +157,5 @@ export const BRAND_CARD_BODY_RESPONSIVE_CLASS = "card-body p-4 md:p-6";
  */
 export const VISIBILITY_SHOW_BELOW_LG_CLASS = "lg:hidden";
 export const VISIBILITY_HIDE_BELOW_LG_CLASS = "hidden lg:block";
+/** Compact fold: hide vertical stats / secondary chrome below sm. */
+export const VISIBILITY_HIDE_BELOW_SM_CLASS = "max-sm:hidden";

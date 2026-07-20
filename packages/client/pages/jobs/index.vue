@@ -42,15 +42,7 @@ const page = useJobsIndexPage();
       :description="t('jobsPage.seoDescription')"
     >
       <template #actions>
-        <!-- Configure above-fold when catalog empty; EmptyState omits duplicate primary. -->
-        <NuxtLink
-          v-if="page.isCatalogEmpty.value"
-          :to="APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')"
-          :class="[PRIMARY_ACTION_CLASS]"
-          :aria-label="t('jobsPage.configureProvidersAria')"
-        >
-          {{ t("jobsPage.configureProvidersButton") }}
-        </NuxtLink>
+        <!-- Empty catalog: EmptyState owns Configure; hero keeps one Refresh only. -->
         <button
           v-if="!page.isCatalogEmpty.value"
           type="button"
@@ -100,23 +92,28 @@ const page = useJobsIndexPage();
       </SectionGrid>
     </section>
 
-    <UiSearchFilterBar
-      v-model="page.searchQuery.value"
-      :placeholder="t('jobsPage.searchPlaceholder')"
-      :aria-label="t('jobsPage.searchAria')"
-      :button-aria-label="t('jobsPage.searchButtonAria')"
-      :show-mobile-filter-toggle="true"
-      :mobile-toggle-aria-label="t('jobsPage.toggleFiltersAria')"
-      :mobile-toggle-text="t('jobsPage.toggleFiltersButton')"
-      :extra-class="SECTION_GAP_BOTTOM_CLASS"
-      @search="page.handleSearch()"
-      @toggle-filters="page.showFilters.value = !page.showFilters.value"
-    >
-      <template #search-text>{{ t("jobsPage.searchButton") }}</template>
-    </UiSearchFilterBar>
+    <template v-if="!page.isCatalogEmpty.value">
+      <UiSearchFilterBar
+        v-model="page.searchQuery.value"
+        :placeholder="t('jobsPage.searchPlaceholder')"
+        :aria-label="t('jobsPage.searchAria')"
+        :button-aria-label="t('jobsPage.searchButtonAria')"
+        :show-mobile-filter-toggle="true"
+        :mobile-toggle-aria-label="t('jobsPage.toggleFiltersAria')"
+        :mobile-toggle-text="t('jobsPage.toggleFiltersButton')"
+        :extra-class="SECTION_GAP_BOTTOM_CLASS"
+        @search="page.handleSearch()"
+        @toggle-filters="page.showFilters.value = !page.showFilters.value"
+      >
+        <template #search-text>{{ t("jobsPage.searchButton") }}</template>
+      </UiSearchFilterBar>
+    </template>
 
     <SectionGrid grid-token="sidebar">
-      <div :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]">
+      <div
+        v-if="!page.isCatalogEmpty.value"
+        :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]"
+      >
         <JobsPageFiltersCard
           v-model:location="page.localFilters.location"
           v-model:remote="page.localFilters.remote"
@@ -163,24 +160,23 @@ const page = useJobsIndexPage();
               ? 'jobsPage.emptyCatalogDescription'
               : 'jobsPage.emptyStateDescription'
           "
-          :cta-label-key="page.isCatalogEmpty.value ? '' : 'jobsPage.clearFiltersButton'"
-          :cta-aria-key="page.isCatalogEmpty.value ? '' : 'jobsPage.clearFiltersAria'"
-          :cta-to="''"
+          :cta-label-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersButton'
+              : 'jobsPage.clearFiltersButton'
+          "
+          :cta-aria-key="
+            page.isCatalogEmpty.value
+              ? 'jobsPage.configureProvidersAria'
+              : 'jobsPage.clearFiltersAria'
+          "
+          :cta-to="
+            page.isCatalogEmpty.value
+              ? APP_ROUTE_BUILDERS.settingsSection('jobIntelligence')
+              : ''
+          "
           @cta="page.clearFilters()"
-        >
-          <template v-if="page.isCatalogEmpty.value" #actions>
-            <button
-              type="button"
-              class="btn btn-outline"
-              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
-              :aria-label="t('jobsPage.refreshAria')"
-              :disabled="page.refreshing.value"
-              @click="page.handleRefresh()"
-            >
-              {{ t("jobsPage.refreshButton") }}
-            </button>
-          </template>
-        </EmptyState>
+        />
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" :extra-class="SECTION_GAP_BOTTOM_CLASS">

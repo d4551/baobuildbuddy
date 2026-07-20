@@ -3,8 +3,10 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
@@ -100,9 +102,11 @@ const { t } = useI18n();
         </fieldset>
       </div>
 
-      <div class="join" :class="[MARGIN_TOKEN_CLASS.mt6]">
-        <button 
-          class="btn btn-primary join-item"
+      <div class="join" :class="[MARGIN_TOKEN_CLASS.mt6, FLUID_WIDTH_CLASS]">
+        <button
+          type="button"
+          class="join-item"
+          :class="[PRIMARY_ACTION_CLASS, FLUID_WIDTH_CLASS]"
           :disabled="isSubmitDisabled"
           :aria-label="t('automation.jobApply.runButtonAria')"
           @click="$emit('submit')"
@@ -110,8 +114,10 @@ const { t } = useI18n();
           <LoadingSpinner size="sm" label="Loading" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.runButton") }}</span>
         </button>
-        <button 
+        <button
+          type="button"
           class="btn btn-outline join-item"
+          :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
           :disabled="isScheduleDisabled"
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"

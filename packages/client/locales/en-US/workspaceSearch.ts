@@ -18,6 +18,9 @@ const workspaceSearch = {
       skills: "Skill",
     },
     searchFailed: "Workspace search failed",
+    autocompleteFailed: "Failed to fetch autocomplete suggestions",
+    suggestionsAria: "Search suggestions",
+    suggestionAria: "Use suggestion {text}",
     closeAria: "Close workspace search",
   },
 } as const;

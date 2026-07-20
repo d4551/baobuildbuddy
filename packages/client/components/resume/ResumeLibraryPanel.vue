@@ -30,6 +30,7 @@ const searchQuery = defineModel<string>("searchQuery", { required: true });
 
 const emit = defineEmits<{
   clearFilters: [];
+  createResume: [];
   selectResume: [resumeId: string];
   requestDelete: [resumeId: string];
   "update:currentPage": [page: number];
@@ -77,12 +78,13 @@ function requestDelete(resumeId?: string): void {
       </div>
     </section>
 
-    <!-- Hero owns Create when library empty — omit duplicate EmptyState primary. -->
     <EmptyState
       v-if="resumes.length === 0"
       title-key="resumePage.emptyStateTitle"
       description-key="resumePage.emptyState"
-      cta-label-key=""
+      cta-label-key="resumePage.createButton"
+      cta-aria-key="resumePage.createButtonAria"
+      @cta="emit('createResume')"
     />
 
     <FilteredEmptyAlert

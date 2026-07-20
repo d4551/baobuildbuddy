@@ -85,7 +85,9 @@ const {
       :description="t('resumePage.subtitle')"
     >
       <template #actions>
+        <!-- Empty library: EmptyState owns Create; hero keeps Guided only. -->
         <button
+          v-if="resumes.length > 0 || selectedResumeId"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('resumePage.createButtonAria')"
           @click="showCreateModal = true"
@@ -132,6 +134,7 @@ const {
       :template-label="resumeTemplateLabel"
       :page-aria="resumePageAria"
       @clear-filters="clearResumeFilters"
+      @create-resume="showCreateModal = true"
       @select-resume="selectedResumeId = $event"
       @request-delete="requestDeleteResume"
       @update:current-page="resumePagination.goToPage"

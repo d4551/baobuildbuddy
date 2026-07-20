@@ -2,6 +2,7 @@
 import type { InterviewConversationStyle, InterviewMode } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -12,6 +13,7 @@ import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { InterviewHubSessionConfig, StudioSelectorOption } from "~/types/interview";
@@ -128,26 +130,35 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
         />
 
         <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <div class="overflow-x-auto rounded-box border border-base-300" :class="[MAX_HEIGHT_TOKEN_CLASS.maxH72]">
-            <table class="table table-sm table-zebra" :aria-label="t('interviewHub.config.jobsTableAria')">
-              <thead>
-                <tr>
-                  <th scope="col">{{ t("interviewHub.config.jobsColumns.job") }}</th>
-                  <th scope="col">{{ t("interviewHub.config.jobsColumns.company") }}</th>
-                  <th scope="col">
-                    <span class="sr-only">{{ t("interviewHub.config.selectButton") }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
-                  <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
-                  <td>{{ job.company }}</td>
-                  <td class="text-right">
-                    <button 
+          <div
+            class="overflow-y-auto rounded-box border border-base-300"
+            :class="[MAX_HEIGHT_TOKEN_CLASS.maxH72]"
+          >
+            <ResponsiveDataSurface>
+              <template #cards>
+                <ul
+                  class="list-none"
+                  :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
+                  :aria-label="t('interviewHub.config.jobsTableAria')"
+                >
+                  <li
+                    v-for="job in paginatedJobs"
+                    :key="job.id"
+                    class="rounded-box border border-base-300 bg-base-100"
+                    :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+                  >
+                    <div>
+                      <p class="font-semibold">{{ job.title }}</p>
+                      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ job.company }}</p>
+                    </div>
+                    <button
                       type="button"
                       class="btn btn-sm btn-ghost"
-                      :class="{ 'btn-primary': job.id === selectedJobId }"
+                      :class="[
+                        TOUCH_TARGET_MIN_CLASS,
+                        FLUID_WIDTH_CLASS,
+                        { 'btn-primary': job.id === selectedJobId },
+                      ]"
                       :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                       @click="emit('selectJob', job.id)"
                     >
@@ -157,10 +168,44 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                           : t("interviewHub.config.selectButton")
                       }}
                     </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </li>
+                </ul>
+              </template>
+              <template #table>
+                <table class="table table-sm table-zebra" :aria-label="t('interviewHub.config.jobsTableAria')">
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ t("interviewHub.config.jobsColumns.job") }}</th>
+                      <th scope="col">{{ t("interviewHub.config.jobsColumns.company") }}</th>
+                      <th scope="col">
+                        <span class="sr-only">{{ t("interviewHub.config.selectButton") }}</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
+                      <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
+                      <td>{{ job.company }}</td>
+                      <td class="text-right">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-ghost"
+                          :class="[TOUCH_TARGET_MIN_CLASS, { 'btn-primary': job.id === selectedJobId }]"
+                          :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
+                          @click="emit('selectJob', job.id)"
+                        >
+                          {{
+                            job.id === selectedJobId
+                              ? t("interviewHub.config.selectedButton")
+                              : t("interviewHub.config.selectButton")
+                          }}
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+            </ResponsiveDataSurface>
           </div>
 
           <AppPagination

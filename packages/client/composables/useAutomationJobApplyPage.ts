@@ -228,6 +228,24 @@ export function useAutomationJobApplyPage() {
     triggerJobApply: dependencies.triggerJobApply,
   });
 
+  // Prefill resume from verify/context when enabled (404 → no-op).
+  watch(
+    bootstrap.resumesData,
+    async (resumes) => {
+      if (form.resumeId.value || !resumes || resumes.length === 0) {
+        return;
+      }
+      const context = await dependencies.getVerifyContext();
+      if (!context) {
+        return;
+      }
+      if (resumes.some((resume) => resume.id === context.resumeId)) {
+        form.resumeId.value = context.resumeId;
+      }
+    },
+    { immediate: true },
+  );
+
   return {
     activeRunId: state.activeRunId,
     coverLetterId: form.coverLetterId,

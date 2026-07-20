@@ -8,6 +8,7 @@ import {
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -173,7 +174,8 @@ const {
                 <div class="flex justify-end">
                   <NuxtLink
                     :to="item.route"
-                    class="btn btn-xs btn-outline"
+                    class="btn btn-outline"
+                    :class="[TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('interviewHub.prep.openAria', { title: item.title })"
                   >
                     {{ item.ctaLabel }}

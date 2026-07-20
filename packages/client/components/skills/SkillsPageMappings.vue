@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
@@ -56,8 +58,63 @@ function normalizedConfidence(confidence: number): number {
     @cta="emit('clearFilters')"
   />
 
-  <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-    <div class="hidden overflow-x-auto md:block">
+  <ResponsiveDataSurface v-else>
+    <template #cards>
+      <ul
+        class="list-none"
+        :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]"
+        :aria-label="t('skillsPage.table.ariaLabel')"
+      >
+        <li
+          v-for="mapping in filteredMappings"
+          :key="mapping.id"
+          class="rounded-box border border-base-300 bg-base-100"
+          :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+          :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
+        >
+          <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div>
+              <p class="font-semibold">{{ mapping.transferableSkill }}</p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mapping.gameExpression }}</p>
+            </div>
+            <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
+          </div>
+
+          <progress
+            class="progress progress-primary"
+            :class="[FLUID_WIDTH_CLASS]"
+            :value="normalizedConfidence(mapping.confidence)"
+            :max="SKILLS_CONFIDENCE_MAX"
+            :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
+          ></progress>
+
+          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+            <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
+            <span
+              v-for="application in mapping.industryApplications.slice(0, 3)"
+              :key="application"
+              class="badge badge-sm badge-soft"
+            >
+              {{ application }}
+            </span>
+            <span v-if="mapping.industryApplications.length > 3" class="badge badge-sm badge-ghost">
+              {{ t("skillsPage.table.moreApplications", { count: mapping.industryApplications.length - 3 }) }}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-ghost btn-sm btn-error"
+            :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+            :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
+            @click="emit('delete', mapping.id)"
+          >
+            {{ t("skillsPage.table.deleteButton") }}
+          </button>
+        </li>
+      </ul>
+    </template>
+    <template #table>
       <table class="table table-zebra" :aria-label="t('skillsPage.table.ariaLabel')">
         <thead>
           <tr>
@@ -75,7 +132,7 @@ function normalizedConfidence(confidence: number): number {
             <td>{{ mapping.transferableSkill }}</td>
             <td>
               <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-                <span 
+                <span
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
                   class="badge badge-sm badge-soft"
@@ -95,8 +152,9 @@ function normalizedConfidence(confidence: number): number {
                     {{ resolveCategoryLabel(mapping.category) }}
                   </span>
                 </div>
-                <progress 
-                  class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+                <progress
+                  class="progress progress-primary"
+                  :class="[FLUID_WIDTH_CLASS]"
                   :value="normalizedConfidence(mapping.confidence)"
                   :max="SKILLS_CONFIDENCE_MAX"
                   :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
@@ -109,8 +167,10 @@ function normalizedConfidence(confidence: number): number {
               </span>
             </td>
             <td>
-              <button 
+              <button
+                type="button"
                 class="btn btn-ghost btn-sm btn-error"
+                :class="[TOUCH_TARGET_MIN_CLASS]"
                 :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                 @click="emit('delete', mapping.id)"
               >
@@ -120,53 +180,6 @@ function normalizedConfidence(confidence: number): number {
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <div class="md:hidden" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-      <article 
-        v-for="mapping in filteredMappings"
-        :key="mapping.id"
-        :class="SURFACE_GLASS_CARD_CLASS"
-        :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
-      >
-        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-          <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <div>
-              <h2 class="card-title text-base">{{ mapping.transferableSkill }}</h2>
-              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mapping.gameExpression }}</p>
-            </div>
-            <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
-          </div>
-
-          <progress 
-            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
-            :value="normalizedConfidence(mapping.confidence)"
-            :max="SKILLS_CONFIDENCE_MAX"
-            :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
-          ></progress>
-
-          <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-            <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
-            <span 
-              v-for="application in mapping.industryApplications.slice(0, 3)"
-              :key="application"
-              class="badge badge-sm badge-soft"
-            >
-              {{ application }}
-            </span>
-          </div>
-
-          <div class="card-actions justify-end">
-            <button 
-              class="btn btn-ghost btn-sm btn-error"
-              :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
-              @click="emit('delete', mapping.id)"
-            >
-              {{ t("skillsPage.table.deleteButton") }}
-            </button>
-          </div>
-        </div>
-      </article>
-    </div>
-  </div>
+    </template>
+  </ResponsiveDataSurface>
 </template>

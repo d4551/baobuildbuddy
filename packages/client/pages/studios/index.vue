@@ -4,6 +4,7 @@ definePageMeta({
 });
 
 import { useI18n } from "vue-i18n";
+import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
 const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";
 const { t } = useI18n();
@@ -32,15 +33,6 @@ useSeoMeta({
       density="comfortable"
     />
 
-    <StatsRow
-      background-class="border border-base-300 bg-base-100"
-      :stats="[
-        { titleKey: 'studiosIndex.stats.totalTitle', value: page.totalStudios.value, valueClass: 'text-primary', descKey: 'studiosIndex.stats.totalDesc' },
-        { titleKey: 'studiosIndex.stats.filteredTitle', value: page.filteredStudios.value.length, valueClass: 'text-secondary', descKey: 'studiosIndex.stats.filteredDesc' },
-        { titleKey: 'studiosIndex.stats.remoteTitle', value: page.remoteFriendlyStudios.value, valueClass: 'text-accent', descKey: 'studiosIndex.stats.remoteDesc' },
-      ]"
-    />
-
     <BootstrapErrorAlert
       v-if="page.pageError.value"
       :title="t('studiosIndex.errorTitle')"
@@ -50,6 +42,7 @@ useSeoMeta({
       @retry="refreshStudios"
     />
 
+    <!-- Filters before stats — search owns fold @320; stats hide below sm. -->
     <StudiosIndexFiltersCard
       v-model:search-query="page.searchQuery.value"
       v-model:selected-type="page.filters.type"
@@ -60,9 +53,29 @@ useSeoMeta({
       @clear="page.clearFilters"
     />
 
+    <div :class="[VISIBILITY_HIDE_BELOW_SM_CLASS]">
+      <StatsRow
+        background-class="border border-base-300 bg-base-100"
+        :stats="[
+          { titleKey: 'studiosIndex.stats.totalTitle', value: page.totalStudios.value, valueClass: 'text-primary', descKey: 'studiosIndex.stats.totalDesc' },
+          { titleKey: 'studiosIndex.stats.filteredTitle', value: page.filteredStudios.value.length, valueClass: 'text-secondary', descKey: 'studiosIndex.stats.filteredDesc' },
+          { titleKey: 'studiosIndex.stats.remoteTitle', value: page.remoteFriendlyStudios.value, valueClass: 'text-accent', descKey: 'studiosIndex.stats.remoteDesc' },
+        ]"
+      />
+    </div>
+
     <LoadingSkeleton
       v-if="(bootstrapPending || page.loading.value) && page.filteredStudios.value.length === 0"
       :lines="6"
+    />
+
+    <EmptyState
+      v-else-if="page.filteredStudios.value.length === 0 && page.totalStudios.value === 0"
+      title-key="studiosIndex.emptyTitle"
+      description-key="studiosIndex.emptyDescription"
+      cta-label-key="studiosIndex.retryButton"
+      cta-aria-key="studiosIndex.retryAria"
+      @cta="refreshStudios()"
     />
 
     <EmptyState
