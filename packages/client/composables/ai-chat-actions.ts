@@ -1,7 +1,9 @@
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AIChatContext, AIChatContextSource, ChatMessage } from "@bao/shared/types/ai";
 import { generateId } from "@bao/shared/utils/validation";
 import type { ComposerTranslation } from "vue-i18n";
 import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
+import { parseJobApplyAutomationAction } from "~/utils/ai-automation-action";
 import { createChatMessage } from "~/utils/chat";
 
 type AIChatResponse = {
@@ -98,6 +100,38 @@ async function requestAIChatResponse(
   return response;
 }
 
+async function executeDetectedAutomationAction(
+  input: ChatActionInput,
+  response: AIChatResponse,
+): Promise<void> {
+  const action = parseJobApplyAutomationAction(response.message ?? "");
+  if (!action) {
+    return;
+  }
+  const { data, error } = await input.api.ai["automation-action"].post(action);
+  if (error) {
+    input.toast.error(input.t("aiChatCommon.automationActionFailed"));
+    return;
+  }
+  const runId =
+    data && typeof data === "object" && "runId" in data && typeof data.runId === "string"
+      ? data.runId
+      : "";
+  if (!runId) {
+    input.toast.error(input.t("aiChatCommon.automationActionFailed"));
+    return;
+  }
+  input.toast.success(input.t("aiChatCommon.automationActionStarted", { runId }));
+  input.messages.value.push(
+    createChatMessage({
+      role: "assistant",
+      content: `${input.t("aiChatCommon.automationActionStarted", { runId })} ${input.t("aiChatCommon.automationActionOpenRuns")}: ${APP_ROUTES.automationRuns}`,
+      sessionId: input.sessionId.value,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+}
+
 export function createChatActions(input: ChatActionInput) {
   const sendMessage = async (content: string, options: SendMessageOptions = {}) => {
     input.streaming.value = true;
@@ -120,6 +154,10 @@ export function createChatActions(input: ChatActionInput) {
       return null;
     }
 
+    await settlePromise(
+      executeDetectedAutomationAction(input, sendResult.value),
+      input.t("aiChatCommon.automationActionFailed"),
+    );
     return sendResult.value;
   };
 

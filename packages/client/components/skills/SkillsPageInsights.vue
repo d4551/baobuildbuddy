@@ -114,6 +114,9 @@ const { t } = useI18n();
             v-else
             title-key="skillsPage.insights.topMappingsEmptyTitle"
             description-key="skillsPage.insights.topMappingsEmptyDescription"
+            cta-label-key="skillsPage.insights.topMappingsEmptyCta"
+            cta-aria-key="skillsPage.insights.topMappingsEmptyCtaAria"
+            :cta-to="APP_ROUTES.skillsPathways"
           />
         </div>
       </article>

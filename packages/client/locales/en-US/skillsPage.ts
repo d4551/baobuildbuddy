@@ -46,6 +46,8 @@ const skillsPage = {
       topMappingsEmptyTitle: "Top mappings are not available yet",
       topMappingsEmptyDescription:
         "Add or analyze mappings to populate the highest-confidence skills in this summary.",
+      topMappingsEmptyCta: "Browse pathways",
+      topMappingsEmptyCtaAria: "Open skill pathways",
     },
     filters: {
       searchPlaceholder: "Search by gaming experience, transferable skill, or application...",

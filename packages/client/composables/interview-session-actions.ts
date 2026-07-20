@@ -30,6 +30,8 @@ type InterviewSessionActionsInput = {
   currentSessionLoadId: Ref<number>;
   getSession: ReturnType<typeof useInterview>["getSession"];
   isLastQuestion: ComputedRef<boolean>;
+  mirrorEndSession?: (sessionId: string) => void;
+  mirrorSubmitResponse?: (sessionId: string, content: string) => void;
   response: Ref<string>;
   router: ReturnType<typeof useRouter>;
   sessionId: ComputedRef<string>;
@@ -151,6 +153,7 @@ function createInterviewCompletionAction(
       return;
     }
 
+    input.mirrorEndSession?.(input.sessionId.value);
     input.toast.success(input.t("interviewSession.toasts.completed"));
     await goToHistory();
   };
@@ -199,6 +202,7 @@ function createInterviewSubmissionAction(input: {
       return;
     }
 
+    input.actions.mirrorSubmitResponse?.(input.actions.sessionId.value, responseText);
     input.actions.stt.stopListening();
     input.actions.response.value = "";
     input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));

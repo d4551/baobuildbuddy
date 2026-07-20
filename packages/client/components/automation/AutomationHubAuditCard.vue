@@ -128,6 +128,9 @@ const readyEntries = computed(() =>
                 v-if="needsAttentionEntries.length === 0"
                 title-key="automation.hub.audit.groups.attentionEmptyTitle"
                 description-key="automation.hub.audit.groups.attentionEmptyDescription"
+                cta-label-key="automation.hub.audit.groups.attentionEmptyCta"
+                cta-aria-key="automation.hub.audit.groups.attentionEmptyCtaAria"
+                :cta-to="APP_ROUTES.automationScraper"
               />
 
               <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">

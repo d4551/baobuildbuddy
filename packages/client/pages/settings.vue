@@ -137,11 +137,14 @@ watch(
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <SettingsSectionTabs v-model:active-section="activeSection">
         <template #profile>
-          <SettingsProfilePanel
-            v-model:profile-form="profileForm"
-            :profile-save-state="profileSaveState"
-            @save="handleSaveProfile"
-          />
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+            <SettingsProfilePanel
+              v-model:profile-form="profileForm"
+              :profile-save-state="profileSaveState"
+              @save="handleSaveProfile"
+            />
+            <SettingsAuthAccessCard />
+          </div>
         </template>
 
         <template #preferences>

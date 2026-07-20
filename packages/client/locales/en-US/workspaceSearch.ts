@@ -8,8 +8,12 @@ const workspaceSearch = {
     submitButton: "Search",
     emptyTitle: "No matches yet",
     emptyDescription: "Enter at least two characters to search across your workspace.",
+    emptyCta: "Browse jobs",
+    emptyCtaAria: "Browse the job board",
     noResultsTitle: "No results",
     noResultsDescription: "Try a different keyword or clear filters in the destination surface.",
+    noResultsCta: "Clear search",
+    noResultsCtaAria: "Clear workspace search query",
     resultAria: "Open {title}",
     typeLabel: {
       jobs: "Job",

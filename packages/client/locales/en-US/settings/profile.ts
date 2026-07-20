@@ -32,6 +32,24 @@ const settingsprofile = {
       saveAria: "Save user profile settings",
       saveButton: "Save Profile",
     },
+    authAccess: {
+      title: "API access key",
+      description:
+        "Rotate or revoke the workspace API key used for authenticated requests. The new key is shown once.",
+      configuredYes: "An API key is configured for this workspace.",
+      configuredNo: "No API key is configured (auth may be disabled for local development).",
+      statusFailed: "Failed to load API key status",
+      rotateButton: "Rotate key",
+      rotateAria: "Rotate workspace API key",
+      rotateFailed: "Failed to rotate API key",
+      rotateSuccess: "API key rotated — save the new key now",
+      revokeButton: "Revoke key",
+      revokeAria: "Revoke workspace API key",
+      revokeFailed: "Failed to revoke API key",
+      revokeSuccess: "API key revoked",
+      newKeyTitle: "New API key (copy now)",
+      newKeyHint: "This key will not be shown again.",
+    },
   },
 } as const;
 

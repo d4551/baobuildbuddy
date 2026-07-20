@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -101,8 +103,7 @@ function typeLabel(type: string): string {
           />
           <button
             type="submit"
-            class="btn btn-primary"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[PRIMARY_ACTION_CLASS]"
             :aria-label="t('workspaceSearch.submitAria')"
             :disabled="loading || query.trim().length < 2"
           >
@@ -142,12 +143,18 @@ function typeLabel(type: string): string {
           v-if="query.trim().length < 2"
           title-key="workspaceSearch.emptyTitle"
           description-key="workspaceSearch.emptyDescription"
+          cta-label-key="workspaceSearch.emptyCta"
+          cta-aria-key="workspaceSearch.emptyCtaAria"
+          :cta-to="APP_ROUTES.jobs"
         />
 
         <EmptyState
           v-else-if="!loading && !suggesting && results.length === 0 && suggestions.length === 0"
           title-key="workspaceSearch.noResultsTitle"
           description-key="workspaceSearch.noResultsDescription"
+          cta-label-key="workspaceSearch.noResultsCta"
+          cta-aria-key="workspaceSearch.noResultsCtaAria"
+          @cta="clear"
         />
 
         <ul v-else-if="results.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]" :aria-label="t('workspaceSearch.title')">

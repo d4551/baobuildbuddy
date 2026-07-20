@@ -108,6 +108,8 @@ const automationhub = {
           attentionEmptyTitle: "No setup blockers",
           attentionEmptyDescription:
             "Every tracked capability is configured enough to run from the current environment.",
+          attentionEmptyCta: "Open scraper hub",
+          attentionEmptyCtaAria: "Open automation scraper hub",
           readyTitle: "Ready to run",
           readyDescription:
             "These capabilities are already configured and can be launched from their workflow pages.",

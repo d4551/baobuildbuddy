@@ -115,8 +115,17 @@ export interface AuthApi {
   status: {
     get(): ApiRequest<AuthStatusResponse>;
   };
+  configured: {
+    get(): ApiRequest<{ configured: boolean }>;
+  };
   init: {
     post(body?: AuthInitRequest): ApiRequest<AuthInitResponse>;
+  };
+  rotate: {
+    post(): ApiRequest<{ configured: boolean; apiKey?: string; message?: string }>;
+  };
+  revoke: {
+    post(): ApiRequest<{ configured: boolean; message?: string }>;
   };
 }
 
@@ -293,6 +302,15 @@ export interface AiApi {
   };
   "match-jobs": {
     post(body: { resumeId?: string; skills?: string[] }): ApiRequest<unknown>;
+  };
+  "automation-action": {
+    post(body: {
+      action: string;
+      jobUrl: string;
+      resumeId: string;
+      coverLetterId?: string;
+      jobId?: string;
+    }): ApiRequest<{ runId?: string; status?: string; message?: string; error?: string }>;
   };
   models: {
     get(): ApiRequest<unknown>;

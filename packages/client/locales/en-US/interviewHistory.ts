@@ -34,6 +34,8 @@ const interviewHistory = {
     selectPromptTitle: "Choose a session",
     selectPromptDescription:
       "Open any interview run from the list to inspect scores, answers, and AI feedback.",
+    selectPromptCta: "Start interview",
+    selectPromptCtaAria: "Start a new interview session",
     fetchErrorFallback: "Failed to load interview sessions",
     sessionNotFound: "Session not found",
     detailLoadErrorFallback: "Failed to load session details",

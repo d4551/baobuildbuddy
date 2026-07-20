@@ -12,7 +12,7 @@ import {
 const scanRoots = ["packages/client"] as const;
 const sourceExtensions = new Set([".vue"]);
 
-const CLASS_ATTR_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/gu;
+const CLASS_ATTR_PATTERN = /\b:?class\s*=\s*["']([^"']+)["']/gu;
 const PRIMARY_SHRINK_PATTERN = /\bbtn-primary\b/u;
 const DENSITY_SHRINK_PATTERN = /\bbtn-(?:sm|xs)\b/u;
 

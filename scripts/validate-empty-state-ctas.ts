@@ -1,7 +1,7 @@
 /**
- * Fail catalog EmptyState mounts that omit a wired primary CTA.
- * Softening ban: empty `cta-label-key=""` / missing cta-to|@cta are violations.
- * Scoped to pages + list panels — chat/prompt empties may omit CTA.
+ * Fail EmptyState mounts that omit a wired primary CTA.
+ * Softening ban: empty `cta-label-key=""` / missing cta-to|@cta / title-regex escapes.
+ * Chat/prompt informational empties stay in SKIP_FILES only when purely instructional.
  */
 import {
   collectProjectFileEntries,
@@ -13,8 +13,6 @@ const scanRoots = ["packages/client/pages", "packages/client/components"] as con
 const sourceExtensions = [".vue"] as const;
 
 const EMPTY_STATE_BLOCK_PATTERN = /<EmptyState\b[\s\S]*?(?:\/>|<\/EmptyState>)/gu;
-const CATALOG_TITLE_PATTERN =
-  /title-key="[^"]*(emptyStateTitle|emptyTitle|notFoundTitle|emptyState\.title|emptyCatalogTitle)[^"]*"/u;
 const STATIC_CTA_LABEL_PATTERN = /cta-label-key\s*=\s*"([^"]*)"/u;
 const BOUND_CTA_LABEL_PATTERN = /:cta-label-key\s*=/u;
 const BOUND_EMPTY_CTA_LABEL_PATTERN = /:cta-label-key\s*=\s*["'][\s\S]*?:\s*['"]\s*['"]/u;
@@ -25,14 +23,10 @@ const BOUND_CTA_TO_PATTERN = /:cta-to\s*=/u;
 const BOUND_EMPTY_CTA_TO_PATTERN = /:cta-to\s*=\s*""/u;
 const CTA_EMIT_PATTERN = /@cta\s*=/u;
 
+/** Instructional-only empties (no catalog next action). Keep minimal. */
 const SKIP_FILES = [
-  "packages/client/components/layout/WorkspaceOmniSearch.vue",
   "packages/client/components/ai/AIChatConversationPanel.vue",
   "packages/client/components/ai/FloatingChatPanel.vue",
-  "packages/client/components/interview/InterviewHistoryDetailCard.vue",
-  "packages/client/components/skills/SkillsPageInsights.vue",
-  "packages/client/components/automation/AutomationHubAuditCard.vue",
-  "packages/client/components/dashboard/DashboardOnboardingCard.vue",
 ] as const;
 
 const hasStaticCtaLabel = (block: string): boolean => {
@@ -66,15 +60,12 @@ const collectViolationsForContent = (
   const violations: ValidationViolation[] = [];
   for (const match of content.matchAll(EMPTY_STATE_BLOCK_PATTERN)) {
     const block = match[0] ?? "";
-    if (!CATALOG_TITLE_PATTERN.test(block)) {
-      continue;
-    }
     if (!hasStaticCtaLabel(block)) {
       violations.push({
         filePath,
         line: 1,
         message:
-          "Catalog EmptyState missing non-empty cta-label-key (empty string softening banned).",
+          "EmptyState missing non-empty cta-label-key (empty string / title-regex softening banned).",
       });
       continue;
     }
@@ -82,7 +73,7 @@ const collectViolationsForContent = (
       violations.push({
         filePath,
         line: 1,
-        message: "Catalog EmptyState has label but no action — wire cta-to or @cta.",
+        message: "EmptyState has label but no action — wire cta-to or @cta.",
       });
     }
   }
@@ -103,6 +94,6 @@ if (import.meta.main) {
   await reportViolations(
     "Empty-state CTA SSOT",
     await collectViolations(),
-    "Wire non-empty cta-label-key (+ cta-to or @cta) on every catalog EmptyState.",
+    "Wire non-empty cta-label-key (+ cta-to or @cta) on every EmptyState.",
   );
 }

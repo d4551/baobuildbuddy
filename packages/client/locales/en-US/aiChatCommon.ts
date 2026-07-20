@@ -6,6 +6,9 @@ const aiChatCommon = {
     unableToProcessFallback: "I'm sorry, I couldn't process that request.",
     requestErrorFallback: "I hit an error processing that request. Please try again.",
     requestErrorToast: "Chat request failed. Please try again.",
+    automationActionStarted: "Job apply automation started (run {runId}).",
+    automationActionFailed: "Could not start job apply automation from chat.",
+    automationActionOpenRuns: "View automation runs",
     timeAt: "at {time}",
     voice: {
       startTitle: "Start voice input",

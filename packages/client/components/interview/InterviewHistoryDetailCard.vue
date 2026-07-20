@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
@@ -125,6 +126,9 @@ const { t } = useI18n();
         <EmptyState
           title-key="interviewHistory.selectPromptTitle"
           description-key="interviewHistory.selectPromptDescription"
+          cta-label-key="interviewHistory.selectPromptCta"
+          cta-aria-key="interviewHistory.selectPromptCtaAria"
+          :cta-to="APP_ROUTES.interview"
         />
       </div>
     </div>

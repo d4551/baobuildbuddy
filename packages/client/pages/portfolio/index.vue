@@ -189,6 +189,7 @@ function updateProjectForm(value: typeof projectForm): void {
         </div>
       </section>
 
+      <!-- Profile stays when empty — EmptyState secondary anchors here. -->
       <PortfolioProfileCard
         :portfolio-form="portfolioForm"
         @update:portfolio-form="updatePortfolioForm"
@@ -196,6 +197,7 @@ function updateProjectForm(value: typeof projectForm): void {
       />
 
       <PortfolioProjectsCard
+        v-if="!isPortfolioEmpty"
         :all-projects-length="projects.length"
         :filtered-projects-length="filteredProjects.length"
         :paginated-projects="projectPagination.items.value"
