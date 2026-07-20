@@ -193,64 +193,6 @@ const seedSpeechAndAiSettings = async (modelId: string): Promise<void> => {
   await writeOutput("seeded speech STT=local/whisper-tiny + local AI");
 };
 
-const configureLocalAiViaUi = async (
-  page: Page,
-  endpoint: string,
-  modelId: string,
-): Promise<void> => {
-  await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("aiProviders")}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await wait(page, 2_000);
-
-  const localDetails = page
-    .locator("details")
-    .filter({ hasText: /Local Model/i })
-    .first();
-  await localDetails.waitFor({ state: "attached", timeout: 15_000 });
-  const localOpen = await localDetails.evaluate((el) => (el as HTMLDetailsElement).open);
-  if (!localOpen) {
-    await localDetails.locator("summary").first().click();
-    await wait(page, 600);
-  }
-
-  const endpointInput = page.getByLabel("Endpoint URL", { exact: true });
-  await endpointInput.waitFor({ state: "visible", timeout: 15_000 });
-  await endpointInput.fill(endpoint);
-
-  const modelInput = page.getByLabel("Local model name", { exact: true });
-  if ((await modelInput.count()) > 0) {
-    await modelInput.fill(modelId);
-  }
-
-  const preferred = page
-    .getByLabel(/preferred provider|Select provider for Chat|AI preferred/i)
-    .first();
-  if ((await preferred.count()) > 0) {
-    await settle(preferred.selectOption("local"));
-  }
-
-  // Accessible name can omit visible label text; match on button text content.
-  const saveKeys = page.locator("button", { hasText: /Save API Keys/i }).first();
-  await saveKeys.click({ timeout: 12_000 });
-  await wait(page, 2_000);
-
-  const savePreferred = page.locator("button", { hasText: /Save chat default/i }).first();
-  if ((await savePreferred.count()) > 0) {
-    await settle(savePreferred.click({ timeout: 5_000 }));
-    await wait(page, 1_000);
-  }
-  const saveRouting = page.locator("button", { hasText: /Save routing/i }).first();
-  if ((await saveRouting.count()) > 0) {
-    await settle(saveRouting.click({ timeout: 5_000 }));
-    await wait(page, 1_000);
-  }
-
-  await shot(page, "01-ai-providers-configured");
-  await writeOutput(`configured local AI via UI endpoint=${endpoint} model=${modelId}`);
-};
-
 const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resumeBuild}`, {
     waitUntil: "domcontentloaded",
@@ -505,19 +447,32 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 1_500);
   await shot(page, "16-interview-config");
 
-  const studioSelect = page.getByLabel(/studio/i).or(page.locator("select")).first();
-  if ((await studioSelect.count()) > 0) {
-    await settle(studioSelect.selectOption({ index: 1 }));
-  }
+  // StudioSelector is a custom combobox (not a native <select>).
+  const studioToggle = page.getByRole("button", { name: /Open studio selector/i }).first();
+  await studioToggle.waitFor({ state: "visible", timeout: 10_000 });
+  await studioToggle.click({ timeout: 8_000 });
+  const studioOption = page
+    .getByRole("option", { name: /Riot Games/i })
+    .or(page.getByRole("option").nth(1))
+    .first();
+  await studioOption.waitFor({ state: "visible", timeout: 10_000 });
+  await studioOption.click({ timeout: 8_000 });
+  await wait(page, 800);
+
   // Enable voice mode when the config checkbox exists.
   const voiceToggle = page.getByLabel(/voice|microphone|enable voice/i).first();
   if ((await voiceToggle.count()) > 0) {
     await settle(voiceToggle.check({ force: true }));
   }
 
-  const start = page
-    .locator("button", { hasText: /Start Interview|Start Session|Begin/i })
-    .first();
+  const start = page.getByRole("button", { name: /Start interview session/i }).first();
+  await start.waitFor({ state: "visible", timeout: 10_000 });
+  for (let attempt = 0; attempt < 40 && (await start.isDisabled()); attempt += 1) {
+    await wait(page, 250);
+  }
+  if (await start.isDisabled()) {
+    throw new Error("Interview start stayed disabled after studio selection.");
+  }
   await start.click({ timeout: 12_000 });
   await page.locator("textarea:visible").first().waitFor({ state: "visible", timeout: 90_000 });
   await shot(page, "17-interview-session");
@@ -619,7 +574,11 @@ const startDisplayRecorder = async (): Promise<DisplayRecorder> => {
       }
       await Bun.write(mp4Path, Bun.file(rawPath));
 
-      // Optional WebM sibling for players that prefer VP8/VP9 containers.
+      // WebM re-encode is optional (libvpx is slow); MP4 is the primary deliverable.
+      if (process.env.PRODUCT_DEMO_WEBM !== "1") {
+        await writeOutput("skipping webm encode (set PRODUCT_DEMO_WEBM=1 to enable)");
+        return { mp4Path, webmPath: null };
+      }
       const webmProc = Bun.spawn(
         [
           "ffmpeg",
