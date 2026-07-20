@@ -124,10 +124,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-      <SettingsPanelHeader
-        :title="t('settings.aiProviders.title')"
-        :description="t('settings.aiProviders.subtitle')"
-      >
+      <SettingsPanelHeader>
         <template #meta>
           <span class="badge badge-neutral badge-sm" aria-hidden="true">
             {{ configuredProviderCount }}/{{ props.providerInputs.length }}

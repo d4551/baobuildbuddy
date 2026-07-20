@@ -121,10 +121,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
-      <SettingsPanelHeader
-        :title="t('settings.brand.title')"
-        :description="t('settings.brand.subtitle')"
-      >
+      <SettingsPanelHeader>
         <template #meta>
           <span 
             class="badge"

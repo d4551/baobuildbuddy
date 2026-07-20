@@ -105,16 +105,26 @@ const createContextChips = ({
   t,
 }: ContextChipBuilderInput) =>
   computed(() => {
-    const chips = [
-      t("floatingChat.domainChip", {
-        context: currentContextLabel.value,
-      }),
-      t("floatingChat.sourceChip", {
-        source: sourceLabel.value,
-      }),
-    ];
-    const entity = context.value.entity;
+    const chips: string[] = [];
+    const isFloatingWidget = context.value.source === "floating-widget";
 
+    // Dedicated chat page already renders Context badge in the header — avoid
+    // Scope/Surface/Route noise that duplicates page chrome on mobile.
+    if (isFloatingWidget) {
+      chips.push(
+        t("floatingChat.domainChip", {
+          context: currentContextLabel.value,
+        }),
+        t("floatingChat.sourceChip", {
+          source: sourceLabel.value,
+        }),
+      );
+      if (routeLabel.value.length > 0) {
+        chips.push(t("floatingChat.routeBadge", { route: routeLabel.value }));
+      }
+    }
+
+    const entity = context.value.entity;
     if (entity) {
       chips.push(
         t("floatingChat.entityChip", {
@@ -122,10 +132,6 @@ const createContextChips = ({
           entity: focusedEntityLabel.value,
         }),
       );
-    }
-
-    if (routeLabel.value.length > 0) {
-      chips.push(t("floatingChat.routeBadge", { route: routeLabel.value }));
     }
 
     chips.push(...buildStateChips(context.value, t));

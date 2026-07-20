@@ -49,7 +49,7 @@ const floatingChat = {
     emptyTitle: "Start a quick check-in",
     emptyDescription:
       "Ask for next steps, follow-up copy, or a focused review from the page you are on.",
-    composerHint: "Press Enter to send. Use Shift+Enter for a new line.",
+    composerHint: "Enter sends · Shift+Enter adds a line.",
     prompts: {
       focusedEntity: "Give me focused coaching for {target}.",
       resume: "How can I improve this resume for {target}?",

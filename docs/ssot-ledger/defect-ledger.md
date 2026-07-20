@@ -42,3 +42,6 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D24 | BROKEN UX | Mobile navbar section label truncates to "A…"/"In…" @320 | FIXED | hide label below `sm`; logo+aria brand; page h1 owns section; `MAX_W_40_CLASS` for sm+ |
 | D25 | DUPLICATED | Scraper providers description in navigator + CapabilityGrid | FIXED | grid intro removed; navigator SSOT; burndown chrome-copy gate |
 | D26 | GAPPED | Interactive burndown desktop-only / 3-click / no 5Q | FIXED | canonical `browser-interaction-burndown.ts` mobile→tablet→desktop + 5Q ledger |
+| D27 | BROKEN UX | Section rail tab labels clip mid-word @320 (Prefe/Re…) | FIXED | remove overflow-x-clip; shrink-0 rail; icon-only labels below sm; aria-label retained |
+| D28 | DUPLICATED | Settings panel h2 repeats WorkspaceSectionNavigator title | FIXED | panel headers meta-only / removed under navigator |
+| D29 | SUBPAR | Chat-page Scope/Surface/Route chips + long composer hint @320 | FIXED | chips only on floating-widget; short composerHint en/es |

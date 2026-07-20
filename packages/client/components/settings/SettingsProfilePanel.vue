@@ -40,7 +40,8 @@ const profileSaveStateLabel = computed(() => {
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <SettingsPanelHeader :title="t('settings.profile.title')">
+      <!-- Title owned by WorkspaceSectionNavigator — meta badge only. -->
+      <SettingsPanelHeader>
         <template #meta>
           <span 
             class="badge"

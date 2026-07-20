@@ -38,10 +38,7 @@ const { t } = useI18n();
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body">
-      <SettingsPanelHeader
-        :title="t('settings.emailDelivery.title')"
-        :description="t('settings.emailDelivery.subtitle')"
-      >
+      <SettingsPanelHeader>
         <template #meta>
           <span 
             class="badge"

@@ -3062,7 +3062,7 @@ const catalog = {
     emptyTitle: "Inicia una revisión rápida",
     emptyDescription:
       "Pide próximos pasos, texto de seguimiento o una revisión enfocada desde la página en la que estás.",
-    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    composerHint: "Enter envía · Shift+Enter nueva línea.",
     prompts: {
       focusedEntity: "Dame coaching enfocado para {target}.",
       resume: "¿Cómo puedo mejorar este currículum para {target}?",
@@ -3122,7 +3122,7 @@ const catalog = {
     emptyTitle: "Tu asistente está listo",
     emptyDescription:
       "Usa las sugerencias junto a la conversación o pide coaching, ayuda de redacción, investigación o guía de automatización.",
-    composerHint: "Presiona Enter para enviar. Usa Shift+Enter para una nueva línea.",
+    composerHint: "Enter envía · Shift+Enter nueva línea.",
     composerIdleStatus: "Listo cuando tú lo estés",
     composerBusyStatus: "Generando una respuesta...",
     contextPanelTitle: "Contexto actual",

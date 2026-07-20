@@ -86,11 +86,12 @@ const activeDescription = computed<string>(() => {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section class="card card-border card-glass overflow-x-clip" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
-      <div class="card-body overflow-x-clip lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
+    <!-- No overflow-x-clip here: section rail must scroll horizontally @320. -->
+    <section class="card card-border card-glass" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
+      <div class="card-body lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div
           v-if="activeSectionEntry"
-          class="flex flex-col xl:flex-row xl:items-center xl:justify-between" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
+          class="flex flex-col" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4]"
         >
           <div class="flex items-start" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
             <span
@@ -123,7 +124,7 @@ const activeDescription = computed<string>(() => {
 
           <nav
             ref="sectionRailRef"
-            class="overflow-x-auto overscroll-x-contain xl:max-w-4xl"
+            class="overflow-x-auto overscroll-x-contain"
             :class="[
               FLUID_WIDTH_CLASS,
               TRUNCATE_FLEX_CHILD_CLASS,
@@ -134,12 +135,12 @@ const activeDescription = computed<string>(() => {
             ]"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max min-w-0 glass-subtle p-2" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div class="tabs tabs-box w-max max-w-none glass-subtle p-2" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto grow justify-start rounded-box px-3 py-2 text-left xl:grow-0"
+                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-left"
                 :class="[
                   TOUCH_TARGET_MIN_CLASS,
                   FLEX_GAP_TOKEN_CLASS.gap3,
@@ -147,6 +148,7 @@ const activeDescription = computed<string>(() => {
                   activeSection === section.id ? 'tab-active' : '',
                 ]"
                 :aria-current="activeSection === section.id ? 'page' : undefined"
+                :aria-label="t(section.labelKey)"
               >
                 <span
                   class="tooltip tooltip-bottom shrink-0"
@@ -165,11 +167,14 @@ const activeDescription = computed<string>(() => {
                   </span>
                 </span>
 
-                <span class="font-medium" :class="[TRUNCATE_FLEX_CHILD_CLASS]">{{ t(section.labelKey) }}</span>
+                <!-- Labels from sm+; @320 icon+aria-label only — avoids mid-word clip on scroll rail. -->
+                <span class="hidden shrink-0 font-medium whitespace-nowrap sm:inline">{{
+                  t(section.labelKey)
+                }}</span>
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
-                  class="badge badge-ghost badge-xs"
+                  class="badge badge-ghost badge-xs shrink-0"
                   aria-hidden="true"
                 >
                   {{ badgeById[section.id] }}

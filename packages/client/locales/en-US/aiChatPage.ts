@@ -16,7 +16,7 @@ const aiChatPage = {
     emptyTitle: "Your assistant is ready",
     emptyDescription:
       "Use the suggested prompts or ask for coaching, writing help, opportunity research, or automation guidance.",
-    composerHint: "Press Enter to send. Use Shift+Enter for a new line.",
+    composerHint: "Enter sends · Shift+Enter adds a line.",
     composerIdleStatus: "Ready when you are",
     composerBusyStatus: "Generating a response...",
     contextPanelTitle: "Current context",

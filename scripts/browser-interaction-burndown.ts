@@ -163,6 +163,15 @@ const collectChromeSignals = async (page: Page) =>
     const truncatedChrome = [...document.querySelectorAll(".navbar *")]
       .map((el) => (el.textContent ?? "").trim())
       .some((text) => isNavbarEllipsisGut(text));
+    const clippedSectionTabs = [...document.querySelectorAll(".tabs .tab")].some((el) => {
+      const label =
+        el.querySelector("span.font-medium, span.whitespace-nowrap") ??
+        (el instanceof HTMLElement ? el : null);
+      if (!(label instanceof HTMLElement)) {
+        return false;
+      }
+      return label.scrollWidth > label.clientWidth + 1;
+    });
     const duplicateChromeCopy = (() => {
       const texts = [...document.querySelectorAll("p")]
         .filter((el) => !el.closest(".grid, .stats, [role='log']"))
@@ -191,6 +200,7 @@ const collectChromeSignals = async (page: Page) =>
       title: document.title.trim(),
       overflowX,
       truncatedChrome,
+      clippedSectionTabs,
       duplicateChromeCopy,
       rawGlass,
       bodyLen: collapseWs(document.body?.innerText ?? "").length,
@@ -238,6 +248,16 @@ const probeRouteShell = async (
       route,
       "truncated-chrome",
       "navbar ellipsis gut",
+    );
+  }
+  if (shell.clippedSectionTabs) {
+    await captureFinding(
+      page,
+      findings,
+      viewport,
+      route,
+      "clipped-section-tabs",
+      "section tab label scrollWidth>clientWidth",
     );
   }
   if (shell.duplicateChromeCopy.length > 0) {
@@ -422,9 +442,9 @@ const buildFiveQ = (
         ? "h1+content present"
         : "FAIL: empty or missing h1",
     ssotUx:
-      shell.overflowX <= 1 && !shell.truncatedChrome
+      shell.overflowX <= 1 && !shell.truncatedChrome && !shell.clippedSectionTabs
         ? "no overflow; chrome intact"
-        : `FAIL: overflow/truncation`,
+        : "FAIL: overflow/truncation",
     interactions:
       errors.every((finding) => !finding.action.startsWith("after-click")) && clicks >= 0
         ? `clicked ${String(clicks)} controls`
