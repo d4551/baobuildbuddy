@@ -7,6 +7,7 @@ const studioAnalytics = {
     retryAria: "Retry loading studio analytics",
     retryButton: "Retry",
     openDirectoryAria: "Open the studio directory",
+    openDirectoryButton: "Browse studios",
     emptyTitle: "No studio analytics available",
     emptyDescription:
       "Refresh studio data from the directory or scraper hub to populate analytics for this workspace.",

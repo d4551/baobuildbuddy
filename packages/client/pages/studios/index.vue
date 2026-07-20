@@ -69,6 +69,9 @@ useSeoMeta({
       v-else-if="page.filteredStudios.value.length === 0"
       title-key="studiosIndex.emptyTitle"
       description-key="studiosIndex.emptyDescription"
+      cta-label-key="studiosIndex.filters.clearButton"
+      cta-aria-key="studiosIndex.filters.clearAria"
+      @cta="page.clearFilters()"
     />
 
     <StudiosIndexGrid

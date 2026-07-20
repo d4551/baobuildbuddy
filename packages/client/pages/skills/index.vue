@@ -142,6 +142,8 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
         :has-mappings="hasMappings"
         :filtered-mappings="filteredMappings"
         @delete="requestDeleteMapping"
+        @add="showAddModal = true"
+        @clear-filters="clearFilters"
       />
     </div>
 

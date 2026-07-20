@@ -73,7 +73,8 @@ useSeoMeta({
       v-else-if="!analytics"
       title-key="studioAnalytics.emptyTitle"
       description-key="studioAnalytics.emptyDescription"
-      cta-label-key="studioAnalytics.retryButton"
+      cta-label-key="studioAnalytics.openDirectoryButton"
+      cta-aria-key="studioAnalytics.openDirectoryAria"
       :cta-to="APP_ROUTES.studios"
     />
 

@@ -52,6 +52,18 @@ const page = useJobsIndexPage();
           {{ t("jobsPage.configureProvidersButton") }}
         </NuxtLink>
         <button
+          v-if="!page.isCatalogEmpty.value"
+          type="button"
+          class="btn btn-outline"
+          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :aria-label="t('jobsPage.aiMatchAria')"
+          :disabled="page.matching.value"
+          @click="page.handleAiMatch()"
+        >
+          <LoadingSpinner v-if="page.matching.value" size="sm" :label="t('jobsPage.aiMatchButton')" />
+          <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
+        </button>
+        <button
           :class="page.isCatalogEmpty.value ? [TOUCH_TARGET_MIN_CLASS, 'btn btn-outline'] : [PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
@@ -63,6 +75,30 @@ const page = useJobsIndexPage();
         </button>
       </template>
     </PageHeroHeader>
+
+    <section
+      v-if="page.recommendations.value.length > 0"
+      :class="[SECTION_GAP_BOTTOM_CLASS]"
+      :aria-label="t('jobsPage.recommendationsAria')"
+    >
+      <h2 :class="[CARD_TITLE_LG_CLASS, SECTION_GAP_BOTTOM_CLASS]">
+        {{ t("jobsPage.recommendationsTitle") }}
+      </h2>
+      <SectionGrid grid-token="twoColumn">
+        <UiGlassCard
+          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          :key="`rec-${job.id}`"
+          :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
+          :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
+          :stagger-index="Math.min(index, 11)"
+        >
+          <div class="card-body relative z-10">
+            <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
+            <p :class="BODY_TEXT_SM_CLASS">{{ job.company }}</p>
+          </div>
+        </UiGlassCard>
+      </SectionGrid>
+    </section>
 
     <UiSearchFilterBar
       v-model="page.searchQuery.value"

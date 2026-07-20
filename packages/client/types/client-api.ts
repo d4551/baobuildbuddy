@@ -8,6 +8,7 @@ import type {
   JobsApi,
   PortfolioApi,
   ResumesApi,
+  SearchApi,
   SettingsApi,
   SkillsApi,
   StatsApi,
@@ -32,7 +33,7 @@ export interface ClientApi {
     analytics: StudioAnalyticsApi;
   };
   automation: object;
-  search: object;
+  search: SearchApi;
   scraper: object;
 }
 

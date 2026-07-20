@@ -138,6 +138,7 @@ onUnmounted(() => {
       <span class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.content.tagline }}</span>
     </div>
     <div class="navbar-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+      <WorkspaceOmniSearch />
       <label class="swap swap-rotate btn btn-ghost btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]">
         <input 
           type="checkbox"

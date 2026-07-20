@@ -165,7 +165,7 @@ useSeoMeta({
             </p>
             <NuxtLink
               v-if="!emailDeliveryConfigured"
-              :to="APP_ROUTES.settings"
+              :to="APP_ROUTE_BUILDERS.settingsSection('emailDelivery')"
               class="btn btn-link btn-sm" :class="[PADDING_TOKEN_CLASS.px0]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >

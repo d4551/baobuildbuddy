@@ -285,41 +285,45 @@ const probeRouteShell = async (
   return shell;
 };
 
-const listClickableControlLabels = async (page: Page): Promise<readonly string[]> =>
-  page.evaluate((maxClicks: number) => {
-    const main = document.querySelector("main");
-    if (!main) {
-      return [];
-    }
-    const controls = Array.from(main.querySelectorAll("button, a.btn, a[href]"));
-    const labels: string[] = [];
-    for (const control of controls) {
-      if (!(control instanceof HTMLElement)) {
-        continue;
+const listClickableControlLabels = async (page: Page): Promise<readonly string[]> => {
+  const evaluated = await settle(
+    page.evaluate((maxClicks: number) => {
+      const main = document.querySelector("main");
+      if (!main) {
+        return [];
       }
-      if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
-        continue;
-      }
-      if (typeof control.checkVisibility === "function") {
-        if (!control.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+      const controls = Array.from(main.querySelectorAll("button, a.btn, a[href]"));
+      const labels: string[] = [];
+      for (const control of controls) {
+        if (!(control instanceof HTMLElement)) {
           continue;
         }
-      } else {
-        const style = window.getComputedStyle(control);
-        if (style.visibility === "hidden" || style.display === "none") {
+        if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
           continue;
         }
+        if (typeof control.checkVisibility === "function") {
+          if (!control.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) {
+            continue;
+          }
+        } else {
+          const style = window.getComputedStyle(control);
+          if (style.visibility === "hidden" || style.display === "none") {
+            continue;
+          }
+        }
+        const aria = control.getAttribute("aria-label")?.replace(/\s+/gu, " ").trim() ?? "";
+        const text = control.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+        // Prefer aria-label — card NuxtLinks concatenate nested copy into textContent.
+        const label = aria.length > 0 ? aria : text;
+        if (label.length > 0 && label.length < 80) {
+          labels.push(label);
+        }
       }
-      const aria = control.getAttribute("aria-label")?.replace(/\s+/gu, " ").trim() ?? "";
-      const text = control.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-      // Prefer aria-label — card NuxtLinks concatenate nested copy into textContent.
-      const label = aria.length > 0 ? aria : text;
-      if (label.length > 0 && label.length < 80) {
-        labels.push(label);
-      }
-    }
-    return [...new Set(labels)].slice(0, maxClicks);
-  }, MAX_CLICKS_PER_ROUTE);
+      return [...new Set(labels)].slice(0, maxClicks);
+    }, MAX_CLICKS_PER_ROUTE),
+  );
+  return evaluated.status === "fulfilled" ? evaluated.value : [];
+};
 
 const clickOneLabel = async (
   page: Page,
@@ -332,30 +336,35 @@ const clickOneLabel = async (
 ): Promise<void> => {
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
-  const clicked = await page.evaluate((targetLabel) => {
-    const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
-    const controls = [...document.querySelectorAll("main button, main a.btn, main a[href]")];
-    for (const control of controls) {
-      if (!(control instanceof HTMLElement)) {
-        continue;
-      }
-      const aria = normalize(control.getAttribute("aria-label") ?? "");
-      const text = normalize(control.textContent ?? "");
-      const resolved = aria.length > 0 ? aria : text;
-      if (resolved !== targetLabel) {
-        continue;
-      }
-      if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
-        continue;
-      }
-      control.click();
-      return true;
+  // Locator click survives SPA navigations; page.evaluate dies when context is destroyed.
+  const normalize = (value: string): string => value.replace(/\s+/gu, " ").trim();
+  const target = normalize(label);
+  const controls = page.locator("main button, main a.btn, main a[href]");
+  const count = await controls.count();
+  let clicked = false;
+  for (let index = 0; index < count; index += 1) {
+    const control = controls.nth(index);
+    const aria = normalize((await control.getAttribute("aria-label")) ?? "");
+    const text = normalize((await control.innerText().catch(() => "")) ?? "");
+    const resolved = aria.length > 0 ? aria : text;
+    if (resolved !== target) {
+      continue;
     }
-    return false;
-  }, label);
+    const disabled =
+      (await control.getAttribute("disabled")) !== null ||
+      (await control.getAttribute("aria-disabled")) === "true";
+    if (disabled) {
+      continue;
+    }
+    const clickResult = await settle(control.click({ timeout: 2500 }));
+    clicked = clickResult.status === "fulfilled";
+    break;
+  }
   if (!clicked) {
     // Prior clicks (refresh/filter) often unmount empty-state CTAs; skip stale labels.
-    const stillListed = (await listClickableControlLabels(page)).includes(label);
+    const stillListedResult = await settle(listClickableControlLabels(page));
+    const stillListed =
+      stillListedResult.status === "fulfilled" && stillListedResult.value.includes(label);
     if (stillListed) {
       await captureFinding(
         page,
@@ -369,6 +378,11 @@ const clickOneLabel = async (
     }
   }
   await page.waitForTimeout(180);
+  // Re-home after in-app navigation before the next evaluate/locator sweep.
+  const origin = `${CLIENT_BASE}${route}`;
+  if (!page.url().startsWith(origin)) {
+    await openRoute(page, route, consoleBucket, pageErrorBucket);
+  }
   if (pageErrorBucket.length > 0) {
     await captureFinding(
       page,

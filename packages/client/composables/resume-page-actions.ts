@@ -29,6 +29,7 @@ function createResumeActionModules(
       {
         aiEnhance: input.aiEnhance,
         aiScore: input.aiScore,
+        analyzeResume: input.analyzeResume,
         enhancing: input.enhancing,
         formData: input.formData,
         scoring: input.scoring,

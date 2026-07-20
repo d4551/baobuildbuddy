@@ -147,15 +147,21 @@ function updateProjectForm(value: typeof projectForm): void {
         <EmptyState
           title-key="portfolioPage.emptyState.title"
           description-key="portfolioPage.emptyState.description"
-        />
-        <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-          <a href="#portfolio-profile-card" class="btn btn-outline">
-            {{ t("portfolioPage.emptyState.profileButton") }}
-          </a>
-          <button class="btn btn-primary" :aria-label="t('portfolioPage.projects.addAria')" @click="openAddModal">
-            {{ t("portfolioPage.projects.addButton") }}
-          </button>
-        </div>
+          cta-label-key="portfolioPage.projects.addButton"
+          cta-aria-key="portfolioPage.projects.addAria"
+          @cta="openAddModal"
+        >
+          <template #actions>
+            <a
+              href="#portfolio-profile-card"
+              class="btn btn-outline"
+              :class="[FLUID_WIDTH_CLASS]"
+              :aria-label="t('portfolioPage.emptyState.profileButton')"
+            >
+              {{ t("portfolioPage.emptyState.profileButton") }}
+            </a>
+          </template>
+        </EmptyState>
       </div>
 
       <section :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">

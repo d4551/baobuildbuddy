@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { InterviewSession } from "@bao/shared/types/interview";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
@@ -97,6 +98,9 @@ const viewSession = (id: string): void => {
         v-if="filteredSessions.length === 0"
         title-key="interviewHistory.emptyStateTitle"
         description-key="interviewHistory.emptyStateDescription"
+        cta-label-key="interviewHistory.emptyStateCta"
+        cta-aria-key="interviewHistory.emptyStateCtaAria"
+        :cta-to="APP_ROUTES.interview"
       />
 
       <ResponsiveDataSurface v-else-if="historyView === 'table'">

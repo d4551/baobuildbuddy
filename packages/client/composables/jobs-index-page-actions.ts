@@ -86,6 +86,11 @@ export const createJobsPageActions = (input: {
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: JobsTranslate;
   refreshing: Ref<boolean>;
+  matching: Ref<boolean>;
+  matchJobs: (resumeId: string) => Promise<unknown>;
+  fetchResumes: () => Promise<void>;
+  resumes: Ref<ReadonlyArray<{ id: string }>> | Readonly<Ref<ReadonlyArray<{ id: string }>>>;
+  fetchRecommendations: () => Promise<void>;
 }) => {
   const searchCriteria = createJobsSearchCriteria(input);
   const refreshActions = createJobsRefreshActions(input);
@@ -110,8 +115,42 @@ export const createJobsPageActions = (input: {
     await refreshActions.maybeAwardSearchXp();
   }
 
+  async function handleAiMatch() {
+    input.matching.value = true;
+    const resumesResult = await settlePromise(
+      input.fetchResumes(),
+      input.t("apiErrors.resumes.fetchListFailed"),
+    );
+    if (!resumesResult.ok) {
+      input.matching.value = false;
+      input.toast.error(input.t("apiErrors.resumes.fetchListFailed"));
+      return;
+    }
+    const resumeId = input.resumes.value[0]?.id;
+    if (!resumeId) {
+      input.matching.value = false;
+      input.toast.error(input.t("jobsPage.toasts.matchNeedsResume"));
+      return;
+    }
+    const matchResult = await settlePromise(
+      input.matchJobs(resumeId),
+      input.t("apiErrors.ai.matchJobsFailed"),
+    );
+    if (matchResult.ok) {
+      await settlePromise(
+        input.fetchRecommendations(),
+        input.t("apiErrors.jobs.fetchRecommendationsFailed"),
+      );
+      input.toast.success(input.t("jobsPage.toasts.matchComplete"));
+    } else {
+      input.toast.error(input.t("apiErrors.ai.matchJobsFailed"));
+    }
+    input.matching.value = false;
+  }
+
   return {
     clearFilters,
+    handleAiMatch,
     handleRefresh: refreshActions.handleRefresh,
     handleSearch,
     interviewJob: (id: string) => navigation.interviewJob(id),

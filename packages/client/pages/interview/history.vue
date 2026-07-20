@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
@@ -65,6 +66,9 @@ useSeoMeta({
       v-else-if="!sessions.length"
       title-key="interviewHistory.emptyStateTitle"
       description-key="interviewHistory.emptyStateDescription"
+      cta-label-key="interviewHistory.emptyStateCta"
+      cta-aria-key="interviewHistory.emptyStateCtaAria"
+      :cta-to="APP_ROUTES.interview"
     />
 
     <SectionGrid v-else grid-token="threeColumnLg">

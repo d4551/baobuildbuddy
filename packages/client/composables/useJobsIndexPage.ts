@@ -1,3 +1,4 @@
+import { settlePromise } from "~/composables/async-flow";
 import { createJobsPageActions } from "~/composables/jobs-index-page-actions";
 import { createJobsFilterOptions } from "~/composables/jobs-index-page-contracts";
 import { createJobsDerivedState, createJobsLabels } from "~/composables/jobs-index-page-derived";
@@ -15,6 +16,10 @@ export function useJobsIndexPage() {
     refresh: refreshJobsBootstrap,
   } = useAsyncData("jobs-page-bootstrap", async () => {
     await runtime.searchJobs();
+    await settlePromise(
+      runtime.fetchRecommendations(),
+      runtime.t("apiErrors.jobs.fetchRecommendationsFailed"),
+    );
     return true;
   });
 
@@ -37,6 +42,11 @@ export function useJobsIndexPage() {
     toast: runtime.toast,
     t: runtime.t,
     refreshing: runtime.refreshing,
+    matching: runtime.matching,
+    matchJobs: runtime.matchJobs,
+    fetchResumes: runtime.fetchResumes,
+    resumes: runtime.resumes,
+    fetchRecommendations: runtime.fetchRecommendations,
   });
 
   registerJobsPageEffects({
@@ -53,6 +63,8 @@ export function useJobsIndexPage() {
     jobsBootstrapStatus,
     loading: runtime.loading,
     localFilters: runtime.localFilters,
+    matching: runtime.matching,
+    recommendations: runtime.recommendations,
     refreshing: runtime.refreshing,
     searchQuery: runtime.searchQuery,
     showFilters: runtime.showFilters,

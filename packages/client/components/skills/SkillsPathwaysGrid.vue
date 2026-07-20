@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CareerPathway } from "@bao/shared/types/skill-mapping";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -89,6 +90,8 @@ const { t } = useI18n();
         v-if="pathways.length === 0"
         title-key="skillsPathwaysPage.pathways.emptyStateTitle"
         description-key="skillsPathwaysPage.pathways.emptyStateDescription"
+        cta-label-key="nav.skills"
+        :cta-to="APP_ROUTES.skills"
       />
     </div>
   </section>

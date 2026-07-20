@@ -220,7 +220,8 @@ function studioDetailLocation(location: string | undefined): string {
       v-else-if="!studio"
       title-key="studioDetail.emptyTitle"
       description-key="studioDetail.emptyDescription"
-      cta-label-key="studioDetail.retryButton"
+      cta-label-key="studioDetail.browseDirectoryButton"
+      cta-aria-key="studioDetail.browseDirectoryAria"
       :cta-to="APP_ROUTES.studios"
     />
 

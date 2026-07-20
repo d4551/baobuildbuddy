@@ -164,6 +164,27 @@ function createTestApiKeyAction(context: SettingsContext) {
   };
 }
 
+function createExportWorkspaceAction(context: SettingsContext) {
+  return async () =>
+    withLoadingState(context.loading, async () => {
+      const { data, error } = await context.api.settings.export.get();
+      assertApiResponse(error, context.t("apiErrors.settings.exportFailed"));
+      return requireValue(data, context.t("apiErrors.settings.missingResponse"));
+    });
+}
+
+function createImportWorkspaceAction(
+  context: SettingsContext,
+  fetchSettings: ReturnType<typeof createFetchSettingsAction>,
+) {
+  return async (payload: NonNullable<Parameters<ApiClient["settings"]["import"]["post"]>[0]>) =>
+    withLoadingState(context.loading, async () => {
+      const { error } = await context.api.settings.import.post(payload);
+      assertApiResponse(error, context.t("apiErrors.settings.importFailed"));
+      await fetchSettings({ force: true });
+    });
+}
+
 function createSettingsActions(context: SettingsContext) {
   const fetchSettings = createFetchSettingsAction(context);
   return {
@@ -172,6 +193,8 @@ function createSettingsActions(context: SettingsContext) {
     updateApiKeys: createUpdateApiKeysAction(context, fetchSettings),
     updateJobTaxonomy: createUpdateJobTaxonomyAction(context, fetchSettings),
     testApiKey: createTestApiKeyAction(context),
+    exportWorkspace: createExportWorkspaceAction(context),
+    importWorkspace: createImportWorkspaceAction(context, fetchSettings),
   };
 }
 

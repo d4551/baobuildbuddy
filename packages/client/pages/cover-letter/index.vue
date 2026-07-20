@@ -174,6 +174,9 @@ const bootstrapErrorMessage = computed(() =>
       v-else-if="coverLetters.length === 0"
       title-key="coverLetterPage.emptyStateTitle"
       description-key="coverLetterPage.emptyStateDescription"
+      cta-label-key="coverLetterPage.generateButton"
+      cta-aria-key="coverLetterPage.generateButtonAria"
+      @cta="showGenerateModal = true"
     />
 
     <FilteredEmptyAlert

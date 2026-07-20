@@ -67,6 +67,7 @@ import studioAnalytics from "./studioAnalytics";
 import studioDetail from "./studioDetail";
 import studioSelector from "./studioSelector";
 import studiosIndex from "./studiosIndex";
+import workspaceSearch from "./workspaceSearch";
 import xpBar from "./xpBar";
 
 type EnglishLocaleCatalog = typeof meta &
@@ -137,7 +138,8 @@ type EnglishLocaleCatalog = typeof meta &
   typeof floatingChat &
   typeof studioSelector &
   typeof aiChatPage &
-  typeof aiChatCommon;
+  typeof aiChatCommon &
+  typeof workspaceSearch;
 
 const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   meta,
@@ -209,6 +211,7 @@ const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   studioSelector,
   aiChatPage,
   aiChatCommon,
+  workspaceSearch,
 );
 
 export default enUSCatalog;

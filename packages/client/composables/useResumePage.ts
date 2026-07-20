@@ -8,6 +8,7 @@ import {
 import { useResumePageDerived } from "~/composables/resume-page-derived";
 
 function useResumePageDependencies() {
+  const ai = useAI();
   return {
     i18n: useI18n(),
     nuxtApp: useNuxtApp(),
@@ -15,6 +16,7 @@ function useResumePageDependencies() {
     route: useRoute(),
     gamification: usePipelineGamification(),
     statistics: useStatistics(),
+    analyzeResume: ai.analyzeResume,
   };
 }
 
@@ -27,6 +29,7 @@ function createResumePageActionsInput(
     aiEnhance: dependencies.resumeApi.aiEnhance,
     aiEnhancementStepLabels: derived.aiEnhancementStepLabels,
     aiScore: dependencies.resumeApi.aiScore,
+    analyzeResume: dependencies.analyzeResume,
     awardForAction: dependencies.gamification.awardForAction,
     closeDeleteResumeDialog: bootstrap.closeDeleteResumeDialog,
     createResume: dependencies.resumeApi.createResume,

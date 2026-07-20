@@ -30,6 +30,7 @@ const searchQuery = defineModel<string>("searchQuery", { required: true });
 
 const emit = defineEmits<{
   clearFilters: [];
+  create: [];
   selectResume: [resumeId: string];
   requestDelete: [resumeId: string];
   "update:currentPage": [page: number];
@@ -81,6 +82,9 @@ function requestDelete(resumeId?: string): void {
       v-if="resumes.length === 0"
       title-key="resumePage.emptyStateTitle"
       description-key="resumePage.emptyState"
+      cta-label-key="resumePage.createButton"
+      cta-aria-key="resumePage.createButtonAria"
+      @cta="emit('create')"
     />
 
     <FilteredEmptyAlert

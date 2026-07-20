@@ -55,6 +55,9 @@ const {
       v-else-if="docsUiState === 'empty'"
       title-key="apiDocs.title"
       description-key="apiDocs.state.empty"
+      cta-label-key="apiDocs.actions.retry"
+      cta-aria-key="apiDocs.actions.retry"
+      @cta="refreshSpec"
     />
 
     <BootstrapErrorAlert

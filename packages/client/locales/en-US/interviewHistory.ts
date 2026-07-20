@@ -10,6 +10,8 @@ const interviewHistory = {
     emptyStateTitle: "No interview sessions found",
     emptyStateDescription:
       "Start a new interview from a scraped job or studio drill to populate your practice history.",
+    emptyStateCta: "Start Interview",
+    emptyStateCtaAria: "Open interview hub to start a practice session",
     tableAriaLabel: "Interview sessions",
     timelineAriaLabel: "Interview sessions timeline view",
     viewButton: "View",

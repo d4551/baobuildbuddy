@@ -145,16 +145,19 @@ watch(
         </template>
 
         <template #preferences>
-          <SettingsPreferencesPanel
-            v-model:preferences-language="preferencesLanguage"
-            v-model:notification-form="notificationForm"
-            :theme="theme"
-            :theme-names="THEME_NAMES"
-            :language-options="languageOptions"
-            :preferences-save-state="preferencesSaveState"
-            @save="handleSavePreferences"
-            @toggle-theme="handleToggleTheme"
-          />
+          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+            <SettingsPreferencesPanel
+              v-model:preferences-language="preferencesLanguage"
+              v-model:notification-form="notificationForm"
+              :theme="theme"
+              :theme-names="THEME_NAMES"
+              :language-options="languageOptions"
+              :preferences-save-state="preferencesSaveState"
+              @save="handleSavePreferences"
+              @toggle-theme="handleToggleTheme"
+            />
+            <SettingsWorkspaceBackupCard />
+          </div>
         </template>
 
         <template #automation>

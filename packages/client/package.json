@@ -29,7 +29,7 @@
     "@elysiajs/eden": "^1.4.9",
     "@nuxt/image": "^2.0.0",
     "@tanstack/vue-query": "^5.92.9",
-    "nuxt": "^4.4.8",
+    "nuxt": "^4.5.0",
     "vue": "^3.5.30",
     "vue-i18n": "^11.3.0",
     "vue-router": "^5.0.3",

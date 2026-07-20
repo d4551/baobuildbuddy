@@ -22,6 +22,8 @@ defineProps<{
 
 const emit = defineEmits<{
   delete: [id: string];
+  add: [];
+  clearFilters: [];
 }>();
 
 const { t } = useI18n();
@@ -40,12 +42,18 @@ function normalizedConfidence(confidence: number): number {
     v-if="!hasMappings"
     title-key="skillsPage.emptyStateTitle"
     description-key="skillsPage.emptyStateDescription"
+    cta-label-key="skillsPage.actions.addMappingButton"
+    cta-aria-key="skillsPage.actions.addMappingAria"
+    @cta="emit('add')"
   />
 
   <EmptyState
     v-else-if="filteredMappings.length === 0"
     title-key="skillsPage.filteredEmptyTitle"
     description-key="skillsPage.filteredEmptyDescription"
+    cta-label-key="skillsPage.filters.clearButton"
+    cta-aria-key="skillsPage.filters.clearAria"
+    @cta="emit('clearFilters')"
   />
 
   <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">

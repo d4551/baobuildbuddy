@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -43,6 +44,9 @@ const { t } = useI18n();
         v-if="recentSessions.length === 0"
         title-key="interviewHub.recent.title"
         description-key="interviewHub.recent.emptyState"
+        cta-label-key="interviewHistory.emptyStateCta"
+        cta-aria-key="interviewHistory.emptyStateCtaAria"
+        :cta-to="APP_ROUTES.interview"
       />
 
       <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
