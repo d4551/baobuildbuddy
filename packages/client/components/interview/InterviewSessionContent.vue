@@ -86,7 +86,7 @@ const { t } = useI18n();
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button 
         type="button"
-        class="btn btn-success btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+        :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-success btn-sm']"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
         @click="$emit('history')"
       >

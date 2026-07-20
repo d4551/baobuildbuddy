@@ -69,7 +69,7 @@ const emit = defineEmits<{
             <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <button 
                 type="button"
-                class="btn btn-success btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-success btn-sm']"
                 :disabled="completingChallenge === challenge.id"
                 :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                 @click="emit('claim', challenge.id)"

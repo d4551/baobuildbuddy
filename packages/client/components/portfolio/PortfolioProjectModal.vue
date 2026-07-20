@@ -180,7 +180,7 @@ function updateFeaturedFlag(event: Event): void {
             {{ tech }}
             <button 
               type="button"
-              class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >

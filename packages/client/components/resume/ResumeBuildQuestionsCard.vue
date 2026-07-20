@@ -37,7 +37,7 @@ const emit = defineEmits<{
           }}
         </h2>
         <button 
-          class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
         >

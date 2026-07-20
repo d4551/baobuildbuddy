@@ -164,7 +164,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
-          <button class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
+          <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
             {{ t("coverLetterPage.filters.clearButton") }}
           </button>
         </div>
@@ -227,14 +227,14 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
 
           <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
             <button
-              class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button
-              class="btn btn-sm btn-error btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

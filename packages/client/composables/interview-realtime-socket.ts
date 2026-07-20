@@ -153,15 +153,20 @@ export async function submitInterviewResponseViaWs(
   if (!socketApi.send({ type: "submit_response", sessionId, content })) {
     return null;
   }
-  const deadline = Date.now() + 20_000;
-  while (Date.now() < deadline) {
-    const feedback = lastFeedback.value;
-    if (feedback && feedback.sessionId === sessionId) {
-      return feedback;
-    }
-    await new Promise<void>((resolve) => {
-      window.setTimeout(resolve, 50);
-    });
-  }
-  return null;
+  return await new Promise<InterviewResponseFeedbackPayload | null>((resolve) => {
+    const deadline = Date.now() + 20_000;
+    const poll = (): void => {
+      const feedback = lastFeedback.value;
+      if (feedback && feedback.sessionId === sessionId) {
+        resolve(feedback);
+        return;
+      }
+      if (Date.now() >= deadline) {
+        resolve(null);
+        return;
+      }
+      window.setTimeout(poll, 50);
+    };
+    poll();
+  });
 }

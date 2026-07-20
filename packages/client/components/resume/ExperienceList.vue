@@ -86,7 +86,7 @@ function removeExperience(index: number): void {
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
             <button 
-              class="btn btn-error btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"
             >

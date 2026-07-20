@@ -195,7 +195,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

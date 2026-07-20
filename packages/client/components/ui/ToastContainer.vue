@@ -77,7 +77,7 @@ function resolveIconPath(type: ToastType): string {
 
         <button 
           type="button"
-          class="btn btn-ghost btn-circle btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-circle btn-sm']"
           :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >

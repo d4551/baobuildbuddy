@@ -152,14 +152,14 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
         <NuxtLink 
           :to="runDetailRoute(activeRunId)"
-          class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
           :aria-label="t('automation.jobApply.openRunDetailAria', { id: activeRunId })"
         >
           {{ t("automation.jobApply.openRunDetailLink") }}
         </NuxtLink>
         <button 
           type="button"
-          class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
           :disabled="isStreamLoading"
           :aria-label="t('automation.jobApply.stream.retryAria')"
           @click="emit('retry')"
@@ -168,7 +168,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </button>
         <button 
           type="button"
-          class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
           :aria-label="t('automation.jobApply.stream.cancelAria')"
           @click="emit('cancel')"
         >

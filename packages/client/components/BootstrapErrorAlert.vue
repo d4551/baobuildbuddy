@@ -59,7 +59,7 @@ const hasRetry = computed(
     <button 
       v-if="hasRetry"
       type="button"
-      class="btn btn-sm btn-ghost shrink-0" :class="[TOUCH_TARGET_MIN_CLASS]"
+      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost shrink-0']"
       :aria-label="retryAriaLabel"
       @click="emit('retry')"
     >

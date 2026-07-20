@@ -47,7 +47,7 @@ function studioLocation(location: string): string {
   >
     <button 
       type="button"
-      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" :class="[TOUCH_TARGET_MIN_CLASS]"
+      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-circle btn-ghost absolute right-2 top-2']"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >

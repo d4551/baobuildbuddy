@@ -67,7 +67,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
               :aria-label="
                 t('apiDocs.endpoint.openTesterAria', {
                   method: methodLabel(endpoint.method),

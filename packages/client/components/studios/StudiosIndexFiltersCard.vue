@@ -82,7 +82,7 @@ const { t } = useI18n();
           <span class="label">{{ t("studiosIndex.filters.remoteLabel") }}</span>
         </label>
 
-        <button class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
+        <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
           {{ t("studiosIndex.filters.clearButton") }}
         </button>
       </div>

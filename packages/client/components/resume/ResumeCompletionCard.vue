@@ -81,7 +81,7 @@ const { t } = useI18n();
             v-for="action in quickActions"
             :key="action.id"
             :to="action.to"
-            class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
             :aria-label="t(action.labelKey)"
           >
             {{ t(action.labelKey) }}

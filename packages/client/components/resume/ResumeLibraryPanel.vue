@@ -70,7 +70,7 @@ function requestDelete(resumeId?: string): void {
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
           <button 
-            class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
           >
@@ -125,21 +125,21 @@ function requestDelete(resumeId?: string): void {
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
-                class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
                 :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
                 @click.stop
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
               <button 
-                class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
               <button 
-                class="btn btn-sm btn-error btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
               >

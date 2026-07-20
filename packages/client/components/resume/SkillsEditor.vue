@@ -81,7 +81,7 @@ function removeSkill(index: number): void {
         {{ skill }}
         <button 
           type="button"
-          class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >

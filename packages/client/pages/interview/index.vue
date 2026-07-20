@@ -206,8 +206,7 @@ const {
                 <div :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("interviewHub.cards.selectedJobValue", { title: selectedJob.title, company: selectedJob.company }) }}</div>
               </div>
               <button
-                class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
-                :class="[POINTER_EVENTS_TOKEN_CLASS.auto]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', POINTER_EVENTS_TOKEN_CLASS.auto]"
                 :aria-label="t('interviewHub.cards.changeJobAria')"
                 @click="openConfig('job')"
               >

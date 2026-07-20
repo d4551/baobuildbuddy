@@ -230,7 +230,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
               {{ application }}
               <button
                 type="button"
-                class="btn btn-ghost btn-sm btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
                 :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                 @click="removeApplication(index)"
               >

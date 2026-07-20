@@ -155,7 +155,7 @@ watch(
       <nav class="join" :aria-label="navigationAria">
         <button 
           type="button"
-          class="join-item btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
           :aria-label="previousAria"
           :disabled="!canGoPrevious"
           @keydown="handleNavigationKeydown"
@@ -169,8 +169,7 @@ watch(
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
-          class="join-item btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
-          :class="{ 'btn-active': page === currentPage }"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': page === currentPage }]"
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
           :tabindex="page === currentPage ? 0 : -1"
@@ -184,7 +183,7 @@ watch(
 
         <button 
           type="button"
-          class="join-item btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
           :aria-label="nextAria"
           :disabled="!canGoNext"
           @keydown="handleNavigationKeydown"

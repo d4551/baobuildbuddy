@@ -126,7 +126,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
           <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="join">
               <button 
-                class="btn join-item btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
                 :disabled="!props.canMove(project.id, 'up') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
                 @click="emit('move', project.id, 'up')"
@@ -134,7 +134,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 {{ t("portfolioPage.projects.moveUpButton") }}
               </button>
               <button 
-                class="btn join-item btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
                 :disabled="!props.canMove(project.id, 'down') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
                 @click="emit('move', project.id, 'down')"
@@ -145,14 +145,14 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <button 
-                class="btn btn-sm btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
                 :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"
                 @click="emit('edit', project)"
               >
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
               <button 
-                class="btn btn-sm btn-error btn-outline" :class="[TOUCH_TARGET_MIN_CLASS]"
+                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"
               >

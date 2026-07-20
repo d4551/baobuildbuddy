@@ -82,7 +82,7 @@ const readyEntries = computed(() =>
         </div>
         <NuxtLink 
           :to="APP_ROUTES.automationScraper"
-          class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
           :aria-label="t('automation.hub.audit.openScraperAria')"
         >
           {{ t("automation.hub.audit.openScraperButton") }}
@@ -179,7 +179,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}
@@ -232,7 +232,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}

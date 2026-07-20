@@ -103,7 +103,7 @@ function handleScheduleInput(event: Event): void {
           />
         </div>
 
-        <NuxtLink :to="latestRunRoute" class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]">
+        <NuxtLink :to="latestRunRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']">
           {{
             latestRun
               ? t("automation.scraper.latestRun.openButton")
@@ -203,7 +203,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -224,7 +224,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -252,7 +252,7 @@ function handleScheduleInput(event: Event): void {
           </fieldset>
           <div class="card-actions justify-end">
             <button 
-              class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
               @click="emit('schedule', capability.target)"
@@ -278,7 +278,7 @@ function handleScheduleInput(event: Event): void {
           <div class="card-actions justify-end">
             <NuxtLink 
               :to="buildRunDetailRoute(latestRun.id)"
-              class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
               :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"
             >
               {{ t("automation.scraper.openRunDetailButton") }}

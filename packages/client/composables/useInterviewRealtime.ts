@@ -6,8 +6,6 @@ import {
   submitInterviewResponseViaWs,
 } from "~/composables/interview-realtime-socket";
 
-export type { InterviewResponseFeedbackPayload } from "~/composables/interview-realtime-socket";
-
 /**
  * Interview coaching WS — WS-or-HTTP single path (never both).
  * submitViaWs writes once on the server and returns response_feedback.

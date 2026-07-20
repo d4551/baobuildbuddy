@@ -24,6 +24,7 @@ const REQUEST_API_EDEN_PATTERN = new RegExp(
 );
 const BUILD_AUTOMATION_RUN_PATTERN = /buildAutomationRunEndpoint\s*\(/gu;
 const BUILD_COVER_LETTER_DETAIL_PATTERN = /buildCoverLetterDetailEndpoint\s*\(/gu;
+const REQUEST_API_CALL_PATTERN = /requestApi\s*(?:<[^>]*>)?\s*\(/u;
 
 const isAllowedFile = (filePath: string): boolean =>
   filePath.endsWith(".test.ts") ||
@@ -43,7 +44,7 @@ export const collectEdenDualPathViolationsForContent = (
 
   // useCoverLetter: ban requestApi + detail builder; allow export download helper only.
   if (filePath.endsWith("useCoverLetter.ts")) {
-    if (/requestApi\s*(?:<[^>]*>)?\s*\(/u.test(content)) {
+    if (REQUEST_API_CALL_PATTERN.test(content)) {
       violations.push({
         filePath,
         line: 1,

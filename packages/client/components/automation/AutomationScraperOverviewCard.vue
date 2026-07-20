@@ -52,7 +52,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-start">
-        <NuxtLink :to="runsRoute" class="btn btn-outline btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]">
+        <NuxtLink :to="runsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </div>

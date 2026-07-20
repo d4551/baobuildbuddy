@@ -40,7 +40,7 @@ const { t } = useI18n();
     <div class="card-body">
       <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHub.recent.title") }}</h2>
-        <NuxtLink :to="viewAllTo" class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]">
+        <NuxtLink :to="viewAllTo" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']">
           {{ t("interviewHub.recent.viewAllButton") }}
         </NuxtLink>
       </div>
@@ -92,8 +92,7 @@ const { t } = useI18n();
                 </div>
                 <button
                   type="button"
-                  class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
-                  :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+                  :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS, 'btn btn-ghost btn-sm']"
                   :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                   @click.stop="emit('viewSession', session.id)"
                 >
@@ -137,8 +136,7 @@ const { t } = useI18n();
                   <td>
                     <button
                       type="button"
-                      class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS]"
-                      :class="[TOUCH_TARGET_MIN_CLASS]"
+                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
                       :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                       @click.stop="emit('viewSession', session.id)"
                     >

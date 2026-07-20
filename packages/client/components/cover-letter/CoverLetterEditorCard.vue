@@ -46,7 +46,7 @@ const emit = defineEmits<{
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
         <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <button class="btn btn-sm btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
+          <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
           <button class="btn btn-primary" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
