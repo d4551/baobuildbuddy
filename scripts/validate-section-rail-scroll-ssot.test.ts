@@ -18,4 +18,17 @@ import { SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TO
     expect(violations.some((value) => value.includes("missing SSOT"))).toBe(true);
     expect(violations.some((value) => value.includes("raw scroll utility"))).toBe(true);
   });
+
+  it("flags overflow-x-clip that would kill the section rail", () => {
+    const content = `
+import { SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_SNAP_ALIGN_START_CLASS, SCROLL_TOUCH_PAN_X_CLASS } from "~/constants/layout";
+<section class="card overflow-x-clip">
+  <nav :class="[SCROLL_SNAP_X_MANDATORY_CLASS, SCROLL_TOUCH_PAN_X_CLASS]">
+    <a :class="[SCROLL_SNAP_ALIGN_START_CLASS]">x</a>
+  </nav>
+</section>
+`;
+    const violations = collectSectionRailScrollViolations(content);
+    expect(violations.some((value) => value.includes("overflow-x-clip"))).toBe(true);
+  });
 });

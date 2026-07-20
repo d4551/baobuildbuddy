@@ -15,6 +15,8 @@ const REQUIRED_TOKENS = [
 ] as const;
 
 const BANNED_INLINE = /\bsnap-x\b|\btouch-pan-x\b/u;
+/** overflow-x-clip on the navigator card kills horizontal section-rail scroll @320. */
+const BANNED_OVERFLOW_CLIP = /\boverflow-x-clip\b/u;
 
 export const collectSectionRailScrollViolations = (content: string): string[] => {
   const violations: string[] = [];
@@ -23,12 +25,15 @@ export const collectSectionRailScrollViolations = (content: string): string[] =>
       violations.push(`missing SSOT token import/use: ${token}`);
     }
   }
-  // Ban raw snap utilities in class="..." string literals (token constants OK).
+  // Ban raw snap / overflow-clip utilities in class="..." string literals (token constants OK).
   const classLiterals = content.matchAll(/class="([^"]*)"/gu);
   for (const match of classLiterals) {
     const classValue = match[1] ?? "";
     if (BANNED_INLINE.test(classValue)) {
       violations.push(`raw scroll utility in class literal: ${classValue}`);
+    }
+    if (BANNED_OVERFLOW_CLIP.test(classValue)) {
+      violations.push("overflow-x-clip banned on WorkspaceSectionNavigator (clips section rail)");
     }
   }
   return violations;

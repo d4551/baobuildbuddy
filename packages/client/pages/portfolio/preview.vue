@@ -121,7 +121,11 @@ async function handleExport(format: "pdf" | "docx") {
             </h2>
             <p :class="PROSE_MEASURE_CENTER_CLASS">{{ portfolio.metadata?.bio }}</p>
           </div>
-          <div class="flex flex-wrap justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
+          <div
+            v-if="portfolio.metadata?.email || portfolio.metadata?.website"
+            class="flex flex-wrap justify-center"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap4]"
+          >
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"

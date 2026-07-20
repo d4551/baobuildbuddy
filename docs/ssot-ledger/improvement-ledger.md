@@ -17,3 +17,6 @@
 | I3 | AI chat context | baseline: chips×2 surfaces | new: one visible set / viewport | Δ: visible badges 8→4 | SSOT: AIChatConversationPanel/Sidebar | gate: post-fix chip audit |
 | I4 | Touch targets | baseline: dock ~42px | new: min-h-11 (55px measured) | Δ: ≥44px | SSOT: TOUCH_TARGET_MIN_CLASS | gate: deep-audit dockItemMin |
 | I5 | AppNavbar mobile chrome | baseline: truncating section crumbs @320 | new: logo-only &lt;sm, labeled ≥sm | Δ: ellipsis false @320; label visible @640 | SSOT: AppNavbar + MAX_W_40_CLASS | gate: validate:no-raw-design-tokens + navbar-320 proof |
+| I6 | Section rail clip gate | baseline: no overflow-x-clip ban | new: class-literal ban + mutation red→green | Δ: gate fails on inject | SSOT: validate-section-rail-scroll-ssot | gate: scripts/validate-section-rail-scroll-ssot.test.ts |
+| I7 | Studio analytics hydration | baseline: mismatch console error | new: 0 hydration errors | Δ: errors 1→0 | SSOT: useAsyncData data owner | gate: browser analytics-verify.json |
+| I8 | Touch targets drawer/menu | baseline: 42px h | new: min-h-11 (≥44) | Δ: +2px to AAA bar | SSOT: SHELL_SIDEBAR_ITEM_CLASS / TOUCH_TARGET_MIN_CLASS | gate: mobile-deep post-fix |

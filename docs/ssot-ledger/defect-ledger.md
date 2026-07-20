@@ -45,3 +45,7 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D27 | BROKEN UX | Section rail tab labels clip mid-word @320 (Prefe/Re…) | FIXED | remove overflow-x-clip; shrink-0 rail; icon-only labels below sm; aria-label retained |
 | D28 | DUPLICATED | Settings panel h2 repeats WorkspaceSectionNavigator title | FIXED | panel headers meta-only / removed under navigator |
 | D29 | SUBPAR | Chat-page Scope/Surface/Route chips + long composer hint @320 | FIXED | chips only on floating-widget; short composerHint en/es |
+| D30 | BROKEN | /studios/analytics hydration mismatch (orphan ref vs useAsyncData) | FIXED | analytics payload via useAsyncData data; SSR=client |
+| D31 | BROKEN | FloatingChatToggleButton SVG_STROKE_WIDTH_DEFAULT unbound | FIXED | import from layout SSOT |
+| D32 | SUBPAR | Sidebar/navbar targets 42px < WCAG 2.5.5 44px | FIXED | SHELL_SIDEBAR_ITEM_CLASS + TOUCH_TARGET_MIN_CLASS on menu |
+| D33 | SUBPAR | Empty contact flex on portfolio preview | FIXED | v-if email\|website |

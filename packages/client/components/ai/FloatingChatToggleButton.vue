@@ -2,6 +2,7 @@
 import {
   ICON_SIZE_CLASS,
   SHADOW_TOKEN_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
 } from "~/constants/layout";
 
 defineProps<{
