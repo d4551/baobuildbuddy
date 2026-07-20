@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -54,7 +55,12 @@ function updateTextValue(event: Event, emitEvent: "update:name" | "update:curren
     </label>
 
     <div class="flex justify-end">
-      <button class="btn btn-primary" :aria-label="t('setup.nextToLocalAiAria')" @click="emit('next')">
+      <button
+        class="btn btn-primary"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="t('setup.nextToLocalAiAria')"
+        @click="emit('next')"
+      >
         {{ t("setup.nextButton") }}
       </button>
     </div>

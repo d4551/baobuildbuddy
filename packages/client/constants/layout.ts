@@ -229,9 +229,9 @@ export const SIDEBAR_WIDTH_LG_CLASS = "lg:w-64";
 export const SHELL_SIDEBAR_ITEM_CLASS =
   "flex min-h-11 min-w-11 items-center gap-2 rounded-box px-2 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right";
 
-/** Navbar dropdown menu surface (daisyUI dropdown-content with shell tokens). */
+/** Navbar dropdown (no menu-sm — keeps locale rows ≥44px). */
 export const SHELL_NAVBAR_DROPDOWN_CLASS =
-  "menu menu-sm dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg";
+  "menu dropdown-content rounded-box z-50 mt-2 w-56 border border-base-300 bg-base-100 p-2 shadow-lg";
 
 /** Dropdown menu width token (used by AppExportMenu and similar transient menus). */
 export const DROPDOWN_MENU_WIDTH_CLASS = "w-40";

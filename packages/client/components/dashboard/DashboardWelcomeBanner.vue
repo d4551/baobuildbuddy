@@ -14,6 +14,7 @@ import {
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -60,16 +61,16 @@ const { t } = useI18n();
         <NuxtLink
           :to="primaryRoute"
           class="btn btn-primary"
-          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS]"
+          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
         >
           {{ primaryLabel }}
         </NuxtLink>
-        <!-- Avoid duplicate Complete Setup CTAs when primary already targets setup. -->
+        <!-- Secondary setup path only when primary is not already setup. -->
         <NuxtLink
           v-if="primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
-          class="btn btn-ghost"
-          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS]"
+          class="btn btn-outline"
+          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
         >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>

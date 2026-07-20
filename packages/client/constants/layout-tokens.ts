@@ -264,7 +264,8 @@ export const MIN_H_80_CLASS = "min-h-80";
  * Apple HIG / WCAG touch-target floor (44×44 CSS px).
  * Use on primary interactive chrome (dock items, critical icon buttons).
  */
-export const TOUCH_TARGET_MIN_CLASS = "min-h-11 min-w-11";
+/** Floor + fixed height so daisyUI menu/btn padding cannot shrink below 44px. */
+export const TOUCH_TARGET_MIN_CLASS = "h-11 min-h-11 min-w-11";
 
 /** Per-item dock link: meets touch-target floor without forking dock chrome. */
 export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";

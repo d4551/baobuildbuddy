@@ -22,3 +22,5 @@
 | I8 | Touch targets drawer/menu | baseline: 42px h | new: min-h-11 (≥44) | Δ: +2px to AAA bar | SSOT: SHELL_SIDEBAR_ITEM_CLASS / TOUCH_TARGET_MIN_CLASS | gate: mobile-deep post-fix |
 | I9 | Job source count SSOT | baseline: panel≠workspace; badge `n/3` | new: `countActiveJobProviderSources` | Δ: truthful enabled+configured count | SSOT: utils/job-provider-source-count.ts | gate: vitest + JI screenshot |
 | I10 | Burndown stale clicks | baseline: warn after empty-state unmount | new: skip if label delisted | Δ: 3 warns→0 | SSOT: browser-interaction-burndown | gate: loop-4 burndown 0 findings |
+| I11 | Touch floor hardened | baseline: min-h-11 alone →42px under menu-sm | new: h-11 + no menu-sm | Δ: locale 42→44 | SSOT: TOUCH_TARGET_MIN_CLASS + SHELL_NAVBAR_DROPDOWN | gate: live measure + lint |
+| I12 | Gamification @320 | baseline: streak clip | new: col stack + shrink-0 label | Δ: clipped→full "day streak" | SSOT: DashboardGamificationCard | gate: deep-a + pass-c/d |

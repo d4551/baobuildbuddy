@@ -55,3 +55,6 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D37 | LYING | Job Intelligence active-sources `4/3` badge; panel vs workspace count drift | FIXED | `countActiveJobProviderSources` SSOT; badge shows live count |
 | D38 | SUBPAR | Jobs empty CTA aria `"Refresh Jobs"` ≠ header `"Refresh job feed"` → burndown warn after first click | FIXED | EmptyState `ctaAriaKey` + jobs uses `refreshAria`/`clearFiltersAria` |
 | D39 | SUBPAR | Burndown warn `control not found` for empty-state CTAs unmounted after Refresh | FIXED | skip stale labels when no longer listed |
+| D40 | BROKEN UX | Dashboard streak label truncates "day stre…" @320 | FIXED | gamification card stacks @mobile; streak shrink-0 + nowrap |
+| D41 | SUBPAR | Locale menu rows 42px under menu-sm | FIXED | drop menu-sm; TOUCH_TARGET_MIN_CLASS = h-11 min-h-11 min-w-11 |
+| D42 | SUBPAR | Setup continue CTA 40px | FIXED | TOUCH_TARGET_MIN_CLASS on SetupProfileStep |
