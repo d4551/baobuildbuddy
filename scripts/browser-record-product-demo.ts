@@ -7,7 +7,8 @@
  * - Live Whisper STT at WHISPER_ENDPOINT (default http://127.0.0.1:8090/v1)
  * Refuses mocks / deterministic stub providers.
  *
- * Proof: Playwright recordVideo (headed, DISPLAY, fake mic WAV) → WebM/MP4.
+ * Proof: headed Chromium on DISPLAY + ffmpeg x11grab (not Playwright recordVideo —
+ * in-process VP8 encoding starves local llama.cpp during long AI calls).
  */
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -15,6 +16,9 @@ import { chromium, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
+
+const DEMO_VIEWPORT = { width: 1440, height: 900 } as const;
+const DEMO_CAPTURE_FPS = 12;
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
@@ -272,6 +276,17 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   }
 
   const answerBox = page.locator("textarea:visible").first();
+  let sawGenerateRequest = false;
+  const onGenerateRequest = (request: { url: () => string; method: () => string }): void => {
+    if (
+      request.url().includes("/resumes/from-questions/generate") &&
+      request.method() === "POST"
+    ) {
+      sawGenerateRequest = true;
+    }
+  };
+  page.on("request", onGenerateRequest);
+  const generateStarted = Date.now();
   const generateResponse = page.waitForResponse(
     (response) =>
       response.url().includes("/resumes/from-questions/generate") &&
@@ -281,12 +296,17 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   await generate.click({ timeout: 10_000 });
   await writeOutput("clicked Generate Questions; waiting for AI question UI");
   const generateResult = await settle(generateResponse);
+  page.off("request", onGenerateRequest);
   if (generateResult.status === "rejected") {
     await shot(page, "03-resume-questions-timeout");
-    throw new Error("Resume guided build: generate request never completed.");
+    throw new Error(
+      sawGenerateRequest
+        ? "Resume guided build: generate request never completed."
+        : "Resume guided build: generate request never fired.",
+    );
   }
   await writeOutput(
-    `resume generate HTTP ${String(generateResult.value.status())} in-flight done`,
+    `resume generate HTTP ${String(generateResult.value.status())} in ${String(Date.now() - generateStarted)}ms`,
   );
   await page
     .getByText(/Question\s+\d+\s+of\s+\d+/i)
@@ -535,32 +555,97 @@ const demoInterview = async (page: Page): Promise<void> => {
   await shot(page, "18-interview-feedback");
 };
 
-const encodeMp4 = async (webmPath: string): Promise<string | null> => {
+type DisplayRecorder = {
+  stop: () => Promise<{ mp4Path: string | null; webmPath: string | null }>;
+};
+
+const startDisplayRecorder = async (): Promise<DisplayRecorder> => {
+  const display = process.env.DISPLAY ?? ":1";
   const mp4Path = join(OUT, "bao-product-demo.mp4");
+  const webmPath = join(OUT, "bao-product-demo.webm");
+  const rawPath = join(OUT, "raw-segments", "display-capture.mp4");
+
+  // Low FPS + ultrafast x264 keeps CPU free for llama.cpp during AI steps.
   const proc = Bun.spawn(
     [
       "ffmpeg",
       "-y",
+      "-loglevel",
+      "error",
+      "-f",
+      "x11grab",
+      "-video_size",
+      `${String(DEMO_VIEWPORT.width)}x${String(DEMO_VIEWPORT.height)}`,
+      "-framerate",
+      String(DEMO_CAPTURE_FPS),
       "-i",
-      webmPath,
+      `${display}.0+0,0`,
       "-c:v",
       "libx264",
+      "-preset",
+      "ultrafast",
+      "-crf",
+      "28",
       "-pix_fmt",
       "yuv420p",
       "-movflags",
       "+faststart",
       "-an",
-      mp4Path,
+      rawPath,
     ],
-    { stdout: "pipe", stderr: "pipe" },
+    { stdout: "ignore", stderr: "pipe" },
   );
-  const code = await proc.exited;
-  if (code !== 0) {
-    const err = await new Response(proc.stderr).text();
-    await writeError(`ffmpeg failed: ${err.slice(0, 400)}`);
-    return null;
-  }
-  return mp4Path;
+  await writeOutput(
+    `x11grab started display=${display} ${String(DEMO_VIEWPORT.width)}x${String(DEMO_VIEWPORT.height)}@${String(DEMO_CAPTURE_FPS)}`,
+  );
+
+  return {
+    stop: async () => {
+      try {
+        proc.kill("SIGINT");
+      } catch {
+        // already exited
+      }
+      const code = await proc.exited;
+      if (code !== 0 && code !== 255) {
+        const err = await new Response(proc.stderr).text();
+        await writeError(`x11grab failed (${String(code)}): ${err.slice(0, 400)}`);
+        return { mp4Path: null, webmPath: null };
+      }
+      const rawExists = await Bun.file(rawPath).exists();
+      if (!rawExists || (await Bun.file(rawPath).size) < 50_000) {
+        await writeError("x11grab produced missing/small capture");
+        return { mp4Path: null, webmPath: null };
+      }
+      await Bun.write(mp4Path, Bun.file(rawPath));
+
+      // Optional WebM sibling for players that prefer VP8/VP9 containers.
+      const webmProc = Bun.spawn(
+        [
+          "ffmpeg",
+          "-y",
+          "-loglevel",
+          "error",
+          "-i",
+          mp4Path,
+          "-c:v",
+          "libvpx",
+          "-b:v",
+          "1M",
+          "-an",
+          webmPath,
+        ],
+        { stdout: "ignore", stderr: "pipe" },
+      );
+      const webmCode = await webmProc.exited;
+      if (webmCode !== 0) {
+        const err = await new Response(webmProc.stderr).text();
+        await writeError(`webm encode failed: ${err.slice(0, 240)}`);
+        return { mp4Path, webmPath: null };
+      }
+      return { mp4Path, webmPath };
+    },
+  };
 };
 
 const main = async (): Promise<void> => {
@@ -572,22 +657,21 @@ const main = async (): Promise<void> => {
   const whisper = await assertLiveWhisper();
   await seedSpeechAndAiSettings(live.modelId);
 
+  const recorder = await startDisplayRecorder();
+
   const browser = await chromium.launch({
     headless: false,
     args: [
       "--disable-dev-shm-usage",
-      "--window-size=1440,900",
+      `--window-size=${String(DEMO_VIEWPORT.width)},${String(DEMO_VIEWPORT.height)}`,
+      "--window-position=0,0",
       "--use-fake-ui-for-media-stream",
       "--use-fake-device-for-media-stream",
       `--use-file-for-fake-audio-capture=${FAKE_AUDIO_WAV}`,
     ],
   });
   const context = await browser.newContext({
-    recordVideo: {
-      dir: join(OUT, "raw-segments"),
-      size: { width: 1440, height: 900 },
-    },
-    viewport: { width: 1440, height: 900 },
+    viewport: { ...DEMO_VIEWPORT },
     acceptDownloads: true,
     permissions: ["microphone"],
   });
@@ -640,27 +724,9 @@ const main = async (): Promise<void> => {
     await settle(shot(page, "99-tour-failed"));
   }
 
-  const video = page.video();
   await context.close();
   await browser.close();
-
-  let webmPath: string | null = null;
-  if (video) {
-    webmPath = await video.path();
-  }
-  const segments = await readdir(join(OUT, "raw-segments"));
-  const webmName = segments.find((name) => name.endsWith(".webm"));
-  const stableWebm = join(OUT, "bao-product-demo.webm");
-  if (webmName) {
-    const source = join(OUT, "raw-segments", webmName);
-    await Bun.write(stableWebm, Bun.file(source));
-    webmPath = stableWebm;
-  }
-
-  let mp4Path: string | null = null;
-  if (webmPath) {
-    mp4Path = await encodeMp4(webmPath);
-  }
+  const { mp4Path, webmPath } = await recorder.stop();
 
   const stillCount = (await readdir(join(OUT, "stills"))).filter((name) =>
     name.endsWith(".png"),
@@ -676,6 +742,7 @@ const main = async (): Promise<void> => {
     whisperEndpoint: whisper.endpoint,
     whisperSample: whisper.text.slice(0, 240),
     mockUsed: false,
+    capture: "ffmpeg-x11grab",
     tourError,
     stillCount,
     webmPath,
@@ -691,8 +758,11 @@ const main = async (): Promise<void> => {
     `browser-record-product-demo: stills=${String(stillCount)} webm=${webmPath ?? "none"} (${String(webmBytes)}) mp4=${mp4Path ?? "none"} (${String(mp4Bytes)}) errors=${String(consoleErrors.length)} live=${live.modelId} tourError=${tourError ?? "none"}`,
   );
 
-  if (!webmPath || webmBytes < 50_000 || tourError) {
-    await writeError("Product demo incomplete (missing/small video or tour error).");
+  if ((!mp4Path || mp4Bytes < 50_000) && (!webmPath || webmBytes < 50_000)) {
+    await writeError("Product demo incomplete (missing/small video).");
+    process.exitCode = 1;
+  } else if (tourError) {
+    await writeError("Product demo incomplete (tour error).");
     process.exitCode = 1;
   }
 };
