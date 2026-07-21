@@ -63,7 +63,7 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
     case "ok":
       break;
     default: {
-      const _exhaustive: never = parsed;
+      parsed satisfies never;
       return {
         error: API_ERROR_MISSING_AUTH_HEADER,
         status: HTTP_STATUS_UNAUTHORIZED,

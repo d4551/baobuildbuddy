@@ -119,8 +119,8 @@ const buildQuestionText = (
     case "closing":
       return `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.role} at ${context.company} right now?`;
     default: {
-      const _exhaustive: never = type;
-      return `How would you contribute as ${context.role} at ${context.company}? (${_exhaustive})`;
+      const unreachable: never = type;
+      return `How would you contribute as ${context.role} at ${context.company}? (${String(unreachable)})`;
     }
   }
 };
@@ -156,8 +156,8 @@ const buildFollowUps = (
         "Why does this studio context fit where you want to grow next?",
       ];
     default: {
-      const _exhaustive: never = type;
-      return [`What else should we cover for ${_exhaustive}?`];
+      const unreachable: never = type;
+      return [`What else should we cover for ${context.role}? (${String(unreachable)})`];
     }
   }
 };
