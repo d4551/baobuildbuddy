@@ -4,18 +4,16 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  PRIMARY_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
@@ -74,7 +72,7 @@ function handleScheduleInput(event: Event): void {
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+  <UiGlassCard :extra-class="FLUID_HEIGHT_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
@@ -288,5 +286,5 @@ function handleScheduleInput(event: Event): void {
         </div>
       </details>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

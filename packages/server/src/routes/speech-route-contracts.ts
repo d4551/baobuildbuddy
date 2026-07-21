@@ -1,8 +1,8 @@
 import {
+  HTTP_STATUS_BAD_GATEWAY,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
-  HTTP_STATUS_BAD_GATEWAY,
 } from "@bao/shared/constants/http";
 import { t } from "elysia";
 

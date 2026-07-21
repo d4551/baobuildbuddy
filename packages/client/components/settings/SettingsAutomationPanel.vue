@@ -4,20 +4,19 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
-
-defineProps<{
-  automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
-}>();
 
 const automationForm = defineModel<AutomationSettings>("automationForm", {
   required: true,
 });
+
+defineProps<{
+  automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
+}>();
 
 const emit = defineEmits<{
   save: [];
@@ -27,7 +26,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <SettingsPanelHeader />
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
@@ -156,5 +155,5 @@ const { t } = useI18n();
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

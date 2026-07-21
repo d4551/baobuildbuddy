@@ -15,8 +15,8 @@ import {
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { formatChatTimestamp } from "~/utils/chat";
 

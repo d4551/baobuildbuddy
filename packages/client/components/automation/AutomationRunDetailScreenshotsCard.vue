@@ -4,7 +4,6 @@ import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -20,18 +19,14 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.runDetail.screenshotsTitle')">
+  <UiGlassCard :aria-label="t('automation.runDetail.screenshotsTitle')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.screenshotsTitle") }}</h2>
       <div v-if="screenshotPaths.length === 0" class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("automation.runDetail.noScreenshots") }}
       </div>
       <SectionGrid v-else grid-token="threeColumn">
-        <article 
-          v-for="(screenshotPath, index) in screenshotPaths"
-          :key="screenshotPath"
-          :class="SURFACE_GLASS_CARD_CLASS"
-        >
+        <UiGlassCard v-for="(screenshotPath, index) in screenshotPaths" :key="screenshotPath">
           <figure :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.pt4]">
             <img 
               v-if="!screenshotHasError(index)"
@@ -59,8 +54,8 @@ const { t } = useI18n();
               {{ screenshotLinkLabel(index) }}
             </a>
           </div>
-        </article>
+        </UiGlassCard>
       </SectionGrid>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

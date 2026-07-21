@@ -446,11 +446,6 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
         }>;
     };
 }, {}, `${string}/refresh`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ status }: {
-    body: unknown;
-    query: Record<string, string | undefined>;
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -458,11 +453,6 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         readonly 200: {
             message: string;
@@ -479,6 +469,16 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
             id?: string | undefined;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     message: string;
     status: string;

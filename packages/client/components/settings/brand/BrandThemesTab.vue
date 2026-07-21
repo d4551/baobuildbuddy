@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_PADDING_MD_P6_CLASS,
-} from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -9,16 +6,15 @@ import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
 
 const brandForm = defineModel<{
   lightThemeJson: string;
   darkThemeJson: string;
 }>("brandForm", { required: true });
-
 
 const props = defineProps<{
   hintIds: {
@@ -33,7 +29,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4, RESPONSIVE_PADDING_MD_P6_CLASS]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ t("settings.brand.tabs.themesDescription") }}
@@ -73,5 +69,5 @@ const { t } = useI18n();
         </fieldset>
       </SectionGrid>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

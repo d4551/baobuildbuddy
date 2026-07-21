@@ -73,6 +73,28 @@ const extractTemplateBlocks = (content: string): string => {
   return content.slice(templateStart, templateEnd + "</template>".length);
 };
 
+const collectPatternViolations = (
+  filePath: string,
+  fullContent: string,
+  haystack: string,
+  haystackOffset: number,
+  pattern: RegExp,
+  skipPattern: RegExp | null,
+  message: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  pattern.lastIndex = 0;
+  for (const match of haystack.matchAll(pattern)) {
+    if (skipPattern?.test(match[0] ?? "")) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(fullContent, haystackOffset + (match.index ?? 0)),
+      message,
+    });
+  }
+  return violations;
+};
+
 export const collectGlassMaterialViolationsForContent = (
   filePath: string,
   content: string,
@@ -80,71 +102,83 @@ export const collectGlassMaterialViolationsForContent = (
   if (isSsotSourceFile(filePath)) return [];
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
-  const violations: ValidationViolation[] = [];
+  const templateOffset = Math.max(0, content.indexOf(template));
 
-  cardSurfaceWithoutGlassPattern.lastIndex = 0;
-  for (const match of template.matchAll(cardSurfaceWithoutGlassPattern)) {
-    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Card surface with shadow but no glass material class. Add card-glass (or card-glass-strong/modal) or consume SURFACE_GLASS_CARD_CLASS from constants/layout.ts.`,
-    });
-  }
+  const cardMsg =
+    "Card surface with shadow but no glass material class. Add card-glass (or card-glass-strong/modal) or consume SURFACE_GLASS_CARD_CLASS from constants/layout.ts.";
+  const panelMsg =
+    "Bespoke panel surface (bg-base-* + shadow-* + border-*) bypasses the glass material system. Use glass / glass-subtle / glass-strong or a SURFACE_GLASS_*_CLASS constant.";
 
-  cardSurfaceWithoutGlassDynamicPattern.lastIndex = 0;
-  for (const match of template.matchAll(cardSurfaceWithoutGlassDynamicPattern)) {
-    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Dynamic :class binding: Card surface with shadow but no glass material class. Add card-glass (or card-glass-strong/modal) or consume SURFACE_GLASS_CARD_CLASS from constants/layout.ts.`,
-    });
-  }
-
-  bespokePanelSurfacePattern.lastIndex = 0;
-  for (const match of template.matchAll(bespokePanelSurfacePattern)) {
-    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Bespoke panel surface (bg-base-* + shadow-* + border-*) bypasses the glass material system. Use glass / glass-subtle / glass-strong or a SURFACE_GLASS_*_CLASS constant.`,
-    });
-  }
-
-  bespokePanelSurfaceDynamicPattern.lastIndex = 0;
-  for (const match of template.matchAll(bespokePanelSurfaceDynamicPattern)) {
-    if (GLASS_TOKEN_TAIL_PATTERN.test(match[0])) continue;
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Dynamic :class binding: Bespoke panel surface (bg-base-* + shadow-* + border-*) bypasses the glass material system. Use glass / glass-subtle / glass-strong or a SURFACE_GLASS_*_CLASS constant.`,
-    });
-  }
-
-  interactiveCardWithoutMixinPattern.lastIndex = 0;
-  for (const match of template.matchAll(interactiveCardWithoutMixinPattern)) {
-    if (GLASS_INTERACTIVE_MIXIN_PATTERN.test(match[0])) continue;
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Interactive card (has @click or role="button") missing glass-interactive mixin. Add glass-interactive or SURFACE_GLASS_CARD_CLASS (which includes it).`,
-    });
-  }
-
-  // Softening ban: consumers must bind SURFACE_GLASS_SUBTLE_CLASS, not raw glass-subtle.
-  const rawSubtlePattern = /\bglass-subtle\b/gu;
-  for (const match of content.matchAll(rawSubtlePattern)) {
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message:
-        "Raw glass-subtle class literal bypasses SURFACE_GLASS_SUBTLE_CLASS. Import SURFACE_GLASS_SUBTLE_CLASS from ~/constants/layout and bind via :class.",
-    });
-  }
-
-  return violations;
+  const cardHits = collectPatternViolations(
+    filePath,
+    content,
+    template,
+    templateOffset,
+    cardSurfaceWithoutGlassPattern,
+    GLASS_TOKEN_TAIL_PATTERN,
+    cardMsg,
+  );
+  const cardDynamicHits = collectPatternViolations(
+    filePath,
+    content,
+    template,
+    templateOffset,
+    cardSurfaceWithoutGlassDynamicPattern,
+    GLASS_TOKEN_TAIL_PATTERN,
+    `Dynamic :class binding: ${cardMsg}`,
+  );
+  const panelHits = collectPatternViolations(
+    filePath,
+    content,
+    template,
+    templateOffset,
+    bespokePanelSurfacePattern,
+    GLASS_TOKEN_TAIL_PATTERN,
+    panelMsg,
+  );
+  return [
+    ...cardHits,
+    ...cardDynamicHits,
+    ...panelHits,
+    ...collectPanelDynamicAndInteractiveHits(filePath, content, template, templateOffset, panelMsg),
+  ];
 };
+
+const collectPanelDynamicAndInteractiveHits = (
+  filePath: string,
+  content: string,
+  template: string,
+  templateOffset: number,
+  panelMsg: string,
+): ValidationViolation[] => [
+  ...collectPatternViolations(
+    filePath,
+    content,
+    template,
+    templateOffset,
+    bespokePanelSurfaceDynamicPattern,
+    GLASS_TOKEN_TAIL_PATTERN,
+    `Dynamic :class binding: ${panelMsg}`,
+  ),
+  ...collectPatternViolations(
+    filePath,
+    content,
+    template,
+    templateOffset,
+    interactiveCardWithoutMixinPattern,
+    GLASS_INTERACTIVE_MIXIN_PATTERN,
+    'Interactive card (has @click or role="button") missing glass-interactive mixin. Add glass-interactive or SURFACE_GLASS_CARD_CLASS (which includes it).',
+  ),
+  ...collectPatternViolations(
+    filePath,
+    content,
+    content,
+    0,
+    /\bglass-subtle\b/gu,
+    null,
+    "Raw glass-subtle class literal bypasses SURFACE_GLASS_SUBTLE_CLASS. Import SURFACE_GLASS_SUBTLE_CLASS from ~/constants/layout and bind via :class.",
+  ),
+];
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({

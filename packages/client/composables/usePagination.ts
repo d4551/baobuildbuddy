@@ -29,9 +29,10 @@ function createPaginationComputeds<T>(
   const totalPages = computed(() =>
     totalItems.value === 0 ? FIRST_PAGE : Math.ceil(totalItems.value / normalizedPageSize),
   );
-  const pageNumbers = computed(() =>
-    Array.from({ length: totalPages.value }, (_, index) => index + FIRST_PAGE),
-  );
+  const pageNumbers = computed(() => {
+    const length = totalPages.value;
+    return Array.from({ length }, (_, index) => index + FIRST_PAGE);
+  });
   const itemsForCurrentPage = computed(() => {
     const startIndex = (currentPage.value - FIRST_PAGE) * normalizedPageSize;
     return items.value.slice(startIndex, startIndex + normalizedPageSize);

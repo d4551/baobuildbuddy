@@ -5,7 +5,6 @@ import {
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -16,7 +15,7 @@ defineProps<{
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.preview.title") }}</h2>
       <div class="border border-base-300 bg-base-100" :class="[SHADOW_TOKEN_CLASS.inner, RADIUS_TOKEN_CLASS.lg, PADDING_TOKEN_CLASS.p6]">
@@ -26,5 +25,5 @@ defineProps<{
         <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("coverLetterDetailPage.preview.empty") }}</p>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

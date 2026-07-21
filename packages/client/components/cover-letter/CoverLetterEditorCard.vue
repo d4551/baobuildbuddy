@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+
+const contentText = defineModel<string>("contentText", { required: true });
 
 defineProps<{
   contentCharacterCount: number;
   t: (key: string, values?: Record<string, unknown>) => string;
 }>();
-
-const contentText = defineModel<string>("contentText", { required: true });
 
 const emit = defineEmits<{
   clear: [];
@@ -25,7 +23,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
@@ -56,5 +54,5 @@ const emit = defineEmits<{
         </div>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

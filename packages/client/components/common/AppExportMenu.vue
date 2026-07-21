@@ -2,14 +2,12 @@
 import { useI18n } from "vue-i18n";
 import {
   ICON_SIZE_CLASS,
-} from "~/constants/layout";
-import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   WIDTH_TOKEN_CLASS,
-} from "~/constants/layout-tokens";
+} from "~/constants/layout";
 
 type ExportFormat = "pdf" | "docx";
 

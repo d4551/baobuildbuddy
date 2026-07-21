@@ -1,10 +1,6 @@
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { describe, expect, it } from "vitest";
-import {
-  DATE_FORMAT_OPTIONS,
-  resolveScheduledRunAt,
-  toIsoTimestamp,
-} from "./schedule-timestamp";
+import { DATE_FORMAT_OPTIONS, resolveScheduledRunAt, toIsoTimestamp } from "./schedule-timestamp";
 
 const createEnvelope = (
   overrides: Pick<RpaRunExecutionEnvelope, "createdAt" | "input">,

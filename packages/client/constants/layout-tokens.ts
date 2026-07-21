@@ -31,6 +31,14 @@ export const POINTER_EVENTS_TOKEN_CLASS = {
 } as const;
 export type PointerEventsToken = keyof typeof POINTER_EVENTS_TOKEN_CLASS;
 
+/**
+ * Linked UiGlassCard content shell: pass clicks to the overlay link, but restore
+ * hit-testing for nested interactive controls (buttons/links/forms/summaries).
+ * Apple HIG: primary card navigation + secondary actions both must remain tappable.
+ */
+export const GLASS_CARD_LINK_CONTENT_CLASS =
+  "pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto [&_input]:pointer-events-auto [&_select]:pointer-events-auto [&_textarea]:pointer-events-auto [&_label]:pointer-events-auto [&_summary]:pointer-events-auto";
+
 /** Common flex gap tokens. */
 export const FLEX_GAP_TOKEN_CLASS = {
   gap0: "gap-0",
@@ -308,3 +316,13 @@ export const MAX_W_3XL_CLASS = "max-w-3xl";
 export const MAX_W_40_CLASS = "max-w-40";
 export const MAX_W_64_CLASS = "max-w-64";
 export const MAX_W_XS_CLASS = "max-w-xs";
+
+/** Empty-state description measure (readable line length under title/CTA). */
+export const EMPTY_STATE_DESCRIPTION_CLASS = "max-w-sm text-muted";
+
+/**
+ * Canonical daisyUI stats row shell (vertical @mobile → horizontal @sm).
+ * StatsRow + LoadingSkeleton(stats) share this — no per-page border/bg literals.
+ */
+export const STATS_ROW_SHELL_CLASS =
+  "stats stats-vertical w-full border border-base-300 bg-base-200 sm:stats-horizontal";

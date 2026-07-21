@@ -20,7 +20,9 @@ export const collectMobileDockBudgetViolations = (): ValidationViolation[] => {
       line: 1,
       message: `includeInDock flags ${String(flagged.length)} items (ids: ${flagged
         .map((item) => item.id)
-        .join(", ")}); MOBILE_DOCK_MAX_ITEMS=${String(MOBILE_DOCK_MAX_ITEMS)}. Demote secondary destinations (docs/API/chat) out of the dock.`,
+        .join(
+          ", ",
+        )}); MOBILE_DOCK_MAX_ITEMS=${String(MOBILE_DOCK_MAX_ITEMS)}. Demote secondary destinations (docs/API/chat) out of the dock.`,
     });
   }
 

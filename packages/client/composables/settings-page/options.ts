@@ -17,14 +17,19 @@ import {
 } from "./shared";
 
 export function createSettingsPageOptionState(t: TranslateFn) {
-  const providerInputs = computed<ProviderInputConfig[]>(() =>
-    AI_PROVIDER_CATALOG.map((provider) => ({
-      id: provider.id,
-      label: t(provider.nameKey),
-      description: t(provider.descriptionKey),
-      field: providerFieldById[provider.id],
-    })),
-  );
+  const providerInputs = computed<ProviderInputConfig[]>(() => {
+    const items: ProviderInputConfig[] = [];
+    for (const provider of AI_PROVIDER_CATALOG) {
+      const providerId = provider.id;
+      items.push({
+        id: providerId,
+        label: t(provider.nameKey),
+        description: t(provider.descriptionKey),
+        field: providerFieldById[providerId],
+      });
+    }
+    return items;
+  });
 
   const languageOptions = computed(() =>
     APP_LANGUAGE_OPTIONS.map((option) => ({

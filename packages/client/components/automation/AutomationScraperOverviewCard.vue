@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRACKING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -21,7 +19,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
         <p class="font-semibold uppercase text-primary" :class="[TRACKING_TOKEN_CLASS.widest, TYPOGRAPHY_SCALE_CLASS.xs]">
@@ -57,5 +55,5 @@ const { t } = useI18n();
         </NuxtLink>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

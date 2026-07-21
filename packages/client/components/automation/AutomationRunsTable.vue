@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
@@ -30,7 +29,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <EmptyState
         v-if="!isLoading && runs.length === 0"
@@ -153,5 +152,5 @@ const { t } = useI18n();
         </template>
       </ResponsiveDataSurface>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

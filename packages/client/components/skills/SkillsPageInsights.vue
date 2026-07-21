@@ -7,7 +7,6 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -37,16 +36,16 @@ const { t } = useI18n();
       ]"
     />
 
-    <div :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard>
       <div class="card-body">
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("skillsPage.description") }}
         </p>
       </div>
-    </div>
+    </UiGlassCard>
 
     <SectionGrid tag="section" grid-token="twoColumnXlGap4">
-      <article :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.pathwaysTitle") }}</h2>
@@ -83,9 +82,9 @@ const { t } = useI18n();
             </NuxtLink>
           </div>
         </div>
-      </article>
+      </UiGlassCard>
 
-      <article :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("skillsPage.insights.topMappingsTitle") }}</h2>
@@ -122,7 +121,7 @@ const { t } = useI18n();
             :cta-to="APP_ROUTES.skillsPathways"
           />
         </div>
-      </article>
+      </UiGlassCard>
     </SectionGrid>
   </div>
 </template>

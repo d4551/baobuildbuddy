@@ -1,10 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
-import {
-  getDockNavigationItems,
-  isDockRouteActive,
-  NAVIGATION_ITEMS,
-} from "./navigation";
+import { describe, expect, it } from "vitest";
+import { getDockNavigationItems, isDockRouteActive, NAVIGATION_ITEMS } from "./navigation";
 
 const getNavigationItem = (id: string) => {
   const navigationItem = NAVIGATION_ITEMS.find((item) => item.id === id);

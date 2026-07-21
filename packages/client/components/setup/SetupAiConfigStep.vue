@@ -8,12 +8,12 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   SVG_SIZE_13,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -143,7 +143,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"
     >
-      <LoadingSpinner size="xs" label="Loading" v-if="testing && testingProvider === 'local'" />
+      <LoadingSpinner size="xs" :label="t('common.loading')" v-if="testing && testingProvider === 'local'" />
       {{ t("setup.testLocalButton") }}
     </button>
 

@@ -18,15 +18,16 @@
  */
 import { computed } from "vue";
 import {
-  POINTER_EVENTS_TOKEN_CLASS,
+  GLASS_CARD_LINK_CONTENT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  SURFACE_GLASS_CARD_STRONG_CLASS,
-  SURFACE_GLASS_CARD_MODAL_CLASS,
-  SURFACE_GLASS_CARD_SELECTED_CLASS,
   SURFACE_GLASS_CARD_DISABLED_CLASS,
   SURFACE_GLASS_CARD_ERROR_CLASS,
+  SURFACE_GLASS_CARD_MODAL_CLASS,
+  SURFACE_GLASS_CARD_SELECTED_CLASS,
+  SURFACE_GLASS_CARD_STRONG_CLASS,
   SURFACE_GLASS_CLEAR_CLASS,
   SURFACE_GLASS_SOLID_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 type GlassCardVariant = "standard" | "strong" | "modal" | "subtle" | "clear" | "solid";
@@ -67,7 +68,7 @@ const surfaceClass = computed(() => {
     standard: SURFACE_GLASS_CARD_CLASS,
     strong: SURFACE_GLASS_CARD_STRONG_CLASS,
     modal: SURFACE_GLASS_CARD_MODAL_CLASS,
-    subtle: SURFACE_GLASS_CLEAR_CLASS,
+    subtle: SURFACE_GLASS_SUBTLE_CLASS,
     clear: SURFACE_GLASS_CLEAR_CLASS,
     solid: SURFACE_GLASS_SOLID_CLASS,
   };
@@ -102,10 +103,7 @@ const cardClass = computed(() => [
       class="absolute inset-0 z-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
       :aria-label="linkAriaLabel"
     />
-    <div
-      class="relative z-10"
-      :class="to ? POINTER_EVENTS_TOKEN_CLASS.none : undefined"
-    >
+    <div class="relative z-10" :class="to ? GLASS_CARD_LINK_CONTENT_CLASS : undefined">
       <slot />
     </div>
   </article>

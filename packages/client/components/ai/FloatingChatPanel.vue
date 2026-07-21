@@ -19,15 +19,12 @@ import {
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 const draft = defineModel<string>("draft", { required: true });
-
 
 defineProps<{
   aiChatPagePath: string;
@@ -87,10 +84,10 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div
+  <UiGlassCard
     v-if="isOpen"
     :id="chatPanelId"
-    :class="[SURFACE_GLASS_CARD_CLASS, SHADOW_TOKEN_CLASS.xl, FLOATING_CHAT_PANEL_SIZE_CLASS]"
+    :extra-class="`${SHADOW_TOKEN_CLASS.xl} ${FLOATING_CHAT_PANEL_SIZE_CLASS}`"
   >
     <div :class="[FLOATING_CHAT_PANEL_BODY_CLASS]">
       <header
@@ -191,12 +188,14 @@ const { t } = useI18n();
           class="flex items-center justify-center"
           :class="[MIN_HEIGHT_ZERO_CLASS, MIN_H_60_CLASS]"
         >
-          <div class="card border border-base-300" :class="[SURFACE_GLASS_SUBTLE_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+          <UiGlassCard variant="subtle" :extra-class="FLUID_WIDTH_CLASS">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
               <h3 class="card-title text-base">{{ t("floatingChat.emptyTitle") }}</h3>
-              <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("floatingChat.emptyDescription") }}</p>
+              <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{ t("floatingChat.emptyDescription") }}
+              </p>
             </div>
-          </div>
+          </UiGlassCard>
         </div>
         <template v-else>
           <AIChatBubble
@@ -294,5 +293,5 @@ const { t } = useI18n();
         />
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

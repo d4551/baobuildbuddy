@@ -22,17 +22,26 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div 
-      v-for="card in orderedCards"
+    <UiGlassCard
+      v-for="(card, index) in orderedCards"
       :key="card.id"
-      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
+      :selected="primaryCardId === card.id"
+      :stagger-index="Math.min(index, 11)"
+      :extra-class="FLUID_HEIGHT_CLASS"
     >
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="t(card.titleKey)">
-              <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
-                <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(card.iconName)" aria-hidden="true"/>
+              <span
+                class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary"
+                :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]"
+              >
+                <component
+                  :is="resolveAppIconComponent(card.iconName)"
+                  :class="[ICON_SIZE_CLASS[4]]"
+                  aria-hidden="true"
+                />
                 <span class="sr-only">{{ t(card.titleKey) }}</span>
               </span>
             </span>
@@ -44,15 +53,11 @@ const { t } = useI18n();
         </div>
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t(card.descriptionKey) }}</p>
         <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-          <NuxtLink
-            :to="card.to"
-            :class="[OUTLINE_ACTION_CLASS]"
-            :aria-label="t(card.buttonKey)"
-          >
+          <NuxtLink :to="card.to" :class="[OUTLINE_ACTION_CLASS]" :aria-label="t(card.buttonKey)">
             {{ t(card.buttonKey) }}
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </SectionGrid>
 </template>

@@ -5,22 +5,21 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
 
+const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+
 const props = defineProps<{
   providerSaveState: SaveState;
 }>();
-
-const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
 
 const emit = defineEmits<{
   save: [];
@@ -45,7 +44,7 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
@@ -98,7 +97,7 @@ const sourceCollectionCount = computed(
         </div>
       </div>
 
-      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
+      <UiGlassCard :aria-label="t('settings.jobIntelligence.defaultsTitle')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.defaultsTitle") }}</h3>
@@ -180,7 +179,7 @@ const sourceCollectionCount = computed(
             </fieldset>
           </SectionGrid>
         </div>
-      </section>
+      </UiGlassCard>
 
       <SettingsJobIntelligenceSourcesGrid v-model:job-provider-form="jobProviderForm" />
 
@@ -188,5 +187,5 @@ const sourceCollectionCount = computed(
 
       <SettingsJobIntelligenceCollectionsCard v-model:job-provider-form="jobProviderForm" />
     </div>
-  </div>
+  </UiGlassCard>
 </template>

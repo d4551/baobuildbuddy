@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_PADDING_LG_P8_CLASS,
-} from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -13,10 +10,10 @@ import {
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_PADDING_LG_P8_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
   primaryRoute: string;
@@ -27,10 +24,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section class="hero overflow-hidden rounded-box border border-base-300 card-glass" :class="[SHADOW_TOKEN_CLASS.sm]">
-    <div class="hero-content max-w-none" :class="[FLUID_WIDTH_CLASS, PADDING_TOKEN_CLASS.px0]">
-      <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS]">
-        <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, RESPONSIVE_PADDING_LG_P8_CLASS]">
+  <UiGlassCard :extra-class="`${FLUID_WIDTH_CLASS} ${SHADOW_TOKEN_CLASS.sm} overflow-hidden`">
+    <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, RESPONSIVE_PADDING_LG_P8_CLASS]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
             <div class="badge badge-primary badge-outline w-fit">
               {{ t(DASHBOARD_COPY_KEYS.pageTitle) }}
@@ -73,7 +68,5 @@ const { t } = useI18n();
             </NuxtLink>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+  </UiGlassCard>
 </template>

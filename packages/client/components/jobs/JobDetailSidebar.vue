@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-  SURFACE_GLASS_CARD_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -27,7 +26,7 @@ const { t } = useI18n();
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard>
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.companyInfoTitle") }}</h2>
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -60,9 +59,9 @@ const { t } = useI18n();
           </div>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div v-if="job.platforms?.length" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="job.platforms?.length">
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.platformsTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -71,9 +70,9 @@ const { t } = useI18n();
           </span>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div v-if="job.gameGenres?.length" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="job.gameGenres?.length">
       <div class="card-body">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobDetail.genresTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -82,6 +81,6 @@ const { t } = useI18n();
           </span>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </div>
 </template>

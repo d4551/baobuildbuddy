@@ -27,7 +27,8 @@ export const collectImportantViolationsForContent = (
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
-      message: "`!important` is forbidden outside assets/css/main.css SSOT. Fix specificity with tokens/cascade.",
+      message:
+        "`!important` is forbidden outside assets/css/main.css SSOT. Fix specificity with tokens/cascade.",
     });
   }
   return violations;

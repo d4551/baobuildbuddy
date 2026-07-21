@@ -5,13 +5,17 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import type { SaveState } from "./save-state";
+
+const preferencesLanguage = defineModel<string>("preferencesLanguage", { required: true });
+const notificationForm = defineModel<NotificationPreferences>("notificationForm", {
+  required: true,
+});
 
 defineProps<{
   theme: string;
@@ -19,11 +23,6 @@ defineProps<{
   languageOptions: ReadonlyArray<{ value: string; label: string }>;
   preferencesSaveState: SaveState;
 }>();
-
-const preferencesLanguage = defineModel<string>("preferencesLanguage", { required: true });
-const notificationForm = defineModel<NotificationPreferences>("notificationForm", {
-  required: true,
-});
 
 const emit = defineEmits<{
   save: [];
@@ -34,7 +33,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <!-- Title owned by WorkspaceSectionNavigator; header kept for SSOT contract. -->
       <SettingsPanelHeader />
@@ -155,5 +154,5 @@ const { t } = useI18n();
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

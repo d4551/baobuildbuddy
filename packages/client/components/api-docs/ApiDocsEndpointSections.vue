@@ -3,17 +3,15 @@ import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SCROLL_MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { ApiEndpoint, ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
@@ -35,11 +33,7 @@ const { t } = useI18n();
 
 <template>
   <div class="flex-1" :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section 
-      v-for="group in endpointGroups"
-      :key="group.id"
-      :class="SURFACE_GLASS_CARD_CLASS"
-    >
+    <UiGlassCard v-for="group in endpointGroups" :key="group.id">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
         <h2 class="card-title">{{ group.label }}</h2>
 
@@ -98,6 +92,6 @@ const { t } = useI18n();
           </SectionGrid>
         </article>
       </div>
-    </section>
+    </UiGlassCard>
   </div>
 </template>

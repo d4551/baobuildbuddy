@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
-  RESPONSIVE_TEXT_MD_3XL_CLASS,
-  RESPONSIVE_WIDTH_SM_AUTO_CLASS,
-} from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -13,12 +8,16 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
+import {
+  RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
+  RESPONSIVE_TEXT_MD_3XL_CLASS,
+  RESPONSIVE_WIDTH_SM_AUTO_CLASS,
+} from "~/constants/ui-layout";
 
 defineProps<{
   welcomeHeading: string;
@@ -32,7 +31,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="[SURFACE_GLASS_CARD_CLASS, 'overflow-hidden', 'glass-card-enter glass-card-enter-0']">
+  <UiGlassCard :stagger-index="0" extra-class="overflow-hidden">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
         <div class="badge badge-primary badge-soft w-fit">
@@ -76,5 +75,5 @@ const { t } = useI18n();
         </NuxtLink>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

@@ -6,12 +6,11 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -156,7 +155,7 @@ function studioDetailLocation(location: string | undefined): string {
           </a>
         </template>
         <template #aside>
-          <div :class="SURFACE_GLASS_CARD_CLASS">
+          <UiGlassCard>
             <div class="card-body">
               <div class="flex items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div class="avatar placeholder">
@@ -201,7 +200,7 @@ function studioDetailLocation(location: string | undefined): string {
                 </div>
               </div>
             </div>
-          </div>
+          </UiGlassCard>
         </template>
       </PageHeroHeader>
     </div>
@@ -228,7 +227,7 @@ function studioDetailLocation(location: string | undefined): string {
 
     <SectionGrid v-else grid-token="threeColumnLg">
       <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-        <div :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard>
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.culture") }}</h2>
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -253,16 +252,16 @@ function studioDetailLocation(location: string | undefined): string {
               </p>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
 
-        <div v-if="studio.interviewStyle" :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard v-if="studio.interviewStyle">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.interviewProcess") }}</h2>
             <p>{{ studio.interviewStyle }}</p>
           </div>
-        </div>
+        </UiGlassCard>
 
-        <div v-if="studio.technologies?.length" :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard v-if="studio.technologies?.length">
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -271,11 +270,11 @@ function studioDetailLocation(location: string | undefined): string {
               </span>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </div>
 
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-        <div v-if="studio.games?.length" :class="SURFACE_GLASS_CARD_CLASS">
+        <UiGlassCard v-if="studio.games?.length">
           <div class="card-body">
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("studioDetail.sections.notableGames") }}</h2>
             <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
@@ -287,7 +286,7 @@ function studioDetailLocation(location: string | undefined): string {
               </li>
             </ul>
           </div>
-        </div>
+        </UiGlassCard>
       </div>
     </SectionGrid>
   </PageScaffold>

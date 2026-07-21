@@ -6,7 +6,6 @@ import {
   MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { JobProviderForm } from "./job-intelligence";
@@ -28,7 +27,7 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
+  <UiGlassCard :aria-label="t('settings.jobIntelligence.advancedCollectionsTitle')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -119,5 +118,5 @@ const sourceCollectionCount = computed(
         </details>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

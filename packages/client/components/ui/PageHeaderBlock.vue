@@ -37,7 +37,11 @@ const resolvedDescriptionClass = computed(() =>
       </component>
       <p v-if="description" :class="resolvedDescriptionClass">{{ description }}</p>
     </div>
-    <div class="flex shrink-0 flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" v-if="hasActions">
+    <div
+      v-if="hasActions"
+      class="flex w-full shrink-0 flex-wrap sm:w-auto"
+      :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+    >
       <slot name="actions" />
     </div>
   </header>

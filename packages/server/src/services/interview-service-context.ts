@@ -5,13 +5,13 @@ import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/setti
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { coverLetters } from "../db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
 import { userProfile } from "../db/schema/user";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import type {
   CandidateInterviewContext,

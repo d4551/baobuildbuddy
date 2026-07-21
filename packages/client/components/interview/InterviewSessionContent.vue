@@ -8,15 +8,13 @@ import type {
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type InterviewCompletionState =
@@ -113,11 +111,7 @@ const { t } = useI18n();
         v-if="completionState === 'ready' || completionState === 'submitting' || completionState === 'completing'"
         class="lg:sticky lg:top-24" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]"
       >
-        <div 
-          v-if="canUseVoice"
-          :class="SURFACE_GLASS_CARD_CLASS"
-          :aria-label="t('interviewSession.voice.idle')"
-        >
+        <UiGlassCard v-if="canUseVoice" :aria-label="t('interviewSession.voice.idle')">
           <div class="card-body flex-row items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -138,7 +132,7 @@ const { t } = useI18n();
               {{ stt.isListening.value ? t("interviewSession.voice.stopButton") : t("interviewSession.voice.startButton") }}
             </button>
           </div>
-        </div>
+        </UiGlassCard>
 
         <InterviewChat
           :response="response"
@@ -168,7 +162,7 @@ const { t } = useI18n();
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"
           >
-            <LoadingSpinner size="xs" label="Loading" v-if="completing" />
+            <LoadingSpinner size="xs" :label="t('common.loading')" v-if="completing" />
             {{ t("interviewSession.endButton") }}
           </button>
         </div>

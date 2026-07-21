@@ -656,9 +656,7 @@ textarea {
     --motion-standard: 1ms;
     --motion-slow: 1ms;
   }
-  *,
-  *::before,
-  *::after {
+  :where(*, *::before, *::after) {
     scroll-behavior: auto;
     animation-duration: 1ms;
     animation-iteration-count: 1;

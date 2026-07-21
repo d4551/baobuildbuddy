@@ -6,8 +6,8 @@ import {
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -197,7 +197,7 @@ function updateRequestBodyValue(event: Event): void {
           :aria-label="t('apiDocs.tester.send')"
           @click="emit('execute')"
         >
-          <LoadingSpinner size="sm" label="Loading" v-if="testerState === 'loading'" />
+          <LoadingSpinner size="sm" :label="t('common.loading')" v-if="testerState === 'loading'" />
           <span v-else>{{ t("apiDocs.tester.send") }}</span>
         </button>
         <button 

@@ -111,11 +111,10 @@ watch(
 
 <template>
   <PageScaffold labelled-by="settings-page-title">
-    <PageHeaderBlock
+    <PageHeroHeader
       title-id="settings-page-title"
       :title="t('settings.title')"
       :description="t('settings.subtitle')"
-      description-class="text-secondary"
     />
 
     <BootstrapErrorAlert

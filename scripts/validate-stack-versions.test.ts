@@ -9,13 +9,19 @@ import {
 describe("readPackageVersionFromJson", () => {
   test("reads matching package name/version", () => {
     expect(
-      readPackageVersionFromJson("elysia", JSON.stringify({ name: "elysia", version: "2.0.0-exp.46" })),
+      readPackageVersionFromJson(
+        "elysia",
+        JSON.stringify({ name: "elysia", version: "2.0.0-exp.46" }),
+      ),
     ).toBe("2.0.0-exp.46");
   });
 
   test("rejects name mismatch", () => {
     expect(
-      readPackageVersionFromJson("elysia", JSON.stringify({ name: "other", version: "2.0.0-exp.46" })),
+      readPackageVersionFromJson(
+        "elysia",
+        JSON.stringify({ name: "other", version: "2.0.0-exp.46" }),
+      ),
     ).toBeNull();
   });
 });

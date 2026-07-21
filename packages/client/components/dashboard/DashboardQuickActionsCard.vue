@@ -6,7 +6,6 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -18,7 +17,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("dashboard.quickActionsTitle") }}</h2>
       <SectionGrid grid-token="bento">
@@ -36,5 +35,5 @@ const { t } = useI18n();
         </NuxtLink>
       </SectionGrid>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

@@ -5,7 +5,6 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   LEADING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -18,11 +17,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section 
-    v-if="currentQuestion?.feedback"
-    :class="SURFACE_GLASS_CARD_CLASS"
-    aria-labelledby="interview-session-feedback-title"
-  >
+  <UiGlassCard v-if="currentQuestion?.feedback" aria-labelledby="interview-session-feedback-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
         <h2 id="interview-session-feedback-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -48,5 +43,5 @@ const { t } = useI18n();
         </div>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

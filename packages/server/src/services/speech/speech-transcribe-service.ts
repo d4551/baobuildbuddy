@@ -4,12 +4,14 @@ import {
   API_ERROR_SPEECH_TRANSCRIBE,
 } from "@bao/shared/constants/api-errors";
 import type { SpeechProviderOption } from "@bao/shared/constants/settings";
-import { settle } from "@bao/shared/utils/promise";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { validateLocalAiEndpoint } from "@bao/shared/utils/local-ai-endpoint";
+import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
-import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
+import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
 
 const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
@@ -22,7 +24,12 @@ export type SpeechTranscribeInput = {
 };
 
 export type SpeechTranscribeResult =
-  | { readonly ok: true; readonly text: string; readonly provider: SpeechProviderOption; readonly model: string }
+  | {
+      readonly ok: true;
+      readonly text: string;
+      readonly provider: SpeechProviderOption;
+      readonly model: string;
+    }
   | { readonly ok: false; readonly error: string; readonly status: 400 | 422 | 502 };
 
 const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
@@ -32,22 +39,23 @@ const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
   "custom",
 ]);
 
+const BASE64_PAYLOAD_RE = /^[A-Za-z0-9+/]+=*$/;
 const decodeAudio = (audioBase64: string): Uint8Array | null => {
   const trimmed = audioBase64.trim();
-  if (trimmed.length === 0) {
+  if (trimmed.length === 0 || !BASE64_PAYLOAD_RE.test(trimmed)) {
     return null;
   }
-  try {
-    return Uint8Array.from(Buffer.from(trimmed, "base64"));
-  } catch {
-    return null;
-  }
+  return Uint8Array.from(Buffer.from(trimmed, "base64"));
 };
 
 const resolveUpstreamAuth = async (
   provider: SpeechProviderOption,
 ): Promise<{ readonly apiKey: string | null }> => {
-  const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID)).limit(1);
+  const rows = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.id, DEFAULT_SETTINGS_ID))
+    .limit(1);
   const row = rows[0];
   if (!row) {
     return { apiKey: null };
@@ -68,7 +76,8 @@ const resolveTranscriptionUrl = (
 ): { readonly ok: true; readonly url: string } | { readonly ok: false; readonly error: string } => {
   const trimmed = endpoint.trim();
   if (provider === "openai") {
-    const base = trimmed.length > 0 ? trimmed.replace(TRAILING_SLASH_RE, "") : "https://api.openai.com/v1";
+    const base =
+      trimmed.length > 0 ? trimmed.replace(TRAILING_SLASH_RE, "") : "https://api.openai.com/v1";
     return { ok: true, url: `${base}/audio/transcriptions` };
   }
   if (provider === "huggingface") {
@@ -96,7 +105,9 @@ const postOpenAiTranscription = async (input: {
   readonly mimeType: string;
   readonly filename: string;
   readonly model: string;
-}): Promise<{ readonly ok: true; readonly text: string } | { readonly ok: false; readonly error: string }> => {
+}): Promise<
+  { readonly ok: true; readonly text: string } | { readonly ok: false; readonly error: string }
+> => {
   const form = new FormData();
   form.append(
     "file",
@@ -123,15 +134,15 @@ const postOpenAiTranscription = async (input: {
   if (!response.ok) {
     return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, 180)}` };
   }
-  try {
-    const parsed = JSON.parse(bodyText) as { text?: unknown };
-    if (typeof parsed.text !== "string" || parsed.text.trim().length === 0) {
-      return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
-    }
-    return { ok: true, text: parsed.text.trim() };
-  } catch {
+  const parsed = safeParseJson(bodyText);
+  if (!isRecord(parsed) || typeof parsed.text !== "string") {
     return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
   }
+  const text = parsed.text.trim();
+  if (text.length === 0) {
+    return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
+  }
+  return { ok: true, text };
 };
 
 export const transcribeSpeechAudio = async (

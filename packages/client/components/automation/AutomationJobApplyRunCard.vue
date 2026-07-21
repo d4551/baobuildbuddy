@@ -5,15 +5,13 @@ import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.sche
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -26,12 +24,10 @@ const props = defineProps<{
   toLocalizedDateTime: (value: string) => string;
 }>();
 
-
 const emit = defineEmits<{
   cancel: [];
   retry: [];
 }>();
-
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
   AUTOMATION_RUN_STATUSES;
@@ -106,7 +102,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.jobApply.stream.title") }}</h2>
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.jobApply.stream.subtitle") }}</p>
@@ -249,5 +245,5 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </ResponsiveDataSurface>
       </section>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

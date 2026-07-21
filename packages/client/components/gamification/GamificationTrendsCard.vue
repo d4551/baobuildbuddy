@@ -3,7 +3,6 @@ import { useI18n } from "vue-i18n";
 import {
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -28,10 +27,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section
-    :class="[SURFACE_GLASS_CARD_CLASS]"
-    aria-labelledby="gamification-trends-title"
-  >
+  <UiGlassCard aria-labelledby="gamification-trends-title">
     <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
         <h2 id="gamification-trends-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -104,5 +100,5 @@ const { t } = useI18n();
         </div>
       </SectionGrid>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

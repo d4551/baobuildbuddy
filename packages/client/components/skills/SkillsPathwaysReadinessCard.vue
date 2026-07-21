@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIAL_METER_GEOMETRY,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -36,9 +36,10 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section 
+  <UiGlassCard
     v-if="readinessAssessment"
-    class="card card-border bg-linear-to-br from-primary to-secondary text-on-primary"
+    variant="solid"
+    extra-class="bg-linear-to-br from-primary to-secondary text-on-primary"
   >
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("skillsPathwaysPage.readiness.title") }}</h2>
@@ -105,7 +106,7 @@ const { t } = useI18n();
         </div>
       </SectionGrid>
     </div>
-  </section>
+  </UiGlassCard>
 
   <EmptyState
     v-else

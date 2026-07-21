@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -40,11 +40,10 @@ useSeoMeta({
 
 <template>
   <PageScaffold tag="section" labelled-by="dashboard-title">
-    <PageHeaderBlock
+    <PageHeroHeader
       title-id="dashboard-title"
       :title="t(DASHBOARD_COPY_KEYS.pageTitle)"
       :description="t(DASHBOARD_COPY_KEYS.metricsSummaryLabel, { brand: resolvedBrand.name })"
-      description-class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
     />
 
     <LoadingSkeleton

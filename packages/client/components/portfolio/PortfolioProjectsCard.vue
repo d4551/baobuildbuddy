@@ -6,18 +6,17 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   HEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  SVG_STROKE_WIDTH_DEFAULT,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SVG_STROKE_WIDTH_DEFAULT,
+  TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -77,11 +76,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
     />
 
     <SectionGrid v-else grid-token="threeColumnResponsive">
-      <div 
-        v-for="(project, idx) in props.paginatedProjects"
-        :key="project.id || `${project.title}-${idx}`"
-        :class="SURFACE_GLASS_CARD_CLASS"
-      >
+      <UiGlassCard v-for="(project, idx) in props.paginatedProjects" :key="project.id || `${project.title}-${idx}`">
         <figure class="overflow-hidden" :class="[HEIGHT_TOKEN_CLASS.h48]" v-if="project.image">
           <NuxtImg 
             :src="project.image"
@@ -172,7 +167,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             </div>
           </div>
         </div>
-      </div>
+      </UiGlassCard>
     </SectionGrid>
 
     <AppPagination

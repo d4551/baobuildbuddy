@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
-import {
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
-} from "~/constants/layout";
+import { STACK_SPACE_Y_TOKEN_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -30,7 +27,6 @@ const page = reactive(useAIDashboardPage());
       title-id="ai-dashboard-title"
       :title="t('aiDashboard.title')"
       :description="t('aiDashboard.subtitle')"
-      description-class="text-secondary"
     >
       <template #actions>
         <button

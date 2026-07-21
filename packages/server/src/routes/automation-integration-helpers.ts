@@ -105,9 +105,7 @@ export const requestJson = async <T>(
   }
   const responseContentType = response.headers.get("content-type") ?? "";
   if (!responseContentType.includes("application/json")) {
-    throw new Error(
-      `Expected JSON response from ${path}, got content-type ${responseContentType}`,
-    );
+    throw new Error(`Expected JSON response from ${path}, got content-type ${responseContentType}`);
   }
   const body = parseJson(rawBody, schema);
   if (body === null) {
@@ -214,14 +212,11 @@ export const waitForRunCompletion = async (
   runId: string,
 ): Promise<typeof automationRuns.$inferSelect> => {
   let lastRun: typeof automationRuns.$inferSelect | null = null;
-  await waitForCondition(
-    async () => {
-      const run = await readRunRowById(runId);
-      lastRun = run;
-      return run?.status === "success" || run?.status === "error";
-    },
-    `Timed out waiting for automation run ${runId} to complete`,
-  );
+  await waitForCondition(async () => {
+    const run = await readRunRowById(runId);
+    lastRun = run;
+    return run?.status === "success" || run?.status === "error";
+  }, `Timed out waiting for automation run ${runId} to complete`);
 
   if (!lastRun) {
     throw new Error(`Automation run ${runId} did not produce a terminal state.`);

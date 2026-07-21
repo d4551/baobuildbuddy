@@ -2,8 +2,8 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -121,7 +121,7 @@ function updateTextValue(
         :aria-label="t('setup.launchAria')"
         @click="emit('complete')"
       >
-        <LoadingSpinner size="xs" label="Loading" v-if="saving" />
+        <LoadingSpinner size="xs" :label="t('common.loading')" v-if="saving" />
         {{ t("setup.launchButton", { brand: brandName }) }}
       </button>
     </div>

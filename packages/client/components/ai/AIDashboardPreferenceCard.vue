@@ -5,14 +5,14 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { ProviderConfig } from "~/types/ai-dashboard";
+
 const selectedModelValue = defineModel<string>("selectedModel", { required: true });
+const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { required: true });
 
-
-defineProps<{
+const props = defineProps<{
   loading: boolean;
   providers: readonly ProviderConfig[];
   selectedProviderModels: readonly string[];
@@ -21,46 +21,48 @@ defineProps<{
   onSave: () => Promise<void> | void;
   t: (key: string, params?: Record<string, string | number>) => string;
 }>();
-
-const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { required: true });
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-      <h2 class="card-title">{{ t("aiDashboard.preference.title") }}</h2>
-      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("aiDashboard.preference.description") }}</p>
+      <h2 class="card-title">{{ props.t("aiDashboard.preference.title") }}</h2>
+      <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+        {{ props.t("aiDashboard.preference.description") }}
+      </p>
 
       <SectionGrid grid-token="twoColumn">
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("aiDashboard.preference.providerLegend") }}</legend>
-          <select 
+          <legend class="fieldset-legend">{{ props.t("aiDashboard.preference.providerLegend") }}</legend>
+          <select
             v-model="selectedProviderModel"
-            class="select" :class="[FLUID_WIDTH_CLASS]"
-            :aria-label="t('aiDashboard.preference.providerAria')"
+            class="select"
+            :class="[FLUID_WIDTH_CLASS]"
+            :aria-label="props.t('aiDashboard.preference.providerAria')"
           >
-            <option disabled value="">{{ t("aiDashboard.preference.selectProviderOption") }}</option>
+            <option disabled value="">{{ props.t("aiDashboard.preference.selectProviderOption") }}</option>
             <option
-              v-for="provider in providers"
+              v-for="provider in props.providers"
               :key="provider.id"
               :value="provider.id"
-              :disabled="!isProviderConfigured(provider.id)"
+              :disabled="!props.isProviderConfigured(provider.id)"
             >
-              {{ providerSelectOptionLabel(provider) }}
+              {{ props.providerSelectOptionLabel(provider) }}
             </option>
           </select>
         </fieldset>
 
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("aiDashboard.preference.modelLegend") }}</legend>
-          <select 
+          <legend class="fieldset-legend">{{ props.t("aiDashboard.preference.modelLegend") }}</legend>
+          <select
             v-model="selectedModelValue"
-            class="select" :class="[FLUID_WIDTH_CLASS]"
-            :aria-label="t('aiDashboard.preference.modelAria')"
-            :disabled="selectedProviderModels.length === 0"
+            class="select"
+            :class="[FLUID_WIDTH_CLASS]"
+            :aria-label="props.t('aiDashboard.preference.modelAria')"
+            :disabled="props.selectedProviderModels.length === 0"
           >
-            <option disabled value="">{{ t("aiDashboard.preference.selectModelOption") }}</option>
-            <option v-for="model in selectedProviderModels" :key="model" :value="model">
+            <option disabled value="">{{ props.t("aiDashboard.preference.selectModelOption") }}</option>
+            <option v-for="model in props.selectedProviderModels" :key="model" :value="model">
               {{ model }}
             </option>
           </select>
@@ -68,16 +70,17 @@ const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { 
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button 
+        <button
+          type="button"
           :class="[PRIMARY_ACTION_CLASS]"
-          :disabled="!selectedProviderModel || !selectedModelValue || loading"
-          :aria-label="t('aiDashboard.preference.saveAria')"
-          @click="onSave"
+          :disabled="!selectedProviderModel || !selectedModelValue || props.loading"
+          :aria-label="props.t('aiDashboard.preference.saveAria')"
+          @click="props.onSave"
         >
-          <LoadingSpinner size="xs" label="Loading" v-if="loading" />
-          <span>{{ t("aiDashboard.preference.saveButton") }}</span>
+          <LoadingSpinner v-if="props.loading" size="xs" :label="props.t('common.loading')" />
+          <span>{{ props.t("aiDashboard.preference.saveButton") }}</span>
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

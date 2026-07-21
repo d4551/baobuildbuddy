@@ -3,13 +3,11 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
@@ -26,9 +24,9 @@ interface ResumeLibraryPanelProps {
   readonly pageAria: (page: number) => string;
 }
 
-defineProps<ResumeLibraryPanelProps>();
-
 const searchQuery = defineModel<string>("searchQuery", { required: true });
+
+defineProps<ResumeLibraryPanelProps>();
 
 const emit = defineEmits<{
   clearFilters: [];
@@ -55,7 +53,7 @@ function requestDelete(resumeId?: string): void {
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section v-if="resumes.length > 0" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="resumes.length > 0">
       <div class="card-body">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">{{ t("resumePage.filters.searchLegend") }}</legend>
@@ -78,7 +76,7 @@ function requestDelete(resumeId?: string): void {
           </button>
         </div>
       </div>
-    </section>
+    </UiGlassCard>
 
     <EmptyState
       v-if="resumes.length === 0"
@@ -99,17 +97,15 @@ function requestDelete(resumeId?: string): void {
     />
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">
-        <div 
-          v-for="resume in paginatedResumes"
+        <UiGlassCard
+          v-for="(resume, index) in paginatedResumes"
           :key="resume.id"
-          class="relative overflow-hidden transition-colors"
-          :class="
-            (resume.experience?.length ?? 0) > 0
-              ? 'card card-border bg-base-100 hover:bg-base-200'
-              : 'card card-dash bg-base-100 hover:bg-base-200'
+          :stagger-index="Math.min(index, 11)"
+          :extra-class="
+            (resume.experience?.length ?? 0) > 0 ? '' : 'card-dash border-dashed'
           "
         >
-          <button 
+          <button
             type="button"
             class="absolute inset-0 z-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
@@ -151,7 +147,7 @@ function requestDelete(resumeId?: string): void {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </SectionGrid>
 
       <AppPagination

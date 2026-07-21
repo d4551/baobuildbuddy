@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
-import { SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
 type ResumeEditorTabId = "personal" | "experience" | "education" | "skills" | "projects" | "gaming";
 
@@ -27,60 +26,42 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div 
-    v-show="activeTab === 'personal'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'personal'">
     <PersonalInfoForm
       :model-value="formData"
       @update:model-value="emit('updatePersonalInfo', $event)"
     />
-  </div>
+  </UiGlassCard>
 
-  <div 
-    v-show="activeTab === 'experience'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'experience'">
     <ExperienceList
       :model-value="formData.experience"
       @update:model-value="emit('updateExperience', $event)"
     />
-  </div>
+  </UiGlassCard>
 
-  <div 
-    v-show="activeTab === 'education'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'education'">
     <EducationList
       :model-value="formData.education"
       @update:model-value="emit('updateEducation', $event)"
     />
-  </div>
+  </UiGlassCard>
 
-  <div 
-    v-show="activeTab === 'skills'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'skills'">
     <SkillsEditor :model-value="formData.skills" @update:model-value="emit('updateSkills', $event)" />
-  </div>
+  </UiGlassCard>
 
-  <div 
-    v-show="activeTab === 'projects'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'projects'">
     <ResumeProjectsEditor
       :model-value="formData.projects"
       @update:model-value="emit('updateProjects', $event)"
     />
-  </div>
+  </UiGlassCard>
 
-  <div 
-    v-show="activeTab === 'gaming'"
-    :class="SURFACE_GLASS_CARD_CLASS"
-  >
+  <UiGlassCard v-show="activeTab === 'gaming'">
     <ResumeGamingFields
       :model-value="formData.gaming"
       @update:model-value="emit('updateGaming', $event)"
     />
-  </div>
+  </UiGlassCard>
 </template>

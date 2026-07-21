@@ -6,11 +6,17 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+
+const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
+  required: true,
+});
+const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
+  required: true,
+});
 
 defineProps<{
   emailDeliveryConfigured: boolean;
@@ -19,13 +25,6 @@ defineProps<{
   securityOptionLabels: ReadonlyArray<{ value: string; label: string }>;
   authModeOptionLabels: ReadonlyArray<{ value: string; label: string }>;
 }>();
-
-const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
-  required: true,
-});
-const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
-  required: true,
-});
 
 const emit = defineEmits<{
   saveSettings: [];
@@ -37,7 +36,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <SettingsPanelHeader>
         <template #meta>
@@ -236,5 +235,5 @@ const { t } = useI18n();
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

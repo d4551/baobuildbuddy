@@ -8,11 +8,11 @@ import {
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
@@ -30,7 +30,6 @@ const studioType = defineModel<FilterSelection<StudioType>>("studioType", { requ
 const platform = defineModel<FilterSelection<Platform>>("platform", { required: true });
 
 const genre = defineModel<FilterSelection<GameGenre>>("genre", { required: true });
-
 
 defineProps<{
   experienceOptions: JobExperienceLevel[];
@@ -63,7 +62,7 @@ const activeFilterCount = computed(() => {
 </script>
 
 <template>
-  <div class="card sticky top-6 card-glass flex flex-col overflow-hidden">
+  <UiGlassCard extra-class="sticky top-6 flex flex-col overflow-hidden">
     <div class="card-body flex-1 overflow-y-auto" :class="[MIN_HEIGHT_ZERO_CLASS]">
       <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4, FLEX_GAP_TOKEN_CLASS.gap2]">
         <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -163,5 +162,5 @@ const activeFilterCount = computed(() => {
         {{ t("jobsPage.applyFiltersButton") }}
       </button>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

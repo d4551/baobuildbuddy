@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { InterviewSession } from "@bao/shared/types/interview";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
-import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -12,7 +12,6 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -57,7 +56,7 @@ const viewSession = (id: string): void => {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
@@ -211,5 +210,5 @@ const viewSession = (id: string): void => {
         </ul>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

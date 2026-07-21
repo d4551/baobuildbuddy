@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -40,7 +39,7 @@ const { t } = useI18n();
         :aria-label="t('resumePage.aiEnhanceButtonAria')"
         @click="emit('enhance')"
       >
-        <LoadingSpinner size="xs" label="Loading" v-if="enhancing" />
+        <LoadingSpinner size="xs" :label="t('common.loading')" v-if="enhancing" />
         <IconBolt :class="[ICON_SIZE_CLASS[4]]" v-else/>
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
@@ -50,7 +49,7 @@ const { t } = useI18n();
         :aria-label="t('resumePage.aiScoreButtonAria')"
         @click="emit('score')"
       >
-        <LoadingSpinner size="xs" label="Loading" v-if="scoring" />
+        <LoadingSpinner size="xs" :label="t('common.loading')" v-if="scoring" />
         {{ t("resumePage.aiScoreButton") }}
       </button>
       <AppExportMenu 

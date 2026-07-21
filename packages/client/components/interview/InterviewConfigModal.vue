@@ -5,8 +5,8 @@ import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
@@ -14,7 +14,6 @@ import {
   PRIMARY_ACTION_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -227,7 +226,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           />
         </div>
 
-        <div v-if="selectedJob" :class="SURFACE_GLASS_CARD_CLASS" role="status" aria-live="polite">
+        <UiGlassCard v-if="selectedJob" role="status" aria-live="polite">
           <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <h4 class="font-semibold">{{ selectedJob.title }}</h4>
             <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -243,7 +242,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               </span>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </div>
 
       <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
@@ -294,7 +293,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
           :disabled="isStartDisabled"
           @click="emit('start')"
         >
-          <LoadingSpinner size="xs" label="Loading" v-if="starting" />
+          <LoadingSpinner size="xs" :label="t('common.loading')" v-if="starting" />
           {{ t("interviewHub.config.startButton") }}
         </button>
       </div>

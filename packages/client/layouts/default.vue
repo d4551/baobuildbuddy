@@ -13,7 +13,7 @@ import {
   SHELL_SKIP_LINK_CLASS,
 } from "~/constants/layout";
 
-const { initTheme, theme, setTheme } = useTheme();
+const { initTheme, theme, setTheme, applySystemThemePreferenceIfUnset } = useTheme();
 const { settings } = useSettings();
 const { t } = useI18n();
 const route = useRoute();
@@ -21,6 +21,9 @@ const isDrawerOpen = useState<boolean>(APP_DRAWER_ID, () => false);
 const isDesktopViewport = ref(false);
 let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
+
+// Cookie/settings path during setup — SSR and client first paint stay aligned.
+initTheme(settings.value?.theme);
 
 /**
  * Floating chat is desktop-only. Below lg the dock owns AI Chat — dual chrome
@@ -43,6 +46,7 @@ function syncDrawerForViewport(isDesktop: boolean): void {
 
 onMounted(() => {
   initTheme(settings.value?.theme);
+  applySystemThemePreferenceIfUnset();
 
   desktopMediaQueryList = window.matchMedia(LAYOUT_DESKTOP_MEDIA_QUERY);
   const handleViewportChange = (event: MediaQueryListEvent) => {
@@ -115,8 +119,10 @@ onUnmounted(() => {
         <AppSidebar />
       </aside>
     </div>
+    <!-- Dock is SSR-safe (route + i18n only). Keep outside ClientOnly so mobile
+         wayfinding aria-current is present before hydration (smoke + a11y). -->
+    <AppDock />
     <ClientOnly>
-      <AppDock />
       <LazyQuickActionFab />
       <LazyFloatingChatWidget v-if="showFloatingChatWidget" />
     </ClientOnly>

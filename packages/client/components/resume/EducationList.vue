@@ -5,10 +5,9 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -74,11 +73,7 @@ function removeEducation(index: number): void {
       </button>
     </div>
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div 
-        v-for="(education, index) in localValue"
-        :key="`${education.school}-${education.degree}-${index}`"
-        :class="SURFACE_GLASS_CARD_CLASS"
-      >
+      <UiGlassCard v-for="(education, index) in localValue" :key="`${education.school}-${education.degree}-${index}`">
         <div class="card-body">
           <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
@@ -151,7 +146,7 @@ function removeEducation(index: number): void {
             </fieldset>
           </SectionGrid>
         </div>
-      </div>
+      </UiGlassCard>
     </div>
   </div>
 </template>

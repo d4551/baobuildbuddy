@@ -159,6 +159,74 @@ function createInterviewCompletionAction(
   };
 }
 
+const submitInterviewResponseHttp = async (
+  actions: InterviewSessionActionsInput,
+  responseText: string,
+): Promise<"failed" | "completed" | "continued"> => {
+  const submitResult = await settlePromise(
+    actions.submitResponse(actions.sessionId.value, {
+      questionIndex: actions.currentQuestionIndex.value,
+      response: responseText,
+    }),
+    actions.t("interviewSession.errors.submitFailed"),
+  );
+  if (!submitResult.ok) {
+    actions.toast.error(
+      getErrorMessage(submitResult.error, actions.t("interviewSession.errors.submitFailed")),
+    );
+    return "failed";
+  }
+  return submitResult.value?.status === "completed" ? "completed" : "continued";
+};
+
+const refreshInterviewSessionAfterWs = async (
+  actions: InterviewSessionActionsInput,
+): Promise<void> => {
+  await settlePromise(
+    actions.getSession(actions.sessionId.value),
+    actions.t("interviewSession.errors.submitFailed"),
+  );
+};
+
+const resolveInterviewResponseText = (
+  actions: InterviewSessionActionsInput,
+  submittedResponse?: string,
+): string =>
+  typeof submittedResponse === "string" ? submittedResponse.trim() : actions.response.value.trim();
+
+const deliverInterviewResponse = async (
+  actions: InterviewSessionActionsInput,
+  responseText: string,
+): Promise<"failed" | "completed" | "continued"> => {
+  const wsHandled = actions.submitViaWs
+    ? await actions.submitViaWs(actions.sessionId.value, responseText)
+    : false;
+  if (wsHandled) {
+    await refreshInterviewSessionAfterWs(actions);
+    return "continued";
+  }
+  return submitInterviewResponseHttp(actions, responseText);
+};
+
+const finishInterviewSubmission = async (input: {
+  actions: InterviewSessionActionsInput;
+  goToHistory: () => Promise<void>;
+  handleCompleteInterview: () => Promise<void>;
+  completedViaHttp: boolean;
+}): Promise<void> => {
+  input.actions.stt.stopListening();
+  input.actions.response.value = "";
+  input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));
+  if (input.completedViaHttp) {
+    input.actions.toast.success(input.actions.t("interviewSession.toasts.completed"));
+    await input.goToHistory();
+    return;
+  }
+  if (input.actions.isLastQuestion.value) {
+    await input.handleCompleteInterview();
+  }
+};
+
 function createInterviewSubmissionAction(input: {
   actions: InterviewSessionActionsInput;
   goToHistory: () => Promise<void>;
@@ -169,10 +237,7 @@ function createInterviewSubmissionAction(input: {
       return;
     }
 
-    const responseText =
-      typeof submittedResponse === "string"
-        ? submittedResponse.trim()
-        : input.actions.response.value.trim();
+    const responseText = resolveInterviewResponseText(input.actions, submittedResponse);
     if (responseText.length < INTERVIEW_MIN_RESPONSE_LENGTH) {
       input.actions.toast.error(
         input.actions.t("interviewSession.errors.minResponseLength", {
@@ -183,53 +248,19 @@ function createInterviewSubmissionAction(input: {
     }
 
     input.actions.submitting.value = true;
-    // WS-or-HTTP single path — never both (mirroring after HTTP double-wrote answers).
-    const wsHandled = input.actions.submitViaWs
-      ? await input.actions.submitViaWs(input.actions.sessionId.value, responseText)
-      : false;
-
-    let completedViaHttp = false;
-    if (!wsHandled) {
-      const submitResult = await settlePromise(
-        input.actions.submitResponse(input.actions.sessionId.value, {
-          questionIndex: input.actions.currentQuestionIndex.value,
-          response: responseText,
-        }),
-        input.actions.t("interviewSession.errors.submitFailed"),
-      );
-      if (!submitResult.ok) {
-        input.actions.submitting.value = false;
-        input.actions.toast.error(
-          getErrorMessage(
-            submitResult.error,
-            input.actions.t("interviewSession.errors.submitFailed"),
-          ),
-        );
-        return;
-      }
-      completedViaHttp = submitResult.value?.status === "completed";
-    } else {
-      // Refresh HTTP session so UI picks up AI analysis written by WS path.
-      await settlePromise(
-        input.actions.getSession(input.actions.sessionId.value),
-        input.actions.t("interviewSession.errors.submitFailed"),
-      );
+    const deliverResult = await deliverInterviewResponse(input.actions, responseText);
+    if (deliverResult === "failed") {
+      input.actions.submitting.value = false;
+      return;
     }
     input.actions.submitting.value = false;
 
-    input.actions.stt.stopListening();
-    input.actions.response.value = "";
-    input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));
-
-    if (completedViaHttp) {
-      input.actions.toast.success(input.actions.t("interviewSession.toasts.completed"));
-      await input.goToHistory();
-      return;
-    }
-
-    if (input.actions.isLastQuestion.value) {
-      await input.handleCompleteInterview();
-    }
+    await finishInterviewSubmission({
+      actions: input.actions,
+      goToHistory: input.goToHistory,
+      handleCompleteInterview: input.handleCompleteInterview,
+      completedViaHttp: deliverResult === "completed",
+    });
   };
 }
 

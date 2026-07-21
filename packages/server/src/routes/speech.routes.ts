@@ -1,5 +1,5 @@
-import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { API_MESSAGE_SPEECH_TRANSCRIBED } from "@bao/shared/constants/api-messages";
+import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import {
   HTTP_STATUS_BAD_GATEWAY,
   HTTP_STATUS_BAD_REQUEST,
@@ -7,17 +7,11 @@ import {
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import { transcribeSpeechAudio } from "../services/speech/speech-transcribe-service";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
-import {
-  type SpeechTranscribeBody,
-  speechTranscribeBodySchema,
-  speechTranscribeResponses,
-} from "./speech-route-contracts";
-
-type RouteStatus = typeof status;
+import { speechTranscribeBodySchema, speechTranscribeResponses } from "./speech-route-contracts";
 
 export const speechRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.speechBase) })
   .use(
@@ -35,7 +29,7 @@ export const speechRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.s
       body: speechTranscribeBodySchema,
       response: speechTranscribeResponses,
     },
-    async ({ body, status }: { body: SpeechTranscribeBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await transcribeSpeechAudio(body);
       if (!result.ok) {
         if (result.status === HTTP_STATUS_BAD_REQUEST) {

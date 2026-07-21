@@ -8,14 +8,14 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const applicationNotes = defineModel<string>("applicationNotes", { required: true });
+
 defineProps<{
   open: boolean;
   titleId: string;
   applying: boolean;
   jobTitle?: string;
 }>();
-
-const applicationNotes = defineModel<string>("applicationNotes", { required: true });
 
 const emit = defineEmits<{
   "update:open": [value: boolean];
@@ -65,7 +65,7 @@ const { t } = useI18n();
         :disabled="applying"
         @click="emit('submit')"
       >
-        <LoadingSpinner size="xs" label="Loading" v-if="applying" />
+        <LoadingSpinner size="xs" :label="t('common.loading')" v-if="applying" />
         {{ t("jobDetail.submitButton") }}
       </button>
     </div>

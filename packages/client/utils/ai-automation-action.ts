@@ -1,5 +1,5 @@
-import { isRecord } from "@bao/shared/utils/type-guards";
 import { safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
 export type JobApplyAutomationAction = {
   action: "job_apply";
@@ -15,9 +15,7 @@ const JOB_APPLY_ACTION_PATTERN = /\{"action"\s*:\s*"job_apply"[^{}]*\}/u;
  * Extracts a confirmed job_apply automation payload from assistant chat text.
  * System prompt emits a JSON action block only after user confirmation.
  */
-export function parseJobApplyAutomationAction(
-  content: string,
-): JobApplyAutomationAction | null {
+export function parseJobApplyAutomationAction(content: string): JobApplyAutomationAction | null {
   const match = content.match(JOB_APPLY_ACTION_PATTERN);
   if (!match?.[0]) {
     return null;

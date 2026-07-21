@@ -18,6 +18,32 @@ export const REQUIRED_LAYOUT_TOKEN_IMPORTS = [
   "ICON_SIZE_CLASS",
 ] as const;
 
+const LAYOUT_TOKENS_DIRECT_IMPORT_PATTERN = /from\s+["']~\/constants\/layout-tokens["']/gu;
+
+const isLayoutTokenOwner = (filePath: string): boolean =>
+  filePath === "packages/client/constants/layout.ts" ||
+  filePath === "packages/client/constants/layout-shell.ts" ||
+  filePath === "packages/client/constants/layout-tokens.ts" ||
+  filePath.endsWith("/validate-layout-token-imports.ts") ||
+  filePath.endsWith("/validate-layout-token-imports.test.ts") ||
+  filePath.includes("/tests/");
+
+export const collectDirectLayoutTokensImportViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (isLayoutTokenOwner(filePath)) return [];
+  if (!filePath.startsWith("packages/client/")) return [];
+  if (!LAYOUT_TOKENS_DIRECT_IMPORT_PATTERN.test(content)) return [];
+  return [
+    {
+      filePath,
+      line: 1,
+      message: `Direct import from ~/constants/layout-tokens bypasses public layout SSOT. Import tokens from ~/constants/layout only.`,
+    },
+  ];
+};
+
 export const collectMissingLayoutTokenImportViolationsForContent = (
   filePath: string,
   content: string,
@@ -26,7 +52,9 @@ export const collectMissingLayoutTokenImportViolationsForContent = (
     return [];
   }
 
-  const violations: ValidationViolation[] = [];
+  const violations: ValidationViolation[] = [
+    ...collectDirectLayoutTokensImportViolationsForContent(filePath, content),
+  ];
   for (const tokenName of REQUIRED_LAYOUT_TOKEN_IMPORTS) {
     const usagePattern = new RegExp(`\\b${tokenName}\\b`, "u");
     if (!usagePattern.test(content)) {

@@ -6,7 +6,7 @@ import {
   toApiScopedPath,
 } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
-import { TRACE_ID_HEADER, TRACE_ID_BYTE_LENGTH } from "@bao/shared/constants/runtime";
+import { TRACE_ID_BYTE_LENGTH, TRACE_ID_HEADER } from "@bao/shared/constants/runtime";
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia, setupTypebox, t } from "elysia";
@@ -61,7 +61,10 @@ const OPENAPI_TAGS = [
   { name: "Studios", description: "Studio directory CRUD and analytics endpoints." },
   { name: "Scraper", description: "Manual scraper trigger endpoints." },
   { name: "AI", description: "AI chat, analysis, matching, and provider introspection endpoints." },
-  { name: "Speech", description: "Speech-to-text transcription via Whisper and other STT providers." },
+  {
+    name: "Speech",
+    description: "Speech-to-text transcription via Whisper and other STT providers.",
+  },
   { name: "Gamification", description: "XP, achievements, challenges, and streak endpoints." },
   { name: "Skill Mapping", description: "Transferable skill analysis and CRUD endpoints." },
   { name: "Search", description: "Global search and autocomplete endpoints." },

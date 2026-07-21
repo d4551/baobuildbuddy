@@ -5,6 +5,7 @@
 
 export const UI_SSOT_AUTHORITY_PATHS = new Set<string>([
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-shell.ts",
   "packages/client/constants/layout-tokens.ts",
   "packages/client/constants/ui-layout.ts",
   "packages/client/constants/chat.ts",

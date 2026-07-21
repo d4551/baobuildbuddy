@@ -37,7 +37,6 @@ const catalogEmpty = computed(
       title-id="studios-index-title"
       :title="t('studiosIndex.title')"
       :description="t('studiosIndex.subtitle')"
-      description-class="text-secondary"
       density="comfortable"
     />
 

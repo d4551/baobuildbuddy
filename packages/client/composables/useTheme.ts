@@ -36,6 +36,8 @@ export function useTheme() {
 
   function initTheme(preferredTheme?: AppDataTheme) {
     // Settings are the persisted SSOT; cookie is a hydration cache only.
+    // Never apply prefers-color-scheme here — that diverges SSR vs client first paint
+    // (hydration mismatch on auth-shell / first visit without cookie).
     if (preferredTheme) {
       setTheme(preferredTheme, { persist: true });
       return;
@@ -45,10 +47,17 @@ export function useTheme() {
     if (savedRaw) {
       const normalized = normalizeAppDataTheme(savedRaw);
       setTheme(normalized, { persist: normalized !== savedRaw });
-      return;
     }
+  }
 
-    if (import.meta.client && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  /**
+   * Post-hydrate only: honor OS dark preference when user has no cookie yet.
+   * Safe after hydration — does not run during setup/SSR.
+   */
+  function applySystemThemePreferenceIfUnset(): void {
+    if (!import.meta.client) return;
+    if (themeCookie.value) return;
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       setTheme(THEME_NAMES.dark, { persist: false });
     }
   }
@@ -58,5 +67,6 @@ export function useTheme() {
     setTheme,
     toggleTheme,
     initTheme,
+    applySystemThemePreferenceIfUnset,
   };
 }

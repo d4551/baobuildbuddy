@@ -2,18 +2,16 @@
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_DESCRIPTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -50,11 +48,7 @@ function studioLocation(location: string): string {
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <SectionGrid grid-token="threeColumn">
-      <article 
-        v-for="studio in studios"
-        :key="studio.id"
-        :class="[SURFACE_GLASS_CARD_CLASS, 'transition-shadow']"
-      >
+      <UiGlassCard v-for="studio in studios" :key="studio.id" extra-class="transition-shadow">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="avatar placeholder">
@@ -97,7 +91,7 @@ function studioLocation(location: string): string {
             </button>
           </div>
         </div>
-      </article>
+      </UiGlassCard>
     </SectionGrid>
 
     <div v-if="hasAdditionalStudios" class="flex justify-center">

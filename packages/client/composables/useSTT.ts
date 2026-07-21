@@ -1,9 +1,9 @@
 import type { VoiceSettings } from "@bao/shared/types/interview";
-import type { SpeechProviderOption } from "@bao/shared/constants/settings";
 import type { Ref } from "vue";
 import { computed, onMounted, readonly, ref } from "#imports";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
 import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import { useSettings } from "./useSettings";
 
 interface RecognitionUpdate {
@@ -13,6 +13,25 @@ interface RecognitionUpdate {
 }
 
 type MicrophoneRecorder = Awaited<ReturnType<typeof createMicrophoneRecorder>>;
+
+interface SttMutableState {
+  transcript: Ref<string>;
+  interimTranscript: Ref<string>;
+  isListening: Ref<boolean>;
+  confidence: Ref<number>;
+  error: Ref<string | null>;
+  recognition: SpeechRecognition | null;
+  recorder: MicrophoneRecorder | null;
+  useServerStt: boolean;
+}
+
+function isSpeechRecognitionEvent(event: Event): event is SpeechRecognitionEvent {
+  return "resultIndex" in event && "results" in event;
+}
+
+function isSpeechRecognitionErrorEvent(event: Event): event is SpeechRecognitionErrorEvent {
+  return "error" in event;
+}
 
 function processRecognitionResults(event: SpeechRecognitionEvent): RecognitionUpdate {
   let finalTranscript = "";
@@ -60,20 +79,125 @@ function toFullTranscript(transcript: string, interimTranscript: string): string
   return combined.trim();
 }
 
-const resolveConfiguredSttProvider = (
-  settingsSpeechProvider: string | undefined,
-): SpeechProviderOption => {
-  if (
-    settingsSpeechProvider === "local" ||
-    settingsSpeechProvider === "openai" ||
-    settingsSpeechProvider === "huggingface" ||
-    settingsSpeechProvider === "custom" ||
-    settingsSpeechProvider === "browser"
-  ) {
-    return settingsSpeechProvider;
+function bindBrowserRecognitionHandlers(state: SttMutableState): void {
+  const recognition = state.recognition;
+  if (!recognition) {
+    return;
   }
-  return "browser";
-};
+  recognition.addEventListener("result", (event: Event) => {
+    if (!isSpeechRecognitionEvent(event)) {
+      return;
+    }
+    const update = processRecognitionResults(event);
+    if (update.finalTranscript.length > 0) {
+      state.transcript.value += update.finalTranscript;
+    }
+    state.interimTranscript.value = update.interimTranscript;
+    if (update.confidence > 0) {
+      state.confidence.value = update.confidence;
+    }
+  });
+  recognition.addEventListener("error", (event: Event) => {
+    if (!isSpeechRecognitionErrorEvent(event)) {
+      return;
+    }
+    state.error.value = `${event.error}: ${event.message ?? ""}`;
+  });
+  recognition.addEventListener("end", () => {
+    state.isListening.value = false;
+  });
+}
+
+function startServerSttListening(state: SttMutableState): boolean {
+  if (state.isListening.value) {
+    return true;
+  }
+  const _micStart = createMicrophoneRecorder().then(
+    (created) => {
+      state.recorder = created;
+      created.start();
+      state.isListening.value = true;
+    },
+    () => {
+      state.error.value = "Failed to start microphone";
+      state.isListening.value = false;
+    },
+  );
+  return true;
+}
+
+function startBrowserSttListening(
+  state: SttMutableState,
+  locale: string | undefined,
+  settings?: Ref<VoiceSettings | undefined>,
+): boolean {
+  if (!state.recognition) {
+    state.error.value = "Speech recognition not supported in this browser";
+    return false;
+  }
+  if (state.isListening.value) {
+    return true;
+  }
+  state.recognition.lang = resolveSpeechLocale(locale ?? settings?.value?.language);
+  state.recognition.start();
+  state.isListening.value = true;
+  return true;
+}
+
+function startSttListening(
+  state: SttMutableState,
+  locale: string | undefined,
+  settings: Ref<VoiceSettings | undefined> | undefined,
+  provider: ReturnType<typeof resolveSpeechSttProvider>,
+): boolean {
+  state.error.value = null;
+  state.transcript.value = "";
+  state.interimTranscript.value = "";
+  state.confidence.value = 0;
+  state.useServerStt = shouldUseServerStt(provider);
+  if (state.useServerStt) {
+    return startServerSttListening(state);
+  }
+  return startBrowserSttListening(state, locale, settings);
+}
+
+function stopServerSttListening(state: SttMutableState): void {
+  const activeRecorder = state.recorder;
+  state.recorder = null;
+  if (!activeRecorder) {
+    state.isListening.value = false;
+    return;
+  }
+  const _micStop = activeRecorder
+    .stop()
+    .then((blob) => transcribeAudioViaServer(blob))
+    .then(
+      (result) => {
+        if (result.ok) {
+          state.transcript.value = result.text;
+          state.interimTranscript.value = "";
+          state.confidence.value = 1;
+        } else {
+          state.error.value = result.error;
+        }
+      },
+      () => {
+        state.error.value = "Failed to transcribe audio";
+      },
+    )
+    .then(() => {
+      state.isListening.value = false;
+    });
+}
+
+function stopSttListening(state: SttMutableState): void {
+  if (state.useServerStt) {
+    stopServerSttListening(state);
+    return;
+  }
+  state.recognition?.stop();
+  state.isListening.value = false;
+}
 
 /**
  * Speech-to-text composable.
@@ -82,136 +206,50 @@ const resolveConfiguredSttProvider = (
  */
 export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   const { settings: appSettings } = useSettings();
-  const transcript = ref("");
-  const interimTranscript = ref("");
-  const isListening = ref(false);
-  const confidence = ref(0);
-  const error = ref<string | null>(null);
-  let recognition: SpeechRecognition | null = null;
-  let recorder: MicrophoneRecorder | null = null;
-  let useServerStt = false;
+  const state: SttMutableState = {
+    transcript: ref(""),
+    interimTranscript: ref(""),
+    isListening: ref(false),
+    confidence: ref(0),
+    error: ref<string | null>(null),
+    recognition: null,
+    recorder: null,
+    useServerStt: false,
+  };
 
   const sttProvider = computed(() =>
-    resolveConfiguredSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
+    resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
   );
 
   onMounted(() => {
-    useServerStt = sttProvider.value !== "browser";
-    if (useServerStt) {
+    state.useServerStt = shouldUseServerStt(sttProvider.value);
+    if (state.useServerStt) {
       return;
     }
-    recognition = createRecognitionInstance(settings);
-    if (!recognition) {
-      return;
-    }
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const update = processRecognitionResults(event);
-      if (update.finalTranscript.length > 0) {
-        transcript.value += update.finalTranscript;
-      }
-      interimTranscript.value = update.interimTranscript;
-      if (update.confidence > 0) {
-        confidence.value = update.confidence;
-      }
-    };
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      error.value = `${event.error}: ${event.message ?? ""}`;
-    };
-    recognition.onend = () => {
-      isListening.value = false;
-    };
+    state.recognition = createRecognitionInstance(settings);
+    bindBrowserRecognitionHandlers(state);
   });
 
   const fullTranscript = computed(() =>
-    toFullTranscript(transcript.value, interimTranscript.value),
+    toFullTranscript(state.transcript.value, state.interimTranscript.value),
   );
   const isSupported = computed(
     () =>
-      sttProvider.value !== "browser" ||
+      shouldUseServerStt(sttProvider.value) ||
       resolveSpeechRecognitionConstructor() !== null ||
       typeof navigator !== "undefined",
   );
 
-  const startListening = (locale?: string): boolean => {
-    error.value = null;
-    transcript.value = "";
-    interimTranscript.value = "";
-    confidence.value = 0;
-    useServerStt = sttProvider.value !== "browser";
-
-    if (useServerStt) {
-      if (isListening.value) {
-        return true;
-      }
-      createMicrophoneRecorder()
-        .then((created) => {
-          recorder = created;
-          created.start();
-          isListening.value = true;
-        })
-        .catch((startError: unknown) => {
-          error.value =
-            startError instanceof Error ? startError.message : "Failed to start microphone";
-          isListening.value = false;
-        });
-      return true;
-    }
-
-    if (!recognition) {
-      error.value = "Speech recognition not supported in this browser";
-      return false;
-    }
-    if (isListening.value) {
-      return true;
-    }
-    recognition.lang = resolveSpeechLocale(locale ?? settings?.value?.language);
-    recognition.start();
-    isListening.value = true;
-    return true;
-  };
-
-  const stopListening = (): void => {
-    if (useServerStt) {
-      const activeRecorder = recorder;
-      recorder = null;
-      if (!activeRecorder) {
-        isListening.value = false;
-        return;
-      }
-      activeRecorder
-        .stop()
-        .then((blob) => transcribeAudioViaServer(blob))
-        .then((result) => {
-          if (result.ok) {
-            transcript.value = result.text;
-            interimTranscript.value = "";
-            confidence.value = 1;
-          } else {
-            error.value = result.error;
-          }
-        })
-        .catch((stopError: unknown) => {
-          error.value =
-            stopError instanceof Error ? stopError.message : "Failed to transcribe audio";
-        })
-        .finally(() => {
-          isListening.value = false;
-        });
-      return;
-    }
-    recognition?.stop();
-    isListening.value = false;
-  };
-
   return {
-    startListening,
-    stopListening,
-    transcript: readonly(transcript),
-    interimTranscript: readonly(interimTranscript),
+    startListening: (locale?: string) =>
+      startSttListening(state, locale, settings, sttProvider.value),
+    stopListening: () => stopSttListening(state),
+    transcript: readonly(state.transcript),
+    interimTranscript: readonly(state.interimTranscript),
     fullTranscript,
-    isListening: readonly(isListening),
-    confidence: readonly(confidence),
-    error: readonly(error),
+    isListening: readonly(state.isListening),
+    confidence: readonly(state.confidence),
+    error: readonly(state.error),
     isSupported: readonly(isSupported),
   };
 }

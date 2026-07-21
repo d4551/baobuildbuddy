@@ -198,6 +198,11 @@ export default defineNuxtConfig({
   },
   experimental: {
     componentIslands: false,
+    // Dev Vite does not always emit `/_nuxt/builds/meta/dev.json`; Nuxt then logs
+    // console errors that fail product browser smoke (docs/api + others). Route-rule
+    // client manifest is optional for this stack; keep islands off + manifest off.
+    // Docs: https://nuxt.com/docs/4.x/guide/going-further/experimental-features
+    appManifest: false,
   },
   hooks: {
     "prerender:routes": (context: { routes: Set<string> }) => {

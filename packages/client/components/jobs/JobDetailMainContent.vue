@@ -7,7 +7,6 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -43,7 +42,7 @@ const { t } = useI18n();
 
 <template>
   <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard>
       <div class="card-body">
         <PageHeroHeader
           :title-id="titleId"
@@ -111,19 +110,19 @@ const { t } = useI18n();
           <span v-if="job.salary" class="badge badge-primary">{{ job.salary }}</span>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard>
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.descriptionTitle") }}</h2>
         <div class="prose max-w-none">
           <p class="whitespace-pre-wrap">{{ job.description }}</p>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
     <div v-if="job.requirements?.length" class="divider divider-primary">{{ t("jobDetail.requirementsTitle") }}</div>
-    <div v-if="job.requirements?.length" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="job.requirements?.length">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.requirementsTitle") }}</h2>
         <ul class="list">
@@ -132,10 +131,10 @@ const { t } = useI18n();
           </li>
         </ul>
       </div>
-    </div>
+    </UiGlassCard>
 
     <div v-if="job.technologies?.length" class="divider divider-primary">{{ t("jobDetail.technologiesTitle") }}</div>
-    <div v-if="job.technologies?.length" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="job.technologies?.length">
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.technologiesTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -144,6 +143,6 @@ const { t } = useI18n();
           </span>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </div>
 </template>

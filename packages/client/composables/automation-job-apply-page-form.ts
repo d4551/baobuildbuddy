@@ -114,15 +114,16 @@ export function useAutomationJobApplyBootstrap(input: {
     },
   );
 
-  const { data: coverLettersData, status: coverLettersStatus } =
-    useAsyncData<CoverLetterSelectOption[]>(
-      "automation-job-apply-cover-letters",
-      async () =>
-        toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
-      {
-        default: () => [],
-      },
-    );
+  const { data: coverLettersData, status: coverLettersStatus } = useAsyncData<
+    CoverLetterSelectOption[]
+  >(
+    "automation-job-apply-cover-letters",
+    async () =>
+      toCoverLetterSelectOptions(await readApiDataOrEmpty(input.api["cover-letters"].get())),
+    {
+      default: () => [],
+    },
+  );
 
   const bootstrapPending = computed(
     () =>

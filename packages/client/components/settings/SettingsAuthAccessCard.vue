@@ -7,7 +7,6 @@ import {
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -83,7 +82,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div>
@@ -132,5 +131,5 @@ onMounted(() => {
         </div>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

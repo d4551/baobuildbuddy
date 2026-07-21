@@ -2,16 +2,13 @@
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-} from "~/constants/layout";
-import {
-  FLEX_GAP_TOKEN_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
-} from "~/constants/layout-tokens";
+} from "~/constants/layout";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 
 const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategory>(
@@ -42,7 +39,7 @@ function setAllCategoryFilter(): void {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
         <svg class="text-muted" :class="[ICON_SIZE_CLASS[4]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -91,5 +88,5 @@ function setAllCategoryFilter(): void {
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

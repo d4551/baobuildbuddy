@@ -5,9 +5,9 @@ import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
+  type PlaywrightBrowsersPathDeps,
   resolvePlaywrightBrowsersPath,
   resolvePlaywrightHostPlatformOverride,
-  type PlaywrightBrowsersPathDeps,
 } from "@bao/shared/utils/playwright-browsers-path";
 
 const playwrightBrowsersPathDeps = (): PlaywrightBrowsersPathDeps => ({

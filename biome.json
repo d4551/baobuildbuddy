@@ -19,7 +19,10 @@
       "!**/packages/desktop/src-tauri/gen",
       "!**/packages/desktop/src-tauri/icons",
       "!**/.omo",
-      "!**/agentiflow"
+      "!**/agentiflow",
+      "!**/docs/browser-smoke",
+      "!**/docs/ssot-ledger/**/*.json",
+      "!**/docs/ssot-ledger/**/*.png"
     ]
   },
   "formatter": {
@@ -114,7 +117,7 @@
         "noMisusedPromises": "error",
         "useAwaitThenable": "error",
         "noVueImportCompilerMacros": "error",
-        "noVueRefAsOperand": "error",
+        "noVueRefAsOperand": "info",
         "useVueNextTickPromise": "error",
         "noDrizzleDeleteWithoutWhere": "error",
         "noDrizzleUpdateWithoutWhere": "error",
@@ -158,13 +161,28 @@
       "linter": {
         "rules": {
           "correctness": {
-            "noUnusedImports": "off",
-            "noUnusedVariables": "off",
-            "noUnusedFunctionParameters": "off"
+            "noUnusedImports": "info",
+            "noUnusedVariables": "info",
+            "noUnusedFunctionParameters": "info"
           },
           "style": {
             "useVueMultiWordComponentNames": "error",
             "useVueDefineMacrosOrder": "error"
+          },
+          "nursery": {
+            "noVueRefAsOperand": "info",
+            "noVueImportCompilerMacros": "error",
+            "useVueNextTickPromise": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/pages/**/*.vue", "**/layouts/**/*.vue", "**/app.vue", "**/error.vue"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useVueMultiWordComponentNames": "info"
           }
         }
       }

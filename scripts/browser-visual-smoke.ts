@@ -4,8 +4,13 @@
  */
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium, type ConsoleMessage, type Page } from "playwright";
+import { type ConsoleMessage, chromium, type Page } from "playwright";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import {
+  collectPageSignals,
+  isMobileAiOrAutomationRoute,
+  scoreSmokeRoute,
+} from "./browser-visual-smoke-signals";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
@@ -43,10 +48,13 @@ const STATIC_ROUTES = [
 ] as const;
 
 const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
-  await page.locator("body").waitFor({ state: "visible", timeout }).then(
-    () => undefined,
-    () => undefined,
-  );
+  await page
+    .locator("body")
+    .waitFor({ state: "visible", timeout })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
   await page.waitForLoadState("domcontentloaded", { timeout }).then(
     () => undefined,
     () => undefined,
@@ -67,100 +75,17 @@ type RouteResult = {
   readonly reason: string | null;
 };
 
-const collectPageSignals = async (page: Page) =>
-  page.evaluate((aiRoutePrefix: string) => {
-    const collapse = (value: string): string =>
-      value
-        .split(" ")
-        .flatMap((part) => part.split("\t"))
-        .flatMap((part) => part.split("\n"))
-        .flatMap((part) => part.split("\r"))
-        .filter((part) => part.length > 0)
-        .join(" ")
-        .trim();
-    const isLevelLabel = (value: string): boolean => {
-      if (!value.startsWith("Level ")) {
-        return false;
-      }
-      const digits = value.slice("Level ".length);
-      return digits.length > 0 && [...digits].every((char) => char >= "0" && char <= "9");
-    };
-    const h1 = document.querySelector("h1");
-    const mains = document.querySelectorAll("main");
-    const dockActive = Array.from(
-      document.querySelectorAll('nav.dock a[aria-current="page"], nav.dock a.dock-active'),
-    ).map((el) => ({
-      href: el.getAttribute("href"),
-      label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? ""),
-    }));
-    const tables = Array.from(document.querySelectorAll("table.table")).map((table) => {
-      const rect = table.getBoundingClientRect();
-      return { width: rect.width, visible: rect.width > 0 && rect.height > 0 };
-    });
-    const underTouch = Array.from(
-      document.querySelectorAll("nav.dock a, .menu a.min-h-11, .menu a.h-11, .menu button.min-h-11"),
-    )
-      .map((el) => {
-        const rect = el.getBoundingClientRect();
-        const style = getComputedStyle(el);
-        if (rect.width <= 0 || rect.height <= 0 || style.visibility === "hidden" || style.display === "none") {
-          return null;
-        }
-        // Closed dropdown/details content is not an active touch target — skip.
-        const details = el.closest("details");
-        if (details && !details.open) {
-          return null;
-        }
-        return {
-          label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? "").slice(0, 40),
-          h: rect.height,
-          under: rect.height + 0.5 < 44,
-        };
-      })
-      .filter((row): row is { label: string; h: number; under: boolean } => row?.under);
-    const setupCtaVisible = Array.from(document.querySelectorAll("a.btn, button.btn")).some((el) => {
-      const rect = el.getBoundingClientRect();
-      return (
-        rect.width > 0 &&
-        rect.height > 0 &&
-        collapse(el.textContent ?? "").toLowerCase().includes("complete setup")
-      );
-    });
-    const levelLabelVisible = Array.from(document.querySelectorAll("p, span, h2, h3, div")).some(
-      (el) => {
-        if (el.childElementCount > 2) {
-          return false;
-        }
-        const rect = el.getBoundingClientRect();
-        const text = collapse(el.textContent ?? "");
-        return rect.width > 0 && rect.height > 0 && isLevelLabel(text);
-      },
+const waitForMobileDockActive = async (page: Page, viewportName: string, route: string) => {
+  if (viewportName !== "mobile" || !isMobileAiOrAutomationRoute(route)) return;
+  await page
+    .locator('nav.dock a[aria-current="page"], nav.dock a.dock-active')
+    .first()
+    .waitFor({ state: "attached", timeout: 5_000 })
+    .then(
+      () => undefined,
+      () => undefined,
     );
-    const setupXpConflict = setupCtaVisible && levelLabelVisible;
-    const floatingChatVisible = [...document.querySelectorAll("button, a")].some((el) => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) {
-        return false;
-      }
-      const aria = (el.getAttribute("aria-label") ?? "").toLowerCase();
-      return aria.includes("floating chat") || aria.includes("show floating chat");
-    });
-    const dockHasAiChat = [...document.querySelectorAll("nav.dock a")].some((a) => {
-      const href = a.getAttribute("href") ?? "";
-      return href === aiRoutePrefix || href.startsWith(`${aiRoutePrefix}/`);
-    });
-    return {
-      h1: h1?.textContent ? collapse(h1.textContent) : null,
-      mainCount: mains.length,
-      bodySnippet: collapse(document.body?.innerText ?? "").slice(0, 240),
-      dockActive,
-      tables,
-      underTouch,
-      setupXpConflict,
-      floatingChatVisible,
-      dockHasAiChat,
-    };
-  }, APP_ROUTES.ai);
+};
 
 const smokeRoute = async (
   page: Page,
@@ -181,54 +106,14 @@ const smokeRoute = async (
   page.on("console", onConsole);
   page.on("pageerror", onPageError);
 
-  const url = `${CLIENT_BASE}${route}`;
   const screenshot = join(OUT_DIR, `${viewportName}-${slug}.png`);
-  let reason: string | null = null;
-
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.goto(`${CLIENT_BASE}${route}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await waitForPageReady(page, 2_000);
+  await waitForMobileDockActive(page, viewportName, route);
   const title = await page.title();
   const signals = await collectPageSignals(page);
   await page.screenshot({ path: screenshot, fullPage: true });
-
-  if (signals.mainCount !== 1) {
-    reason = `expected 1 main landmark, got ${String(signals.mainCount)}`;
-  } else if (!signals.h1 || signals.h1.length === 0) {
-    reason = "missing h1";
-  } else if (title.trim().length === 0) {
-    reason = "empty title";
-  } else if (pageErrors.length > 0) {
-    reason = `pageerror: ${pageErrors[0] ?? "unknown"}`;
-  } else if (
-    viewportName === "mobile" &&
-    (route === APP_ROUTES.ai ||
-      route.startsWith(`${APP_ROUTES.ai}/`) ||
-      route === APP_ROUTES.automation ||
-      route.startsWith(`${APP_ROUTES.automation}/`)) &&
-    signals.dockActive.length === 0
-  ) {
-    reason = `dock orphan on ${route} — expected aria-current/dock-active`;
-  } else if (
-    viewportName === "mobile" &&
-    route === APP_ROUTES.automationRuns &&
-    signals.tables.some((table) => table.visible && table.width > 360)
-  ) {
-    reason = `automation runs table still wide @320 (max visible ${String(
-      Math.max(0, ...signals.tables.filter((table) => table.visible).map((table) => table.width)),
-    )}px)`;
-  } else if (viewportName === "mobile" && signals.underTouch.length > 0) {
-    reason = `touch target under 44px: ${signals.underTouch[0]?.label ?? "unknown"} (${String(
-      signals.underTouch[0]?.h ?? 0,
-    )}px)`;
-  } else if (route === APP_ROUTES.dashboard && signals.setupXpConflict) {
-    reason = "dashboard Setup CTA vs Level/XP gamification contradiction";
-  } else if (
-    viewportName === "mobile" &&
-    signals.floatingChatVisible &&
-    signals.dockHasAiChat
-  ) {
-    reason = "dual chat chrome: floating FAB + dock AI Chat below lg";
-  }
+  const reason = scoreSmokeRoute(viewportName, route, title, signals, pageErrors);
 
   page.off("console", onConsole);
   page.off("pageerror", onPageError);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  EMPTY_STATE_DESCRIPTION_CLASS,
   EMPTY_STATE_STACK_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
@@ -56,7 +57,10 @@ const ctaAriaLabel = computed(() => {
     <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.base]">
       {{ t(titleKey) }}
     </h3>
-    <!-- Primary CTA first, then secondary actions — Configure/clear clears fold @320. -->
+    <!-- Title → description → primary CTA → secondary (fold @320: CTA still above fold via stack density). -->
+    <p :class="[EMPTY_STATE_DESCRIPTION_CLASS, TYPOGRAPHY_SCALE_CLASS.sm]">
+      {{ t(descriptionKey) }}
+    </p>
     <div
       class="flex w-full flex-col items-stretch sm:flex-row sm:flex-wrap sm:items-center sm:justify-center"
       :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
@@ -80,8 +84,5 @@ const ctaAriaLabel = computed(() => {
       </button>
       <slot name="actions" />
     </div>
-    <p class="max-w-sm text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-      {{ t(descriptionKey) }}
-    </p>
   </div>
 </template>

@@ -5,14 +5,14 @@ import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import type { ApplicationAutomationService } from "../services/automation/application-automation-service";
 import {
-  SCHEDULE_LEAD_TIME_MS,
-  SMTP_FROM_NAME,
-  SMTP_PASSWORD,
-  SMTP_USERNAME,
   createResumeRecord,
   readRunRowById,
   requestEmailResponseBody,
   requestExecutionEnvelope,
+  SCHEDULE_LEAD_TIME_MS,
+  SMTP_FROM_NAME,
+  SMTP_PASSWORD,
+  SMTP_USERNAME,
   subscribeToRunEvents,
   upsertDeterministicSettings,
   waitForRunCompletion,

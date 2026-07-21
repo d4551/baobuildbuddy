@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -8,7 +8,6 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -24,16 +23,12 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
 
       <SectionGrid grid-token="threeColumn">
-        <article 
-          v-for="pathway in pathways"
-          :key="pathway.id"
-          :class="SURFACE_GLASS_CARD_CLASS"
-        >
+        <UiGlassCard v-for="pathway in pathways" :key="pathway.id">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -83,7 +78,7 @@ const { t } = useI18n();
               </span>
             </p>
           </div>
-        </article>
+        </UiGlassCard>
       </SectionGrid>
 
       <EmptyState
@@ -94,5 +89,5 @@ const { t } = useI18n();
         :cta-to="APP_ROUTES.skills"
       />
     </div>
-  </section>
+  </UiGlassCard>
 </template>

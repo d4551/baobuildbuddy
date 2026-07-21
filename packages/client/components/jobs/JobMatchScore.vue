@@ -3,8 +3,8 @@ import { useI18n } from "vue-i18n";
 import { useScoreColor } from "~/composables/useScoreColor";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_XS_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,

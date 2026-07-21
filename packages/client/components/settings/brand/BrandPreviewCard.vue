@@ -12,7 +12,6 @@ import {
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TRACKING_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -60,7 +59,7 @@ const brandPreviewThemes = computed<
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div>
@@ -138,5 +137,5 @@ const brandPreviewThemes = computed<
         </section>
       </SectionGrid>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

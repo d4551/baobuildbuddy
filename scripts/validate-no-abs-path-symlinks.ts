@@ -1,7 +1,11 @@
-import { lstat, readlink, readdir } from "node:fs/promises";
+import { lstat, readdir, readlink } from "node:fs/promises";
 import { join } from "node:path";
 import { settle } from "../packages/shared/src/utils/promise";
-import { IGNORED_DIRECTORY_NAMES, reportViolations, type ValidationViolation } from "./utils/validation-helpers";
+import {
+  IGNORED_DIRECTORY_NAMES,
+  reportViolations,
+  type ValidationViolation,
+} from "./utils/validation-helpers";
 
 /**
  * Absolute symlink targets that leak host user paths into the repo.
@@ -9,8 +13,7 @@ import { IGNORED_DIRECTORY_NAMES, reportViolations, type ValidationViolation } f
  */
 const ABS_USER_HOME_TARGET_PATTERN = /^(?:\/Users\/|\/home\/)/u;
 const GIT_LS_FILES_LINE_BREAK_PATTERN = /\r?\n/u;
-const GIT_LS_FILES_SYMLINK_ENTRY_PATTERN =
-  /^(?<mode>\d{6})\s+\S+\s+\d+\s+(?<path>.+)$/u;
+const GIT_LS_FILES_SYMLINK_ENTRY_PATTERN = /^(?<mode>\d{6})\s+\S+\s+\d+\s+(?<path>.+)$/u;
 
 export type AbsPathSymlinkViolation = {
   filePath: string;
@@ -72,7 +75,9 @@ export const collectTrackedSymlinkEntriesFromGitLsFiles = async (
   gitLsFilesSOutput: string,
   readWorkingTreeTarget: (filePath: string) => Promise<string | null>,
 ): Promise<Array<{ filePath: string; target: string }>> => {
-  const lines = gitLsFilesSOutput.split(GIT_LS_FILES_LINE_BREAK_PATTERN).filter((line) => line.length > 0);
+  const lines = gitLsFilesSOutput
+    .split(GIT_LS_FILES_LINE_BREAK_PATTERN)
+    .filter((line) => line.length > 0);
   const symlinkPaths = lines
     .map((line) => {
       const match = GIT_LS_FILES_SYMLINK_ENTRY_PATTERN.exec(line);

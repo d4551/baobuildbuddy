@@ -135,20 +135,33 @@ const extractSystemPrompt = (
   return systemMessages.map((message) => message.content).join("\n\n");
 };
 
-export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
-  const models = await listOpenAIV1Models();
-  const requested = models.find((entry) => entry.id === body.model);
-  if (!requested) {
-    return routeResult(
-      HTTP_STATUS_NOT_FOUND,
-      toOpenAIV1Error(
-        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
-        "invalid_request_error",
-        "model_not_found",
-      ),
-    );
-  }
+const toOpenAIV1ChatPayload = (model: string, prompt: string, content: string) => {
+  const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
+  const completionTokens = Math.max(1, Math.ceil(content.length / 4));
+  return {
+    id: `chatcmpl-${generateId()}`,
+    object: "chat.completion" as const,
+    created: OPENAI_V1_EPOCH_SECONDS(),
+    model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant" as const,
+          content,
+        },
+        finish_reason: "stop" as const,
+      },
+    ],
+    usage: {
+      prompt_tokens: promptTokens,
+      completion_tokens: completionTokens,
+      total_tokens: promptTokens + completionTokens,
+    },
+  };
+};
 
+const generateOpenAIV1ChatContent = async (body: OpenAIV1ChatCompletionsBody) => {
   const parsed = parseOpenAIV1ModelId(body.model);
   const aiService = await getAIService();
   const prompt = extractUserPrompt(body.messages);
@@ -173,48 +186,55 @@ export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletions
   );
 
   if (generationResult.status === "rejected") {
-    return routeResult(
-      HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAIV1Error(
-        toErrorMessage(generationResult.reason, API_ERROR_OPENAI_V1_GENERATION_FAILED),
-        "server_error",
+    return {
+      ok: false as const,
+      result: routeResult(
+        HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        toOpenAIV1Error(
+          toErrorMessage(generationResult.reason, API_ERROR_OPENAI_V1_GENERATION_FAILED),
+          "server_error",
+        ),
       ),
-    );
+    };
   }
 
   const response = generationResult.value;
   if (response.error) {
+    return {
+      ok: false as const,
+      result: routeResult(
+        HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        toOpenAIV1Error(response.error, "server_error"),
+      ),
+    };
+  }
+
+  return { ok: true as const, prompt, content: response.content };
+};
+
+export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
+  const models = await listOpenAIV1Models();
+  const requested = models.find((entry) => entry.id === body.model);
+  if (!requested) {
     return routeResult(
-      HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAIV1Error(response.error, "server_error"),
+      HTTP_STATUS_NOT_FOUND,
+      toOpenAIV1Error(
+        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
+        "invalid_request_error",
+        "model_not_found",
+      ),
     );
   }
 
-  const completionId = `chatcmpl-${generateId()}`;
-  const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-  const completionTokens = Math.max(1, Math.ceil(response.content.length / 4));
+  const generation = await generateOpenAIV1ChatContent(body);
+  if (!generation.ok) {
+    return generation.result;
+  }
 
-  return routeResult(HTTP_STATUS_OK, {
-    id: completionId,
-    object: "chat.completion" as const,
-    created: OPENAI_V1_EPOCH_SECONDS(),
-    model: body.model,
-    choices: [
-      {
-        index: 0,
-        message: {
-          role: "assistant" as const,
-          content: response.content,
-        },
-        finish_reason: "stop" as const,
-      },
-    ],
-    usage: {
-      prompt_tokens: promptTokens,
-      completion_tokens: completionTokens,
-      total_tokens: promptTokens + completionTokens,
-    },
-  });
+  return routeResult(
+    HTTP_STATUS_OK,
+    toOpenAIV1ChatPayload(body.model, generation.prompt, generation.content),
+  );
 };
 
 export const createOpenAIV1ChatCompletionStream = async (

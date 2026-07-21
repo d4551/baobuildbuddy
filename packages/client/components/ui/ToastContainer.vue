@@ -11,9 +11,9 @@ import {
   MARGIN_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   TOAST_CONTAINER_DOM_ID,
+  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();

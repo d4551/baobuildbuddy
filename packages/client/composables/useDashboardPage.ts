@@ -214,9 +214,7 @@ export function useDashboardPage() {
     );
     claimingChallengeId.value = null;
     if (!claimResult.ok) {
-      $toast.error(
-        getErrorMessage(claimResult.error, t("dashboard.claimChallengeErrorFallback")),
-      );
+      $toast.error(getErrorMessage(claimResult.error, t("dashboard.claimChallengeErrorFallback")));
       return;
     }
     $toast.success(t("dashboard.claimChallengeToast"));

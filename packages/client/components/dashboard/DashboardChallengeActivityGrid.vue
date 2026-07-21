@@ -15,7 +15,6 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
@@ -44,7 +43,7 @@ const canClaimChallenge = computed(() => {
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div v-if="dailyChallenge" :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+    <UiGlassCard v-if="dailyChallenge" :extra-class="FLUID_HEIGHT_CLASS">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
         <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
@@ -80,7 +79,7 @@ const canClaimChallenge = computed(() => {
               <LoadingSpinner
                 v-if="claimingChallengeId === dailyChallenge.id"
                 size="xs"
-                label="Loading"
+                :label="t('common.loading')"
                 aria-hidden="true"
               />
               {{ t("dashboard.claimChallengeLabel") }}
@@ -95,9 +94,9 @@ const canClaimChallenge = computed(() => {
           </p>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+    <UiGlassCard :extra-class="FLUID_HEIGHT_CLASS">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul
@@ -139,6 +138,6 @@ const canClaimChallenge = computed(() => {
           :cta-to="APP_ROUTES.jobs"
         />
       </div>
-    </div>
+    </UiGlassCard>
   </SectionGrid>
 </template>

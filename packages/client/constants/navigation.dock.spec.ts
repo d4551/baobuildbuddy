@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getDockNavigationItems,
-  MOBILE_DOCK_MAX_ITEMS,
-  NAVIGATION_ITEMS,
-} from "./navigation";
+import { getDockNavigationItems, MOBILE_DOCK_MAX_ITEMS, NAVIGATION_ITEMS } from "./navigation";
 
 describe("mobile dock navigation SSOT", () => {
   it("keeps dock at or under Apple HIG primary-destination cap", () => {

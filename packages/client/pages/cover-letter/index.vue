@@ -3,7 +3,6 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -11,9 +10,8 @@ import {
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
@@ -111,10 +109,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
       </template>
     </PageHeroHeader>
 
-    <section
-      v-if="hasCoverLetters || hasFiltersApplied"
-      :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
-    >
+    <UiGlassCard v-if="hasCoverLetters || hasFiltersApplied" extra-class="glass-card-enter glass-card-enter-0">
       <div class="card-body">
         <SectionGrid grid-token="fourColumnLgGap4">
           <fieldset class="fieldset lg:col-span-2">
@@ -169,7 +164,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
           </button>
         </div>
       </div>
-    </section>
+    </UiGlassCard>
 
     <LoadingSkeleton
       v-if="bootstrapPending || (loading && coverLetters.length === 0)"

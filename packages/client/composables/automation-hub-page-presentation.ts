@@ -91,7 +91,8 @@ const createAutomationCardPresentation = (
       return orderedCards.value[0] ?? null;
     }
 
-    return orderedCards.value.find((card) => card.id === currentPrimaryCardId) ?? null;
+    const cards = orderedCards.value;
+    return cards.find((card) => card.id === currentPrimaryCardId) ?? null;
   });
 
   return {

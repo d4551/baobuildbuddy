@@ -6,9 +6,9 @@ import {
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type ProviderField =
@@ -18,6 +18,8 @@ type ProviderField =
   | "openaiApiKey"
   | "claudeApiKey"
   | "huggingfaceToken";
+
+const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
 
 defineProps<{
   providerInputs: ReadonlyArray<{
@@ -36,10 +38,9 @@ defineProps<{
   providerPlaceholder: (providerId: AIProviderType, providerLabel: string) => string;
 }>();
 
-const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
-
 const emit = defineEmits<{
   testProvider: [providerId: AIProviderType];
+
   saveKeys: [];
 }>();
 </script>

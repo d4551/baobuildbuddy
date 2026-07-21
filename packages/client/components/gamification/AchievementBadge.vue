@@ -8,11 +8,10 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-defineProps<{
+const props = defineProps<{
   achievement: {
     id: string;
     name: string;
@@ -27,8 +26,10 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div 
-    :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'glass-interactive ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
+  <UiGlassCard
+    :selected="props.achievement.unlocked"
+    :disabled="!props.achievement.unlocked"
+    :extra-class="props.achievement.unlocked ? 'cursor-pointer' : ''"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >
@@ -55,5 +56,5 @@ const { t } = useI18n();
         </div>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

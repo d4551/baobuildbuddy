@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, PRIMARY_ACTION_CLASS } from "~/constants/layout";
+import {
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
+} from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],

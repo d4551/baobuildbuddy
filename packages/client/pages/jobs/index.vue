@@ -15,11 +15,11 @@ import {
   ICON_SIZE_XS_ALT_CLASS,
   LABEL_HIDE_BELOW_SM_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   ROW_GAP_XS_CLASS,
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
   STACK_SPACING_SM_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
@@ -110,7 +110,7 @@ const page = useJobsIndexPage();
     <SectionGrid grid-token="sidebar">
       <div
         v-if="!page.isCatalogEmpty.value"
-        :class="[' shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]"
+        :class="['shrink-0', SIDEBAR_WIDTH_LG_CLASS, { 'hidden lg:block': !page.showFilters.value }, FLUID_WIDTH_CLASS]"
       >
         <JobsPageFiltersCard
           v-model:location="page.localFilters.location"

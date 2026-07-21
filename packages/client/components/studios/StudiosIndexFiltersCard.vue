@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
-const remoteWork = defineModel<boolean>("remoteWork", { required: true });
 
+const remoteWork = defineModel<boolean>("remoteWork", { required: true });
 
 defineProps<{
   studioSizeOptions: string[];
@@ -29,7 +27,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <SectionGrid grid-token="fourColumnLg">
         <fieldset class="fieldset lg:col-span-2">
@@ -88,5 +86,5 @@ const { t } = useI18n();
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

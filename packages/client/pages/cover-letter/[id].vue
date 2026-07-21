@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
+  COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_DEFAULT_TEMPLATE,
+  COVER_LETTER_POSITION_MIN_LENGTH,
   type CoverLetterTemplate,
   isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
@@ -15,6 +17,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
 import {
+  countCoverLetterSections,
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
@@ -28,7 +31,7 @@ const route = useRoute();
 const { getCoverLetter, updateCoverLetter, generateCoverLetter, exportDocument, loading } =
   useCoverLetter();
 type GenerateCoverLetterResult = Awaited<ReturnType<typeof generateCoverLetter>>;
-const { $toast } = useNuxtApp();
+const toast = useToast();
 const { t } = useI18n();
 useSeoMeta({
   title: t("coverLetterDetailPage.details.title"),
@@ -70,14 +73,7 @@ const heroTitle = computed(() =>
 const heroDescription = computed(() => t("coverLetterDetailPage.hero.description"));
 
 const contentCharacterCount = computed(() => formData.contentText.trim().length);
-const contentSectionCount = computed(() => {
-  if (!formData.contentText.trim()) return 0;
-  return formData.contentText
-    .trim()
-    .split(/\n{2,}/)
-    .map((section) => section.trim())
-    .filter((section) => section.length > 0).length;
-});
+const contentSectionCount = computed(() => countCoverLetterSections(formData.contentText));
 
 const hasUnsavedChanges = computed(() => buildFormFingerprint() !== lastSavedFingerprint.value);
 
@@ -134,7 +130,7 @@ async function handleSave() {
   if (!letterId.value) return;
 
   if (formData.company.trim().length < COVER_LETTER_COMPANY_MIN_LENGTH) {
-    $toast.error(
+    toast.error(
       t("coverLetterDetailPage.toasts.companyMinLength", {
         count: COVER_LETTER_COMPANY_MIN_LENGTH,
       }),
@@ -143,7 +139,7 @@ async function handleSave() {
   }
 
   if (formData.position.trim().length < COVER_LETTER_POSITION_MIN_LENGTH) {
-    $toast.error(
+    toast.error(
       t("coverLetterDetailPage.toasts.positionMinLength", {
         count: COVER_LETTER_POSITION_MIN_LENGTH,
       }),
@@ -166,7 +162,7 @@ async function handleSave() {
   }
 
   lastSavedFingerprint.value = buildFormFingerprint();
-  $toast.success(t("coverLetterDetailPage.toasts.saved"));
+  toast.success(t("coverLetterDetailPage.toasts.saved"));
 }
 
 async function handleRegenerate() {
@@ -186,13 +182,13 @@ async function handleRegenerate() {
 
   const regeneratedContent = resolveGeneratedContent(regenerated);
   if (!regeneratedContent) {
-    $toast.error(t("coverLetterDetailPage.toasts.regenerateMissingContent"));
+    toast.error(t("coverLetterDetailPage.toasts.regenerateMissingContent"));
     showRegenerateDialog.value = false;
     return;
   }
 
   formData.contentText = coverLetterContentToPlainText(regeneratedContent);
-  $toast.success(t("coverLetterDetailPage.toasts.regenerated"));
+  toast.success(t("coverLetterDetailPage.toasts.regenerated"));
   showRegenerateDialog.value = false;
 }
 
@@ -210,13 +206,13 @@ async function handleExport(format: "pdf" | "docx") {
     t("coverLetterDetailPage.toasts.exportFailed"),
   );
   if (!exportResult.ok) {
-    $toast.error(
+    toast.error(
       getErrorMessage(exportResult.error, t("coverLetterDetailPage.toasts.exportFailed")),
     );
     return;
   }
 
-  $toast.success(t("coverLetterDetailPage.toasts.exported"));
+  toast.success(t("coverLetterDetailPage.toasts.exported"));
 }
 </script>
 
@@ -238,7 +234,7 @@ async function handleExport(format: "pdf" | "docx") {
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
           @click="requestRegenerate"
         >
-          <LoadingSpinner size="xs" label="Loading" v-if="regenerating" />
+          <LoadingSpinner size="xs" :label="t('common.loading')" v-if="regenerating" />
           <IconRefresh v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("coverLetterDetailPage.actions.regenerateButton") }}
         </button>

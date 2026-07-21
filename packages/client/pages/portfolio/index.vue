@@ -2,15 +2,13 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
-
   FLUID_WIDTH_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
@@ -177,10 +175,7 @@ function updateProjectForm(value: typeof projectForm): void {
         />
       </div>
 
-      <section
-        v-if="!isPortfolioEmpty"
-        :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']"
-      >
+      <UiGlassCard v-if="!isPortfolioEmpty" extra-class="glass-card-enter glass-card-enter-0">
         <div class="card-body">
           <SectionGrid grid-token="threeColumnLgGap4">
             <fieldset class="fieldset lg:col-span-2">
@@ -201,7 +196,7 @@ function updateProjectForm(value: typeof projectForm): void {
             </button>
           </div>
         </div>
-      </section>
+      </UiGlassCard>
 
       <PortfolioProfileCard
         v-if="!isPortfolioEmpty"

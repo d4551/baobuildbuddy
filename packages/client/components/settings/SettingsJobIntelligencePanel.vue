@@ -8,20 +8,19 @@ import {
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
+const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+
 defineProps<{
   providerSaveState: SaveState;
   taxonomySaveState: SaveState;
 }>();
-
-const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
-const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
 
 const emit = defineEmits<{
   saveProviders: [];
@@ -52,7 +51,7 @@ const taxonomyAssetCount = computed(
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <div :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard>
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
         <SettingsPanelHeader />
         <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
@@ -75,7 +74,7 @@ const taxonomyAssetCount = computed(
           </div>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
     <SettingsJobIntelligenceProvidersWorkspace
       v-model:job-provider-form="jobProviderForm"

@@ -4,7 +4,6 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -166,7 +165,7 @@ useSeoMeta({
           />
 
           <SectionGrid grid-token="twoColumnWide">
-            <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-next-action-title">
+            <UiGlassCard aria-labelledby="automation-next-action-title">
               <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
                 <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                   <h2 id="automation-next-action-title" class="card-title">
@@ -195,7 +194,7 @@ useSeoMeta({
                   </div>
                 </div>
               </div>
-            </section>
+            </UiGlassCard>
 
             <WorkPipeline
               :title="t('automation.hub.pipelineTitle')"

@@ -11,8 +11,8 @@ import { settle } from "@bao/shared/utils/promise";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { settings } from "../db/schema/settings";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts-scrape";
 import type {

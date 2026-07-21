@@ -16,7 +16,6 @@ const props = withDefaults(
   },
 );
 
-
 const AI_PROVIDER_ICON_PATHS: Record<AIProviderType, readonly IconPath[]> = {
   local: [
     {

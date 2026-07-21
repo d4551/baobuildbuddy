@@ -14,8 +14,8 @@ import {
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
   SKILLS_CONFIDENCE_MAX,
@@ -105,7 +105,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"
         >
-          <LoadingSpinner size="xs" label="Loading" v-if="analyzing" />
+          <LoadingSpinner size="xs" :label="t('common.loading')" v-if="analyzing" />
           <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>

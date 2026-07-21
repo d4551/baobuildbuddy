@@ -22,8 +22,22 @@ const seedAuthKey = async (rawKey: string) => {
   const keyHash = hashApiKey(rawKey);
   await db
     .insert(auth)
-    .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: keyHash, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
-    .onConflictDoUpdate({ target: auth.id, set: { apiKeyHash: keyHash, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null } });
+    .values({
+      id: DEFAULT_PROFILE_ID,
+      apiKeyHash: keyHash,
+      apiKeyCreatedAt: new Date().toISOString(),
+      apiKeyExpiresAt: null,
+      apiKeyRevokedAt: null,
+    })
+    .onConflictDoUpdate({
+      target: auth.id,
+      set: {
+        apiKeyHash: keyHash,
+        apiKeyCreatedAt: new Date().toISOString(),
+        apiKeyExpiresAt: null,
+        apiKeyRevokedAt: null,
+      },
+    });
 };
 
 beforeAll(async () => {
@@ -53,8 +67,22 @@ afterEach(async () => {
   } else {
     await db
       .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: originalApiKey, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
-      .onConflictDoUpdate({ target: auth.id, set: { apiKeyHash: originalApiKey, apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null } });
+      .values({
+        id: DEFAULT_PROFILE_ID,
+        apiKeyHash: originalApiKey,
+        apiKeyCreatedAt: new Date().toISOString(),
+        apiKeyExpiresAt: null,
+        apiKeyRevokedAt: null,
+      })
+      .onConflictDoUpdate({
+        target: auth.id,
+        set: {
+          apiKeyHash: originalApiKey,
+          apiKeyCreatedAt: new Date().toISOString(),
+          apiKeyExpiresAt: null,
+          apiKeyRevokedAt: null,
+        },
+      });
   }
 });
 

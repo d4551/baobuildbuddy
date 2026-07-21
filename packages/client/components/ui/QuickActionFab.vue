@@ -6,14 +6,12 @@ import { FAB_QUICK_ACTIONS } from "~/constants/dashboard-pipeline";
 import {
   FAB_ACTION_MIN_WIDTH_CLASS,
   FAB_POSITION_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
+  PRIMARY_ACTION_CLASS,
   QUICK_ACTION_MENU_ID,
 } from "~/constants/layout";
-import {
-  FLEX_GAP_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
-} from "~/constants/layout-tokens";
 
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();

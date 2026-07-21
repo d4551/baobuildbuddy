@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { hashApiKey } from "../utils/crypto";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { createTestDbPath, requestJson } from "../test-utils";
+import { hashApiKey } from "../utils/crypto";
 
 type OpenApiOperation = {
   tags?: string[];
@@ -87,36 +87,32 @@ beforeAll(async () => {
   app = appModule.app;
 });
 
+const assertOpenApiOperationTags = (path: string, operations: OpenApiSpec["paths"][string]) => {
+  for (const method of OPENAPI_METHODS) {
+    const operation = operations[method];
+    if (!operation) continue;
+    // WebSocket operations are documented without HTTP OpenAPI tags.
+    if (path.includes("/ws/")) continue;
+    const expectedTag = resolveExpectedTag(path);
+    // Routes without an expected tag prefix are fine (e.g. auth lifecycle routes)
+    if (!expectedTag) continue;
+    // Tags may not be present on routes registered before the openapi plugin
+    if (!operation.tags) continue;
+    expect(operation.tags).toBeArray();
+    expect(operation.tags?.length).toBeGreaterThan(0);
+    expect(operation.tags).toContain(expectedTag);
+  }
+};
+
 describe("openapi tags", () => {
   test("generated OpenAPI spec tags every documented API operation", async () => {
-    const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, { Authorization: `Bearer ${TEST_AUTH_KEY}` });
+    const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, {
+      Authorization: `Bearer ${TEST_AUTH_KEY}`,
+    });
     expect(response.status).toBe(200);
 
     for (const [path, operations] of Object.entries(response.body.paths)) {
-      for (const method of OPENAPI_METHODS) {
-        const operation = operations[method];
-        if (!operation) {
-          continue;
-        }
-
-        // WebSocket operations are documented without HTTP OpenAPI tags.
-        if (path.includes("/ws/")) {
-          continue;
-        }
-
-        const expectedTag = resolveExpectedTag(path);
-        // Routes without an expected tag prefix are fine (e.g. auth lifecycle routes)
-        if (!expectedTag) {
-          continue;
-        }
-        // Tags may not be present on routes registered before the openapi plugin
-        if (!operation.tags) {
-          continue;
-        }
-        expect(operation.tags).toBeArray();
-        expect(operation.tags?.length).toBeGreaterThan(0);
-        expect(operation.tags).toContain(expectedTag);
-      }
+      assertOpenApiOperationTags(path, operations);
     }
   });
 });

@@ -7,7 +7,6 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -63,13 +62,20 @@ async function handleImportFile(event: Event): Promise<void> {
     return;
   }
   const parsed = safeParseJson(textResult.value);
-  if (!isRecord(parsed) || typeof parsed.version !== "string" || typeof parsed.exportedAt !== "string") {
+  if (
+    !isRecord(parsed) ||
+    typeof parsed.version !== "string" ||
+    typeof parsed.exportedAt !== "string"
+  ) {
     $toast.error(t("settings.preferences.importInvalid"));
     return;
   }
   const payload = parsed as SettingsWorkspaceExportPayload;
   pending.value = true;
-  const result = await settlePromise(importWorkspace(payload), t("apiErrors.settings.importFailed"));
+  const result = await settlePromise(
+    importWorkspace(payload),
+    t("apiErrors.settings.importFailed"),
+  );
   pending.value = false;
   if (!result.ok) {
     $toast.error(getErrorMessage(result.error, t("apiErrors.settings.importFailed")));
@@ -81,7 +87,7 @@ async function handleImportFile(event: Event): Promise<void> {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div>
@@ -125,5 +131,5 @@ async function handleImportFile(event: Event): Promise<void> {
         </div>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

@@ -64,3 +64,7 @@ docs/assets/docs.generated.css
 .desktop-release-artifacts/
 
 # docs/ssot-ledger is tracked evidence SSOT (defect/improvement/baseline hashes)
+/docs/ssot-ledger
+
+# Browser proof screenshots + report.json (local smoke artifacts)
+/docs/browser-smoke/

@@ -6,7 +6,6 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -19,7 +18,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.runDetail.timeline.aria')">
+  <UiGlassCard :aria-label="t('automation.runDetail.timeline.aria')">
     <div class="card-body">
       <h2 class="card-title">{{ t("automation.runDetail.timeline.title") }}</h2>
       <p
@@ -79,5 +78,5 @@ const { t } = useI18n();
         </template>
       </ResponsiveDataSurface>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

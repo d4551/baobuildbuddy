@@ -6,14 +6,13 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
-  MIN_HEIGHT_SCROLL_CLASS,
   MIN_H_80_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
@@ -27,7 +26,6 @@ interface Response {
   text: string;
 }
 const currentResponse = defineModel<string>("response", { default: "" });
-
 
 const props = withDefaults(
   defineProps<{
@@ -166,7 +164,7 @@ watch(renderedMessages, async () => {
 </script>
 
 <template>
-  <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]" aria-labelledby="interview-chat-workspace-title">
+  <UiGlassCard :extra-class="FLUID_HEIGHT_CLASS" aria-labelledby="interview-chat-workspace-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap0, PADDING_TOKEN_CLASS.p0]">
       <div class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py5]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -221,7 +219,7 @@ watch(renderedMessages, async () => {
               :aria-label="t(props.submitButtonAriaLabelKey)"
               :disabled="!canSubmit"
             >
-              <LoadingSpinner size="sm" label="Loading" v-if="props.isSubmitting" />
+              <LoadingSpinner size="sm" :label="t('common.loading')" v-if="props.isSubmitting" />
               {{ t(props.submitButtonLabelKey) }}
             </button>
           </div>
@@ -234,5 +232,5 @@ watch(renderedMessages, async () => {
         </div>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

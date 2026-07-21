@@ -32,10 +32,13 @@ const RE_NO_JOBS = /No jobs loaded yet/i;
 const RE_GREENHOUSE_BOARDS = /Greenhouse boards JSON/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.locator("body").waitFor({ state: "visible", timeout: ms }).then(
-    () => undefined,
-    () => undefined,
-  );
+  await page
+    .locator("body")
+    .waitFor({ state: "visible", timeout: ms })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
   await page.waitForLoadState("domcontentloaded", { timeout: ms }).then(
     () => undefined,
     () => undefined,
@@ -63,7 +66,11 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
   await page.getByRole("button", { name: RE_EXPORT }).first().click();
   await wait(page, 400);
   const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
-  await page.getByRole("menuitem", { name: RE_PDF }).or(page.getByRole("button", { name: RE_PDF })).first().click();
+  await page
+    .getByRole("menuitem", { name: RE_PDF })
+    .or(page.getByRole("button", { name: RE_PDF }))
+    .first()
+    .click();
   const downloadResult = await settle(downloadPromise);
   if (downloadResult.status === "rejected") {
     await writeError(`PDF download failed: ${downloadResult.reason.message}`);
@@ -72,7 +79,9 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
   }
   const path = await saveDownload(downloadResult.value, "resume-real.pdf");
   const bytes = (await Bun.file(path).arrayBuffer()).byteLength;
-  const header = Buffer.from(await Bun.file(path).arrayBuffer()).subarray(0, 5).toString("utf8");
+  const header = Buffer.from(await Bun.file(path).arrayBuffer())
+    .subarray(0, 5)
+    .toString("utf8");
   await writeOutput(`PDF path=${path} bytes=${String(bytes)} header=${header}`);
   if (header !== "%PDF-" || bytes < 1_000) {
     await writeError("Downloaded file is not a real PDF");

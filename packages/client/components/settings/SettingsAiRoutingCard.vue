@@ -10,13 +10,14 @@ import {
   MIN_WIDTH_FORM_COL_CLASS,
   MIN_WIDTH_SELECT_CLASS,
   PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
+
+const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
 
 defineProps<{
   providerInputs: ReadonlyArray<{
@@ -34,15 +35,13 @@ defineProps<{
   t: ComposerTranslation;
 }>();
 
-const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
-
 const emit = defineEmits<{
   save: [];
 }>();
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, MARGIN_TOKEN_CLASS.mb4]">
+  <UiGlassCard :extra-class="MARGIN_TOKEN_CLASS.mb4">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -179,5 +178,5 @@ const emit = defineEmits<{
         </template>
       </ResponsiveDataSurface>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

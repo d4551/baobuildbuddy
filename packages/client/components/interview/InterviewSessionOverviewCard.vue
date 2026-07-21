@@ -7,7 +7,6 @@ import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -60,7 +59,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-briefing-title">
+  <UiGlassCard aria-labelledby="interview-session-briefing-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <PageHeaderBlock
         title-id="interview-session-briefing-title"
@@ -119,5 +118,5 @@ const roundedProgress = computed(() => Math.round(props.progress));
         :aria-label="t('interviewSession.progressAria')"
       ></progress>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

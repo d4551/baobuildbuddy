@@ -17,7 +17,6 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_STRONG_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -34,7 +33,7 @@ const { t } = useI18n();
 
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-    <section :class="[SURFACE_GLASS_CARD_STRONG_CLASS, 'text-on-glass']">
+    <UiGlassCard variant="strong" extra-class="text-on-glass">
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <div>
@@ -59,7 +58,7 @@ const { t } = useI18n();
           </template>
         </p>
       </div>
-    </section>
+    </UiGlassCard>
 
     <StatsRow 
       background-class="bg-base-200"

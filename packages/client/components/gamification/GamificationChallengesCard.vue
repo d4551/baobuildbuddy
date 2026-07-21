@@ -9,7 +9,6 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
@@ -30,16 +29,12 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title" :class="[MARGIN_TOKEN_CLASS.mb4]">{{ t("gamificationPage.dailyChallengesTitle") }}</h2>
 
       <div v-if="challenges.length > 0" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-        <article 
-          v-for="challenge in challenges"
-          :key="challenge.id"
-          :class="SURFACE_GLASS_CARD_CLASS"
-        >
+        <UiGlassCard v-for="challenge in challenges" :key="challenge.id">
           <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb2]">
               <h3 class="font-semibold">{{ challenge.name }}</h3>
@@ -79,14 +74,14 @@ const { t } = useI18n();
                 <LoadingSpinner
                   v-if="completingChallenge === challenge.id"
                   size="xs"
-                  label="Loading"
+                  :label="t('common.loading')"
                   aria-hidden="true"
                 />
                 {{ t("gamificationPage.challengeClaimLabel") }}
               </button>
             </div>
           </div>
-        </article>
+        </UiGlassCard>
       </div>
 
       <EmptyState
@@ -97,5 +92,5 @@ const { t } = useI18n();
         :cta-to="APP_ROUTES.dashboard"
       />
     </div>
-  </section>
+  </UiGlassCard>
 </template>

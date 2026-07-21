@@ -6,11 +6,10 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
@@ -45,7 +44,6 @@ const brandForm = defineModel<{
   contentOverridesJson: string;
 }>("brandForm", { required: true });
 
-
 const props = defineProps<{
   brandSaveState: SaveState;
   brandDraft: BrandSettings;
@@ -54,11 +52,9 @@ const props = defineProps<{
   themeNames: { light: string; dark: string };
 }>();
 
-
 const emit = defineEmits<{
   save: [];
 }>();
-
 
 const BRAND_EDITOR_PANELS = [
   { id: "identity", labelKey: "settings.brand.tabs.identity" },
@@ -125,7 +121,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader>
         <template v-if="brandSaveStateLabel" #meta>
@@ -255,5 +251,5 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </div>
       </SectionGrid>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

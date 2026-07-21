@@ -11,7 +11,6 @@ interface ResumeTabListProps {
 
 const activeTab = defineModel<string>("activeTab", { required: true });
 
-
 const props = defineProps<ResumeTabListProps>();
 
 const tabRefs = ref<(HTMLButtonElement | null)[]>([]);
@@ -32,48 +31,38 @@ function selectTab(tab: string): void {
   activeTab.value = tab;
 }
 
+function resolveTabKeyTargetIndex(
+  eventKey: string,
+  index: number,
+  lastTabIndex: number,
+): number | null {
+  if (eventKey === "ArrowRight") {
+    return index === lastTabIndex ? 0 : index + 1;
+  }
+  if (eventKey === "ArrowLeft") {
+    return index === 0 ? lastTabIndex : index - 1;
+  }
+  if (eventKey === "Home") {
+    return 0;
+  }
+  if (eventKey === "End") {
+    return lastTabIndex;
+  }
+  return null;
+}
+
 function handleTabKeydown(event: KeyboardEvent, index: number): void {
   const lastTabIndex = props.tabs.length - 1;
-  if (event.key === "ArrowRight") {
-    event.preventDefault();
-    const nextIndex = index === lastTabIndex ? 0 : index + 1;
-    const nextTab = props.tabs[nextIndex];
-    if (nextTab) {
-      selectTab(nextTab);
-    }
-    focusTab(nextIndex);
+  const nextIndex = resolveTabKeyTargetIndex(event.key, index, lastTabIndex);
+  if (nextIndex === null) {
     return;
   }
-
-  if (event.key === "ArrowLeft") {
-    event.preventDefault();
-    const nextIndex = index === 0 ? lastTabIndex : index - 1;
-    const nextTab = props.tabs[nextIndex];
-    if (nextTab) {
-      selectTab(nextTab);
-    }
-    focusTab(nextIndex);
-    return;
+  event.preventDefault();
+  const nextTab = props.tabs[nextIndex];
+  if (nextTab) {
+    selectTab(nextTab);
   }
-
-  if (event.key === "Home") {
-    event.preventDefault();
-    const firstTab = props.tabs[0];
-    if (firstTab) {
-      selectTab(firstTab);
-    }
-    focusTab(0);
-    return;
-  }
-
-  if (event.key === "End") {
-    event.preventDefault();
-    const lastTab = props.tabs[lastTabIndex];
-    if (lastTab) {
-      selectTab(lastTab);
-    }
-    focusTab(lastTabIndex);
-  }
+  focusTab(nextIndex);
 }
 
 watch(

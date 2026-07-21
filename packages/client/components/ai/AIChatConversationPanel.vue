@@ -14,12 +14,11 @@ import {
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 
@@ -90,7 +89,7 @@ const updateInput = (event: Event): void => {
 </script>
 
 <template>
-  <section class="card border border-base-300 bg-base-100" :class="[MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]">
+  <UiGlassCard :extra-class="[MIN_HEIGHT_ZERO_CLASS, 'flex flex-1 flex-col'].join(' ')">
     <div class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS]">
       <header class="border-b border-base-300" :class="[PADDING_TOKEN_CLASS.px5, PADDING_TOKEN_CLASS.py5, CHAT_PANEL_PADDING_SM_PX6_CLASS]">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
@@ -137,7 +136,7 @@ const updateInput = (event: Event): void => {
         @scroll="emit('scroll')"
       >
         <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
-          <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+          <UiGlassCard :extra-class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS].join(' ')">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                 <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
@@ -151,7 +150,7 @@ const updateInput = (event: Event): void => {
                 @prompt="emit('prompt', $event)"
               />
             </div>
-          </div>
+          </UiGlassCard>
         </div>
 
         <div v-else :class="[PADDING_TOKEN_CLASS.py1, STACK_SPACE_Y_TOKEN_CLASS.stack4]">
@@ -278,5 +277,5 @@ const updateInput = (event: Event): void => {
         </form>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

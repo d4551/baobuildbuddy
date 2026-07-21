@@ -56,7 +56,12 @@ for (const entry of readdirSync(BUN_STORE)) {
 }
 
 // Workspace package node_modules may also host eslint-plugin-vue / parsers.
-const workspacePackageDirs = ["packages/client", "packages/server", "packages/shared", "packages/scraper"];
+const workspacePackageDirs = [
+  "packages/client",
+  "packages/server",
+  "packages/shared",
+  "packages/scraper",
+];
 for (const workspacePackage of workspacePackageDirs) {
   for (const nestedName of [
     "eslint-plugin-vue",

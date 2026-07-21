@@ -8,9 +8,8 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -55,7 +54,7 @@ const promptExpectedMinutes = computed(() => {
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="interview-session-prompt-title">
+  <UiGlassCard aria-labelledby="interview-session-prompt-title">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]" id="interview-session-prompt-title">
@@ -117,5 +116,5 @@ const promptExpectedMinutes = computed(() => {
         </p>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

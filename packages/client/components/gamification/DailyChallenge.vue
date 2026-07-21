@@ -6,12 +6,10 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  SURFACE_GLASS_CARD_DISABLED_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-defineProps<{
+const props = defineProps<{
   challenge: {
     id: string;
     title: string;
@@ -28,10 +26,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div 
-    class="relative overflow-hidden"
-    :class="[SURFACE_GLASS_CARD_CLASS, challenge.completed ? SURFACE_GLASS_CARD_DISABLED_CLASS : '']"
-  >
+  <UiGlassCard extra-class="relative overflow-hidden" :disabled="props.challenge.completed">
     <div 
       v-if="challenge.completed"
       class="absolute inset-0 bg-success/10 flex items-center justify-center z-10"
@@ -67,5 +62,5 @@ const { t } = useI18n();
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

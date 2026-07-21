@@ -4,7 +4,7 @@ import { collectUiCanonicalPrimitiveViolationsForContent } from "./validate-ui-c
 const PAGE_PATH = "packages/client/pages/example.vue";
 const COMPONENT_PATH = "packages/client/components/example/ExampleWidget.vue";
 
-describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
+describe("collectUiCanonicalPrimitiveViolationsForContent: flags inline card card-border card-glass literals without SURFACE_GLASS_CARD_CLASS import", () => {
   test("flags inline card card-border card-glass literals without SURFACE_GLASS_CARD_CLASS import", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -16,7 +16,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("SURFACE_GLASS_CARD_CLASS"))).toBe(true);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: passes when file references SURFACE_GLASS_CARD_CLASS", () => {
   test("passes when file references SURFACE_GLASS_CARD_CLASS", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -31,7 +33,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("SURFACE_GLASS_CARD_CLASS"))).toBe(false);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: flags inline loading-spinner literals without LoadingSpinner primitive", () => {
   test("flags inline loading-spinner literals without LoadingSpinner primitive", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -39,7 +43,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("LoadingSpinner"))).toBe(true);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: passes when LoadingSpinner primitive is imported", () => {
   test("passes when LoadingSpinner primitive is imported", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -54,7 +60,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("LoadingSpinner"))).toBe(false);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: flags raw HTML table without daisyUI table primitive", () => {
   test("flags raw HTML table without daisyUI table primitive", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -62,7 +70,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("daisyUI table"))).toBe(true);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: flags raw progress element without daisyUI progress primitive", () => {
   test("flags raw progress element without daisyUI progress primitive", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -70,7 +80,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("daisyUI progress"))).toBe(true);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: softening regression: flags card-glass even with extra classes around it", () => {
   test("softening regression: flags card-glass even with extra classes around it", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       COMPONENT_PATH,
@@ -78,7 +90,9 @@ describe("collectUiCanonicalPrimitiveViolationsForContent", () => {
     );
     expect(violations.length).toBeGreaterThan(0);
   });
+});
 
+describe("collectUiCanonicalPrimitiveViolationsForContent: softening regression: page with isEmpty but no EmptyState primitive fails", () => {
   test("softening regression: page with isEmpty but no EmptyState primitive fails", () => {
     const violations = collectUiCanonicalPrimitiveViolationsForContent(
       PAGE_PATH,

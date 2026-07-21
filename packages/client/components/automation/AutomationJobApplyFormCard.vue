@@ -5,12 +5,11 @@ import {
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
-const runAt = defineModel<string>("runAt", { required: true });
 
+const runAt = defineModel<string>("runAt", { required: true });
 
 defineProps<{
   coverLetters: CoverLetterSelectOption[];
@@ -34,7 +33,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <fieldset class="fieldset">
@@ -112,7 +111,7 @@ const { t } = useI18n();
           :aria-label="t('automation.jobApply.runButtonAria')"
           @click="$emit('submit')"
         >
-          <LoadingSpinner size="sm" label="Loading" v-if="pending" />
+          <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.runButton") }}</span>
         </button>
         <button
@@ -123,10 +122,10 @@ const { t } = useI18n();
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"
         >
-          <LoadingSpinner size="sm" label="Loading" v-if="pending" />
+          <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pending" />
           <span v-else>{{ t("automation.jobApply.schedule.button") }}</span>
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

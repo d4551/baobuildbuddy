@@ -111,8 +111,12 @@ async function generateQuestions() {
 
   aiQuestions.value = questions;
   currentQuestionIndex.value = 0;
-  Object.keys(answers).forEach((k) => delete answers[k]);
-  questions.forEach((q) => (answers[q.id] = ""));
+  for (const k of Object.keys(answers)) {
+    delete answers[k];
+  }
+  for (const q of questions) {
+    answers[q.id] = "";
+  }
   phase.value = "questions";
 }
 

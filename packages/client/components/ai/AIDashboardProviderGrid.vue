@@ -3,14 +3,12 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TRUNCATE_FLEX_CHILD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TRUNCATE_FLEX_CHILD_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type {
   ProviderConfig,
@@ -58,11 +56,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
 
 <template>
   <SectionGrid grid-token="twoColumnMdGap6">
-    <div 
-      v-for="provider in providers"
-      :key="provider.id"
-      :class="SURFACE_GLASS_CARD_CLASS"
-    >
+    <UiGlassCard v-for="provider in providers" :key="provider.id">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">
@@ -121,6 +115,6 @@ function resolveProviderStatus(provider: ProviderConfig): {
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </SectionGrid>
 </template>

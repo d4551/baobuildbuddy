@@ -6,7 +6,6 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -82,7 +81,6 @@ const {
       title-id="interview-hub-title"
       :title="t('interviewHub.title')"
       :description="t('interviewHub.subtitle')"
-      description-class="text-secondary"
       density="comfortable"
     >
       <template #actions>
@@ -140,7 +138,7 @@ const {
         ]"
       />
 
-      <div :class="[SURFACE_GLASS_CARD_CLASS, 'glass-card-enter glass-card-enter-0']">
+      <UiGlassCard extra-class="glass-card-enter glass-card-enter-0">
         <div class="card-body">
           <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div>
@@ -188,7 +186,7 @@ const {
             </UiGlassCard>
           </SectionGrid>
         </div>
-      </div>
+      </UiGlassCard>
 
       <InterviewPracticeModeCards
         :selected-job="selectedJob"

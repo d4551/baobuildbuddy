@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRACKING_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_BUTTON_VARIANT_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{
@@ -32,7 +30,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <aside :class="[SURFACE_GLASS_CARD_CLASS, 'lg:sticky', 'lg:top-6', RESPONSIVE_WIDTH_LG_W80_CLASS, 'lg:shrink-0']">
+  <UiGlassCard :extra-class="`lg:sticky lg:top-6 lg:shrink-0 ${RESPONSIVE_WIDTH_LG_W80_CLASS}`">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title text-base">{{ t("apiDocs.endpointNavigator") }}</h2>
       <nav :aria-label="t('apiDocs.a11y.endpointNavigation')">
@@ -55,5 +53,5 @@ const { t } = useI18n();
         </ul>
       </nav>
     </div>
-  </aside>
+  </UiGlassCard>
 </template>

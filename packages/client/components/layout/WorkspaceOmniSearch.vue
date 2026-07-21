@@ -2,6 +2,10 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
+  resolveWorkspaceSearchResultRoute,
+  useWorkspaceSearch,
+} from "~/composables/useWorkspaceSearch";
+import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -11,10 +15,6 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import {
-  resolveWorkspaceSearchResultRoute,
-  useWorkspaceSearch,
-} from "~/composables/useWorkspaceSearch";
 
 const WORKSPACE_SEARCH_DIALOG_TITLE_ID = "workspace-omni-search-title";
 

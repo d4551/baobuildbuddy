@@ -14,7 +14,6 @@ import {
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -32,7 +31,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
       <div
         class="sm:items-center sm:justify-between"
@@ -86,5 +85,5 @@ const { t } = useI18n();
         </div>
       </div>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

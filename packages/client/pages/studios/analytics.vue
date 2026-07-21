@@ -6,7 +6,6 @@ import {
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -101,7 +100,7 @@ useSeoMeta({
         </div>
       </div>
 
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.byTypeTitle") }}</h2>
 
@@ -115,9 +114,9 @@ useSeoMeta({
             </div>
           </SectionGrid>
         </div>
-      </div>
+      </UiGlassCard>
 
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.bySizeTitle") }}</h2>
 
@@ -139,9 +138,9 @@ useSeoMeta({
             </div>
           </div>
         </div>
-      </div>
+      </UiGlassCard>
 
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.topTechnologiesTitle") }}</h2>
           <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">
@@ -167,9 +166,9 @@ useSeoMeta({
             </div>
           </div>
         </div>
-      </div>
+      </UiGlassCard>
 
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
@@ -215,7 +214,7 @@ useSeoMeta({
             </div>
           </SectionGrid>
         </div>
-      </div>
+      </UiGlassCard>
     </div>
   </PageScaffold>
 </template>

@@ -3,9 +3,10 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+
+const targetRole = defineModel<string>("targetRole", { required: true });
 
 defineProps<{
   studios: ReadonlyArray<{ id: string; name: string }>;
@@ -15,7 +16,6 @@ defineProps<{
   t: (key: string, values?: Record<string, unknown>) => string;
 }>();
 
-const targetRole = defineModel<string>("targetRole", { required: true });
 const studioName = defineModel<string>("studioName", { required: true });
 const studioId = defineModel<string>("studioId", { required: true });
 const experienceLevel = defineModel<string>("experienceLevel", { required: true });
@@ -26,7 +26,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <h2 class="card-title">{{ t("resumeBuildPage.target.title") }}</h2>
       <p class="text-secondary" :class="[MARGIN_TOKEN_CLASS.mb4, TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumeBuildPage.target.description") }}</p>
@@ -95,5 +95,5 @@ const emit = defineEmits<{
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

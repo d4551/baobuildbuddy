@@ -241,42 +241,43 @@ function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
 }
 
 function createSkillMappingActions(context: SkillMappingContext) {
-  const fetchMappings = async () =>
-    withLoadingState(context.loading, async () => {
-      const data = await readApiData(
-        context.api.skills.mappings.get(),
-        context.t("apiErrors.skills.fetchMappingsFailed"),
-      );
-      context.mappings.value = Array.isArray(data)
-        ? data
-            .map((entry) => toSkillMapping(entry))
-            .filter((entry): entry is SkillMapping => entry !== null)
-        : [];
-    });
+  const loadMappings = async (): Promise<void> => {
+    const data = await readApiData(
+      context.api.skills.mappings.get(),
+      context.t("apiErrors.skills.fetchMappingsFailed"),
+    );
+    context.mappings.value = Array.isArray(data)
+      ? data
+          .map((entry) => toSkillMapping(entry))
+          .filter((entry): entry is SkillMapping => entry !== null)
+      : [];
+  };
 
-  const createMapping = async (mappingData: CreateMappingInput) =>
+  const fetchMappings = (): Promise<void> => withLoadingState(context.loading, loadMappings);
+
+  const createMapping = (mappingData: CreateMappingInput): Promise<void> =>
     withLoadingState(context.loading, async () => {
       await readApiData(
         context.api.skills.mappings.post(mappingData),
         context.t("apiErrors.skills.createMappingFailed"),
       );
-      await await fetchMappings();
+      await loadMappings();
     });
 
-  const updateMapping = async (id: string, updates: UpdateMappingInput) =>
+  const updateMapping = (id: string, updates: UpdateMappingInput): Promise<void> =>
     withLoadingState(context.loading, async () => {
       await readApiData(
         context.api.skills.mappings({ id }).put(updates),
         context.t("apiErrors.skills.updateMappingFailed"),
       );
-      await await fetchMappings();
+      await loadMappings();
     });
 
-  const deleteMapping = async (id: string) =>
+  const deleteMapping = (id: string): Promise<void> =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.skills.mappings({ id }).delete();
       assertApiResponse(error, context.t("apiErrors.skills.deleteMappingFailed"));
-      await await fetchMappings();
+      await loadMappings();
     });
 
   return {

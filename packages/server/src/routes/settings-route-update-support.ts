@@ -28,8 +28,8 @@ import {
   normalizeLocalModelEndpoint,
 } from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
-import { resolveKnownProvider } from "./settings-route-contracts";
 import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
+import { resolveKnownProvider } from "./settings-route-contracts";
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
 const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
@@ -232,6 +232,33 @@ export const buildSettingsUpdate = (
   return update;
 };
 
+const encryptOptionalSecret = (value: string | undefined): string | null | undefined => {
+  if (value === undefined) return undefined;
+  return value.length > 0 ? encryptProviderKey(value) : null;
+};
+
+const assignEncryptedApiKeys = (
+  update: Partial<SettingsInsert>,
+  body: {
+    geminiApiKey?: string;
+    openaiApiKey?: string;
+    claudeApiKey?: string;
+    huggingfaceToken?: string;
+    emailTransportPassword?: string;
+  },
+): void => {
+  const gemini = encryptOptionalSecret(body.geminiApiKey);
+  if (gemini !== undefined) update.geminiApiKey = gemini;
+  const openai = encryptOptionalSecret(body.openaiApiKey);
+  if (openai !== undefined) update.openaiApiKey = openai;
+  const claude = encryptOptionalSecret(body.claudeApiKey);
+  if (claude !== undefined) update.claudeApiKey = claude;
+  const huggingface = encryptOptionalSecret(body.huggingfaceToken);
+  if (huggingface !== undefined) update.huggingfaceToken = huggingface;
+  const emailPassword = encryptOptionalSecret(body.emailTransportPassword);
+  if (emailPassword !== undefined) update.emailTransportPassword = emailPassword;
+};
+
 export const buildApiKeysUpdate = (body: {
   geminiApiKey?: string;
   openaiApiKey?: string;
@@ -254,31 +281,12 @@ export const buildApiKeysUpdate = (body: {
   }
 
   const update: Partial<SettingsInsert> = {};
-  if (body.geminiApiKey !== undefined) {
-    update.geminiApiKey = body.geminiApiKey ? encryptProviderKey(body.geminiApiKey) : null;
-  }
-  if (body.openaiApiKey !== undefined) {
-    update.openaiApiKey = body.openaiApiKey ? encryptProviderKey(body.openaiApiKey) : null;
-  }
-  if (body.claudeApiKey !== undefined) {
-    update.claudeApiKey = body.claudeApiKey ? encryptProviderKey(body.claudeApiKey) : null;
-  }
-  if (body.huggingfaceToken !== undefined) {
-    update.huggingfaceToken = body.huggingfaceToken
-      ? encryptProviderKey(body.huggingfaceToken)
-      : null;
-  }
+  assignEncryptedApiKeys(update, body);
   if (body.localModelEndpoint !== undefined) {
     update.localModelEndpoint = normalizeLocalModelEndpoint(body.localModelEndpoint);
   }
   if (body.localModelName !== undefined) {
     update.localModelName = body.localModelName;
-  }
-  if (body.emailTransportPassword !== undefined) {
-    update.emailTransportPassword =
-      body.emailTransportPassword.length > 0
-        ? encryptProviderKey(body.emailTransportPassword)
-        : null;
   }
   update.updatedAt = new Date().toISOString();
   return update;

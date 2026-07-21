@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { FLEX_GAP_TOKEN_CLASS, TOUCH_TARGET_MIN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 withDefaults(
   defineProps<{

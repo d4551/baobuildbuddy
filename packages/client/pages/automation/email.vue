@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_H_36_CLASS,
   MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -76,7 +74,7 @@ useSeoMeta({
       @retry="() => refreshEmailSettings()"
     />
 
-    <div v-else :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-else>
       <div class="card-body">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <fieldset class="fieldset">
@@ -210,7 +208,7 @@ useSeoMeta({
           </button>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
     <BootstrapErrorAlert
       v-if="submitError"
@@ -218,7 +216,7 @@ useSeoMeta({
       :message="submitError"
     />
 
-    <div v-if="scheduledRun" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="scheduledRun">
       <div class="card-body">
         <div role="alert" class="alert alert-info">
           <div>
@@ -247,9 +245,9 @@ useSeoMeta({
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div v-if="lastResult" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="lastResult">
       <div class="card-body">
         <div role="alert" class="alert alert-success">
           <div>
@@ -291,6 +289,6 @@ useSeoMeta({
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </PageScaffold>
 </template>

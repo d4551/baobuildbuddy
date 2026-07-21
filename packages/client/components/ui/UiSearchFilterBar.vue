@@ -10,7 +10,6 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 
 withDefaults(
@@ -57,7 +56,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
 </script>
 
 <template>
-  <div :class="[SURFACE_GLASS_CARD_CLASS, extraClass]">
+  <UiGlassCard :extra-class="extraClass">
     <div class="card-body">
       <div class="flex flex-col sm:flex-row" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div class="join w-full min-w-0 flex-1">
@@ -115,5 +114,5 @@ function onSearchKeydown(event: KeyboardEvent): void {
         <slot name="extra" />
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

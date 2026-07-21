@@ -17,10 +17,9 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  PROSE_MEASURE_CENTER_CLASS,
   PRIMARY_ACTION_CLASS,
+  PROSE_MEASURE_CENTER_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
@@ -114,7 +113,7 @@ async function handleExport(format: "pdf" | "docx") {
     />
 
     <div v-else :class="UI_SPACING_CLASS_BY_TOKEN.relaxed">
-      <div :class="SURFACE_GLASS_CARD_CLASS">
+      <UiGlassCard>
         <div class="card-body items-center text-center" :class="[FLEX_GAP_TOKEN_CLASS.gap6, PADDING_TOKEN_CLASS.py12]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
             <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl4, HERO_TITLE_RESPONSIVE_CLASS]">
@@ -151,7 +150,7 @@ async function handleExport(format: "pdf" | "docx") {
             </a>
           </div>
         </div>
-      </div>
+      </UiGlassCard>
 
       <div v-if="featuredProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
@@ -159,11 +158,7 @@ async function handleExport(format: "pdf" | "docx") {
           :title="t('portfolioPage.preview.featuredProjectsTitle')"
         />
         <SectionGrid grid-token="twoColumnMdGap6">
-          <div
-            v-for="project in featuredProjects"
-            :key="project.id"
-            :class="SURFACE_GLASS_CARD_CLASS"
-          >
+          <UiGlassCard v-for="project in featuredProjects" :key="project.id">
             <figure v-if="project.image" :class="[CONTENT_H_64_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
@@ -198,7 +193,7 @@ async function handleExport(format: "pdf" | "docx") {
                 </a>
               </div>
             </div>
-          </div>
+          </UiGlassCard>
         </SectionGrid>
       </div>
 
@@ -208,11 +203,7 @@ async function handleExport(format: "pdf" | "docx") {
           :title="featuredProjects.length ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
         />
         <SectionGrid grid-token="threeColumnMdGap6">
-          <div
-            v-for="project in regularProjects"
-            :key="project.id"
-            :class="SURFACE_GLASS_CARD_CLASS"
-          >
+          <UiGlassCard v-for="project in regularProjects" :key="project.id">
             <figure v-if="project.image" :class="[CONTENT_H_48_CLASS, 'overflow-hidden']">
               <NuxtImg
                 :src="project.image"
@@ -247,7 +238,7 @@ async function handleExport(format: "pdf" | "docx") {
                 </a>
               </div>
             </div>
-          </div>
+          </UiGlassCard>
         </SectionGrid>
       </div>
 

@@ -87,7 +87,7 @@ describe("Layout SSOT — Glass surface tokens", () => {
 
 // ── Token coverage ────────────────────────────────────────────────────
 
-describe("Layout SSOT — Layout token declarations", () => {
+describe("Layout SSOT — shell/page tokens", () => {
   it("layout.ts declares shell and page tokens", () => {
     const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
     const tokens = [
@@ -132,7 +132,9 @@ describe("Layout SSOT — Layout token declarations", () => {
       expect(content, `Missing grid: ${g}`).toContain(g);
     }
   });
+});
 
+describe("Layout SSOT — icon and dimension tokens", () => {
   it("ICON_SIZE_CLASS has canonical icon sizes", () => {
     const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
     expect(content).toContain('xs: "h-3 w-3"');
@@ -229,15 +231,12 @@ describe("Layout SSOT — Validator recognizes surface constants", () => {
       join(CLIENT_ROOT, "../../scripts/validate-ui-typography.ts"),
       "utf8",
     );
-    const authority = readFileSync(
-      join(CLIENT_ROOT, "../../scripts/ui-ssot-authority.ts"),
-      "utf8",
-    );
+    const authority = readFileSync(join(CLIENT_ROOT, "../../scripts/ui-ssot-authority.ts"), "utf8");
     expect(authority).toContain("UI_SSOT_AUTHORITY_PATHS");
     expect(noRaw).toContain("isUiSsotAuthority");
     expect(noRaw).toContain("isControlPrimitiveOwner");
     expect(noRaw).not.toContain("SSOT_ALLOWLIST_PATHS");
-    expect(typography).not.toContain("startsWith(\"packages/client/components/ai/");
+    expect(typography).not.toContain('startsWith("packages/client/components/ai/');
     expect(typography).toContain("isControlPrimitiveOwner");
   });
 });

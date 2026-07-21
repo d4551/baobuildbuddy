@@ -6,7 +6,7 @@ import {
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout-tokens";
+} from "~/constants/layout";
 
 type ConfirmDialogVariant = "default" | "danger";
 

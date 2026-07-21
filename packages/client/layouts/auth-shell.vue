@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { AUTH_CARD_SHELL_CLASS, AUTH_SHELL_OUTER_CLASS } from "~/constants/layout";
 
-const { initTheme, theme } = useTheme();
+const { initTheme, theme, applySystemThemePreferenceIfUnset } = useTheme();
+
+// Cookie path during setup so SSR HTML matches client first paint.
+initTheme();
 
 onMounted(() => {
-  initTheme();
+  applySystemThemePreferenceIfUnset();
 });
 </script>
 

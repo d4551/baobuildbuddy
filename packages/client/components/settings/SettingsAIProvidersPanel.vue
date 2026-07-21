@@ -10,13 +10,12 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -29,6 +28,12 @@ type ProviderField =
   | "huggingfaceToken";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
+
+const preferredProviderSelection = defineModel<AIProviderType>("preferredProviderSelection", {
+  required: true,
+});
+const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
+const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
 
 const props = defineProps<{
   providerInputs: ReadonlyArray<{
@@ -49,12 +54,6 @@ const props = defineProps<{
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
 }>();
-
-const preferredProviderSelection = defineModel<AIProviderType>("preferredProviderSelection", {
-  required: true,
-});
-const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
-const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
 
 const emit = defineEmits<{
   savePreferredProvider: [];
@@ -124,7 +123,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader>
         <template #meta>
@@ -169,7 +168,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
       </div>
 
       <SectionGrid grid-token="providersSplit">
-        <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.title')">
+        <UiGlassCard :aria-label="t('settings.aiProviders.title')">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -213,12 +212,9 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               </article>
             </SectionGrid>
           </div>
-        </section>
+        </UiGlassCard>
 
-        <section 
-          :class="SURFACE_GLASS_CARD_CLASS"
-          :aria-label="t('settings.aiProviders.preferredProviderLegend')"
-        >
+        <UiGlassCard :aria-label="t('settings.aiProviders.preferredProviderLegend')">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <h3 class="card-title text-base">{{ t("settings.aiProviders.preferredProviderLegend") }}</h3>
@@ -262,7 +258,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               </button>
             </div>
           </div>
-        </section>
+        </UiGlassCard>
       </SectionGrid>
 
       <SettingsAiRoutingCard
@@ -274,7 +270,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         @save="emit('saveRouting')"
       />
 
-      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.aiProviders.saveAria')">
+      <UiGlassCard :aria-label="t('settings.aiProviders.saveAria')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.aiProviders.saveButton") }}</h3>
@@ -298,7 +294,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             @save-keys="emit('saveKeys')"
           />
         </div>
-      </section>
+      </UiGlassCard>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

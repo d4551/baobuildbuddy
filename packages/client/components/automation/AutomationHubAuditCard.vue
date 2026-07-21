@@ -7,16 +7,14 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
   resolveAutomationCapabilityAction,
@@ -71,7 +69,7 @@ const readyEntries = computed(() =>
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('automation.hub.audit.aria')">
+  <UiGlassCard :aria-label="t('automation.hub.audit.aria')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <div>
@@ -115,7 +113,7 @@ const readyEntries = computed(() =>
         />
 
         <SectionGrid grid-token="twoColumnWide">
-          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-attention-title">
+          <UiGlassCard aria-labelledby="automation-capability-attention-title">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
                 <h3 id="automation-capability-attention-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -188,9 +186,9 @@ const readyEntries = computed(() =>
                 </div>
               </div>
             </div>
-          </section>
+          </UiGlassCard>
 
-          <section :class="SURFACE_GLASS_CARD_CLASS" aria-labelledby="automation-capability-ready-title">
+          <UiGlassCard aria-labelledby="automation-capability-ready-title">
             <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
               <div>
                 <h3 id="automation-capability-ready-title" class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
@@ -241,9 +239,9 @@ const readyEntries = computed(() =>
                 </div>
               </div>
             </div>
-          </section>
+          </UiGlassCard>
         </SectionGrid>
       </template>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

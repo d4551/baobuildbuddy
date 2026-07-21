@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
-
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+
+const answers = defineModel<Record<string, string>>("answers", { required: true });
 
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
@@ -15,8 +15,6 @@ defineProps<{
   errorMessage: string;
   t: (key: string, values?: Record<string, unknown>) => string;
 }>();
-
-const answers = defineModel<Record<string, string>>("answers", { required: true });
 
 const emit = defineEmits<{
   previous: [];
@@ -26,7 +24,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">
@@ -94,5 +92,5 @@ const emit = defineEmits<{
         </button>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

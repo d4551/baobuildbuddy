@@ -41,6 +41,26 @@ export type InterviewRealtimeSocket = {
   getSocket: () => WebSocket | null;
 };
 
+const toResponseFeedbackPayload = (raw: string): InterviewResponseFeedbackPayload | null => {
+  const payload = safeParseJson(raw);
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return null;
+  }
+  const record = payload as InterviewSocketPayload;
+  if (record.type !== "response_feedback" || typeof record.sessionId !== "string") {
+    return null;
+  }
+  return {
+    type: "response_feedback",
+    sessionId: record.sessionId,
+    feedback: record.feedback ?? null,
+    error: typeof record.error === "string" ? record.error : null,
+    questionIndex: typeof record.questionIndex === "number" ? record.questionIndex : 0,
+    isComplete: Boolean(record.isComplete),
+    responseIndex: typeof record.responseIndex === "number" ? record.responseIndex : 0,
+  };
+};
+
 /**
  * Low-level interview WS socket with response_feedback capture.
  */
@@ -53,7 +73,10 @@ export function createInterviewRealtimeSocket(input: {
   let socket: WebSocket | null = null;
 
   const connect = (): void => {
-    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+    if (
+      socket &&
+      (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)
+    ) {
       return;
     }
     const url = resolveWebSocketEndpoint(input.wsBase, input.requestUrl, WS_ENDPOINTS.interview);
@@ -65,22 +88,10 @@ export function createInterviewRealtimeSocket(input: {
       if (typeof event.data !== "string") {
         return;
       }
-      const payload = safeParseJson(event.data) as InterviewSocketPayload | null;
-      if (!payload || typeof payload !== "object" || payload.type !== "response_feedback") {
-        return;
+      const feedback = toResponseFeedbackPayload(event.data);
+      if (feedback) {
+        input.lastFeedback.value = feedback;
       }
-      if (typeof payload.sessionId !== "string") {
-        return;
-      }
-      input.lastFeedback.value = {
-        type: "response_feedback",
-        sessionId: payload.sessionId,
-        feedback: payload.feedback ?? null,
-        error: typeof payload.error === "string" ? payload.error : null,
-        questionIndex: typeof payload.questionIndex === "number" ? payload.questionIndex : 0,
-        isComplete: Boolean(payload.isComplete),
-        responseIndex: typeof payload.responseIndex === "number" ? payload.responseIndex : 0,
-      };
     };
     socket.onclose = () => {
       input.connected.value = false;

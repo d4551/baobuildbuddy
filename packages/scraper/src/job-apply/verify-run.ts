@@ -1,6 +1,5 @@
 import { basename } from "node:path";
 import { jobApplyScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scripts.schema";
-import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { resumeDataSchema } from "@bao/shared/schemas/resume.schema";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { parseScriptInput } from "../runtime/io";
@@ -77,6 +76,43 @@ const emitProgress = (
   });
 };
 
+const buildVerificationForm = (
+  personalInfo: { name?: string; email?: string; phone?: string } | undefined,
+  coverLetterContent: JsonObject | undefined,
+  customAnswers: Record<string, string>,
+): FormData => {
+  const form = new FormData();
+  form.set("name", personalInfo?.name?.trim() ?? "");
+  form.set("email", personalInfo?.email?.trim() ?? "");
+  form.set("phone", personalInfo?.phone?.trim() ?? "");
+  if (coverLetterContent) {
+    form.set("coverLetter", flattenJsonStrings(coverLetterContent));
+  }
+  for (const [fieldName, fieldValue] of Object.entries(customAnswers)) {
+    form.set(fieldName, fieldValue);
+  }
+  return form;
+};
+
+const submitVerificationForm = async (
+  form: FormData,
+  jobUrl: string,
+  emitter: ProtocolEmitter,
+): Promise<boolean> => {
+  const submitResponse = await fetch(resolveSubmitUrl(jobUrl), {
+    method: "POST",
+    body: form,
+  });
+  if (submitResponse.ok) {
+    return true;
+  }
+  emitter.emitError(
+    "SCRIPT_OUTPUT_INVALID",
+    `Verification submission failed with status ${String(submitResponse.status)}.`,
+  );
+  return false;
+};
+
 /**
  * Deterministic job-apply path for BAO_ENABLE_AUTOMATION_VERIFY.
  * Posts multipart form fields to the job fixture submit URL without Playwright.
@@ -106,21 +142,11 @@ export const emitVerificationRun = async (): Promise<number> => {
   );
   await Bun.sleep(50);
 
-  const personalInfo = resumeParsed.data.personalInfo;
-  const form = new FormData();
-  form.set("name", personalInfo?.name?.trim() ?? "");
-  form.set("email", personalInfo?.email?.trim() ?? "");
-  form.set("phone", personalInfo?.phone?.trim() ?? "");
-
-  const coverLetterContent: JsonObject | undefined = envelope.coverLetter?.content;
-  if (coverLetterContent) {
-    form.set("coverLetter", flattenJsonStrings(coverLetterContent));
-  }
-
-  for (const [fieldName, fieldValue] of Object.entries(envelope.customAnswers)) {
-    form.set(fieldName, fieldValue);
-  }
-
+  const form = buildVerificationForm(
+    resumeParsed.data.personalInfo,
+    envelope.coverLetter?.content,
+    envelope.customAnswers,
+  );
   emitProgress(emitter, "verify_fields", 2, "Applying deterministic verification answers.");
   await Bun.sleep(50);
 
@@ -136,21 +162,11 @@ export const emitVerificationRun = async (): Promise<number> => {
     3,
     "Completing deterministic verification submission.",
   );
-
-  const submitResponse = await fetch(resolveSubmitUrl(envelope.jobUrl), {
-    method: "POST",
-    body: form,
-  });
-
-  if (!submitResponse.ok) {
-    emitter.emitError(
-      "SCRIPT_OUTPUT_INVALID",
-      `Verification submission failed with status ${String(submitResponse.status)}.`,
-    );
+  if (!(await submitVerificationForm(form, envelope.jobUrl, emitter))) {
     return 1;
   }
 
-  const result: RpaRunResult = {
+  emitter.emitResult({
     success: true,
     error: null,
     screenshots: [],
@@ -160,7 +176,6 @@ export const emitVerificationRun = async (): Promise<number> => {
       { action: "verify_fields", status: "ok" },
       { action: "verify_submission", status: "ok" },
     ],
-  };
-  emitter.emitResult(result);
+  });
   return 0;
 };

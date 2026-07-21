@@ -56,6 +56,20 @@ export function coverLetterContentToPlainText(
  * @param value Editable plain-text cover-letter input.
  * @returns Structured cover-letter content suitable for API payloads.
  */
+/**
+ * Counts non-empty cover-letter sections separated by blank lines.
+ */
+export function countCoverLetterSections(value: string): number {
+  const trimmedValue = value.trim();
+  if (trimmedValue.length === 0) {
+    return 0;
+  }
+  return trimmedValue
+    .split(SECTION_SPLIT_PATTERN)
+    .map((section) => section.trim())
+    .filter((section) => section.length > 0).length;
+}
+
 export function plainTextToCoverLetterContent(value: string): CoverLetterData["content"] {
   const trimmedValue = value.trim();
   if (trimmedValue.length === 0) return {};
