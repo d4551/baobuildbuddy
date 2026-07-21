@@ -5,6 +5,7 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -12,6 +13,11 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SOFT_PRIMARY_CLASS,
+  BADGE_SOFT_WARNING_SM_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   jobsLoading: boolean;
@@ -35,11 +41,11 @@ const { t } = useI18n();
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h2 class="card-title">{{ t("automation.scraper.table.title") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <span class="badge badge-soft badge-primary">
+          <span :class="[BADGE_SOFT_PRIMARY_CLASS]">
             {{ t("automation.scraper.stats.interviewEntryTitle") }}:
             {{ t("automation.scraper.stats.interviewEntryValue") }}
           </span>
-          <NuxtLink :to="jobsRoute" class="btn btn-ghost" :class="[TOUCH_TARGET_MIN_CLASS]">
+          <NuxtLink :to="jobsRoute" :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]">
             {{ t("automation.scraper.table.openBoardButton") }}
           </NuxtLink>
         </div>
@@ -72,10 +78,10 @@ const { t } = useI18n();
                 </p>
               </div>
               <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <span v-if="job.remote" class="badge badge-ghost badge-sm">
+                <span v-if="job.remote" :class="[BADGE_GHOST_SM_CLASS]">
                   {{ t("jobCard.remoteBadge") }}
                 </span>
-                <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
+                <span v-if="job.hybrid" :class="[BADGE_GHOST_SM_CLASS]">
                   {{ t("jobCard.hybridBadge") }}
                 </span>
               </div>
@@ -119,16 +125,16 @@ const { t } = useI18n();
                         {{ job.enrichment?.summary }}
                       </p>
                       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                        <span v-if="job.remote" class="badge badge-ghost badge-sm">
+                        <span v-if="job.remote" :class="[BADGE_GHOST_SM_CLASS]">
                           {{ t("jobCard.remoteBadge") }}
                         </span>
-                        <span v-if="job.hybrid" class="badge badge-ghost badge-sm">
+                        <span v-if="job.hybrid" :class="[BADGE_GHOST_SM_CLASS]">
                           {{ t("jobCard.hybridBadge") }}
                         </span>
                         <span
                           v-for="focusArea in jobInterviewFocusAreas(job)"
                           :key="`${job.id}-${focusArea}`"
-                          class="badge badge-warning badge-soft badge-sm"
+                          :class="[BADGE_SOFT_WARNING_SM_CLASS]"
                         >
                           {{ focusArea }}
                         </span>

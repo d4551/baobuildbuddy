@@ -11,6 +11,9 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   currentQuestion: InterviewQuestion | undefined;
@@ -105,7 +108,7 @@ const promptExpectedMinutes = computed(() => {
           <span 
             v-for="tag in promptTags"
             :key="tag"
-            class="badge badge-outline badge-primary"
+            :class="[BADGE_PRIMARY_OUTLINE_CLASS]"
           >
             {{ tag }}
           </span>

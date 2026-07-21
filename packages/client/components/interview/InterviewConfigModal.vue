@@ -7,9 +7,12 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
+  OUTLINE_ACTION_JOIN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
@@ -17,6 +20,9 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+} from "~/constants/layout-badges";
 import type { InterviewHubSessionConfig, StudioSelectorOption } from "~/types/interview";
 
 defineProps<{
@@ -93,8 +99,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     <div class="join" :class="[MARGIN_TOKEN_CLASS.mt4]">
       <button 
         type="button"
-        class="btn join-item btn-outline"
-        :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'job' }"
+        :class="[OUTLINE_ACTION_JOIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'job' }]"
         :aria-label="t('interviewHub.config.switchToJobAria')"
         @click="emit('update:selected-mode', 'job')"
       >
@@ -102,8 +107,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
       <button 
         type="button"
-        class="btn join-item btn-outline"
-        :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'studio' }"
+        :class="[OUTLINE_ACTION_JOIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'studio' }]"
         :aria-label="t('interviewHub.config.switchToStudioAria')"
         @click="emit('update:selected-mode', 'studio')"
       >
@@ -158,12 +162,9 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                     </div>
                     <button
                       type="button"
-                      class="btn btn-sm btn-ghost"
-                      :class="[
-                        TOUCH_TARGET_MIN_CLASS,
+                      :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS,
                         FLUID_WIDTH_CLASS,
-                        { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId },
-                      ]"
+                        { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId }]"
                       :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                       @click="emit('selectJob', job.id)"
                     >
@@ -194,8 +195,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                       <td class="text-end">
                         <button
                           type="button"
-                          class="btn btn-sm btn-ghost"
-                          :class="[TOUCH_TARGET_MIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId }]"
+                          :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId }]"
                           :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                           @click="emit('selectJob', job.id)"
                         >
@@ -236,7 +236,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               <span 
                 v-for="tech in selectedJob.technologies?.slice(0, 6)"
                 :key="tech"
-                class="badge badge-sm badge-outline"
+                :class="[BADGE_OUTLINE_SM_CLASS]"
               >
                 {{ tech }}
               </span>
@@ -280,7 +280,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('interviewHub.config.cancelAria')"
           @click="emit('update:open', false)"
         >

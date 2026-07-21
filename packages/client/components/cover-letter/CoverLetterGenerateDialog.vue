@@ -5,6 +5,7 @@ import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPa
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -136,7 +137,7 @@ defineEmits<{
 
     <div class="modal-action">
       <button 
-        class="btn btn-ghost"
+        :class="[GHOST_ACTION_CLASS]"
         :aria-label="$t('coverLetterPage.generate.cancelAria')"
         @click="open = false"
       >

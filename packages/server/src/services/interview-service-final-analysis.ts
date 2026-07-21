@@ -56,17 +56,22 @@ function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnal
     overallScore: average,
     strengths: strengths.slice(0, 5),
     improvements: improvements.slice(0, 5),
-    recommendations:
-      average >= SCORE_PASS_THRESHOLD
-        ? ["Sustain your structured communication and add extra quantification."]
-        : average >= SCORE_WARNING_THRESHOLD
-          ? ["Work on measurable examples and deeper technical justification."]
-          : ["Practice response structure using situation, action, result examples."],
+    recommendations: resolveFinalRecommendations(average),
     feedback:
       average >= SCORE_PASS_THRESHOLD
         ? "Strong session across technical and behavioral areas."
         : "Good foundation; improve depth, metrics, and real project examples.",
   };
+}
+
+function resolveFinalRecommendations(average: number): string[] {
+  if (average >= SCORE_PASS_THRESHOLD) {
+    return ["Sustain your structured communication and add extra quantification."];
+  }
+  if (average >= SCORE_WARNING_THRESHOLD) {
+    return ["Work on measurable examples and deeper technical justification."];
+  }
+  return ["Practice response structure using situation, action, result examples."];
 }
 
 function buildFinalAnalysisPrompt({

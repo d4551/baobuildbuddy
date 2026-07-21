@@ -9,6 +9,9 @@ import {
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -68,7 +71,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         heading-tag="h2"
       >
         <template #actions>
-          <div class="badge badge-outline badge-primary" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+          <div :class="[BADGE_PRIMARY_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             {{ sessionProgressLabel }}
           </div>
         </template>

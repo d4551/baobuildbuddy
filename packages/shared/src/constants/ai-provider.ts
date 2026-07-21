@@ -206,12 +206,12 @@ export function normalizeAIRouting(
     const provider = AI_PROVIDER_ID_LIST.includes(configuredProvider ?? fallbackProvider)
       ? (configuredProvider ?? fallbackProvider)
       : fallbackProvider;
-    const model =
-      typeof configuredTarget?.model === "string" && configuredTarget.model.trim().length > 0
-        ? configuredTarget.model.trim()
-        : typeof fallbackModel === "string" && fallbackModel.trim().length > 0
-          ? fallbackModel.trim()
-          : undefined;
+    let model: string | undefined;
+    if (typeof configuredTarget?.model === "string" && configuredTarget.model.trim().length > 0) {
+      model = configuredTarget.model.trim();
+    } else if (typeof fallbackModel === "string" && fallbackModel.trim().length > 0) {
+      model = fallbackModel.trim();
+    }
     return [purpose, model ? { provider, model } : { provider }] as const;
   });
   return Object.fromEntries(entries) as AIRouting;

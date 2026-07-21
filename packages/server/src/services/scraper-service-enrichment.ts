@@ -25,6 +25,16 @@ const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/iu;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/u;
 const SENTENCE_END_PATTERN = /[.!?]$/u;
 
+const resolveRemoteWorkHiringSignal = (remoteWork: boolean | null): string | undefined => {
+  if (remoteWork === null) {
+    return undefined;
+  }
+  if (remoteWork) {
+    return "Remote work is supported.";
+  }
+  return "Remote work is not emphasized.";
+};
+
 export const createScrapeEnrichmentAccumulator = (): ScrapeEnrichmentAccumulator => ({
   enabled: true,
   enrichedRecords: 0,
@@ -146,11 +156,7 @@ export const buildFallbackStudioEnrichment = (
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
     studioRow.size ? `Team size is described as ${studioRow.size}.` : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
-    studioRow.remoteWork === null
-      ? undefined
-      : studioRow.remoteWork
-        ? "Remote work is supported."
-        : "Remote work is not emphasized.",
+    resolveRemoteWorkHiringSignal(studioRow.remoteWork),
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,

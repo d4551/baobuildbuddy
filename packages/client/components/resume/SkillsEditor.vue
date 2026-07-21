@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -11,6 +12,9 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_LG_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   modelValue: string[];
@@ -77,12 +81,12 @@ function removeSkill(index: number): void {
       <div 
         v-for="(skill, index) in localValue"
         :key="`${skill}-${index}`"
-        class="badge badge-lg" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+        :class="[BADGE_LG_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]"
       >
         {{ skill }}
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+          :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
           :aria-label="t('resumePage.skills.removeButtonAria', { index: index + 1 })"
           @click="removeSkill(index)"
         >

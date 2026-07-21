@@ -6,6 +6,7 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -13,6 +14,9 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_INFO_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
@@ -70,7 +74,7 @@ const { t } = useI18n();
                   <span :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatRunStatus(run.status) }}</span>
                   <span
                     v-if="isLiveRun(run)"
-                    class="badge badge-info badge-outline"
+                    :class="[BADGE_INFO_OUTLINE_CLASS]"
                     :aria-label="t('automation.runs.liveBadgeAria')"
                   >
                     {{ t("automation.runs.liveBadge") }}
@@ -126,7 +130,7 @@ const { t } = useI18n();
                     <span>{{ formatRunStatus(run.status) }}</span>
                     <span
                       v-if="isLiveRun(run)"
-                      class="badge badge-info badge-outline"
+                      :class="[BADGE_INFO_OUTLINE_CLASS]"
                       :aria-label="t('automation.runs.liveBadgeAria')"
                     >
                       {{ t("automation.runs.liveBadge") }}
@@ -139,8 +143,7 @@ const { t } = useI18n();
                 <td>
                   <NuxtLink
                     :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                    class="btn btn-ghost"
-                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
                   >
                     {{ t("automation.runs.openButton") }}

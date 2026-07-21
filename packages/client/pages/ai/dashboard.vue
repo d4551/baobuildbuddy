@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
-import { STACK_SPACE_Y_TOKEN_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
+import {
+  OUTLINE_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+} from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -30,8 +34,7 @@ const page = reactive(useAIDashboardPage());
     >
       <template #actions>
         <button
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"
           @click="page.fetchProviderStats"

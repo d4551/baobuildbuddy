@@ -235,7 +235,7 @@ const catalog = {
       "このプレビューを開くには、履歴書ワークスペースから保存済みの履歴書を選択してください。",
     websiteLinkAria: "個人ウェブサイトを開く",
     linkedinLinkAria: "LinkedInプロフィールを開く",
-    githubLinkAria: "Git" + "Hubプロフィールを開く",
+    githubLinkAria: ["GitHub", "プロフィールを開く"].join(""),
   },
   skillsPage: {
     seoTitle: "スキルマッパー",
@@ -730,7 +730,7 @@ const catalog = {
       currentCompanyLegend: "現在の会社",
       locationLegend: "所在地",
       yearsExperienceLegend: "経験年数",
-      githubLegend: "Git" + "Hubプロフィール",
+      githubLegend: ["GitHub", "プロフィール"].join(""),
       linkedinLegend: "LinkedInプロフィール",
       summaryLegend: "概要",
       technicalSkillsLegend: "技術スキル（カンマ区切り）",
@@ -802,7 +802,7 @@ const catalog = {
         },
         interviewQuestions: {
           label: "面接質問",
-          description: "質問生成、" + "深掘り、" + "会話型面接の進行制御。",
+          description: ["質問生成、", "深掘り、", "会話型面接の進行制御。"].join(""),
         },
         interviewFeedback: {
           label: "面接フィードバック",

@@ -161,8 +161,13 @@ type MacosTauriCommandEntry = {
   readonly bundleCommand: readonly string[];
 };
 
-const readEnvValue = (value: string | undefined): string | undefined =>
-  value === undefined ? undefined : value.trim().length > 0 ? value.trim() : undefined;
+const readEnvValue = (value: string | undefined): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
 
 const buildSigningConfigForHost = (
   hostTarget: HostReleaseTarget | undefined,
@@ -1319,12 +1324,19 @@ const main = async (): Promise<void> => {
   if (!skipBuild && isLinuxReleaseTarget(requestedTarget)) {
     await signLinuxArtifacts(metadata, requestedTarget, stageRequest.profile);
   }
-  const artifactNames =
-    requestedTarget === "macos"
-      ? await stageMacosArtifacts(metadata, outputRoot, stageRequest.profile)
-      : requestedTarget === "windows"
-        ? await stageWindowsArtifacts(metadata, outputRoot, stageRequest.profile)
-        : await stageLinuxArtifacts(metadata, outputRoot, requestedTarget, stageRequest.profile);
+  let artifactNames: string[];
+  if (requestedTarget === "macos") {
+    artifactNames = await stageMacosArtifacts(metadata, outputRoot, stageRequest.profile);
+  } else if (requestedTarget === "windows") {
+    artifactNames = await stageWindowsArtifacts(metadata, outputRoot, stageRequest.profile);
+  } else {
+    artifactNames = await stageLinuxArtifacts(
+      metadata,
+      outputRoot,
+      requestedTarget,
+      stageRequest.profile,
+    );
+  }
   await writeProvenance(hostTarget, outputRoot, artifactNames, buildCommands);
   await writeOutput(
     `desktop-release:${requestedTarget} staged ${artifactNames.join(", ")} in ${join(outputRoot, requestedTarget)}`,

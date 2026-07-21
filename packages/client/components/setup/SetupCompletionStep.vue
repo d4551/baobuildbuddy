@@ -4,6 +4,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -107,8 +108,7 @@ function updateTextValue(
     <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button
         type="button"
-        class="btn btn-ghost"
-        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
         :aria-label="t('setup.backToAiConfigAria')"
         @click="emit('back')"
       >

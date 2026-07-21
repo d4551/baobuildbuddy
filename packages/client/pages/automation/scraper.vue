@@ -8,8 +8,9 @@ import {
   type AutomationScraperSectionId,
   isAutomationScraperSectionId,
 } from "~/components/automation/scraper-sections";
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import { OUTLINE_ACTION_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
+import { resolveRouteSectionId } from "~/utils/route-query";
 
 definePageMeta({
   middleware: ["auth"],
@@ -61,19 +62,13 @@ const {
   jobInterviewFocusAreas,
 } = useAutomationScraperPage();
 
-const routeSection = computed<AutomationScraperSectionId>(() => {
-  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
-  const candidateSection =
-    typeof sectionQueryValue === "string"
-      ? sectionQueryValue
-      : Array.isArray(sectionQueryValue)
-        ? sectionQueryValue[0]
-        : null;
-
-  return candidateSection && isAutomationScraperSectionId(candidateSection)
-    ? candidateSection
-    : AUTOMATION_SCRAPER_DEFAULT_SECTION_ID;
-});
+const routeSection = computed<AutomationScraperSectionId>(() =>
+  resolveRouteSectionId(
+    route.query[APP_ROUTE_QUERY_KEYS.section],
+    isAutomationScraperSectionId,
+    AUTOMATION_SCRAPER_DEFAULT_SECTION_ID,
+  ),
+);
 
 const activeSection = ref<AutomationScraperSectionId>(routeSection.value);
 
@@ -108,7 +103,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       density="compact"
     >
       <template #actions>
-        <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-outline">
+        <NuxtLink :to="APP_ROUTES.automationRuns" :class="[OUTLINE_ACTION_CLASS]">
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </template>

@@ -231,12 +231,15 @@ export const enhanceResumeWithAi = async (
   const parsed = safeParseJson(response.content);
   const parsedRecord =
     parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-  const suggestions =
-    parsedRecord && Array.isArray(parsedRecord.suggestions)
-      ? parsedRecord.suggestions
-      : parsedRecord
-        ? [parsedRecord]
-        : [{ text: response.content, section }];
+  const suggestions = (() => {
+    if (parsedRecord && "suggestions" in parsedRecord && Array.isArray(parsedRecord.suggestions)) {
+      return parsedRecord.suggestions;
+    }
+    if (parsedRecord) {
+      return [parsedRecord];
+    }
+    return [{ text: response.content, section }];
+  })();
 
   return {
     resume,

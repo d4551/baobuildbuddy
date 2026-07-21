@@ -9,6 +9,8 @@ import {
   APP_DRAWER_ID,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_SQUARE_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
@@ -104,7 +106,7 @@ onUnmounted(() => {
         :for="APP_DRAWER_ID"
         role="button"
         tabindex="0"
-        class="btn btn-ghost btn-circle drawer-button shrink-0 lg:hidden"
+        :class="[GHOST_ACTION_SQUARE_CLASS, 'drawer-button shrink-0 lg:hidden']"
         :aria-label="t('a11y.toggleSidebar')"
         :aria-controls="APP_DRAWER_ID"
         :aria-expanded="isDrawerOpen"
@@ -117,8 +119,7 @@ onUnmounted(() => {
       </label>
       <NuxtLink
         :to="APP_ROUTES.dashboard"
-        class="btn btn-ghost shrink-0 text-primary lg:hidden"
-        :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+        :class="[GHOST_ACTION_CLASS, 'shrink-0 text-primary lg:hidden', FLEX_GAP_TOKEN_CLASS.gap2]"
         :aria-label="resolvedBrand.name"
       >
         <img :src="resolvedBrand.logoPath" alt="" aria-hidden="true" :class="[ICON_SIZE_CLASS.sm, 'shrink-0', RADIUS_TOKEN_CLASS.sm]" />
@@ -139,7 +140,7 @@ onUnmounted(() => {
     </div>
     <div class="navbar-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
       <WorkspaceOmniSearch />
-      <label class="swap swap-rotate btn btn-ghost btn-circle" :class="[TOUCH_TARGET_MIN_CLASS]">
+      <label :class="[GHOST_ACTION_SQUARE_CLASS, 'swap swap-rotate']">
         <input 
           type="checkbox"
           class="theme-controller"
@@ -162,8 +163,7 @@ onUnmounted(() => {
       </label>
       <details ref="userMenu" class="dropdown dropdown-end" @toggle="syncUserMenuState">
         <summary 
-          class="btn btn-ghost btn-circle"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('a11y.userMenu')"
           :aria-controls="userMenuId"
           :aria-expanded="isUserMenuOpen"

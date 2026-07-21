@@ -2,13 +2,18 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   selectedJob: { title: string; company?: string } | null;
@@ -29,7 +34,7 @@ const { t } = useI18n();
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
-          <span class="badge badge-primary badge-outline">{{ t("interviewHub.cards.recommendedBadge") }}</span>
+          <span :class="[BADGE_PRIMARY_OUTLINE_CLASS]">{{ t("interviewHub.cards.recommendedBadge") }}</span>
         </div>
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewHub.cards.jobPracticeDescription") }}
@@ -52,7 +57,7 @@ const { t } = useI18n();
               </div>
             </div>
             <button
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', POINTER_EVENTS_TOKEN_CLASS.auto]"
+              :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, POINTER_EVENTS_TOKEN_CLASS.auto]"
               :aria-label="t('interviewHub.cards.changeJobAria')"
               @click="emit('openJob')"
             >
@@ -62,8 +67,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            class="btn btn-outline"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('interviewHub.cards.configureJobAria')"
             @click="emit('openJob')"
           >
@@ -88,8 +92,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            class="btn btn-outline"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('interviewHub.cards.configureStudioAria')"
             @click="emit('openStudio')"
           >

@@ -3,9 +3,11 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -104,7 +106,7 @@ function updateProjectForm(value: typeof projectForm): void {
       <template v-if="!isPortfolioEmpty" #actions>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('portfolioPage.actions.previewAria')"
         >
           <svg :class="ICON_SIZE_CLASS['4']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -158,8 +160,7 @@ function updateProjectForm(value: typeof projectForm): void {
           <template #actions>
             <button
               type="button"
-              class="btn btn-outline"
-              :class="[FLUID_WIDTH_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, FLUID_WIDTH_CLASS]"
               :aria-label="t('portfolioPage.emptyState.profileButton')"
               @click="showEmptyProfileEditor = !showEmptyProfileEditor"
             >
@@ -191,7 +192,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

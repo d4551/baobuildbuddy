@@ -7,6 +7,10 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_CLASS,
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   activeSession: InterviewSession;
@@ -62,7 +66,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
               <span 
                 v-for="focusArea in focusAreas"
                 :key="focusArea"
-                class="badge badge-outline badge-primary"
+                :class="[BADGE_PRIMARY_OUTLINE_CLASS]"
               >
                 {{ focusArea }}
               </span>
@@ -80,7 +84,7 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
               <span 
                 v-for="signal in targetSignals"
                 :key="signal"
-                class="badge badge-outline"
+                :class="[BADGE_OUTLINE_CLASS]"
               >
                 {{ signal }}
               </span>

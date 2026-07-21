@@ -3,7 +3,7 @@ import type { ApiHttpMethod } from "~/types/api-docs";
 
 export const createApiDocsMethodPresentation = () => ({
   methodBadgeClass(method: ApiHttpMethod): string {
-    return `badge badge-sm ${HTTP_METHOD_CLASSES[method]} font-semibold`;
+    return `${HTTP_METHOD_CLASSES[method]} font-semibold`;
   },
   methodLabel(method: ApiHttpMethod): string {
     return method.toUpperCase();

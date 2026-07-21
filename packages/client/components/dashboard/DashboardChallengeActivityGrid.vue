@@ -17,6 +17,9 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_CLASS,
+} from "~/constants/layout-badges";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 const props = defineProps<{
@@ -49,7 +52,7 @@ const canClaimChallenge = computed(() => {
         <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
-            <span class="badge badge-primary">
+            <span :class="[BADGE_PRIMARY_CLASS]">
               {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dailyChallenge.xpReward }) }}
             </span>
           </div>

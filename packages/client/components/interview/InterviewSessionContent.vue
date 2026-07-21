@@ -10,6 +10,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_ERROR_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
@@ -157,7 +158,7 @@ const { t } = useI18n();
         <div class="flex justify-end">
           <button 
             type="button"
-            class="btn btn-outline btn-error"
+            :class="[OUTLINE_ACTION_ERROR_CLASS]"
             :disabled="!canComplete || completionState !== 'ready'"
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"

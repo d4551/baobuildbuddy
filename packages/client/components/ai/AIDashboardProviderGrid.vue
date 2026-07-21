@@ -5,11 +5,16 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SOFT_NEUTRAL_CLASS,
+  BADGE_SOFT_WARNING_CLASS,
+} from "~/constants/layout-badges";
 import type {
   ProviderConfig,
   ProviderConnectivityResult,
@@ -38,13 +43,13 @@ function resolveProviderStatus(provider: ProviderConfig): {
   if (!configured) {
     return {
       label: props.t("aiDashboard.providerCard.notConfiguredBadge"),
-      badgeClass: "badge-warning badge-soft",
+      badgeClass: BADGE_SOFT_WARNING_CLASS,
     };
   }
   if (!provider.available) {
     return {
       label: props.providerAvailabilityLabel(false),
-      badgeClass: "badge-neutral badge-soft",
+      badgeClass: BADGE_SOFT_NEUTRAL_CLASS,
     };
   }
   return {
@@ -69,7 +74,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
-          <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">
+          <span class="shrink-0" :class="[resolveProviderStatus(provider).badgeClass]">
             {{ resolveProviderStatus(provider).label }}
           </span>
         </div>
@@ -94,7 +99,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
 
         <div class="card-actions justify-end">
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+            :class="[OUTLINE_ACTION_DENSE_CLASS]"
             :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
             @click="onTestProvider(provider.id)"

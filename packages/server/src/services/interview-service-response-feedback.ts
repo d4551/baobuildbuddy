@@ -107,12 +107,12 @@ function normalizeQuestionFeedback(
     return null;
   }
 
-  const parsedScore =
-    typeof raw.score === "number"
-      ? raw.score
-      : typeof raw.score === "string"
-        ? Number.parseInt(raw.score, 10)
-        : Number.NaN;
+  let parsedScore = Number.NaN;
+  if (typeof raw.score === "number") {
+    parsedScore = raw.score;
+  } else if (typeof raw.score === "string") {
+    parsedScore = Number.parseInt(raw.score, 10);
+  }
   if (!Number.isFinite(parsedScore)) {
     return null;
   }

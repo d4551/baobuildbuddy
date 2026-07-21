@@ -18,7 +18,7 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:300
   "",
 );
 const OUT_DIR =
-  process.env.BROWSER_SMOKE_OUT ?? join("/opt/cursor/artifacts/baseline/browser-smoke");
+  process.env.BROWSER_SMOKE_OUT ?? join(process.cwd(), "artifacts", "baseline", "browser-smoke");
 const VIEWPORTS = [
   { name: "mobile", width: 320, height: 720 },
   { name: "tablet", width: 768, height: 1024 },
@@ -46,6 +46,8 @@ const STATIC_ROUTES = [
   ["docs-api", APP_ROUTES.apiDocs],
   ["settings", APP_ROUTES.settings],
 ] as const;
+
+const LOADING_STATUS_TEXT_PATTERN = /^Loading$/u;
 
 const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
   await page
@@ -110,6 +112,16 @@ const smokeRoute = async (
   await page.goto(`${CLIENT_BASE}${route}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
   await waitForPageReady(page, 2_000);
   await waitForMobileDockActive(page, viewportName, route);
+  if (route === APP_ROUTES.settings) {
+    await page
+      .getByTestId("settings-auth-access-status")
+      .filter({ hasNotText: LOADING_STATUS_TEXT_PATTERN })
+      .waitFor({ state: "visible", timeout: 8_000 })
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+  }
   const title = await page.title();
   const signals = await collectPageSignals(page);
   await page.screenshot({ path: screenshot, fullPage: true });

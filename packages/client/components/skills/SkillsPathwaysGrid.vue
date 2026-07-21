@@ -10,6 +10,10 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SM_CLASS,
+  BADGE_XS_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   pathways: readonly CareerPathway[];
@@ -35,7 +39,7 @@ const { t } = useI18n();
                 <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">{{ getPathwayIcon(pathway.id) }}</span>
                 <h3 class="card-title text-base">{{ pathway.title }}</h3>
               </div>
-              <span class="badge badge-sm" :class="getReadinessBadgeColor(pathway.matchScore)">
+              <span :class="[BADGE_SM_CLASS, getReadinessBadgeColor(pathway.matchScore)]">
                 {{ pathway.matchScore }}%
               </span>
             </div>
@@ -48,7 +52,7 @@ const { t } = useI18n();
             <div>
               <p class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPathwaysPage.pathways.requiredSkillsTitle") }}</p>
               <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-                <span v-for="skill in pathway.requiredSkills" :key="skill" class="badge badge-xs">
+                <span v-for="skill in pathway.requiredSkills" :key="skill" :class="[BADGE_XS_CLASS]">
                   {{ skill }}
                 </span>
               </div>

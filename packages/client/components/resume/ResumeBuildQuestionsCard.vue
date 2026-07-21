@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -36,7 +38,7 @@ const emit = defineEmits<{
           }}
         </h2>
         <button 
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+          :class="[GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
         >
@@ -71,7 +73,7 @@ const emit = defineEmits<{
 
       <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
         <button 
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :disabled="currentQuestionIndex === 0"
           :aria-label="t('resumeBuildPage.questions.backAria')"
           @click="emit('previous')"

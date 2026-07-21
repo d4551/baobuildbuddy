@@ -10,6 +10,9 @@ import {
   PADDING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SOFT_SM_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   achievement: {
@@ -30,8 +33,12 @@ const { t } = useI18n();
     :selected="props.achievement.unlocked"
     :disabled="!props.achievement.unlocked"
     :extra-class="props.achievement.unlocked ? 'cursor-pointer' : ''"
-    :title="achievement.description"
-    :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
+    :aria-label="
+      t('gamificationPage.achievementBadgeAria', {
+        name: achievement.name,
+        description: achievement.description,
+      })
+    "
   >
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
@@ -46,7 +53,7 @@ const { t } = useI18n();
         <div class="flex-1">
           <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ achievement.name }}</h3>
           <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ achievement.description }}</p>
-          <span class="badge badge-soft badge-sm" :class="[MARGIN_TOKEN_CLASS.mt2]">
+          <span :class="[BADGE_SOFT_SM_CLASS, MARGIN_TOKEN_CLASS.mt2]">
             +{{ achievement.xpReward }} {{ t("gamificationPage.xpSuffix") }}
           </span>
         </div>

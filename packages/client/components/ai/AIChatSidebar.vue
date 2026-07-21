@@ -7,6 +7,11 @@ import {
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_CLASS,
+  BADGE_SOFT_INFO_CLASS,
+  BADGE_SOFT_PRIMARY_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   currentContextLabel: string;
@@ -33,13 +38,13 @@ const { t } = useI18n();
           {{ t("aiChatPage.contextPanelDescription") }}
         </p>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <span class="badge badge-soft badge-info">
+          <span :class="[BADGE_SOFT_INFO_CLASS]">
             {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
           </span>
-          <span v-if="focusedEntityLabel" class="badge badge-soft badge-primary">
+          <span v-if="focusedEntityLabel" :class="[BADGE_SOFT_PRIMARY_CLASS]">
             {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
           </span>
-          <span v-for="chip in contextChips" :key="`aside-${chip}`" class="badge badge-ghost">
+          <span v-for="chip in contextChips" :key="`aside-${chip}`" :class="[BADGE_GHOST_CLASS]">
             {{ chip }}
           </span>
         </div>

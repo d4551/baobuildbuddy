@@ -118,6 +118,10 @@ const buildQuestionText = (
       return `This opportunity signals ${context.hiringSignal}. How would you ramp up in your first 30 days and prove the ${context.pitchAngle} angle is real?`;
     case "closing":
       return `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.role} at ${context.company} right now?`;
+    default: {
+      const _exhaustive: never = type;
+      return `How would you contribute as ${context.role} at ${context.company}? (${_exhaustive})`;
+    }
   }
 };
 
@@ -151,6 +155,10 @@ const buildFollowUps = (
         "Which accomplishment best proves that claim?",
         "Why does this studio context fit where you want to grow next?",
       ];
+    default: {
+      const _exhaustive: never = type;
+      return [`What else should we cover for ${_exhaustive}?`];
+    }
   }
 };
 

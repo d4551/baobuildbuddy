@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
@@ -202,7 +203,7 @@ function updateRequestBodyValue(event: Event): void {
         </button>
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('apiDocs.tester.closeAria')"
           @click="emit('update:open', false)"
         >

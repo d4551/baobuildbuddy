@@ -5,12 +5,21 @@ import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_CLASS,
+  BADGE_OUTLINE_CLASS,
+  BADGE_PRIMARY_CLASS,
+  BADGE_SUCCESS_CLASS,
+} from "~/constants/layout-badges";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 const open = defineModel<boolean>("open", { required: true });
@@ -47,7 +56,7 @@ function studioLocation(location: string): string {
   >
     <button 
       type="button"
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-circle btn-ghost absolute end-2 top-2']"
+      :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS, 'absolute end-2 top-2']"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
@@ -63,10 +72,10 @@ function studioLocation(location: string): string {
       </p>
 
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
-        <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
-        <span class="badge badge-outline">{{ studioSizeLabel(t, studio.size) }}</span>
-        <span class="badge badge-ghost">{{ studioLocation(studio.location) }}</span>
-        <span v-if="studio.remoteWork" class="badge badge-success">
+        <span :class="[BADGE_PRIMARY_CLASS]">{{ studioTypeLabel(t, studio.type) }}</span>
+        <span :class="[BADGE_OUTLINE_CLASS]">{{ studioSizeLabel(t, studio.size) }}</span>
+        <span :class="[BADGE_GHOST_CLASS]">{{ studioLocation(studio.location) }}</span>
+        <span v-if="studio.remoteWork" :class="[BADGE_SUCCESS_CLASS]">
           {{ t("studiosIndex.card.remoteBadge") }}
         </span>
       </div>
@@ -104,7 +113,7 @@ function studioLocation(location: string): string {
         </button>
         <button 
           type="button"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.openDetailAria', { studio: studio.name })"
           @click="$emit('openDetail', studio.id)"
         >
@@ -112,7 +121,7 @@ function studioLocation(location: string): string {
         </button>
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
           @click="$emit('close')"
         >

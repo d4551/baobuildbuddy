@@ -7,12 +7,17 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   activeRunId: string;
@@ -62,12 +67,12 @@ const lifecycleStepClasses = computed<[string, string, string]>(() => {
     runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus)
       ? "step step-primary"
       : "step";
-  const completionStep =
-    runStatus === RUN_STATUS_SUCCESS
-      ? "step step-success"
-      : runStatus === RUN_STATUS_ERROR
-        ? "step step-error"
-        : "step";
+  let completionStep = "step";
+  if (runStatus === RUN_STATUS_SUCCESS) {
+    completionStep = "step step-success";
+  } else if (runStatus === RUN_STATUS_ERROR) {
+    completionStep = "step step-error";
+  }
   return [queueStep, runningStep, completionStep];
 });
 
@@ -150,14 +155,14 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
         <NuxtLink 
           :to="runDetailRoute(activeRunId)"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+          :class="[OUTLINE_ACTION_DENSE_CLASS]"
           :aria-label="t('automation.jobApply.openRunDetailAria', { id: activeRunId })"
         >
           {{ t("automation.jobApply.openRunDetailLink") }}
         </NuxtLink>
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+          :class="[GHOST_ACTION_DENSE_CLASS]"
           :disabled="isStreamLoading"
           :aria-label="t('automation.jobApply.stream.retryAria')"
           @click="emit('retry')"
@@ -166,7 +171,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </button>
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+          :class="[GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('automation.jobApply.stream.cancelAria')"
           @click="emit('cancel')"
         >
@@ -214,7 +219,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
                       {{ toLocalizedDateTime(event.timestamp) }}
                     </p>
                   </div>
-                  <span class="badge badge-sm badge-outline">
+                  <span :class="[BADGE_OUTLINE_SM_CLASS]">
                     {{ resolveStreamEventStatusLabel(event) }}
                   </span>
                 </div>

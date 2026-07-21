@@ -10,6 +10,12 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_NEUTRAL_CLASS,
+  BADGE_PRIMARY_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
+  BADGE_SECONDARY_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   mappingMetrics: {
@@ -58,17 +64,17 @@ const { t } = useI18n();
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.totalMappingsLabel") }}</span>
               <span class="list-col-grow"></span>
-              <span class="badge badge-neutral">{{ mappingMetrics.total }}</span>
+              <span :class="[BADGE_NEUTRAL_CLASS]">{{ mappingMetrics.total }}</span>
             </li>
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.avgConfidenceLabel") }}</span>
               <span class="list-col-grow"></span>
-              <span class="badge badge-primary">{{ mappingMetrics.averageConfidence }}%</span>
+              <span :class="[BADGE_PRIMARY_CLASS]">{{ mappingMetrics.averageConfidence }}%</span>
             </li>
             <li class="list-row">
               <span class="font-medium">{{ t("skillsPage.insights.categoriesCoverageLabel") }}</span>
               <span class="list-col-grow"></span>
-              <span class="badge badge-secondary">{{ mappingMetrics.categoriesUsed }}</span>
+              <span :class="[BADGE_SECONDARY_CLASS]">{{ mappingMetrics.categoriesUsed }}</span>
             </li>
           </ul>
 
@@ -108,7 +114,7 @@ const { t } = useI18n();
                 <p class="font-medium">{{ mapping.transferableSkill }}</p>
                 <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ mapping.gameExpression }}</p>
               </div>
-              <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
+              <span :class="[BADGE_PRIMARY_SM_CLASS]">{{ mapping.confidence }}%</span>
             </li>
           </ul>
 

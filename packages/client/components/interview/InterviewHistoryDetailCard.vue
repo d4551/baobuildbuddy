@@ -7,6 +7,7 @@ import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -53,7 +54,7 @@ const { t } = useI18n();
           <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("interviewHistory.detailsTitle") }}</h3>
           <button 
             type="button"
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+            :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >

@@ -8,6 +8,7 @@ import {
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
@@ -19,6 +20,9 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_WARNING_XS_CLASS,
+} from "~/constants/layout-badges";
 import type { NavigationItem } from "~/constants/navigation";
 import { getSidebarNavigationItems, isRouteActive } from "~/constants/navigation";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
@@ -84,9 +88,10 @@ function sidebarLinkClass(item: NavigationItem): string[] {
             :aria-label="resolveSidebarLabel(item)"
           >
             <span class="indicator">
-              <span 
+              <span
                 v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-                class="indicator-item badge badge-warning badge-xs" :class="[FONT_WEIGHT_TOKEN_CLASS.bold]"
+                class="indicator-item"
+                :class="[BADGE_WARNING_XS_CLASS, FONT_WEIGHT_TOKEN_CLASS.bold]"
                 role="status"
                 :aria-label="t('a11y.aiConfigIncompleteAria')"
                 :title="t('a11y.aiConfigIncompleteAria')"
@@ -105,8 +110,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         <li class="mt-auto" :class="[PADDING_TOKEN_CLASS.pt4]">
           <button 
             type="button"
-            class="btn btn-ghost justify-start is-drawer-close:btn-square"
-            :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_CLASS, 'justify-start is-drawer-close:btn-square', FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('a11y.toggleSidebarNavigation')"
             :aria-controls="APP_DRAWER_ID"
             :aria-expanded="isDrawerOpen"

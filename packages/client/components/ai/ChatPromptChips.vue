@@ -5,6 +5,9 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  SOFT_ACTION_CLASS,
+} from "~/constants/layout-action-soft";
 
 withDefaults(
   defineProps<{
@@ -28,8 +31,7 @@ const { t } = useI18n();
     <li v-for="prompt in prompts" :key="prompt">
       <button
         type="button"
-        class="btn btn-soft"
-        :class="[TOUCH_TARGET_MIN_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
+        :class="[SOFT_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, TYPOGRAPHY_SCALE_CLASS.xs]"
         :aria-label="t('floatingChat.suggestionAria', { prompt })"
         :disabled="loading"
         @click="emit('prompt', prompt)"

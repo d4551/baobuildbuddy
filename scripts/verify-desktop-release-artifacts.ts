@@ -31,6 +31,7 @@ import {
 } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { resolveCommandDetails } from "./utils/command-capture-details";
 import {
   hasNativeDesktopReleaseProvenance,
   isDesktopReleaseProvenance,
@@ -993,12 +994,10 @@ const verifyDmgArtifact = async (artifact: ReleaseArtifact): Promise<Verificatio
     DISK_IMAGE_TIMEOUT_MS,
   );
   return {
-    details:
-      commandResult.exitCode === 0
-        ? "hdiutil verify passed"
-        : commandResult.timedOut
-          ? "hdiutil verify timed out"
-          : commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`,
+    details: resolveCommandDetails(commandResult, {
+      success: "hdiutil verify passed",
+      timeout: "hdiutil verify timed out",
+    }),
     label: `artifact:${artifact.relativePath}`,
     ok: commandResult.exitCode === 0,
   };
@@ -1140,12 +1139,10 @@ const verifyWindowsExecutableSignature = async (
     DISK_IMAGE_TIMEOUT_MS,
   );
   return {
-    details:
-      commandResult.exitCode === 0
-        ? `authenticode verify passed (${artifact.kind})`
-        : commandResult.timedOut
-          ? "signtool verify timed out"
-          : commandResult.stderr || commandResult.stdout || `exitCode=${commandResult.exitCode}`,
+    details: resolveCommandDetails(commandResult, {
+      success: `authenticode verify passed (${artifact.kind})`,
+      timeout: "signtool verify timed out",
+    }),
     label: `artifact:${artifact.relativePath}:authenticode`,
     ok: commandResult.exitCode === 0,
   };
@@ -1191,14 +1188,10 @@ const verifyPortableExecutableSignatureInZip = async (
       );
       return [
         {
-          details:
-            commandResult.exitCode === 0
-              ? "portable executable is Authenticode-signed"
-              : commandResult.timedOut
-                ? "portable executable authenticode verification timed out"
-                : commandResult.stderr ||
-                  commandResult.stdout ||
-                  `exitCode=${commandResult.exitCode}`,
+          details: resolveCommandDetails(commandResult, {
+            success: "portable executable is Authenticode-signed",
+            timeout: "portable executable authenticode verification timed out",
+          }),
           label: `artifact:${artifact.relativePath}:portable-signature`,
           ok: commandResult.exitCode === 0,
         },

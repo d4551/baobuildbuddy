@@ -54,9 +54,14 @@ useSeoMeta({
 </script>
 
 <template>
-  <div :class="CHAT_PAGE_CONTAINER_CLASS">
+  <PageScaffold
+    labelled-by="ai-chat-page-title"
+    :extra-class="CHAT_PAGE_CONTAINER_CLASS"
+    spacing-token="compact"
+  >
     <SectionGrid grid-token="chatSplit">
       <AIChatConversationPanel
+        title-id="ai-chat-page-title"
         :resolved-brand="resolvedBrand"
         :locale="locale"
         :loading="loading"
@@ -114,5 +119,5 @@ useSeoMeta({
         @prompt="handlePromptSelection"
       />
     </SectionGrid>
-  </div>
+  </PageScaffold>
 </template>

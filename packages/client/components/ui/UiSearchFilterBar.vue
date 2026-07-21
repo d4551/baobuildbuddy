@@ -9,6 +9,8 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  OUTLINE_ACTION_JOIN_CLASS,
   PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
@@ -83,7 +85,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
           </button>
           <button 
             v-if="showMobileFilterToggle"
-            class="btn btn-outline join-item sm:hidden"
+            :class="[OUTLINE_ACTION_JOIN_CLASS, 'sm:hidden']"
             :aria-label="mobileToggleAriaLabel"
             @click="emit('toggle-filters')"
           >
@@ -97,7 +99,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
         </div>
         <button 
           v-if="showMobileFilterToggle"
-          class="btn btn-outline hidden sm:inline-flex lg:hidden"
+          :class="[OUTLINE_ACTION_CLASS, 'hidden sm:inline-flex lg:hidden']"
           :aria-label="mobileToggleAriaLabel"
           @click="emit('toggle-filters')"
         >

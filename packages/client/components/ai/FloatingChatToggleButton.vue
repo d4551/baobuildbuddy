@@ -6,6 +6,9 @@ import {
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_ERROR_SM_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   chatPanelId: string;
@@ -23,7 +26,7 @@ const emit = defineEmits<{
   <div class="indicator">
     <span
       v-if="unreadCount > 0 && !isOpen"
-      class="indicator-item badge badge-error badge-sm"
+      class="indicator-item" :class="[BADGE_ERROR_SM_CLASS]"
       :aria-label="t('floatingChat.unreadAria', { count: unreadCount })"
     >
       {{ unreadCount }}

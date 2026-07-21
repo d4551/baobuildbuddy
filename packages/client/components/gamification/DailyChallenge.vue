@@ -8,6 +8,9 @@ import {
   PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_ACCENT_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   challenge: {
@@ -42,7 +45,7 @@ const { t } = useI18n();
     <div class="card-body">
       <div class="flex justify-between items-start">
         <h2 class="card-title">{{ challenge.title }}</h2>
-        <div class="badge badge-accent" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+        <div :class="[BADGE_ACCENT_CLASS, FLEX_GAP_TOKEN_CLASS.gap1]">
           <IconSparkles :class="[ICON_SIZE_CLASS[3]]"/>
           {{ t("dashboard.dailyChallengeXpLabel", { xp: challenge.xpReward }) }}
         </div>

@@ -6,6 +6,7 @@ import { DASHBOARD_ONBOARDING_STEPS } from "~/constants/dashboard-core";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -13,6 +14,9 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 import { RESPONSIVE_PADDING_LG_P8_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
@@ -27,7 +31,7 @@ const { t } = useI18n();
   <UiGlassCard :extra-class="`${FLUID_WIDTH_CLASS} ${SHADOW_TOKEN_CLASS.sm} overflow-hidden`">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, RESPONSIVE_PADDING_LG_P8_CLASS]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-            <div class="badge badge-primary badge-outline w-fit">
+            <div class="w-fit" :class="[BADGE_PRIMARY_OUTLINE_CLASS]">
               {{ t(DASHBOARD_COPY_KEYS.pageTitle) }}
             </div>
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">
@@ -61,8 +65,7 @@ const { t } = useI18n();
             </NuxtLink>
             <NuxtLink
               :to="APP_ROUTES.jobs"
-              class="btn btn-outline"
-              :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS]"
             >
               {{ t("dashboard.quickActions.actions.browseJobs") }}
             </NuxtLink>

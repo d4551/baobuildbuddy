@@ -6,10 +6,14 @@ import {
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_JOIN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 
 type ProviderField =
   | "localModelEndpoint"
@@ -72,7 +76,7 @@ const emit = defineEmits<{
       <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <AIProviderIcon class="text-primary" :class="[ICON_SIZE_CLASS[5]]" :provider-id="provider.id"/>
         {{ provider.label }}
-        <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
+        <span v-if="providerConfiguredById[provider.id]" :class="[BADGE_SUCCESS_SM_CLASS]">
           {{ t("settings.aiProviders.configuredBadge") }}
         </span>
       </summary>
@@ -90,7 +94,7 @@ const emit = defineEmits<{
             />
             <button 
               type="button"
-              class="btn btn-outline join-item"
+              :class="[OUTLINE_ACTION_JOIN_CLASS]"
               :aria-label="t('settings.aiProviders.testAria')"
               @click="emit('testProvider', provider.id)"
             >

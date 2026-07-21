@@ -7,12 +7,16 @@ import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SOFT_PRIMARY_CLASS,
+} from "~/constants/layout-badges";
 import {
   RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
   RESPONSIVE_TEXT_MD_3XL_CLASS,
@@ -34,7 +38,7 @@ const { t } = useI18n();
   <UiGlassCard :stagger-index="0" extra-class="overflow-hidden">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-        <div class="badge badge-primary badge-soft w-fit">
+        <div class="w-fit" :class="[BADGE_SOFT_PRIMARY_CLASS]">
           {{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}
         </div>
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, RESPONSIVE_TEXT_MD_3XL_CLASS]">
@@ -68,8 +72,7 @@ const { t } = useI18n();
         <NuxtLink
           v-if="showSetupAction && primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
-          class="btn btn-outline"
-          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
         >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>

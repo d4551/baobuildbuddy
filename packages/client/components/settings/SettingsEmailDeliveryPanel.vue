@@ -6,9 +6,13 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  SECONDARY_ACTION_CLASS,
+} from "~/constants/layout-action-soft";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
@@ -212,7 +216,7 @@ const { t } = useI18n();
 
       <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
         <button 
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :disabled="!hasStoredPassword"
           :aria-label="t('settings.emailDelivery.clearPasswordAria')"
           @click="emit('clearPassword')"
@@ -220,7 +224,7 @@ const { t } = useI18n();
           {{ t("settings.emailDelivery.clearPasswordButton") }}
         </button>
         <button 
-          class="btn btn-secondary"
+          :class="[SECONDARY_ACTION_CLASS]"
           :aria-label="t('settings.emailDelivery.savePasswordAria')"
           @click="emit('savePassword')"
         >

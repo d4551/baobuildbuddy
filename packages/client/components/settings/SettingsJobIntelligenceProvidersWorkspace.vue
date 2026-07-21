@@ -10,6 +10,10 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_NEUTRAL_SM_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -52,13 +56,12 @@ const sourceCollectionCount = computed(
       >
         <template #meta>
           <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-            <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
+            <span :class="[BADGE_NEUTRAL_SM_CLASS]" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
               {{ configuredSourceCount }}
             </span>
             <span 
               v-if="providerSaveStateLabelKey"
-              class="badge badge-sm"
-              :class="getSaveStateBadgeClass(providerSaveState)"
+              :class="[BADGE_SM_CLASS, getSaveStateBadgeClass(providerSaveState)]"
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>

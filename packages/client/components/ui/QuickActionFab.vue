@@ -63,8 +63,12 @@ function setActiveActionRef(
     actionItemRefs.value[index] = null;
     return;
   }
-  const refEl: Element | null =
-    element instanceof Element ? element : element.$el instanceof Element ? element.$el : null;
+  let refEl: Element | null = null;
+  if (element instanceof Element) {
+    refEl = element;
+  } else if (element.$el instanceof Element) {
+    refEl = element.$el;
+  }
   actionItemRefs.value[index] = refEl instanceof HTMLAnchorElement ? refEl : null;
 }
 

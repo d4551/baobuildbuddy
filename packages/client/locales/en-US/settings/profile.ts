@@ -37,8 +37,12 @@ const settingsprofile = {
       description:
         "Rotate or revoke the workspace API key used for authenticated requests. The new key is shown once.",
       configuredYes: "An API key is configured for this workspace.",
-      configuredNo: "No API key is configured (auth may be disabled for local development).",
+      configuredNo: "No API key is configured. Complete setup to create the first key.",
+      authDisabled:
+        "Authentication is disabled for this environment (BAO_DISABLE_AUTH). API key rotate/revoke is unavailable.",
       statusFailed: "Failed to load API key status",
+      setupButton: "Open setup",
+      setupAria: "Open first-run setup to create an API key",
       rotateButton: "Rotate key",
       rotateAria: "Rotate workspace API key",
       rotateFailed: "Failed to rotate API key",

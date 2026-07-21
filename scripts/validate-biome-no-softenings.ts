@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { safeParseJson } from "../packages/shared/src/utils/json";
+import {
+  MAX_LINES_PER_FUNCTION_CEILING,
+  validateGroupRatchets,
+} from "./utils/biome-softener-ratchet";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 /**
@@ -15,7 +19,7 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
  */
 
 const BIOME_CONFIG_PATH = "biome.json";
-const MAX_LINES_PER_FUNCTION = 60;
+const MAX_LINES_PER_FUNCTION = MAX_LINES_PER_FUNCTION_CEILING;
 
 /** Proven tooling gaps — may be "info" only, never off/warn. */
 const TOOLING_GAP_INFO_RULES: ReadonlyArray<{
@@ -72,16 +76,13 @@ const isToolingGapInfo = (includesKey: string | null, rulePath: string): boolean
   return false;
 };
 
-/** Documented info-only tooling gaps (never off/warn). */
+/** Documented info-only tooling gaps (never off/warn). Complexity/barrel NEVER info. */
 const ALLOWED_INFO_RULES = new Set([
   "noUnusedImports",
   "noUnusedVariables",
   "noUnusedFunctionParameters",
   "useVueMultiWordComponentNames",
   "noVueRefAsOperand",
-  "noExcessiveCognitiveComplexity",
-  "noExcessiveLinesPerFunction",
-  "noBarrelFile",
 ]);
 
 type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
@@ -216,33 +217,6 @@ const validateDomains = (domains: JsonValue, violations: ValidationViolation[]):
   }
 };
 
-const validateComplexityRatchet = (
-  complexity: { [key: string]: JsonValue },
-  violations: ValidationViolation[],
-): void => {
-  if (complexity.noVoid !== "error") {
-    pushViolation(violations, 'linter.rules.complexity.noVoid must be "error".');
-  }
-  if (complexity.noExcessiveCognitiveComplexity !== "error") {
-    pushViolation(
-      violations,
-      'linter.rules.complexity.noExcessiveCognitiveComplexity must be "error" (info/off/warn/delete is softener).',
-    );
-  }
-  const linesPerFn = complexity.noExcessiveLinesPerFunction;
-  const linesOk =
-    isRecord(linesPerFn) &&
-    linesPerFn.level === "error" &&
-    isRecord(linesPerFn.options) &&
-    linesPerFn.options.maxLines === MAX_LINES_PER_FUNCTION;
-  if (!linesOk) {
-    pushViolation(
-      violations,
-      `linter.rules.complexity.noExcessiveLinesPerFunction must be error with maxLines=${String(MAX_LINES_PER_FUNCTION)} (info/off/warn/delete/ceiling-raise is softener).`,
-    );
-  }
-};
-
 const validateRulesRatchet = (
   rules: { [key: string]: JsonValue },
   violations: ValidationViolation[],
@@ -264,35 +238,9 @@ const validateRulesRatchet = (
       );
     }
   }
-  if (!isRecord(rules.nursery)) {
-    pushViolation(
-      violations,
-      "linter.rules.nursery must opt into floating-promise / vue / drizzle / playwright gates.",
-    );
-  }
-  const complexity = rules.complexity;
-  if (!isRecord(complexity)) {
-    pushViolation(
-      violations,
-      "linter.rules.complexity must be a rule object with noVoid/complexity ceilings.",
-    );
-  } else {
-    validateComplexityRatchet(complexity, violations);
-  }
-  const performance = rules.performance;
-  if (
-    !isRecord(performance) ||
-    (performance.noBarrelFile !== "error" && performance.noBarrelFile !== "info")
-  ) {
-    pushViolation(
-      violations,
-      'linter.rules.performance.noBarrelFile must be "error" or "info" (off/warn/delete is softener).',
-    );
-  }
-  const nursery = rules.nursery;
-  if (isRecord(nursery) && nursery.noVueRefAsOperand === "off") {
-    pushViolation(violations, "linter.rules.nursery.noVueRefAsOperand cannot be off.");
-  }
+  validateGroupRatchets(rules, violations, BIOME_CONFIG_PATH, (message) => {
+    pushViolation(violations, message);
+  });
 };
 
 const validateOverrides = (overrides: JsonValue, violations: ValidationViolation[]): void => {

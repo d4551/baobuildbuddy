@@ -8,6 +8,9 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   timelineEntries: readonly TimelineEntry[];
@@ -48,7 +51,7 @@ const { t } = useI18n();
                     {{ toLocalizedDateTime(entry.timestamp) }}
                   </p>
                 </div>
-                <span class="badge badge-sm badge-outline">
+                <span :class="[BADGE_OUTLINE_SM_CLASS]">
                   {{ t(`automation.runs.statusOptions.${entry.status}`) }}
                 </span>
               </div>

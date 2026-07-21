@@ -3,8 +3,10 @@ import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_DESCRIPTION_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -13,6 +15,11 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
 defineProps<{
@@ -67,16 +74,16 @@ function studioLocation(location: string): string {
           </p>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-            <span class="badge badge-primary badge-sm">{{ studioTypeLabel(t, studio.type) }}</span>
-            <span class="badge badge-outline badge-sm">{{ studioSizeLabel(t, studio.size) }}</span>
-            <span v-if="studio.remoteWork" class="badge badge-success badge-sm">
+            <span :class="[BADGE_PRIMARY_SM_CLASS]">{{ studioTypeLabel(t, studio.type) }}</span>
+            <span :class="[BADGE_OUTLINE_SM_CLASS]">{{ studioSizeLabel(t, studio.size) }}</span>
+            <span v-if="studio.remoteWork" :class="[BADGE_SUCCESS_SM_CLASS]">
               {{ t("studiosIndex.card.remoteBadge") }}
             </span>
           </div>
 
           <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt1]">
             <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+              :class="[GHOST_ACTION_DENSE_CLASS]"
               :aria-label="t('studiosIndex.card.previewAria', { studio: studio.name })"
               @click="$emit('preview', studio.id)"
             >
@@ -97,7 +104,7 @@ function studioLocation(location: string): string {
     <div v-if="hasAdditionalStudios" class="flex justify-center">
       <button 
         type="button"
-        class="btn btn-outline"
+        :class="[OUTLINE_ACTION_CLASS]"
         :aria-label="t('studiosIndex.list.loadMoreAria')"
         @click="$emit('loadMore')"
       >

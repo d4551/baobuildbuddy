@@ -7,6 +7,10 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SOFT_WARNING_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import type { JobProviderForm } from "./job-intelligence";
 
 const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
@@ -14,7 +18,7 @@ const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { requir
 const { t } = useI18n();
 
 function providerBadgeClass(isConfigured: boolean): string {
-  return isConfigured ? "badge-success" : "badge-warning";
+  return isConfigured ? BADGE_SUCCESS_SM_CLASS : BADGE_SOFT_WARNING_SM_CLASS;
 }
 
 function providerBadgeLabel(isConfigured: boolean): string {
@@ -35,9 +39,9 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.hitmarkerDescription") }}
             </p>
           </div>
-          <span 
-            class="badge badge-sm shrink-0"
-            :class="providerBadgeClass(jobProviderForm.hitmarkerEnabled && jobProviderForm.hitmarkerApiBaseUrl.trim().length > 0)"
+          <span
+            class="shrink-0"
+            :class="[providerBadgeClass(jobProviderForm.hitmarkerEnabled && jobProviderForm.hitmarkerApiBaseUrl.trim().length > 0)]"
           >
             {{
               providerBadgeLabel(
@@ -89,9 +93,9 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.greenhouseDescription") }}
             </p>
           </div>
-          <span 
-            class="badge badge-sm shrink-0"
-            :class="providerBadgeClass(jobProviderForm.greenhouseApiBaseUrl.trim().length > 0)"
+          <span
+            class="shrink-0"
+            :class="[providerBadgeClass(jobProviderForm.greenhouseApiBaseUrl.trim().length > 0)]"
           >
             {{ providerBadgeLabel(jobProviderForm.greenhouseApiBaseUrl.trim().length > 0) }}
           </span>
@@ -130,9 +134,9 @@ function providerBadgeLabel(isConfigured: boolean): string {
               {{ t("settings.jobIntelligence.leverDescription") }}
             </p>
           </div>
-          <span 
-            class="badge badge-sm shrink-0"
-            :class="providerBadgeClass(jobProviderForm.leverApiBaseUrl.trim().length > 0)"
+          <span
+            class="shrink-0"
+            :class="[providerBadgeClass(jobProviderForm.leverApiBaseUrl.trim().length > 0)]"
           >
             {{ providerBadgeLabel(jobProviderForm.leverApiBaseUrl.trim().length > 0) }}
           </span>

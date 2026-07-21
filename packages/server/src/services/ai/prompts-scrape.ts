@@ -1,5 +1,15 @@
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 
+const formatStudioRemoteWork = (remoteWork: boolean | null): string => {
+  if (remoteWork === null) {
+    return "unknown";
+  }
+  if (remoteWork) {
+    return "true";
+  }
+  return "false";
+};
+
 /**
  * Scrape enrichment prompt for a normalized scraped job row.
  */
@@ -48,7 +58,7 @@ Studio:
 - Games: ${studio.games?.join(", ") ?? "unknown"}
 - Technologies: ${studio.technologies?.join(", ") ?? "unknown"}
 - Interview style: ${studio.interviewStyle ?? "unknown"}
-- Remote work: ${studio.remoteWork === null ? "unknown" : studio.remoteWork ? "true" : "false"}
+- Remote work: ${formatStudioRemoteWork(studio.remoteWork)}
 
 Return strict JSON object only for scrape enrichment:
 {

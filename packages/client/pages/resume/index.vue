@@ -4,8 +4,10 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -97,8 +99,7 @@ const {
         </button>
         <NuxtLink
           :to="APP_ROUTES.resumeBuild"
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('resumePage.guidedButtonAria')"
         >
           {{ t("resumePage.guidedButton") }}
@@ -227,7 +228,7 @@ const {
 
       <div class="modal-action">
         <button
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('resumePage.createModal.cancelAria')"
           @click="showCreateModal = false"
         >

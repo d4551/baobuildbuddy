@@ -20,6 +20,9 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_XS_CLASS,
+} from "~/constants/layout-badges";
 
 interface WorkspaceSectionItem {
   readonly id: string;
@@ -185,7 +188,7 @@ const activeDescription = computed<string>(() => {
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
-                  class="badge badge-ghost badge-xs shrink-0"
+                  :class="[BADGE_GHOST_XS_CLASS, 'shrink-0']"
                   aria-hidden="true"
                 >
                   {{ badgeById[section.id] }}

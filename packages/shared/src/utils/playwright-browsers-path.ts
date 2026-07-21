@@ -78,14 +78,14 @@ export const resolvePlaywrightHostPlatformOverride = (
   }
 
   const LAST_STABLE_MACOS_MAJOR_VERSION = 15;
-  const macVersion =
-    major < 18
-      ? "mac10.13"
-      : major === 18
-        ? "mac10.14"
-        : major === 19
-          ? "mac10.15"
-          : `mac${String(Math.min(major - 9, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
+  let macVersion = `mac${String(Math.min(major - 9, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
+  if (major < 18) {
+    macVersion = "mac10.13";
+  } else if (major === 18) {
+    macVersion = "mac10.14";
+  } else if (major === 19) {
+    macVersion = "mac10.15";
+  }
 
   return architecture === "arm64" ? `${macVersion}-arm64` : macVersion;
 };

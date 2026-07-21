@@ -112,3 +112,48 @@ describe("collectBiomeSofteningViolationsForContent: flags overrides that disabl
     expect(violations.some((v) => v.message.includes("linter.enabled=false"))).toBe(true);
   });
 });
+
+describe("collectBiomeSofteningViolationsForContent: flags noBarrelFile info demotion", () => {
+  test("flags noBarrelFile info demotion as softener", () => {
+    const sample = VALID_BIOME.replaceAll('"noBarrelFile": "error"', '"noBarrelFile": "info"');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noBarrelFile"))).toBe(true);
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags complexity cognitive info demotion", () => {
+  test("flags noExcessiveCognitiveComplexity info demotion as softener", () => {
+    const sample = VALID_BIOME.replaceAll(
+      '"noExcessiveCognitiveComplexity": "error"',
+      '"noExcessiveCognitiveComplexity": "info"',
+    );
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noExcessiveCognitiveComplexity"))).toBe(true);
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags maxLines ceiling raise", () => {
+  test("flags maxLines>60 as softener", () => {
+    const sample = VALID_BIOME.replaceAll('"maxLines": 60', '"maxLines": 120');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("maxLines"))).toBe(true);
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags noVoid demotion", () => {
+  test("flags noVoid info demotion as softener", () => {
+    const sample = VALID_BIOME.replaceAll('"noVoid": "error"', '"noVoid": "info"');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noVoid"))).toBe(true);
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags a11y group off", () => {
+  test("flags a11y off as softener", () => {
+    const sample = VALID_BIOME.replaceAll('"a11y": "error"', '"a11y": "off"');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("a11y") || v.message.includes("off"))).toBe(
+      true,
+    );
+  });
+});

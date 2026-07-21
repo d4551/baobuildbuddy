@@ -33,6 +33,42 @@ export const STACK_VERSION_PINS: readonly StackVersionPin[] = [
     requiredPrefix: "2.0.0-exp.",
     resolveFromPackage: "packages/server",
   },
+  {
+    packageName: "nuxt",
+    requiredInstalled: "4.5.0",
+    requiredPrefix: "4.",
+    resolveFromPackage: "packages/client",
+  },
+  {
+    packageName: "daisyui",
+    requiredInstalled: "5.7.0",
+    requiredPrefix: "5.",
+    resolveFromPackage: "packages/client",
+  },
+  {
+    packageName: "zod",
+    requiredInstalled: "4.4.3",
+    requiredPrefix: "4.",
+    resolveFromPackage: "packages/client",
+  },
+  {
+    packageName: "vue-i18n",
+    requiredInstalled: "11.4.7",
+    requiredPrefix: "11.",
+    resolveFromPackage: "packages/client",
+  },
+  {
+    packageName: "@tanstack/vue-query",
+    requiredInstalled: "5.101.3",
+    requiredPrefix: "5.",
+    resolveFromPackage: "packages/client",
+  },
+  {
+    packageName: "playwright",
+    requiredInstalled: "1.61.1",
+    requiredPrefix: "1.6",
+    resolveFromPackage: ".",
+  },
 ] as const;
 
 export type ResolvedPackageVersion = {

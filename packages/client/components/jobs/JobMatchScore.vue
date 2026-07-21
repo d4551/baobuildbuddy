@@ -11,6 +11,9 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_LG_CLASS,
+} from "~/constants/layout-badges";
 
 interface MatchBreakdown {
   skills: number;
@@ -53,7 +56,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
   <div v-else class="flex flex-col items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
     <div class="text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, MAX_W_XS_CLASS]">
       <div class="flex justify-center">
-        <span class="badge badge-lg" :class="scoreBadgeClass">
+        <span :class="[BADGE_LG_CLASS, scoreBadgeClass]">
           {{ score }}%
         </span>
       </div>

@@ -8,7 +8,9 @@ import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -16,6 +18,10 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SOFT_SUCCESS_CLASS,
+} from "~/constants/layout-badges";
 import {
   resolveAutomationCapabilityAction,
   resolveAutomationCapabilityDisplayName,
@@ -80,7 +86,7 @@ const readyEntries = computed(() =>
         </div>
         <NuxtLink 
           :to="APP_ROUTES.automationScraper"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+          :class="[OUTLINE_ACTION_DENSE_CLASS]"
           :aria-label="t('automation.hub.audit.openScraperAria')"
         >
           {{ t("automation.hub.audit.openScraperButton") }}
@@ -158,7 +164,7 @@ const readyEntries = computed(() =>
                           {{ capabilityStatusLabel(capability.configured, capabilityIssueCount(capability)) }}
                         </span>
                       </div>
-                      <span class="badge badge-ghost badge-sm">{{ capabilityTypeLabel(capability) }}</span>
+                      <span :class="[BADGE_GHOST_SM_CLASS]">{{ capabilityTypeLabel(capability) }}</span>
                       <AutomationCoverageChips
                         :manual-run-available="capability.manualRunAvailable"
                         :scheduled-run-available="capability.scheduledRunAvailable"
@@ -177,7 +183,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+                      :class="[OUTLINE_ACTION_DENSE_CLASS]"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}
@@ -215,11 +221,11 @@ const readyEntries = computed(() =>
                           </span>
                         </span>
                         <p class="font-semibold">{{ capabilityDisplayName(capability) }}</p>
-                        <span class="badge badge-success badge-soft whitespace-nowrap">
+                        <span class="whitespace-nowrap" :class="[BADGE_SOFT_SUCCESS_CLASS]">
                           {{ t("automation.hub.audit.issueState.ready") }}
                         </span>
                       </div>
-                      <span class="badge badge-ghost badge-sm">{{ capabilityTypeLabel(capability) }}</span>
+                      <span :class="[BADGE_GHOST_SM_CLASS]">{{ capabilityTypeLabel(capability) }}</span>
                       <AutomationCoverageChips
                         :manual-run-available="capability.manualRunAvailable"
                         :scheduled-run-available="capability.scheduledRunAvailable"
@@ -230,7 +236,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+                      :class="[GHOST_ACTION_DENSE_CLASS]"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}

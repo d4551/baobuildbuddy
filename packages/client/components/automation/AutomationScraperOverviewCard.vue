@@ -4,6 +4,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -50,7 +51,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-start">
-        <NuxtLink :to="runsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
+        <NuxtLink :to="runsRoute" :class="[OUTLINE_ACTION_DENSE_CLASS]">
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </div>

@@ -3,6 +3,7 @@ import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
 import {
+  GHOST_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -138,7 +139,7 @@ function handleClose(): void {
       <button 
         ref="cancelButton"
         type="button"
-        class="btn btn-ghost"
+        :class="[GHOST_ACTION_CLASS]"
         :aria-label="resolvedCancelText"
         @click="handleCancel"
       >

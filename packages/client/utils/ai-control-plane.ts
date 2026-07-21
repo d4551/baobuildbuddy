@@ -299,8 +299,12 @@ const normalizeProviderRow = (
 
   const available = asBoolean(row.available) ?? isProviderConfigured(settings, rawId);
   const rawHealth = asString(row.health);
-  const health =
-    rawHealth && isProviderHealth(rawHealth) ? rawHealth : available ? "healthy" : "unconfigured";
+  let health: AIProviderHealth = "unconfigured";
+  if (rawHealth && isProviderHealth(rawHealth)) {
+    health = rawHealth;
+  } else if (available) {
+    health = "healthy";
+  }
   const models = asStringArray(row.models);
 
   return {

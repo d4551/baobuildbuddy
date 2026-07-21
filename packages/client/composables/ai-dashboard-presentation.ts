@@ -1,5 +1,11 @@
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ComputedRef, Ref } from "vue";
+import {
+  BADGE_ERROR_SM_CLASS,
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+  BADGE_WARNING_SM_CLASS,
+} from "~/constants/layout-badges";
 import type {
   DashboardStats,
   ProviderConfig,
@@ -21,10 +27,10 @@ const HEALTH_LABEL_KEY_BY_VALUE: Record<ProviderHealth, string> = {
 };
 
 const HEALTH_BADGE_CLASS_BY_VALUE: Record<ProviderHealth, string> = {
-  healthy: "badge-success",
-  degraded: "badge-warning",
-  down: "badge-error",
-  unconfigured: "badge-ghost",
+  healthy: BADGE_SUCCESS_SM_CLASS,
+  degraded: BADGE_WARNING_SM_CLASS,
+  down: BADGE_ERROR_SM_CLASS,
+  unconfigured: BADGE_GHOST_SM_CLASS,
 };
 
 export function createDashboardProviderPresentation(

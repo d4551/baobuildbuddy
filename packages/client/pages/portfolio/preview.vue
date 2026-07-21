@@ -13,15 +13,21 @@ import {
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_PRINT_HIDDEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   PROSE_MEASURE_CENTER_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -75,7 +81,7 @@ async function handleExport(format: "pdf" | "docx") {
     >
       <template #actions>
         <button
-          class="btn btn-ghost print:hidden"
+          :class="[GHOST_ACTION_PRINT_HIDDEN_CLASS]"
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
         >
@@ -129,7 +135,7 @@ async function handleExport(format: "pdf" | "docx") {
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('portfolioPage.preview.contactAria')"
             >
               <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -142,7 +148,7 @@ async function handleExport(format: "pdf" | "docx") {
               :href="portfolio.metadata?.website"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('portfolioPage.preview.websiteAria')"
             >
               <IconGlobe :class="ICON_SIZE_CLASS.sm" />
@@ -175,7 +181,7 @@ async function handleExport(format: "pdf" | "docx") {
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
-                  class="badge badge-primary"
+                  :class="[BADGE_PRIMARY_CLASS]"
                 >
                   {{ tech }}
                 </span>
@@ -220,7 +226,7 @@ async function handleExport(format: "pdf" | "docx") {
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
-                  class="badge badge-sm"
+                  :class="[BADGE_SM_CLASS]"
                 >
                   {{ tech }}
                 </span>

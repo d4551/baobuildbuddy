@@ -5,11 +5,18 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
+  OUTLINE_ACTION_ERROR_DENSE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_SM_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 
 interface ResumeLibraryPanelProps {
   readonly resumes: readonly ResumeData[];
@@ -68,7 +75,7 @@ function requestDelete(resumeId?: string): void {
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+            :class="[GHOST_ACTION_DENSE_CLASS]"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
           >
@@ -114,8 +121,8 @@ function requestDelete(resumeId?: string): void {
           <div class="relative z-10 card-body" :class="[POINTER_EVENTS_TOKEN_CLASS.none]">
             <h3 class="card-title">{{ resume.name }}</h3>
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-              <span class="badge badge-sm">{{ templateLabel(resume.template) }}</span>
-              <span v-if="resume.isDefault" class="badge badge-primary badge-sm">
+              <span :class="[BADGE_SM_CLASS]">{{ templateLabel(resume.template) }}</span>
+              <span v-if="resume.isDefault" :class="[BADGE_PRIMARY_SM_CLASS]">
                 {{ t("resumePage.defaultBadge") }}
               </span>
             </div>
@@ -125,21 +132,21 @@ function requestDelete(resumeId?: string): void {
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+                :class="[GHOST_ACTION_DENSE_CLASS]"
                 :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
                 @click.stop
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+                :class="[OUTLINE_ACTION_DENSE_CLASS]"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
+                :class="[TOUCH_TARGET_MIN_CLASS, OUTLINE_ACTION_ERROR_DENSE_CLASS]"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
               >

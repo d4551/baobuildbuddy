@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -52,7 +53,7 @@ const { t } = useI18n();
     <div class="modal-action">
       <button 
         type="button"
-        class="btn btn-ghost"
+        :class="[GHOST_ACTION_CLASS]"
         :aria-label="t('jobDetail.cancelApplyAria')"
         @click="emit('update:open', false)"
       >

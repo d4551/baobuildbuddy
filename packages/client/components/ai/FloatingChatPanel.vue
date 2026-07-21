@@ -10,6 +10,7 @@ import {
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_SQUARE_CLASS,
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -23,6 +24,11 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_XS_CLASS,
+  BADGE_SOFT_INFO_XS_CLASS,
+  BADGE_SOFT_PRIMARY_XS_CLASS,
+} from "~/constants/layout-badges";
 
 const draft = defineModel<string>("draft", { required: true });
 
@@ -98,12 +104,12 @@ const { t } = useI18n();
           <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ resolvedBrand.assistantName }}</h2>
           <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("floatingChat.subtitle") }}</p>
-            <span class="badge badge-soft badge-info badge-xs" :aria-label="t('floatingChat.contextAria', { context: currentContextLabel })">
+            <span :class="[BADGE_SOFT_INFO_XS_CLASS]" :aria-label="t('floatingChat.contextAria', { context: currentContextLabel })">
               {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
             </span>
             <span
               v-if="focusedEntityLabel"
-              class="badge badge-soft badge-primary badge-xs"
+              :class="[BADGE_SOFT_PRIMARY_XS_CLASS]"
               :aria-label="t('floatingChat.focusedEntityAria', { entity: focusedEntityLabel })"
             >
               {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
@@ -116,15 +122,14 @@ const { t } = useI18n();
             :aria-label="t('floatingChat.contextChipsAria')"
           >
             <li v-for="chip in contextChips" :key="chip">
-              <span class="badge badge-ghost badge-xs">{{ chip }}</span>
+              <span :class="[BADGE_GHOST_XS_CLASS]">{{ chip }}</span>
             </li>
           </ul>
         </div>
         <div class="flex shrink-0 items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
           <NuxtLink
             :to="aiChatPagePath"
-            class="btn btn-ghost btn-square"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('floatingChat.expandAria')"
             :title="t('floatingChat.expandButton')"
           >
@@ -132,8 +137,7 @@ const { t } = useI18n();
           </NuxtLink>
           <button
             type="button"
-            class="btn btn-ghost btn-square"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('floatingChat.voiceSettings.toggleAria')"
             :title="t('floatingChat.voiceSettings.toggleButton')"
             :aria-expanded="isSpeechSettingsOpen"
@@ -143,8 +147,7 @@ const { t } = useI18n();
           </button>
           <button
             type="button"
-            class="btn btn-ghost btn-square"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('floatingChat.clearAria')"
             :title="t('floatingChat.clearButton')"
             @click="emit('clear')"
@@ -153,8 +156,7 @@ const { t } = useI18n();
           </button>
           <button
             type="button"
-            class="btn btn-ghost btn-square"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('floatingChat.closeAria')"
             @click="emit('close')"
           >

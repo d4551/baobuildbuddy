@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
@@ -57,7 +58,7 @@ function setAllCategoryFilter(): void {
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" role="radiogroup" :aria-label="t('skillsPage.filters.categoryGroupAria')">
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', isAllCategorySelected ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, isAllCategorySelected ? PRIMARY_BUTTON_VARIANT_CLASS : '']"
           :aria-label="t('skillsPage.filters.allAria')"
           :aria-pressed="isAllCategorySelected"
           @click="setAllCategoryFilter"
@@ -68,7 +69,7 @@ function setAllCategoryFilter(): void {
           v-for="categoryOption in categoryOptions"
           :key="categoryOption.value"
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', categoryFilter === categoryOption.value ? PRIMARY_BUTTON_VARIANT_CLASS : 'btn-ghost']"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, categoryFilter === categoryOption.value ? PRIMARY_BUTTON_VARIANT_CLASS : '']"
           :aria-label="t('skillsPage.filters.categoryAria', { category: categoryOption.label })"
           :aria-pressed="categoryFilter === categoryOption.value"
           @click="categoryFilter = categoryOption.value"
@@ -79,7 +80,7 @@ function setAllCategoryFilter(): void {
 
       <div class="flex justify-end">
         <button 
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+          :class="[GHOST_ACTION_DENSE_CLASS]"
           :disabled="!hasActiveFilters"
           :aria-label="t('skillsPage.filters.clearAria')"
           @click.prevent="emit('clear')"

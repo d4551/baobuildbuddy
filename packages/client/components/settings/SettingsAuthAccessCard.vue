@@ -1,40 +1,79 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import { assertApiResponse, settlePromise, withLoadingState } from "~/composables/async-flow";
+import { settlePromise, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
+import { useAuth } from "~/composables/useAuth";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const api = useApi();
+const { checkAuthStatus } = useAuth();
 const { $toast } = useNuxtApp();
 
-const loading = ref(false);
-const configured = ref(false);
+const actionLoading = ref(false);
 const rotatedKey = ref("");
-const statusLoaded = ref(false);
 
-async function refreshConfigured(): Promise<void> {
-  await withLoadingState(loading, async () => {
-    const { data, error } = await api.auth.configured.get();
-    assertApiResponse(error, t("settings.authAccess.statusFailed"));
-    configured.value = Boolean(data?.configured);
-    statusLoaded.value = true;
-  });
-}
+const {
+  data: authStatus,
+  pending: statusPending,
+  error: statusError,
+  refresh: refreshAuthStatus,
+} = await useAsyncData("settings-auth-access-card", () => checkAuthStatus(), {
+  server: true,
+  lazy: false,
+  default: () => ({
+    authRequired: true,
+    configured: false,
+    bootstrapRequired: true,
+    setupTokenConfigured: false,
+  }),
+});
+
+const authRequired = computed(() => authStatus.value?.authRequired !== false);
+const configured = computed(() => authStatus.value?.configured === true);
+const bootstrapRequired = computed(() => authStatus.value?.bootstrapRequired === true);
+
+const statusLabel = computed(() => {
+  if (statusPending.value && !authStatus.value) {
+    return t("common.loading");
+  }
+  if (statusError.value) {
+    return t("settings.authAccess.statusFailed");
+  }
+  if (!authRequired.value) {
+    return t("settings.authAccess.authDisabled");
+  }
+  if (bootstrapRequired.value || !configured.value) {
+    return t("settings.authAccess.configuredNo");
+  }
+  return t("settings.authAccess.configuredYes");
+});
+
+const canRotate = computed(
+  () => authRequired.value && configured.value && !bootstrapRequired.value && !actionLoading.value,
+);
+const canRevoke = computed(() => canRotate.value);
+const showSetupCta = computed(
+  () =>
+    !statusPending.value && authRequired.value && (bootstrapRequired.value || !configured.value),
+);
 
 async function handleRotate(): Promise<void> {
   const result = await settlePromise(
-    withLoadingState(loading, async () => {
+    withLoadingState(actionLoading, async () => {
       const { data, error } = await api.auth.rotate.post();
-      assertApiResponse(error, t("settings.authAccess.rotateFailed"));
+      if (error) {
+        throw new Error(t("settings.authAccess.rotateFailed"));
+      }
       return data;
     }),
     t("settings.authAccess.rotateFailed"),
@@ -44,15 +83,17 @@ async function handleRotate(): Promise<void> {
     return;
   }
   rotatedKey.value = typeof result.value?.apiKey === "string" ? result.value.apiKey : "";
-  configured.value = true;
+  await refreshAuthStatus();
   $toast.success(t("settings.authAccess.rotateSuccess"));
 }
 
 async function handleRevoke(): Promise<void> {
   const result = await settlePromise(
-    withLoadingState(loading, async () => {
+    withLoadingState(actionLoading, async () => {
       const { error } = await api.auth.revoke.post();
-      assertApiResponse(error, t("settings.authAccess.revokeFailed"));
+      if (error) {
+        throw new Error(t("settings.authAccess.revokeFailed"));
+      }
     }),
     t("settings.authAccess.revokeFailed"),
   );
@@ -61,24 +102,9 @@ async function handleRevoke(): Promise<void> {
     return;
   }
   rotatedKey.value = "";
-  configured.value = false;
+  await refreshAuthStatus();
   $toast.success(t("settings.authAccess.revokeSuccess"));
 }
-
-onMounted(() => {
-  settlePromise(refreshConfigured(), t("settings.authAccess.statusFailed")).then(
-    (result) => {
-      if (!result.ok) {
-        statusLoaded.value = true;
-      }
-      return undefined;
-    },
-    () => {
-      statusLoaded.value = true;
-      return undefined;
-    },
-  );
-});
 </script>
 
 <template>
@@ -94,10 +120,14 @@ onMounted(() => {
           </p>
         </div>
 
-        <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]" role="status" aria-live="polite">
-          <template v-if="!statusLoaded || loading">{{ t("common.loading") }}</template>
-          <template v-else-if="configured">{{ t("settings.authAccess.configuredYes") }}</template>
-          <template v-else>{{ t("settings.authAccess.configuredNo") }}</template>
+        <p
+          class="text-secondary"
+          :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+          role="status"
+          aria-live="polite"
+          data-testid="settings-auth-access-status"
+        >
+          {{ statusLabel }}
         </p>
 
         <div v-if="rotatedKey" class="alert alert-warning" role="status">
@@ -109,21 +139,28 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+          <NuxtLink
+            v-if="showSetupCta"
+            :to="APP_ROUTES.setup"
+            :class="[PRIMARY_ACTION_CLASS]"
+            :aria-label="t('settings.authAccess.setupAria')"
+          >
+            {{ t("settings.authAccess.setupButton") }}
+          </NuxtLink>
           <button
             type="button"
             :class="[PRIMARY_ACTION_CLASS]"
             :aria-label="t('settings.authAccess.rotateAria')"
-            :disabled="loading || !configured"
+            :disabled="!canRotate"
             @click="handleRotate"
           >
             {{ t("settings.authAccess.rotateButton") }}
           </button>
           <button
             type="button"
-            class="btn btn-outline"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('settings.authAccess.revokeAria')"
-            :disabled="loading || !configured"
+            :disabled="!canRevoke"
             @click="handleRevoke"
           >
             {{ t("settings.authAccess.revokeButton") }}

@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_JOIN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -116,8 +117,7 @@ const { t } = useI18n();
         </button>
         <button
           type="button"
-          class="btn btn-outline join-item"
-          :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+          :class="[OUTLINE_ACTION_JOIN_CLASS, TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
           :disabled="isScheduleDisabled"
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"

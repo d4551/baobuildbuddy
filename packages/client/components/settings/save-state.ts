@@ -1,3 +1,9 @@
+import {
+  BADGE_ERROR_SM_CLASS,
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
+
 export type SaveState = "idle" | "saving" | "success" | "error";
 
 export function getSaveStateLabelKey(value: SaveState): string | null {
@@ -8,7 +14,7 @@ export function getSaveStateLabelKey(value: SaveState): string | null {
 }
 
 export function getSaveStateBadgeClass(value: SaveState): string {
-  if (value === "success") return "badge-success";
-  if (value === "error") return "badge-error";
-  return "badge-ghost";
+  if (value === "success") return BADGE_SUCCESS_SM_CLASS;
+  if (value === "error") return BADGE_ERROR_SM_CLASS;
+  return BADGE_GHOST_SM_CLASS;
 }

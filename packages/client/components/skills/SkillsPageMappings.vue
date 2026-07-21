@@ -5,12 +5,19 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_ERROR_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_OUTLINE_SM_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
+  BADGE_SOFT_SM_CLASS,
+} from "~/constants/layout-badges";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,
@@ -77,7 +84,7 @@ function normalizedConfidence(confidence: number): number {
               <p class="font-semibold">{{ mapping.transferableSkill }}</p>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ mapping.gameExpression }}</p>
             </div>
-            <span class="badge badge-primary badge-sm">{{ mapping.confidence }}%</span>
+            <span :class="[BADGE_PRIMARY_SM_CLASS]">{{ mapping.confidence }}%</span>
           </div>
 
           <progress
@@ -89,23 +96,22 @@ function normalizedConfidence(confidence: number): number {
           ></progress>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-            <span class="badge badge-outline badge-sm">{{ resolveCategoryLabel(mapping.category) }}</span>
+            <span :class="[BADGE_OUTLINE_SM_CLASS]">{{ resolveCategoryLabel(mapping.category) }}</span>
             <span
               v-for="application in mapping.industryApplications.slice(0, 3)"
               :key="application"
-              class="badge badge-sm badge-soft"
+              :class="[BADGE_SOFT_SM_CLASS]"
             >
               {{ application }}
             </span>
-            <span v-if="mapping.industryApplications.length > 3" class="badge badge-sm badge-ghost">
+            <span v-if="mapping.industryApplications.length > 3" :class="[BADGE_GHOST_SM_CLASS]">
               {{ t("skillsPage.table.moreApplications", { count: mapping.industryApplications.length - 3 }) }}
             </span>
           </div>
 
           <button
             type="button"
-            class="btn btn-ghost btn-sm btn-error"
-            :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+            :class="[GHOST_ACTION_ERROR_DENSE_CLASS, FLUID_WIDTH_CLASS]"
             :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
             @click="emit('delete', mapping.id)"
           >
@@ -135,11 +141,11 @@ function normalizedConfidence(confidence: number): number {
                 <span
                   v-for="application in mapping.industryApplications.slice(0, 3)"
                   :key="application"
-                  class="badge badge-sm badge-soft"
+                  :class="[BADGE_SOFT_SM_CLASS]"
                 >
                   {{ application }}
                 </span>
-                <span v-if="mapping.industryApplications.length > 3" class="badge badge-sm badge-ghost">
+                <span v-if="mapping.industryApplications.length > 3" :class="[BADGE_GHOST_SM_CLASS]">
                   {{ t("skillsPage.table.moreApplications", { count: mapping.industryApplications.length - 3 }) }}
                 </span>
               </div>
@@ -162,14 +168,14 @@ function normalizedConfidence(confidence: number): number {
               </div>
             </td>
             <td>
-              <span class="badge badge-outline badge-sm">
+              <span :class="[BADGE_OUTLINE_SM_CLASS]">
                 {{ resolveCategoryLabel(mapping.category) }}
               </span>
             </td>
             <td>
               <button
                 type="button"
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-error']"
+                :class="[GHOST_ACTION_ERROR_DENSE_CLASS]"
                 :aria-label="t('skillsPage.table.deleteAria', { skill: mapping.transferableSkill })"
                 @click="emit('delete', mapping.id)"
               >

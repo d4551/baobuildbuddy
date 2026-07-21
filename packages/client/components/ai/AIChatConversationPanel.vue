@@ -7,6 +7,7 @@ import {
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -20,9 +21,15 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_CLASS,
+  BADGE_SOFT_INFO_CLASS,
+  BADGE_SOFT_PRIMARY_CLASS,
+} from "~/constants/layout-badges";
 import { CHAT_PANEL_PADDING_SM_PX6_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
+  titleId: string;
   resolvedBrand: { assistantName: string; name: string };
   locale: string;
   loading: boolean;
@@ -95,28 +102,30 @@ const updateInput = (event: Event): void => {
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
             <div>
-              <h1 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
+              <h1
+                :id="titleId"
+                :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]"
+              >
                 {{ t("aiChatPage.title", { brand: resolvedBrand.name }) }}
               </h1>
               <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
             </div>
             <!-- Below xl the sidebar is hidden; header owns context chips. At xl+ sidebar owns them. -->
             <div class="flex flex-wrap items-center xl:hidden" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <span class="badge badge-soft badge-info">
+              <span :class="[BADGE_SOFT_INFO_CLASS]">
                 {{ t("floatingChat.contextBadge", { context: currentContextLabel }) }}
               </span>
-              <span v-if="focusedEntityLabel" class="badge badge-soft badge-primary">
+              <span v-if="focusedEntityLabel" :class="[BADGE_SOFT_PRIMARY_CLASS]">
                 {{ t("floatingChat.focusedEntityBadge", { entity: focusedEntityLabel }) }}
               </span>
-              <span v-for="chip in contextChips" :key="chip" class="badge badge-ghost">
+              <span v-for="chip in contextChips" :key="chip" :class="[BADGE_GHOST_CLASS]">
                 {{ chip }}
               </span>
             </div>
           </div>
           <button
             type="button"
-            class="btn btn-ghost self-start"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[GHOST_ACTION_CLASS, 'self-start']"
             :aria-label="t('aiChatPage.clearAria')"
             @click="emit('clear')"
           >

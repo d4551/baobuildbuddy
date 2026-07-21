@@ -7,7 +7,9 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
@@ -15,6 +17,10 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SM_CLASS,
+  BADGE_SOFT_SM_CLASS,
+} from "~/constants/layout-badges";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -84,10 +90,10 @@ function handleScheduleInput(event: Event): void {
               </span>
             </span>
             <h2 class="card-title">{{ capability.name }}</h2>
-            <span class="badge badge-soft badge-sm" :class="capabilityAvailabilityBadgeClass(capability)">
+            <span :class="[BADGE_SOFT_SM_CLASS, capabilityAvailabilityBadgeClass(capability)]">
               {{ capabilityAvailabilityLabel(capability) }}
             </span>
-            <span class="badge badge-sm" :class="runStateBadgeClass(runState)">
+            <span :class="[BADGE_SM_CLASS, runStateBadgeClass(runState)]">
               {{ runStateLabel(runState) }}
             </span>
           </div>
@@ -102,7 +108,7 @@ function handleScheduleInput(event: Event): void {
           />
         </div>
 
-        <NuxtLink :to="latestRunRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']">
+        <NuxtLink :to="latestRunRoute" :class="[GHOST_ACTION_DENSE_CLASS]">
           {{
             latestRun
               ? t("automation.scraper.latestRun.openButton")
@@ -202,7 +208,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_DENSE_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -223,7 +229,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_DENSE_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -251,7 +257,7 @@ function handleScheduleInput(event: Event): void {
           </fieldset>
           <div class="card-actions justify-end">
             <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+              :class="[OUTLINE_ACTION_DENSE_CLASS]"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
               @click="emit('schedule', capability.target)"
@@ -277,7 +283,7 @@ function handleScheduleInput(event: Event): void {
           <div class="card-actions justify-end">
             <NuxtLink 
               :to="buildRunDetailRoute(latestRun.id)"
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+              :class="[GHOST_ACTION_DENSE_CLASS]"
               :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"
             >
               {{ t("automation.scraper.openRunDetailButton") }}

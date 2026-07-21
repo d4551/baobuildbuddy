@@ -198,6 +198,14 @@ function buildFallbackQuestionText(
         ],
         tags: [...seed.tags, "candidate-context", "closing"],
       };
+    default: {
+      const _exhaustive: never = seed.type;
+      return {
+        question: `How would you contribute as ${context.roleTarget} at ${context.interviewEntity}?`,
+        followUps: ["What evidence supports that?"],
+        tags: [...seed.tags, "fallback", String(_exhaustive)],
+      };
+    }
   }
 }
 

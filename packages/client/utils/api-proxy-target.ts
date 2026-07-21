@@ -14,12 +14,12 @@ export function normalizeApiProxyTarget(target: string): string | undefined {
 
   const resolvedTarget = new URL(trimmedTarget);
   const normalizedPath = trimTrailingSlash(resolvedTarget.pathname);
-  const pathnameWithApiPrefix =
-    normalizedPath.length === 0 || normalizedPath === "/"
-      ? API_ENDPOINT_PREFIX
-      : normalizedPath.endsWith(API_ENDPOINT_PREFIX)
-        ? normalizedPath
-        : `${normalizedPath}${API_ENDPOINT_PREFIX}`;
+  let pathnameWithApiPrefix = `${normalizedPath}${API_ENDPOINT_PREFIX}`;
+  if (normalizedPath.length === 0 || normalizedPath === "/") {
+    pathnameWithApiPrefix = API_ENDPOINT_PREFIX;
+  } else if (normalizedPath.endsWith(API_ENDPOINT_PREFIX)) {
+    pathnameWithApiPrefix = normalizedPath;
+  }
 
   resolvedTarget.pathname = pathnameWithApiPrefix;
   resolvedTarget.search = "";

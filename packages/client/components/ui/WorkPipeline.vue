@@ -10,6 +10,11 @@ import {
   FLUID_WIDTH_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_XS_CLASS,
+  BADGE_INFO_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 
 interface WorkPipelineProps {
   readonly title: string;
@@ -23,9 +28,9 @@ const props = defineProps<WorkPipelineProps>();
 const { t } = useI18n();
 
 const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
-  complete: "badge-success",
-  inProgress: "badge-info",
-  pending: "badge-ghost",
+  complete: BADGE_SUCCESS_SM_CLASS,
+  inProgress: BADGE_INFO_SM_CLASS,
+  pending: BADGE_GHOST_XS_CLASS,
 };
 </script>
 
@@ -53,7 +58,10 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
             :aria-current="step.status === 'inProgress' ? 'step' : undefined"
           >
             <span>{{ t(step.labelKey) }}</span>
-            <span class="badge badge-xs whitespace-nowrap" :class="statusBadgeClassByStepStatus[step.status]">
+            <span
+              class="whitespace-nowrap"
+              :class="[statusBadgeClassByStepStatus[step.status]]"
+            >
               {{ t(DASHBOARD_PIPELINE_STATUS_KEYS[step.status]) }}
             </span>
           </NuxtLink>

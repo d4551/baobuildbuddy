@@ -12,6 +12,10 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_CLASS,
+  BADGE_SUCCESS_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   challenges: readonly DailyChallenge[];
@@ -39,8 +43,8 @@ const { t } = useI18n();
             <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb2]">
               <h3 class="font-semibold">{{ challenge.name }}</h3>
               <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <span class="badge badge-primary">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
-                <span v-if="challenge.completed" class="badge badge-success">
+                <span :class="[BADGE_PRIMARY_CLASS]">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
+                <span v-if="challenge.completed" :class="[BADGE_SUCCESS_CLASS]">
                   {{ t("gamificationPage.challengeDoneLabel") }}
                 </span>
               </div>

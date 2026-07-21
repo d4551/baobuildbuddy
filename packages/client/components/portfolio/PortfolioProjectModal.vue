@@ -8,6 +8,8 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -181,7 +183,7 @@ function updateFeaturedFlag(event: Event): void {
             {{ tech }}
             <button 
               type="button"
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+              :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
@@ -204,7 +206,7 @@ function updateFeaturedFlag(event: Event): void {
     </div>
 
     <div class="modal-action">
-      <button class="btn btn-ghost" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
+      <button :class="[GHOST_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
       <button 

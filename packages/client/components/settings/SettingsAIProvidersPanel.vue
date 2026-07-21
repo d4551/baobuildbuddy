@@ -17,6 +17,12 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_ERROR_SM_CLASS,
+  BADGE_GHOST_SM_CLASS,
+  BADGE_NEUTRAL_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 type ProviderField =
@@ -85,9 +91,9 @@ const selectedProviderLabel = computed(
 function providerStatusClass(providerId: AIProviderType): string {
   const testResult = props.testResults[providerId];
   if (testResult) {
-    return testResult.valid ? "badge-success" : "badge-error";
+    return testResult.valid ? BADGE_SUCCESS_SM_CLASS : BADGE_ERROR_SM_CLASS;
   }
-  return props.providerConfiguredById[providerId] ? "badge-success" : "badge-ghost";
+  return props.providerConfiguredById[providerId] ? BADGE_SUCCESS_SM_CLASS : BADGE_GHOST_SM_CLASS;
 }
 
 function providerStatusLabel(providerId: AIProviderType): string {
@@ -127,7 +133,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader>
         <template #meta>
-          <span class="badge badge-neutral badge-sm" aria-hidden="true">
+          <span :class="[BADGE_NEUTRAL_SM_CLASS]" aria-hidden="true">
             {{ configuredProviderCount }}/{{ props.providerInputs.length }}
           </span>
         </template>
@@ -177,7 +183,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
                   {{ t("settings.aiProviders.readinessDescription") }}
                 </p>
               </div>
-              <span class="badge badge-ghost badge-sm" aria-hidden="true">
+              <span :class="[BADGE_GHOST_SM_CLASS]" aria-hidden="true">
                 {{ configuredProviderCount }}
               </span>
             </div>
@@ -198,7 +204,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
                       </p>
                     </div>
                   </div>
-                  <span class="badge badge-sm shrink-0" :class="providerStatusClass(provider.id)">
+                  <span class="shrink-0" :class="[providerStatusClass(provider.id)]">
                     {{ providerStatusLabel(provider.id) }}
                   </span>
                 </div>

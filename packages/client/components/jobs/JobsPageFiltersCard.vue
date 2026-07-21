@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
@@ -14,6 +15,9 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_SM_CLASS,
+} from "~/constants/layout-badges";
 
 type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 
@@ -69,14 +73,13 @@ const activeFilterCount = computed(() => {
           <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("jobsPage.filtersTitle") }}</h2>
           <span
             v-if="activeFilterCount > 0"
-            class="badge badge-primary badge-sm"
+            :class="[BADGE_PRIMARY_SM_CLASS]"
           >
             {{ t("jobsPage.filtersActiveCount", { count: activeFilterCount }) }}
           </span>
         </div>
         <button
-          class="btn btn-ghost"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('jobsPage.clearFiltersAria')"
           @click="emit('clear')"
         >

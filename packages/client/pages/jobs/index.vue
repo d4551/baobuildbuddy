@@ -14,6 +14,8 @@ import {
   ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_XS_ALT_CLASS,
   LABEL_HIDE_BELOW_SM_CLASS,
+  OUTLINE_ACTION_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   ROW_GAP_XS_CLASS,
@@ -23,6 +25,11 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+  BADGE_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
@@ -44,8 +51,7 @@ const page = useJobsIndexPage();
       <template v-if="!page.isCatalogEmpty.value" #actions>
         <button
           type="button"
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('jobsPage.aiMatchAria')"
           :disabled="page.matching.value"
           @click="page.handleAiMatch()"
@@ -178,8 +184,7 @@ const page = useJobsIndexPage();
           <template v-if="page.isCatalogEmpty.value" #actions>
             <button
               type="button"
-              class="btn btn-outline"
-              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
               :aria-label="t('jobsPage.refreshAria')"
               :disabled="page.refreshing.value"
               @click="page.handleRefresh()"
@@ -208,7 +213,7 @@ const page = useJobsIndexPage();
                 <p class="font-medium text-secondary">{{ job.company }}</p>
 
                 <div :class="[STACK_SPACING_SM_CLASS, 'flex flex-wrap', ROW_GAP_XS_CLASS]">
-                  <span class="badge badge-sm">
+                  <span :class="[BADGE_SM_CLASS]">
                     <svg :class="['me-1', ICON_SIZE_CHEVRON_CLASS]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -216,11 +221,11 @@ const page = useJobsIndexPage();
                     {{ job.location }}
                   </span>
 
-                  <span v-if="job.remote" class="badge badge-success badge-sm">
+                  <span v-if="job.remote" :class="[BADGE_SUCCESS_SM_CLASS]">
                     {{ t("jobsPage.remoteBadge") }}
                   </span>
 
-                  <span v-if="job.experienceLevel" class="badge badge-sm badge-outline">
+                  <span v-if="job.experienceLevel" :class="[BADGE_OUTLINE_SM_CLASS]">
                     {{ page.experienceOptionLabel(job.experienceLevel) }}
                   </span>
                 </div>
@@ -242,7 +247,7 @@ const page = useJobsIndexPage();
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+                      :class="[OUTLINE_ACTION_DENSE_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >

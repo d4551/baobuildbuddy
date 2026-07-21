@@ -48,12 +48,12 @@ function normalizeDashboardStats(
   const userMessages = readNumberField(usagePayload, "userMessages") ?? 0;
   const assistantMessages = readNumberField(usagePayload, "assistantMessages") ?? 0;
   const sessions = readNumberField(usagePayload, "sessions") ?? 0;
-  const successRate =
-    userMessages > 0
-      ? Math.round((assistantMessages / userMessages) * 100)
-      : totalMessages > 0
-        ? 100
-        : 0;
+  let successRate = 0;
+  if (userMessages > 0) {
+    successRate = Math.round((assistantMessages / userMessages) * 100);
+  } else if (totalMessages > 0) {
+    successRate = 100;
+  }
 
   return {
     totalRequests: totalMessages,

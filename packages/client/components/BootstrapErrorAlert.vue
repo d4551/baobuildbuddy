@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
@@ -59,7 +60,7 @@ const hasRetry = computed(
     <button 
       v-if="hasRetry"
       type="button"
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost shrink-0']"
+      :class="[GHOST_ACTION_DENSE_CLASS, 'shrink-0']"
       :aria-label="retryAriaLabel"
       @click="emit('retry')"
     >

@@ -18,6 +18,10 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_XS_CLASS,
+  BADGE_OUTLINE_XS_CLASS,
+} from "~/constants/layout-badges";
 import { formatChatTimestamp } from "~/utils/chat";
 
 const props = withDefaults(
@@ -52,13 +56,15 @@ const avatarClass = computed(() => {
   }
   return props.isLatestAssistantMessage && props.isStreaming ? "avatar-online" : "avatar-offline";
 });
-const avatarLabel = computed(() =>
-  isAssistant.value
-    ? props.isStreaming
-      ? t("aiChatCommon.voice.speakingStatus")
-      : props.assistantLabel
-    : props.userLabel,
-);
+const avatarLabel = computed(() => {
+  if (!isAssistant.value) {
+    return props.userLabel;
+  }
+  if (props.isStreaming) {
+    return t("aiChatCommon.voice.speakingStatus");
+  }
+  return props.assistantLabel;
+});
 const chatBubbleClass = computed(() =>
   isAssistant.value
     ? `border border-base-300 ${SURFACE_GLASS_SUBTLE_CLASS} text-base-content ${SHADOW_TOKEN_CLASS.sm}`
@@ -148,7 +154,7 @@ const ariaLabel = computed(() => {
         :aria-label="props.contextChipsAria || undefined"
       >
         <li v-for="chip in props.contextChips" :key="chip">
-          <span class="badge badge-outline badge-xs">{{ chip }}</span>
+          <span :class="[BADGE_OUTLINE_XS_CLASS]">{{ chip }}</span>
         </li>
       </ul>
       <span 
@@ -174,9 +180,9 @@ const ariaLabel = computed(() => {
       v-if="isAssistant && (props.message.provider || props.message.model)"
       class="chat-footer flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap1]"
     >
-      <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
-      <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>
-      <span v-if="props.message.confidence !== undefined" class="badge badge-outline badge-xs">
+      <span v-if="props.message.provider" :class="[BADGE_GHOST_XS_CLASS]">{{ props.message.provider }}</span>
+      <span v-if="props.message.model" :class="[BADGE_GHOST_XS_CLASS, 'text-muted']">{{ props.message.model }}</span>
+      <span v-if="props.message.confidence !== undefined" :class="[BADGE_OUTLINE_XS_CLASS]">
         {{ props.message.confidence }}%
       </span>
     </div>

@@ -3,8 +3,12 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_SQUARE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
+  OUTLINE_ACTION_JOIN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -99,7 +103,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.me2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute end-1.5 top-1/2 -translate-y-1/2 transition-colors']"
+            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, GHOST_ACTION_SQUARE_CLASS, 'btn-sm absolute end-1.5 top-1/2 -translate-y-1/2 transition-colors']"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
@@ -138,7 +142,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     </label>
 
     <button 
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+      :class="[OUTLINE_ACTION_DENSE_CLASS]"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"
@@ -170,7 +174,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               @input="updateProviderCredential($event, provider)"
             />
             <button 
-              class="btn btn-outline join-item"
+              :class="[OUTLINE_ACTION_JOIN_CLASS]"
               :disabled="testing || !providerCredentials[provider].trim()"
               :aria-label="t('setup.testProviderAria', { provider: providerLabels[provider] })"
               @click="emit('test-provider', provider)"
@@ -185,8 +189,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     <div class="flex justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button
         type="button"
-        class="btn btn-ghost"
-        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
         :aria-label="t('setup.backToProfileAria')"
         @click="emit('back')"
       >

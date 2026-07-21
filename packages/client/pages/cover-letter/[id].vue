@@ -12,6 +12,7 @@ import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -229,7 +230,7 @@ async function handleExport(format: "pdf" | "docx") {
       </template>
       <template #actions>
         <button
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :disabled="regenerating"
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
           @click="requestRegenerate"
@@ -243,7 +244,7 @@ async function handleExport(format: "pdf" | "docx") {
           :button-label="t('coverLetterDetailPage.actions.exportButton')"
           :button-aria-label="t('coverLetterDetailPage.actions.exportAria')"
           :disabled="loading"
-          summary-class="btn btn-outline"
+          summary-class="[OUTLINE_ACTION_CLASS]"
           @export="handleExport"
         />
 

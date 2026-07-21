@@ -2,9 +2,12 @@
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  LINK_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_H_36_CLASS,
   MIN_HEIGHT_SCROLL_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -56,7 +59,7 @@ useSeoMeta({
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automationRuns"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.email.openRunsAria')"
         >
           {{ t("automation.email.openRunsButton") }}
@@ -168,7 +171,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTE_BUILDERS.settingsSection('emailDelivery')"
-              class="btn btn-link btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, PADDING_TOKEN_CLASS.px0]"
+              :class="[LINK_ACTION_DENSE_CLASS, PADDING_TOKEN_CLASS.px0]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -198,7 +201,7 @@ useSeoMeta({
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :disabled="pending || !canSubmit || !form.runAt"
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"
@@ -238,7 +241,7 @@ useSeoMeta({
         <div class="card-actions justify-end">
           <NuxtLink
             :to="APP_ROUTE_BUILDERS.automationRunDetail(scheduledRun.id)"
-            class="btn btn-ghost"
+            :class="[GHOST_ACTION_CLASS]"
             :aria-label="t('automation.email.openRunDetailAria', { id: scheduledRun.id })"
           >
             {{ t("automation.email.openRunDetailButton") }}
@@ -282,7 +285,7 @@ useSeoMeta({
         <div class="card-actions justify-end">
           <NuxtLink
             :to="APP_ROUTE_BUILDERS.automationRunDetail(lastResult.runId)"
-            class="btn btn-ghost"
+            :class="[GHOST_ACTION_CLASS]"
             :aria-label="t('automation.email.openRunDetailAria', { id: lastResult.runId })"
           >
             {{ t("automation.email.openRunDetailButton") }}

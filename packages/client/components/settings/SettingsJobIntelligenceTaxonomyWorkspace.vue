@@ -10,6 +10,13 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_NEUTRAL_SM_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
+import {
+  SECONDARY_ACTION_DENSE_CLASS,
+} from "~/constants/layout-action-soft";
 import type { JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
@@ -44,18 +51,17 @@ const populatedTaxonomyCount = computed(
       >
         <template #meta>
           <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-            <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summaryTaxonomyTitle')">
+            <span :class="[BADGE_NEUTRAL_SM_CLASS]" :aria-label="t('settings.jobIntelligence.summaryTaxonomyTitle')">
               {{ populatedTaxonomyCount }}/2
             </span>
             <span 
               v-if="taxonomySaveStateLabelKey"
-              class="badge badge-sm"
-              :class="getSaveStateBadgeClass(taxonomySaveState)"
+              :class="[BADGE_SM_CLASS, getSaveStateBadgeClass(taxonomySaveState)]"
             >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
             <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-secondary btn-sm']"
+              :class="[TOUCH_TARGET_MIN_CLASS, SECONDARY_ACTION_DENSE_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"
             >

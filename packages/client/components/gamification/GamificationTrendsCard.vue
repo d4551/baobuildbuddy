@@ -39,65 +39,63 @@ const { t } = useI18n();
       </div>
 
       <SectionGrid grid-token="twoColumn">
-        <div
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]"
-        >
-          <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-            {{ t("gamificationPage.trends.weeklyTitle") }}
-          </h3>
-          <template v-if="weekly">
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{ t("gamificationPage.trends.weeklyXp", { xp: weekly.xpEarned }) }}
+        <UiGlassCard variant="subtle" :stagger-index="0">
+          <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]">
+            <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+              {{ t("gamificationPage.trends.weeklyTitle") }}
+            </h3>
+            <template v-if="weekly">
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{ t("gamificationPage.trends.weeklyXp", { xp: weekly.xpEarned }) }}
+              </p>
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{ t("gamificationPage.trends.weeklyActions", { count: weekly.actionsCount }) }}
+              </p>
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{
+                  t("gamificationPage.trends.weeklyChallenges", {
+                    count: weekly.challengesCompleted,
+                  })
+                }}
+              </p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                {{ t("gamificationPage.trends.topCategory", { category: weekly.topCategory }) }}
+              </p>
+            </template>
+            <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+              {{ t("gamificationPage.trends.weeklyEmpty") }}
             </p>
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{ t("gamificationPage.trends.weeklyActions", { count: weekly.actionsCount }) }}
-            </p>
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{
-                t("gamificationPage.trends.weeklyChallenges", {
-                  count: weekly.challengesCompleted,
-                })
-              }}
-            </p>
-            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
-              {{ t("gamificationPage.trends.topCategory", { category: weekly.topCategory }) }}
-            </p>
-          </template>
-          <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-            {{ t("gamificationPage.trends.weeklyEmpty") }}
-          </p>
-        </div>
+          </div>
+        </UiGlassCard>
 
-        <div
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]"
-        >
-          <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-            {{ t("gamificationPage.trends.monthlyTitle") }}
-          </h3>
-          <template v-if="monthly">
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{ t("gamificationPage.trends.monthlyXp", { xp: monthly.totalXP }) }}
+        <UiGlassCard variant="subtle" :stagger-index="1">
+          <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p4]">
+            <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+              {{ t("gamificationPage.trends.monthlyTitle") }}
+            </h3>
+            <template v-if="monthly">
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{ t("gamificationPage.trends.monthlyXp", { xp: monthly.totalXP }) }}
+              </p>
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{ t("gamificationPage.trends.monthlyLevels", { count: monthly.levelsGained }) }}
+              </p>
+              <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+                {{
+                  t("gamificationPage.trends.monthlyAchievements", {
+                    count: monthly.achievementsUnlocked,
+                  })
+                }}
+              </p>
+              <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
+                {{ t("gamificationPage.trends.monthlyStreak", { days: monthly.streakDays }) }}
+              </p>
+            </template>
+            <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+              {{ t("gamificationPage.trends.monthlyEmpty") }}
             </p>
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{ t("gamificationPage.trends.monthlyLevels", { count: monthly.levelsGained }) }}
-            </p>
-            <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{
-                t("gamificationPage.trends.monthlyAchievements", {
-                  count: monthly.achievementsUnlocked,
-                })
-              }}
-            </p>
-            <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
-              {{ t("gamificationPage.trends.monthlyStreak", { days: monthly.streakDays }) }}
-            </p>
-          </template>
-          <p v-else class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-            {{ t("gamificationPage.trends.monthlyEmpty") }}
-          </p>
-        </div>
+          </div>
+        </UiGlassCard>
       </SectionGrid>
     </div>
   </UiGlassCard>

@@ -1,6 +1,10 @@
 import type { InterviewMode } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
 type InterviewHubPresentationInput = {
@@ -49,7 +53,7 @@ export function createInterviewHubPresentation(
       return mode === "job" ? t("interviewHub.mode.job") : t("interviewHub.mode.studio");
     },
     prepStatusBadgeClass(ready: boolean): string {
-      return ready ? "badge-success" : "badge-ghost";
+      return ready ? BADGE_SUCCESS_SM_CLASS : BADGE_GHOST_SM_CLASS;
     },
     questionCountLabel(count: number): string {
       const key = QUESTION_COUNT_LABEL_KEYS[count as keyof typeof QUESTION_COUNT_LABEL_KEYS];

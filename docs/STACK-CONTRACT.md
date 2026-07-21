@@ -32,8 +32,10 @@ If parent AGENTS and this file conflict on SSOT shape: **this document wins for 
 | `skipLibCheck` | **false** | Enforced. Upstream Elysia/Drizzle/OpenAPI `.d.ts` are marked `// @ts-nocheck` by `scripts/patch-upstream-dts-nocheck.ts` (`postinstall`) until those packages ship TS7-clean declarations. First-party source remains fully checked (`scripts/typecheck-workspace.ts`). |
 | API client types | **Eden Treaty** (`@elysiajs/eden@1.4.9`) | Generated from server. **No Eden 2.x on npm** (latest/experimental still 1.x); keep Eden 1 until upstream publishes Elysia-2-compatible Eden. OpenAPI plugin is `@elysiajs/openapi@2.0.0-exp.0`. |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
-| UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
-| Styling | **Tailwind CSS 4** + **daisyUI 5** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark) |
+| UI | **Nuxt 4** (`4.5.0`) + **Vue 3** + **vue-i18n** (`11.4.7`) | Port **3001** |
+| Styling | **Tailwind CSS 4** + **daisyUI 5.7** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark) |
+| Schemas | **Zod 4.4** | Shared + client + server |
+| Browser proof | **Playwright 1.61** | `proof:browser-smoke` / burndown |
 
 ## Non-goals (do not “migrate” without an explicit product decision)
 

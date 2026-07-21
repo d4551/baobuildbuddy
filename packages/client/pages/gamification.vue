@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
-
-definePageMeta({
-  middleware: ["auth"],
-});
-
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { getXPProgress } from "@bao/shared/constants/xp-levels";
 import type { DailyChallenge } from "@bao/shared/types/gamification";
@@ -24,7 +18,12 @@ import {
   GAMIFICATION_LOADING_SKELETON_LINES,
   GAMIFICATION_XP_TARGET_FALLBACK,
 } from "~/constants/gamification";
+import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
+
+definePageMeta({
+  middleware: ["auth"],
+});
 
 type GamificationUiState = "idle" | "loading" | "error" | "empty" | "success";
 

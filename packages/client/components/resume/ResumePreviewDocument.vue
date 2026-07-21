@@ -11,6 +11,9 @@ import {
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   resume: ResumeData;
@@ -131,7 +134,7 @@ const { t } = useI18n();
         :class="[MARGIN_TOKEN_CLASS.mb3]"
       />
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" :class="[BADGE_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ skill }}
         </span>
       </div>

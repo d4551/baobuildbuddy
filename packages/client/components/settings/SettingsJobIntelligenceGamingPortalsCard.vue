@@ -8,6 +8,10 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
+import {
   countConfiguredGamingPortals,
   parseGamingPortalsJson,
   serializeGamingPortalsJson,
@@ -52,7 +56,10 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
             {{ t("settings.jobIntelligence.gamingPortalsTogglesDescription") }}
           </p>
         </div>
-        <span class="badge badge-sm shrink-0" :class="configuredPortalCount > 0 ? 'badge-success' : 'badge-ghost'">
+        <span
+          class="shrink-0"
+          :class="[configuredPortalCount > 0 ? BADGE_SUCCESS_SM_CLASS : BADGE_GHOST_SM_CLASS]"
+        >
           {{
             t("settings.jobIntelligence.gamingPortalsConfiguredCount", {
               count: configuredPortalCount,

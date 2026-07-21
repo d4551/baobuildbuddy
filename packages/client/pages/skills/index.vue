@@ -10,13 +10,19 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_SM_CLASS,
+} from "~/constants/layout-badges";
 import {
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
@@ -89,18 +95,17 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.gamification"
-          class="btn btn-ghost" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+          :class="[GHOST_ACTION_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]"
           :aria-label="t('skillsPage.gamification.openProgressAria')"
         >
-          <span class="badge badge-primary badge-sm">
+          <span :class="[BADGE_PRIMARY_SM_CLASS]">
             {{ t("skillsPage.gamification.levelLabel", { level: gamificationLevel }) }}
           </span>
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
         <button
           v-if="hasMappings"
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS]"
           :disabled="analyzing"
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"
@@ -236,7 +241,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
               {{ application }}
               <button
                 type="button"
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+                :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
                 :aria-label="t('skillsPage.createModal.removeApplicationAria', { application })"
                 @click="removeApplication(index)"
               >
@@ -263,7 +268,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
 
       <div class="modal-action">
         <button
-          class="btn btn-ghost"
+          :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('skillsPage.createModal.cancelAria')"
           @click="showAddModal = false"
         >

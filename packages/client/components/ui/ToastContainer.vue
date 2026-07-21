@@ -6,6 +6,7 @@ import {
   AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -77,7 +78,7 @@ function resolveIconPath(type: ToastType): string {
 
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-circle btn-sm']"
+          :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
           :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >

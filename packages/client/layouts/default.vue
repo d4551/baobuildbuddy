@@ -60,14 +60,15 @@ onMounted(() => {
   };
 });
 
+// Cookie + setup initTheme already applied settings.theme. Do not re-apply
+// with immediate:true (SSR/client race can log hydration mismatches).
 watch(
   () => settings.value?.theme,
   (nextTheme) => {
-    if (nextTheme) {
+    if (nextTheme && nextTheme !== theme.value) {
       setTheme(nextTheme, { persist: false });
     }
   },
-  { immediate: true },
 );
 
 watch(

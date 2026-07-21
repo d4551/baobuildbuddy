@@ -6,12 +6,17 @@ import {
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
 interface Studio {
@@ -187,7 +192,7 @@ function handleComboboxKeydown(event: KeyboardEvent): void {
 
 function studioTypeBadgeClass(type: string): string {
   const normalizedType = type.trim();
-  return normalizedType.length > 0 ? "badge-outline" : "badge-ghost";
+  return normalizedType.length > 0 ? "badge-outline" : BADGE_GHOST_CLASS;
 }
 
 function resolvedStudioTypeLabel(type: string): string {
@@ -207,7 +212,7 @@ function studioLocationLabel(location: string): string {
   <div class="dropdown" :class="[FLUID_WIDTH_CLASS, { 'dropdown-open': isOpen }]">
     <button 
       type="button"
-      class="btn btn-outline justify-between" :class="[FLUID_WIDTH_CLASS]"
+      :class="[OUTLINE_ACTION_CLASS, 'justify-between', FLUID_WIDTH_CLASS]"
       :aria-label="t('studioSelector.toggleAria')"
       :aria-expanded="isOpen"
       :aria-controls="listboxId"
@@ -217,7 +222,7 @@ function studioLocationLabel(location: string): string {
     >
       <span v-if="selectedStudio" class="flex items-center truncate" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <span class="truncate">{{ selectedStudio.name }}</span>
-        <span class="badge badge-sm" :class="studioTypeBadgeClass(selectedStudio.type)">
+        <span :class="[BADGE_SM_CLASS, studioTypeBadgeClass(selectedStudio.type)]">
           {{ resolvedStudioTypeLabel(selectedStudio.type) }}
         </span>
       </span>
@@ -272,7 +277,7 @@ function studioLocationLabel(location: string): string {
           >
             <div class="flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <span class="font-medium truncate">{{ studio.name }}</span>
-              <span class="badge badge-sm" :class="studioTypeBadgeClass(studio.type)">
+              <span :class="[BADGE_SM_CLASS, studioTypeBadgeClass(studio.type)]">
                 {{ resolvedStudioTypeLabel(studio.type) }}
               </span>
             </div>

@@ -40,6 +40,21 @@ const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
 ]);
 
 const BASE64_PAYLOAD_RE = /^[A-Za-z0-9+/]+=*$/;
+
+const resolveTranscriptionFilename = (filename: string | undefined, mimeType: string): string => {
+  const trimmed = filename?.trim();
+  if (trimmed) {
+    return trimmed;
+  }
+  if (mimeType.includes("wav")) {
+    return "recording.wav";
+  }
+  if (mimeType.includes("mp3")) {
+    return "recording.mp3";
+  }
+  return "recording.webm";
+};
+
 const decodeAudio = (audioBase64: string): Uint8Array | null => {
   const trimmed = audioBase64.trim();
   if (trimmed.length === 0 || !BASE64_PAYLOAD_RE.test(trimmed)) {
@@ -171,13 +186,7 @@ export const transcribeSpeechAudio = async (
   }
 
   const auth = await resolveUpstreamAuth(provider);
-  const filename =
-    input.filename?.trim() ||
-    (input.mimeType.includes("wav")
-      ? "recording.wav"
-      : input.mimeType.includes("mp3")
-        ? "recording.mp3"
-        : "recording.webm");
+  const filename = resolveTranscriptionFilename(input.filename, input.mimeType);
 
   const upstream = await postOpenAiTranscription({
     url: urlResult.url,

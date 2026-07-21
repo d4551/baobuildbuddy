@@ -11,6 +11,9 @@ import {
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   orderedCards: readonly AutomationHubCard[];
@@ -47,7 +50,7 @@ const { t } = useI18n();
             </span>
             <h2 class="card-title">{{ t(card.titleKey) }}</h2>
           </div>
-          <span v-if="primaryCardId === card.id" class="badge badge-primary badge-outline">
+          <span v-if="primaryCardId === card.id" :class="[BADGE_PRIMARY_OUTLINE_CLASS]">
             {{ t("automation.hub.pipelineTitle") }}
           </span>
         </div>

@@ -4,10 +4,14 @@ import {
   FLUID_WIDTH_CLASS,
   FORM_WIDTH_32_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_LG_CLASS,
+} from "~/constants/layout-badges";
 
 definePageMeta({
   middleware: ["auth"],
@@ -49,7 +53,7 @@ useSeoMeta({
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.studios"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('studioAnalytics.openDirectoryAria')"
         >
           {{ t("studiosIndex.title") }}
@@ -127,7 +131,7 @@ useSeoMeta({
             >
               <div class="flex justify-between items-center" :class="[MARGIN_TOKEN_CLASS.mb2]">
                 <span class="font-medium">{{ size }}</span>
-                <span class="badge badge-lg">{{ count }}</span>
+                <span :class="[BADGE_LG_CLASS]">{{ count }}</span>
               </div>
               <progress
                 class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"

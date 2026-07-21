@@ -6,12 +6,19 @@ import {
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_SM_CLASS,
+  BADGE_PRIMARY_CLASS,
+  BADGE_PRIMARY_LG_CLASS,
+  BADGE_SUCCESS_CLASS,
+} from "~/constants/layout-badges";
 
 definePageMeta({
   middleware: ["auth"],
@@ -147,7 +154,7 @@ function studioDetailLocation(location: string | undefined): string {
             :href="studio.website"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
           >
             <IconGlobe :class="ICON_SIZE_CLASS.sm" />
@@ -168,9 +175,9 @@ function studioDetailLocation(location: string | undefined): string {
                     <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ studioSummaryTitle }}</h2>
                   </div>
                   <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                    <span class="badge badge-primary">{{ studioTypeLabel(t, studio?.type) }}</span>
+                    <span :class="[BADGE_PRIMARY_CLASS]">{{ studioTypeLabel(t, studio?.type) }}</span>
                     <span class="badge">{{ studioSizeLabel(t, studio?.size) }}</span>
-                    <span v-if="studio?.remoteWork" class="badge badge-success">
+                    <span v-if="studio?.remoteWork" :class="[BADGE_SUCCESS_CLASS]">
                       {{ t("studioDetail.remoteFriendlyBadge") }}
                     </span>
                   </div>
@@ -242,7 +249,7 @@ function studioDetailLocation(location: string | undefined): string {
               <div v-if="cultureValues.length > 0">
                 <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("studioDetail.culture.valuesLabel") }}</p>
                 <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt1]">
-                  <span v-for="value in cultureValues" :key="value" class="badge badge-outline badge-sm">
+                  <span v-for="value in cultureValues" :key="value" :class="[BADGE_OUTLINE_SM_CLASS]">
                     {{ value }}
                   </span>
                 </div>
@@ -265,7 +272,7 @@ function studioDetailLocation(location: string | undefined): string {
           <div class="card-body">
             <h2 class="card-title">{{ t("studioDetail.sections.technologies") }}</h2>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <span v-for="tech in studio.technologies" :key="tech" class="badge badge-primary badge-lg">
+              <span v-for="tech in studio.technologies" :key="tech" :class="[BADGE_PRIMARY_LG_CLASS]">
                 {{ tech }}
               </span>
             </div>

@@ -4,6 +4,12 @@ import {
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import { SCRAPER_JOB_QUERY_LIMIT } from "@bao/shared/constants/interview";
+import {
+  BADGE_ERROR_SM_CLASS,
+  BADGE_GHOST_SM_CLASS,
+  BADGE_INFO_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -13,10 +19,10 @@ import type {
 } from "~/types/automation-scraper";
 
 export const RUN_STATE_BADGE_CLASS: Record<AutomationScraperRunState, string> = {
-  idle: "badge-ghost",
-  running: "badge-info",
-  success: "badge-success",
-  error: "badge-error",
+  idle: BADGE_GHOST_SM_CLASS,
+  running: BADGE_INFO_SM_CLASS,
+  success: BADGE_SUCCESS_SM_CLASS,
+  error: BADGE_ERROR_SM_CLASS,
 };
 
 const createTargetRecord = <TValue>(factory: () => TValue): TargetRecord<TValue> => {

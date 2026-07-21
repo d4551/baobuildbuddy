@@ -9,6 +9,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_SECONDARY_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -16,6 +17,15 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_ACCENT_LG_CLASS,
+  BADGE_OUTLINE_CLASS,
+  BADGE_OUTLINE_MUTED_CLASS,
+  BADGE_SECONDARY_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
+import {
+  ACCENT_ACTION_CLASS,
+} from "~/constants/layout-action-soft";
 
 type BrandPreviewTheme = "light" | "dark";
 
@@ -73,7 +83,7 @@ const brandPreviewThemes = computed<
             {{ t("settings.brand.previewSubtitle") }}
           </p>
         </div>
-        <span class="badge badge-outline">{{ brandDraft.assistantName }}</span>
+        <span :class="[BADGE_OUTLINE_CLASS]">{{ brandDraft.assistantName }}</span>
       </div>
 
       <SectionGrid grid-token="twoColumnXlGap4">
@@ -98,7 +108,7 @@ const brandPreviewThemes = computed<
                 </p>
               </div>
             </div>
-            <span class="badge badge-outline border-current/20 text-current/80">
+            <span :class="[BADGE_OUTLINE_MUTED_CLASS]">
               {{ themeSurface.label }}
             </span>
           </div>
@@ -114,23 +124,22 @@ const brandPreviewThemes = computed<
           </div>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt5]">
-            <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
+            <span :class="[BADGE_ACCENT_LG_CLASS, SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
-            <span class="badge badge-secondary badge-outline">
+            <span :class="[BADGE_SECONDARY_OUTLINE_CLASS]">
               {{ brandDraft.apiName }}
             </span>
           </div>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt6]">
             <span
-              class="btn btn-accent border-0"
-              :class="[SHADOW_TOKEN_CLASS.sm]"
+              :class="[ACCENT_ACTION_CLASS, SHADOW_TOKEN_CLASS.sm]"
               aria-hidden="true"
             >
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>
-            <span class="btn btn-secondary btn-outline" aria-hidden="true">
+            <span :class="[OUTLINE_ACTION_SECONDARY_CLASS]" aria-hidden="true">
               {{ t("settings.brand.previewSecondaryAction") }}
             </span>
           </div>

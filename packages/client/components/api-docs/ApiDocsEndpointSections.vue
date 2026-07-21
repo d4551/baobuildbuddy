@@ -5,6 +5,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SCROLL_MARGIN_TOKEN_CLASS,
@@ -61,7 +62,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+              :class="[OUTLINE_ACTION_DENSE_CLASS]"
               :aria-label="
                 t('apiDocs.endpoint.openTesterAria', {
                   method: methodLabel(endpoint.method),

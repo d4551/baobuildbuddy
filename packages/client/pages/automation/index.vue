@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   FLEX_GAP_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -23,6 +24,7 @@ import {
   isAutomationHubSectionId,
 } from "~/components/automation/hub-sections";
 import { getErrorMessage } from "~/utils/errors";
+import { resolveRouteSectionId } from "~/utils/route-query";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -66,19 +68,13 @@ const {
   uiState: page.uiState,
 };
 
-const routeSection = computed<AutomationHubSectionId>(() => {
-  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
-  const candidateSection =
-    typeof sectionQueryValue === "string"
-      ? sectionQueryValue
-      : Array.isArray(sectionQueryValue)
-        ? sectionQueryValue[0]
-        : null;
-
-  return candidateSection && isAutomationHubSectionId(candidateSection)
-    ? candidateSection
-    : AUTOMATION_HUB_DEFAULT_SECTION_ID;
-});
+const routeSection = computed<AutomationHubSectionId>(() =>
+  resolveRouteSectionId(
+    route.query[APP_ROUTE_QUERY_KEYS.section],
+    isAutomationHubSectionId,
+    AUTOMATION_HUB_DEFAULT_SECTION_ID,
+  ),
+);
 
 const activeSection = ref<AutomationHubSectionId>(routeSection.value);
 
@@ -185,8 +181,7 @@ useSeoMeta({
                   <div class="card-actions justify-end">
                     <NuxtLink
                       :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
-                      class="btn btn-outline"
-                      :class="[TOUCH_TARGET_MIN_CLASS]"
+                      :class="[OUTLINE_ACTION_CLASS]"
                       :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
                     >
                       {{ t(primaryCard?.buttonKey ?? "automation.hub.cards.scraper.button") }}

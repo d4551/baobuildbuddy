@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -98,8 +99,7 @@ function handleAutoSpeakChange(event: Event): void {
 <template>
   <button
     v-if="props.supportsRecognition"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
+    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
     :title="
       props.isListening
         ? t('aiChatCommon.voice.stopTitle')
@@ -141,8 +141,7 @@ function handleAutoSpeakChange(event: Event): void {
   </button>
   <button
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
     :aria-label="t('aiChatCommon.voice.replayAria')"
     :title="t('aiChatCommon.voice.replayTitle')"
     :disabled="!props.canReplayAssistant || props.loading"

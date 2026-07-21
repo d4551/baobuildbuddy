@@ -55,6 +55,8 @@
         "recommended": true,
         "noVoid": "error",
         "noExcessiveCognitiveComplexity": "error",
+        "noUselessContinue": "error",
+        "noUselessStringConcat": "error",
         "noExcessiveLinesPerFunction": {
           "level": "error",
           "options": {
@@ -94,11 +96,14 @@
         "noFocusedTests": "error",
         "noExportsInTest": "error",
         "noAlert": "error",
-        "noDocumentCookie": "error"
+        "noDocumentCookie": "error",
+        "noConstantBinaryExpressions": "error",
+        "noImplicitAnyLet": "error"
       },
       "style": {
         "recommended": true,
         "noNonNullAssertion": "error",
+        "noNestedTernary": "error",
         "useConst": "error",
         "useTemplate": "error",
         "useExportType": "error",
@@ -110,7 +115,10 @@
         "useDefaultParameterLast": "error",
         "useExponentiationOperator": "error",
         "useAsConstAssertion": "error",
-        "useEnumInitializers": "error"
+        "useEnumInitializers": "error",
+        "useDefaultSwitchClause": "error",
+        "useCollapsedElseIf": "error",
+        "useArrayLiterals": "error"
       },
       "nursery": {
         "noFloatingPromises": "error",
@@ -121,6 +129,14 @@
         "useVueNextTickPromise": "error",
         "noDrizzleDeleteWithoutWhere": "error",
         "noDrizzleUpdateWithoutWhere": "error",
+        "useExhaustiveSwitchCases": "error",
+        "useSortedClasses": {
+          "level": "error",
+          "options": {
+            "attributes": ["class", "className", "classList"],
+            "functions": ["clsx", "cn", "twMerge", "twJoin"]
+          }
+        },
         "noPlaywrightElementHandle": "error",
         "noPlaywrightEval": "error",
         "noPlaywrightForceOption": "error",
