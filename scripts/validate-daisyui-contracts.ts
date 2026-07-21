@@ -114,6 +114,14 @@ const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
   "UiGlassCard",
 ] as const;
 
+/** SSOT constants that already include daisyUI base `list`. */
+const SSOT_SURFACE_CONSTANTS_WITH_LIST = ["INSET_LIST_CLASS"] as const;
+
+const SSOT_LIST_CONSTANT_USAGE_PATTERN = new RegExp(
+  `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_LIST.join("|")})\\b`,
+  "u",
+);
+
 const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(
   `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_CARD.join("|")})\\b`,
   "u",
@@ -232,9 +240,28 @@ const markImplicitCardToken = (
   }
 };
 
+const markImplicitListToken = (
+  fileContent: string,
+  classTokens: Set<string>,
+  firstLineByClass: Map<string, number>,
+): void => {
+  if (!SSOT_LIST_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    return;
+  }
+  classTokens.add("list");
+  if (firstLineByClass.has("list")) {
+    return;
+  }
+  const match = SSOT_LIST_CONSTANT_USAGE_PATTERN.exec(fileContent);
+  if (match) {
+    firstLineByClass.set("list", getLineFromOffset(fileContent, match.index));
+  }
+};
+
 const collectFileLevelPartViolations = (filePath: string, fileContent: string): Violation[] => {
   const { classTokens, firstLineByClass } = collectStaticClassTokens(fileContent);
   markImplicitCardToken(fileContent, classTokens, firstLineByClass);
+  markImplicitListToken(fileContent, classTokens, firstLineByClass);
 
   return FILE_LEVEL_PART_REQUIREMENTS.flatMap((requirement) =>
     requirement.partClasses

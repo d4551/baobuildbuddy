@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -26,8 +27,7 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 text-base-content print:rounded-none print:border-0"
-    :class="[PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
+    class="mx-auto max-w-4xl text-base-content print:rounded-none print:border-0" :class="[INSET_PANEL_CLASS, PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
   >
     <div class="border-b-2 border-base-content/30 text-center" :class="[MARGIN_TOKEN_CLASS.mb8, PADDING_TOKEN_CLASS.pb4]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>

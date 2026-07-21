@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_MUTED_CLASS,
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -170,7 +171,7 @@ useSeoMeta({
                     {{ t("automation.hub.nextAction.description") }}
                   </p>
                 </div>
-                <div class="rounded-box border border-base-300 bg-base-200" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p4]">
+                <div :class="[INSET_PANEL_MUTED_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p4]">
                   <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     {{ nextPipelineStepLabel }}
                   </p>

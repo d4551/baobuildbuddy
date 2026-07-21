@@ -6,6 +6,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_ERROR_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -74,8 +75,7 @@ function normalizedConfidence(confidence: number): number {
         <li
           v-for="mapping in filteredMappings"
           :key="mapping.id"
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+          :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
           :aria-label="t('skillsPage.mobile.cardAria', { skill: mapping.transferableSkill })"
         >
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

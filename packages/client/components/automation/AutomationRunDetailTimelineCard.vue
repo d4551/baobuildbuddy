@@ -4,6 +4,7 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -41,8 +42,7 @@ const { t } = useI18n();
             <li
               v-for="entry in timelineEntries"
               :key="entry.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div>

@@ -10,6 +10,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_MUTED_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
@@ -142,7 +143,7 @@ const readyEntries = computed(() =>
                 <div 
                   v-for="capability in needsAttentionEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
+                  :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4]"
                 >
                   <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
@@ -208,7 +209,7 @@ const readyEntries = computed(() =>
                 <div 
                   v-for="capability in readyEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
+                  :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4]"
                 >
                   <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

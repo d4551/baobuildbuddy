@@ -9,6 +9,7 @@ import {
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_MUTED_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -195,7 +196,7 @@ function handleScheduleInput(event: Event): void {
 
       <div
         v-if="issueCount > 0 && compactMode"
-        class="rounded-box border border-base-300 bg-base-200 text-secondary" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
+        class="text-secondary" :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <p class="font-semibold text-base-content">
@@ -216,7 +217,7 @@ function handleScheduleInput(event: Event): void {
 
       <details
         v-else-if="issueCount > 0"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        class="collapse collapse-arrow" :class="[INSET_PANEL_MUTED_CLASS]"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
@@ -237,7 +238,7 @@ function handleScheduleInput(event: Event): void {
 
       <details 
         v-if="showOperations"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        class="collapse collapse-arrow" :class="[INSET_PANEL_MUTED_CLASS]"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.schedule.disclosureTitle") }}
@@ -270,7 +271,7 @@ function handleScheduleInput(event: Event): void {
 
       <details 
         v-if="showOperations && latestRun"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        class="collapse collapse-arrow" :class="[INSET_PANEL_MUTED_CLASS]"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ latestRunNoticeText(capability.target) }}

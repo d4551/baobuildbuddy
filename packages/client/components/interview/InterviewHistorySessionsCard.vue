@@ -11,6 +11,7 @@ import {
   GHOST_ACTION_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -112,8 +113,7 @@ const viewSession = (id: string): void => {
             <li
               v-for="session in filteredSessions"
               :key="session.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div>

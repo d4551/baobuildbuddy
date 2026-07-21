@@ -3,11 +3,12 @@ import type { ResumeFormEducation } from "@bao/shared/utils/resume-transform";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
+  CARD_BODY_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_ERROR_DENSE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -61,10 +62,10 @@ function removeEducation(index: number): void {
 </script>
 
 <template>
-  <div class="card-body">
+  <div :class="[CARD_BODY_CLASS]">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
-      <button 
+      <button
         :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.education.addButtonAria')"
         @click="addEducation"
@@ -74,13 +75,13 @@ function removeEducation(index: number): void {
     </div>
     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <UiGlassCard v-for="(education, index) in localValue" :key="`${education.school}-${education.degree}-${index}`">
-        <div class="card-body">
+        <div :class="[CARD_BODY_CLASS]">
           <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
             <h3 class="font-semibold">
               {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
+            <button
+              :class="[OUTLINE_ACTION_ERROR_DENSE_CLASS]"
               :aria-label="t('resumePage.education.removeButtonAria', { index: index + 1 })"
               @click="removeEducation(index)"
             >

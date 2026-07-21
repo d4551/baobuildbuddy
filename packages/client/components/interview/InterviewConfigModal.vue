@@ -9,6 +9,7 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   GHOST_ACTION_CLASS,
   GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
@@ -153,8 +154,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                   <li
                     v-for="job in paginatedJobs"
                     :key="job.id"
-                    class="rounded-box border border-base-300 bg-base-100"
-                    :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+                    :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
                   >
                     <div>
                       <p class="font-semibold">{{ job.title }}</p>

@@ -12,6 +12,8 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
+  INSET_LIST_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -49,7 +51,7 @@ const canClaimChallenge = computed(() => {
     <UiGlassCard v-if="dailyChallenge" :extra-class="FLUID_HEIGHT_CLASS">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
-        <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <div :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
             <span :class="[BADGE_PRIMARY_CLASS]">
@@ -104,7 +106,7 @@ const canClaimChallenge = computed(() => {
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul
           v-if="recentActivity.length > 0"
-          class="list rounded-box border border-base-300 bg-base-100"
+          :class="[INSET_LIST_CLASS]"
         >
           <li
             v-for="(activity, index) in recentActivity"

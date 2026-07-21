@@ -5,6 +5,7 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  INSET_PANEL_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_WIDTH_FORM_COL_CLASS,
@@ -63,8 +64,7 @@ const emit = defineEmits<{
             <li
               v-for="section in aiRoutingSections"
               :key="section.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
             >
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <p class="font-medium">{{ section.label }}</p>

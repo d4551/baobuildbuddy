@@ -3,6 +3,7 @@ import { SPEECH_PROVIDER_OPTIONS, type SpeechProviderOption } from "@bao/shared/
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  FIELDSET_PANEL_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -75,7 +76,7 @@ function handleTtsModelChange(event: Event): void {
 </script>
 
 <template>
-  <fieldset class="fieldset rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p3]">
+  <fieldset :class="[FIELDSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p3]">
     <legend class="fieldset-legend" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("aiChatPage.voiceSettings.legend") }}</legend>
     <SectionGrid grid-token="twoColumnSmGap2">
       <label class="label" for="speech-profile-stt-provider" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">

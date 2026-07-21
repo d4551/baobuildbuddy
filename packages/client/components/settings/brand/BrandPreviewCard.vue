@@ -8,6 +8,7 @@ import {
   AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_SECONDARY_CLASS,
   PADDING_TOKEN_CLASS,
@@ -94,9 +95,14 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="rounded-box border border-base-300 bg-base-100 object-contain" :class="[SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10], PADDING_TOKEN_CLASS.p1]"
+                class="object-contain"
+                :class="[INSET_PANEL_CLASS, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10], PADDING_TOKEN_CLASS.p1]"
               />
-              <div class="flex items-center justify-center rounded-box border border-base-300 bg-base-100 font-semibold" v-else :class="[TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10]]">
+              <div
+                v-else
+                class="flex items-center justify-center font-semibold"
+                :class="[INSET_PANEL_CLASS, TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10]]"
+              >
                 {{ brandPreviewInitial }}
               </div>
               <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">

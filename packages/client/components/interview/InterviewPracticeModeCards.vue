@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
@@ -41,8 +42,7 @@ const { t } = useI18n();
         </p>
         <div
           v-if="selectedJob"
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3, STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+          :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3, STACK_SPACE_Y_TOKEN_CLASS.stack2]"
         >
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <div>
@@ -85,8 +85,7 @@ const { t } = useI18n();
         </p>
         <div
           v-if="selectedStudioName"
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3]"
+          :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3]"
         >
           <span>{{ t("interviewHub.cards.currentStudio", { studio: selectedStudioName }) }}</span>
         </div>

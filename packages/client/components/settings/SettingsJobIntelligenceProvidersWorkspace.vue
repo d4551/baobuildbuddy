@@ -4,6 +4,7 @@ import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -168,7 +169,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+              <label class="flex items-center justify-between" :class="[INSET_PANEL_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
                 <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>

@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  INSET_PANEL_MUTED_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
@@ -40,7 +41,7 @@ const { t } = useI18n();
         <li class="step">{{ t("automation.scraper.steps.interview") }}</li>
       </ul>
 
-      <div class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]">
+      <div :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4]">
         <p class="font-medium text-base-content" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("automation.scraper.overview.workflowTitle") }}
         </p>

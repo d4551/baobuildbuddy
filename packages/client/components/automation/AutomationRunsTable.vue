@@ -7,6 +7,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -54,8 +55,7 @@ const { t } = useI18n();
             <li
               v-for="run in runs"
               :key="run.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]">

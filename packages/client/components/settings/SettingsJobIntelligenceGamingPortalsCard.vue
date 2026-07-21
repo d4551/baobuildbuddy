@@ -3,6 +3,7 @@ import type { GamingPortalConfig } from "@bao/shared/types/settings";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -86,8 +87,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
         <li
           v-for="portal in portals"
           :key="portal.id"
-          class="list-row items-center rounded-box border border-base-300 bg-base-100"
-          :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]"
+          class="list-row items-center" :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]"
         >
           <div class="list-col-grow" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ portal.name }}</span>

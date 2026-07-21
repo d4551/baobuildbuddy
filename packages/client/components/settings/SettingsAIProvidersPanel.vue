@@ -8,6 +8,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -192,7 +193,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               <article 
                 v-for="provider in props.providerInputs"
                 :key="provider.id"
-                class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4]"
+                :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p4]"
               >
                 <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                   <div class="flex items-start" :class="[TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap3]">

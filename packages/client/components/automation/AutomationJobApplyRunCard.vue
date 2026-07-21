@@ -8,6 +8,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
@@ -208,8 +209,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
               <li
                 v-for="event in eventRows"
                 :key="`${event.runId}-${event.sequence}`"
-                class="rounded-box border border-base-300 bg-base-100"
-                :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+                :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
               >
                 <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <div>

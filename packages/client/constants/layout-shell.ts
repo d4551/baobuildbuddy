@@ -249,6 +249,34 @@ export const STAT_CARD_ICON_BADGE_CLASS = "rounded-box glass-subtle p-3";
 /** Stat card body spacing (comfortable responsive padding). */
 export const CARD_BODY_COMFORTABLE_CLASS = "card-body flex flex-col justify-between p-5 md:p-6";
 
+/**
+ * Default daisyUI card body (no extra density). Prefer CARD_BODY_COMFORTABLE_CLASS
+ * for primary content cards; use this for compact hubs/lists.
+ */
+export const CARD_BODY_CLASS = "card-body";
+
+/** Compact card body with stack rhythm for hub list cards. */
+export const CARD_BODY_COMPACT_CLASS = "card-body flex flex-col gap-3";
+
+/**
+ * Nested inset panel inside a glass card (list rows, challenge body, capability cells).
+ * Use instead of raw `rounded-box border border-base-300 bg-base-*` literals.
+ */
+export const INSET_PANEL_CLASS = "rounded-box border border-base-300 bg-base-100";
+
+/** Muted inset panel (secondary nested surface / callout). */
+export const INSET_PANEL_MUTED_CLASS = "rounded-box border border-base-300 bg-base-200";
+
+/** daisyUI list shell with inset panel chrome (recent activity, session lists). */
+export const INSET_LIST_CLASS = "list rounded-box border border-base-300 bg-base-100";
+
+/**
+ * Form fieldset panel (settings brand tabs, speech profiles).
+ * Compose with padding/gap/shadow tokens at call sites.
+ */
+export const FIELDSET_PANEL_CLASS =
+  "fieldset min-w-0 rounded-box border border-base-300 bg-base-100";
+
 /** Achievement badge icon container (circular accent surface). */
 export const ACHIEVEMENT_ICON_BADGE_CLASS =
   "flex h-12 w-12 items-center justify-center rounded-full";

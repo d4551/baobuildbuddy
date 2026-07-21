@@ -8,6 +8,7 @@ import {
   GHOST_ACTION_CIRCLE_DENSE_CLASS,
   GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -80,19 +81,19 @@ function studioLocation(location: string): string {
       </div>
 
       <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd">
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div class="stat" :class="[INSET_PANEL_CLASS]">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
         </div>
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div class="stat" :class="[INSET_PANEL_CLASS]">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
           <div class="stat-value text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studioLocation(studio.location) }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
         </div>
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div class="stat" :class="[INSET_PANEL_CLASS]">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
           <div class="stat-value text-accent" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
