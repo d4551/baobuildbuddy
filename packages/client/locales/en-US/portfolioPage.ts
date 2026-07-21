@@ -72,10 +72,10 @@ const portfolioPage = {
     profile: {
       title: "Portfolio Information",
       titleLegend: "Portfolio Title",
-      titlePlaceholder: "e.g. John Doe - Game Developer",
+      titlePlaceholder: "Enter your portfolio title",
       titleAria: "Portfolio title",
       emailLegend: "Email",
-      emailPlaceholder: "contact{'@'}example.com",
+      emailPlaceholder: "Enter contact email address",
       emailAria: "Contact email",
       websiteLegend: "Website",
       websitePlaceholder: "https://yourwebsite.com",

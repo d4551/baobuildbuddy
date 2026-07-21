@@ -37,10 +37,6 @@ import portfolioPage from "./portfolioPage";
 import portfolioProjectCard from "./portfolioProjectCard";
 import quickFab from "./quickFab";
 import resumeBuildPage from "./resumeBuildPage";
-import resumeComponentEducation from "./resumeComponentEducation";
-import resumeComponentExperience from "./resumeComponentExperience";
-import resumeComponentPersonalInfo from "./resumeComponentPersonalInfo";
-import resumeComponentSkills from "./resumeComponentSkills";
 import resumePage from "./resumePage";
 import resumePreview from "./resumePreview";
 import settingsaiProviders from "./settings/aiProviders";
@@ -97,10 +93,6 @@ type EnglishLocaleCatalog = typeof meta &
   typeof interviewScoreCard &
   typeof dailyChallengeCard &
   typeof xpBar &
-  typeof resumeComponentPersonalInfo &
-  typeof resumeComponentExperience &
-  typeof resumeComponentEducation &
-  typeof resumeComponentSkills &
   typeof jobDetail &
   typeof studioDetail &
   typeof studiosIndex &
@@ -169,10 +161,6 @@ const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   interviewScoreCard,
   dailyChallengeCard,
   xpBar,
-  resumeComponentPersonalInfo,
-  resumeComponentExperience,
-  resumeComponentEducation,
-  resumeComponentSkills,
   jobDetail,
   studioDetail,
   studiosIndex,

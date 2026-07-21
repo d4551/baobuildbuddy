@@ -20,7 +20,7 @@ const PAGE_HERO_GLASS_SUBTLE_PATTERN = /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?gl
 
 describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(join(CLIENT_ROOT, "constants/layout-shell.ts"), "utf8");
     expect(content).toContain(
       'SURFACE_GLASS_CARD_CLASS = "card card-border card-glass glass-interactive"',
     );
@@ -103,7 +103,8 @@ describe("Layout SSOT — shell/page tokens", () => {
       "SIDEBAR_WIDTH_LG_CLASS",
     ];
     for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
-    expect(content, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
+    const heroSource = readFileSync(join(CLIENT_ROOT, "constants/layout-shell.ts"), "utf8");
+    expect(heroSource, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
       PAGE_HERO_GLASS_SUBTLE_PATTERN,
     );
   });
@@ -136,7 +137,7 @@ describe("Layout SSOT — shell/page tokens", () => {
 
 describe("Layout SSOT — icon and dimension tokens", () => {
   it("ICON_SIZE_CLASS has canonical icon sizes", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(join(CLIENT_ROOT, "constants/layout-shell.ts"), "utf8");
     expect(content).toContain('xs: "h-3 w-3"');
     expect(content).toContain('sm: "h-5 w-5"');
     expect(content).toContain('md: "h-6 w-6"');
@@ -144,7 +145,7 @@ describe("Layout SSOT — icon and dimension tokens", () => {
   });
 
   it("ICON_DECORATIVE_STROKE_WIDTH is defined", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(join(CLIENT_ROOT, "constants/layout-shell.ts"), "utf8");
     expect(content).toContain("ICON_DECORATIVE_STROKE_WIDTH = 2");
   });
 

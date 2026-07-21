@@ -68,3 +68,4 @@ docs/assets/docs.generated.css
 
 # Browser proof screenshots + report.json (local smoke artifacts)
 /docs/browser-smoke/
+/artifacts/baseline/browser-smoke

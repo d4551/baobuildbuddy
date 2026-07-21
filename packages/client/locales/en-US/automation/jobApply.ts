@@ -8,7 +8,7 @@ const automationjobApply = {
       emptyResumesCta: "Open Resume Builder",
       emptyResumesCtaAria: "Open resume builder to create a resume for job apply",
       jobUrlLegend: "Job URL",
-      jobUrlPlaceholder: "https://example.com/jobs/123",
+      jobUrlPlaceholder: "Paste the job posting URL",
       jobUrlAria: "Job posting URL",
       resumeLegend: "Resume",
       resumeAria: "Select resume",

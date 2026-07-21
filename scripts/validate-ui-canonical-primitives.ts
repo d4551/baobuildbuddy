@@ -24,6 +24,9 @@ const SURFACE_GLASS_CONSTANT_REFERENCE_PATTERN =
 /** Canonical card owner — only this SFC may bind SURFACE_GLASS_CARD_*CLASS. */
 const UI_GLASS_CARD_PRIMITIVE_PATH = "packages/client/components/ui/UiGlassCard.vue";
 const SURFACE_GLASS_CARD_CLASS_TOKEN_PATTERN = /\bSURFACE_GLASS_CARD_(?:STRONG_|MODAL_)?CLASS\b/gu;
+const SURFACE_GLASS_CARD_CLASS_IMPORT_PATTERN =
+  /import\s*\{[^}]*\bSURFACE_GLASS_CARD_(?:STRONG_|MODAL_)?CLASS\b[^}]*\}\s*from\s*["'][^"']*constants\/layout(?:\/[^"']*)?["']/u;
+const IMPORT_STATEMENT_PATTERN = /\bimport\b/u;
 const UI_GLASS_CARD_COMPONENT_REFERENCE = /<UiGlassCard\b/u;
 const LOADING_SPINNER_LITERAL_PATTERN = /loading\s+loading-spinner\b/gu;
 const LOADING_SPINNER_PRIMITIVE_REFERENCE = /LoadingSpinner\b/u;
@@ -63,7 +66,7 @@ const collectCardGlassLiteralViolations = (
     violations.push({
       filePath,
       line: getLineFromOffset(content, match.index ?? 0),
-      message: `Inline card-glass literal "${match[0]}" bypasses UiGlassCard. Use <UiGlassCard> (variant prop for material strength).`,
+      message: `Inline card-glass literal "${match[0]}" bypasses UiGlassCard and SURFACE_GLASS_CARD_CLASS. Use <UiGlassCard> (variant prop for material strength).`,
     });
   }
   BARE_CARD_GLASS_CLASS_PATTERN.lastIndex = 0;
@@ -127,13 +130,22 @@ const collectSurfaceGlassCardConstantViolations = (
   if (filePath === UI_GLASS_CARD_PRIMITIVE_PATH) return [];
   if (isSsotPrimitive(filePath) && !filePath.endsWith(".vue")) return [];
   const violations: ValidationViolation[] = [];
-  SURFACE_GLASS_CARD_CLASS_TOKEN_PATTERN.lastIndex = 0;
-  for (const match of content.matchAll(SURFACE_GLASS_CARD_CLASS_TOKEN_PATTERN)) {
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, match.index ?? 0),
-      message: `Raw ${match[0]} bypasses the UiGlassCard primitive. Replace the surface shell with <UiGlassCard> (variant / selected / disabled / staggerIndex / extraClass).`,
-    });
+  if (!SURFACE_GLASS_CARD_CLASS_IMPORT_PATTERN.test(content)) {
+    SURFACE_GLASS_CARD_CLASS_TOKEN_PATTERN.lastIndex = 0;
+    for (const match of content.matchAll(SURFACE_GLASS_CARD_CLASS_TOKEN_PATTERN)) {
+      const matchOffset = match.index ?? 0;
+      const lineStart = content.lastIndexOf("\n", matchOffset) + 1;
+      const lineEnd = content.indexOf("\n", matchOffset);
+      const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+      if (IMPORT_STATEMENT_PATTERN.test(line)) {
+        continue;
+      }
+      violations.push({
+        filePath,
+        line: getLineFromOffset(content, matchOffset),
+        message: `Raw ${match[0]} bypasses the UiGlassCard primitive. Replace the surface shell with <UiGlassCard> (variant / selected / disabled / staggerIndex / extraClass).`,
+      });
+    }
   }
   return violations;
 };

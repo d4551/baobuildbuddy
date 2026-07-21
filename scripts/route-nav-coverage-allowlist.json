@@ -1,0 +1,6 @@
+[
+  {
+    "route": "/setup",
+    "reason": "First-run setup wizard uses auth-shell layout (no nav chrome). Intentionally headless — reached via auth middleware redirect, not nav."
+  }
+]

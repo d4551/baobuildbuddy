@@ -47,9 +47,53 @@ const toastLiteralPattern =
 const isIgnoredFile = (filePath: string): boolean =>
   filePath.endsWith(".spec.ts") ||
   filePath.endsWith(".test.ts") ||
-  filePath.includes("/locales/") ||
   filePath.includes("/.nuxt/") ||
   filePath.includes("/dist/");
+
+const isLocaleCatalogFile = (filePath: string): boolean => filePath.includes("/locales/");
+
+/**
+ * Placeholder/sample value patterns that must never appear as a VALUE in an
+ * i18n catalog — even in form placeholders. Form placeholders should be
+ * instructional ("Enter your name"), not example identities ("John Doe").
+ * Root cause this locks forward: the orphan `resumeComponentPersonalInfo`
+ * catalog shipped "John Doe" / "john@example.com" / "+1 (555) 123-4567"
+ * undetected because the locales directory was excluded from scanning.
+ */
+const PLACEHOLDER_VALUE_PATTERNS = [
+  /\b(?:John|Jane|Juan|Maria)\s+(?:Doe|Smith|Pérez|García)\b/u,
+  /(?:@|\{?@?\})?example\.(?:com|org|net)\b/u,
+  /(?:@|\{?@?\})?ejemplo\.(?:com|es)\b/u,
+  /\b555[\s).-]*\d{3}[\s.-]?\d{4}\b/u,
+  /linkedin\.com\/in\/[a-z]+\d?/u,
+  /github\.com\/[a-z]+\d?/u,
+  /\byoursite\.com\b/u,
+  /lorem\s+ipsum/u,
+] as const;
+
+const STRING_VALUE_PATTERN = /:\s*["']([^"']+)["']/gu;
+
+const collectPlaceholderValueViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  STRING_VALUE_PATTERN.lastIndex = 0;
+  for (const match of content.matchAll(STRING_VALUE_PATTERN)) {
+    const value = match[1] ?? "";
+    for (const pattern of PLACEHOLDER_VALUE_PATTERNS) {
+      if (pattern.test(value)) {
+        violations.push({
+          filePath,
+          line: getLineFromOffset(content, match.index ?? 0),
+          message: `Placeholder/sample value "${value}" in i18n catalog must be instructional, not an example identity. Form placeholders should say "Enter your name", not "John Doe".`,
+        });
+        break;
+      }
+    }
+  }
+  return violations;
+};
 const ASCII_LETTER_PATTERN = /[A-Za-z]/u;
 const LOCALE_KEY_PATTERN = /^[a-z0-9]+(?:[._-][a-z0-9]+)+$/u;
 
@@ -87,6 +131,15 @@ export const collectHardcodedUserStringViolationsForContent = (
 ): ValidationViolation[] => {
   if (isIgnoredFile(filePath)) {
     return [];
+  }
+
+  if (isLocaleCatalogFile(filePath)) {
+    // Locale catalogs legitimately contain translations (user-facing strings
+    // ARE the source of truth here), so the general hardcoded-string check is
+    // skipped. However, placeholder/sample values ("John Doe",
+    // "john@example.com", "+1 (555) 123-4567") are still banned — form
+    // placeholders must be instructional, not example identities.
+    return collectPlaceholderValueViolations(filePath, content);
   }
 
   return [

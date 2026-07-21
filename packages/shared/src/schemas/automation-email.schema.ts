@@ -25,7 +25,7 @@ export const emailResponseRequestSchema = z.object({
     .min(1)
     .max(SCHEMA_MAX_LENGTH_EMAIL)
     .refine((value) => isValidEmail(value), {
-      message: "recipientEmail must be a valid email address",
+      error: "recipientEmail must be a valid email address",
     })
     .optional(),
   deliverAfterGeneration: z.boolean().optional(),

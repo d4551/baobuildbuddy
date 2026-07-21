@@ -34,7 +34,7 @@ export const rpaTimestampSchema = z
   .string()
   .trim()
   .min(1)
-  .refine((value) => Number.isFinite(Date.parse(value)), "Invalid timestamp");
+  .refine((value) => Number.isFinite(Date.parse(value)), { error: "Invalid timestamp" });
 
 /**
  * Supported protocol event kinds.
