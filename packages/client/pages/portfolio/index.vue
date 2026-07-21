@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesPortfolioIndexPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
@@ -191,7 +193,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button type="button" :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

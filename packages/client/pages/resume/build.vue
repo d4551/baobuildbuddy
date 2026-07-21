@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesResumeBuildPage" });
+
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({

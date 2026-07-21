@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesInterviewSessionPage" });
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -38,7 +40,7 @@ useSeoMeta({
       v-else-if="page.activeSession.value"
       :active-session="page.activeSession.value"
       :session-id="page.sessionId.value"
-      :completion-state="page.completionState.value === 'completed' ? 'completed' : page.completionState.value === 'completing' ? 'completing' : page.completionState.value === 'submitting' ? 'submitting' : 'ready'"
+      :completion-state="page.completionState.value"
       :target-job="page.targetJob.value"
       :progress="page.progress.value"
       :elapsed-time-duration="page.elapsedTimeDuration.value"

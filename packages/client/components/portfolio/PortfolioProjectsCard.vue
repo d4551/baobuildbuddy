@@ -58,7 +58,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
   <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
     <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
-      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
+      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
         <IconPlus :class="[ICON_SIZE_CLASS[4]]"/>
         {{ t("portfolioPage.projects.addButton") }}
       </button>
@@ -138,7 +138,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
           <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="join">
-              <button 
+              <button type="button" 
                 :class="[GHOST_ACTION_DENSE_CLASS]"
                 :disabled="!props.canMove(project.id, 'up') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
@@ -146,7 +146,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
               >
                 {{ t("portfolioPage.projects.moveUpButton") }}
               </button>
-              <button 
+              <button type="button" 
                 :class="[GHOST_ACTION_DENSE_CLASS]"
                 :disabled="!props.canMove(project.id, 'down') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
@@ -157,14 +157,14 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             </div>
 
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <button 
+              <button type="button" 
                 :class="[OUTLINE_ACTION_DENSE_CLASS]"
                 :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"
                 @click="emit('edit', project)"
               >
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
-              <button 
+              <button type="button" 
                 :class="[TOUCH_TARGET_MIN_CLASS, OUTLINE_ACTION_ERROR_DENSE_CLASS]"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"

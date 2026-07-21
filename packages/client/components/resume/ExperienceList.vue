@@ -66,7 +66,7 @@ function removeExperience(index: number): void {
   <div class="card-body">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.experience.title") }}</h2>
-      <button 
+      <button type="button" 
         :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.experience.addButtonAria')"
         @click="addExperience"
@@ -81,7 +81,7 @@ function removeExperience(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button 
+            <button type="button" 
               :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"

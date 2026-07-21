@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesSettingsPage" });
+
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({

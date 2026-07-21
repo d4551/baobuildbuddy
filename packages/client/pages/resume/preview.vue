@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesResumePreviewPage" });
+
 import {
   GHOST_ACTION_PRINT_HIDDEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
@@ -107,7 +109,7 @@ function handlePrint() {
       :description="t('resumePreview.description')"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[GHOST_ACTION_PRINT_HIDDEN_CLASS]"
           :aria-label="t('resumePage.backButtonAria')"
           @click="router.back()"
@@ -116,7 +118,7 @@ function handlePrint() {
           {{ t("resumePage.backButton") }}
         </button>
 
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_PRINT_HIDDEN_CLASS]"
           :aria-label="t('resumePreview.printAria')"
           @click="handlePrint"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesStudiosDetailPage" });
+
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -137,7 +139,7 @@ function studioDetailLocation(location: string | undefined): string {
         density="comfortable"
       >
         <template #actions>
-          <button
+          <button type="button"
             :class="[PRIMARY_ACTION_CLASS]"
             :disabled="!studio"
             :aria-label="t('studioDetail.practiceInterviewAria')"

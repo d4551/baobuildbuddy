@@ -71,7 +71,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
             @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
             @keydown="onSearchKeydown"
           />
-          <button 
+          <button type="button" 
             :class="[PRIMARY_ACTION_CLASS, 'join-item']"
             :aria-label="buttonAriaLabel"
             @click="emit('search')"
@@ -83,7 +83,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
             </slot>
             <span class="hidden sm:inline"><slot name="search-text" /></span>
           </button>
-          <button 
+          <button type="button" 
             v-if="showMobileFilterToggle"
             :class="[OUTLINE_ACTION_JOIN_CLASS, 'sm:hidden']"
             :aria-label="mobileToggleAriaLabel"
@@ -97,7 +97,7 @@ function onSearchKeydown(event: KeyboardEvent): void {
             <span class="sr-only">{{ mobileToggleText }}</span>
           </button>
         </div>
-        <button 
+        <button type="button" 
           v-if="showMobileFilterToggle"
           :class="[OUTLINE_ACTION_CLASS, 'hidden sm:inline-flex lg:hidden']"
           :aria-label="mobileToggleAriaLabel"

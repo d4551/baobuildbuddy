@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesCoverLetterIndexPage" });
+
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
@@ -165,7 +167,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
-          <button :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
+          <button type="button" :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
             {{ t("coverLetterPage.filters.clearButton") }}
           </button>
         </div>
@@ -231,14 +233,14 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
           </div>
 
           <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_DENSE_CLASS]"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
-            <button
+            <button type="button"
               :class="[TOUCH_TARGET_MIN_CLASS, OUTLINE_ACTION_ERROR_DENSE_CLASS]"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"

@@ -164,7 +164,7 @@ function updateFeaturedFlag(event: Event): void {
             @input="handleTechnologyInput"
             @keyup.enter="emit('addTechnology')"
           />
-          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
+          <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.addTechnologyAria')" @click="emit('addTechnology')">
             {{ t("portfolioPage.modal.addTechnologyButton") }}
           </button>
         </div>
@@ -205,10 +205,10 @@ function updateFeaturedFlag(event: Event): void {
     </div>
 
     <div class="modal-action">
-      <button :class="[GHOST_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
+      <button type="button" :class="[GHOST_ACTION_CLASS]" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
-      <button 
+      <button type="button" 
         :class="[PRIMARY_ACTION_CLASS]"
         :disabled="!props.projectForm.title || !props.projectForm.description"
         :aria-label="t('portfolioPage.modal.saveAria')"

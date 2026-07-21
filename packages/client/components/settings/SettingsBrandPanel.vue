@@ -234,7 +234,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
           </div>
 
           <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
-            <button 
+            <button type="button" 
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"

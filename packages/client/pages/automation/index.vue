@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesAutomationIndexPage" });
+
 import {
   FLEX_GAP_TOKEN_CLASS,
   INSET_PANEL_MUTED_CLASS,

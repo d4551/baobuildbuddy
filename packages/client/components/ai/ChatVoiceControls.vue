@@ -65,6 +65,16 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
+const voiceStatusKey = computed(() => {
+  if (props.isListening) {
+    return "aiChatCommon.voice.listeningStatus";
+  }
+  if (props.isSpeaking) {
+    return "aiChatCommon.voice.speakingStatus";
+  }
+  return "aiChatCommon.voice.idleStatus";
+});
+
 const iconClass = computed(() => (props.compact ? ICON_SIZE_CLASS["4"] : ICON_SIZE_CLASS.sm));
 const showAdvancedSpeechConfig = computed(
   () =>
@@ -97,7 +107,7 @@ function handleAutoSpeakChange(event: Event): void {
 </script>
 
 <template>
-  <button
+  <button type="button"
     v-if="props.supportsRecognition"
     :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
     :title="
@@ -139,7 +149,7 @@ function handleAutoSpeakChange(event: Event): void {
       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
-  <button
+  <button type="button"
     v-if="props.supportsSynthesis"
     :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
     :aria-label="t('aiChatCommon.voice.replayAria')"
@@ -191,13 +201,7 @@ function handleAutoSpeakChange(event: Event): void {
       />
     </label>
     <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" aria-live="polite">
-      {{
-        props.isListening
-          ? t("aiChatCommon.voice.listeningStatus")
-          : props.isSpeaking
-            ? t("aiChatCommon.voice.speakingStatus")
-            : t("aiChatCommon.voice.idleStatus")
-      }}
+      {{ t(voiceStatusKey) }}
     </p>
   </div>
 

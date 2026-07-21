@@ -16,6 +16,10 @@ import {
 const open = defineModel<boolean>("open", { default: false });
 const form = defineModel<CoverLetterGenerateForm>("form", { required: true });
 
+const closeDialog = (): void => {
+  open.value = false;
+};
+
 defineProps<{
   generating: boolean;
   titleId: string;
@@ -136,14 +140,14 @@ defineEmits<{
     </div>
 
     <div class="modal-action">
-      <button 
+      <button type="button" 
         :class="[GHOST_ACTION_CLASS]"
         :aria-label="$t('coverLetterPage.generate.cancelAria')"
-        @click="open = false"
+        @click="closeDialog"
       >
         {{ $t("coverLetterPage.generate.cancelButton") }}
       </button>
-      <button 
+      <button type="button" 
         :class="[PRIMARY_ACTION_CLASS]"
         :disabled="generating || !form.company || !form.position"
         :aria-label="$t('coverLetterPage.generate.submitAria')"

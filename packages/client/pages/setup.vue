@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesSetupPage" });
+
 import { useI18n } from "vue-i18n";
 import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -38,6 +40,18 @@ const {
 
 const { t } = useI18n();
 
+const handleNameUpdate = (value: string): void => {
+  name.value = value;
+};
+
+const handleCurrentRoleUpdate = (value: string): void => {
+  currentRole.value = value;
+};
+
+const handleLocalModelNameUpdate = (value: string): void => {
+  localModelName.value = value;
+};
+
 useSeoMeta({
   title: t("setup.seoTitle", { brand: resolvedBrand.name }),
   description: t("setup.seoDescription"),
@@ -76,8 +90,8 @@ useSeoMeta({
         v-if="step === 1"
         :name="name"
         :current-role="currentRole"
-        @update:name="name = $event"
-        @update:current-role="currentRole = $event"
+        @update:name="handleNameUpdate"
+        @update:current-role="handleCurrentRoleUpdate"
         @next="step = 2"
       />
 
@@ -94,7 +108,7 @@ useSeoMeta({
         :testing-provider="testingProvider"
         :ollama-website-url="OLLAMA_WEBSITE_URL"
         @update:local-model-endpoint="localModelEndpoint = $event"
-        @update:local-model-name="localModelName = $event"
+        @update:local-model-name="handleLocalModelNameUpdate"
         @update:provider-credential="updateProviderCredential($event.provider, $event.value)"
         @test-provider="handleTestProvider"
         @copy="copyOllamaCommand"

@@ -10,11 +10,11 @@ import {
 
 const answers = defineModel<Record<string, string>>("answers", { required: true });
 
-defineProps<{
+const props = defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
   currentQuestionIndex: number;
   errorMessage: string;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
 }>();
 
 const emit = defineEmits<{
@@ -22,6 +22,8 @@ const emit = defineEmits<{
   next: [];
   changeTarget: [];
 }>();
+
+const currentQuestion = computed(() => props.aiQuestions[props.currentQuestionIndex]);
 </script>
 
 <template>
@@ -36,7 +38,7 @@ const emit = defineEmits<{
             })
           }}
         </h2>
-        <button 
+        <button type="button" 
           :class="[GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
@@ -45,24 +47,24 @@ const emit = defineEmits<{
         </button>
       </div>
 
-      <fieldset v-if="aiQuestions[currentQuestionIndex]" class="fieldset">
-        <legend class="fieldset-legend">{{ aiQuestions[currentQuestionIndex]?.category }}</legend>
-        <label :for="`answer-${aiQuestions[currentQuestionIndex]?.id}`" class="label">
-          {{ aiQuestions[currentQuestionIndex]?.question }}
+      <fieldset v-if="currentQuestion" class="fieldset">
+        <legend class="fieldset-legend">{{ currentQuestion.category }}</legend>
+        <label :for="`answer-${currentQuestion.id}`" class="label">
+          {{ currentQuestion.question }}
         </label>
-        <textarea 
-          :id="`answer-${aiQuestions[currentQuestionIndex]?.id}`"
-          v-model="answers[aiQuestions[currentQuestionIndex]!.id]"
+        <textarea
+          :id="`answer-${currentQuestion.id}`"
+          v-model="answers[currentQuestion.id]"
           class="textarea" :class="[FLUID_WIDTH_CLASS]"
           rows="4"
           :placeholder="
             t('resumeBuildPage.questions.answerPlaceholder', {
-              question: aiQuestions[currentQuestionIndex]?.question,
+              question: currentQuestion.question,
             })
           "
           :aria-label="
             t('resumeBuildPage.questions.answerAria', {
-              question: aiQuestions[currentQuestionIndex]?.question,
+              question: currentQuestion.question,
             })
           "
         />
@@ -71,7 +73,7 @@ const emit = defineEmits<{
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
       <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
-        <button 
+        <button type="button" 
           :class="[GHOST_ACTION_CLASS]"
           :disabled="currentQuestionIndex === 0"
           :aria-label="t('resumeBuildPage.questions.backAria')"
@@ -79,9 +81,9 @@ const emit = defineEmits<{
         >
           {{ t("resumeBuildPage.questions.backButton") }}
         </button>
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
-          :disabled="!(answers[aiQuestions[currentQuestionIndex]?.id ?? ''] ?? '').trim()"
+          :disabled="!(answers[currentQuestion?.id ?? ''] ?? '').trim()"
           :aria-label="t('resumeBuildPage.questions.nextAria')"
           @click="emit('next')"
         >

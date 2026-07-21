@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "AppErrorPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
@@ -43,7 +45,7 @@ const message = computed(() => {
           <NuxtLink :to="APP_ROUTES.dashboard" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('errorPage.backToDashboardButton')">
             {{ t("errorPage.backToDashboardButton") }}
           </NuxtLink>
-          <button :class="[GHOST_ACTION_CLASS]" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">
+          <button type="button" :class="[GHOST_ACTION_CLASS]" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">
             {{ t("errorPage.resetButton") }}
           </button>
         </div>

@@ -146,7 +146,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.automation.saveAria')"
           @click="emit('save')"

@@ -184,7 +184,7 @@ const profileSaveStateLabel = computed(() => {
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.profile.saveAria')"
           :disabled="profileSaveState === 'saving'"

@@ -78,7 +78,7 @@ const activeFilterCount = computed(() => {
             {{ t("jobsPage.filtersActiveCount", { count: activeFilterCount }) }}
           </span>
         </div>
-        <button
+        <button type="button"
           :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('jobsPage.clearFiltersAria')"
           @click="emit('clear')"

@@ -42,6 +42,10 @@ async function submitSearch(): Promise<void> {
   await search();
 }
 
+const openSearch = (): void => {
+  open.value = true;
+};
+
 async function openResult(result: (typeof results.value)[number]): Promise<void> {
   open.value = false;
   clear();
@@ -72,7 +76,7 @@ function typeLabel(type: string): string {
       :aria-label="t('workspaceSearch.openButtonAria')"
       :aria-expanded="open"
       :aria-controls="WORKSPACE_SEARCH_DIALOG_TITLE_ID"
-      @click="open = true"
+      @click="openSearch"
     >
       <IconSearch :class="ICON_SIZE_CLASS.sm" />
     </button>

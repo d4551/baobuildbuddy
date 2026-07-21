@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesSkillsIndexPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import SkillsPageFilters from "~/components/skills/SkillsPageFilters.vue";
@@ -102,7 +104,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           </span>
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
-        <button
+        <button type="button"
           v-if="hasMappings"
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="analyzing"
@@ -113,7 +115,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>
-        <button
+        <button type="button"
           v-if="hasMappings"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('skillsPage.actions.addMappingAria')"
@@ -266,14 +268,14 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       </div>
 
       <div class="modal-action">
-        <button
+        <button type="button"
           :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('skillsPage.createModal.cancelAria')"
           @click="showAddModal = false"
         >
           {{ t("skillsPage.createModal.cancelButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="loading || !newMapping.gameExpression.trim() || !newMapping.transferableSkill.trim()"
           :aria-label="t('skillsPage.createModal.createAria')"

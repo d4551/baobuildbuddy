@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesStudiosIndexPage" });
+
 definePageMeta({
   middleware: ["auth"],
 });

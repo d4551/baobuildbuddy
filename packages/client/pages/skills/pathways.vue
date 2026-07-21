@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesSkillsPathwaysPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { definePageMeta, useSeoMeta } from "#imports";

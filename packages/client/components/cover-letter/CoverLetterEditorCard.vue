@@ -45,10 +45,10 @@ const emit = defineEmits<{
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
         <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <button :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
+          <button type="button" :class="[GHOST_ACTION_DENSE_CLASS]" :aria-label="t('coverLetterDetailPage.editor.clearAria')" @click="emit('clear')">
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
-          <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
+          <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('coverLetterDetailPage.editor.saveAria')" @click="emit('save')">
             {{ t("coverLetterDetailPage.editor.saveButton") }}
           </button>
         </div>

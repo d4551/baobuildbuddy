@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesAiIndexPage" });
+
 /**
  * Canonical AI entry: redirect to chat (no phantom empty surface).
  * Prefer Nuxt redirect meta over empty template + navigateTo for SSR/nav consistency.

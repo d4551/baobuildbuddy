@@ -143,7 +143,7 @@ const emit = defineEmits<{
     </details>
 
     <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
+      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
         {{ t("settings.aiProviders.saveButton") }}
       </button>
     </div>

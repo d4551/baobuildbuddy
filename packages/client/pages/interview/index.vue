@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesInterviewIndexPage" });
+
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -88,14 +90,14 @@ const {
       density="comfortable"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('interviewHub.hero.openJobAria')"
           @click="openConfig('job')"
         >
           {{ t("interviewHub.hero.openJobButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('interviewHub.hero.openStudioAria')"
           @click="openConfig('studio')"

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesCoverLetterDetailPage" });
+
 import {
   COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_DEFAULT_TEMPLATE,
@@ -229,7 +231,7 @@ async function handleExport(format: "pdf" | "docx") {
         <AppBreadcrumbs :crumbs="breadcrumbs" />
       </template>
       <template #actions>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="regenerating"
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
@@ -248,7 +250,7 @@ async function handleExport(format: "pdf" | "docx") {
           @export="handleExport"
         />
 
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!hasUnsavedChanges"
           :aria-label="t('coverLetterDetailPage.actions.saveAria')"

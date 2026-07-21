@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesInterviewHistoryPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 

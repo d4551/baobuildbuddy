@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesJobsDetailPage" });
+
 import { MARGIN_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({

@@ -65,14 +65,14 @@ const viewSession = (id: string): void => {
         <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
         <div class="flex flex-col sm:flex-row sm:items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="join">
-            <button 
+            <button type="button" 
               :class="[GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': historyView === 'table' }]"
               :aria-label="t('interviewHistory.tableAriaLabel')"
               @click="selectHistoryView('table')"
             >
               {{ t("interviewHistory.viewModes.table") }}
             </button>
-            <button 
+            <button type="button" 
               :class="[GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': historyView === 'timeline' }]"
               :aria-label="t('interviewHistory.timelineAriaLabel')"
               @click="selectHistoryView('timeline')"
@@ -194,7 +194,7 @@ const viewSession = (id: string): void => {
               <p class="font-semibold">{{ session.studioName }}</p>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatDuration(session.duration ?? 0) }}</p>
-              <button 
+              <button type="button" 
                 :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, MARGIN_TOKEN_CLASS.mt2]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"

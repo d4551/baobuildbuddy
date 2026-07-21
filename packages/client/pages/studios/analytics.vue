@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesStudiosAnalyticsPage" });
+
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,

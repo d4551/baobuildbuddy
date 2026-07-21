@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesAutomationEmailPage" });
+
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -190,7 +192,7 @@ useSeoMeta({
         </div>
 
         <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
-          <button
+          <button type="button"
             :class="[PRIMARY_ACTION_CLASS]"
             :disabled="pending || !canSubmit"
             :aria-label="t('automation.email.generateAria')"
@@ -199,7 +201,7 @@ useSeoMeta({
             <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'generate'" />
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
-          <button
+          <button type="button"
             :class="[OUTLINE_ACTION_CLASS]"
             :disabled="pending || !canSubmit || !form.runAt"
             :aria-label="t('automation.email.schedule.buttonAria')"

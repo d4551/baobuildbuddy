@@ -256,7 +256,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             </fieldset>
 
             <div class="flex justify-end">
-              <button 
+              <button type="button" 
                 :class="[PRIMARY_ACTION_CLASS]"
                 :aria-label="t('settings.aiProviders.preferredProviderAria')"
                 @click="emit('savePreferredProvider')"

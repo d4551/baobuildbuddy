@@ -8,124 +8,55 @@ import {
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 /**
- * Biome softener gate — forbids lint severity demotions and disabled groups.
+ * Biome softener gate — zero-tolerance for severity demotions or disabled rules.
  *
- * Binding: "off" and "warn" are always forbidden (no hide-the-sin).
- * Proven Biome tooling gaps may use "info" only (still reported, not CI-hidden):
- * - noUnused* on .vue (template-blind SFC analysis)
- * - noVueRefAsOperand (nursery FP on forEach)
- * - useVueMultiWordComponentNames on Nuxt pages/layouts/app/error
- * All other off|warn|info, linter disabled, maxLines>60 = softener = fail.
+ * Binding contract (no allowlist, no "tooling gap" excuse):
+ * - "off" forbidden everywhere.
+ * - "warn" forbidden everywhere.
+ * - "info" forbidden everywhere. Use "error" or delete the rule.
+ * - linter.enabled=false forbidden at root and in overrides.
+ * - maxLines ceiling > 60 forbidden.
+ * - html.experimentalFullSupportEnabled must be true (required for Vue/Svelte/Astro
+ *   template binding tracking; without it noUnusedVariables produces false positives
+ *   that historically justified "info" demotions — closing that escape hatch).
+ *
+ * Rules intentionally absent because the upstream tool cannot support them on this
+ * stack are documented in scripts/docs/biome-tailwind-incompatibility.md and tracked
+ * in validate-biome-no-softenings.test.ts. Adding them back at any severity below
+ * "error" is a softener. Adding them at "error" without the upstream fix is a
+ * false-positive generator and also rejected.
  */
 
 const BIOME_CONFIG_PATH = "biome.json";
 const MAX_LINES_PER_FUNCTION = MAX_LINES_PER_FUNCTION_CEILING;
-
-/** Proven tooling gaps — may be "info" only, never off/warn. */
-const TOOLING_GAP_INFO_RULES: ReadonlyArray<{
-  readonly includesKey: string | null;
-  readonly rulePaths: ReadonlySet<string>;
-}> = [
-  {
-    includesKey: null,
-    rulePaths: new Set(["nursery.noVueRefAsOperand"]),
-  },
-  {
-    includesKey: "**/*.vue",
-    rulePaths: new Set([
-      "correctness.noUnusedImports",
-      "correctness.noUnusedVariables",
-      "correctness.noUnusedFunctionParameters",
-      "nursery.noVueRefAsOperand",
-    ]),
-  },
-  {
-    includesKey: "**/app.vue,**/error.vue,**/layouts/**/*.vue,**/pages/**/*.vue",
-    rulePaths: new Set(["style.useVueMultiWordComponentNames"]),
-  },
-];
-
-const includesKeyFrom = (includes: JsonValue): string => {
-  if (!Array.isArray(includes)) {
-    return "";
-  }
-  return includes
-    .filter((entry): entry is string => typeof entry === "string")
-    .slice()
-    .sort()
-    .join(",");
-};
-
-const ROOT_RULES_PREFIX = /^linter\.rules\./u;
-const OVERRIDE_RULES_PREFIX = /^overrides\[\d+\]\.linter\.rules\./u;
-const LEVEL_SUFFIX = /\.level$/u;
-
-const isToolingGapInfo = (includesKey: string | null, rulePath: string): boolean => {
-  const normalizedPath = rulePath.replace(ROOT_RULES_PREFIX, "").replace(LEVEL_SUFFIX, "");
-  const leaf = normalizedPath.split(".").pop() ?? normalizedPath;
-  for (const gap of TOOLING_GAP_INFO_RULES) {
-    if (gap.includesKey !== includesKey) {
-      continue;
-    }
-    for (const path of gap.rulePaths) {
-      if (path === normalizedPath || path.endsWith(`.${leaf}`) || path === leaf) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
-/** Documented info-only tooling gaps (never off/warn). Complexity/barrel NEVER info. */
-const ALLOWED_INFO_RULES = new Set([
-  "noUnusedImports",
-  "noUnusedVariables",
-  "noUnusedFunctionParameters",
-  "useVueMultiWordComponentNames",
-  "noVueRefAsOperand",
-]);
 
 type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
 const isRecord = (value: JsonValue): value is { [key: string]: JsonValue } =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const inspectInfoSeverity = (
-  key: string,
-  nextPath: string,
-  includesKey: string | null,
-  violations: ValidationViolation[],
-): void => {
-  const shortPath = nextPath.replace(ROOT_RULES_PREFIX, "").replace(OVERRIDE_RULES_PREFIX, "");
-  if (!ALLOWED_INFO_RULES.has(key) || !isToolingGapInfo(includesKey, shortPath)) {
-    pushViolation(
-      violations,
-      `Severity info at ${nextPath} is forbidden outside documented tooling-gap allowlist (vue unused / Nuxt multiword / noVueRefAsOperand).`,
-    );
-  }
+const ROOT_RULES_PREFIX = /^linter\.rules\./u;
+const OVERRIDE_RULES_PREFIX = /^overrides\[\d+\]\.linter\.rules\./u;
+const LEVEL_SUFFIX = /\.level$/u;
+
+const pushViolation = (violations: ValidationViolation[], message: string): void => {
+  violations.push({ filePath: BIOME_CONFIG_PATH, line: 1, message });
 };
 
 const inspectLevelObject = (
-  key: string,
   value: { [key: string]: JsonValue },
   nextPath: string,
   violations: ValidationViolation[],
 ): void => {
   const level = value.level;
-  if (level === "off" || level === "warn") {
+  if (level === "off" || level === "warn" || level === "info") {
     pushViolation(
       violations,
-      `Softening forbidden at ${nextPath}.level=${JSON.stringify(level)}. Use "error"/"on".`,
-    );
-  }
-  if (level === "info" && !ALLOWED_INFO_RULES.has(key)) {
-    pushViolation(
-      violations,
-      `Severity info at ${nextPath}.level is forbidden outside documented allowlist.`,
+      `Softening forbidden at ${nextPath}.level=${JSON.stringify(level)}. Use "error"/"on". Zero info allowlist.`,
     );
   }
   if (
-    key === "noExcessiveLinesPerFunction" &&
+    keyOf(value) === "noExcessiveLinesPerFunction" &&
     isRecord(value.options) &&
     typeof value.options.maxLines === "number" &&
     value.options.maxLines > MAX_LINES_PER_FUNCTION
@@ -137,53 +68,45 @@ const inspectLevelObject = (
   }
 };
 
+const keyOf = (value: { [key: string]: JsonValue }): string =>
+  typeof value.rule === "string" ? value.rule : "";
+
 const walkRuleEntry = (
   key: string,
   value: JsonValue,
   path: string,
   violations: ValidationViolation[],
-  includesKey: string | null,
 ): void => {
   const nextPath = `${path}.${key}`;
   if (key === "preset" || key === "recommended") {
     return;
   }
-  if (value === "off" || value === "warn") {
+  if (value === "off" || value === "warn" || value === "info") {
     pushViolation(
       violations,
-      `Softening forbidden at ${nextPath}=${JSON.stringify(value)}. Use "error" (or documented "info" tooling-gap only). Never off/warn.`,
+      `Softening forbidden at ${nextPath}=${JSON.stringify(value)}. Use "error". Zero info allowlist. Never off/warn/info.`,
     );
     return;
   }
-  if (value === "info") {
-    inspectInfoSeverity(key, nextPath, includesKey, violations);
-    return;
-  }
   if (isRecord(value) && "level" in value) {
-    inspectLevelObject(key, value, nextPath, violations);
+    if (typeof value.rule !== "string") {
+      (value as { rule: string }).rule = key;
+    }
+    inspectLevelObject(value, nextPath, violations);
     return;
   }
   if (isRecord(value)) {
-    walkRules(value, nextPath, violations, includesKey);
+    walkRules(value, nextPath, violations);
   }
 };
 
-const walkRules = (
-  rules: JsonValue,
-  path: string,
-  violations: ValidationViolation[],
-  includesKey: string | null,
-): void => {
+const walkRules = (rules: JsonValue, path: string, violations: ValidationViolation[]): void => {
   if (!isRecord(rules)) {
     return;
   }
   for (const [key, value] of Object.entries(rules)) {
-    walkRuleEntry(key, value, path, violations, includesKey);
+    walkRuleEntry(key, value, path, violations);
   }
-};
-
-const pushViolation = (violations: ValidationViolation[], message: string): void => {
-  violations.push({ filePath: BIOME_CONFIG_PATH, line: 1, message });
 };
 
 const validateDomains = (domains: JsonValue, violations: ValidationViolation[]): void => {
@@ -217,6 +140,22 @@ const validateDomains = (domains: JsonValue, violations: ValidationViolation[]):
   }
 };
 
+const validateHtmlSupport = (config: JsonValue, violations: ValidationViolation[]): void => {
+  if (!isRecord(config) || !isRecord(config.html)) {
+    pushViolation(
+      violations,
+      "html.experimentalFullSupportEnabled must be true (Vue/Svelte/Astro template binding tracking; closes info-demotion escape hatch).",
+    );
+    return;
+  }
+  if (config.html.experimentalFullSupportEnabled !== true) {
+    pushViolation(
+      violations,
+      "html.experimentalFullSupportEnabled must be true (required to keep noUnusedVariables/noUnusedImports at error without false positives).",
+    );
+  }
+};
+
 const validateRulesRatchet = (
   rules: { [key: string]: JsonValue },
   violations: ValidationViolation[],
@@ -227,7 +166,7 @@ const validateRulesRatchet = (
       'linter.rules.preset must be "recommended" (stack-scoped; domains supply framework depth).',
     );
   }
-  walkRules(rules, "linter.rules", violations, null);
+  walkRules(rules, "linter.rules", violations);
   const requiredErrorGroups = ["a11y", "performance", "security", "suspicious"] as const;
   for (const group of requiredErrorGroups) {
     const value = rules[group];
@@ -254,18 +193,16 @@ const validateOverrides = (overrides: JsonValue, violations: ValidationViolation
       continue;
     }
     const overrideLinter = override.linter;
-    if (!isRecord(overrideLinter)) {
-      continue;
-    }
-    if (overrideLinter.enabled === false) {
-      pushViolation(
-        violations,
-        `overrides[${index}] linter.enabled=false is forbidden (was used to mute .vue).`,
-      );
-    }
-    const key = includesKeyFrom(override.includes);
-    if (isRecord(overrideLinter.rules)) {
-      walkRules(overrideLinter.rules, `overrides[${index}].linter.rules`, violations, key);
+    if (isRecord(overrideLinter)) {
+      if (overrideLinter.enabled === false) {
+        pushViolation(
+          violations,
+          `overrides[${index}] linter.enabled=false is forbidden (mute-the-files softener).`,
+        );
+      }
+      if (isRecord(overrideLinter.rules)) {
+        walkRules(overrideLinter.rules, `overrides[${index}].linter.rules`, violations);
+      }
     }
   }
 };
@@ -284,6 +221,8 @@ export const collectBiomeSofteningViolationsForContent = (
       },
     ];
   }
+
+  validateHtmlSupport(config, violations);
 
   const linter = config.linter;
   if (!isRecord(linter)) {

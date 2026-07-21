@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesPortfolioPreviewPage" });
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -80,7 +82,7 @@ async function handleExport(format: "pdf" | "docx") {
       :description="t('portfolioPage.preview.description')"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[GHOST_ACTION_PRINT_HIDDEN_CLASS]"
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"

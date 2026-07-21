@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesJobsIndexPage" });
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -59,7 +61,7 @@ const page = useJobsIndexPage();
           <LoadingSpinner v-if="page.matching.value" size="sm" :label="t('jobsPage.aiMatchButton')" />
           <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
@@ -246,14 +248,14 @@ const page = useJobsIndexPage();
                     {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
-                    <button
+                    <button type="button"
                       :class="[OUTLINE_ACTION_DENSE_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
-                    <button
+                    <button type="button"
                       :class="[PRIMARY_ACTION_CLASS]"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"

@@ -60,7 +60,7 @@ const populatedTaxonomyCount = computed(
             >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
-            <button 
+            <button type="button" 
               :class="[TOUCH_TARGET_MIN_CLASS, SECONDARY_ACTION_DENSE_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"

@@ -66,7 +66,7 @@ const sourceCollectionCount = computed(
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button
+            <button type="button"
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"

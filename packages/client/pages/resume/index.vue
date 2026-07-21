@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesResumeIndexPage" });
+
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
@@ -87,7 +89,7 @@ const {
     >
       <template #actions>
         <!-- Empty library: EmptyState owns Create; hero keeps Guided only. -->
-        <button
+        <button type="button"
           v-if="resumes.length > 0 || selectedResumeId"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('resumePage.createButtonAria')"
@@ -226,14 +228,14 @@ const {
       </fieldset>
 
       <div class="modal-action">
-        <button
+        <button type="button"
           :class="[GHOST_ACTION_CLASS]"
           :aria-label="t('resumePage.createModal.cancelAria')"
           @click="showCreateModal = false"
         >
           {{ t("resumePage.createModal.cancelButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="creating || !newResumeName.trim()"
           :aria-label="t('resumePage.createModal.createAria')"

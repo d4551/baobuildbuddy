@@ -85,7 +85,7 @@ const emit = defineEmits<{
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!canProceedTarget"
           :aria-label="t('resumeBuildPage.target.generateAria')"

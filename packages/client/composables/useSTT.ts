@@ -1,6 +1,6 @@
 import type { VoiceSettings } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
-import { computed, onMounted, readonly, ref } from "#imports";
+import { computed, onMounted, onUnmounted, readonly, ref } from "#imports";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
 import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
@@ -23,6 +23,8 @@ interface SttMutableState {
   recognition: SpeechRecognition | null;
   recorder: MicrophoneRecorder | null;
   useServerStt: boolean;
+  /** Tracked mic lifecycle promise — observed so the chain is never floating. */
+  micPromise: Promise<void> | null;
 }
 
 function isSpeechRecognitionEvent(event: Event): event is SpeechRecognitionEvent {
@@ -112,17 +114,25 @@ function startServerSttListening(state: SttMutableState): boolean {
   if (state.isListening.value) {
     return true;
   }
-  const _micStart = createMicrophoneRecorder().then(
-    (created) => {
-      state.recorder = created;
-      created.start();
-      state.isListening.value = true;
-    },
-    () => {
-      state.error.value = "Failed to start microphone";
-      state.isListening.value = false;
-    },
-  );
+  const micPromise = createMicrophoneRecorder()
+    .then(
+      (created) => {
+        state.recorder = created;
+        created.start();
+        state.isListening.value = true;
+      },
+      () => {
+        state.error.value = "Failed to start microphone";
+        state.isListening.value = false;
+      },
+    )
+    .then(
+      () => undefined,
+      (error: Error) => {
+        state.error.value = error instanceof Error ? error.message : "Microphone start failed";
+      },
+    );
+  state.micPromise = micPromise;
   return true;
 }
 
@@ -168,7 +178,7 @@ function stopServerSttListening(state: SttMutableState): void {
     state.isListening.value = false;
     return;
   }
-  const _micStop = activeRecorder
+  const micPromise = activeRecorder
     .stop()
     .then((blob) => transcribeAudioViaServer(blob))
     .then(
@@ -187,7 +197,14 @@ function stopServerSttListening(state: SttMutableState): void {
     )
     .then(() => {
       state.isListening.value = false;
-    });
+    })
+    .then(
+      () => undefined,
+      (error: Error) => {
+        state.error.value = error instanceof Error ? error.message : "Microphone stop failed";
+      },
+    );
+  state.micPromise = micPromise;
 }
 
 function stopSttListening(state: SttMutableState): void {
@@ -215,6 +232,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
     recognition: null,
     recorder: null,
     useServerStt: false,
+    micPromise: null,
   };
 
   const sttProvider = computed(() =>
@@ -228,6 +246,15 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
     }
     state.recognition = createRecognitionInstance(settings);
     bindBrowserRecognitionHandlers(state);
+  });
+
+  onUnmounted(() => {
+    if (state.recognition) {
+      state.recognition.stop();
+      state.recognition = null;
+    }
+    state.recorder = null;
+    state.isListening.value = false;
   });
 
   const fullTranscript = computed(() =>

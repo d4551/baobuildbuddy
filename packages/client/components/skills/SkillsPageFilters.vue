@@ -79,7 +79,7 @@ function setAllCategoryFilter(): void {
       </div>
 
       <div class="flex justify-end">
-        <button 
+        <button type="button" 
           :class="[GHOST_ACTION_DENSE_CLASS]"
           :disabled="!hasActiveFilters"
           :aria-label="t('skillsPage.filters.clearAria')"

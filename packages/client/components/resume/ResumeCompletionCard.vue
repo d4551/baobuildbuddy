@@ -61,7 +61,7 @@ const { t } = useI18n();
         }}
       </p>
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <button
+        <button type="button"
           v-for="section in sections"
           :key="section.id"
           class="cursor-pointer"

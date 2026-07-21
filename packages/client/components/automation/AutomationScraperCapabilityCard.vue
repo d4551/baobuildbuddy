@@ -63,6 +63,28 @@ const jobIntelligenceSettingsRoute = APP_ROUTE_BUILDERS.settingsSection("jobInte
 
 const issues = computed(() => resolveAutomationCapabilityIssues(props.capability, t));
 const issueCount = computed(() => issues.value.length);
+const readinessColorClass = computed(() => {
+  if (props.capability.configured) {
+    return "text-success";
+  }
+  return issueCount.value > 0 ? "text-warning" : "text-error";
+});
+const latestRunColorClass = computed(() => {
+  switch (props.runState) {
+    case "success": {
+      return "text-success";
+    }
+    case "error": {
+      return "text-error";
+    }
+    case "running": {
+      return "text-info";
+    }
+    default: {
+      return "text-base-content";
+    }
+  }
+});
 const capabilityIconName = computed(() => SCRAPE_TARGET_ICON_NAMES[props.capability.target]);
 const latestRunRoute = computed(() =>
   props.latestRun ? props.buildRunDetailRoute(props.latestRun.id) : props.automationRunsRoute,
@@ -120,8 +142,8 @@ function handleScheduleInput(event: Event): void {
       <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
-          <div 
-            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error']"
+          <div
+            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, readinessColorClass]"
           >
             {{ capabilityAvailabilityLabel(capability) }}
           </div>
@@ -144,7 +166,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content']">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, latestRunColorClass]">
             {{ runStateLabel(runState) }}
           </div>
           <div class="stat-desc">
@@ -158,7 +180,7 @@ function handleScheduleInput(event: Event): void {
       </div>
 
       <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="cardRunAria(capability.target)"
           :disabled="pendingAction !== null || !capability.configured"
@@ -256,7 +278,7 @@ function handleScheduleInput(event: Event): void {
             <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
           </fieldset>
           <div class="card-actions justify-end">
-            <button 
+            <button type="button" 
               :class="[OUTLINE_ACTION_DENSE_CLASS]"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"

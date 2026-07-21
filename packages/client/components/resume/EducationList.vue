@@ -65,7 +65,7 @@ function removeEducation(index: number): void {
   <div :class="[CARD_BODY_CLASS]">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.education.title") }}</h2>
-      <button
+      <button type="button"
         :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.education.addButtonAria')"
         @click="addEducation"
@@ -80,7 +80,7 @@ function removeEducation(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.education.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_ERROR_DENSE_CLASS]"
               :aria-label="t('resumePage.education.removeButtonAria', { index: index + 1 })"
               @click="removeEducation(index)"

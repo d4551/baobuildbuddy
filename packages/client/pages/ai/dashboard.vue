@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesAiDashboardPage" });
+
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import {
   OUTLINE_ACTION_CLASS,
@@ -32,7 +34,7 @@ const page = reactive(useAIDashboardPage());
       :description="t('aiDashboard.subtitle')"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"

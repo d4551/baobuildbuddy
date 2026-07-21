@@ -208,7 +208,7 @@ function handleMenuFocusOut(event: FocusEvent): void {
   }
 }
 
-watch(isOpen, async (nextOpen, previousOpen) => {
+watch(isOpen, async (_nextOpen, previousOpen) => {
   if (previousOpen) {
     await nextTick();
     trigger.value?.focus();

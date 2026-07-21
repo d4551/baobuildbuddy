@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: "PagesAutomationRunsDetailPage" });
+
 import { OUTLINE_ACTION_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
@@ -31,6 +33,14 @@ const {
   screenshotHasError,
   retryRunStream,
 } = useAutomationRunDetailPage();
+
+const errorMessage = computed(() => {
+  const error = run.value?.error;
+  if (!error) {
+    return "";
+  }
+  return typeof error === "string" ? error : error.message;
+});
 
 useSeoMeta({
   title: t("automation.runDetail.title"),
@@ -70,9 +80,7 @@ useSeoMeta({
         :output-summary="outputSummary"
         :status-text="statusText"
         :progress-percent="progressPercent"
-        :error-message="
-          run.error ? (typeof run.error === 'string' ? run.error : run.error.message) : ''
-        "
+        :error-message="errorMessage"
       />
 
       <AutomationRunDetailTimelineCard

@@ -24,6 +24,21 @@ const LAYOUT_MUTE_PATTERN =
 const NUXT_PAGES_GLOB_PATTERN = /pages\/\*\*\/\*\.vue/u;
 const NUXT_LAYOUTS_GLOB_PATTERN = /layouts\/\*\*\/\*\.vue/u;
 
+/**
+ * Unused-ignore patterns are an evasion loophole: declaring
+ * `argsIgnorePattern: "^_"` lets a developer silence noUnusedParameters by
+ * prefixing any arg with `_`, hiding a real unused parameter (or in the
+ * underscore-evasion case, an unused top-level declaration that eslint
+ * classifies as a var). The canonical fix is to remove the unused symbol; the
+ * gate bans these config keys so the loophole cannot be re-opened.
+ */
+const IGNORE_PATTERN_BAN_PATTERNS: ReadonlyArray<{ name: string; pattern: RegExp }> = [
+  { name: "argsIgnorePattern", pattern: /argsIgnorePattern\s*:/u },
+  { name: "varsIgnorePattern", pattern: /varsIgnorePattern\s*:/u },
+  { name: "caughtErrorsIgnorePattern", pattern: /caughtErrorsIgnorePattern\s*:/u },
+  { name: "destructuredArrayIgnorePattern", pattern: /destructuredArrayIgnorePattern\s*:/u },
+];
+
 const collectOffRules = (content: string): string[] => {
   const found: string[] = [];
   for (const match of content.matchAll(RULE_OFF_PATTERN)) {
@@ -87,6 +102,15 @@ export const collectEslintSofteningViolationsForContent = (
       line: 1,
       message: 'ESLint severity "warn" is forbidden softener — use "error".',
     });
+  }
+  for (const { name, pattern } of IGNORE_PATTERN_BAN_PATTERNS) {
+    if (pattern.test(content)) {
+      violations.push({
+        filePath,
+        line: 1,
+        message: `ESLint ${name} config key is a forbidden unused-ignore evasion. Remove unused symbols at the source; do not open a prefix-ignore loophole.`,
+      });
+    }
   }
   return violations;
 };
