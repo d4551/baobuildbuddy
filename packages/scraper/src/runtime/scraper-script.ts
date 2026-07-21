@@ -20,6 +20,8 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
     return 1;
   }
 
+  const envelope = inputResult.value;
+
   const launchResult = await launchAutomationBrowser(DEFAULT_AUTOMATION_SETTINGS);
   if (!launchResult.ok) {
     process.stderr.write(
@@ -30,7 +32,7 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
 
   const session = launchResult.session;
   const navigationResult = await settle(
-    session.page.goto(inputResult.value.sourceUrl, {
+    session.page.goto(envelope.sourceUrl, {
       waitUntil: "domcontentloaded",
       timeout: automationRuntimeConfig.navigationTimeoutMs,
     }),
@@ -47,7 +49,7 @@ export const runPortalScraperScript = async (extractor: PortalJobExtractor): Pro
     }),
   );
 
-  const rowsResult = await settle(extractor(session.page, inputResult.value.sourceUrl));
+  const rowsResult = await settle(extractor(session.page, envelope.sourceUrl));
   await closeAutomationBrowser(session);
 
   if (rowsResult.status === "rejected") {

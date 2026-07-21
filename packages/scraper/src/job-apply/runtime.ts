@@ -18,13 +18,14 @@ import type { JobApplyStrategy } from "./strategy-registry";
  */
 export const runJobApplyAutomation = async (): Promise<number> => {
   const inputResult = await parseScriptInput(jobApplyScriptEnvelopeSchema);
-  const runId = inputResult.ok ? inputResult.value.runId : "run-missing-id";
-  const emitter = new ProtocolEmitter(runId);
-
   if (!inputResult.ok) {
+    const emitter = new ProtocolEmitter("run-missing-id");
     emitter.emitError("OUTPUT_VALIDATION_ERROR", inputResult.message);
     return 1;
   }
+
+  const envelope = inputResult.value;
+  const emitter = new ProtocolEmitter(envelope.runId);
 
   const strategyPreview: JobApplyStrategy["id"] = "generic";
   emitter.emitProgress({
@@ -35,7 +36,7 @@ export const runJobApplyAutomation = async (): Promise<number> => {
     message: `Detected ${strategyPreview}`,
   });
 
-  const state = await createExecutionState(inputResult.value, emitter);
+  const state = await createExecutionState(envelope, emitter);
   if (!state) {
     return 1;
   }

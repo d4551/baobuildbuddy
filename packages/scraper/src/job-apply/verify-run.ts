@@ -119,15 +119,14 @@ const submitVerificationForm = async (
  */
 export const emitVerificationRun = async (): Promise<number> => {
   const inputResult = await parseScriptInput(jobApplyScriptEnvelopeSchema);
-  const runId = inputResult.ok ? inputResult.value.runId : "automation-verify-run";
-  const emitter = new ProtocolEmitter(runId);
-
   if (!inputResult.ok) {
+    const emitter = new ProtocolEmitter("automation-verify-run");
     emitter.emitError("OUTPUT_VALIDATION_ERROR", inputResult.message);
     return 1;
   }
 
   const envelope = inputResult.value;
+  const emitter = new ProtocolEmitter(envelope.runId);
   const resumeParsed = resumeDataSchema.safeParse(envelope.resume);
   if (!resumeParsed.success) {
     emitter.emitError("OUTPUT_VALIDATION_ERROR", "Verification resume payload is invalid.");

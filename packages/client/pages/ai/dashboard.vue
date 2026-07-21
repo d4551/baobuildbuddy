@@ -3,7 +3,6 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import {
   OUTLINE_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({

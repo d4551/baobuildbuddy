@@ -8,7 +8,6 @@ import {
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { SettingsWorkspaceExportPayload } from "~/types/client-api-workspace";

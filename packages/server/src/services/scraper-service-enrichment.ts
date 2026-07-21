@@ -156,7 +156,7 @@ export const buildFallbackStudioEnrichment = (
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
     studioRow.size ? `Team size is described as ${studioRow.size}.` : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
-    resolveRemoteWorkHiringSignal(studioRow.remoteWork),
+    resolveRemoteWorkHiringSignal(studioRow.remoteWork ?? null),
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,

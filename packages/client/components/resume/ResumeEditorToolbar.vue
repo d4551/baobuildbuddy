@@ -6,7 +6,6 @@ import {
   ICON_SIZE_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 
 interface ResumeEditorToolbarProps {

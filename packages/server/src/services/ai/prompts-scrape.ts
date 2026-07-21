@@ -58,7 +58,7 @@ Studio:
 - Games: ${studio.games?.join(", ") ?? "unknown"}
 - Technologies: ${studio.technologies?.join(", ") ?? "unknown"}
 - Interview style: ${studio.interviewStyle ?? "unknown"}
-- Remote work: ${formatStudioRemoteWork(studio.remoteWork)}
+- Remote work: ${formatStudioRemoteWork(studio.remoteWork ?? null)}
 
 Return strict JSON object only for scrape enrichment:
 {

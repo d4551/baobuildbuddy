@@ -11,7 +11,6 @@ import {
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {

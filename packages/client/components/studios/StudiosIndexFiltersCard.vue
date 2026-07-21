@@ -5,7 +5,6 @@ import {
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
