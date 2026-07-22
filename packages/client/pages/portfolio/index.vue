@@ -34,6 +34,9 @@ const {
   await page.loadPortfolio();
   return true;
 });
+// Client hydrate skips the loader when payload exists; form is local reactive and
+// would stay empty while SSR HTML already has metadata — sync from shared useState.
+page.syncPortfolioMetadata(page.portfolio.value?.metadata);
 
 useSeoMeta({
   title: t("portfolioPage.title"),

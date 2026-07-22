@@ -193,19 +193,27 @@ function handleDocumentKeydown(event: KeyboardEvent): void {
 }
 
 function handleMenuFocusOut(event: FocusEvent): void {
-  const nextTarget = event.relatedTarget;
   if (!isOpen.value) {
     return;
   }
 
-  if (!(nextTarget instanceof Node)) {
-    closeMenu();
+  const nextTarget = event.relatedTarget;
+  if (nextTarget instanceof Node && menu.value?.contains(nextTarget)) {
     return;
   }
 
-  if (!menu.value?.contains(nextTarget)) {
+  // relatedTarget is often null under Playwright / synthetic focus moves.
+  // Defer and close only when focus truly left the dropdown root.
+  requestAnimationFrame(() => {
+    if (!isOpen.value) {
+      return;
+    }
+    const active = document.activeElement;
+    if (active instanceof Node && menu.value?.contains(active)) {
+      return;
+    }
     closeMenu();
-  }
+  });
 }
 
 watch(isOpen, async (_nextOpen, previousOpen) => {

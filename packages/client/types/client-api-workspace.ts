@@ -55,7 +55,8 @@ export interface SearchApi {
 }
 
 export interface AutomationVerifyContextPayload {
-  resumeId: string;
+  enabled?: boolean;
+  resumeId?: string;
 }
 
 export interface AutomationRunsApi {

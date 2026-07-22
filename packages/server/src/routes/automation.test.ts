@@ -473,6 +473,30 @@ function registerCapabilityAuditRouteTest(): void {
   });
 }
 
+function registerVerifyContextDisabledHonestyTest(): void {
+  test("GET automation verify/context returns enabled:false when verification is off", async () => {
+    const previous = process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+    process.env.BAO_ENABLE_AUTOMATION_VERIFY = "false";
+    try {
+      const res = await requestJson<{ enabled?: boolean; resumeId?: string; reason?: string }>(
+        app,
+        "GET",
+        API_ENDPOINTS.automationVerifyContext,
+      );
+      expect(res.status).toBe(HTTP_STATUS_OK);
+      expect(res.body.enabled).toBe(false);
+      expect(res.body.resumeId).toBeUndefined();
+      expect(typeof res.body.reason).toBe("string");
+    } finally {
+      if (previous === undefined) {
+        delete process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+      } else {
+        process.env.BAO_ENABLE_AUTOMATION_VERIFY = previous;
+      }
+    }
+  });
+}
+
 describe("automation routes", () => {
   registerJobApplyValidationTest();
   registerMissingResumeTest();
@@ -484,4 +508,5 @@ describe("automation routes", () => {
   registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
   registerCapabilityAuditRouteTest();
+  registerVerifyContextDisabledHonestyTest();
 });

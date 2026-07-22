@@ -123,6 +123,7 @@
     "proof:browser-burndown": "bun run scripts/browser-interaction-burndown.ts",
     "proof:browser-video": "bun run scripts/browser-record-visual-proof.ts",
     "proof:browser-product-demo": "bun run scripts/browser-record-product-demo.ts",
+    "proof:exports": "bun run scripts/proof-export-visual.ts",
     "speech:whisper:serve": "WHISPER_MODEL=tiny WHISPER_PORT=8090 python3 scripts/whisper-openai-server.py",
     "validate:locales": "bun run scripts/validate-locale-overrides.ts",
     "validate:page-seo": "bun run scripts/validate-page-seo-metadata.ts",
