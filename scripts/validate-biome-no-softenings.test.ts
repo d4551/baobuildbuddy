@@ -178,8 +178,8 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
 
   test("flags noMagicNumbers demotion (industry best practice)", () => {
     const sample = VALID_BIOME.replaceAll(
-      '"noMagicNumbers": {',
-      '"noMagicNumbers": "off", "_x": {',
+      '"noMagicNumbers": "error"',
+      '"noMagicNumbers": "off"',
     );
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noMagicNumbers"))).toBe(true);
@@ -229,16 +229,24 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
 
   test("flags noUndeclaredClasses demotion", () => {
     const sample = VALID_BIOME.replaceAll(
-      '"noUndeclaredClasses": "error"',
-      '"noUndeclaredClasses": "off"',
+      '"noFloatingPromises": "error"',
+      '"noFloatingPromises": "error", "noUndeclaredClasses": "off"',
     );
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noUndeclaredClasses"))).toBe(true);
   });
 
   test("flags noUnusedClasses demotion", () => {
-    const sample = VALID_BIOME.replaceAll('"noUnusedClasses": "error"', '"noUnusedClasses": "off"');
+    const sample = VALID_BIOME.replaceAll(
+      '"noFloatingPromises": "error"',
+      '"noFloatingPromises": "error", "noUnusedClasses": "off"',
+    );
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noUnusedClasses"))).toBe(true);
+  });
+
+  test("repo biome.json intentionally omits noUndeclaredClasses/noUnusedClasses (Tailwind incompatibility)", () => {
+    expect(VALID_BIOME.includes("noUndeclaredClasses")).toBe(false);
+    expect(VALID_BIOME.includes("noUnusedClasses")).toBe(false);
   });
 });

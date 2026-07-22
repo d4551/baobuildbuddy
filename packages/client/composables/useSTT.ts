@@ -1,3 +1,4 @@
+import { AI_CHAT_VOICE_ERROR_CODES, AI_CHAT_VOICE_ERROR_MESSAGE_KEYS } from "@bao/shared/constants/ai-voice";
 import type { VoiceSettings } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import { computed, onMounted, onUnmounted, readonly, ref } from "#imports";
@@ -122,14 +123,14 @@ function startServerSttListening(state: SttMutableState): boolean {
         state.isListening.value = true;
       },
       () => {
-        state.error.value = "Failed to start microphone";
+        state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.audioCapture];
         state.isListening.value = false;
       },
     )
     .then(
       () => undefined,
       (error: Error) => {
-        state.error.value = error instanceof Error ? error.message : "Microphone start failed";
+        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.startFailed];
       },
     );
   state.micPromise = micPromise;
@@ -142,7 +143,7 @@ function startBrowserSttListening(
   settings?: Ref<VoiceSettings | undefined>,
 ): boolean {
   if (!state.recognition) {
-    state.error.value = "Speech recognition not supported in this browser";
+    state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition];
     return false;
   }
   if (state.isListening.value) {
@@ -192,7 +193,7 @@ function stopServerSttListening(state: SttMutableState): void {
         }
       },
       () => {
-        state.error.value = "Failed to transcribe audio";
+        state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
       },
     )
     .then(() => {
@@ -201,7 +202,7 @@ function stopServerSttListening(state: SttMutableState): void {
     .then(
       () => undefined,
       (error: Error) => {
-        state.error.value = error instanceof Error ? error.message : "Microphone stop failed";
+        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
       },
     );
   state.micPromise = micPromise;

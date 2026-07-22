@@ -179,12 +179,7 @@
         "useVueHyphenatedAttributes": "error",
         "noShoutyConstants": "error",
         "noCommonJs": "error",
-        "noMagicNumbers": {
-          "level": "error",
-          "options": {
-            "ignoreNumbers": [0, 1, 2, -1, 10, 24, 60, 100, 1000]
-          }
-        },
+        "noMagicNumbers": "error",
         "useThrowOnlyError": "error",
         "useExplicitLengthCheck": "error",
         "noDoneCallback": "error"

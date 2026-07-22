@@ -223,7 +223,7 @@ const createStartListeningAction = (
       if (state.isListening.value) {
         return true;
       }
-      const _micStart = createMicrophoneRecorder().then(
+      createMicrophoneRecorder().then(
         (created) => {
           recorder = created;
           created.start();
@@ -257,7 +257,10 @@ const createStartListeningAction = (
         state.isListening.value = false;
         return;
       }
-      const _micStop = active
+      const markListeningStopped = (): void => {
+        state.isListening.value = false;
+      };
+      active
         .stop()
         .then((blob) => transcribeAudioViaServer(blob))
         .then(
@@ -273,9 +276,7 @@ const createStartListeningAction = (
             state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
           },
         )
-        .then(() => {
-          state.isListening.value = false;
-        });
+        .then(markListeningStopped, markListeningStopped);
       return;
     }
     if (state.recognition.value) {

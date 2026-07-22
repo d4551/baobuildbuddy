@@ -2,7 +2,6 @@
  * Biome UI/complexity ratchet predicates — extracted so softener gate stays ≤400 lines.
  */
 import {
-  validateNurseryAdditionsRatchet,
   validateStyleAdditionsRatchet,
   validateSuspiciousAdditionsRatchet,
 } from "./biome-softener-ratchet-v2";
@@ -362,7 +361,6 @@ export const validateGroupRatchets = (
     );
   } else {
     validateNurseryUiRatchet(nursery, violations, biomePath);
-    validateNurseryAdditionsRatchet(nursery, violations, biomePath);
   }
 };
 

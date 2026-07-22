@@ -11,6 +11,7 @@ export type RunDetailFields = {
   screenshots: readonly string[];
   input: JsonObject | null;
   output: JsonValue | null;
+  error: string | null;
 };
 
 export type OutputStep = {
@@ -61,7 +62,19 @@ export const projectRunDetail = <T>(value: T): RunDetailFields | null => {
     screenshots: screenshots.filter((entry): entry is string => typeof entry === "string"),
     input: isRecord(parsed.input) ? parsed.input : null,
     output: parsed.output ?? null,
+    error: projectRunErrorMessage(parsed.error),
   };
+};
+
+const projectRunErrorMessage = (value: JsonValue | undefined): string | null => {
+  const direct = asString(value);
+  if (direct) {
+    return direct;
+  }
+  if (isRecord(value)) {
+    return asString(value.message) ?? null;
+  }
+  return null;
 };
 
 const projectStreamEvent = (value: JsonValue): StreamEventFields | null => {

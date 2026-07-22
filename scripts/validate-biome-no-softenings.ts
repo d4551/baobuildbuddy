@@ -35,10 +35,6 @@ type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string
 const isRecord = (value: JsonValue): value is { [key: string]: JsonValue } =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const ROOT_RULES_PREFIX = /^linter\.rules\./u;
-const OVERRIDE_RULES_PREFIX = /^overrides\[\d+\]\.linter\.rules\./u;
-const LEVEL_SUFFIX = /\.level$/u;
-
 const pushViolation = (violations: ValidationViolation[], message: string): void => {
   violations.push({ filePath: BIOME_CONFIG_PATH, line: 1, message });
 };

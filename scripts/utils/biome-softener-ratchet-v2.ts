@@ -35,8 +35,7 @@ export const validateStyleAdditionsRatchet = (
   }
   const magicNumbers = style.noMagicNumbers;
   const magicNumbersOk =
-    magicNumbers === "error" ||
-    (isSoftenerRecord(magicNumbers) && magicNumbers.level === "error");
+    magicNumbers === "error" || (isSoftenerRecord(magicNumbers) && magicNumbers.level === "error");
   if (!magicNumbersOk) {
     violations.push({
       filePath: biomePath,
@@ -55,13 +54,4 @@ export const validateSuspiciousAdditionsRatchet = (
   for (const ruleName of ["noEmptyBlockStatements", "noTemplateCurlyInString"] as const) {
     requireRuleError(suspicious, ruleName, "linter.rules.suspicious", violations, biomePath);
   }
-};
-
-export const validateNurseryAdditionsRatchet = (
-  _nursery: { [key: string]: SoftenerJsonValue },
-  _violations: ValidationViolation[],
-  _biomePath: string,
-): void => {
-  // noUndeclaredClasses / noUnusedClasses intentionally NOT enforced — see
-  // header comment re: Tailwind false positives.
 };

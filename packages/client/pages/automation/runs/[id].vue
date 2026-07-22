@@ -34,13 +34,7 @@ const {
   retryRunStream,
 } = useAutomationRunDetailPage();
 
-const errorMessage = computed(() => {
-  const error = run.value?.error;
-  if (!error) {
-    return "";
-  }
-  return typeof error === "string" ? error : error.message;
-});
+const errorMessage = computed(() => run.value?.error ?? "");
 
 useSeoMeta({
   title: t("automation.runDetail.title"),

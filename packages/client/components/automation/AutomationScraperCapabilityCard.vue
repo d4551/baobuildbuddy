@@ -139,45 +139,14 @@ function handleScheduleInput(event: Event): void {
         </NuxtLink>
       </div>
 
-      <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
-          <div
-            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, readinessColorClass]"
-          >
-            {{ capabilityAvailabilityLabel(capability) }}
-          </div>
-          <div class="stat-desc">
-            {{ t("automation.scraper.providerCard.readinessDescription") }}
-          </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.issuesTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, issueCount === 0 ? 'text-success' : 'text-warning']">
-            {{ issueCount }}
-          </div>
-          <div class="stat-desc">
-            {{
-              issueCount === 0
-                ? t("automation.scraper.providerCard.issuesReady")
-                : t("automation.scraper.providerCard.issuesNeedsAttention")
-            }}
-          </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, latestRunColorClass]">
-            {{ runStateLabel(runState) }}
-          </div>
-          <div class="stat-desc">
-            {{
-              latestRun
-                ? latestRunStatusText(capability.target)
-                : t("automation.scraper.providerCard.latestRunDescription")
-            }}
-          </div>
-        </div>
-      </div>
+      <AutomationScraperCapabilityStats
+        :readiness-label="capabilityAvailabilityLabel(capability)"
+        :readiness-color-class="readinessColorClass"
+        :issue-count="issueCount"
+        :latest-run-state-label="runStateLabel(runState)"
+        :latest-run-color-class="latestRunColorClass"
+        :latest-run-description="latestRun ? latestRunStatusText(capability.target) : t('automation.scraper.providerCard.latestRunDescription')"
+      />
 
       <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <button type="button" 

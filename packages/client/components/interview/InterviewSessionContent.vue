@@ -10,6 +10,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_ERROR_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -133,6 +134,15 @@ const { t } = useI18n();
               {{ stt.isListening.value ? t("interviewSession.voice.stopButton") : t("interviewSession.voice.startButton") }}
             </button>
           </div>
+          <p
+            v-if="stt.error.value"
+            class="text-error"
+            :class="[TYPOGRAPHY_SCALE_CLASS.xs, MARGIN_TOKEN_CLASS.mt1]"
+            role="alert"
+            aria-live="assertive"
+          >
+            {{ t(stt.error.value) }}
+          </p>
         </UiGlassCard>
 
         <InterviewChat

@@ -1,8 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  collectAllowlistIntegrityViolations,
-  collectUnderscoreEvasionViolationsForContent,
-} from "./validate-no-underscore-evasion";
+import { collectUnderscoreEvasionViolationsForContent } from "./validate-no-underscore-evasion";
 
 const SAMPLE_FILE = "packages/client/components/sample.vue";
 const SAMPLE_TS = "packages/client/composables/sample.ts";
@@ -60,31 +57,33 @@ describe("validate-no-underscore-evasion", () => {
     expect(violations).toEqual([]);
   });
 
-  test("useSpeech.ts is allowlisted pending MAS guard contract resolution (ledger exists)", () => {
+  test("NO ALLOWLIST: useSpeech.ts is flagged like any other source (no special exemption)", () => {
     const content = "const _micStart = Promise.resolve();\n";
     const violations = collectUnderscoreEvasionViolationsForContent(
       "packages/client/composables/useSpeech.ts",
       content,
     );
-    expect(violations).toEqual([]);
+    expect(violations.length).toBe(1);
   });
 
-  test("allowlist integrity: dangling ledger reference is flagged", () => {
-    const original = collectUnderscoreEvasionViolationsForContent(
-      "packages/client/composables/useSpeech.ts",
-      "const _micStart = 1;\n",
-    );
-    expect(original).toEqual([]);
-
+  test("NO ALLOWLIST: arbitrary source files are flagged (no ledger exemption)", () => {
     const tempFile = "packages/client/composables/__bogus_allowlist_target.ts";
     const violations = collectUnderscoreEvasionViolationsForContent(tempFile, "const _x = 1;\n");
     expect(violations.length).toBe(1);
     expect(violations[0]?.message).toContain("_x");
   });
 
-  test("allowlist integrity: every entry references a real on-disk ledger file", () => {
-    const integrityViolations = collectAllowlistIntegrityViolations();
-    expect(integrityViolations).toEqual([]);
+  test("NO ALLOWLIST: exemption set is closed to test files + gate source only", () => {
+    const flaggedSource = collectUnderscoreEvasionViolationsForContent(
+      "packages/client/composables/production.ts",
+      "const _leak = 1;\n",
+    );
+    expect(flaggedSource.length).toBe(1);
+    const exemptTest = collectUnderscoreEvasionViolationsForContent(
+      "packages/client/composables/production.test.ts",
+      "const _fixture = 1;\n",
+    );
+    expect(exemptTest).toEqual([]);
   });
 
   test("clean Vue <script setup> source passes", () => {
