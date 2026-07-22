@@ -7,6 +7,7 @@ const catalog = {
     tagline: "Asistente de Carrera con IA para Desarrollo de Juegos",
   },
   common: {
+    save: "Guardar",
     loading: "Cargando",
     localeNames: {
       enUS: "Inglés",
@@ -39,6 +40,7 @@ const catalog = {
     dismissNotification: "Descartar notificación",
     localeSwitcher: "Cambiar idioma",
     localeOptionAria: "Cambiar idioma a {locale}",
+    aiConfigIncompleteAria: "Los proveedores de IA necesitan configuración en Ajustes",
   },
   apiErrors: {
     jobs: {
@@ -162,14 +164,25 @@ const catalog = {
     dashboard: "Panel",
     jobs: "Empleos",
     resume: "Currículum",
+    resumeBuild: "Constructor de currículum",
+    resumePreview: "Vista previa del currículum",
     coverLetter: "Carta de Presentación",
     portfolio: "Portafolio",
+    portfolioPreview: "Vista previa del portafolio",
     interview: "Entrevista",
+    interviewHistory: "Historial de entrevistas",
+    interviewSession: "Sesión de entrevista",
     skills: "Habilidades",
+    skillsPathways: "Rutas de habilidades",
     studios: "Estudios",
+    studiosAnalytics: "Analíticas de estudios",
     aiDashboard: "Panel de IA",
     aiChat: "Chat IA",
     automation: "Automatización",
+    automationJobApply: "Automatización de solicitudes",
+    automationScraper: "Automatización de extracción",
+    automationEmail: "Automatización de email",
+    automationRuns: "Ejecuciones de automatización",
     gamification: "Gamificación",
     settings: "Configuración",
     apiDocs: "Documentación de API",
@@ -1899,6 +1912,9 @@ const catalog = {
     },
     jobApply: {
       title: "Automatización de Solicitudes",
+      bootstrapError: "No se pudo cargar la automatización de solicitudes.",
+      bootstrapRetry: "Reintentar",
+      bootstrapRetryAria: "Reintentar carga de la automatización de solicitudes",
       emptyResumesTitle: "Se requiere un currículum",
       emptyResumesDescription:
         "Crea un currículum antes de ejecutar la automatización de solicitud. La ejecución necesita un currículum seleccionado.",
@@ -1914,6 +1930,7 @@ const catalog = {
       coverLetterLegend: "Carta de Presentación (opcional)",
       coverLetterAria: "Seleccionar carta opcional",
       noCoverLetterOption: "Sin carta",
+      coverLetterOption: "{position} en {company}",
       unknownCompany: "Desconocido",
       unknownPosition: "Puesto",
       jobIdLegend: "ID de Empleo (opcional)",
@@ -1971,6 +1988,7 @@ const catalog = {
         eventType: {
           progress: "Progreso",
           result: "Resultado",
+          error: "Fallo",
         },
         eventMessages: {
           resultSuccess: "La ejecución terminó correctamente.",
@@ -2798,6 +2816,10 @@ const catalog = {
     aiProviders: {
       title: "Proveedores de IA",
       subtitle: "Mantén proveedores locales como principales y cloud como respaldo controlado.",
+      openaiV1Title: "API Chat Completions de OpenAI",
+      openaiV1Description:
+        "Apunta los SDK de OpenAI a esta URL base con tu clave API de Bao como token Bearer (models + chat/completions).",
+      openaiV1Aria: "URL base de la API Chat Completions de OpenAI",
       expandAria: "Expandir configuración de {provider}",
       configuredBadge: "Configurado",
       endpointLabel: "URL del Endpoint",
@@ -2820,13 +2842,20 @@ const catalog = {
       preferredProviderSaveButton: "Guardar chat por defecto",
       preferredProviderHint:
         "Este control rápido define el proveedor predeterminado para chat y conversaciones.",
+      readinessTitle: "Preparación de proveedores",
+      readinessDescription:
+        "Comprueba la configuración y la conectividad antes de asignar proveedores a los flujos de trabajo.",
       preferredProviderSaved: "Proveedor preferido actualizado",
       routingTitle: "Enrutamiento por propósito",
       routingSubtitle:
         "Asigna un proveedor y un modelo opcional a cada capacidad de IA para que chat, entrevistas, exportaciones y automatizaciones no compartan una única configuración global.",
+      routingCoverageTitle: "Flujos enrutados",
+      routingCoverageDescription:
+        "Cada capacidad de IA puede mantener su propio proveedor y una anulación opcional de modelo.",
       saveRoutingAria: "Guardar enrutamiento de IA por propósito",
       saveRoutingButton: "Guardar enrutamiento",
       routingSaved: "Enrutamiento de IA guardado",
+      purposeColumnLabel: "Propósito",
       purposeProviderLegend: "Proveedor",
       purposeProviderAria: "Seleccionar proveedor para {purpose}",
       purposeModelLegend: "Modelo específico",
@@ -2879,7 +2908,10 @@ const catalog = {
       ollamaTipTitle: "Consejo: Ollama va por fuera de esta app",
       ollamaTipDescription:
         "Instálalo primero y sigue la configuración oficial de Ollama para tu propia máquina o proyecto en",
+      ollamaTipLinkLabel: "Sitio de Ollama",
       ollamaTipLinkAria: "Abrir sitio web de Ollama en una pestaña nueva",
+      credentialsDescription:
+        "Guarda y prueba credenciales solo para los proveedores que planeas enrutar a flujos de trabajo activos.",
     },
     brand: {
       title: "Plano de control de marca",
@@ -2981,6 +3013,7 @@ const catalog = {
     errors: {
       failedToTestProvider: "Error al probar proveedor",
       failedToSaveApiKeys: "Error al guardar claves API",
+      missingProviderCredential: "Añade credenciales del proveedor antes de probar la conexión.",
       failedToSaveEmailDelivery: "Error al guardar la configuración de entrega de correo",
       failedToSaveEmailDeliveryPassword: "Error al guardar la contraseña de entrega de correo",
       failedToSaveTheme: "Error al guardar tema",

@@ -464,6 +464,18 @@
     "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
   },
   {
+    "key": "automation.jobApply.bootstrapError",
+    "reason": "Critical namespace raw-catalog contract key requested for locale coverage (enterprise UX fabric 2026-07-22; add consumer when job-apply bootstrap state is wired)."
+  },
+  {
+    "key": "automation.jobApply.bootstrapRetry",
+    "reason": "Critical namespace raw-catalog contract key requested for locale coverage (enterprise UX fabric 2026-07-22; add consumer when job-apply bootstrap state is wired)."
+  },
+  {
+    "key": "automation.jobApply.bootstrapRetryAria",
+    "reason": "Critical namespace raw-catalog contract key requested for locale coverage (enterprise UX fabric 2026-07-22; add consumer when job-apply bootstrap state is wired)."
+  },
+  {
     "key": "automation.runDetail.loadErrorFallback",
     "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
   },
@@ -610,6 +622,10 @@
   {
     "key": "settings.errors.failedToSaveApiKeys",
     "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+  },
+  {
+    "key": "settings.errors.missingProviderCredential",
+    "reason": "Critical namespace raw-catalog contract key requested for locale coverage (enterprise UX fabric 2026-07-22; add consumer when provider credential preflight messaging is wired)."
   },
   {
     "key": "floatingChat.domainChip",
