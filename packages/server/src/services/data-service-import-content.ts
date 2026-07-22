@@ -35,7 +35,7 @@ export const importResumesSection = async (
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
-  if (!(data.resumes?.length > 0)) {
+  if (data.resumes?.length === 0) {
     return;
   }
 
@@ -70,7 +70,7 @@ export const importCoverLettersSection = async (
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
-  if (!(data.coverLetters?.length > 0)) {
+  if (data.coverLetters?.length === 0) {
     return;
   }
 
@@ -104,7 +104,7 @@ export const importPortfolioProjectsSection = async (
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
-  if (!(data.portfolioProjects?.length > 0)) {
+  if (data.portfolioProjects?.length === 0) {
     return;
   }
 
@@ -149,7 +149,7 @@ export const importInterviewSessionsSection = async (
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
-  if (!(data.interviewSessions?.length > 0)) {
+  if (data.interviewSessions?.length === 0) {
     return;
   }
 
@@ -183,7 +183,7 @@ export const importSkillMappingsSection = async (
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
-  if (!(data.skillMappings?.length > 0)) {
+  if (data.skillMappings?.length === 0) {
     return;
   }
 
@@ -216,7 +216,7 @@ export const importChatHistorySection = async (
   data: BaoExportData,
   imported: Record<string, number>,
 ): Promise<void> => {
-  if (!(data.chatHistory?.length > 0)) {
+  if (data.chatHistory?.length === 0) {
     return;
   }
 

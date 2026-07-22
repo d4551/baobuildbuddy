@@ -5,6 +5,8 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_40 = 40;
+const NUM_80 = 80;
 
 /**
  * Stub / noop / placeholder detection gate (AGENTS.md prohibited debt vocabulary).
@@ -103,13 +105,13 @@ const hasControlWiring = (tagName: string, attrs: string): boolean => {
 const extractControlInnerPreview = (template: string, openTagEnd: number): string => {
   const after = template.slice(openTagEnd);
   const closeIdx = after.search(CLOSE_TAG_START_PATTERN);
-  const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, 80);
+  const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, NUM_80);
   return inner
     .replace(NESTED_TAG_STRIP_PATTERN, " ")
     .replace(I18N_BINDING_STRIP_PATTERN, " ")
     .replace(WHITESPACE_COLLAPSE_PATTERN, " ")
     .trim()
-    .slice(0, 40);
+    .slice(0, NUM_40);
 };
 
 const collectInertHandlerViolations = (

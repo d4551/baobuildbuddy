@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
-import type { SetupStep } from "./setup-page-contracts";
+import { SETUP_FINAL_STEP, type SetupStep } from "./setup-page-contracts";
 
 defineProps<{
   currentStep: SetupStep;
@@ -18,7 +18,7 @@ const { t } = useI18n();
     <li class="step" :class="{ 'step-primary': currentStep >= 2 }" :data-content="currentStep > 2 ? '✓' : '2'">
       {{ t("setup.steps.localAi") }}
     </li>
-    <li class="step" :class="{ 'step-primary': currentStep >= 3 }" :data-content="currentStep >= 3 ? '✓' : '3'">
+    <li class="step" :class="{ 'step-primary': currentStep >= SETUP_FINAL_STEP }" :data-content="currentStep >= SETUP_FINAL_STEP ? '✓' : '3'">
       {{ t("setup.steps.done") }}
     </li>
   </ul>

@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { effectScope } from "vue";
 import { useScrollSpy } from "./useScrollSpy";
+const RATIO_0_3 = 0.3;
+const RATIO_0_8 = 0.8;
 
 class MockIntersectionObserver implements IntersectionObserver {
   static latest: MockIntersectionObserver | null = null;
@@ -115,7 +117,7 @@ function assertUpdatesActiveSectionFromObserver(): void {
     throw new Error("Observer was not created");
   }
 
-  observer.trigger([createEntry(sectionOne, 0.3), createEntry(sectionTwo, 0.8)]);
+  observer.trigger([createEntry(sectionOne, RATIO_0_3), createEntry(sectionTwo, RATIO_0_8)]);
 
   expect(scrollSpy.activeSectionId.value).toBe("two");
   expect(replaceStateSpy).toHaveBeenCalledWith({}, "", "#two");

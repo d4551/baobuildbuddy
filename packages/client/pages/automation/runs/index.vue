@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
 
 defineOptions({ name: "AutomationRunsPage" });
@@ -63,7 +66,7 @@ useSeoMeta({
       :t="t"
     />
 
-    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="6" />
+    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="error"

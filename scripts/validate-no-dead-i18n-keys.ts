@@ -67,7 +67,7 @@ const isAllowlistEntry = (value: JsonValue): value is AllowlistEntry => {
     return false;
   }
   const record = value;
-  return typeof record["key"] === "string" && typeof record["reason"] === "string";
+  return typeof record.key === "string" && typeof record.reason === "string";
 };
 
 const loadAllowlist = async (): Promise<AllowlistEntry[]> => {

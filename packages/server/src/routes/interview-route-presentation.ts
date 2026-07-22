@@ -10,10 +10,11 @@ import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { studios } from "../db/schema/schema-modules";
 import type { SessionPayload } from "./interview-route-contracts";
+const NUM_1000 = 1000;
 
 const formatDurationMs = (startTime: number, endTime?: number | null): string => {
   if (!endTime) return "N/A";
-  const elapsedSeconds = Math.max(0, Math.floor((endTime - startTime) / 1000));
+  const elapsedSeconds = Math.max(0, Math.floor((endTime - startTime) / NUM_1000));
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
   return `${minutes}m ${seconds}s`;

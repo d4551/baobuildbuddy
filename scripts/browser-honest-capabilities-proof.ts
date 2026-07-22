@@ -1,3 +1,14 @@
+const NUM_1000 = 1_000;
+const NUM_1200 = 1_200;
+const NUM_1500 = 1_500;
+const NUM_1800 = 1_800;
+const NUM_2000 = 2_000;
+const NUM_20000 = 20_000;
+const NUM_2500 = 2_500;
+const NUM_35000 = 35_000;
+const NUM_400 = 400;
+const NUM_5 = 5;
+const NUM_8 = 8;
 /**
  * Honest headed proof for capabilities that can run in this environment:
  * - PDF export via UI download (real pdf-lib bytes)
@@ -60,11 +71,11 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_800);
+  await wait(page, NUM_1800);
   await page.locator("main button.btn-outline", { hasText: RE_EDIT }).first().click();
-  await wait(page, 1_200);
+  await wait(page, NUM_1200);
   await page.getByRole("button", { name: RE_EXPORT }).first().click();
-  await wait(page, 400);
+  await wait(page, NUM_400);
   const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
   await page
     .getByRole("menuitem", { name: RE_PDF })
@@ -80,10 +91,10 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
   const path = await saveDownload(downloadResult.value, "resume-real.pdf");
   const bytes = (await Bun.file(path).arrayBuffer()).byteLength;
   const header = Buffer.from(await Bun.file(path).arrayBuffer())
-    .subarray(0, 5)
+    .subarray(0, NUM_5)
     .toString("utf8");
   await writeOutput(`PDF path=${path} bytes=${String(bytes)} header=${header}`);
-  if (header !== "%PDF-" || bytes < 1_000) {
+  if (header !== "%PDF-" || bytes < NUM_1000) {
     await writeError("Downloaded file is not a real PDF");
     return null;
   }
@@ -93,7 +104,7 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "02-resume-preview-rich");
   return path;
 };
@@ -103,7 +114,7 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
 
   // Enable Work With Indies portal checkbox if present
   const portalToggle = page.getByLabel(RE_WWI).or(page.getByText(RE_WWI)).first();
@@ -116,20 +127,20 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
     );
   }
   await page.getByRole("button", { name: RE_SAVE }).last().click();
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "03-providers-saved");
 
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationScraper}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   const runButtons = page.getByRole("button", { name: RE_SCRAPE_RUN });
   await writeOutput(`scraper run buttons=${String(await runButtons.count())}`);
   const enabledRun = runButtons.filter({ hasNot: page.locator(":disabled") }).first();
   if ((await enabledRun.count()) > 0) {
     await enabledRun.click();
-    await wait(page, 35_000);
+    await wait(page, NUM_35000);
   }
   await shot(page, "04-scraper-ran");
 
@@ -137,11 +148,11 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_500);
+  await wait(page, NUM_1500);
   const refresh = page.getByRole("button", { name: RE_REFRESH_JOBS }).first();
   if ((await refresh.count()) > 0) {
     await refresh.click();
-    await wait(page, 20_000);
+    await wait(page, NUM_20000);
   }
   await shot(page, "05-jobs-feed");
   const empty = await page.getByText(RE_NO_JOBS).count();
@@ -150,7 +161,7 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
     [...document.querySelectorAll("main h3, main .card-title")]
       .map((el) => (el.textContent ?? "").trim())
       .filter((text) => text.length > 0)
-      .slice(0, 8),
+      .slice(0, NUM_8),
   );
   await writeOutput(
     `jobs empty=${String(empty)} cards=${String(cards)} titles=${JSON.stringify(titles)}`,
@@ -163,7 +174,7 @@ const proveBrowserTts = async (page: Page): Promise<boolean> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_500);
+  await wait(page, NUM_1500);
   const result = await page.evaluate(async () => {
     const synth = window.speechSynthesis;
     if (!synth) {
@@ -187,7 +198,7 @@ const proveBrowserTts = async (page: Page): Promise<boolean> => {
       // Some environments fire neither end nor error promptly.
       window.setTimeout(() => {
         resolve(synth.speaking || voices.length >= 0);
-      }, 2_500);
+      }, NUM_2500);
     });
     return {
       ok: spoken,
@@ -246,7 +257,7 @@ const main = async (): Promise<void> => {
       reason: "No microphone device / permission in this cloud agent environment for real STT",
     },
     pdf: {
-      status: pdfPath && pdfStat && pdfStat.size > 1000 ? "OK" : "FAIL",
+      status: pdfPath && pdfStat && pdfStat.size > NUM_1000 ? "OK" : "FAIL",
       path: pdfPath,
       bytes: pdfStat?.size ?? 0,
     },

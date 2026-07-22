@@ -1,3 +1,5 @@
+const NUM_240 = 240;
+const NUM_400 = 400;
 /**
  * Headed visual proof recorder (no curl, no headless).
  * Tours primary routes at mobile → tablet → desktop and writes WebM + stills.
@@ -61,16 +63,16 @@ const main = async (): Promise<void> => {
   const page = await context.newPage();
   page.on("console", (message: ConsoleMessage) => {
     if (message.type() === "error") {
-      consoleErrors.push(`[${new Date().toISOString()}] ${message.text().slice(0, 240)}`);
+      consoleErrors.push(`[${new Date().toISOString()}] ${message.text().slice(0, NUM_240)}`);
     }
   });
   page.on("pageerror", (error: Error) => {
-    consoleErrors.push(`[pageerror] ${error.message.slice(0, 240)}`);
+    consoleErrors.push(`[pageerror] ${error.message.slice(0, NUM_240)}`);
   });
 
   await mapSequential(VIEWPORTS, async (viewport) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await waitForPageReady(page, 400);
+    await waitForPageReady(page, NUM_400);
     await mapSequential(ROUTES, async (route) => {
       await tourRoute(page, stillsDir, consoleErrors, CLIENT_BASE, viewport, route);
     });

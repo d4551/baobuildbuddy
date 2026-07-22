@@ -13,8 +13,12 @@ import { db } from "../../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
+const NUM_1024 = 1024;
+const NUM_120000 = 120_000;
+const NUM_180 = 180;
+const NUM_8 = 8;
 
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const MAX_AUDIO_BYTES = NUM_8 * NUM_1024 * NUM_1024;
 const TRAILING_SLASH_RE = /\/$/u;
 
 export type SpeechTranscribeInput = {
@@ -145,7 +149,7 @@ const postOpenAiTranscription = async (input: {
       method: "POST",
       headers,
       body: form,
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(NUM_120000),
     }),
   );
   if (responseResult.status === "rejected") {
@@ -154,7 +158,7 @@ const postOpenAiTranscription = async (input: {
   const response = responseResult.value;
   const bodyText = await response.text();
   if (!response.ok) {
-    return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, 180)}` };
+    return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, NUM_180)}` };
   }
   const parsed = safeParseJson(bodyText);
   if (!isRecord(parsed) || typeof parsed.text !== "string") {

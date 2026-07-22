@@ -9,6 +9,9 @@ import {
   resolvePlaywrightBrowsersPath,
   resolvePlaywrightHostPlatformOverride,
 } from "@bao/shared/utils/playwright-browsers-path";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
+const NUM_2000 = 2_000;
+const NUM_3000 = 3_000;
 
 const playwrightBrowsersPathDeps = (): PlaywrightBrowsersPathDeps => ({
   pathExists: existsSync,
@@ -84,14 +87,14 @@ export interface AutomationRuntimeConfig {
 export const automationRuntimeConfig: AutomationRuntimeConfig = {
   navigationTimeoutMs: parsePositiveInt(
     Bun.env.AUTOMATION_NAVIGATION_TIMEOUT_MS,
-    DEFAULT_AUTOMATION_SETTINGS.defaultTimeout * 1_000,
+    DEFAULT_AUTOMATION_SETTINGS.defaultTimeout * MS_PER_SECOND,
   ),
-  pageSettleDelayMs: parsePositiveInt(Bun.env.AUTOMATION_PAGE_SETTLE_DELAY_MS, 2_000),
+  pageSettleDelayMs: parsePositiveInt(Bun.env.AUTOMATION_PAGE_SETTLE_DELAY_MS, NUM_2000),
   secondaryNavigationDelayMs: parsePositiveInt(
     Bun.env.AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS,
-    2_000,
+    NUM_2000,
   ),
-  postSubmitDelayMs: parsePositiveInt(Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS, 3_000),
+  postSubmitDelayMs: parsePositiveInt(Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS, NUM_3000),
   get enableAutomationVerify(): boolean {
     return Bun.env.BAO_ENABLE_AUTOMATION_VERIFY === "true";
   },

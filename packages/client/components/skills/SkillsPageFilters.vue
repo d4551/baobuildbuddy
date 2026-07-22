@@ -32,6 +32,7 @@ const emit = defineEmits<{
 
 const isAllCategorySelected = computed(() => categoryFilter.value === SKILLS_FILTER_ALL_VALUE);
 
+const searchInputId = `skills-page-search-${useId()}`;
 const { t } = useI18n();
 
 function setAllCategoryFilter(): void {
@@ -42,11 +43,13 @@ function setAllCategoryFilter(): void {
 <template>
   <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-      <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+      <label :for="searchInputId" class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+        <span class="sr-only">{{ t("skillsPage.filters.searchPlaceholder") }}</span>
         <svg class="text-muted" :class="[ICON_SIZE_CLASS[4]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input 
+          :id="searchInputId"
           v-model="searchFilter"
           class="grow"
           type="text"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
@@ -7,7 +8,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-defineProps<{
+const props = defineProps<{
   screenshotPaths: readonly string[];
   screenshotEndpoint: (index: number) => string;
   screenshotLinkLabel: (index: number) => string;
@@ -16,6 +17,19 @@ defineProps<{
 }>();
 
 const { t } = useI18n();
+
+function bindScreenshotErrorHandler(
+  index: number,
+  element: Element | ComponentPublicInstance | null,
+): void {
+  if (!(element instanceof HTMLImageElement)) {
+    return;
+  }
+
+  element.onerror = () => {
+    props.markScreenshotError(index);
+  };
+}
 </script>
 
 <template>
@@ -30,10 +44,10 @@ const { t } = useI18n();
           <figure :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.pt4]">
             <img 
               v-if="!screenshotHasError(index)"
+              :ref="(element) => bindScreenshotErrorHandler(index, element)"
               :src="screenshotEndpoint(index)"
               :class="[RADIUS_TOKEN_CLASS.lg]"
               :alt="t('automation.runDetail.screenshotAlt', { index: index + 1 })"
-              @error="markScreenshotError(index)"
             />
             <div 
               v-else

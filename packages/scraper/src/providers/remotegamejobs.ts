@@ -2,6 +2,13 @@ import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import { buildScraperHash } from "../runtime/hash";
 import { toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
+import {
+  SCRAPER_JOB_COMPANY_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MIN_LENGTH,
+} from "@bao/shared/constants/scraper";
+const NUM_50 = 50;
+const NUM_80 = 80;
 
 const REMOTE_GAME_JOBS_RESULT_LIMIT = 50;
 const EMPLOYMENT_TYPE_TOKENS = ["full-time", "part-time", "contract", "freelance", "internship"];
@@ -36,13 +43,13 @@ const extractRemoteGameJobsCandidates = ({
         !employmentTypeTokens.includes(lowered) &&
         !line.startsWith("Remote") &&
         line.length > 2 &&
-        line.length < 80
+        line.length < NUM_80
       );
     }) ?? "Unknown";
 
   const boxes = Array.from(document.querySelectorAll<HTMLElement>(boxSelector));
 
-  return boxes.slice(0, 50).flatMap((box) => {
+  return boxes.slice(0, NUM_50).flatMap((box) => {
     const link =
       box.querySelector<HTMLAnchorElement>(primaryLinkSelector) ??
       box.querySelector<HTMLAnchorElement>(secondaryLinkSelector);
@@ -51,7 +58,7 @@ const extractRemoteGameJobsCandidates = ({
     }
 
     const title = ((link.textContent ?? "").trim().split("\n")[0] ?? "").trim();
-    if (title.length < 5) {
+    if (title.length < SCRAPER_JOB_TITLE_MIN_LENGTH) {
       return [];
     }
 
@@ -89,8 +96,8 @@ export const extractRemoteGameJobs = async (
   });
 
   return rows.slice(0, REMOTE_GAME_JOBS_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100) || "Unknown";
+    const title = toBoundedText(row.title, SCRAPER_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPER_JOB_COMPANY_MAX_LENGTH) || "Unknown";
 
     return {
       title,

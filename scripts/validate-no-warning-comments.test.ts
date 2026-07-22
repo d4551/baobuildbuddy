@@ -3,15 +3,17 @@ import {
   collectWarningCommentViolationsForContent,
   listWarningKinds,
 } from "./validate-no-warning-comments";
+const NUM_3 = 3;
+const NUM_6 = 6;
 
 const SAMPLE_FILE = "packages/client/components/sample.vue";
 
 const kindNames = (): readonly string[] => listWarningKinds().map((kind) => kind.name);
 
-describe("validate-no-warning-comments", () => {
+describe("validate-no-warning-comments: registered tokens", () => {
   test("VACUOUS_GATE: every registered warning token is flagged when injected", () => {
     const names = kindNames();
-    expect(names.length).toBe(6);
+    expect(names.length).toBe(NUM_6);
     for (const name of names) {
       const content = `// ${name}: fix this later`;
       const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
@@ -20,6 +22,16 @@ describe("validate-no-warning-comments", () => {
     }
   });
 
+  test("multiple distinct markers in one file each produce a violation", () => {
+    const names = kindNames();
+    const lines = names.map((name) => `// ${name}: x`);
+    const content = lines.join("\n");
+    const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
+    expect(violations.length).toBe(names.length);
+  });
+});
+
+describe("validate-no-warning-comments: clean source and exemptions", () => {
   test("clean source produces zero violations", () => {
     const content = "const greeting = 'hello';\nexport { greeting };\n";
     const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
@@ -41,14 +53,16 @@ describe("validate-no-warning-comments", () => {
     );
     expect(peerViolations).toEqual([]);
   });
+});
 
+describe("validate-no-warning-comments: boundary and reporting", () => {
   test("reports correct line number for inline markers", () => {
     const firstName = kindNames()[0] ?? "";
     expect(firstName.length).toBeGreaterThan(0);
     const content = `line1\nline2\n// ${firstName}: bypass auth\nline4`;
     const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
     expect(violations.length).toBe(1);
-    expect(violations[0]?.line).toBe(3);
+    expect(violations[0]?.line).toBe(NUM_3);
   });
 
   test("word-boundary prevents false positives on legitimate identifiers", () => {
@@ -61,14 +75,6 @@ describe("validate-no-warning-comments", () => {
     const content = "const todo = 'task';\n";
     const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
     expect(violations.length).toBe(0);
-  });
-
-  test("multiple distinct markers in one file each produce a violation", () => {
-    const names = kindNames();
-    const lines = names.map((name) => `// ${name}: x`);
-    const content = lines.join("\n");
-    const violations = collectWarningCommentViolationsForContent(SAMPLE_FILE, content);
-    expect(violations.length).toBe(names.length);
   });
 
   test("uppercase name appears at least once in lowercase source — boundary holds", () => {

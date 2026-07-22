@@ -2,6 +2,12 @@ import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
+import {
+  SCRAPER_JOB_COMPANY_MAX_LENGTH,
+  SCRAPER_JOB_LOCATION_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MAX_LENGTH,
+} from "@bao/shared/constants/scraper";
+const NUM_3 = 3;
 
 const GRACKLE_RESULT_LIMIT = 50;
 
@@ -35,7 +41,7 @@ export const extractGrackleJobs = async (
       }
 
       const title = (link.innerText ?? "").trim();
-      if (title.length < 3) {
+      if (title.length < NUM_3) {
         return null;
       }
 
@@ -60,9 +66,9 @@ export const extractGrackleJobs = async (
   }, GRACKLE_RESULT_LIMIT);
 
   return rows.slice(0, GRACKLE_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100) || "Unknown";
-    const location = toBoundedText(row.location, 100) || "Remote";
+    const title = toBoundedText(row.title, SCRAPER_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPER_JOB_COMPANY_MAX_LENGTH) || "Unknown";
+    const location = toBoundedText(row.location, SCRAPER_JOB_LOCATION_MAX_LENGTH) || "Remote";
 
     return {
       title,

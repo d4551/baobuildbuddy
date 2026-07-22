@@ -4,7 +4,7 @@ import {
   API_ERROR_INVALID_API_KEY,
   API_ERROR_MISSING_AUTH_HEADER,
 } from "@bao/shared/constants/api-errors";
-import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
+import { HTTP_STATUS_OK, HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
@@ -196,7 +196,7 @@ describe("authGuard HTTP default-deny", () => {
         headers: { authorization: "Bearer bao_guard_test_key" },
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     const body = (await response.json()) as { ok: boolean };
     expect(body.ok).toBe(true);
   });

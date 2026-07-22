@@ -2,7 +2,9 @@ import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/r
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
 import automationJobApplyCatalog from "~/locales/en-US/automation/jobApply";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import { useAutomation } from "./useAutomation";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_TOO_MANY_REQUESTS, HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 
 const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success", "error"]);
 const PROGRESS_STATUS_TO_RUN_STATUS = {
@@ -74,10 +76,10 @@ const toStreamError = (error: unknown, fallbackMessage: string): StreamError => 
 };
 
 const toUiStateFromError = (error: StreamError): AutomationRunUiState => {
-  if (error.statusCode === 401) {
+  if (error.statusCode === HTTP_STATUS_UNAUTHORIZED) {
     return "unauthorized";
   }
-  if (!error.statusCode || error.statusCode >= 500 || error.statusCode === 429) {
+  if (!error.statusCode || error.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR || error.statusCode === HTTP_STATUS_TOO_MANY_REQUESTS) {
     return "errorRetryable";
   }
   return "errorNonRetryable";
@@ -100,7 +102,7 @@ const computeProgressPercent = (step: number | null, totalSteps: number | null):
   if (typeof step !== "number" || typeof totalSteps !== "number" || totalSteps <= 0) {
     return null;
   }
-  return Math.max(0, Math.min(100, Math.round((step / totalSteps) * 100)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round((step / totalSteps) * PERCENT_MAX)));
 };
 
 function createStreamStateRefs(): StreamStateRefs {
@@ -187,7 +189,7 @@ function applyResultEvent(
     error: success ? null : event.result.error,
     screenshots:
       event.result.screenshots.length > 0 ? event.result.screenshots : currentRun.screenshots,
-    progress: 100,
+    progress: PERCENT_MAX,
     currentStep: resultSteps,
     totalSteps: resultSteps,
     completedAt: event.timestamp,

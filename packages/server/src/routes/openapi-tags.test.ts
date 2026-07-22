@@ -3,6 +3,7 @@ import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints"
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { createTestDbPath, requestJson } from "../test-utils";
 import { hashApiKey } from "../utils/crypto";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 
 type OpenApiOperation = {
   tags?: string[];
@@ -109,7 +110,7 @@ describe("openapi tags", () => {
     const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, {
       Authorization: `Bearer ${TEST_AUTH_KEY}`,
     });
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
 
     for (const [path, operations] of Object.entries(response.body.paths)) {
       assertOpenApiOperationTags(path, operations);

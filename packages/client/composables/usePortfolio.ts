@@ -5,7 +5,6 @@ import type {
   PortfolioMetadata,
   PortfolioProject,
 } from "@bao/shared/types/portfolio";
-import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { toPortfolioData } from "./api-normalizer-portfolio";
 import {

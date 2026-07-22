@@ -6,6 +6,8 @@ import frFRCatalog from "../packages/client/locales/fr-FR/catalog";
 import jaJPCatalog from "../packages/client/locales/ja-JP/catalog";
 import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const RATIO_0_05 = 0.05;
 
 /**
  * Locale parity gate (HARDENED):
@@ -63,7 +65,7 @@ const isCoverageFloors = (value: JsonValue): value is CoverageFloors => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
-  const floors = value["floors"];
+  const floors = value.floors;
   if (typeof floors !== "object" || floors === null || Array.isArray(floors)) {
     return false;
   }
@@ -89,51 +91,66 @@ const criticalReferenceKeys = [...referenceKeys].filter((key) =>
 const isCriticalKey = (key: string): boolean =>
   criticalPrefixes.some((prefix) => key === prefix || key.startsWith(`${prefix}.`));
 
+const collectCoverageViolations = (
+  filePath: string,
+  localeId: string,
+  localeKeys: Set<string>,
+  floors: CoverageFloors,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  const coveragePct = Number(((localeKeys.size / referenceKeys.size) * PERCENT_MAX).toFixed(1));
+  const floor = floors.floors[localeId];
+  if (typeof floor !== "number") {
+    violations.push({
+      filePath: COVERAGE_FLOORS_PATH,
+      line: 1,
+      message: `Missing coverage floor for locale "${localeId}".`,
+    });
+  } else if (coveragePct + RATIO_0_05 < floor) {
+    violations.push({
+      filePath,
+      line: 1,
+      message: `Raw catalog coverage ${coveragePct}% is below ratchet floor ${floor}% for ${localeId}.`,
+    });
+  }
+  return violations;
+};
+
+const collectMissingCriticalKeyViolations = (
+  filePath: string,
+  localeKeys: Set<string>,
+): ValidationViolation[] =>
+  criticalReferenceKeys
+    .filter((key) => !localeKeys.has(key))
+    .map((key) => ({
+      filePath,
+      line: 1,
+      message: `Missing critical raw locale key "${key}" required by en-US catalog.`,
+    }));
+
+const collectOrphanKeyViolations = (
+  filePath: string,
+  localeKeys: Set<string>,
+): ValidationViolation[] =>
+  [...localeKeys]
+    .filter((key) => !referenceKeys.has(key))
+    .map((key) => ({
+      filePath,
+      line: 1,
+      message: `Orphan locale key "${key}" is not present in en-US catalog.`,
+    }));
+
 const collectViolations = (): ValidationViolation[] => {
   const floors = loadCoverageFloors();
   const violations: ValidationViolation[] = [];
 
   for (const { filePath, localeId, value } of locales) {
     const localeKeys = new Set(collectPaths(value));
-    const coveragePct = Number(((localeKeys.size / referenceKeys.size) * 100).toFixed(1));
-    const floor = floors.floors[localeId];
-    if (typeof floor !== "number") {
-      violations.push({
-        filePath: COVERAGE_FLOORS_PATH,
-        line: 1,
-        message: `Missing coverage floor for locale "${localeId}".`,
-      });
-    } else if (coveragePct + 0.05 < floor) {
-      violations.push({
-        filePath,
-        line: 1,
-        message: `Raw catalog coverage ${coveragePct}% is below ratchet floor ${floor}% for ${localeId}.`,
-      });
-    }
-
-    for (const key of criticalReferenceKeys) {
-      if (!localeKeys.has(key)) {
-        violations.push({
-          filePath,
-          line: 1,
-          message: `Missing critical raw locale key "${key}" required by en-US catalog.`,
-        });
-      }
-    }
-
-    // Extra keys outside en-US are still violations (orphan keys).
-    for (const key of localeKeys) {
-      if (!referenceKeys.has(key)) {
-        violations.push({
-          filePath,
-          line: 1,
-          message: `Orphan locale key "${key}" is not present in en-US catalog.`,
-        });
-      }
-    }
+    violations.push(...collectCoverageViolations(filePath, localeId, localeKeys, floors));
+    violations.push(...collectMissingCriticalKeyViolations(filePath, localeKeys));
+    violations.push(...collectOrphanKeyViolations(filePath, localeKeys));
   }
 
-  // VACUOUS guard: critical set must stay non-empty.
   if (criticalReferenceKeys.length === 0) {
     violations.push({
       filePath: CRITICAL_NAMESPACES_PATH,
@@ -141,9 +158,6 @@ const collectViolations = (): ValidationViolation[] => {
       message: "Critical namespace list matched zero en-US keys — gate would be vacuous.",
     });
   }
-
-  // Keep isCriticalKey referenced for tests/export consumers.
-  void isCriticalKey;
 
   return violations;
 };
@@ -156,4 +170,5 @@ if (import.meta.main) {
   );
 }
 
-export { collectPaths, collectViolations, isCriticalKey, criticalReferenceKeys };
+export { collectViolations, isCriticalKey };
+

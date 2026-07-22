@@ -5,6 +5,7 @@ import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";
 import { assertClientApi } from "~/types/client-api";
 import { resolveTreatyBase } from "~/utils/treaty-base";
+import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 
 const AUTH_KEY = AUTH_KEY_STORAGE_KEY;
 
@@ -75,7 +76,7 @@ export default defineNuxtPlugin({
         return key ? { Authorization: `Bearer ${key}` } : {};
       },
       onResponse: (response) => {
-        if (response.status === 401) {
+        if (response.status === HTTP_STATUS_UNAUTHORIZED) {
           writeApiKey(null);
         }
       },

@@ -1,6 +1,12 @@
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
+const NUM_16 = 16;
+const NUM_18 = 18;
+const NUM_22 = 22;
+const NUM_26 = 26;
+const NUM_32 = 32;
+const NUM_8 = 8;
 
 export function renderPortfolioSocialLinks(
   context: PortfolioRenderContext,
@@ -21,7 +27,7 @@ export function renderPortfolioSocialLinks(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.subtle,
   });
-  context.yPosition -= 16;
+  context.yPosition -= NUM_16;
 }
 
 function renderPortfolioTitleBlock(
@@ -35,7 +41,7 @@ function renderPortfolioTitleBlock(
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 18;
+  context.yPosition -= NUM_18;
 
   if (!metadata.author) {
     return;
@@ -48,7 +54,7 @@ function renderPortfolioTitleBlock(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.muted,
   });
-  context.yPosition -= 18;
+  context.yPosition -= NUM_18;
 }
 
 function renderPortfolioKicker(context: PortfolioRenderContext): void {
@@ -59,7 +65,7 @@ function renderPortfolioKicker(context: PortfolioRenderContext): void {
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.accent,
   });
-  context.yPosition -= 22;
+  context.yPosition -= NUM_22;
 }
 
 function renderPortfolioSummary(
@@ -80,7 +86,7 @@ function renderPortfolioSummary(
     maxWidth: context.width - context.margin * 2,
     lineGap: 3,
   });
-  context.yPosition -= 8;
+  context.yPosition -= NUM_8;
 }
 
 function renderPortfolioContactLine(
@@ -101,7 +107,7 @@ function renderPortfolioContactLine(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.accent,
   });
-  context.yPosition -= 18;
+  context.yPosition -= NUM_18;
 }
 
 function renderPortfolioCoverDivider(context: PortfolioRenderContext): void {
@@ -111,7 +117,7 @@ function renderPortfolioCoverDivider(context: PortfolioRenderContext): void {
     thickness: 1,
     color: PORTFOLIO_PDF_COLORS.line,
   });
-  context.yPosition -= 26;
+  context.yPosition -= NUM_26;
 }
 
 export function renderPortfolioCoverPage(
@@ -124,12 +130,12 @@ export function renderPortfolioCoverPage(
   renderPortfolioSummary(context, metadata);
   renderPortfolioContactLine(context, metadata);
   renderPortfolioSocialLinks(context, metadata.social);
-  context.yPosition -= 18;
+  context.yPosition -= NUM_18;
   renderPortfolioCoverDivider(context);
 }
 
 export function startPortfolioProjectsSection(context: PortfolioRenderContext): void {
-  ensurePortfolioSpace(context, 32);
+  ensurePortfolioSpace(context, NUM_32);
   context.page.drawText("SELECTED CASE STUDIES", {
     x: context.margin,
     y: context.yPosition,
@@ -137,5 +143,5 @@ export function startPortfolioProjectsSection(context: PortfolioRenderContext): 
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 22;
+  context.yPosition -= NUM_22;
 }

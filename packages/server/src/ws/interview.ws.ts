@@ -11,6 +11,10 @@ import {
 } from "./interview-ws-contracts";
 import { handleEndSession, handleStartSession, handleSubmitResponse } from "./interview-ws-support";
 
+const noopWebSocketClose = (): void => {
+  return;
+};
+
 export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.interview), {
   body: interviewWebSocketBodySchema,
   async beforeHandle({ request }) {
@@ -75,5 +79,5 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
       }
     }
   },
-  close() {},
+  close: noopWebSocketClose,
 });

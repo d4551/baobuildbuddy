@@ -28,6 +28,16 @@ const isIgnoredFile = (filePath: string): boolean =>
   filePath.includes("/db/seed/") ||
   filePath.endsWith("/studios.generated.ts");
 
+const resolveMaxLineCount = (filePath: string): number => {
+  if (filePath.endsWith(".vue")) {
+    return maxVueLines;
+  }
+  if (filePath.endsWith(".rs")) {
+    return maxRustLines;
+  }
+  return maxTypeScriptLines;
+};
+
 const functionPattern =
   /(?:^|\n)(?:export\s+)?(?:async\s+)?function\s+[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;
 const methodPattern =
@@ -170,11 +180,7 @@ export const collectMonolithViolationsForContent = (
   }
 
   const violations: ValidationViolation[] = [];
-  const maxLines = filePath.endsWith(".vue")
-    ? maxVueLines
-    : filePath.endsWith(".rs")
-      ? maxRustLines
-      : maxTypeScriptLines;
+  const maxLines = resolveMaxLineCount(filePath);
   const lineCount = countLines(content);
 
   if (lineCount > maxLines) {

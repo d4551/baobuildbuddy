@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesSettingsPage" });
 
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
@@ -129,7 +132,7 @@ watch(
         settingsBootstrapStatus === 'pending' ||
           (settingsLoading && profileLoading && !settings && !profile)
       "
-      :lines="8"
+      :lines="LOADING_SKELETON_LINES.form"
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">

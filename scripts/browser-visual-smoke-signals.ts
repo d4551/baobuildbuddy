@@ -1,3 +1,8 @@
+const NUM_240 = 240;
+const NUM_360 = 360;
+const NUM_40 = 40;
+const NUM_44 = 44;
+const RATIO_0_5 = 0.5;
 /**
  * DOM signal collectors for browser-visual-smoke (line/complexity split).
  */
@@ -24,7 +29,7 @@ const collectLandmarkSignals = async (page: Page) =>
     return {
       h1: h1?.textContent ? collapse(h1.textContent) : null,
       mainCount: document.querySelectorAll("main").length,
-      bodySnippet: collapse(document.body?.innerText ?? "").slice(0, 240),
+      bodySnippet: collapse(document.body?.innerText ?? "").slice(0, NUM_240),
       dockActive: Array.from(
         document.querySelectorAll('nav.dock a[aria-current="page"], nav.dock a.dock-active'),
       ).map((el) => ({
@@ -60,9 +65,9 @@ const collectTouchSignals = async (page: Page) =>
         const details = el.closest("details");
         if (details && !details.open) return null;
         return {
-          label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? "").slice(0, 40),
+          label: collapse(el.getAttribute("aria-label") ?? el.textContent ?? "").slice(0, NUM_40),
           h: rect.height,
-          under: rect.height + 0.5 < 44,
+          under: rect.height + RATIO_0_5 < NUM_44,
         };
       })
       .filter((row): row is { label: string; h: number; under: boolean } => Boolean(row?.under));
@@ -158,7 +163,7 @@ const scoreMobileSignals = (route: string, signals: PageSignals): string | null 
   }
   if (
     route === APP_ROUTES.automationRuns &&
-    signals.tables.some((table) => table.visible && table.width > 360)
+    signals.tables.some((table) => table.visible && table.width > NUM_360)
   ) {
     const maxWidth = Math.max(
       0,

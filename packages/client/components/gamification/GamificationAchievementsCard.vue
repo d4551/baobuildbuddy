@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
 import type { Achievement } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
@@ -23,7 +26,7 @@ const { t } = useI18n();
           <UiGlassCard
             v-for="(achievement, index) in unlockedAchievements"
             :key="achievement.id"
-            :stagger-index="Math.min(index, 11)"
+            :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             extra-class="border-2 border-success"
           >
             <AchievementBadge :achievement="achievement" />

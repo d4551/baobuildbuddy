@@ -1,3 +1,10 @@
+const NUM_10000 = 10_000;
+const NUM_120 = 120;
+const NUM_120000 = 120_000;
+const NUM_240 = 240;
+const NUM_3 = 3;
+const NUM_36 = 36;
+const NUM_8 = 8;
 /**
  * Live LLM + Whisper probes and settings seed for product demo.
  */
@@ -29,7 +36,7 @@ const joinEndpoint = (base: string, path: string): string =>
 
 const resolveLiveModelId = async (): Promise<string> => {
   const modelsUrl = joinEndpoint(LOCAL_ENDPOINT, "models");
-  const modelsResponse = await fetch(modelsUrl, { signal: AbortSignal.timeout(10_000) });
+  const modelsResponse = await fetch(modelsUrl, { signal: AbortSignal.timeout(NUM_10000) });
   if (!modelsResponse.ok) {
     throw new Error(`Live AI probe failed: GET ${modelsUrl} → ${String(modelsResponse.status)}`);
   }
@@ -48,11 +55,11 @@ const resolveLiveModelId = async (): Promise<string> => {
 
 export const assertLiveInference = async (): Promise<LiveModelProbe> => {
   const modelId = await resolveLiveModelId();
-  const nonce = `BAO_LIVE_${Date.now().toString(36)}`;
+  const nonce = `BAO_LIVE_${Date.now().toString(NUM_36)}`;
   const chatResponse = await fetch(joinEndpoint(LOCAL_ENDPOINT, "chat/completions"), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(NUM_120000),
     body: JSON.stringify({
       model: modelId,
       temperature: 0.2,
@@ -68,14 +75,14 @@ export const assertLiveInference = async (): Promise<LiveModelProbe> => {
   if (!chatResponse.ok) {
     const body = await chatResponse.text();
     throw new Error(
-      `Live AI probe failed: chat/completions → ${String(chatResponse.status)} ${body.slice(0, 240)}`,
+      `Live AI probe failed: chat/completions → ${String(chatResponse.status)} ${body.slice(0, NUM_240)}`,
     );
   }
   const chatJson = (await chatResponse.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const sample = chatJson.choices?.[0]?.message?.content?.trim() ?? "";
-  if (sample.length < 3) {
+  if (sample.length < NUM_3) {
     throw new Error("Live AI probe failed: empty completion (refusing mock/empty provider).");
   }
   const banned = [RE_BAO_DEMO_DETERMINISTIC, RE_BUILD_DETERMINISTIC_CONTENT, RE_DETERMINISTIC_AI];
@@ -83,7 +90,7 @@ export const assertLiveInference = async (): Promise<LiveModelProbe> => {
     throw new Error("Live AI probe failed: response looks like a mock/deterministic stub.");
   }
   await writeOutput(
-    `live AI ok endpoint=${LOCAL_ENDPOINT} model=${modelId} sample=${sample.slice(0, 120)}`,
+    `live AI ok endpoint=${LOCAL_ENDPOINT} model=${modelId} sample=${sample.slice(0, NUM_120)}`,
   );
   return { endpoint: LOCAL_ENDPOINT, modelId, sample };
 };
@@ -102,17 +109,17 @@ export const assertLiveWhisper = async (): Promise<LiveWhisperProbe> => {
   const response = await fetch(joinEndpoint(WHISPER_ENDPOINT, "audio/transcriptions"), {
     method: "POST",
     body: form,
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(NUM_120000),
   });
   if (!response.ok) {
     throw new Error(`Live Whisper probe failed: ${String(response.status)}`);
   }
   const json = (await response.json()) as { text?: string };
   const text = json.text?.trim() ?? "";
-  if (text.length < 8) {
+  if (text.length < NUM_8) {
     throw new Error("Live Whisper probe failed: empty transcript");
   }
-  await writeOutput(`live Whisper ok endpoint=${WHISPER_ENDPOINT} text=${text.slice(0, 120)}`);
+  await writeOutput(`live Whisper ok endpoint=${WHISPER_ENDPOINT} text=${text.slice(0, NUM_120)}`);
   return { endpoint: WHISPER_ENDPOINT, text };
 };
 

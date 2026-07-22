@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesPortfolioIndexPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -139,7 +142,7 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="bootstrapErrorMessage"

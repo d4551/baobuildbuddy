@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  AUTOMATION_LIVE_EVENT_WINDOW,
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -26,7 +30,7 @@ useSeoMeta({
       :description="t('automation.hub.cards.jobApply.description')"
     />
 
-    <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="5" />
+    <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="LOADING_SKELETON_LINES.medium" />
 
     <BootstrapErrorAlert
       v-else-if="page.bootstrapError.value"
@@ -74,7 +78,7 @@ useSeoMeta({
       :run="page.streamRun.value"
       :stream-state="page.streamState.value"
       :stream-error-message="page.streamError.value?.message || ''"
-      :event-rows="[...page.streamEvents.value].slice(-12).reverse()"
+      :event-rows="[...page.streamEvents.value].slice(-AUTOMATION_LIVE_EVENT_WINDOW).reverse()"
       :to-localized-date-time="page.toLocalizedDateTime"
       :run-detail-route="page.runDetailRoute"
       @retry="page.runStream.retry"

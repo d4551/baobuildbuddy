@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesInterviewSessionPage" });
 
 definePageMeta({
@@ -25,7 +28,7 @@ useSeoMeta({
       :description="t('interviewSession.subtitle')"
     />
 
-    <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="8" />
+    <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="page.completionState.value === 'error'"

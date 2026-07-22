@@ -1,3 +1,9 @@
+const NUM_1000 = 1_000;
+const NUM_1200 = 1_200;
+const NUM_1800 = 1_800;
+const NUM_2000 = 2_000;
+const NUM_2500 = 2_500;
+const NUM_45000 = 45_000;
 /**
  * Portfolio / cover-letter / AI-chat demo surfaces (complexity split).
  */
@@ -23,11 +29,11 @@ export const demoPortfolio = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_800);
+  await wait(page, NUM_1800);
   await shot(page, "07-portfolio-empty-or-list");
   const add = page.getByRole("button", { name: RE_ADD_PROJECT }).first();
   await settle(add.click({ timeout: 8_000 }));
-  await wait(page, 1_000);
+  await wait(page, NUM_1000);
   await settle(
     page
       .getByLabel(RE_TITLE)
@@ -55,13 +61,13 @@ export const demoPortfolio = async (page: Page): Promise<void> => {
   await settle(
     page.getByRole("button", { name: RE_SAVE_CREATE_PROJECT }).last().click({ timeout: 8_000 }),
   );
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   await shot(page, "08-portfolio-project-added");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolioPreview}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "09-portfolio-preview-styled");
 };
 
@@ -70,13 +76,13 @@ export const demoCoverLetter = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_800);
+  await wait(page, NUM_1800);
   await shot(page, "10-cover-letter-hub");
   await page
     .locator("button", { hasText: RE_GENERATE_COVER_LETTER })
     .first()
     .click({ timeout: 10_000 });
-  await wait(page, 1_200);
+  await wait(page, NUM_1200);
   await page.getByLabel(RE_COMPANY).first().fill("Hitmarker Studios");
   await page.getByLabel(RE_POSITION_ROLE).first().fill("Gameplay Programmer");
   const jobDesc = page.getByLabel(RE_JOB_DESCRIPTION).first();
@@ -89,12 +95,12 @@ export const demoCoverLetter = async (page: Page): Promise<void> => {
     .locator("button", { hasText: RE_GENERATE_CREATE_SUBMIT })
     .last()
     .click({ timeout: 10_000 });
-  await wait(page, 45_000);
+  await wait(page, NUM_45000);
   await shot(page, "11-cover-letter-generated");
   const card = page.locator("main a.card, main .card a, main a[href*='cover-letter']").first();
   if ((await card.count()) > 0) {
     await card.click();
-    await wait(page, 2_000);
+    await wait(page, NUM_2000);
     await shot(page, "12-cover-letter-detail-styled");
   }
 };
@@ -104,7 +110,7 @@ export const demoAiChat = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "13-ai-chat");
   await page
     .locator("main textarea")
@@ -113,6 +119,6 @@ export const demoAiChat = async (page: Page): Promise<void> => {
       "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
     );
   await page.locator("button", { hasText: RE_SEND_SUBMIT }).first().click({ timeout: 8_000 });
-  await wait(page, 45_000);
+  await wait(page, NUM_45000);
   await shot(page, "14-ai-chat-response");
 };

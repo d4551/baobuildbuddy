@@ -7,6 +7,8 @@ import {
 } from "~/composables/api-docs-page-tester-request";
 import type { ApiEndpoint, ApiTesterState, FetchEndpointResultOk } from "~/types/api-docs";
 import { toApiDocsUiStateFromStatusCode } from "~/utils/api-docs-status";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK, HTTP_STATUS_TOO_MANY_REQUESTS } from "@bao/shared/constants/http";
+const NUM_300 = 300;
 
 type MutableRef<T> = {
   value: T;
@@ -51,13 +53,13 @@ const applyApiDocsTesterSuccess = (input: {
 }) => {
   input.testerResponse.value = input.responseResult;
   const isSuccessStatusCode =
-    input.responseResult.statusCode >= 200 && input.responseResult.statusCode < 300;
+    input.responseResult.statusCode >= HTTP_STATUS_OK && input.responseResult.statusCode < NUM_300;
 
   if (!isSuccessStatusCode) {
     input.testerState.value = toApiDocsUiStateFromStatusCode(input.responseResult.statusCode);
     if (input.testerState.value === "loading" || input.testerState.value === "success") {
       input.testerState.value =
-        input.responseResult.statusCode === 429 || input.responseResult.statusCode >= 500
+        input.responseResult.statusCode === HTTP_STATUS_TOO_MANY_REQUESTS || input.responseResult.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR
           ? "errorRetryable"
           : "errorNonRetryable";
     }

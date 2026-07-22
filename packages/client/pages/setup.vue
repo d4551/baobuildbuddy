@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+const NUM_3 = 3;
 defineOptions({ name: "PagesSetupPage" });
 
 import { useI18n } from "vue-i18n";
@@ -73,7 +77,7 @@ useSeoMeta({
       density="comfortable"
     />
 
-    <LoadingSkeleton v-if="setupBootstrapPending" :lines="8" />
+    <LoadingSkeleton v-if="setupBootstrapPending" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="setupBootstrapError"
@@ -113,7 +117,7 @@ useSeoMeta({
         @test-provider="handleTestProvider"
         @copy="copyOllamaCommand"
         @back="step = 1"
-        @next="step = 3"
+        @next="step = NUM_3"
       />
 
       <SetupCompletionStep

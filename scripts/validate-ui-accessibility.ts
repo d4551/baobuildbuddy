@@ -1,6 +1,28 @@
 import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_180 = 180;
+const NUM_3 = 3;
+const RATIO_0_0041960863 = 0.0041960863;
+const RATIO_0_05 = 0.05;
+const RATIO_0_0638541728 = 0.0638541728;
+const RATIO_0_0722 = 0.0722;
+const RATIO_0_0894841775 = 0.0894841775;
+const RATIO_0_1055613458 = 0.1055613458;
+const RATIO_0_2126 = 0.2126;
+const RATIO_0_2158037573 = 0.2158037573;
+const RATIO_0_2309699292 = 0.2309699292;
+const RATIO_0_3413193965 = 0.3413193965;
+const RATIO_0_3963377774 = 0.3963377774;
+const RATIO_0_7034186147 = 0.7034186147;
+const RATIO_0_7152 = 0.7152;
+const RATIO_1_2684380046 = 1.2684380046;
+const RATIO_1_291485548 = 1.291485548;
+const RATIO_1_707614701 = 1.707614701;
+const RATIO_2_6097574011 = 2.6097574011;
+const RATIO_3_3077115913 = 3.3077115913;
+const RATIO_4_0767416621 = 4.0767416621;
 
 type OklchColor = {
   lightnessPercent: number;
@@ -94,24 +116,24 @@ const clamp01 = (value: number): number => {
 };
 
 const oklchToRelativeLuminance = (color: OklchColor): number => {
-  const l = color.lightnessPercent / 100;
-  const hueRadians = (color.hueDegrees * Math.PI) / 180;
+  const l = color.lightnessPercent / PERCENT_MAX;
+  const hueRadians = (color.hueDegrees * Math.PI) / NUM_180;
   const a = color.chroma * Math.cos(hueRadians);
   const b = color.chroma * Math.sin(hueRadians);
 
-  const lPrime = l + 0.3963377774 * a + 0.2158037573 * b;
-  const mPrime = l - 0.1055613458 * a - 0.0638541728 * b;
-  const sPrime = l - 0.0894841775 * a - 1.291485548 * b;
+  const lPrime = l + RATIO_0_3963377774 * a + RATIO_0_2158037573 * b;
+  const mPrime = l - RATIO_0_1055613458 * a - RATIO_0_0638541728 * b;
+  const sPrime = l - RATIO_0_0894841775 * a - RATIO_1_291485548 * b;
 
-  const lCube = lPrime ** 3;
-  const mCube = mPrime ** 3;
-  const sCube = sPrime ** 3;
+  const lCube = lPrime ** NUM_3;
+  const mCube = mPrime ** NUM_3;
+  const sCube = sPrime ** NUM_3;
 
-  const redLinear = clamp01(4.0767416621 * lCube - 3.3077115913 * mCube + 0.2309699292 * sCube);
-  const greenLinear = clamp01(-1.2684380046 * lCube + 2.6097574011 * mCube - 0.3413193965 * sCube);
-  const blueLinear = clamp01(-0.0041960863 * lCube - 0.7034186147 * mCube + 1.707614701 * sCube);
+  const redLinear = clamp01(RATIO_4_0767416621 * lCube - RATIO_3_3077115913 * mCube + RATIO_0_2309699292 * sCube);
+  const greenLinear = clamp01(-RATIO_1_2684380046 * lCube + RATIO_2_6097574011 * mCube - RATIO_0_3413193965 * sCube);
+  const blueLinear = clamp01(-RATIO_0_0041960863 * lCube - RATIO_0_7034186147 * mCube + RATIO_1_707614701 * sCube);
 
-  return 0.2126 * redLinear + 0.7152 * greenLinear + 0.0722 * blueLinear;
+  return RATIO_0_2126 * redLinear + RATIO_0_7152 * greenLinear + RATIO_0_0722 * blueLinear;
 };
 
 const getContrastRatio = (firstColor: OklchColor, secondColor: OklchColor): number => {
@@ -119,7 +141,7 @@ const getContrastRatio = (firstColor: OklchColor, secondColor: OklchColor): numb
   const second = oklchToRelativeLuminance(secondColor);
   const lighter = Math.max(first, second);
   const darker = Math.min(first, second);
-  return (lighter + 0.05) / (darker + 0.05);
+  return (lighter + RATIO_0_05) / (darker + RATIO_0_05);
 };
 
 const buildDataThemeBlockPattern = (themeName: string): RegExp => {

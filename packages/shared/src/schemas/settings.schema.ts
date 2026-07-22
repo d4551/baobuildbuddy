@@ -32,6 +32,16 @@ import {
   DEFAULT_JOB_PROVIDER_SETTINGS,
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
+const NUM_100 = 100;
+const NUM_1000 = 1000;
+const NUM_120 = 120;
+const NUM_20 = 20;
+const NUM_200 = 200;
+const NUM_30 = 30;
+const NUM_5 = 5;
+const NUM_50 = 50;
+const NUM_500 = 500;
+const NUM_7 = 7;
 
 const brandThemeColorValueSchema = z
   .string()
@@ -107,29 +117,29 @@ export const gamingPortalIdSchema = z.enum([
 ]);
 
 export const companyBoardConfigSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  token: z.string().trim().min(1).max(120),
+  name: z.string().trim().min(1).max(NUM_120),
+  token: z.string().trim().min(1).max(NUM_120),
   type: companyBoardTypeSchema,
   enabled: z.boolean(),
-  priority: z.number().int().min(0).max(1000),
+  priority: z.number().int().min(0).max(NUM_1000),
 });
 
 export const greenhouseBoardConfigSchema = z.object({
-  board: z.string().trim().min(1).max(120),
-  company: z.string().trim().min(1).max(120),
+  board: z.string().trim().min(1).max(NUM_120),
+  company: z.string().trim().min(1).max(NUM_120),
   enabled: z.boolean(),
 });
 
 export const leverCompanyConfigSchema = z.object({
-  slug: z.string().trim().min(1).max(120),
-  company: z.string().trim().min(1).max(120),
+  slug: z.string().trim().min(1).max(NUM_120),
+  company: z.string().trim().min(1).max(NUM_120),
   enabled: z.boolean(),
 });
 
 export const gamingPortalConfigSchema = z.object({
   id: gamingPortalIdSchema,
-  name: z.string().trim().min(1).max(120),
-  source: z.string().trim().min(1).max(120),
+  name: z.string().trim().min(1).max(NUM_120),
+  source: z.string().trim().min(1).max(NUM_120),
   fallbackUrl: z.string().url(),
   enabled: z.boolean(),
 });
@@ -151,23 +161,23 @@ export const jobProviderSettingsSchema = z.object({
     .int()
     .min(SCHEMA_PROVIDER_TIMEOUT_MIN_MS)
     .max(SCHEMA_PROVIDER_TIMEOUT_MAX_MS),
-  companyBoardResultLimit: z.number().int().min(1).max(200),
-  gamingBoardResultLimit: z.number().int().min(1).max(200),
-  unknownLocationLabel: z.string().trim().min(1).max(100),
-  unknownCompanyLabel: z.string().trim().min(1).max(100),
+  companyBoardResultLimit: z.number().int().min(1).max(NUM_200),
+  gamingBoardResultLimit: z.number().int().min(1).max(NUM_200),
+  unknownLocationLabel: z.string().trim().min(1).max(NUM_100),
+  unknownCompanyLabel: z.string().trim().min(1).max(NUM_100),
   hitmarkerEnabled: z.boolean().default(DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerEnabled),
   hitmarkerApiBaseUrl: z.string().url(),
-  hitmarkerDefaultQuery: z.string().trim().min(1).max(100),
-  hitmarkerDefaultLocation: z.string().trim().min(1).max(100),
+  hitmarkerDefaultQuery: z.string().trim().min(1).max(NUM_100),
+  hitmarkerDefaultLocation: z.string().trim().min(1).max(NUM_100),
   greenhouseApiBaseUrl: z.string().url(),
   greenhouseMaxPages: z.number().int().min(SCHEMA_MAX_PAGES_MIN).max(SCHEMA_MAX_PAGES_MAX),
-  greenhouseBoards: z.array(greenhouseBoardConfigSchema).max(500),
+  greenhouseBoards: z.array(greenhouseBoardConfigSchema).max(NUM_500),
   leverApiBaseUrl: z.string().url(),
   leverMaxPages: z.number().int().min(SCHEMA_MAX_PAGES_MIN).max(SCHEMA_MAX_PAGES_MAX),
-  leverCompanies: z.array(leverCompanyConfigSchema).max(500),
+  leverCompanies: z.array(leverCompanyConfigSchema).max(NUM_500),
   companyBoardApiTemplates: companyBoardApiTemplatesSchema,
-  companyBoards: z.array(companyBoardConfigSchema).max(500),
-  gamingPortals: z.array(gamingPortalConfigSchema).max(50),
+  companyBoards: z.array(companyBoardConfigSchema).max(NUM_500),
+  gamingPortals: z.array(gamingPortalConfigSchema).max(NUM_50),
 });
 
 export const notificationPreferencesSchema = z
@@ -209,12 +219,12 @@ export const textToSpeechSettingsSchema = z.object({
     .trim()
     .max(SCHEMA_MAX_LENGTH_LONG)
     .default(DEFAULT_SPEECH_SETTINGS.tts.endpoint),
-  voice: z.string().trim().min(1).max(120).default(DEFAULT_SPEECH_SETTINGS.tts.voice),
+  voice: z.string().trim().min(1).max(NUM_120).default(DEFAULT_SPEECH_SETTINGS.tts.voice),
   format: z.enum(["mp3", "wav"]).default(DEFAULT_SPEECH_SETTINGS.tts.format),
 });
 
 export const speechSettingsSchema = z.object({
-  locale: z.string().trim().min(2).max(20).default(DEFAULT_SPEECH_SETTINGS.locale),
+  locale: z.string().trim().min(2).max(NUM_20).default(DEFAULT_SPEECH_SETTINGS.locale),
   stt: speechToTextSettingsSchema.default(DEFAULT_SPEECH_SETTINGS.stt),
   tts: textToSpeechSettingsSchema.default(DEFAULT_SPEECH_SETTINGS.tts),
 });
@@ -257,7 +267,7 @@ export const emailTransportSettingsSchema = z
       .number()
       .int()
       .min(1)
-      .max(120)
+      .max(NUM_120)
       .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS.connectionTimeoutSeconds),
   })
   .default(DEFAULT_EMAIL_TRANSPORT_SETTINGS);
@@ -342,9 +352,9 @@ export const brandSettingsPatchSchema = z.object({
 export const automationSettingsSchema = z
   .object({
     headless: z.boolean().default(true),
-    defaultTimeout: z.number().int().min(1).max(120).default(30),
-    screenshotRetention: z.number().int().min(1).max(30).default(7),
-    maxConcurrentRuns: z.number().int().min(1).max(5).default(1),
+    defaultTimeout: z.number().int().min(1).max(NUM_120).default(NUM_30),
+    screenshotRetention: z.number().int().min(1).max(NUM_30).default(NUM_7),
+    maxConcurrentRuns: z.number().int().min(1).max(NUM_5).default(1),
     defaultBrowser: z.enum(AUTOMATION_BROWSER_OPTIONS).default("chrome"),
     enableSmartSelectors: z.boolean().default(true),
     autoSaveScreenshots: z.boolean().default(true),

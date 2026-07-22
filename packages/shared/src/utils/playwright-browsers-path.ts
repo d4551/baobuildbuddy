@@ -1,4 +1,7 @@
 import { join } from "node:path";
+const NUM_18 = 18;
+const NUM_19 = 19;
+const NUM_9 = 9;
 
 /** Marker injected by Cursor agent sandboxes into incomplete Playwright caches. */
 export const CURSOR_SANDBOX_BROWSER_CACHE_MARKER = "cursor-sandbox-cache";
@@ -78,12 +81,12 @@ export const resolvePlaywrightHostPlatformOverride = (
   }
 
   const LAST_STABLE_MACOS_MAJOR_VERSION = 15;
-  let macVersion = `mac${String(Math.min(major - 9, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
-  if (major < 18) {
+  let macVersion = `mac${String(Math.min(major - NUM_9, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
+  if (major < NUM_18) {
     macVersion = "mac10.13";
-  } else if (major === 18) {
+  } else if (major === NUM_18) {
     macVersion = "mac10.14";
-  } else if (major === 19) {
+  } else if (major === NUM_19) {
     macVersion = "mac10.15";
   }
 

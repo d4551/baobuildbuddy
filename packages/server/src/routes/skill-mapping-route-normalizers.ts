@@ -11,6 +11,7 @@ import {
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 
 type DemandLevel = SkillMapping["demandLevel"];
 type SkillEvidenceType = SkillEvidence["type"];
@@ -91,7 +92,7 @@ export const normalizeSkillEvidence = (value: JsonValue | undefined): SkillEvide
 
 export const clampConfidence = (value: number | undefined): number =>
   typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.min(100, Math.round(value)))
+    ? Math.max(0, Math.min(PERCENT_MAX, Math.round(value)))
     : SKILLS_DEFAULT_CONFIDENCE;
 
 export const mapSuggestedMappingToCreateInput = (suggestedMapping: JsonObject) => {
@@ -107,7 +108,7 @@ export const mapSuggestedMappingToCreateInput = (suggestedMapping: JsonObject) =
     confidence:
       typeof suggestedMapping.confidence === "number" &&
       Number.isFinite(suggestedMapping.confidence)
-        ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
+        ? Math.max(0, Math.min(PERCENT_MAX, Math.round(suggestedMapping.confidence)))
         : 60,
     category: normalizeCategory(suggestedMapping.category),
     demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),

@@ -11,6 +11,8 @@ import {
   normalizeProviderRows,
   resolveProviderModelSelection,
 } from "~/utils/ai-control-plane";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_100 = 100;
 
 export type DashboardBootstrap = {
   activeModel: string;
@@ -50,9 +52,9 @@ function normalizeDashboardStats(
   const sessions = readNumberField(usagePayload, "sessions") ?? 0;
   let successRate = 0;
   if (userMessages > 0) {
-    successRate = Math.round((assistantMessages / userMessages) * 100);
+    successRate = Math.round((assistantMessages / userMessages) * PERCENT_MAX);
   } else if (totalMessages > 0) {
-    successRate = 100;
+    successRate = NUM_100;
   }
 
   return {

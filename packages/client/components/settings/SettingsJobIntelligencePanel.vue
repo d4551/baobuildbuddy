@@ -31,16 +31,24 @@ const { t } = useI18n();
 
 const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
-const sourceCollectionCount = computed(
-  () =>
-    [
-      jobProviderForm.value.greenhouseBoardsJson,
-      jobProviderForm.value.leverCompaniesJson,
-      jobProviderForm.value.companyBoardsJson,
-      jobProviderForm.value.companyBoardApiTemplatesJson,
-      jobProviderForm.value.gamingPortalsJson,
-    ].filter((value) => value.trim().length > 0).length,
-);
+const sourceCollectionCount = computed(() => {
+  const sourceFields = [
+    jobProviderForm.value.greenhouseBoardsJson,
+    jobProviderForm.value.leverCompaniesJson,
+    jobProviderForm.value.companyBoardsJson,
+    jobProviderForm.value.companyBoardApiTemplatesJson,
+    jobProviderForm.value.gamingPortalsJson,
+  ];
+
+  let configuredCollections = 0;
+  for (const sourceField of sourceFields) {
+    if (sourceField.trim().length > 0) {
+      configuredCollections += 1;
+    }
+  }
+
+  return configuredCollections;
+});
 
 const taxonomyAssetCount = computed(
   () =>

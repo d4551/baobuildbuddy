@@ -7,6 +7,7 @@ import {
   RATE_LIMIT_MAX_SKILL_ANALYSIS,
 } from "../config/rate-limit";
 import { resolveRateLimitClientKey } from "./request";
+const NUM_1000 = 1000;
 
 type RateLimitBucket = {
   count: number;
@@ -45,7 +46,7 @@ export function createRateLimitPlugin(options: CreateRateLimitOptions) {
     const remaining = Math.max(0, options.max - existing.count);
     set.headers["x-ratelimit-limit"] = String(options.max);
     set.headers["x-ratelimit-remaining"] = String(remaining);
-    set.headers["x-ratelimit-reset"] = String(Math.ceil(existing.resetAt / 1000));
+    set.headers["x-ratelimit-reset"] = String(Math.ceil(existing.resetAt / NUM_1000));
 
     if (existing.count > options.max) {
       set.status = HTTP_STATUS_TOO_MANY_REQUESTS;

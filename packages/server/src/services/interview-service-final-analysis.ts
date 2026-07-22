@@ -25,6 +25,7 @@ import {
   buildStudioPromptContext,
 } from "./interview-service-prompt-context";
 import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
+const NUM_5 = 5;
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
   if (responses.length === 0) {
@@ -54,8 +55,8 @@ function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnal
 
   return {
     overallScore: average,
-    strengths: strengths.slice(0, 5),
-    improvements: improvements.slice(0, 5),
+    strengths: strengths.slice(0, NUM_5),
+    improvements: improvements.slice(0, NUM_5),
     recommendations: resolveFinalRecommendations(average),
     feedback:
       average >= SCORE_PASS_THRESHOLD

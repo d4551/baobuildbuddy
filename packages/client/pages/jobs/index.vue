@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
+const NUM_4 = 4;
 defineOptions({ name: "PagesJobsIndexPage" });
 
 definePageMeta({
@@ -84,11 +88,11 @@ const page = useJobsIndexPage();
       </h2>
       <SectionGrid grid-token="twoColumn">
         <UiGlassCard
-          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          v-for="(job, index) in page.recommendations.value.slice(0, NUM_4)"
           :key="`rec-${job.id}`"
           :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
-          :stagger-index="Math.min(index, 11)"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
           <div class="card-body relative z-10">
             <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
@@ -204,7 +208,7 @@ const page = useJobsIndexPage();
               :key="job.id"
               :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
-              :stagger-index="Math.min(index, 11)"
+              :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             >
               <div class="card-body relative z-10">
                 <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">

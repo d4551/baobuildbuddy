@@ -1,3 +1,9 @@
+const NUM_122 = 122;
+const NUM_4 = 4;
+const NUM_40 = 40;
+const NUM_65 = 65;
+const NUM_90 = 90;
+const NUM_97 = 97;
 /**
  * Chrome signal collectors for browser-interaction-burndown (complexity split).
  */
@@ -47,11 +53,11 @@ const collectChromeQuality = async (page: Page) =>
   page.evaluate(() => {
     const isAsciiLetter = (ch: string): boolean => {
       const code = ch.charCodeAt(0);
-      return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+      return (code >= NUM_65 && code <= NUM_90) || (code >= NUM_97 && code <= NUM_122);
     };
     const isNavbarEllipsisGut = (text: string): boolean => {
       if (text.length === 2) return isAsciiLetter(text[0] ?? "") && text[1] === "…";
-      if (text.length === 4) return isAsciiLetter(text[0] ?? "") && text.slice(1) === "...";
+      if (text.length === NUM_4) return isAsciiLetter(text[0] ?? "") && text.slice(1) === "...";
       return false;
     };
     const collapseWs = (value: string): string => value.replace(/\s+/gu, " ").trim();
@@ -70,7 +76,7 @@ const collectChromeQuality = async (page: Page) =>
     const texts = [...document.querySelectorAll("p")]
       .filter((el) => !el.closest(".grid, .stats, [role='log']"))
       .map((el) => collapseWs(el.textContent ?? ""))
-      .filter((text) => text.length > 40);
+      .filter((text) => text.length > NUM_40);
     const counts = new Map<string, number>();
     for (const text of texts) {
       counts.set(text, (counts.get(text) ?? 0) + 1);

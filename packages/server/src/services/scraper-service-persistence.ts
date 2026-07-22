@@ -16,6 +16,7 @@ import {
   DEFAULT_JOB_TYPE,
   PORTAL_SCRIPT_ID_BY_ID,
 } from "./scraper-service-contracts";
+const NUM_100 = 100;
 
 export const runWithErrorCollection = async (
   operation: () => Promise<void>,
@@ -82,9 +83,9 @@ export const upsertScrapedJob = async (
   now: string,
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
-  const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
+  const contentHash = String(job.contentHash?.trim().length > 0? job.contentHash : job.id).slice(
     0,
-    100,
+    NUM_100,
   );
 
   await db

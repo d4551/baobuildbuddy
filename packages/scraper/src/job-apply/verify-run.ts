@@ -4,6 +4,8 @@ import { resumeDataSchema } from "@bao/shared/schemas/resume.schema";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { parseScriptInput } from "../runtime/io";
 import { ProtocolEmitter } from "../runtime/protocol";
+const NUM_3 = 3;
+const NUM_50 = 50;
 
 const VERIFY_TOTAL_STEPS = 3 as const;
 
@@ -139,7 +141,7 @@ export const emitVerificationRun = async (): Promise<number> => {
     1,
     "Preparing deterministic verification automation run.",
   );
-  await Bun.sleep(50);
+  await Bun.sleep(NUM_50);
 
   const form = buildVerificationForm(
     resumeParsed.data.personalInfo,
@@ -147,7 +149,7 @@ export const emitVerificationRun = async (): Promise<number> => {
     envelope.customAnswers,
   );
   emitProgress(emitter, "verify_fields", 2, "Applying deterministic verification answers.");
-  await Bun.sleep(50);
+  await Bun.sleep(NUM_50);
 
   const resumeError = await appendResumeArtifact(form, envelope.resumeFilePath);
   if (resumeError !== null) {
@@ -158,7 +160,7 @@ export const emitVerificationRun = async (): Promise<number> => {
   emitProgress(
     emitter,
     "verify_submission",
-    3,
+    NUM_3,
     "Completing deterministic verification submission.",
   );
   if (!(await submitVerificationForm(form, envelope.jobUrl, emitter))) {

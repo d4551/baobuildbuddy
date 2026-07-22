@@ -8,6 +8,10 @@ import type {
 import { normalizeConfig } from "./interview-service-config-normalizers";
 import type { DBInterviewSession } from "./interview-service-contracts";
 import { isRecord, parseNumber, parseStringArray } from "./interview-service-value-parsers";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_30 = 30;
+const NUM_300 = 300;
+const NUM_90 = 90;
 
 const questionTypePattern = new Set<string>([
   "behavioral",
@@ -76,7 +80,7 @@ export function normalizeQuestions(raw: unknown): InterviewQuestion[] {
         type: normalizeQuestionType(value.type, "behavioral"),
         question: value.question.trim(),
         followUps: parseStringArray(followUps),
-        expectedDuration: parseNumber(value.expectedDuration, 90, 30, 300),
+        expectedDuration: parseNumber(value.expectedDuration, NUM_90, NUM_30, NUM_300),
         difficulty: normalizeDifficulty(value.difficulty),
         tags: parseStringArray(value.tags),
       };
@@ -88,7 +92,7 @@ export function normalizeScore(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
   }
-  return Math.max(0, Math.min(100, Math.round(value)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
 }
 
 export function normalizeAiAnalysisScore(scoreCandidate: unknown): number {

@@ -14,6 +14,7 @@ import {
   SHELL_SIDEBAR_ASIDE_CLASS,
   SHELL_SKIP_LINK_CLASS,
 } from "~/constants/layout";
+import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { initTheme, theme, setTheme, applySystemThemePreferenceIfUnset } = useTheme();
 const { settings } = useSettings();
@@ -112,12 +113,13 @@ onUnmounted(() => {
       <ToastContainer />
     </div>
     <div class="drawer-side" :class="SHELL_DRAWER_SIDE_CLASS">
-      <label
-        :for="APP_DRAWER_ID"
+      <button
+        type="button"
         class="drawer-overlay"
         :aria-label="t('a11y.closeSidebar')"
         :aria-controls="APP_DRAWER_ID"
-      ></label>
+        @click="setDrawerToggleState(false)"
+      />
       <aside :class="SHELL_SIDEBAR_ASIDE_CLASS" :aria-label="t('a11y.sidebarNavigation')">
         <AppSidebar />
       </aside>

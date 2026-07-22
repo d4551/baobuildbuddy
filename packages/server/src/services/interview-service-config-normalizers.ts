@@ -25,6 +25,11 @@ import {
   parseString,
   parseStringArray,
 } from "./interview-service-value-parsers";
+const NUM_120 = 120;
+const NUM_3 = 3;
+const NUM_5 = 5;
+const RATIO_0_25 = 0.25;
+const RATIO_0_5 = 0.5;
 
 const DEFAULT_INTERVIEW_CONVERSATION_STYLE: InterviewConversationStyle = "natural";
 
@@ -117,8 +122,8 @@ export function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined 
   const speakerId = parseString(raw.speakerId, "");
   const voiceId = parseString(raw.voiceId, "");
   const voiceSettings: VoiceSettings = {
-    rate: parseNumber(raw.rate, INTERVIEW_DEFAULT_VOICE_SETTINGS.rate, 0.25, 3),
-    pitch: parseNumber(raw.pitch, INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch, 0.5, 2),
+    rate: parseNumber(raw.rate, INTERVIEW_DEFAULT_VOICE_SETTINGS.rate, RATIO_0_25, NUM_3),
+    pitch: parseNumber(raw.pitch, INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch, RATIO_0_5, 2),
     volume: parseNumber(raw.volume, INTERVIEW_DEFAULT_VOICE_SETTINGS.volume, 0, 2),
     language: parseString(raw.language, INTERVIEW_DEFAULT_VOICE_SETTINGS.language),
   };
@@ -160,7 +165,7 @@ export function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
     1,
     INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
   );
-  const duration = parseNumber(raw.duration, INTERVIEW_DEFAULT_DURATION_MINUTES, 5, 120);
+  const duration = parseNumber(raw.duration, INTERVIEW_DEFAULT_DURATION_MINUTES, NUM_5, NUM_120);
   const experienceLevel = normalizeExperienceLevel(
     parseString(raw.experienceLevel, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL),
   );

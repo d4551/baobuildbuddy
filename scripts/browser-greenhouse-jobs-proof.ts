@@ -1,3 +1,10 @@
+const NUM_1500 = 1_500;
+const NUM_20 = 20;
+const NUM_2500 = 2_500;
+const NUM_25000 = 25_000;
+const NUM_400 = 400;
+const NUM_500 = 500;
+const NUM_800 = 800;
 /**
  * Headed proof: configure Greenhouse boards via UI, Refresh Jobs, verify non-empty feed.
  * Uses HTTP job providers (not Playwright RPA) — still real network fetch of public boards.
@@ -43,16 +50,16 @@ const configureGreenhouseBoards = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   const jobIntelNav = page.getByRole("button", { name: RE_JOB_INTELLIGENCE }).first();
   if ((await jobIntelNav.count()) > 0) {
     await jobIntelNav.click();
-    await wait(page, 800);
+    await wait(page, NUM_800);
   }
   const boardsSummary = page.getByText(RE_BOARDS_LABEL).first();
   await boardsSummary.waitFor({ state: "visible", timeout: 10_000 });
   await boardsSummary.click();
-  await wait(page, 400);
+  await wait(page, NUM_400);
   await page.getByLabel(RE_BOARDS_LABEL).fill(
     JSON.stringify(
       [
@@ -64,7 +71,7 @@ const configureGreenhouseBoards = async (page: Page): Promise<void> => {
     ),
   );
   await page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first().click();
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   await shot(page, "01-greenhouse-saved");
 };
 
@@ -73,17 +80,17 @@ const refreshJobsBoard = async (page: Page) => {
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 1_500);
+  await wait(page, NUM_1500);
   await page.getByRole("button", { name: RE_REFRESH_JOBS }).click();
-  await wait(page, 25_000);
+  await wait(page, NUM_25000);
   await shot(page, "02-jobs-after-refresh");
   return page.evaluate(() => ({
     empty: document.body.innerText.includes("No jobs loaded yet"),
     titles: [...document.querySelectorAll("main .card-title, main h3, main a")]
       .map((element) => element.textContent?.trim())
       .filter((value): value is string => Boolean(value) && value.length > 2)
-      .slice(0, 20),
-    bodySnippet: document.body.innerText.slice(0, 500),
+      .slice(0, NUM_20),
+    bodySnippet: document.body.innerText.slice(0, NUM_500),
   }));
 };
 

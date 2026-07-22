@@ -9,6 +9,7 @@ import {
   buildAutomationProcessEnv,
   sanitizePlaywrightBrowsersPathEnv,
 } from "./config";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 
 /**
  * Browser context bundle returned by Bun-based automation scripts.
@@ -82,7 +83,7 @@ export const launchAutomationBrowser = async (
 
   const page = pageResult.value;
   page.setDefaultTimeout(
-    Math.max(settings.defaultTimeout * 1_000, automationRuntimeConfig.navigationTimeoutMs),
+    Math.max(settings.defaultTimeout * MS_PER_SECOND, automationRuntimeConfig.navigationTimeoutMs),
   );
 
   return {

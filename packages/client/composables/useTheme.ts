@@ -6,6 +6,7 @@ import {
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import { readonly } from "vue";
 import { useCookie, useState } from "#imports";
+const NUM_365 = 365;
 
 /**
  * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.
@@ -17,7 +18,7 @@ export function useTheme() {
     default: () => null,
     path: "/",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: 60 * 60 * 24 * NUM_365,
   });
 
   function setTheme(newTheme: AppDataTheme, options: { persist?: boolean } = {}) {

@@ -203,6 +203,10 @@ async function handleChatMessage(socket: ChatSocket, data: ChatMessage): Promise
   }
 }
 
+const noopWebSocketClose = (): void => {
+  return;
+};
+
 export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat), {
   body: chatWebSocketBodySchema,
   async beforeHandle({ request }) {
@@ -236,5 +240,5 @@ export const chatWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.chat),
       ...(data.sessionId ? { sessionId: data.sessionId } : {}),
     });
   },
-  close() {},
+  close: noopWebSocketClose,
 });

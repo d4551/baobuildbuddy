@@ -1,5 +1,5 @@
 import { API_ERROR_NETWORK_REQUEST_FAILED } from "@bao/shared/constants/api-errors";
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_TOO_MANY_REQUESTS } from "@bao/shared/constants/http";
 import { config } from "../../config/env";
 import type { FetchPageResult } from "./smart-field-mapper-contracts";
 
@@ -23,7 +23,7 @@ const isRetryableFetchFailure = (result: FetchPageResult): boolean => {
   if (typeof result.statusCode !== "number") {
     return true;
   }
-  return result.statusCode === 429 || result.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR;
+  return result.statusCode === HTTP_STATUS_TOO_MANY_REQUESTS || result.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR;
 };
 
 const fetchPage = (url: string): Promise<FetchPageResult> =>

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesAutomationEmailPage" });
 
 import {
@@ -68,7 +71,7 @@ useSeoMeta({
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="emailSettingsPending" :lines="6" />
+    <LoadingSkeleton v-if="emailSettingsPending" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="emailSettingsError"

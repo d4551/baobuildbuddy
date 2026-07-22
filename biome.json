@@ -20,6 +20,7 @@
       "!**/packages/desktop/src-tauri/icons",
       "!**/.omo",
       "!**/agentiflow",
+      "!**/docs",
       "!**/docs/browser-smoke",
       "!**/docs/ssot-ledger/**/*.json",
       "!**/docs/ssot-ledger/**/*.png"
@@ -34,7 +35,7 @@
   "linter": {
     "enabled": true,
     "domains": {
-      "vue": "all",
+      "vue": "recommended",
       "drizzle": "all",
       "project": "recommended",
       "test": "recommended",
@@ -203,8 +204,17 @@
         "useSortedClasses": {
           "level": "error",
           "options": {
-            "attributes": ["class", "className", "classList"],
-            "functions": ["clsx", "cn", "twMerge", "twJoin"]
+            "attributes": [
+              "class",
+              "className",
+              "classList"
+            ],
+            "functions": [
+              "clsx",
+              "cn",
+              "twMerge",
+              "twJoin"
+            ]
           }
         },
         "noPlaywrightElementHandle": "error",
@@ -234,7 +244,9 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.{ts,js,mjs,cjs}"],
+      "includes": [
+        "**/*.{ts,js,mjs,cjs}"
+      ],
       "linter": {
         "rules": {
           "correctness": {
@@ -246,7 +258,9 @@
       }
     },
     {
-      "includes": ["**/*.vue"],
+      "includes": [
+        "**/*.vue"
+      ],
       "linter": {
         "rules": {
           "correctness": {
@@ -264,6 +278,34 @@
             "useVueNextTickPromise": "error",
             "noInlineStyles": "error",
             "useScopedStyles": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/constants/**",
+        "packages/client/constants/**",
+        "packages/shared/src/constants/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "packages/client/pages/**/*.vue",
+        "packages/client/layouts/**/*.vue",
+        "packages/client/error.vue"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useVueMultiWordComponentNames": "off"
           }
         }
       }

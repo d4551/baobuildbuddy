@@ -3,6 +3,9 @@ import {
   collectSourceSuppressionViolationsForContent,
   listSuppressionKinds,
 } from "./validate-no-source-suppressions";
+const NUM_3 = 3;
+const NUM_7 = 7;
+const NUM_8 = 8;
 
 const SAMPLE_FILE = "packages/client/components/sample.vue";
 
@@ -11,7 +14,7 @@ const buildExpectedNames = (): readonly string[] => listSuppressionKinds().map((
 describe("validate-no-source-suppressions", () => {
   test("VACUOUS_GATE: every registered kind is flagged when injected", () => {
     const names = buildExpectedNames();
-    expect(names.length).toBeGreaterThanOrEqual(7);
+    expect(names.length).toBeGreaterThanOrEqual(NUM_7);
     for (const name of names) {
       const content = `const x = 1; // ${name}`;
       const violations = collectSourceSuppressionViolationsForContent(SAMPLE_FILE, content);
@@ -57,7 +60,7 @@ describe("validate-no-source-suppressions", () => {
     const content = `line1\nline2\nconst y = 2; // ${firstName}\nline4`;
     const violations = collectSourceSuppressionViolationsForContent(SAMPLE_FILE, content);
     expect(violations.length).toBe(1);
-    expect(violations[0]?.line).toBe(3);
+    expect(violations[0]?.line).toBe(NUM_3);
   });
 
   test("multiple tokens in one file each produce a violation", () => {
@@ -69,6 +72,6 @@ describe("validate-no-source-suppressions", () => {
   });
 
   test("kind registry count is stable and matches the documented set size", () => {
-    expect(buildExpectedNames().length).toBe(8);
+    expect(buildExpectedNames().length).toBe(NUM_8);
   });
 });

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 defineOptions({ name: "PagesGamificationPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -92,7 +93,7 @@ const lockedAchievements = computed(
 const levelProgress = computed(() => {
   const progress = hubData.value?.progress;
   if (!progress) return 0;
-  return Math.round(getXPProgress(progress.xp).progress * 100);
+  return Math.round(getXPProgress(progress.xp).progress * PERCENT_MAX);
 });
 
 const xpTarget = computed(() => {

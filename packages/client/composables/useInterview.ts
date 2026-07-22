@@ -53,7 +53,7 @@ const createStartSessionAction =
   (context: InterviewContext, fetchSessions: () => Promise<void>) =>
   async (studioId?: string, config?: Partial<InterviewConfig>) =>
     withLoadingState(context.loading, async () => {
-      const resolvedStudioId = studioId?.trim().length ? studioId : INTERVIEW_FALLBACK_STUDIO_ID;
+      const resolvedStudioId = studioId?.trim().length > 0? studioId : INTERVIEW_FALLBACK_STUDIO_ID;
       const { data, error } = await context.api.interview.sessions.post({
         studioId: resolvedStudioId,
         config,

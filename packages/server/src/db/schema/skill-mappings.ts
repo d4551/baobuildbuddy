@@ -1,6 +1,7 @@
 import type { SkillEvidence } from "@bao/shared/types/skill-mapping";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+const NUM_50 = 50;
 
 const EMPTY_JSON_ARRAY = sql`'[]'`;
 const CURRENT_TIMESTAMP = sql`(CURRENT_TIMESTAMP)`;
@@ -13,7 +14,7 @@ export const skillMappings = sqliteTable("skill_mappings", {
     .$type<string[]>()
     .default(EMPTY_JSON_ARRAY),
   evidence: text("evidence", { mode: "json" }).$type<SkillEvidence[]>().default(EMPTY_JSON_ARRAY),
-  confidence: integer("confidence").default(50),
+  confidence: integer("confidence").default(NUM_50),
   category: text("category"),
   demandLevel: text("demand_level").default("medium"),
   aiGenerated: integer("ai_generated", { mode: "boolean" }).default(false),

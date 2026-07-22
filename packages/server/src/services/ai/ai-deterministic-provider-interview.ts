@@ -1,4 +1,5 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+const NUM_3 = 3;
 
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
@@ -31,7 +32,7 @@ const parseQuestionCount = (prompt: string): number => {
   const matchedValue = exactMatch?.[1] ?? generateMatch?.[1];
   const parsed = matchedValue ? Number.parseInt(matchedValue, DECIMAL_RADIX) : Number.NaN;
   if (!Number.isFinite(parsed) || parsed < 1) {
-    return 3;
+    return NUM_3;
   }
   return Math.min(parsed, TEST_AI_MAX_QUESTION_COUNT);
 };
@@ -62,7 +63,7 @@ const extractPromptHighlights = (value: string): string[] =>
     .split(PROMPT_HIGHLIGHT_SPLIT_PATTERN)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0 && entry.toLowerCase() !== "not specified")
-    .slice(0, 3);
+    .slice(0, NUM_3);
 
 const buildPromptContext = (prompt: string): DeterministicInterviewPromptContext => {
   const studio =

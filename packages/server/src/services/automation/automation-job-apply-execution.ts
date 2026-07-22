@@ -26,6 +26,7 @@ import type {
 } from "./automation-service-contracts";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 import { runRpaScript } from "./rpa-runner-protocol";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 
 const logger = createServerLogger("automation-job-apply-execution");
 
@@ -79,7 +80,7 @@ const runJobApplyScript = async (
       timeoutMs:
         Number.isFinite(preparation.automationSettings.defaultTimeout) &&
         preparation.automationSettings.defaultTimeout > 0
-          ? Math.trunc(preparation.automationSettings.defaultTimeout * 1_000)
+          ? Math.trunc(preparation.automationSettings.defaultTimeout * MS_PER_SECOND)
           : config.automationScriptTimeoutMs,
       outputDir: preparation.runArtifactDir,
     },

@@ -7,6 +7,8 @@ export type SetupProvider = AIProviderType;
 export type CloudProvider = Exclude<SetupProvider, "local">;
 export type SetupStep = 1 | 2 | 3;
 
+export const SETUP_FINAL_STEP: SetupStep = 3;
+
 export type SetupAuthStatus = {
   authRequired: boolean;
   configured: boolean;

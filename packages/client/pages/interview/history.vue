@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesInterviewHistoryPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -53,7 +56,7 @@ useSeoMeta({
       :description="t('interviewHistory.subtitle')"
     />
 
-    <LoadingSkeleton v-if="bootstrapPending && !sessions.length" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending && sessions.length === 0" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="sessionsError"
@@ -65,7 +68,7 @@ useSeoMeta({
     />
 
     <EmptyState
-      v-else-if="!sessions.length"
+      v-else-if="sessions.length === 0"
       title-key="interviewHistory.emptyStateTitle"
       description-key="interviewHistory.emptyStateDescription"
       cta-label-key="interviewHistory.emptyStateCta"

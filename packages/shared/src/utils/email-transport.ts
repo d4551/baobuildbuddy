@@ -1,5 +1,7 @@
 import type { EmailTransportSettings } from "../types/settings";
 import { isValidEmail } from "./validation";
+const NUM_120 = 120;
+const NUM_65535 = 65_535;
 
 /**
  * Returns whether a persisted outbound email transport configuration is complete enough to send mail.
@@ -26,11 +28,11 @@ export function isEmailTransportConfigured(
     return false;
   }
 
-  if (!Number.isFinite(port) || port < 1 || port > 65_535) {
+  if (!Number.isFinite(port) || port < 1 || port > NUM_65535) {
     return false;
   }
 
-  if (!Number.isFinite(timeout) || timeout < 1 || timeout > 120) {
+  if (!Number.isFinite(timeout) || timeout < 1 || timeout > NUM_120) {
     return false;
   }
 

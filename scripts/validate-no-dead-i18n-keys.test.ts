@@ -4,7 +4,7 @@ import { findDeadKeys } from "./validate-no-dead-i18n-keys";
 describe("findDeadKeys", () => {
   test("flags a key with no literal or dynamic consumer (VACUOUS_GATE_TEST)", () => {
     const keys = ["app.tagline", "app.consumed", "dashboard.dynamic.metric"];
-    const corpus = ['t("app.consumed")', "t(`dashboard.dynamic.${variable}`)"].join("\n");
+    const corpus = ['t("app.consumed")', `t(\`dashboard.dynamic.\${variable}\`)`].join("\n");
     const violations = findDeadKeys(keys, corpus, []);
     expect(violations).toHaveLength(1);
     expect(violations[0]?.message).toContain("app.tagline");
@@ -12,7 +12,7 @@ describe("findDeadKeys", () => {
 
   test("allows a key consumed via dynamic template prefix", () => {
     const keys = ["apiDocs.state.errorRetryable", "apiDocs.state.loading"];
-    const corpus = "t(`apiDocs.state.${docsUiState}`)";
+    const corpus = `t(\`apiDocs.state.\${docsUiState}\`)`;
     const violations = findDeadKeys(keys, corpus, []);
     expect(violations).toHaveLength(0);
   });

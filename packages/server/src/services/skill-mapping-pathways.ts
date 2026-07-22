@@ -1,6 +1,7 @@
 import { getGamificationPathwayIcon } from "@bao/shared/constants/gamification-icons";
 import { PATHWAY_SALARY_RANGES } from "@bao/shared/constants/salary-ranges";
 import type { CareerPathway, SkillCategory, SkillMapping } from "@bao/shared/types/skill-mapping";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 
 type CareerPathwayDefinition = Omit<CareerPathway, "id" | "matchScore">;
 
@@ -342,7 +343,7 @@ const calculatePathwayMatchScore = (mappings: SkillMapping[]): number => {
   }
   const averageConfidence =
     mappings.reduce((sum, mapping) => sum + mapping.confidence, 0) / mappings.length;
-  return Math.min(100, Math.round(averageConfidence * (1 + mappings.length / 10)));
+  return Math.min(PERCENT_MAX, Math.round(averageConfidence * (1 + mappings.length / 10)));
 };
 
 const buildPathway = (category: SkillCategory, mappings: SkillMapping[]): CareerPathway => {

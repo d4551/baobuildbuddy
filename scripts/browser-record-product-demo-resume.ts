@@ -1,3 +1,12 @@
+const NUM_1200 = 1_200;
+const NUM_15000 = 15_000;
+const NUM_1800 = 1_800;
+const NUM_20 = 20;
+const NUM_200 = 200;
+const NUM_2000 = 2_000;
+const NUM_250 = 250;
+const NUM_400 = 400;
+const NUM_600 = 600;
 /**
  * Resume guided-build demo steps (complexity split).
  */
@@ -27,7 +36,7 @@ const completeResumeQuestionSteps = async (page: Page, step = 0): Promise<void> 
   await visibleAnswer.fill(
     `Alex Rivera, Gameplay Programmer — shipped combat pacing on a live co-op title. Answer ${String(step + 1)}.`,
   );
-  await wait(page, 400);
+  await wait(page, NUM_400);
   const synthesize = page
     .locator("button", { hasText: RE_SYNTHESIZE_RESUME })
     .filter({ hasNot: page.locator("[disabled]") })
@@ -38,10 +47,10 @@ const completeResumeQuestionSteps = async (page: Page, step = 0): Promise<void> 
   }
   const next = page.locator("button", { hasText: RE_NEXT }).first();
   if ((await next.count()) === 0) return;
-  await waitForEnabled(page, next, 20, 200);
+  await waitForEnabled(page, next, NUM_20, NUM_200);
   if (await next.isDisabled()) return;
   await next.click();
-  await wait(page, 600);
+  await wait(page, NUM_600);
   return completeResumeQuestionSteps(page, step + 1);
 };
 
@@ -50,7 +59,7 @@ const fillResumeTargetForm = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_800);
+  await wait(page, NUM_1800);
   await shot(page, "02-resume-build-target");
   await page.getByLabel("Target role", { exact: true }).fill("Gameplay Programmer");
   const experience = page.getByLabel("Experience level", { exact: true });
@@ -66,7 +75,7 @@ const fillResumeTargetForm = async (page: Page): Promise<void> => {
 const runGenerateQuestions = async (page: Page): Promise<void> => {
   const generate = page.locator("button", { hasText: RE_GENERATE_QUESTIONS }).first();
   await generate.waitFor({ state: "visible", timeout: 10_000 });
-  await waitForEnabled(page, generate, 20, 250);
+  await waitForEnabled(page, generate, NUM_20, NUM_250);
   let sawGenerateRequest = false;
   const onGenerateRequest = (request: { url: () => string; method: () => string }): void => {
     if (
@@ -102,33 +111,33 @@ const runGenerateQuestions = async (page: Page): Promise<void> => {
 };
 
 const finishResumePreviewExport = async (page: Page): Promise<void> => {
-  await wait(page, 15_000);
+  await wait(page, NUM_15000);
   const lateSynth = page.locator("button", { hasText: RE_SYNTHESIZE_RESUME }).first();
   if ((await lateSynth.count()) > 0 && !(await lateSynth.isDisabled())) {
     await settle(lateSynth.click({ timeout: 10_000 }));
-    await wait(page, 15_000);
+    await wait(page, NUM_15000);
   }
   await shot(page, "04-resume-synthesized");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resumePreview}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "05-resume-preview-styled");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resume}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 1_800);
+  await wait(page, NUM_1800);
   const edit = page.getByRole("button", { name: RE_EDIT }).first();
   if ((await edit.count()) > 0) {
     await edit.click();
-    await wait(page, 1_200);
+    await wait(page, NUM_1200);
   }
   const exportBtn = page.getByRole("button", { name: RE_EXPORT }).first();
   if ((await exportBtn.count()) === 0) return;
   await exportBtn.click();
-  await wait(page, 400);
+  await wait(page, NUM_400);
   const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
   await page
     .getByRole("menuitem", { name: RE_PDF })

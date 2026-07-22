@@ -19,6 +19,8 @@ import type {
   StudioContext,
 } from "./interview-service-contracts";
 import { isRecord, parseString, parseStringArray } from "./interview-service-value-parsers";
+const NUM_3 = 3;
+const NUM_4 = 4;
 
 type StudioRow = typeof studios.$inferSelect;
 
@@ -89,7 +91,7 @@ function summarizeUserProfileContext(row: typeof userProfile.$inferSelect | unde
 - Technical skills: ${joinInterviewList(row.technicalSkills ?? [])}
 - Soft skills: ${joinInterviewList(row.softSkills ?? [])}
 - Gaming specializations: ${joinInterviewList(specializations)}
-- Shipped titles: ${joinInterviewList(shippedTitles, 4)}`;
+- Shipped titles: ${joinInterviewList(shippedTitles, NUM_4)}`;
 }
 
 function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): string {
@@ -120,8 +122,8 @@ function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): s
   return `Resume context:
 - Resume name: ${parseString(row.name, DEFAULT_UNSPECIFIED_LABEL)}
 - Summary: ${parseString(row.summary, DEFAULT_UNSPECIFIED_LABEL)}
-- Experience highlights: ${joinInterviewList(experience, 4)}
-- Project highlights: ${joinInterviewList(projects, 4)}
+- Experience highlights: ${joinInterviewList(experience, NUM_4)}
+- Project highlights: ${joinInterviewList(projects, NUM_4)}
 - Technical skills: ${joinInterviewList(technicalSkills)}
 - Soft skills: ${joinInterviewList(softSkills)}`;
 }
@@ -157,7 +159,7 @@ function summarizePortfolioContext(
     .sort((left, right) => Number(right.featured) - Number(left.featured))
     .map((project) => {
       const technologies = Array.isArray(project.technologies)
-        ? joinInterviewList(project.technologies, 3)
+        ? joinInterviewList(project.technologies, NUM_3)
         : DEFAULT_UNSPECIFIED_LABEL;
       return `${project.title} (${parseString(project.role, "Role not specified")}; tech: ${technologies})`;
     });
@@ -165,7 +167,7 @@ function summarizePortfolioContext(
   return `Portfolio context:
 - Portfolio title: ${parseString(metadata?.title, DEFAULT_UNSPECIFIED_LABEL)}
 - Portfolio summary: ${parseString(metadata?.description, parseString(metadata?.bio, DEFAULT_UNSPECIFIED_LABEL))}
-- Featured work: ${joinInterviewList(featuredProjects, 3)}`;
+- Featured work: ${joinInterviewList(featuredProjects, NUM_3)}`;
 }
 
 async function resolvePreferredResume(candidateContext?: InterviewCandidateContext) {

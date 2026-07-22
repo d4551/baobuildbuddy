@@ -1,4 +1,5 @@
 import type { ComputedRef } from "vue";
+const NUM_1000 = 1000;
 
 interface TimedInterviewSession {
   endTime?: number | null;
@@ -27,7 +28,7 @@ function estimateElapsedTime(
 
   const start = Number.isFinite(startTime) ? startTime : fallbackSeconds;
   const end = typeof endTime === "number" && Number.isFinite(endTime) ? endTime : Date.now();
-  const rawSeconds = Math.floor((end - start) / 1000);
+  const rawSeconds = Math.floor((end - start) / NUM_1000);
   return Math.max(0, rawSeconds);
 }
 

@@ -28,6 +28,7 @@ import { resolveDesktopRuntimeTargetInfo } from "../packages/shared/src/utils/de
 import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
+const NUM_4 = 4;
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -1081,7 +1082,7 @@ const stageLinuxArtifacts = async (
     await Promise.all(
       artifactNames.map(async (artifactName) => {
         if (artifactName.endsWith(".sig")) {
-          const unsignedArtifactName = artifactName.slice(0, -4);
+          const unsignedArtifactName = artifactName.slice(0, -NUM_4);
           const unsignedKind = inferLinuxArtifactKind(unsignedArtifactName);
           const signatureBundlePath = buildLinuxBundlePathCandidatesForFileNames(
             target,

@@ -40,8 +40,8 @@ const isRouteAllowlistEntry = (value: JsonValue): value is RouteAllowlistEntry =
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
-  const route = value["route"];
-  const reason = value["reason"];
+  const route = value.route;
+  const reason = value.reason;
   return typeof route === "string" && typeof reason === "string";
 };
 

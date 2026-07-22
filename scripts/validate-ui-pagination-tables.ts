@@ -4,6 +4,7 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_3 = 3;
 
 /**
  * Data surface primitives gate (design.md §5, §11).
@@ -173,7 +174,7 @@ const collectMultiColumnTableViolations = (
   template: string,
 ): ValidationViolation[] => {
   const thCount = (template.match(/<th\b/gu) ?? []).length;
-  if (thCount < 3) return [];
+  if (thCount < NUM_3) return [];
   if (!tableWithoutOverflowScrollPattern.test(template)) return [];
   if (RESPONSIVE_DATA_SURFACE_PATTERN.test(content) || DUAL_SURFACE_TOKEN_PATTERN.test(content)) {
     return [];

@@ -14,6 +14,7 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
+const NUM_30 = 30;
 
 const INTERVIEW_STATUS_VALUES = [
   "preparing",
@@ -219,7 +220,7 @@ const toInterviewConfig = (value: unknown, questionCount: number): InterviewSess
     roleCategory: asString(configRecord.roleCategory),
     experienceLevel: asString(configRecord.experienceLevel) ?? "mid",
     focusAreas: asStringArray(configRecord.focusAreas),
-    duration: asNumber(configRecord.duration) ?? 30,
+    duration: asNumber(configRecord.duration) ?? NUM_30,
     questionCount: asNumber(configRecord.questionCount) ?? questionCount,
     includeTechnical: asBoolean(configRecord.includeTechnical) ?? true,
     includeBehavioral: asBoolean(configRecord.includeBehavioral) ?? true,

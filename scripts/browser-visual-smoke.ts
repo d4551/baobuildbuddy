@@ -1,3 +1,7 @@
+const NUM_12 = 12;
+const NUM_1500 = 1_500;
+const NUM_2000 = 2_000;
+const NUM_40 = 40;
 /**
  * Browser-only visual smoke (Playwright). No curl / raw API fetch.
  * Navigates Nuxt routes, captures screenshots + console errors.
@@ -110,7 +114,7 @@ const smokeRoute = async (
 
   const screenshot = join(OUT_DIR, `${viewportName}-${slug}.png`);
   await page.goto(`${CLIENT_BASE}${route}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
-  await waitForPageReady(page, 2_000);
+  await waitForPageReady(page, NUM_2000);
   await waitForMobileDockActive(page, viewportName, route);
   if (route === APP_ROUTES.settings) {
     await page
@@ -164,7 +168,7 @@ const clickFirstNavLinks = async (page: Page, viewportName: string): Promise<Rou
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await waitForPageReady(page, 1_500);
+  await waitForPageReady(page, NUM_1500);
 
   // Prefer sidebar / drawer links for primary discovery.
   const hrefs = await page.evaluate(() => {
@@ -172,7 +176,7 @@ const clickFirstNavLinks = async (page: Page, viewportName: string): Promise<Rou
     const paths = anchors
       .map((anchor) => anchor.getAttribute("href") ?? "")
       .filter((href) => href.startsWith("/") && !href.startsWith("//"));
-    return [...new Set(paths)].slice(0, 12);
+    return [...new Set(paths)].slice(0, NUM_12);
   });
 
   return mapSequential(hrefs, async (href, index) => {
@@ -214,7 +218,7 @@ const main = async (): Promise<void> => {
     `browser-visual-smoke: ${String(report.length)} captures, ${String(failures.length)} failures → ${summaryPath}`,
   );
   const failureLines = failures
-    .slice(0, 40)
+    .slice(0, NUM_40)
     .map(
       (failure) =>
         `- ${failure.viewport}/${failure.slug} ${failure.route}: ${failure.reason ?? "console"} | console=${String(failure.consoleErrors.length)}`,

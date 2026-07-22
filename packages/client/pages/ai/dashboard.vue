@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesAiDashboardPage" });
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
@@ -46,7 +49,7 @@ const page = reactive(useAIDashboardPage());
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="page.loading" :lines="8" />
+    <LoadingSkeleton v-if="page.loading" :lines="LOADING_SKELETON_LINES.form" />
     <BootstrapErrorAlert
       v-else-if="page.dashboardBootstrapError"
       :message="getErrorMessage(page.dashboardBootstrapError, t('aiDashboard.toasts.loadFailed'))"
@@ -71,7 +74,7 @@ const page = reactive(useAIDashboardPage());
           :t="page.t"
         />
         <template #fallback>
-          <LoadingSkeleton :lines="5" />
+          <LoadingSkeleton :lines="LOADING_SKELETON_LINES.medium" />
         </template>
       </ClientOnly>
 

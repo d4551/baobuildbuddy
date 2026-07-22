@@ -24,6 +24,7 @@ import {
 import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import type { JobApplyStrategy } from "./strategy-registry";
 import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 
 const buildResult = (
   success: boolean,
@@ -178,7 +179,7 @@ export const initializeApplicationPage = async (
   addStep(state.steps, "init", "ok", `headless=${String(state.payload.settings.headless)}`);
 
   const timeoutMs = Math.max(
-    state.payload.settings.defaultTimeout * 1_000,
+    state.payload.settings.defaultTimeout * MS_PER_SECOND,
     automationRuntimeConfig.navigationTimeoutMs,
   );
   const navigateResult = await withRetry(() =>

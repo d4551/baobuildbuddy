@@ -4,6 +4,7 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_16 = 16;
 
 const bannedPattern =
   /\b(?:shims?|polyfills?|compat(?:ibility|ibilities)?|wrappers?|adapters?)\b/giu;
@@ -11,7 +12,7 @@ const disabledPolyfillPattern = /\bpolyfill\s*:\s*false\b/u;
 
 const isDisabledPolyfillConfiguration = (content: string, matchIndex: number): boolean => {
   const surroundingSnippet = content.slice(
-    Math.max(0, matchIndex - 16),
+    Math.max(0, matchIndex - NUM_16),
     Math.min(content.length, matchIndex + 24),
   );
   return disabledPolyfillPattern.test(surroundingSnippet);

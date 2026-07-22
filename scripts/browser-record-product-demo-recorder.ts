@@ -1,3 +1,5 @@
+const NUM_240 = 240;
+const NUM_255 = 255;
 /**
  * Display recorder for product demo (ffmpeg x11grab).
  */
@@ -57,7 +59,7 @@ const encodeWebmFromRaw = async (rawPath: string, webmPath: string): Promise<str
   const webmCode = await webmProc.exited;
   if (webmCode === 0) return webmPath;
   const err = await new Response(webmProc.stderr).text();
-  await writeError(`webm encode failed: ${err.slice(0, 240)}`);
+  await writeError(`webm encode failed: ${err.slice(0, NUM_240)}`);
   return null;
 };
 
@@ -75,9 +77,9 @@ export const startDisplayRecorder = (): DisplayRecorder => {
     stop: async () => {
       proc.kill("SIGINT");
       const code = await proc.exited;
-      if (code !== 0 && code !== 255) {
+      if (code !== 0 && code !== NUM_255) {
         const err = await new Response(proc.stderr).text();
-        await writeError(`display capture failed: ${err.slice(0, 240)}`);
+        await writeError(`display capture failed: ${err.slice(0, NUM_240)}`);
         return { mp4Path: null, webmPath: null };
       }
       await Bun.write(mp4Path, Bun.file(rawPath));

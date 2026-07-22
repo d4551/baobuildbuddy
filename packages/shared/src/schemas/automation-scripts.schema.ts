@@ -17,6 +17,7 @@ import type { GamingPortalId } from "../types/settings";
 import { jsonObjectSchema } from "./json.schema";
 import { rpaProtocolVersionSchema, rpaRunIdentifierSchema } from "./rpa-protocol.schema";
 import { automationSettingsSchema } from "./settings.schema";
+const NUM_20 = 20;
 
 /**
  * Stable automation script identifiers used by the server/runtime boundary.
@@ -125,7 +126,7 @@ export const jobApplyCoverLetterSchema = z.object({
  */
 export const jobApplySelectorMapSchema = z.record(
   z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT)).max(20),
+  z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT)).max(NUM_20),
 );
 
 /**

@@ -10,6 +10,16 @@ import { useI18n } from "vue-i18n";
 import { withLoadingState } from "./async-flow";
 import { parseAchievementList, parseDailyChallengeList } from "./gamification-entity-normalizers";
 import { readRequiredApiPayload } from "~/utils/api-response";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_14 = 14;
+const NUM_3 = 3;
+const NUM_30 = 30;
+const NUM_7 = 7;
+const RATIO_1_0 = 1.0;
+const RATIO_1_25 = 1.25;
+const RATIO_1_5 = 1.5;
+const RATIO_2_0 = 2.0;
+const RATIO_3_0 = 3.0;
 
 interface GamificationState {
   progress: ReturnType<typeof useState<UserGamificationData | null>>;
@@ -204,11 +214,11 @@ const createFetchMonthlyStatsAction = (context: GamificationContext) => async ()
 const createGamificationComputedState = (state: GamificationState) => {
   const level = computed(() => {
     const xp = state.progress.value?.xp || 0;
-    return Math.floor(Math.sqrt(xp / 100)) + 1;
+    return Math.floor(Math.sqrt(xp / PERCENT_MAX)) + 1;
   });
 
   const xpToNextLevel = computed(() => {
-    const nextLevelXp = level.value ** 2 * 100;
+    const nextLevelXp = level.value ** 2 * PERCENT_MAX;
     const currentXp = state.progress.value?.xp || 0;
     return nextLevelXp - currentXp;
   });
@@ -219,11 +229,11 @@ const createGamificationComputedState = (state: GamificationState) => {
 
   const streakMultiplier = computed(() => {
     const streak = currentStreak.value;
-    if (streak >= 30) return 3.0;
-    if (streak >= 14) return 2.0;
-    if (streak >= 7) return 1.5;
-    if (streak >= 3) return 1.25;
-    return 1.0;
+    if (streak >= NUM_30) return RATIO_3_0;
+    if (streak >= NUM_14) return RATIO_2_0;
+    if (streak >= NUM_7) return RATIO_1_5;
+    if (streak >= NUM_3) return RATIO_1_25;
+    return RATIO_1_0;
   });
 
   const actionHistory = computed<JsonValue[]>(() => {

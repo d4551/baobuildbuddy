@@ -61,7 +61,7 @@ function focusMenuItem(index: number): void {
 
 function getMenuIndex(currentIndex: number, direction: number): number {
   const menuItems = getMenuItems();
-  if (!menuItems.length) {
+  if (menuItems.length === 0) {
     return 0;
   }
 
@@ -251,18 +251,18 @@ function emitExport(format: ExportFormat): void {
       {{ props.buttonLabel }}
     </button>
 
-    <ul
+    <div
+      role="menu"
       class="menu dropdown-content z-20"
       :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]"
       v-show="isOpen"
       :id="exportMenuId"
-      role="menu"
       aria-orientation="vertical"
       :aria-labelledby="exportTriggerId"
       :aria-label="props.buttonAriaLabel"
       @focusout="handleMenuFocusOut"
     >
-      <li v-for="(format, index) in exportFormats" :key="format" role="none">
+      <div v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
           :id="`${exportMenuId}-${format}`"
           type="button"
@@ -275,7 +275,7 @@ function emitExport(format: ExportFormat): void {
         >
           {{ formatLabels[format] }}
         </button>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
 </template>

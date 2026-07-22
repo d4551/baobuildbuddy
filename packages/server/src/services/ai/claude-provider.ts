@@ -4,6 +4,8 @@ import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { BaseAIProvider } from "./provider-interface";
+const NUM_4096 = 4096;
+const RATIO_0_7 = 0.7;
 
 /**
  * Anthropic Claude AI Provider
@@ -31,8 +33,8 @@ export class ClaudeProvider extends BaseAIProvider {
     const responseResult = await settle(
       this.client.messages.create({
         model,
-        max_tokens: options?.maxTokens ?? 4096,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? NUM_4096,
+        temperature: options?.temperature ?? RATIO_0_7,
         system: options?.systemPrompt,
         messages: [
           {
@@ -77,8 +79,8 @@ export class ClaudeProvider extends BaseAIProvider {
       Promise.resolve(
         this.client.messages.stream({
           model,
-          max_tokens: options?.maxTokens ?? 4096,
-          temperature: options?.temperature ?? 0.7,
+          max_tokens: options?.maxTokens ?? NUM_4096,
+          temperature: options?.temperature ?? RATIO_0_7,
           system: options?.systemPrompt,
           messages: [
             {

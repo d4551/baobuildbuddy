@@ -11,7 +11,6 @@ import {
   INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
@@ -223,57 +222,13 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
           </div>
         </UiGlassCard>
 
-        <UiGlassCard :aria-label="t('settings.aiProviders.preferredProviderLegend')">
-          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-              <h3 class="card-title text-base">{{ t("settings.aiProviders.preferredProviderLegend") }}</h3>
-              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
-            </div>
-
-            <div class="stats stats-vertical bg-base-100" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-              <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
-                <div class="stat-title">{{ t("settings.aiProviders.preferredProviderLegend") }}</div>
-                <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ selectedProviderLabel }}</div>
-                <div class="stat-desc">{{ t("settings.aiProviders.preferredProviderSaveButton") }}</div>
-              </div>
-            </div>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">
-                {{ t("settings.aiProviders.preferredProviderLegend") }}
-              </legend>
-              <select 
-                v-model="preferredProviderSelection"
-                class="select" :class="[FLUID_WIDTH_CLASS]"
-                :aria-label="t('settings.aiProviders.preferredProviderAria')"
-              >
-                <option
-                  v-for="provider in props.providerInputs"
-                  :key="provider.id"
-                  :value="provider.id"
-                >
-                  {{ provider.label }}
-                </option>
-              </select>
-            </fieldset>
-
-            <div class="flex justify-end">
-              <button type="button" 
-                :class="[PRIMARY_ACTION_CLASS]"
-                :aria-label="t('settings.aiProviders.preferredProviderAria')"
-                :disabled="props.providerRoutingSaveState === 'saving'"
-                @click="emit('savePreferredProvider')"
-              >
-                <LoadingSpinner
-                  v-if="props.providerRoutingSaveState === 'saving'"
-                  size="xs"
-                  :label="t('settings.saveState.saving')"
-                />
-                {{ t("settings.aiProviders.preferredProviderSaveButton") }}
-              </button>
-            </div>
-          </div>
-        </UiGlassCard>
+        <SettingsAiPreferredProviderCard
+          v-model:preferred-provider-selection="preferredProviderSelection"
+          :provider-inputs="props.providerInputs"
+          :selected-provider-label="selectedProviderLabel"
+          :save-state="props.providerRoutingSaveState"
+          @save="emit('savePreferredProvider')"
+        />
       </SectionGrid>
 
       <SettingsAiRoutingCard

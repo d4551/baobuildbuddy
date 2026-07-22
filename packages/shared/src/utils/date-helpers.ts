@@ -1,3 +1,8 @@
+const NUM_1000 = 1000;
+const NUM_30 = 30;
+const NUM_3600 = 3600;
+const NUM_7 = 7;
+const NUM_86400 = 86400;
 /**
  * Date utility helpers
  */
@@ -28,7 +33,7 @@ export function formatRelativeTime(
   options?: FormatRelativeTimeOptions,
 ): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  const seconds = Math.floor((Date.now() - d.getTime()) / NUM_1000);
   const prefix = options?.keyPrefix ?? DEFAULT_KEY_PREFIX;
 
   if (seconds < 60) {
@@ -37,12 +42,12 @@ export function formatRelativeTime(
     }
     return t(`${prefix}.justNow`);
   }
-  if (seconds < 3600)
+  if (seconds < NUM_3600)
     return t(`${prefix}.minutesAgo`, { count: Math.max(1, Math.floor(seconds / 60)) });
-  if (seconds < 86400)
-    return t(`${prefix}.hoursAgo`, { count: Math.max(1, Math.floor(seconds / 3600)) });
+  if (seconds < NUM_86400)
+    return t(`${prefix}.hoursAgo`, { count: Math.max(1, Math.floor(seconds / NUM_3600)) });
   if (options?.daysOnly || seconds < SECONDS_PER_WEEK)
-    return t(`${prefix}.daysAgo`, { count: Math.max(1, Math.floor(seconds / 86400)) });
+    return t(`${prefix}.daysAgo`, { count: Math.max(1, Math.floor(seconds / NUM_86400)) });
   if (seconds < SECONDS_PER_30_DAYS)
     return t(`${prefix}.weeksAgo`, { count: Math.floor(seconds / SECONDS_PER_WEEK) });
   return d.toLocaleDateString();
@@ -97,7 +102,7 @@ export function formatRelativeTimeForDate(
 
   if (diffDays <= 0) return t(`${options.keyPrefix}.today`);
   if (diffDays === 1) return t(`${options.keyPrefix}.yesterday`);
-  if (diffDays < 7) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
-  if (diffDays < 30) return t(`${options.keyPrefix}.weeksAgo`, { count: Math.floor(diffDays / 7) });
-  return t(`${options.keyPrefix}.monthsAgo`, { count: Math.floor(diffDays / 30) });
+  if (diffDays < NUM_7) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
+  if (diffDays < NUM_30) return t(`${options.keyPrefix}.weeksAgo`, { count: Math.floor(diffDays / NUM_7) });
+  return t(`${options.keyPrefix}.monthsAgo`, { count: Math.floor(diffDays / NUM_30) });
 }

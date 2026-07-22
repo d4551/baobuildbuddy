@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesAutomationScraperPage" });
 
 import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
@@ -114,7 +117,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
     <div :class="contentScaffoldClass">
       <LoadingSkeleton
         v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
-        :lines="6"
+        :lines="LOADING_SKELETON_LINES.long"
       />
 
       <BootstrapErrorAlert
@@ -134,7 +137,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
           @retry="() => refreshScraperJobs()"
         />
 
-        <LoadingSkeleton v-if="scraperJobsPending" :lines="6" />
+        <LoadingSkeleton v-if="scraperJobsPending" :lines="LOADING_SKELETON_LINES.long" />
 
         <template v-else>
           <WorkspaceSectionNavigator

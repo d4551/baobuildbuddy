@@ -20,6 +20,7 @@ import type {
   ScrapeEnrichmentAttempt,
 } from "./scraper-service-contracts";
 import { SCRAPE_ENRICHMENT_WARNING_LIMIT } from "./scraper-service-contracts";
+const NUM_4 = 4;
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/iu;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/u;
@@ -111,7 +112,7 @@ const compactList = (items: readonly (string | undefined)[]): string[] => {
     }
     unique.add(normalized);
   }
-  return Array.from(unique).slice(0, 4);
+  return Array.from(unique).slice(0, NUM_4);
 };
 
 export const buildFallbackJobEnrichment = (jobRow: ScrapedJob): ScrapePersonaEnrichment => {
@@ -154,16 +155,16 @@ export const buildFallbackStudioEnrichment = (
   ),
   hiringSignals: compactList([
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
-    studioRow.size ? `Team size is described as ${studioRow.size}.` : undefined,
+    studioRow.size > 0? `Team size is described as ${studioRow.size}.` : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
     resolveRemoteWorkHiringSignal(studioRow.remoteWork ?? null),
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,
-    studioRow.games?.length
+    studioRow.games?.length > 0
       ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.`
       : undefined,
-    studioRow.technologies?.length
+    studioRow.technologies?.length > 0
       ? `Experience with technologies such as ${studioRow.technologies.slice(0, 2).join(", ")}.`
       : undefined,
     studioRow.interviewStyle

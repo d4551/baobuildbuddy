@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesSkillsPathwaysPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -76,7 +79,7 @@ useSeoMeta({
       @retry="() => page.refreshGamificationProgress()"
     />
 
-    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="8" />
+    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="page.uiState.value === 'error'"

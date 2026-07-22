@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  PERCENT_MAX,
+} from "~/constants/numeric-ui";
 import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
@@ -51,7 +54,7 @@ const streamStatusLabel = computed<string>(() => {
 const streamProgressValue = computed<number>(() => {
   const progress = props.run?.progress;
   if (typeof progress === "number" && Number.isFinite(progress)) {
-    return Math.max(0, Math.min(100, progress));
+    return Math.max(0, Math.min(PERCENT_MAX, progress));
   }
   return 0;
 });

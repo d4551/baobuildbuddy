@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { useI18n } from "vue-i18n";
@@ -107,7 +110,7 @@ function requestDelete(resumeId?: string): void {
         <UiGlassCard
           v-for="(resume, index) in paginatedResumes"
           :key="resume.id"
-          :stagger-index="Math.min(index, 11)"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
           :extra-class="
             (resume.experience?.length ?? 0) > 0 ? '' : 'card-dash border-dashed'
           "

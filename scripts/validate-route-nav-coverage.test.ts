@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { findOrphanRoutes, hasExactNavEntry } from "./validate-route-nav-coverage";
 
-describe("findOrphanRoutes", () => {
+describe("findOrphanRoutes: orphan detection", () => {
   test("flags a route with no nav entry, no redirect, no dynamic, no allowlist (VACUOUS_GATE_TEST)", () => {
     const pages = [
       {
@@ -49,6 +49,21 @@ describe("findOrphanRoutes", () => {
     expect(violations).toHaveLength(0);
   });
 
+  test("allows a route in the allowlist", () => {
+    const pages = [
+      {
+        filePath: "packages/client/pages/setup.vue",
+        route: "/setup",
+        isRedirect: false,
+        isDynamic: false,
+      },
+    ];
+    const violations = findOrphanRoutes(pages, new Set(), new Set(["/setup"]));
+    expect(violations).toHaveLength(0);
+  });
+});
+
+describe("findOrphanRoutes: child route coverage", () => {
   test("rejects parent-prefix-only coverage for static child routes (HARDENED)", () => {
     const pages = [
       {
@@ -75,19 +90,6 @@ describe("findOrphanRoutes", () => {
     ];
     const navPaths = new Set(["/resume", "/resume/build"]);
     const violations = findOrphanRoutes(pages, navPaths, new Set());
-    expect(violations).toHaveLength(0);
-  });
-
-  test("allows a route in the allowlist", () => {
-    const pages = [
-      {
-        filePath: "packages/client/pages/setup.vue",
-        route: "/setup",
-        isRedirect: false,
-        isDynamic: false,
-      },
-    ];
-    const violations = findOrphanRoutes(pages, new Set(), new Set(["/setup"]));
     expect(violations).toHaveLength(0);
   });
 });

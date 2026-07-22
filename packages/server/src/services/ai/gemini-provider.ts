@@ -4,6 +4,10 @@ import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { type GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { BaseAIProvider } from "./provider-interface";
+const NUM_2048 = 2048;
+const NUM_40 = 40;
+const RATIO_0_7 = 0.7;
+const RATIO_0_95 = 0.95;
 
 /**
  * Google Gemini AI Provider
@@ -33,10 +37,10 @@ export class GeminiProvider extends BaseAIProvider {
     const generativeModel =
       model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
-      temperature: options?.temperature ?? 0.7,
-      maxOutputTokens: options?.maxTokens ?? 2048,
-      topP: options?.topP ?? 0.95,
-      topK: options?.topK ?? 40,
+      temperature: options?.temperature ?? RATIO_0_7,
+      maxOutputTokens: options?.maxTokens ?? NUM_2048,
+      topP: options?.topP ?? RATIO_0_95,
+      topK: options?.topK ?? NUM_40,
     };
 
     let fullPrompt = prompt;
@@ -85,10 +89,10 @@ export class GeminiProvider extends BaseAIProvider {
     const generativeModel =
       model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
-      temperature: options?.temperature ?? 0.7,
-      maxOutputTokens: options?.maxTokens ?? 2048,
-      topP: options?.topP ?? 0.95,
-      topK: options?.topK ?? 40,
+      temperature: options?.temperature ?? RATIO_0_7,
+      maxOutputTokens: options?.maxTokens ?? NUM_2048,
+      topP: options?.topP ?? RATIO_0_95,
+      topK: options?.topK ?? NUM_40,
     };
 
     let fullPrompt = prompt;

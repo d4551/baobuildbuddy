@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const NUM_25 = 25;
+const NUM_50 = 50;
 defineOptions({ name: "PagesResumeBuildPage" });
 
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
@@ -60,14 +62,14 @@ const canProceedTarget = computed(() => targetRole.value.trim().length > 0);
 
 const progressValue = computed(() => {
   if (phase.value === "target") return 0;
-  if (phase.value === "generating" || phase.value === "synthesizing") return 50;
+  if (phase.value === "generating" || phase.value === "synthesizing") return NUM_50;
   if (phase.value === "questions" && aiQuestions.value.length > 0) {
     const answered = aiQuestions.value.filter(
       (q) => (answers[q.id] ?? "").trim().length > 0,
     ).length;
-    return 25 + (answered / aiQuestions.value.length) * 50;
+    return NUM_25 + (answered / aiQuestions.value.length) * NUM_50;
   }
-  return 25;
+  return NUM_25;
 });
 
 async function generateQuestions() {

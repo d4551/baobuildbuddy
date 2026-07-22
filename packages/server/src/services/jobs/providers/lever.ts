@@ -1,3 +1,4 @@
+const NUM_100 = 100;
 /**
  * Lever ATS provider.
  */
@@ -150,7 +151,7 @@ export class LeverProvider implements JobProvider {
         return searchText.includes(queryLower);
       });
     const nextJobs = [...accumulatedJobs, ...pageJobs];
-    if (data.length < 100) {
+    if (data.length < NUM_100) {
       return nextJobs;
     }
 

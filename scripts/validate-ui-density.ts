@@ -5,6 +5,9 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_120 = 120;
+const NUM_200 = 200;
+const NUM_30 = 30;
 
 /**
  * UI density gate (design.md §8.2, §11 — "What would Apple do?").
@@ -90,7 +93,7 @@ const collectCrampedRowViolations = (
   for (const match of template.matchAll(crampedRowPattern)) {
     const classValue = match[0] ?? "";
     const lineText =
-      template.slice(Math.max(0, (match.index ?? 0) - 120), (match.index ?? 0) + 200) ?? "";
+      template.slice(Math.max(0, (match.index ?? 0) - NUM_120), (match.index ?? 0) + NUM_200) ?? "";
     const hasWrap = FLEX_WRAP_PATTERN.test(classValue);
     const hasOverflowGuard = OVERFLOW_GUARD_PATTERN.test(classValue);
     const hasMinW0 = MIN_W_ZERO_PATTERN.test(classValue);
@@ -127,7 +130,7 @@ const collectVerboseIconButtonViolations = (
       violations.push({
         filePath,
         line: getLineFromOffset(content, (match.index ?? 0) + Math.max(0, templateOffset)),
-        message: `Button with icon + verbose label ("${visibleText.slice(0, 30)}…", ${visibleText.length} chars). Icon already communicates the action; shorten the label or use aria-label + icon-only on tight surfaces.`,
+        message: `Button with icon + verbose label ("${visibleText.slice(0, NUM_30)}…", ${visibleText.length} chars). Icon already communicates the action; shorten the label or use aria-label + icon-only on tight surfaces.`,
       });
     }
   }

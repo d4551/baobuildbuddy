@@ -38,6 +38,46 @@ import {
 } from "./utils/desktop-release-refresh";
 import { orderTargetsPresentInProvenance } from "./utils/desktop-release-verify-targets";
 import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scraper";
+const NUM_104 = 104;
+const NUM_105 = 105;
+const NUM_11 = 11;
+const NUM_110 = 110;
+const NUM_114 = 114;
+const NUM_115 = 115;
+const NUM_124 = 124;
+const NUM_127 = 127;
+const NUM_13 = 13;
+const NUM_137 = 137;
+const NUM_16 = 16;
+const NUM_171 = 171;
+const NUM_20 = 20;
+const NUM_219 = 219;
+const NUM_237 = 237;
+const NUM_238 = 238;
+const NUM_256 = 256;
+const NUM_26 = 26;
+const NUM_3 = 3;
+const NUM_32 = 32;
+const NUM_33 = 33;
+const NUM_4 = 4;
+const NUM_48 = 48;
+const NUM_6 = 6;
+const NUM_62 = 62;
+const NUM_64 = 64;
+const NUM_65 = 65;
+const NUM_69 = 69;
+const NUM_70 = 70;
+const NUM_71 = 71;
+const NUM_73 = 73;
+const NUM_75 = 75;
+const NUM_76 = 76;
+const NUM_77 = 77;
+const NUM_78 = 78;
+const NUM_8 = 8;
+const NUM_80 = 80;
+const NUM_90 = 90;
+const NUM_97 = 97;
+const NUM_99 = 99;
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -198,16 +238,16 @@ const SIGCHECK_MIN_SIZE_BYTES = 128;
 
 const GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
 
-const PNG_SIGNATURE = Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10]);
+const PNG_SIGNATURE = Uint8Array.from([NUM_137, NUM_80, NUM_78, NUM_71, NUM_13, 10, NUM_26, 10]);
 const ICO_SIGNATURE = Uint8Array.from([0, 0, 1, 0]);
-const ICNS_SIGNATURE = Uint8Array.from([105, 99, 110, 115]);
-const APPIMAGE_SIGNATURE = Uint8Array.from([65, 73, 2]);
-const DEB_SIGNATURE = Uint8Array.from([33, 60, 97, 114, 99, 104, 62, 10]);
-const RPM_SIGNATURE = Uint8Array.from([237, 171, 238, 219]);
-const ZIP_SIGNATURE = Uint8Array.from([80, 75, 3, 4]);
-const WINDOWS_EXE_SIGNATURE = Uint8Array.from([77, 90]);
+const ICNS_SIGNATURE = Uint8Array.from([NUM_105, NUM_99, NUM_110, NUM_115]);
+const APPIMAGE_SIGNATURE = Uint8Array.from([NUM_65, NUM_73, 2]);
+const DEB_SIGNATURE = Uint8Array.from([NUM_33, 60, NUM_97, NUM_114, NUM_99, NUM_104, NUM_62, 10]);
+const RPM_SIGNATURE = Uint8Array.from([NUM_237, NUM_171, NUM_238, NUM_219]);
+const ZIP_SIGNATURE = Uint8Array.from([NUM_80, NUM_75, NUM_3, NUM_4]);
+const WINDOWS_EXE_SIGNATURE = Uint8Array.from([NUM_77, NUM_90]);
 const ZIP_LIST_TIMEOUT_MS = 30_000;
-const REQUIRED_ICO_LAYER_SIZES = [16, 24, 32, 48, 64, 256] as const;
+const REQUIRED_ICO_LAYER_SIZES = [NUM_16, 24, NUM_32, NUM_48, NUM_64, NUM_256] as const;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u;
 const SHA256_ENTRY_PATTERN = /^([a-f0-9]{64}) {2}(.+)$/u;
@@ -524,13 +564,13 @@ const verifyPngIcon = async (
 
   const bytes = new Uint8Array(await Bun.file(absolutePath).arrayBuffer());
   const pngView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const actualWidth = pngView.getUint32(16);
-  const actualHeight = pngView.getUint32(20);
+  const actualWidth = pngView.getUint32(NUM_16);
+  const actualHeight = pngView.getUint32(NUM_20);
   const bitDepth = bytes[24];
   const colorType = bytes[25];
   const isPng = bytesStartWith(bytes, PNG_SIGNATURE);
   const ok =
-    isPng && actualWidth === width && actualHeight === height && bitDepth === 8 && colorType === 6;
+    isPng && actualWidth === width && actualHeight === height && bitDepth === NUM_8 && colorType === NUM_6;
 
   return {
     details: ok
@@ -553,7 +593,7 @@ const verifyIcnsIcon = async (): Promise<VerificationResult> => {
 
   const bytes = new Uint8Array(await Bun.file(absolutePath).arrayBuffer());
   const icnsView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const declaredSize = icnsView.getUint32(4);
+  const declaredSize = icnsView.getUint32(NUM_4);
   const ok = bytesStartWith(bytes, ICNS_SIGNATURE) && declaredSize === bytes.byteLength;
 
   return {
@@ -577,13 +617,13 @@ const verifyIcoIcon = async (): Promise<VerificationResult> => {
 
   const bytes = new Uint8Array(await Bun.file(absolutePath).arrayBuffer());
   const icoView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const iconCount = icoView.getUint16(4, true);
+  const iconCount = icoView.getUint16(NUM_4, true);
   const layerSizes = new Set<number>();
 
   for (let entryIndex = 0; entryIndex < iconCount; entryIndex += 1) {
-    const entryOffset = 6 + entryIndex * 16;
-    const width = bytes[entryOffset] === 0 ? 256 : bytes[entryOffset];
-    const height = bytes[entryOffset + 1] === 0 ? 256 : bytes[entryOffset + 1];
+    const entryOffset = NUM_6 + entryIndex * NUM_16;
+    const width = bytes[entryOffset] === 0 ? NUM_256 : bytes[entryOffset];
+    const height = bytes[entryOffset + 1] === 0 ? NUM_256 : bytes[entryOffset + 1];
     if (width === height) {
       layerSizes.add(width);
     }
@@ -900,7 +940,7 @@ const captureCommand = (command: readonly string[], timeoutMs: number): Promise<
       ]);
       clearTimeout(timeout);
       resolveCommand({
-        exitCode: timedOut ? 124 : exitCode,
+        exitCode: timedOut ? NUM_124 : exitCode,
         stderr: stderr.trim(),
         stdout: stdout.trim(),
         timedOut,
@@ -1018,7 +1058,7 @@ const verifyMagicArtifact = async (
     };
   }
 
-  const lfsProbe = await readFilePrefix(artifact.absolutePath, 256);
+  const lfsProbe = await readFilePrefix(artifact.absolutePath, NUM_256);
   if (isGitLfsPointerFileContent(lfsProbe)) {
     return {
       details: "Git LFS pointer file; run git lfs pull in the repo root to fetch release binaries",
@@ -1048,10 +1088,10 @@ const verifyArtifactType = async (artifact: ReleaseArtifact): Promise<Verificati
   }
 
   if (artifact.kind === "appimage") {
-    const elfPrefix = await readFilePrefix(artifact.absolutePath, 11);
+    const elfPrefix = await readFilePrefix(artifact.absolutePath, NUM_11);
     const ok =
-      bytesStartWith(elfPrefix, Uint8Array.from([127, 69, 76, 70])) &&
-      bytesStartWith(elfPrefix, APPIMAGE_SIGNATURE, 8);
+      bytesStartWith(elfPrefix, Uint8Array.from([NUM_127, NUM_69, NUM_76, NUM_70])) &&
+      bytesStartWith(elfPrefix, APPIMAGE_SIGNATURE, NUM_8);
     return {
       details: ok ? "AppImage ELF and AI\\x02 signature verified" : "AppImage header mismatch",
       label: `artifact:${artifact.relativePath}`,
@@ -1726,7 +1766,7 @@ const verifyLinuxPackagePayload = async (
     ] as const;
   }
 
-  const pointerProbe = await readFilePrefix(artifact.absolutePath, 256);
+  const pointerProbe = await readFilePrefix(artifact.absolutePath, NUM_256);
   if (isGitLfsPointerFileContent(pointerProbe)) {
     return [
       {

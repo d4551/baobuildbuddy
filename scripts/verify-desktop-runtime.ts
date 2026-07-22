@@ -40,6 +40,11 @@ import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+const NUM_3 = 3;
+const NUM_4 = 4;
+const NUM_5000 = 5_000;
+const NUM_8 = 8;
 
 type BrowserCheckResult = {
   pageTitle: string;
@@ -268,7 +273,7 @@ const requestJson = async <T>(
     },
     signal:
       init.signal ??
-      AbortSignal.timeout(init.body ? RUN_COMPLETION_TIMEOUT_MS : POLL_INTERVAL_MS * 8),
+      AbortSignal.timeout(init.body ? RUN_COMPLETION_TIMEOUT_MS : POLL_INTERVAL_MS * NUM_8),
   });
   const rawBody = await response.text();
   if (rawBody.trim().length === 0) {
@@ -332,14 +337,14 @@ const configureVerificationSettings = async (): Promise<void> => {
     }),
   });
 
-  if (response.status !== 200) {
+  if (response.status !== HTTP_STATUS_OK) {
     throw new Error(`Failed to configure verification settings (status ${response.status})`);
   }
 };
 
 const readAutomationVerifyContext = async (): Promise<AutomationVerifyContext> => {
   const response = await requestJson<unknown>(API_ENDPOINTS.automationVerifyContext);
-  if (response.status !== 200 || !hasAutomationVerifyContext(response.body)) {
+  if (response.status !== HTTP_STATUS_OK || !hasAutomationVerifyContext(response.body)) {
     throw new Error(`Failed to read automation verification context (status ${response.status})`);
   }
 
@@ -350,7 +355,7 @@ const readAutomationVerifyContext = async (): Promise<AutomationVerifyContext> =
 
 const readAutomationRun = async (runId: string): Promise<RpaRunExecutionEnvelope> => {
   const response = await requestJson<RpaRunExecutionEnvelope>(buildAutomationRunEndpoint(runId));
-  if (response.status !== 200 || !hasRunEnvelope(response.body)) {
+  if (response.status !== HTTP_STATUS_OK || !hasRunEnvelope(response.body)) {
     throw new Error(`Failed to read automation run ${runId}`);
   }
 
@@ -517,7 +522,7 @@ const createJobApplyRun = async (params: {
       ...(params.runAt ? { runAt: params.runAt } : {}),
     }),
   });
-  if (response.status !== 200 || !hasRunEnvelope(response.body)) {
+  if (response.status !== HTTP_STATUS_OK || !hasRunEnvelope(response.body)) {
     throw new Error(`Failed to create job-apply run via ${endpoint}.`);
   }
 
@@ -704,7 +709,7 @@ const verifyCorsContract = async (
     headers: {
       origin,
     },
-    signal: AbortSignal.timeout(POLL_INTERVAL_MS * 4),
+    signal: AbortSignal.timeout(POLL_INTERVAL_MS * NUM_4),
   });
 
   const allowedOrigin = response.headers.get("access-control-allow-origin");
@@ -761,7 +766,7 @@ const buildLaunchOptions = (executablePath: string | null): PlaywrightLaunchOpti
   return launchOptions;
 };
 
-const BROWSER_LAUNCH_MAX_ATTEMPTS = process.platform === "win32" ? 3 : 1;
+const BROWSER_LAUNCH_MAX_ATTEMPTS = process.platform === "win32" ? NUM_3 : 1;
 const BROWSER_LAUNCH_RETRY_DELAY_MS = 3_000;
 
 const attemptBrowserLaunch = async (
@@ -852,7 +857,7 @@ const runNativeBrowserChecks = async (
 
   const websocketUrl = `${wsBase}${WS_ENDPOINTS.automation}`;
   const websocketOpened = await new Promise<boolean>((resolve) => {
-    const timeout = setTimeout(() => resolve(false), 5_000);
+    const timeout = setTimeout(() => resolve(false), NUM_5000);
     const socket = new WebSocket(websocketUrl);
     socket.addEventListener("open", () => {
       clearTimeout(timeout);
@@ -901,7 +906,7 @@ const readPlaywrightWebsocketStatus = async (
     async ({ automationWebsocketEndpoint, runtimeWsBase }) => {
       const targetUrl = `${runtimeWsBase}${automationWebsocketEndpoint}`;
       return new Promise<boolean>((resolve) => {
-        const timeout = window.setTimeout(() => resolve(false), 5_000);
+        const timeout = window.setTimeout(() => resolve(false), NUM_5000);
         const socket = new WebSocket(targetUrl);
 
         socket.onopen = () => {

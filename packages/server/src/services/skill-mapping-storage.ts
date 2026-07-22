@@ -3,6 +3,7 @@ import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema/skill-mappings";
+const NUM_50 = 50;
 
 export type SkillMappingInsert = Omit<SkillMapping, "id">;
 export type SkillMappingUpdate = Partial<SkillMapping>;
@@ -14,7 +15,7 @@ const toSkillMappingInsert = (data: SkillMappingInsert, now: string, id: string)
   transferableSkill: data.transferableSkill,
   industryApplications: data.industryApplications || [],
   evidence: data.evidence || [],
-  confidence: data.confidence || 50,
+  confidence: data.confidence || NUM_50,
   category: data.category,
   demandLevel: data.demandLevel,
   aiGenerated: data.aiGenerated,

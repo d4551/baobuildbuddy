@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 defineOptions({ name: "PagesDocsApiPage" });
 
 import { useI18n } from "vue-i18n";
@@ -49,7 +52,7 @@ const {
     />
 
     <div v-if="docsUiState === 'loading'" role="status" aria-live="polite" :aria-label="t('apiDocs.state.loading')">
-      <LoadingSkeleton :lines="6" />
+      <LoadingSkeleton :lines="LOADING_SKELETON_LINES.long" />
     </div>
 
     <EmptyState

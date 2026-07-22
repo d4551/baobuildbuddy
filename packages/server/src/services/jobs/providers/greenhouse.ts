@@ -1,3 +1,4 @@
+const NUM_100 = 100;
 /**
  * Greenhouse ATS provider.
  */
@@ -125,7 +126,7 @@ export class GreenhouseProvider implements JobProvider {
 
     const pageJobs = this.filterMappedJobs(fetchStatus.jobs, company, board, query);
     const nextJobs = [...accumulatedJobs, ...pageJobs];
-    if (fetchStatus.jobs.length < 100) {
+    if (fetchStatus.jobs.length < NUM_100) {
       return nextJobs;
     }
     return this.fetchBoardJobsPage(context, { page: page + 1, accumulatedJobs: nextJobs });

@@ -39,13 +39,14 @@ import { rateLimit } from "./utils/rate-limit";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
+const NUM_16 = 16;
 
 setupTypebox();
 
 const createTraceId = (): string => {
   const bytes = new Uint8Array(TRACE_ID_BYTE_LENGTH);
   crypto.getRandomValues(bytes);
-  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...bytes].map((b) => b.toString(NUM_16).padStart(2, "0")).join("");
 };
 
 const OPENAPI_TAGS = [

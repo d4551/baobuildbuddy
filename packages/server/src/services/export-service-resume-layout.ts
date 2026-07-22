@@ -17,6 +17,7 @@ import {
   toPdfColor,
   type WrappedTextOptions,
 } from "./export-service-contracts";
+const RATIO_0_5 = 0.5;
 
 export function resolveResumePdfTemplate(
   requestedTemplate: string | undefined,
@@ -33,7 +34,7 @@ export function resolveResumePdfTemplate(
 }
 
 export function applyResumeBackground(context: ResumeRenderContext, page = context.page): void {
-  if (context.background.r >= 0.5) {
+  if (context.background.r >= RATIO_0_5) {
     return;
   }
 

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 import type {
   RpaCapabilityAuditEntry,
   RpaCapabilityAuditReport,
@@ -96,7 +99,7 @@ const readyEntries = computed(() =>
       <LoadingSkeleton
         v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
         variant="stats"
-        :lines="3"
+        :lines="LOADING_SKELETON_LINES.compact"
       />
 
       <BootstrapErrorAlert

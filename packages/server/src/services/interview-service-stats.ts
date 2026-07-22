@@ -1,4 +1,5 @@
 import type { InterviewSession } from "@bao/shared/types/interview";
+const NUM_3 = 3;
 
 export function calculateInterviewStats(sessions: InterviewSession[]): {
   totalInterviews: number;
@@ -26,10 +27,10 @@ export function calculateInterviewStats(sessions: InterviewSession[]): {
 
   const strongestAreas = [
     ...new Set(sessions.flatMap((session) => session.finalAnalysis?.strengths || [])),
-  ].slice(0, 3);
+  ].slice(0, NUM_3);
   const improvementAreas = [
     ...new Set(sessions.flatMap((session) => session.finalAnalysis?.improvements || [])),
-  ].slice(0, 3);
+  ].slice(0, NUM_3);
   const totalTimeSpent = sessions.reduce((accumulator, session) => {
     if (session.startTime && session.endTime) {
       return accumulator + (session.endTime - session.startTime);
@@ -42,7 +43,7 @@ export function calculateInterviewStats(sessions: InterviewSession[]): {
   }
   const favoriteStudios = [...studioCounts.entries()]
     .sort((left, right) => right[1] - left[1])
-    .slice(0, 3)
+    .slice(0, NUM_3)
     .map(([studioId]) => studioId);
 
   return {
