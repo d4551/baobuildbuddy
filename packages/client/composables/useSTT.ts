@@ -3,7 +3,11 @@ import type { VoiceSettings } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import { computed, onMounted, onUnmounted, readonly, ref } from "#imports";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
-import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import {
+  createMicrophoneRecorder,
+  type ServerSttRequestOptions,
+  transcribeAudioViaServer,
+} from "./speech-server-stt";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import { useSettings } from "./useSettings";
 
@@ -172,7 +176,10 @@ function startSttListening(
   return startBrowserSttListening(state, locale, settings);
 }
 
-function stopServerSttListening(state: SttMutableState): void {
+function stopServerSttListening(
+  state: SttMutableState,
+  options: ServerSttRequestOptions,
+): void {
   const activeRecorder = state.recorder;
   state.recorder = null;
   if (!activeRecorder) {
@@ -181,7 +188,7 @@ function stopServerSttListening(state: SttMutableState): void {
   }
   const micPromise = activeRecorder
     .stop()
-    .then((blob) => transcribeAudioViaServer(blob))
+    .then((blob) => transcribeAudioViaServer(blob, options))
     .then(
       (result) => {
         if (result.ok) {
@@ -208,9 +215,9 @@ function stopServerSttListening(state: SttMutableState): void {
   state.micPromise = micPromise;
 }
 
-function stopSttListening(state: SttMutableState): void {
+function stopSttListening(state: SttMutableState, options: ServerSttRequestOptions): void {
   if (state.useServerStt) {
-    stopServerSttListening(state);
+    stopServerSttListening(state, options);
     return;
   }
   state.recognition?.stop();
@@ -239,6 +246,14 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   const sttProvider = computed(() =>
     resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
   );
+  const getServerSttOptions = (): ServerSttRequestOptions => {
+    const stt = appSettings.value?.automationSettings?.speech?.stt;
+    return {
+      provider: resolveSpeechSttProvider(stt?.provider),
+      model: stt?.model?.trim() || "",
+      endpoint: stt?.endpoint?.trim() || "",
+    };
+  };
 
   onMounted(() => {
     state.useServerStt = shouldUseServerStt(sttProvider.value);
@@ -271,7 +286,7 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   return {
     startListening: (locale?: string) =>
       startSttListening(state, locale, settings, sttProvider.value),
-    stopListening: () => stopSttListening(state),
+    stopListening: () => stopSttListening(state, getServerSttOptions()),
     transcript: readonly(state.transcript),
     interimTranscript: readonly(state.interimTranscript),
     fullTranscript,

@@ -138,6 +138,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             id: string;
                             jobId: string;
                             savedAt: string;
+                            gamification?: {
+                                xpAwarded: number;
+                                reason: string;
+                            } | undefined;
                         } | undefined;
                         id?: string | undefined;
                         jobId?: string | undefined;
@@ -147,6 +151,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         id: string;
                         jobId: string;
                         savedAt: string;
+                        gamification?: {
+                            xpAwarded: number;
+                            reason: string;
+                        } | undefined;
                     };
                     404: {
                         error: string;
@@ -264,6 +272,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             timeline?: unknown[] | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
+                            gamification?: {
+                                xpAwarded: number;
+                                reason: string;
+                            } | undefined;
                         } | undefined;
                         id?: string | undefined;
                         jobId?: string | undefined;
@@ -281,6 +293,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         timeline?: unknown[] | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
+                        gamification?: {
+                            xpAwarded: number;
+                            reason: string;
+                        } | undefined;
                     };
                     404: {
                         error: string;
@@ -328,6 +344,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             timeline?: unknown[] | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
+                            gamification?: {
+                                xpAwarded: number;
+                                reason: string;
+                            } | undefined;
                         };
                         404: {
                             error: string;
@@ -370,6 +390,10 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         timeline?: unknown[] | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
+                        gamification?: {
+                            xpAwarded: number;
+                            reason: string;
+                        } | undefined;
                     }[];
                 };
                 error: never;

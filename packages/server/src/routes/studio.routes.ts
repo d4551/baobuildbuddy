@@ -30,6 +30,49 @@ export interface StudioAnalytics {
   topTechnologies: Array<{ name: string; count: number }>;
 }
 
+type StudioAnalyticsRow = {
+  type: string | null;
+  size: string | null;
+  remoteWork: boolean | null;
+  technologies: string[] | null;
+};
+
+const incrementCount = (bucket: Record<string, number>, key: string): void => {
+  bucket[key] = (bucket[key] || 0) + 1;
+};
+
+const buildStudioAnalytics = (allStudios: StudioAnalyticsRow[]): StudioAnalytics => {
+  const analytics: StudioAnalytics = {
+    totalStudios: allStudios.length,
+    byType: {},
+    bySize: {},
+    remoteWorkStudios: allStudios.filter((studio) => studio.remoteWork === true).length,
+    topTechnologies: [],
+  };
+
+  const techCount: Record<string, number> = {};
+  for (const studio of allStudios) {
+    if (studio.type) {
+      incrementCount(analytics.byType, studio.type);
+    }
+    if (studio.size !== null && studio.size.length > 0) {
+      incrementCount(analytics.bySize, studio.size);
+    }
+    if (studio.technologies) {
+      for (const tech of studio.technologies) {
+        incrementCount(techCount, tech);
+      }
+    }
+  }
+
+  analytics.topTechnologies = Object.entries(techCount)
+    .map(([name, count]) => ({ name, count }))
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 10);
+
+  return analytics;
+};
+
 export const studioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.studiosBase),
 })
@@ -79,42 +122,7 @@ export const studioRoutes = new Elysia({
     },
     async ({ status }) => {
       const allStudios = await db.select().from(studios);
-
-      const analytics: StudioAnalytics = {
-        totalStudios: allStudios.length,
-        byType: {},
-        bySize: {},
-        remoteWorkStudios: allStudios.filter((studio) => studio.remoteWork === true).length,
-        topTechnologies: [],
-      };
-
-      for (const studio of allStudios) {
-        if (studio.type) {
-          analytics.byType[studio.type] = (analytics.byType[studio.type] || 0) + 1;
-        }
-      }
-
-      for (const studio of allStudios) {
-        if (studio.size > 0) {
-          analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
-        }
-      }
-
-      const techCount: Record<string, number> = {};
-      for (const studio of allStudios) {
-        if (studio.technologies) {
-          for (const tech of studio.technologies) {
-            techCount[tech] = (techCount[tech] || 0) + 1;
-          }
-        }
-      }
-
-      analytics.topTechnologies = Object.entries(techCount)
-        .map(([name, count]) => ({ name, count }))
-        .sort((left, right) => right.count - left.count)
-        .slice(0, 10);
-
-      return status(HTTP_STATUS_OK, analytics);
+      return status(HTTP_STATUS_OK, buildStudioAnalytics(allStudios));
     },
   )
   .get(

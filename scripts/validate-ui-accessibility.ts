@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
-import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+import { PERCENT_MAX } from "./constants/numeric-literals";
 const NUM_180 = 180;
 const NUM_3 = 3;
 const RATIO_0_0041960863 = 0.0041960863;

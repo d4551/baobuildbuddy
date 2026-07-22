@@ -3,6 +3,9 @@ export type SpeechTranscribeInput = {
     readonly audioBase64: string;
     readonly mimeType: string;
     readonly filename?: string;
+    readonly provider?: string;
+    readonly model?: string;
+    readonly endpoint?: string;
 };
 export type SpeechTranscribeResult = {
     readonly ok: true;

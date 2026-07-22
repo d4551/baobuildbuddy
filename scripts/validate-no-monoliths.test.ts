@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { collectMonolithViolationsForContent } from "./validate-no-monoliths";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+import {
+  HTTP_BAD_REQUEST as HTTP_STATUS_BAD_REQUEST,
+  HTTP_INTERNAL_ERROR as HTTP_STATUS_INTERNAL_SERVER_ERROR,
+} from "./constants/numeric-literals";
 const NUM_450 = 450;
 
 const COMPONENT_PATH = "packages/client/components/example/ExampleWidget.vue";

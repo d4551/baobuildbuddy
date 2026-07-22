@@ -124,10 +124,16 @@ export const jobsListResponseSchema = t.Object({
   total: t.Number(),
 });
 
+export const gamificationAwardResponseSchema = t.Object({
+  xpAwarded: t.Number(),
+  reason: t.String(),
+});
+
 export const savedJobResponseSchema = t.Object({
   id: t.String(),
   jobId: t.String(),
   savedAt: t.String(),
+  gamification: t.Optional(gamificationAwardResponseSchema),
 });
 
 export const applicationResponseSchema = t.Object({
@@ -139,6 +145,7 @@ export const applicationResponseSchema = t.Object({
   timeline: t.Optional(t.Union([t.Array(t.Unknown()), t.Null()])),
   createdAt: t.Optional(t.String()),
   updatedAt: t.Optional(t.String()),
+  gamification: t.Optional(gamificationAwardResponseSchema),
 });
 
 export const jobsRefreshResponseSchema = t.Object({

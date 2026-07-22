@@ -40,7 +40,7 @@ import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { HTTP_OK as HTTP_STATUS_OK } from "./constants/numeric-literals";
 const NUM_3 = 3;
 const NUM_4 = 4;
 const NUM_5000 = 5_000;

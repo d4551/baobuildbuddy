@@ -29,10 +29,11 @@ type JobRow = typeof jobs.$inferSelect;
 type SavedJobRow = typeof savedJobs.$inferSelect;
 type ApplicationRow = typeof applications.$inferSelect;
 type RouteErrorBody = { error: string };
+type GamificationAwardBody = { readonly xpAwarded: number; readonly reason: string };
 type SaveJobResult =
   | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
   | { status: null; body: { message: string; saved: SavedJobRow } }
-  | { status: typeof HTTP_STATUS_CREATED; body: SavedJobRow };
+  | { status: typeof HTTP_STATUS_CREATED; body: SavedJobRow & { gamification: GamificationAwardBody } };
 type NewApplicationBody = {
   id: string;
   jobId: string;
@@ -40,6 +41,7 @@ type NewApplicationBody = {
   appliedDate: string;
   notes: string;
   timeline: Array<{ status: string; date: string; notes: string }>;
+  gamification: GamificationAwardBody;
 };
 type CreateApplicationResult =
   | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }

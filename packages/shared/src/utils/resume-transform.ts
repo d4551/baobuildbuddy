@@ -103,7 +103,7 @@ function mapFormEducationToResumeEducation(
 }
 
 function buildSkillsFromForm(skillsInput: string[] | undefined): ResumeSkills {
-  return skillsInput?.length > 0? { technical: skillsInput } : {};
+  return (skillsInput ?? []).length > 0 ? { technical: skillsInput } : {};
 }
 
 function mapFormProjectsToResumeProjects(
@@ -112,7 +112,9 @@ function mapFormProjectsToResumeProjects(
   return (projects || []).map((project) => ({
     title: project.name,
     description: project.description,
-    ...(project.technologies?.length > 0? { technologies: project.technologies } : {}),
+    ...((project.technologies ?? []).length > 0
+      ? { technologies: project.technologies }
+      : {}),
     ...(project.url ? { link: project.url } : {}),
   }));
 }
@@ -124,9 +126,9 @@ function buildGamingExperience(gaming: ResumeFormData["gaming"] | undefined): Ga
   const genres = toArray(gaming.genres);
   const achievements = toArray(gaming.achievements);
   return {
-    ...(roles.length > 0? { gameEngines: roles.join(", ") } : {}),
-    ...(genres.length > 0? { genres: genres.join(", ") } : {}),
-    ...(achievements.length > 0? { shippedTitles: achievements.join("; ") } : {}),
+    ...(roles.length > 0 ? { gameEngines: roles.join(", ") } : {}),
+    ...(genres.length > 0 ? { genres: genres.join(", ") } : {}),
+    ...(achievements.length > 0 ? { shippedTitles: achievements.join("; ") } : {}),
   };
 }
 

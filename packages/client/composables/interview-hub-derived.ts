@@ -98,7 +98,7 @@ function useInterviewHubPrepState(
     },
     {
       id: "portfolio",
-      ready: portfolio.value?.projects.length > 0? portfolio.value.projects.length > 0 : false,
+      ready: (portfolio.value?.projects ?? []).length > 0,
       title: t("interviewHub.prep.items.portfolio.title"),
       description: t("interviewHub.prep.items.portfolio.description"),
       ctaLabel: t("interviewHub.prep.items.portfolio.cta"),

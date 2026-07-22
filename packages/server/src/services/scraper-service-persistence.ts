@@ -18,6 +18,24 @@ import {
 } from "./scraper-service-contracts";
 const NUM_100 = 100;
 
+const resolveScrapedContentHash = (job: JobSearchResult["jobs"][number]): string => {
+  const trimmedContentHash = job.contentHash?.trim() ?? "";
+  const hashSource = trimmedContentHash.length > 0 ? trimmedContentHash : job.id;
+  return String(hashSource).slice(0, NUM_100);
+};
+
+const resolveScrapedJobSource = (job: JobSearchResult["jobs"][number]): string => {
+  const trimmedSource = job.source?.trim() ?? "";
+  return trimmedSource.length > 0 ? trimmedSource : DEFAULT_JOB_SOURCE;
+};
+
+const resolveOptionalPostedDate = (postedDate: string | null | undefined): string | null => {
+  if (postedDate === null || postedDate === undefined) {
+    return null;
+  }
+  return postedDate.length > 0 ? postedDate : null;
+};
+
 export const runWithErrorCollection = async (
   operation: () => Promise<void>,
   errors: string[],
@@ -83,10 +101,10 @@ export const upsertScrapedJob = async (
   now: string,
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
-  const contentHash = String(job.contentHash?.trim().length > 0? job.contentHash : job.id).slice(
-    0,
-    NUM_100,
-  );
+  const contentHash = resolveScrapedContentHash(job);
+  const source = resolveScrapedJobSource(job);
+  const postedDate = resolveOptionalPostedDate(job.postedDate);
+  const enrichmentValue = enrichment ?? null;
 
   await db
     .insert(jobs)
@@ -99,12 +117,11 @@ export const upsertScrapedJob = async (
       hybrid: false,
       description: job.description ?? null,
       url: job.url ?? null,
-      source:
-        job.source?.trim() && job.source.trim().length > 0 ? job.source.trim() : DEFAULT_JOB_SOURCE,
+      source,
       contentHash,
-      postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
+      postedDate,
       type: DEFAULT_JOB_TYPE,
-      enrichment: enrichment ?? null,
+      enrichment: enrichmentValue,
       createdAt: now,
       updatedAt: now,
     })
@@ -118,13 +135,10 @@ export const upsertScrapedJob = async (
         hybrid: false,
         description: job.description ?? null,
         url: job.url ?? null,
-        source:
-          job.source?.trim() && job.source.trim().length > 0
-            ? job.source.trim()
-            : DEFAULT_JOB_SOURCE,
-        postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
+        source,
+        postedDate,
         type: DEFAULT_JOB_TYPE,
-        enrichment: enrichment ?? null,
+        enrichment: enrichmentValue,
         updatedAt: now,
       },
     });

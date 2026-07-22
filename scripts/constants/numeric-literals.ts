@@ -1,6 +1,6 @@
 /**
- * Script-side numeric SSOT. Biome `noMagicNumbers` exempts `**/constants/**`.
- * Prefer `@bao/shared` constants when a domain name already exists.
+ * Script-side numeric SSOT. Biome noMagicNumbers is muted under constants globs.
+ * Prefer shared package constants when a domain name already exists.
  */
 
 export const PAD_LOCALE_WIDTH = 5;

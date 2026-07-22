@@ -155,17 +155,19 @@ export const buildFallbackStudioEnrichment = (
   ),
   hiringSignals: compactList([
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
-    studioRow.size > 0? `Team size is described as ${studioRow.size}.` : undefined,
+    (studioRow.size ?? "").length > 0
+      ? `Team size is described as ${studioRow.size}.`
+      : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
     resolveRemoteWorkHiringSignal(studioRow.remoteWork ?? null),
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,
-    studioRow.games?.length > 0
-      ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.`
+    (studioRow.games ?? []).length > 0
+      ? `Knowledge of games such as ${(studioRow.games ?? []).slice(0, 2).join(", ")}.`
       : undefined,
-    studioRow.technologies?.length > 0
-      ? `Experience with technologies such as ${studioRow.technologies.slice(0, 2).join(", ")}.`
+    (studioRow.technologies ?? []).length > 0
+      ? `Experience with technologies such as ${(studioRow.technologies ?? []).slice(0, 2).join(", ")}.`
       : undefined,
     studioRow.interviewStyle
       ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.`

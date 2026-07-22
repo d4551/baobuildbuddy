@@ -6,7 +6,7 @@ import frFRCatalog from "../packages/client/locales/fr-FR/catalog";
 import jaJPCatalog from "../packages/client/locales/ja-JP/catalog";
 import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
-import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+import { PERCENT_MAX } from "./constants/numeric-literals";
 const RATIO_0_05 = 0.05;
 
 /**

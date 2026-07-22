@@ -19,7 +19,10 @@ export declare class GamificationService {
         actionsCount: number;
         streakDays: number;
     }>;
-    trackAction(statKey: keyof GamificationStats, xpAmount: number, reason: string): Promise<void>;
+    trackAction(statKey: keyof GamificationStats, xpAmount: number, reason: string): Promise<{
+        readonly xpAwarded: number;
+        readonly reason: string;
+    }>;
     trackActionFireAndForget(statKey: keyof GamificationStats, xpAmount: number, reason: string): void;
 }
 export declare const gamificationService: GamificationService;

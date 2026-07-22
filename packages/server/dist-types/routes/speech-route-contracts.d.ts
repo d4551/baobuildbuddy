@@ -2,11 +2,17 @@ export declare const speechTranscribeBodySchema: import("typebox").TObject<{
     audioBase64: import("typebox").TString;
     mimeType: import("typebox").TString;
     filename: import("typebox").TOptional<import("typebox").TString>;
+    provider: import("typebox").TOptional<import("typebox").TString>;
+    model: import("typebox").TOptional<import("typebox").TString>;
+    endpoint: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export type SpeechTranscribeBody = {
     audioBase64: string;
     mimeType: string;
     filename?: string;
+    provider?: string;
+    model?: string;
+    endpoint?: string;
 };
 export declare const speechTranscribeResponses: {
     200: import("typebox").TObject<{
