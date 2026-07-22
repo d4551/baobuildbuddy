@@ -201,9 +201,23 @@ const smokeViewport = async (
   return [...staticResults, ...navResults];
 };
 
+const resolveSmokeLaunchOptions = (): {
+  headless: boolean;
+  channel?: "chrome";
+} => {
+  // Visual proof defaults to headed Chromium when a display is available.
+  // Set PAGE_PROOF_HEADLESS=true only for CI environments without a display.
+  const forceHeadless = process.env.PAGE_PROOF_HEADLESS === "true";
+  const hasDisplay = Boolean(process.env.DISPLAY && process.env.DISPLAY.length > 0);
+  if (forceHeadless || !hasDisplay) {
+    return { headless: true };
+  }
+  return { headless: false, channel: "chrome" };
+};
+
 const main = async (): Promise<void> => {
   await mkdir(OUT_DIR, { recursive: true });
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch(resolveSmokeLaunchOptions());
   const reportChunks = await mapSequential(VIEWPORTS, async (viewport) =>
     smokeViewport(browser, viewport),
   );

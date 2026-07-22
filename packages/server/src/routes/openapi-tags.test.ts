@@ -1,9 +1,14 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { createTestDbPath, requestJson } from "../test-utils";
 import { hashApiKey } from "../utils/crypto";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+
+// Must bind DB_PATH before any db/app import — Bun caches the sqlite singleton.
+delete Bun.env.BAO_DISABLE_AUTH;
+delete process.env.BAO_DISABLE_AUTH;
+Bun.env.DB_PATH = createTestDbPath("openapi-tags");
 
 type OpenApiOperation = {
   tags?: string[];
@@ -55,8 +60,6 @@ let app: { handle: (request: Request) => Response | Promise<Response> };
 const TEST_AUTH_KEY = "bao_opentag_test_key";
 
 beforeAll(async () => {
-  Bun.env.DB_PATH = createTestDbPath("openapi-tags");
-
   const dbModule = await import("../db/client");
   const initModule = await import("../db/init");
   const seedModule = await import("../db/seed");
@@ -107,9 +110,13 @@ const assertOpenApiOperationTags = (path: string, operations: OpenApiSpec["paths
 
 describe("openapi tags", () => {
   test("generated OpenAPI spec tags every documented API operation", async () => {
-    const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, {
-      Authorization: `Bearer ${TEST_AUTH_KEY}`,
-    });
+    const response = await requestJson<OpenApiSpec>(
+      app,
+      "GET",
+      API_ENDPOINTS.apiDocsJson,
+      undefined,
+      { Authorization: `Bearer ${TEST_AUTH_KEY}` },
+    );
     expect(response.status).toBe(HTTP_STATUS_OK);
 
     for (const [path, operations] of Object.entries(response.body.paths)) {
