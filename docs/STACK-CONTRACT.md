@@ -99,3 +99,7 @@ Contract-escalation note for parent `.bao`-archive playbooks: [`ssot-ledger/cont
 - **daisyUI:** Prefer project MCP **daisyUI-Snippets** when the server is enabled; otherwise [daisyUI llms.txt](https://daisyui.com/llms.txt) and repo script `validate:daisyui-contracts`.
 - **Context7:** Use when quota allows for library-specific questions; if MCP quota is exceeded, use `bun run audit:official-llms` + official `llms.txt` URLs as the safe equivalent.
 - **brutalise / parent fabric scanners:** May reject `/workspace` as outside allowed roots. Do not invent `.bao` archives to satisfy them; rely on this contract’s validators (`bun run lint`) and browser proof scripts.
+
+## i18n coverage bar (2026-07-22)
+
+Raw override catalogs are validated by `validate:i18n-parity` (not merged English fallback). Critical namespaces must be 100% present; overall coverage is ratchet-floored via `scripts/i18n-coverage-floors.json`. See `docs/ssot-ledger/contract-escalation-i18n-raw.md`.

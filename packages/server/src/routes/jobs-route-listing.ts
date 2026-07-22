@@ -156,14 +156,14 @@ export const saveJob = async (jobId: string): Promise<SaveJobResult> => {
   };
 
   await db.insert(savedJobs).values(newSaved);
-  gamificationService.trackActionFireAndForget(
+  const gamification = await gamificationService.trackAction(
     "jobsSaved",
     ROUTE_GAMIFICATION_XP.jobsSaved,
     "job_saved",
   );
   return {
     status: HTTP_STATUS_CREATED,
-    body: newSaved,
+    body: { ...newSaved, gamification },
   };
 };
 
@@ -224,14 +224,14 @@ export const createApplication = async (
   };
 
   await db.insert(applications).values(newApplication);
-  gamificationService.trackActionFireAndForget(
+  const gamification = await gamificationService.trackAction(
     "jobApplications",
     ROUTE_GAMIFICATION_XP.jobApplications,
     "job_applied",
   );
   return {
     status: HTTP_STATUS_CREATED,
-    body: newApplication,
+    body: { ...newApplication, gamification },
   };
 };
 

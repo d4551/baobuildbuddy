@@ -1,10 +1,17 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import type { SpeechProviderOption } from "@bao/shared/constants/settings";
 import { settle } from "@bao/shared/utils/promise";
 import { requestApi, useClientApiRequestRuntime } from "./api-request";
 
 export type ServerSttResult =
   | { readonly ok: true; readonly text: string }
   | { readonly ok: false; readonly error: string };
+
+export type ServerSttRequestOptions = {
+  readonly provider: SpeechProviderOption;
+  readonly model: string;
+  readonly endpoint: string;
+};
 
 const blobToBase64 = async (blob: Blob): Promise<string> => {
   const buffer = await blob.arrayBuffer();
@@ -68,9 +75,12 @@ export const createMicrophoneRecorder = async (): Promise<{
 };
 
 /**
- * Uploads recorded audio to the server Whisper/STT proxy.
+ * Uploads recorded audio to the server Whisper/STT proxy with explicit provider routing.
  */
-export const transcribeAudioViaServer = async (blob: Blob): Promise<ServerSttResult> => {
+export const transcribeAudioViaServer = async (
+  blob: Blob,
+  options: ServerSttRequestOptions,
+): Promise<ServerSttResult> => {
   if (blob.size === 0) {
     return { ok: false, error: "empty audio recording" };
   }
@@ -83,6 +93,9 @@ export const transcribeAudioViaServer = async (blob: Blob): Promise<ServerSttRes
         audioBase64,
         mimeType: blob.type || "audio/webm",
         filename: blob.type.includes("wav") ? "recording.wav" : "recording.webm",
+        provider: options.provider,
+        model: options.model,
+        endpoint: options.endpoint,
       },
     }),
   );

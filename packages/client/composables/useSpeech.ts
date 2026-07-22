@@ -213,6 +213,11 @@ const createStopSpeakingAction = (state: SpeechState) => (): void => {
 const createStartListeningAction = (
   state: SpeechState,
   getProvider: () => ReturnType<typeof resolveSpeechSttProvider>,
+  getServerSttOptions: () => {
+    provider: ReturnType<typeof resolveSpeechSttProvider>;
+    model: string;
+    endpoint: string;
+  },
 ) => {
   let recorder: MicrophoneRecorder | null = null;
   const startListening = (locale?: string): boolean => {
@@ -260,9 +265,10 @@ const createStartListeningAction = (
       const markListeningStopped = (): void => {
         state.isListening.value = false;
       };
+      const sttOptions = getServerSttOptions();
       active
         .stop()
-        .then((blob) => transcribeAudioViaServer(blob))
+        .then((blob) => transcribeAudioViaServer(blob, sttOptions))
         .then(
           (result) => {
             if (result.ok) {
@@ -320,12 +326,20 @@ export function useSpeech() {
   const { settings: appSettings } = useSettings();
   const getProvider = () =>
     resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider);
+  const getServerSttOptions = () => {
+    const stt = appSettings.value?.automationSettings?.speech?.stt;
+    return {
+      provider: resolveSpeechSttProvider(stt?.provider),
+      model: stt?.model?.trim() || "",
+      endpoint: stt?.endpoint?.trim() || "",
+    };
+  };
   const state = createSpeechState();
   const loadVoices = createLoadVoicesAction(state);
   setupSpeechApis(state, loadVoices);
 
   const speechSupport = createSpeechSupportState(state, getProvider);
-  const listeningActions = createStartListeningAction(state, getProvider);
+  const listeningActions = createStartListeningAction(state, getProvider, getServerSttOptions);
   const actions = {
     speak: createSpeakAction(state),
     stopSpeaking: createStopSpeakingAction(state),

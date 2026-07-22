@@ -1,38 +1,11 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
-import type { AppTranslationSchema } from "~/locales/en-US";
+import { NAVIGATION_SECONDARY_ITEMS } from "./navigation-secondary";
+import type { NavigationItem } from "./navigation-types";
 
-type StringKeyOf<T> = Extract<keyof T, string>;
+export type { NavigationItem, NavigationLabelKey } from "./navigation-types";
 
 const PATH_SPLIT_PATTERN = /[?#]/u;
 const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;
-
-/**
- * Translation keys available for navigation labels.
- */
-type NavigationLabelKey = `nav.${StringKeyOf<AppTranslationSchema["nav"]>}`;
-
-/**
- * Shared navigation item contract for app chrome components.
- */
-export interface NavigationItem {
-  /** Stable identifier for keyed rendering and analytics events. */
-  readonly id: string;
-  /** Translation key for the human-readable navigation label. */
-  readonly labelKey: NavigationLabelKey;
-  /** Target route path. */
-  readonly to: string;
-  /** Heroicon path data used by sidebar and dock icon renderers. */
-  readonly iconPath: string;
-  /** Whether this item appears in the desktop sidebar. */
-  readonly includeInSidebar: boolean;
-  /** Whether this item appears in the mobile dock navigation. */
-  readonly includeInDock: boolean;
-  /**
-   * Extra path prefixes that light this dock item (section wayfinding).
-   * Example: ai-chat matches APP_ROUTES.aiDashboard via APP_ROUTES.ai.
-   */
-  readonly dockMatchPrefixes?: readonly string[];
-}
 
 /**
  * Canonical app navigation registry used by sidebar and dock.
@@ -166,6 +139,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     includeInSidebar: true,
     includeInDock: true,
   },
+  ...NAVIGATION_SECONDARY_ITEMS,
 ] as const;
 
 /**
@@ -290,4 +264,24 @@ export function resolveLongestMatchingSidebarNavItem(path: string): NavigationIt
   return matches.reduce((best, item) =>
     normalizeRoutePath(item.to).length > normalizeRoutePath(best.to).length ? item : best,
   );
+}
+
+/**
+ * Resolves the most specific registered nav item (primary + secondary) for breadcrumbs.
+ */
+export function resolveLongestMatchingNavItem(path: string): NavigationItem | null {
+  const matches = NAVIGATION_ITEMS.filter((item) => isRouteActive(path, item.to));
+  if (matches.length === 0) {
+    return null;
+  }
+  return matches.reduce((best, item) =>
+    normalizeRoutePath(item.to).length > normalizeRoutePath(best.to).length ? item : best,
+  );
+}
+
+/**
+ * Looks up a navigation item by stable id.
+ */
+export function findNavigationItemById(id: string): NavigationItem | null {
+  return NAVIGATION_ITEMS.find((item) => item.id === id) ?? null;
 }

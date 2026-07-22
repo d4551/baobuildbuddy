@@ -1553,6 +1553,8 @@ const catalog = {
       saved: "Empleo guardado",
       unsaved: "Empleo quitado de guardados",
       applicationSubmitted: "Solicitud enviada",
+      saveReward: "Empleo guardado (+{xp} XP)",
+      applyReward: "Solicitud enviada (+{xp} XP)",
     },
     errors: {
       saveFailed: "Error al actualizar estado del empleo guardado",

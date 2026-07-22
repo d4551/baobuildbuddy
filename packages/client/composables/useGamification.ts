@@ -9,6 +9,7 @@ import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { withLoadingState } from "./async-flow";
 import { parseAchievementList, parseDailyChallengeList } from "./gamification-entity-normalizers";
+import { readRequiredApiPayload } from "~/utils/api-response";
 
 interface GamificationState {
   progress: ReturnType<typeof useState<UserGamificationData | null>>;
@@ -46,17 +47,6 @@ const GAMIFICATION_STAT_KEYS: readonly GamificationStatKey[] = [
   "interviewsCompleted",
   "studiosExplored",
 ];
-
-const readApiData = async <T>(request: Promise<T>, fallbackMessage: string): Promise<JsonValue> => {
-  const response = await request;
-  if (!isRecord(response) || !("data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data ?? null;
-};
 
 const toNumberWithDefault = <T>(value: T, fallback: number): number =>
   typeof value === "number" ? value : fallback;
@@ -134,7 +124,7 @@ const createGamificationState = (): GamificationState => ({
 
 const createFetchProgressAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.gamification.progress.get(),
       context.t("apiErrors.gamification.fetchProgressFailed"),
     );
@@ -148,7 +138,7 @@ const createAwardXpAction =
   (context: GamificationContext, fetchProgress: () => Promise<void>) =>
   async (amount: number, reason: string) =>
     withLoadingState(context.loading, async () => {
-      await readApiData(
+      await readRequiredApiPayload(
         context.api.gamification["award-xp"].post({ amount, reason }),
         context.t("apiErrors.gamification.awardXPFailed"),
       );
@@ -157,7 +147,7 @@ const createAwardXpAction =
 
 const createFetchAchievementsAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.gamification.achievements.get(),
       context.t("apiErrors.gamification.fetchAchievementsFailed"),
     );
@@ -166,7 +156,7 @@ const createFetchAchievementsAction = (context: GamificationContext) => async ()
 
 const createFetchChallengesAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.gamification.challenges.get(),
       context.t("apiErrors.gamification.fetchChallengesFailed"),
     );
@@ -185,7 +175,7 @@ const createCompleteChallengeAction =
   ) =>
   async (id: string) =>
     withLoadingState(context.loading, async () => {
-      await readApiData(
+      await readRequiredApiPayload(
         context.api.gamification.challenges({ id }).complete.post(),
         context.t("apiErrors.gamification.completeChallengeFailed"),
       );
@@ -195,7 +185,7 @@ const createCompleteChallengeAction =
 
 const createFetchWeeklyProgressAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.gamification.weekly.get(),
       context.t("apiErrors.gamification.fetchWeeklyFailed"),
     );
@@ -204,7 +194,7 @@ const createFetchWeeklyProgressAction = (context: GamificationContext) => async 
 
 const createFetchMonthlyStatsAction = (context: GamificationContext) => async () =>
   withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.gamification.monthly.get(),
       context.t("apiErrors.gamification.fetchMonthlyFailed"),
     );

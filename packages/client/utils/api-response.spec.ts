@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import {
   hasApiResponseError,
-  readApiDataOrEmpty,
+  readRequiredApiPayload,
   requireApiResponseData,
   requireApiResponsePayload,
   unwrapApiResponsePayload,
@@ -33,7 +33,11 @@ it("requireApiResponseData returns typed data and formats errors", () => {
   ).toThrow("boom");
 });
 
-it("empty reader returns [] on error envelopes", async () => {
-  await expect(readApiDataOrEmpty(Promise.resolve({ error: "nope" }))).resolves.toEqual([]);
-  await expect(readApiDataOrEmpty(Promise.resolve({ data: [1, 2] }))).resolves.toEqual([1, 2]);
+it("readRequiredApiPayload rejects error envelopes", async () => {
+  await expect(readRequiredApiPayload(Promise.resolve({ error: "nope" }), "fallback")).rejects.toThrow(
+    "fallback",
+  );
+  await expect(readRequiredApiPayload(Promise.resolve({ data: [1, 2] }), "fallback")).resolves.toEqual([
+    1, 2,
+  ]);
 });

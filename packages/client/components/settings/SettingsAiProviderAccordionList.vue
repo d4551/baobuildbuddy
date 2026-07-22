@@ -37,6 +37,7 @@ defineProps<{
   testResults: Readonly<Record<AIProviderType, { valid: boolean; message?: string } | null>>;
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
+  keysSaveState?: "idle" | "saving" | "success" | "error";
   t: (key: string, values?: Record<string, unknown>) => string;
   providerKeyLabel: (providerId: AIProviderType) => string;
   providerPlaceholder: (providerId: AIProviderType, providerLabel: string) => string;
@@ -96,6 +97,7 @@ const emit = defineEmits<{
               type="button"
               :class="[OUTLINE_ACTION_JOIN_CLASS]"
               :aria-label="t('settings.aiProviders.testAria')"
+              :disabled="testingProvider === provider.id || keysSaveState === 'saving'"
               @click="emit('testProvider', provider.id)"
             >
               <LoadingSpinner
@@ -103,7 +105,9 @@ const emit = defineEmits<{
                 size="xs"
                 :label="t('settings.aiProviders.testButton')"
               />
-              {{ t("settings.aiProviders.testButton") }}
+              <template v-else>
+                {{ t("settings.aiProviders.testButton") }}
+              </template>
             </button>
           </div>
         </fieldset>
@@ -143,8 +147,21 @@ const emit = defineEmits<{
     </details>
 
     <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
-        {{ t("settings.aiProviders.saveButton") }}
+      <button
+        type="button"
+        :class="[PRIMARY_ACTION_CLASS]"
+        :aria-label="t('settings.aiProviders.saveAria')"
+        :disabled="keysSaveState === 'saving'"
+        @click="emit('saveKeys')"
+      >
+        <LoadingSpinner
+          v-if="keysSaveState === 'saving'"
+          size="xs"
+          :label="t('settings.saveState.saving')"
+        />
+        <template v-else>
+          {{ t("settings.aiProviders.saveButton") }}
+        </template>
       </button>
     </div>
   </div>

@@ -5,6 +5,7 @@ definePageMeta({
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const page = useAutomationJobApplyPage();
@@ -26,6 +27,15 @@ useSeoMeta({
     />
 
     <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="5" />
+
+    <BootstrapErrorAlert
+      v-else-if="page.bootstrapError.value"
+      :title="t('automation.jobApply.bootstrapError')"
+      :message="getErrorMessage(page.bootstrapError.value, t('automation.jobApply.bootstrapError'))"
+      :retry-label="t('automation.jobApply.bootstrapRetry')"
+      :retry-aria-label="t('automation.jobApply.bootstrapRetryAria')"
+      @retry="page.refreshBootstrap()"
+    />
 
     <EmptyState
       v-else-if="!hasResumes"

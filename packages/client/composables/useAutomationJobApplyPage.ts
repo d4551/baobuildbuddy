@@ -210,7 +210,7 @@ export function useAutomationJobApplyPage() {
   const form = useAutomationJobApplyForm();
   const bootstrap = useAutomationJobApplyBootstrap({
     api: dependencies.api,
-    runtime: dependencies.runtime,
+    t: dependencies.t,
   });
   const state = createAutomationJobApplyState(dependencies.runStream);
   const presentation = createAutomationJobApplyPresentation({
@@ -248,6 +248,7 @@ export function useAutomationJobApplyPage() {
 
   return {
     activeRunId: state.activeRunId,
+    bootstrapError: bootstrap.bootstrapError,
     bootstrapPending: bootstrap.bootstrapPending,
     coverLetterId: form.coverLetterId,
     coverLettersData: bootstrap.coverLettersData,
@@ -257,6 +258,7 @@ export function useAutomationJobApplyPage() {
     jobId: form.jobId,
     jobUrl: form.jobUrl,
     pending: state.pending,
+    refreshBootstrap: bootstrap.refreshBootstrap,
     resolveScheduledRunAt,
     resumeId: form.resumeId,
     resumesData: bootstrap.resumesData,

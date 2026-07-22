@@ -21,6 +21,9 @@ export type SpeechTranscribeInput = {
   readonly audioBase64: string;
   readonly mimeType: string;
   readonly filename?: string;
+  readonly provider?: string;
+  readonly model?: string;
+  readonly endpoint?: string;
 };
 
 export type SpeechTranscribeResult =
@@ -32,12 +35,16 @@ export type SpeechTranscribeResult =
     }
   | { readonly ok: false; readonly error: string; readonly status: 400 | 422 | 502 };
 
-const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
-  "local",
-  "openai",
-  "huggingface",
-  "custom",
-]);
+const SERVER_STT_PROVIDERS = ["local", "openai", "huggingface", "custom"] as const satisfies readonly SpeechProviderOption[];
+
+const resolveServerSttProvider = (value: string): SpeechProviderOption | null => {
+  for (const option of SERVER_STT_PROVIDERS) {
+    if (option === value) {
+      return option;
+    }
+  }
+  return null;
+};
 
 const BASE64_PAYLOAD_RE = /^[A-Za-z0-9+/]+=*$/;
 
@@ -164,13 +171,14 @@ export const transcribeSpeechAudio = async (
   input: SpeechTranscribeInput,
 ): Promise<SpeechTranscribeResult> => {
   const automation = await loadAutomationSettings();
-  const provider = automation.speech.stt.provider;
-  const model = automation.speech.stt.model;
-  const endpoint = automation.speech.stt.endpoint;
-
-  if (!SERVER_STT_PROVIDERS.has(provider)) {
+  const provider = resolveServerSttProvider(
+    input.provider?.trim() || automation.speech.stt.provider,
+  );
+  if (!provider) {
     return { ok: false, error: API_ERROR_SPEECH_STT_NOT_CONFIGURED, status: 422 };
   }
+  const model = input.model?.trim() || automation.speech.stt.model;
+  const endpoint = input.endpoint?.trim() || automation.speech.stt.endpoint;
 
   const bytes = decodeAudio(input.audioBase64);
   if (!bytes || bytes.byteLength === 0) {

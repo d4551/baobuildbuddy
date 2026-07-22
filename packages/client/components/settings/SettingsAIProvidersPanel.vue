@@ -60,6 +60,8 @@ const props = defineProps<{
   testResults: Readonly<Record<AIProviderType, { valid: boolean; message?: string } | null>>;
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
+  providerKeysSaveState?: "idle" | "saving" | "success" | "error";
+  providerRoutingSaveState?: "idle" | "saving" | "success" | "error";
 }>();
 
 const emit = defineEmits<{
@@ -259,8 +261,14 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
               <button type="button" 
                 :class="[PRIMARY_ACTION_CLASS]"
                 :aria-label="t('settings.aiProviders.preferredProviderAria')"
+                :disabled="props.providerRoutingSaveState === 'saving'"
                 @click="emit('savePreferredProvider')"
               >
+                <LoadingSpinner
+                  v-if="props.providerRoutingSaveState === 'saving'"
+                  size="xs"
+                  :label="t('settings.saveState.saving')"
+                />
                 {{ t("settings.aiProviders.preferredProviderSaveButton") }}
               </button>
             </div>
@@ -294,6 +302,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             :test-results="props.testResults"
             :testing-provider="props.testingProvider"
             :show-ollama-hot-tip="props.showOllamaHotTip"
+            :keys-save-state="props.providerKeysSaveState ?? 'idle'"
             :t="t"
             :provider-key-label="providerKeyLabel"
             :provider-placeholder="providerPlaceholder"

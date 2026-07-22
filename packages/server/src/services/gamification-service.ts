@@ -199,7 +199,7 @@ export class GamificationService {
     statKey: keyof GamificationStats,
     xpAmount: number,
     reason: string,
-  ): Promise<void> {
+  ): Promise<{ readonly xpAwarded: number; readonly reason: string }> {
     const progress = await this.getProgress();
     const currentStats = toNumericStats(progress.stats);
     const updatedStats: Partial<GamificationStats> = {
@@ -216,6 +216,7 @@ export class GamificationService {
 
     await this.awardXP(xpAmount, reason);
     await this.checkAchievements(updatedStats);
+    return { xpAwarded: xpAmount, reason };
   }
 
   trackActionFireAndForget(

@@ -1,9 +1,13 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
-import { normalizeRoutePath, resolveLongestMatchingSidebarNavItem } from "~/constants/navigation";
+import {
+  findNavigationItemById,
+  normalizeRoutePath,
+  resolveLongestMatchingNavItem,
+} from "~/constants/navigation";
 
 /**
- * Section breadcrumbs for the app navbar (Dashboard → current area), driven by `NAVIGATION_ITEMS`.
+ * Section breadcrumbs for the app navbar (Dashboard → section → workflow), driven by `NAVIGATION_ITEMS`.
  */
 export function useNavbarBreadcrumbs() {
   const route = useRoute();
@@ -15,22 +19,31 @@ export function useNavbarBreadcrumbs() {
       return [{ label: t("nav.dashboard") }] as const;
     }
 
-    const section = resolveLongestMatchingSidebarNavItem(route.path);
-    if (!section) {
+    const match = resolveLongestMatchingNavItem(route.path);
+    if (!match) {
       return [
         { label: t("nav.dashboard"), to: APP_ROUTES.dashboard },
         { label: t("nav.breadcrumbUnknown") },
       ] as const;
     }
 
-    if (normalizeRoutePath(section.to) === "/") {
+    if (normalizeRoutePath(match.to) === "/") {
       return [{ label: t("nav.dashboard") }] as const;
     }
 
-    return [
+    const crumbs: Array<{ label: string; to?: string }> = [
       { label: t("nav.dashboard"), to: APP_ROUTES.dashboard },
-      { label: t(section.labelKey) },
-    ] as const;
+    ];
+
+    if (match.parentId) {
+      const parent = findNavigationItemById(match.parentId);
+      if (parent) {
+        crumbs.push({ label: t(parent.labelKey), to: parent.to });
+      }
+    }
+
+    crumbs.push({ label: t(match.labelKey) });
+    return crumbs;
   });
 
   return { navbarBreadcrumbs };

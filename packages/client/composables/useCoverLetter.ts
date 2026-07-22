@@ -4,6 +4,7 @@ import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type { ClientApi } from "~/types/client-api";
+import { readRequiredApiPayload } from "~/utils/api-response";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
   type ClientApiRequestRuntime,
@@ -51,23 +52,6 @@ interface CoverLetterContext {
   currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
 }
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    throw new Error(fallbackMessage);
-  }
-  if (isRecord(response) && "error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  if (isRecord(response) && "data" in response) {
-    return response.data;
-  }
-  return response;
-};
-
 const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
   if (!isRecord(value)) {
     return null;
@@ -107,7 +91,7 @@ const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult 
 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].get(),
     context.t("coverLetterPage.toasts.fetchFailed"),
   );
@@ -124,7 +108,7 @@ async function getCoverLetter(
   id: string,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"]({ id }).get(),
     context.t("coverLetterDetailPage.toasts.loadFailed"),
   );
@@ -145,7 +129,7 @@ async function createCoverLetter(
   letterData: CreateCoverLetterInput,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].post(letterData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
@@ -167,7 +151,7 @@ async function updateCoverLetter(
   updates: UpdateCoverLetterInput,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"]({ id }).put(updates),
     context.t("coverLetterDetailPage.toasts.saveFailed"),
   );
@@ -201,7 +185,7 @@ async function generateCoverLetter(
   generationData: GenerateCoverLetterInput,
 ): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].generate.post(generationData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );

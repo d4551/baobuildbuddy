@@ -14,6 +14,7 @@ import {
   useClientApiRequestRuntime,
 } from "./api-request";
 import { assertApiResponse, withLoadingState } from "./async-flow";
+import { readRequiredApiPayload } from "~/utils/api-response";
 
 type ApiClient = ReturnType<typeof useApi>;
 type UpdatePortfolioPayload = NonNullable<Parameters<ApiClient["portfolio"]["put"]>[0]>;
@@ -30,20 +31,6 @@ interface PortfolioContext {
   runtime: ClientApiRequestRuntime;
 }
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data;
-};
-
 function hydratePortfolio(context: PortfolioContext, next: PortfolioData | null): void {
   context.portfolio.value = next;
   context.projects.value = next && Array.isArray(next.projects) ? next.projects : [];
@@ -51,7 +38,7 @@ function hydratePortfolio(context: PortfolioContext, next: PortfolioData | null)
 
 async function fetchPortfolio(context: PortfolioContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.portfolio.get(),
       context.t("apiErrors.portfolio.fetchFailed"),
     );
@@ -65,7 +52,7 @@ async function updatePortfolio(
 ): Promise<PortfolioData | null> {
   return withLoadingState(context.loading, async () => {
     const payload: UpdatePortfolioPayload = { metadata: updates };
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.portfolio.put(payload),
       context.t("apiErrors.portfolio.updateFailed"),
     );
@@ -80,7 +67,7 @@ async function addProject(
   projectData: CreateProjectPayload,
 ): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    await readApiData(
+    await readRequiredApiPayload(
       context.api.portfolio.projects.post(projectData),
       context.t("apiErrors.portfolio.addProjectFailed"),
     );
@@ -94,7 +81,7 @@ async function updateProject(
   updates: UpdateProjectPayload,
 ): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    await readApiData(
+    await readRequiredApiPayload(
       context.api.portfolio.projects({ id }).put(updates),
       context.t("apiErrors.portfolio.updateProjectFailed"),
     );
@@ -112,7 +99,7 @@ async function deleteProject(context: PortfolioContext, id: string): Promise<voi
 
 async function reorderProjects(context: PortfolioContext, orderedIds: string[]): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.portfolio.projects.reorder.post({ orderedIds }),
       context.t("apiErrors.portfolio.reorderFailed"),
     );

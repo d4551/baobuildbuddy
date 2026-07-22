@@ -2,7 +2,7 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
-import { requireApiResponsePayload } from "~/utils/api-response";
+import { readRequiredApiPayload } from "~/utils/api-response";
 import { toJob } from "./api-normalizer-jobs";
 import { withLoadingState } from "./async-flow";
 
@@ -22,14 +22,6 @@ interface JobsContext {
   filters: ReturnType<typeof useState<Record<string, string>>>;
 }
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  return requireApiResponsePayload(response, fallbackMessage);
-};
-
 async function searchJobs(
   context: JobsContext,
   searchFilters?: Record<string, string>,
@@ -38,7 +30,7 @@ async function searchJobs(
     if (searchFilters) {
       context.filters.value = searchFilters;
     }
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.get({ query: context.filters.value }),
       context.t("apiErrors.jobs.searchFailed"),
     );
@@ -49,7 +41,7 @@ async function searchJobs(
 
 async function getJob(context: JobsContext, id: string): Promise<Job | null> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs({ id }).get(),
       context.t("apiErrors.jobs.fetchFailed"),
     );
@@ -59,7 +51,7 @@ async function getJob(context: JobsContext, id: string): Promise<Job | null> {
 
 async function fetchSavedJobs(context: JobsContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.saved.get(),
       context.t("apiErrors.jobs.fetchSavedFailed"),
     );
@@ -84,7 +76,7 @@ async function fetchSavedJobs(context: JobsContext): Promise<void> {
 
 async function saveJob(context: JobsContext, jobId: string): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.save.post({ jobId }),
       context.t("apiErrors.jobs.saveFailed"),
     );
@@ -96,14 +88,14 @@ async function saveJob(context: JobsContext, jobId: string): Promise<unknown> {
 async function unsaveJob(context: JobsContext, jobId: string): Promise<void> {
   return withLoadingState(context.loading, async () => {
     const jobSaveRoute = context.api.jobs.save({ jobId });
-    await readApiData(jobSaveRoute.delete(), context.t("apiErrors.jobs.unsaveFailed"));
+    await readRequiredApiPayload(jobSaveRoute.delete(), context.t("apiErrors.jobs.unsaveFailed"));
     await fetchSavedJobs(context);
   });
 }
 
 async function fetchApplications(context: JobsContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.applications.get(),
       context.t("apiErrors.jobs.fetchApplicationsFailed"),
     );
@@ -128,7 +120,7 @@ async function fetchApplications(context: JobsContext): Promise<void> {
 
 async function applyToJob(context: JobsContext, jobId: string, notes?: string): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.apply.post({ jobId, notes }),
       context.t("apiErrors.jobs.applyFailed"),
     );
@@ -144,7 +136,7 @@ async function updateApplication(
 ): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
     const applicationRoute = context.api.jobs.apply({ id });
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       applicationRoute.put({ status }),
       context.t("apiErrors.jobs.updateApplicationFailed"),
     );
@@ -155,7 +147,7 @@ async function updateApplication(
 
 async function refreshJobs(context: JobsContext): Promise<unknown> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.refresh.post(),
       context.t("apiErrors.jobs.refreshFailed"),
     );
@@ -166,7 +158,7 @@ async function refreshJobs(context: JobsContext): Promise<unknown> {
 
 async function fetchRecommendations(context: JobsContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.jobs.recommendations.get(),
       context.t("apiErrors.jobs.fetchRecommendationsFailed"),
     );

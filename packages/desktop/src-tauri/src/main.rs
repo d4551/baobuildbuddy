@@ -1,12 +1,17 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod process_manager;
+mod service_ready;
+use process_manager::ProcessManager;
+
+use service_ready::{are_services_ready, is_service_ready_with_address, wait_for_service_port, wait_for_service_port_or_process_exit, wait_for_services, ServiceEndpoints};
+
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
-use std::net::TcpStream;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -21,62 +26,13 @@ const DEFAULT_HOST: &str = "127.0.0.1";
 const DEFAULT_SERVER_PORT: u16 = 3000;
 const DEFAULT_CLIENT_PORT: u16 = 3001;
 const DEFAULT_BOOTSTRAP_COMMAND: &str = "bun";
-const READY_TIMEOUT_SECONDS: u64 = 120;
 const RUNTIME_MANIFEST_RESOURCE_PATH: &str = "gen/runtime/manifest.json";
 const STARTUP_LOG_DIRECTORY_NAME: &str = "BaoBuildBuddy";
 const STARTUP_LOG_FILE_NAME: &str = "desktop-startup.log";
 #[cfg(target_os = "windows")]
 const WINDOWS_WEBVIEW2_APP_GUID: &str = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}";
-const WINDOWS_BAD_IMAGE_FORMAT_EXIT_CODE: i32 = -1073741701;
 #[cfg(target_os = "windows")]
 const WINDOWS_CREATE_NO_WINDOW_FLAG: u32 = 0x08000000;
-const WINDOWS_DLL_NOT_FOUND_EXIT_CODE: i32 = -1073741515;
-const WINDOWS_ILLEGAL_INSTRUCTION_EXIT_CODE: i32 = -1073741795;
-
-#[derive(Default)]
-struct ProcessManager {
-    child: Arc<Mutex<Option<Child>>>,
-}
-
-impl ProcessManager {
-    pub fn set_child(&self, child: Child) {
-        let mut guard = match self.child.lock() {
-            Ok(guard) => guard,
-            Err(error) => {
-                eprintln!("Unable to track local stack process: {error}");
-                return;
-            }
-        };
-
-        *guard = Some(child);
-    }
-
-    pub fn shutdown(&self) {
-        let Some(mut child) = self.take_child() else {
-            return;
-        };
-
-        if let Err(error) = child.kill() {
-            if error.kind() != io::ErrorKind::InvalidInput {
-                eprintln!("Failed to stop stack process: {error}");
-            }
-        }
-
-        let _ = child.wait();
-    }
-
-    fn take_child(&self) -> Option<Child> {
-        let mut guard = match self.child.lock() {
-            Ok(guard) => guard,
-            Err(error) => {
-                eprintln!("Unable to access local stack process handle: {error}");
-                return None;
-            }
-        };
-
-        guard.take()
-    }
-}
 
 #[derive(Default)]
 struct StackStartup {
@@ -95,6 +51,21 @@ impl StackStartup {
         }
     }
 }
+
+impl ServiceEndpoints for StackStartup {
+    fn host(&self) -> &str {
+        self.host.as_str()
+    }
+
+    fn server_port(&self) -> u16 {
+        self.server_port
+    }
+
+    fn client_port(&self) -> u16 {
+        self.client_port
+    }
+}
+
 
 #[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -644,13 +615,20 @@ fn launch_packaged_server(runtime: &PackagedRuntime) -> io::Result<Child> {
         .env("PORT", runtime.manifest.server_port.to_string())
         .env("HOST", runtime.manifest.server_host.as_str())
         .env("NODE_ENV", "production")
-        .env("BAO_DISABLE_AUTH", "true")
         .env("BAO_SCRIPT_RUNNER_PATH", script_runner_path)
         .env("BAO_SCRAPER_DIR", scraper_dir)
         .env("CORS_ORIGINS", runtime.manifest.cors_origins.join(","))
         .stdin(Stdio::null())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit());
+
+    // Auth stays enabled by default for packaged desktop. Opt out only via explicit env.
+    if let Ok(auth_override) = std::env::var("BAO_DISABLE_AUTH") {
+        command.env("BAO_DISABLE_AUTH", auth_override);
+    }
+    if let Ok(setup_token) = std::env::var("BAO_AUTH_SETUP_TOKEN") {
+        command.env("BAO_AUTH_SETUP_TOKEN", setup_token);
+    }
 
     if let Some(script_runner_entrypoint) = runtime.manifest.script_runner_entrypoint.as_ref() {
         command.env(
@@ -663,103 +641,11 @@ fn launch_packaged_server(runtime: &PackagedRuntime) -> io::Result<Child> {
     command.spawn()
 }
 
-fn wait_for_services(startup: &StackStartup) -> io::Result<()> {
-    wait_for_service_port(startup.host.as_str(), startup.server_port)?;
-    wait_for_service_port(startup.host.as_str(), startup.client_port)
-}
-
-fn are_services_ready(startup: &StackStartup) -> bool {
-    is_service_ready_with_address(startup.host.as_str(), startup.server_port)
-        && is_service_ready_with_address(startup.host.as_str(), startup.client_port)
-}
-
-fn wait_for_service_port(host: &str, port: u16) -> io::Result<()> {
-    let end_time = Instant::now() + Duration::from_secs(READY_TIMEOUT_SECONDS);
-
-    while Instant::now() < end_time {
-        if is_service_ready_with_address(host, port) {
-            return Ok(());
-        }
-
-        std::thread::sleep(Duration::from_millis(250));
-    }
-
-    Err(io::Error::new(
-        io::ErrorKind::TimedOut,
-        format!("Timed out waiting for service on {host}:{port}"),
-    ))
-}
-
-fn wait_for_service_port_or_process_exit(
-    host: &str,
-    port: u16,
-    child: &mut Child,
-) -> io::Result<()> {
-    let end_time = Instant::now() + Duration::from_secs(READY_TIMEOUT_SECONDS);
-
-    while Instant::now() < end_time {
-        if is_service_ready_with_address(host, port) {
-            return Ok(());
-        }
-
-        if let Some(status) = child.try_wait()? {
-            let status_message = format_exit_status(&status);
-            let exit_hint = format_exit_hint(&status);
-            return Err(io::Error::new(
-                io::ErrorKind::BrokenPipe,
-                format!(
-                    "Bundled desktop server exited before opening {host}:{port} with {}{}",
-                    status_message, exit_hint,
-                ),
-            ));
-        }
-
-        std::thread::sleep(Duration::from_millis(250));
-    }
-
-    Err(io::Error::new(
-        io::ErrorKind::TimedOut,
-        format!("Timed out waiting for service on {host}:{port}"),
-    ))
-}
-
-fn is_service_ready_with_address(host: &str, port: u16) -> bool {
-    match TcpStream::connect(format!("{host}:{port}")) {
-        Ok(stream) => {
-            drop(stream);
-            true
-        }
-        Err(_) => false,
-    }
-}
-
 fn format_exit_status(status: &ExitStatus) -> String {
     match status.code() {
         Some(code) => format!("status code {code}"),
         None => "an unknown termination signal".to_string(),
     }
-}
-
-fn format_exit_hint(status: &ExitStatus) -> String {
-    match status.code().and_then(windows_exit_hint) {
-        Some(hint) => format!(". {hint}"),
-        None => String::new(),
-    }
-}
-
-fn windows_exit_hint(code: i32) -> Option<&'static str> {
-    match code {
-    WINDOWS_BAD_IMAGE_FORMAT_EXIT_CODE => Some(
-      "Windows reported an invalid image format. This usually points to an architecture mismatch or a corrupted dependency.",
-    ),
-    WINDOWS_DLL_NOT_FOUND_EXIT_CODE => Some(
-      "Windows reported a missing runtime dependency. Antivirus or a blocked system dependency can cause this.",
-    ),
-    WINDOWS_ILLEGAL_INSTRUCTION_EXIT_CODE => Some(
-      "Windows reported an illegal instruction. This usually means the bundled runtime required CPU features the machine does not support.",
-    ),
-    _ => None,
-  }
 }
 
 fn configure_background_process(command: &mut Command) {

@@ -91,6 +91,8 @@ export function createSettingsPageProviderRuntimeState() {
       huggingface: null,
     }),
     testingProvider: ref<AIProviderType | null>(null),
+    providerKeysSaveState: ref<SaveState>("idle"),
+    providerRoutingSaveState: ref<SaveState>("idle"),
     preferencesLanguage: ref<AppLanguageCode>(DEFAULT_APP_LANGUAGE),
     preferredProviderSelection: ref<AIProviderType>(AI_PROVIDER_DEFAULT),
     emailTransportPasswordDraft: ref(""),
