@@ -2,6 +2,7 @@
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesStudiosIndexPage" });
 
 definePageMeta({

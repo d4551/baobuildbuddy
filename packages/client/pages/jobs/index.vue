@@ -2,6 +2,7 @@
 import {
   UI_STAGGER_INDEX_MAX,
 } from "~/constants/numeric-ui";
+
 const NUM_4 = 4;
 defineOptions({ name: "PagesJobsIndexPage" });
 

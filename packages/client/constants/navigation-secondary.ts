@@ -114,5 +114,4 @@ export const NAVIGATION_SECONDARY_ITEMS: readonly NavigationItem[] = [
     includeInDock: false,
     parentId: "automation",
   },
-
 ] as const;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
@@ -8,6 +9,7 @@ import { useI18n } from "vue-i18n";
 import { definePageMeta, useSeoMeta } from "#imports";
 
 definePageMeta({
+  path: APP_ROUTES.apiDocs,
   middleware: ["auth"],
 });
 const { t } = useI18n();

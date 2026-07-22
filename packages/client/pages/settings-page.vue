@@ -1,16 +1,18 @@
 <script setup lang="ts">
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesSettingsPage" });
 
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
+  path: APP_ROUTES.settings,
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSeoMeta } from "#imports";

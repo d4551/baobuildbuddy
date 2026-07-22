@@ -26,6 +26,10 @@ const ALLOWLIST_PATH = "scripts/route-nav-coverage-allowlist.json";
 
 const DYNAMIC_SEGMENT_PATTERN = /\[([a-zA-Z0-9_-]+)\]/u;
 const REDIRECT_PATTERN = /definePageMeta\s*\(\s*\{[^}]*redirect\b/su;
+/** Canonical URL override from definePageMeta({ path }) — wins over filename route. */
+const PAGE_META_PATH_LITERAL_PATTERN = /\bpath\s*:\s*["']([^"']+)["']/u;
+const PAGE_META_PATH_APP_ROUTES_PATTERN =
+  /\bpath\s*:\s*(?:APP_ROUTES|APP_ROUTE_PATHS)\.(\w+)/u;
 const TO_PATTERN = /to:\s*APP_ROUTES\.(\w+)/gu;
 const VUE_EXTENSION_PATTERN = /\.vue$/u;
 const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;
@@ -94,12 +98,24 @@ const collectPageRoutes = async (): Promise<
       }
       return segment;
     });
-    const route = `/${segments.filter((s) => s.length > 0).join("/")}`;
+    const fileDerivedRoute = `/${segments.filter((s) => s.length > 0).join("/")}`;
+    const content = readFileSync(resolve(process.cwd(), normalized), "utf-8");
+    const literalPath = PAGE_META_PATH_LITERAL_PATTERN.exec(content)?.[1];
+    const appRouteKey = PAGE_META_PATH_APP_ROUTES_PATTERN.exec(content)?.[1];
+    let pathOverride: string | undefined;
+    if (appRouteKey && appRouteKey in APP_ROUTES) {
+      const appRoutePath = APP_ROUTES[appRouteKey as keyof typeof APP_ROUTES];
+      if (typeof appRoutePath === "string" && appRoutePath.length > 0) {
+        pathOverride = appRoutePath;
+      }
+    } else if (literalPath && literalPath.length > 0) {
+      pathOverride = literalPath;
+    }
+    const route = pathOverride ?? fileDerivedRoute;
     const normalizedRoute =
       route === "/"
         ? "/"
         : route.replace(MULTIPLE_SLASH_PATTERN, "/").replace(TRAILING_SLASH_PATTERN, "");
-    const content = readFileSync(resolve(process.cwd(), normalized), "utf-8");
     const isRedirect = REDIRECT_PATTERN.test(content);
     const isDynamic = DYNAMIC_SEGMENT_PATTERN.test(relative);
     return { filePath: normalized, route: normalizedRoute, isRedirect, isDynamic };

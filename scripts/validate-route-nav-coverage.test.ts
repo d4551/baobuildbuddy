@@ -52,7 +52,7 @@ describe("findOrphanRoutes: orphan detection", () => {
   test("allows a route in the allowlist", () => {
     const pages = [
       {
-        filePath: "packages/client/pages/setup.vue",
+        filePath: "packages/client/pages/setup-wizard.vue",
         route: "/setup",
         isRedirect: false,
         isDynamic: false,
@@ -67,7 +67,7 @@ describe("findOrphanRoutes: child route coverage", () => {
   test("rejects parent-prefix-only coverage for static child routes (HARDENED)", () => {
     const pages = [
       {
-        filePath: "packages/client/pages/resume/build.vue",
+        filePath: "packages/client/pages/resume/build-page.vue",
         route: "/resume/build",
         isRedirect: false,
         isDynamic: false,
@@ -82,7 +82,7 @@ describe("findOrphanRoutes: child route coverage", () => {
   test("allows exact secondary nav registration for child routes", () => {
     const pages = [
       {
-        filePath: "packages/client/pages/resume/build.vue",
+        filePath: "packages/client/pages/resume/build-page.vue",
         route: "/resume/build",
         isRedirect: false,
         isDynamic: false,

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 defineOptions({ name: "PagesResumePreviewPage" });
 
 import {
@@ -10,10 +11,10 @@ import {
 } from "~/constants/layout";
 
 definePageMeta({
+  path: APP_ROUTES.resumePreview,
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";

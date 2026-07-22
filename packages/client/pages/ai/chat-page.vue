@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+
 defineOptions({ name: "PagesAiChatPage" });
 
 import { useI18n } from "vue-i18n";
 
 definePageMeta({
+  path: APP_ROUTES.aiChat,
   middleware: ["auth"],
 });
 const { t } = useI18n();

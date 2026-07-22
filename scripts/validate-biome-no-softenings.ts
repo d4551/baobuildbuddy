@@ -10,8 +10,8 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 /**
  * Biome softener gate — zero-tolerance for severity demotions or disabled rules.
  *
- * Binding contract (no allowlist, no "tooling gap" excuse):
- * - "off" forbidden everywhere.
+ * Binding contract (zero softeners — no allowlist, no "tooling gap" excuse):
+ * - "off" forbidden everywhere (root and overrides).
  * - "warn" forbidden everywhere.
  * - "info" forbidden everywhere. Use "error" or delete the rule.
  * - linter.enabled=false forbidden at root and in overrides.
@@ -25,6 +25,9 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
  * in validate-biome-no-softenings.test.ts. Adding them back at any severity below
  * "error" is a softener. Adding them at "error" without the upstream fix is a
  * false-positive generator and also rejected.
+ *
+ * Nuxt reserved filenames use useVueMultiWordComponentNames.options.ignores
+ * (rule stays error). Magic numbers stay error in constants — extract named consts.
  */
 
 const BIOME_CONFIG_PATH = "biome.json";
@@ -179,61 +182,6 @@ const validateRulesRatchet = (
   });
 };
 
-/**
- * Constant-definition files are the SSOT owners of numeric literals.
- * noMagicNumbers must stay "error" everywhere else; only these globs may mute it.
- * Contract: docs/STACK-CONTRACT.md + scripts/docs/biome-tailwind-incompatibility.md
- */
-const MAGIC_NUMBER_DEFINITION_GLOBS = new Set([
-  "**/constants/**",
-  "packages/client/constants/**",
-  "packages/shared/src/constants/**",
-]);
-
-/**
- * Nuxt route/layout filenames are single-segment by router contract; Biome keys
- * filenames (not defineOptions). Scoped mute only — see
- * docs/ssot-ledger/cycle-2026-07-22/contract-escalation-vue-multiword-nuxt-routes.md
- */
-const NUXT_ROUTE_FILE_GLOBS = new Set([
-  "packages/client/pages/**/*.vue",
-  "packages/client/layouts/**/*.vue",
-  "packages/client/error.vue",
-]);
-
-const isSingleStyleRuleOffOverride = (
-  override: { [key: string]: JsonValue },
-  allowedGlobs: Set<string>,
-  ruleName: string,
-): boolean => {
-  const includes = override.includes;
-  if (!Array.isArray(includes) || includes.length === 0) {
-    return false;
-  }
-  if (!includes.every((entry) => typeof entry === "string" && allowedGlobs.has(entry))) {
-    return false;
-  }
-  const rules = isRecord(override.linter) ? override.linter.rules : null;
-  if (!isRecord(rules) || !isRecord(rules.style)) {
-    return false;
-  }
-  const styleKeys = Object.keys(rules.style);
-  if (styleKeys.length !== 1 || styleKeys[0] !== ruleName) {
-    return false;
-  }
-  if (rules.style[ruleName] !== "off") {
-    return false;
-  }
-  const ruleGroups = Object.keys(rules);
-  return ruleGroups.length === 1 && ruleGroups[0] === "style";
-};
-
-const isMagicNumberDefinitionOverride = (override: { [key: string]: JsonValue }): boolean =>
-  isSingleStyleRuleOffOverride(override, MAGIC_NUMBER_DEFINITION_GLOBS, "noMagicNumbers");
-
-const isNuxtRouteMultiWordOverride = (override: { [key: string]: JsonValue }): boolean =>
-  isSingleStyleRuleOffOverride(override, NUXT_ROUTE_FILE_GLOBS, "useVueMultiWordComponentNames");
-
 const validateOverrides = (overrides: JsonValue, violations: ValidationViolation[]): void => {
   if (!Array.isArray(overrides)) {
     pushViolation(violations, "biome.json overrides must be an array.");
@@ -242,9 +190,6 @@ const validateOverrides = (overrides: JsonValue, violations: ValidationViolation
   for (const [index, override] of overrides.entries()) {
     if (!isRecord(override)) {
       pushViolation(violations, `overrides[${index}] must be an object.`);
-      continue;
-    }
-    if (isMagicNumberDefinitionOverride(override) || isNuxtRouteMultiWordOverride(override)) {
       continue;
     }
     const overrideLinter = override.linter;

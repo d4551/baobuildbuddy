@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 const NUM_3 = 3;
 defineOptions({ name: "PagesSetupPage" });
 
@@ -10,6 +12,7 @@ import { FLUID_WIDTH_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
+  path: APP_ROUTES.setup,
   layout: "auth-shell",
 });
 

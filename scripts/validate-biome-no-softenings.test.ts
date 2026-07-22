@@ -28,17 +28,25 @@ describe("collectBiomeSofteningViolationsForContent: repo biome.json is fully ha
     expect(violations).toHaveLength(0);
   });
 
-  test("repo biome.json contains no info/warn; off only in allowlisted overrides", () => {
+  test("repo biome.json contains zero info/warn/off softeners", () => {
     expect(VALID_BIOME.includes(': "info"')).toBe(false);
     expect(VALID_BIOME.includes(': "warn"')).toBe(false);
     expect(VALID_BIOME.includes('"level": "info"')).toBe(false);
     expect(VALID_BIOME.includes('"level": "warn"')).toBe(false);
     expect(VALID_BIOME.includes('"level": "off"')).toBe(false);
-    // Allowlisted offs: constants noMagicNumbers + Nuxt route multi-word (filename SSOT).
-    expect(VALID_BIOME.includes('"noMagicNumbers": "off"')).toBe(true);
-    expect(VALID_BIOME.includes('"useVueMultiWordComponentNames": "off"')).toBe(true);
+    expect(VALID_BIOME.includes('"noMagicNumbers": "off"')).toBe(false);
+    expect(VALID_BIOME.includes('"useVueMultiWordComponentNames": "off"')).toBe(false);
     const offMatches = VALID_BIOME.match(/: "off"/g) ?? [];
-    expect(offMatches).toHaveLength(2);
+    expect(offMatches).toHaveLength(0);
+  });
+
+  test("repo biome.json keeps multiword at error with Nuxt-reserved ignores only", () => {
+    expect(VALID_BIOME.includes('"useVueMultiWordComponentNames"')).toBe(true);
+    expect(VALID_BIOME.includes('"ignores"')).toBe(true);
+    expect(VALID_BIOME.includes('"index"')).toBe(true);
+    expect(VALID_BIOME.includes('"default"')).toBe(true);
+    expect(VALID_BIOME.includes('"error"')).toBe(true);
+    expect(VALID_BIOME.includes('"[id]"')).toBe(true);
   });
 
   test("repo biome.json enables html.experimentalFullSupportEnabled", () => {
@@ -141,8 +149,8 @@ describe("collectBiomeSofteningViolationsForContent: flags noUnusedImports demot
 describe("collectBiomeSofteningViolationsForContent: flags vue and complexity demotions", () => {
   test("flags useVueMultiWordComponentNames info demotion (zero info allowlist)", () => {
     const sample = VALID_BIOME.replaceAll(
-      '"useVueMultiWordComponentNames": "error"',
-      '"useVueMultiWordComponentNames": "info"',
+      '"useVueMultiWordComponentNames": {\n          "level": "error"',
+      '"useVueMultiWordComponentNames": {\n          "level": "info"',
     );
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("useVueMultiWordComponentNames"))).toBe(true);

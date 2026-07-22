@@ -2,9 +2,10 @@
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesAutomationScraperPage" });
 
-import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { APP_ROUTES as APP_ROUTE_PATHS, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
@@ -18,6 +19,7 @@ import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/
 import { resolveRouteSectionId } from "~/utils/route-query";
 
 definePageMeta({
+  path: APP_ROUTE_PATHS.automationScraper,
   middleware: ["auth"],
 });
 

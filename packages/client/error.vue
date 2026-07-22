@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+
 const props = defineProps<{
   error: {
     statusCode?: number;

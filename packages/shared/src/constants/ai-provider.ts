@@ -1,5 +1,13 @@
 import type { AIProviderType, AIRouting, AIRoutingPurpose, AIRoutingTarget } from "../types/ai";
 import { AI_PROVIDER_IDS, AI_ROUTING_PURPOSE_IDS } from "../types/ai";
+import {
+  HTTP_STATUS_MULTIPLE_CHOICES,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
+} from "./http";
+
+const isHttpSuccessStatus = (status: number): boolean =>
+  status >= HTTP_STATUS_OK && status < HTTP_STATUS_MULTIPLE_CHOICES;
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
 const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
@@ -103,7 +111,7 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
     buildUrl: (apiKey: string): string =>
       `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
     buildInit: () => ({ method: "GET" as const }),
-    isSuccess: (status: number) => status >= 200 && status < 300,
+    isSuccess: isHttpSuccessStatus,
   },
   openai: {
     provider: "openai" as const,
@@ -113,7 +121,7 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
       method: "GET" as const,
       headers: { Authorization: `Bearer ${apiKey}` },
     }),
-    isSuccess: (status: number) => status >= 200 && status < 300,
+    isSuccess: isHttpSuccessStatus,
   },
   claude: {
     provider: "claude" as const,
@@ -132,7 +140,8 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
         messages: [{ role: "user", content: "hi" }],
       }),
     }),
-    isSuccess: (status: number) => (status >= 200 && status < 300) || status === 429,
+    isSuccess: (status: number) =>
+      isHttpSuccessStatus(status) || status === HTTP_STATUS_TOO_MANY_REQUESTS,
   },
   local: {
     provider: "local" as const,
@@ -140,7 +149,7 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
     buildUrl: (_: string, localEndpoint = LOCAL_AI_DEFAULT_ENDPOINT): string =>
       `${localEndpoint}/models`,
     buildInit: () => ({ method: "GET" as const }),
-    isSuccess: (status: number) => status >= 200 && status < 300,
+    isSuccess: isHttpSuccessStatus,
   },
   huggingface: {
     provider: "huggingface" as const,
@@ -150,7 +159,7 @@ export const AI_PROVIDER_TEST_STRATEGIES = {
       method: "GET" as const,
       headers: { Authorization: `Bearer ${apiKey}` },
     }),
-    isSuccess: (status: number) => status >= 200 && status < 300,
+    isSuccess: isHttpSuccessStatus,
   },
 } satisfies Record<
   AIProviderType,

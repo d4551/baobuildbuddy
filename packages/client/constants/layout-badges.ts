@@ -47,7 +47,6 @@ export const BADGE_NEUTRAL_CLASS = "badge badge-neutral";
 export const BADGE_SECONDARY_CLASS = "badge badge-secondary";
 export const BADGE_ACCENT_CLASS = "badge badge-accent";
 export const BADGE_ACCENT_SM_CLASS = "badge badge-accent badge-sm";
-export const BADGE_OUTLINE_MUTED_CLASS =
-  "badge badge-outline border-current/20 text-current/80";
+export const BADGE_OUTLINE_MUTED_CLASS = "badge badge-outline border-current/20 text-current/80";
 export const BADGE_ACCENT_LG_CLASS = "badge badge-accent badge-lg border-0";
 export const BADGE_SECONDARY_OUTLINE_CLASS = "badge badge-secondary badge-outline";

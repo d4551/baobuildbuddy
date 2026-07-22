@@ -2,6 +2,7 @@
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesSkillsPathwaysPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -19,6 +20,7 @@ import {
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
+  path: APP_ROUTES.skillsPathways,
   middleware: ["auth"],
 });
 const { t } = useI18n();

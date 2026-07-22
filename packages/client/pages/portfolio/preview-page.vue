@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 defineOptions({ name: "PagesPortfolioPreviewPage" });
 
 definePageMeta({
+  path: APP_ROUTES.portfolioPreview,
   middleware: ["auth"],
 });
 
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {

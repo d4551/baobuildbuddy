@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesInterviewSessionPage" });
 
 definePageMeta({
+  path: APP_ROUTES.interviewSession,
   middleware: ["auth"],
 });
 
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();

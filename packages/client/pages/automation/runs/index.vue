@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
-import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
 
 defineOptions({ name: "AutomationRunsPage" });
 

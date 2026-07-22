@@ -2,6 +2,7 @@
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesIndexPage" });
 
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";

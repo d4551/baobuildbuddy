@@ -1,7 +1,7 @@
 /**
  * Shared numeric literals for non-domain call sites.
  * Domain-specific values stay in http.ts / time.ts / score-thresholds / etc.
- * Biome noMagicNumbers is muted under constants globs (definition SSOT).
+ * Definition SSOT: named consts here; consumers import — noMagicNumbers stays error.
  */
 
 export const PERCENT_MAX = 100;

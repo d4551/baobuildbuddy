@@ -1,4 +1,6 @@
 import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "../types/jobs";
+import { COUNT_FIFTEEN, COUNT_SIX } from "./numeric";
+import { MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from "./time";
 
 /**
  * Sentinel value used by UI filters to represent "no active filter".
@@ -107,16 +109,16 @@ export const JOB_QUERY_MAX_LIMIT = 100;
 /**
  * Default cache expiry for aggregated job listings (6 hours).
  */
-export const JOB_AGGREGATOR_CACHE_EXPIRY_MS = 6 * 60 * 60 * 1000;
+export const JOB_AGGREGATOR_CACHE_EXPIRY_MS = COUNT_SIX * MS_PER_HOUR;
 
 /** Salary string parse multiplier (e.g. "50" → 50_000). */
-export const JOB_SALARY_PARSE_MULTIPLIER = 1000;
+export const JOB_SALARY_PARSE_MULTIPLIER = MS_PER_SECOND;
 
 /** Rate limit window for job provider fetches (1 minute). */
-export const JOB_PROVIDER_RATE_LIMIT_WINDOW_MS = 60 * 1000;
+export const JOB_PROVIDER_RATE_LIMIT_WINDOW_MS = MS_PER_MINUTE;
 
 /** Maximum requests per provider per rate limit window. */
-export const JOB_PROVIDER_RATE_LIMIT_MAX_REQUESTS = 15;
+export const JOB_PROVIDER_RATE_LIMIT_MAX_REQUESTS = COUNT_FIFTEEN;
 
 /** Default match score for job recommendations when AI matching is not used. */
 export const JOB_DEFAULT_RECOMMENDATION_SCORE = 50;

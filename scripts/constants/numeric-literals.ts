@@ -1,5 +1,5 @@
 /**
- * Script-side numeric SSOT. Biome noMagicNumbers is muted under constants globs.
+ * Script-side numeric SSOT. Named consts only; noMagicNumbers stays error.
  * Prefer shared package constants when a domain name already exists.
  */
 
@@ -26,6 +26,7 @@ export const PERCENT_HIGH = 80;
 export const PERCENT_MID = 50;
 export const PERCENT_LOW = 20;
 
+export const MS_ONE_HUNDRED = 100;
 export const MS_SECOND = 1000;
 export const MS_TWO_SECONDS = 2_000;
 export const MS_ONE_AND_HALF_SECONDS = 1_500;
@@ -36,6 +37,7 @@ export const MS_TEN_SECONDS = 10_000;
 export const MS_THIRTY_SECONDS = 30_000;
 export const MS_MINUTE = 60_000;
 
+export const COUNT_TWO = 2;
 export const COUNT_THREE = 3;
 export const COUNT_FOUR = 4;
 export const COUNT_FIVE = 5;
@@ -57,6 +59,7 @@ export const COUNT_FIFTY = 50;
 export const COUNT_SEVENTY = 70;
 export const COUNT_ONE_TWENTY = 120;
 export const COUNT_ONE_FIFTY = 150;
+export const COUNT_TWO_HUNDRED = 200;
 export const COUNT_TWO_FORTY = 240;
 export const COUNT_TWO_FIFTY = 250;
 export const COUNT_FIVE_HUNDRED = 500;

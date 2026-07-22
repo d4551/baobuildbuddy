@@ -175,7 +175,17 @@
         "useDefaultSwitchClause": "error",
         "useCollapsedElseIf": "error",
         "useArrayLiterals": "error",
-        "useVueMultiWordComponentNames": "error",
+        "useVueMultiWordComponentNames": {
+          "level": "error",
+          "options": {
+            "ignores": [
+              "index",
+              "default",
+              "error",
+              "[id]"
+            ]
+          }
+        },
         "useVueDefineMacrosOrder": "error",
         "useVueHyphenatedAttributes": "error",
         "noShoutyConstants": "error",
@@ -269,7 +279,17 @@
             "noUnusedFunctionParameters": "error"
           },
           "style": {
-            "useVueMultiWordComponentNames": "error",
+            "useVueMultiWordComponentNames": {
+              "level": "error",
+              "options": {
+                "ignores": [
+                  "index",
+                  "default",
+                  "error",
+                  "[id]"
+                ]
+              }
+            },
             "useVueDefineMacrosOrder": "error"
           },
           "nursery": {
@@ -278,34 +298,6 @@
             "useVueNextTickPromise": "error",
             "noInlineStyles": "error",
             "useScopedStyles": "error"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "**/constants/**",
-        "packages/client/constants/**",
-        "packages/shared/src/constants/**"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "noMagicNumbers": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "packages/client/pages/**/*.vue",
-        "packages/client/layouts/**/*.vue",
-        "packages/client/error.vue"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "useVueMultiWordComponentNames": "off"
           }
         }
       }

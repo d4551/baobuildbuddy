@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 const NUM_25 = 25;
 const NUM_50 = 50;
 defineOptions({ name: "PagesResumeBuildPage" });
@@ -6,10 +7,10 @@ defineOptions({ name: "PagesResumeBuildPage" });
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
+  path: APP_ROUTES.resumeBuild,
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";

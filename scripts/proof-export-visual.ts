@@ -6,13 +6,22 @@
  */
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium, type Page } from "playwright";
+import { chromium, type Download, type Locator, type Page, type Response } from "playwright";
 import {
   API_ENDPOINTS,
   buildCoverLetterExportEndpoint,
   buildResumeExportEndpoint,
 } from "../packages/shared/src/constants/endpoints";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_OK } from "../packages/shared/src/constants/http";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import { safeParseJson } from "../packages/shared/src/utils/json";
+import { settle } from "../packages/shared/src/utils/promise";
+import {
+  COUNT_FOUR,
+  COUNT_TWO,
+  COUNT_TWO_HUNDRED,
+  MS_ONE_HUNDRED,
+} from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 const API_BASE = (process.env.PAGE_PROOF_API_BASE ?? "http://127.0.0.1:3000").replace(/\/$/u, "");
@@ -24,10 +33,18 @@ const OUT_DIR = process.env.EXPORT_PROOF_OUT ?? join("/opt/cursor/artifacts/expo
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const NAV_TIMEOUT_MS = 60_000;
 const MENU_TIMEOUT_MS = 10_000;
+const MAIN_WAIT_MS = 30_000;
+const EXPAND_POLL_ATTEMPTS = 20;
+const PDF_HEADER_BYTES = COUNT_FOUR;
+const ERROR_SNIPPET_LENGTH = COUNT_TWO_HUNDRED;
 
 const PDF_MAGIC = "%PDF";
-const DOCX_MAGIC_0 = 0x50; // P
-const DOCX_MAGIC_1 = 0x4b; // K
+const DOCX_MAGIC_0 = 0x50;
+const DOCX_MAGIC_1 = 0x4b;
+const EXPORT_LABEL_PATTERN = /export/iu;
+const PDF_MENU_PATTERN = /pdf/iu;
+const DOCX_MENU_PATTERN = /docx/iu;
+const EXPORT_PATH_PATTERN = /\/export/u;
 
 type ProofRow = {
   surface: string;
@@ -36,6 +53,19 @@ type ProofRow = {
   bytes: number;
   path?: string;
   reason?: string;
+};
+
+type UiProofRow = {
+  slug: string;
+  ok: boolean;
+  reason?: string;
+  downloadBytes?: number;
+};
+
+type UiSurface = {
+  slug: string;
+  route: string;
+  downloadPdf: boolean;
 };
 
 const apiJson = async <T>(
@@ -49,13 +79,13 @@ const apiJson = async <T>(
     body: body ? JSON.stringify(body) : undefined,
   });
   const raw = await response.text();
-  let parsed: T;
-  try {
-    parsed = JSON.parse(raw) as T;
-  } catch {
-    throw new Error(`${method} ${path} non-JSON (${String(response.status)}): ${raw.slice(0, 200)}`);
+  const parsed = safeParseJson(raw);
+  if (parsed === null) {
+    throw new Error(
+      `${method} ${path} non-JSON (${String(response.status)}): ${raw.slice(0, ERROR_SNIPPET_LENGTH)}`,
+    );
   }
-  return { status: response.status, body: parsed, raw };
+  return { status: response.status, body: parsed as T, raw };
 };
 
 const apiBinary = async (
@@ -77,12 +107,14 @@ const apiBinary = async (
 };
 
 const isPdf = (bytes: Uint8Array): boolean => {
-  if (bytes.length < 4) return false;
+  if (bytes.length < PDF_HEADER_BYTES) {
+    return false;
+  }
   return String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) === PDF_MAGIC;
 };
 
 const isDocxZip = (bytes: Uint8Array): boolean =>
-  bytes.length >= 2 && bytes[0] === DOCX_MAGIC_0 && bytes[1] === DOCX_MAGIC_1;
+  bytes.length >= COUNT_TWO && bytes[0] === DOCX_MAGIC_0 && bytes[1] === DOCX_MAGIC_1;
 
 const saveExport = async (
   rows: ProofRow[],
@@ -94,7 +126,7 @@ const saveExport = async (
   const result = await apiBinary("POST", path, body);
   const filePath = join(OUT_DIR, `${surface}.${format}`);
   const magicOk = format === "pdf" ? isPdf(result.bytes) : isDocxZip(result.bytes);
-  const ok = result.status === 200 && result.bytes.length > 0 && magicOk;
+  const ok = result.status === HTTP_STATUS_OK && result.bytes.length > 0 && magicOk;
   if (ok) {
     await Bun.write(filePath, result.bytes);
   }
@@ -134,7 +166,7 @@ const seedEntities = async (): Promise<{
     ],
     skills: { technical: ["C++", "Unreal Engine", "TypeScript"] },
   });
-  if (resume.status !== 201) {
+  if (resume.status !== HTTP_STATUS_CREATED) {
     throw new Error(`resume create failed: ${String(resume.status)}`);
   }
 
@@ -147,12 +179,12 @@ const seedEntities = async (): Promise<{
       conclusion: "Sincerely,",
     },
   });
-  if (cover.status !== 201 || !cover.body.id) {
+  if (cover.status !== HTTP_STATUS_CREATED || !cover.body.id) {
     throw new Error(`cover letter create failed: ${String(cover.status)}`);
   }
 
   const portfolioGet = await apiJson<{ id: string }>("GET", API_ENDPOINTS.portfolio);
-  if (portfolioGet.status !== 200) {
+  if (portfolioGet.status !== HTTP_STATUS_OK) {
     throw new Error(`portfolio get failed: ${String(portfolioGet.status)}`);
   }
   const portfolioPut = await apiJson("PUT", API_ENDPOINTS.portfolio, {
@@ -162,7 +194,7 @@ const seedEntities = async (): Promise<{
       tagline: "Gameplay systems that ship",
     },
   });
-  if (portfolioPut.status !== 200) {
+  if (portfolioPut.status !== HTTP_STATUS_OK) {
     throw new Error(`portfolio put failed: ${String(portfolioPut.status)}`);
   }
 
@@ -176,41 +208,111 @@ const seedEntities = async (): Promise<{
   return { resumeId: resume.body.id, coverLetterId: cover.body.id };
 };
 
+const expectExpanded = async (trigger: Locator): Promise<void> => {
+  const poll = async (attempt: number): Promise<void> => {
+    if (attempt >= EXPAND_POLL_ATTEMPTS) {
+      return;
+    }
+    const expanded = await trigger.getAttribute("aria-expanded");
+    if (expanded === "true") {
+      return;
+    }
+    await Bun.sleep(MS_ONE_HUNDRED);
+    await poll(attempt + 1);
+  };
+  await poll(0);
+};
+
+const isExportPostOk = (response: Response): boolean =>
+  response.request().method() === "POST" &&
+  EXPORT_PATH_PATTERN.test(response.url()) &&
+  response.status() === HTTP_STATUS_OK;
+
+const readDownloadBytes = async (
+  download: Download | null,
+  exportResponse: Response,
+  filePath: string,
+): Promise<Uint8Array> => {
+  if (download) {
+    await download.saveAs(filePath);
+    return new Uint8Array(await Bun.file(filePath).arrayBuffer());
+  }
+  const bytes = new Uint8Array(await exportResponse.body());
+  await Bun.write(filePath, bytes);
+  return bytes;
+};
+
+const downloadPdfFromMenu = async (
+  page: Page,
+  pdfItem: Locator,
+  slug: string,
+): Promise<{ ok: boolean; reason?: string; downloadBytes?: number }> => {
+  const exportResponsePromise = page.waitForResponse(isExportPostOk, {
+    timeout: MENU_TIMEOUT_MS,
+  });
+  const downloadPromise = page.waitForEvent("download", { timeout: MENU_TIMEOUT_MS });
+  await pdfItem.click();
+  const exportSettled = await settle(exportResponsePromise);
+  const downloadSettled = await settle(downloadPromise);
+  if (exportSettled.status === "rejected") {
+    return {
+      ok: false,
+      reason: `ui pdf download failed: ${exportSettled.reason.message}`,
+    };
+  }
+  const filePath = join(OUT_DIR, `${slug}-ui-download.pdf`);
+  const download =
+    downloadSettled.status === "fulfilled" ? downloadSettled.value : null;
+  const bytes = await readDownloadBytes(download, exportSettled.value, filePath);
+  if (!isPdf(bytes)) {
+    return {
+      ok: false,
+      reason: "ui pdf download failed magic check",
+      downloadBytes: bytes.length,
+    };
+  }
+  return { ok: true, downloadBytes: bytes.length };
+};
+
 const openExportMenuAndShot = async (
   page: Page,
   route: string,
   slug: string,
   options?: { downloadPdf?: boolean },
-): Promise<{ ok: boolean; reason?: string; downloadBytes?: number }> => {
+): Promise<UiProofRow> => {
   await page.goto(`${CLIENT_BASE}${route}`, {
     waitUntil: "domcontentloaded",
     timeout: NAV_TIMEOUT_MS,
   });
-  await page.locator("main").waitFor({ state: "visible", timeout: 30_000 });
-  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.locator("main").waitFor({ state: "visible", timeout: MAIN_WAIT_MS });
 
   const trigger = page
     .locator('button[aria-haspopup="menu"]')
-    .filter({ hasText: /export/i })
+    .filter({ hasText: EXPORT_LABEL_PATTERN })
     .first();
-  const visible = await trigger.isVisible().catch(() => false);
+  const visibleResult = await settle(trigger.isVisible());
+  const visible = visibleResult.status === "fulfilled" && visibleResult.value;
   if (!visible) {
     await page.screenshot({
       path: join(OUT_DIR, `${slug}-missing-export.png`),
       fullPage: true,
     });
-    return { ok: false, reason: "export menu trigger not visible" };
+    return { slug, ok: false, reason: "export menu trigger not visible" };
   }
 
   await trigger.click();
   await expectExpanded(trigger);
 
-  const pdfItem = page.getByRole("menuitem", { name: /pdf/i }).first();
-  const docxItem = page.getByRole("menuitem", { name: /docx/i }).first();
-  await pdfItem.waitFor({ state: "visible", timeout: MENU_TIMEOUT_MS }).catch(() => undefined);
+  const pdfItem = page.getByRole("menuitem", { name: PDF_MENU_PATTERN }).first();
+  const docxItem = page.getByRole("menuitem", { name: DOCX_MENU_PATTERN }).first();
+  await settle(pdfItem.waitFor({ state: "visible", timeout: MENU_TIMEOUT_MS }));
+  const pdfVisible = await settle(pdfItem.isVisible());
+  const docxVisible = await settle(docxItem.isVisible());
   const menuOk =
-    (await pdfItem.isVisible().catch(() => false)) &&
-    (await docxItem.isVisible().catch(() => false));
+    pdfVisible.status === "fulfilled" &&
+    pdfVisible.value &&
+    docxVisible.status === "fulfilled" &&
+    docxVisible.value;
 
   await page.screenshot({
     path: join(OUT_DIR, `${slug}-menu-open.png`),
@@ -218,97 +320,62 @@ const openExportMenuAndShot = async (
   });
 
   if (!menuOk) {
-    return { ok: false, reason: "pdf/docx menuitems missing" };
+    return { slug, ok: false, reason: "pdf/docx menuitems missing" };
   }
 
   if (!options?.downloadPdf) {
-    return { ok: true };
+    return { slug, ok: true };
   }
 
-  // UI uses blob ObjectURL + <a download>. Prefer Playwright download event
-  // (response.body() can be empty after the page consumes the stream).
-  const exportResponsePromise = page.waitForResponse(
-    (response) =>
-      response.request().method() === "POST" &&
-      /\/export/u.test(response.url()) &&
-      response.status() === 200,
-    { timeout: MENU_TIMEOUT_MS },
-  );
-  const downloadPromise = page.waitForEvent("download", { timeout: MENU_TIMEOUT_MS }).catch(
-    () => null,
-  );
-  await pdfItem.click();
-  try {
-    const exportResponse = await exportResponsePromise;
-    const download = await downloadPromise;
-    const filePath = join(OUT_DIR, `${slug}-ui-download.pdf`);
-    let bytes: Uint8Array;
-    if (download) {
-      await download.saveAs(filePath);
-      bytes = new Uint8Array(await Bun.file(filePath).arrayBuffer());
-    } else {
-      bytes = new Uint8Array(await exportResponse.body());
-      await Bun.write(filePath, bytes);
-    }
-    if (!isPdf(bytes)) {
-      return {
-        ok: false,
-        reason: "ui pdf download failed magic check",
-        downloadBytes: bytes.length,
-      };
-    }
-    return { ok: true, downloadBytes: bytes.length };
-  } catch (error) {
-    return {
-      ok: false,
-      reason: `ui pdf download failed: ${error instanceof Error ? error.message : String(error)}`,
-    };
-  }
+  const downloadResult = await downloadPdfFromMenu(page, pdfItem, slug);
+  return { slug, ...downloadResult };
 };
 
-const expectExpanded = async (trigger: ReturnType<Page["locator"]>): Promise<void> => {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const expanded = await trigger.getAttribute("aria-expanded");
-    if (expanded === "true") {
-      return;
-    }
-    await Bun.sleep(100);
+const runUiSurfaces = async (
+  page: Page,
+  surfaces: readonly UiSurface[],
+): Promise<UiProofRow[]> => {
+  const [head, ...tail] = surfaces;
+  if (!head) {
+    return [];
   }
+  const first = await openExportMenuAndShot(page, head.route, head.slug, {
+    downloadPdf: head.downloadPdf,
+  });
+  const rest = await runUiSurfaces(page, tail);
+  return [first, ...rest];
 };
 
-const main = async (): Promise<void> => {
-  await mkdir(OUT_DIR, { recursive: true });
-  const rows: ProofRow[] = [];
-  const uiRows: Array<{ slug: string; ok: boolean; reason?: string; downloadBytes?: number }> = [];
-
-  const { resumeId, coverLetterId } = await seedEntities();
-
+const persistBinaryExports = async (
+  rows: ProofRow[],
+  resumeId: string,
+  coverLetterId: string,
+): Promise<void> => {
   await saveExport(rows, "resume", "pdf", buildResumeExportEndpoint(resumeId), {
     format: "pdf",
   });
   await saveExport(rows, "resume", "docx", buildResumeExportEndpoint(resumeId), {
     format: "docx",
   });
-  await saveExport(
-    rows,
-    "cover-letter",
-    "pdf",
-    buildCoverLetterExportEndpoint(coverLetterId),
-    { format: "pdf" },
-  );
-  await saveExport(
-    rows,
-    "cover-letter",
-    "docx",
-    buildCoverLetterExportEndpoint(coverLetterId),
-    { format: "docx" },
-  );
+  await saveExport(rows, "cover-letter", "pdf", buildCoverLetterExportEndpoint(coverLetterId), {
+    format: "pdf",
+  });
+  await saveExport(rows, "cover-letter", "docx", buildCoverLetterExportEndpoint(coverLetterId), {
+    format: "docx",
+  });
   await saveExport(rows, "portfolio", "pdf", `${API_ENDPOINTS.portfolio}/export`, {
     format: "pdf",
   });
   await saveExport(rows, "portfolio", "docx", `${API_ENDPOINTS.portfolio}/export`, {
     format: "docx",
   });
+};
+
+const main = async (): Promise<void> => {
+  await mkdir(OUT_DIR, { recursive: true });
+  const rows: ProofRow[] = [];
+  const { resumeId, coverLetterId } = await seedEntities();
+  await persistBinaryExports(rows, resumeId, coverLetterId);
 
   const hasDisplay = Boolean(process.env.DISPLAY && process.env.DISPLAY.length > 0);
   const forceHeadless = process.env.PAGE_PROOF_HEADLESS === "true";
@@ -319,8 +386,7 @@ const main = async (): Promise<void> => {
   );
   const page = await browser.newPage({ viewport: VIEWPORT, acceptDownloads: true });
 
-  // Library list has no Export control — preview/detail surfaces own the menu.
-  for (const entry of [
+  const surfaces: readonly UiSurface[] = [
     {
       slug: "resume-preview",
       route: `${APP_ROUTES.resumePreview}?id=${encodeURIComponent(resumeId)}`,
@@ -333,13 +399,8 @@ const main = async (): Promise<void> => {
       route: `${APP_ROUTES.coverLetter}/${encodeURIComponent(coverLetterId)}`,
       downloadPdf: false,
     },
-  ] as const) {
-    const result = await openExportMenuAndShot(page, entry.route, entry.slug, {
-      downloadPdf: entry.downloadPdf,
-    });
-    uiRows.push({ slug: entry.slug, ...result });
-  }
-
+  ];
+  const uiRows = await runUiSurfaces(page, surfaces);
   await browser.close();
 
   const report = { API_BASE, CLIENT_BASE, binary: rows, ui: uiRows };

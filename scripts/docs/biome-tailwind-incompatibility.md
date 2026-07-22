@@ -1,4 +1,4 @@
-# Biome × Tailwind incompatibility ledger
+# Biome × Tailwind / Nuxt incompatibility ledger
 
 Referenced by `scripts/validate-biome-no-softenings.ts` (header contract) and tracked in
 `scripts/validate-biome-no-softenings.test.ts`.
@@ -11,35 +11,40 @@ Referenced by `scripts/validate-biome-no-softenings.ts` (header contract) and tr
 | `noUnusedClasses` | nursery | daisyUI theme classes and token-driven class constants (`packages/client/constants/*`) are consumed via JS constant references and `data-theme` activation, not static CSS selectors Biome can trace → false-positive generator. |
 | `useVueVapor` | performance | Nuxt 4 SSR (`packages/client`) is the binding UI runtime (`docs/STACK-CONTRACT.md`). Vue Vapor is a separate client compiler mode and is not the Nuxt SSR contract; enabling `domains.vue=all` force-errors every SFC for `vapor` macros. Domain stays `recommended`; rule remains absent. |
 
-## Constant-definition exemption (noMagicNumbers)
+## noMagicNumbers (no mute)
 
-Numeric literals inside `**/constants/**` (client + shared) are the SSOT owners of those values.
-`biome.json` may include a narrow override that sets `style.noMagicNumbers=off` **only** for those globs.
-Consumers outside constants must keep named imports; the softener gate rejects any broader mute.
+`style.noMagicNumbers` stays `"error"` everywhere, including `**/constants/**`.
+Constant files own named literals as initializers / composed named consts. Nested
+argument/expression literals must be extracted (see `time.ts`, `jobs.ts`,
+`jobs-taxonomy.ts` auto sort-order).
 
-## Nuxt route-file exemption (useVueMultiWordComponentNames)
+## useVueMultiWordComponentNames (no mute)
 
-Biome keys **filenames**, not `defineOptions({ name })`. Nuxt pages/layouts/error must keep
-single-segment route filenames. Scoped override `off` is allowlisted for
-`packages/client/pages/**/*.vue`, `packages/client/layouts/**/*.vue`, and
-`packages/client/error.vue` only. Components under `components/**` stay at `error`.
-See `docs/ssot-ledger/cycle-2026-07-22/contract-escalation-vue-multiword-nuxt-routes.md`.
+Rule stays `"error"`. Biome keys **filenames** (not `defineOptions`).
+
+Proper fixes on this stack:
+
+1. **Nuxt-reserved single stems** use the rule's `options.ignores`:
+   `index`, `default`, `error`, `[id]` (file-based router contract).
+2. **All other pages** use multi-word kebab filenames + `definePageMeta({ path })`
+   to keep canonical `APP_ROUTES` URLs (e.g. `settings-page.vue` → `/settings`).
+
+Scoped `off` overrides are forbidden softener.
 
 ## Contract
 
 1. Tailwind class rules stay **absent** from `biome.json` at any severity. `useVueVapor` stays absent (Nuxt SSR).
 2. Adding them back at `off` / `warn` / `info` is a softener — flagged by
-   `collectBiomeSofteningViolationsForContent` (generic severity walk; covered by
-   "flags noUndeclaredClasses demotion" / "flags noUnusedClasses demotion" tests).
+   `collectBiomeSofteningViolationsForContent`.
 3. Adding them back at `error` without an upstream Biome fix for Tailwind-aware class
    resolution is a false-positive generator and equally rejected.
 4. If upstream Biome ships Tailwind-aware class analysis, re-evaluate: enable at
    `error`, delete the absence-tracking test, and update this ledger.
-5. Only allowlisted `off` overrides may exist: magic-number definition globs + Nuxt route multi-word globs.
+5. Zero `off` / `warn` / `info` in `biome.json` (root or overrides).
 
 ## Verification
 
 - `validate:biome-no-softenings` (part of `bun run lint`) walks every rule entry;
-  `off`/`warn`/`info` outside allowlisted overrides fails.
+  any `off`/`warn`/`info` fails.
 - Absence is pinned by the test
   "repo biome.json intentionally omits noUndeclaredClasses/noUnusedClasses (Tailwind incompatibility)".

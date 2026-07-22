@@ -2,12 +2,14 @@
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesInterviewHistoryPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
+  path: APP_ROUTES.interviewHistory,
   middleware: ["auth"],
 });
 

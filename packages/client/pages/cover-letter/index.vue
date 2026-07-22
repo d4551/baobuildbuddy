@@ -3,6 +3,7 @@ import {
   LOADING_SKELETON_LINES,
   UI_STAGGER_INDEX_MAX,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesCoverLetterIndexPage" });
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";

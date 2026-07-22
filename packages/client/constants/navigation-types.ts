@@ -31,4 +31,3 @@ export interface NavigationItem {
    */
   readonly parentId?: string;
 }
-

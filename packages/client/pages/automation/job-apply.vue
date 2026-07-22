@@ -3,6 +3,7 @@ import {
   AUTOMATION_LIVE_EVENT_WINDOW,
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });

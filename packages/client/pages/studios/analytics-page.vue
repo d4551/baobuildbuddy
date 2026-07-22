@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesStudiosAnalyticsPage" });
 
 import {
@@ -20,10 +22,10 @@ import {
 } from "~/constants/layout-badges";
 
 definePageMeta({
+  path: APP_ROUTES.studiosAnalytics,
   middleware: ["auth"],
 });
 
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();

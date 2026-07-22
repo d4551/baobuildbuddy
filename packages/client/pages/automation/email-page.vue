@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import {
   LOADING_SKELETON_LINES,
 } from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesAutomationEmailPage" });
 
 import {
@@ -21,10 +23,10 @@ import {
 } from "~/constants/layout";
 
 definePageMeta({
+  path: APP_ROUTES.automationEmail,
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { getErrorMessage } from "~/utils/errors";
 
 const {

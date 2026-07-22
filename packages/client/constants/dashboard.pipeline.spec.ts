@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveDashboardFlowActions, resolveDashboardPipelineSteps } from "./dashboard-pipeline";
+import {
+  DASHBOARD_FLOW_ACTION_VISIBLE_MAX,
+  resolveDashboardFlowActions,
+  resolveDashboardPipelineSteps,
+} from "./dashboard-pipeline";
 
 describe("resolveDashboardPipelineSteps", () => {
   it("marks first step as in progress when no data is available", () => {
@@ -75,7 +79,7 @@ describe("dashboard flow action resolver", () => {
     const actions = resolveDashboardFlowActions(pipelineSteps);
 
     expect(actions[0]?.id).toBe("customize");
-    expect(actions.length).toBe(4);
+    expect(actions.length).toBe(DASHBOARD_FLOW_ACTION_VISIBLE_MAX);
   });
 
   it("switches to advanced actions once the full pipeline is complete", () => {
@@ -94,6 +98,6 @@ describe("dashboard flow action resolver", () => {
 
     expect(actions[0]?.id).toBe("interview");
     expect(actions[1]?.id).toBe("ai-chat");
-    expect(actions.length).toBe(4);
+    expect(actions.length).toBe(DASHBOARD_FLOW_ACTION_VISIBLE_MAX);
   });
 });

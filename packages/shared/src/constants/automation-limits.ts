@@ -1,3 +1,5 @@
+import { DAYS_PER_MONTH_APPROX, MS_PER_DAY } from "./time";
+
 /**
  * Default maximum number of automation runs returned by history endpoints.
  */
@@ -51,7 +53,7 @@ export const AUTOMATION_SCHEDULE_RETRY_DELAY_MS = 30_000;
 /**
  * Maximum lead time for scheduling a run (30 days, ms).
  */
-export const AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS = 30 * 24 * 60 * 60 * 1000;
+export const AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS = DAYS_PER_MONTH_APPROX * MS_PER_DAY;
 
 /** Progress value when run is complete (100%). */
 export const AUTOMATION_FINISHED_PROGRESS = 100;

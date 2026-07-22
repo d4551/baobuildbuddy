@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+
 defineOptions({ name: "PagesGamificationPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -25,6 +26,7 @@ import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
+  path: APP_ROUTES.gamification,
   middleware: ["auth"],
 });
 

@@ -60,35 +60,35 @@ packages/client/
 | Route | File | Purpose |
 |---|---|---|
 | `/` | `pages/index.vue` | Dashboard: welcome banner, gamification, stat cards, pipeline, quick actions |
-| `/setup` | `pages/setup.vue` | 3-step setup wizard (profile → AI config → completion) |
-| `/settings` | `pages/settings.vue` | Settings panels (profile, AI providers, brand, automation, job intelligence, email) |
+| `/setup` | `pages/setup-wizard.vue` | 3-step setup wizard (profile → AI config → completion) |
+| `/settings` | `pages/settings-page.vue` | Settings panels (profile, AI providers, brand, automation, job intelligence, email) |
 | `/jobs` | `pages/jobs/index.vue` | Jobs index with filters, search, saved/applied tracking |
 | `/jobs/[id]` | `pages/jobs/[id].vue` | Job detail (sidebar + main content, apply dialog, match score) |
 | `/resume` | `pages/resume/index.vue` | Resume library + editor panels |
-| `/resume/build` | `pages/resume/build.vue` | Resume builder (questions, target card, enhancement steps) |
-| `/resume/preview` | `pages/resume/preview.vue` | Resume preview document |
+| `/resume/build` | `pages/resume/build-page.vue` | Resume builder (questions, target card, enhancement steps) |
+| `/resume/preview` | `pages/resume/preview-page.vue` | Resume preview document |
 | `/cover-letter` | `pages/cover-letter/index.vue` | Cover letter list + editor |
 | `/cover-letter/[id]` | `pages/cover-letter/[id].vue` | Cover letter detail (form, stats, generate dialog) |
 | `/portfolio` | `pages/portfolio/index.vue` | Portfolio grid (projects, profile cards) |
-| `/portfolio/preview` | `pages/portfolio/preview.vue` | Portfolio preview |
+| `/portfolio/preview` | `pages/portfolio/preview-page.vue` | Portfolio preview |
 | `/interview` | `pages/interview/index.vue` | Interview hub (config, recent sessions) |
-| `/interview/session` | `pages/interview/session.vue` | Live interview session (chat, scorecard, feedback) |
-| `/interview/history` | `pages/interview/history.vue` | Interview history (sessions, detail cards) |
+| `/interview/session` | `pages/interview/session-page.vue` | Live interview session (chat, scorecard, feedback) |
+| `/interview/history` | `pages/interview/history-page.vue` | Interview history (sessions, detail cards) |
 | `/skills` | `pages/skills/index.vue` | Skill mapper (filters, insights, mappings) |
-| `/skills/pathways` | `pages/skills/pathways.vue` | Skills pathways (grid, readiness card) |
+| `/skills/pathways` | `pages/skills/pathways-page.vue` | Skills pathways (grid, readiness card) |
 | `/studios` | `pages/studios/index.vue` | Studios index (grid, filters) |
 | `/studios/[id]` | `pages/studios/[id].vue` | Studio detail / preview modal |
-| `/studios/analytics` | `pages/studios/analytics.vue` | Studio analytics |
-| `/ai/dashboard` | `pages/ai/dashboard.vue` | AI provider dashboard (preference, provider grid) |
-| `/ai/chat` | `pages/ai/chat.vue` | Full-page AI chat (conversation panel, sidebar, voice controls) |
+| `/studios/analytics` | `pages/studios/analytics-page.vue` | Studio analytics |
+| `/ai/dashboard` | `pages/ai/dashboard-page.vue` | AI provider dashboard (preference, provider grid) |
+| `/ai/chat` | `pages/ai/chat-page.vue` | Full-page AI chat (conversation panel, sidebar, voice controls) |
 | `/automation` | `pages/automation/index.vue` | Automation hub (action grid, audit card) |
-| `/automation/scraper` | `pages/automation/scraper.vue` | Scraper (overview, capabilities, jobs) |
+| `/automation/scraper` | `packages/client/pages/automation/scraper-page.vue` | Scraper (overview, capabilities, jobs) |
 | `/automation/job-apply` | `pages/automation/job-apply.vue` | Job-apply automation (form, run cards, scheduled) |
 | `/automation/runs` | `pages/automation/runs/index.vue` | Automation runs table + filters |
 | `/automation/runs/[id]` | `pages/automation/runs/[id].vue` | Run detail (stats, payload, timeline, screenshots) |
-| `/automation/email` | `pages/automation/email.vue` | Email automation |
-| `/gamification` | `pages/gamification.vue` | Gamification hub (challenges, achievements, summary) |
-| `/docs/api` | `pages/docs/api.vue` | API documentation explorer (navigator, sections, tester) |
+| `/automation/email` | `pages/automation/email-page.vue` | Email automation |
+| `/gamification` | `pages/gamification-hub.vue` | Gamification hub (challenges, achievements, summary) |
+| `/docs/api` | `pages/docs/api-docs.vue` | API documentation explorer (navigator, sections, tester) |
 
 All authenticated pages declare `definePageMeta({ middleware: ["auth"] })`.
 Each page delegates business logic to a `use<Feature>Page` composable and renders
