@@ -70,3 +70,9 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D51 | SUBPAR | Emoji as gamification icons | FIXED | AppIcon IconSparkles/IconBolt/IconCheckCircle |
 | D52 | SUBPAR | Surface/Route telemetry chips on floating panel | FIXED | entity+state chips only |
 
+
+| D53 | DRIFTED | SearchType shared≠server; incomplete entities | FIXED | SEARCH_RESULT_TYPES + SearchService expand; parity gate |
+| D54 | SUBPAR | Cmd/Ctrl+K → chat not OmniSearch | FIXED | bao:open-omni-search; Shift+K chat; probe green |
+| D55 | SOFTENED | desktop package.json echo lint/typecheck | FIXED | validate-desktop-package + no-soft-package-scripts |
+| D56 | GAPPED | OUTLINE_ACTION under-enforced | FIXED | migrate + validate:outline-action-density |
+| D57 | BROKEN | Elysia exp.49 .ws() without websocket() | FIXED | app.use(websocket()) |
