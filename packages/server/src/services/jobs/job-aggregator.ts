@@ -9,6 +9,7 @@ import {
   JOB_QUERY_DEFAULT_PAGE,
 } from "@bao/shared/constants/jobs";
 import type { Job, JobFilters, JobSearchResult } from "@bao/shared/types/jobs";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import type { applications } from "../../db/schema/jobs";

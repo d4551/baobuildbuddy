@@ -1,6 +1,7 @@
 import { API_ERROR_UNSUPPORTED_AUTOMATION_ACTION } from "@bao/shared/constants/api-errors";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { settle } from "@bao/shared/utils/promise";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
 import { mapAutomationRouteError } from "../utils/automation-route-error";
 import { createServerLogger } from "../utils/logger";

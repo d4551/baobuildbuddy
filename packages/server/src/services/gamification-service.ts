@@ -1,4 +1,5 @@
 import { MS_PER_DAY } from "@bao/shared/constants/time";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { getLevelForXP } from "@bao/shared/constants/xp-levels";
 import type {
   Achievement,

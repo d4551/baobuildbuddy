@@ -1,4 +1,5 @@
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";

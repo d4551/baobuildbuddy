@@ -9,6 +9,7 @@ import {
   HTTP_STATUS_NOT_FOUND,
 } from "@bao/shared/constants/http";
 import { TRACE_ID_HEADER } from "@bao/shared/constants/runtime";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { Elysia } from "elysia";
 import { createServerLogger } from "../utils/logger";
 
@@ -87,6 +88,8 @@ export const errorHandler = new Elysia({ name: "error-handler" }).error((context
   logger.error(
     `[${code}] traceId=${traceId}`,
     error instanceof Error ? error.message : String(error),
+    toErrorMessage(error),
+  _unused?: never,
   );
   set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
   return { error: API_ERROR_INTERNAL_SERVER, code, traceId };
