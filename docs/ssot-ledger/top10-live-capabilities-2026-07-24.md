@@ -26,6 +26,10 @@
 13. **Cover-letter PDF UI** — Generate dialog type company/position → Export PDF (`%PDF-`, 1930B).
 14. **Burndown soft warns** — Playwright role-click fallback → **0 findings**.
 
+## Closed (RPA integration)
+
+15. **RPA UI proof** — Settings enable WWI → hub → Run Job Scraper → runs 17→18 → Job Apply typed+run (`proof:rpa-live`).
+
 ## Remaining DRY / best-in-class (next)
 
 1. **Portfolio PDF UI** — empty library still skips Export.

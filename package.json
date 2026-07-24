@@ -108,6 +108,7 @@
     "proof:nav-ia": "bun run scripts/browser-proof-nav-ia.ts",
     "proof:ollama-live": "bun run scripts/browser-proof-ollama-live.ts",
     "proof:pdf-live": "bun run scripts/browser-proof-pdf-live.ts",
+    "proof:rpa-live": "bun run scripts/browser-proof-rpa-live.ts",
     "proof:honest-capabilities": "bun run scripts/browser-honest-capabilities-proof.ts",
     "proof:browser-video": "bun run scripts/browser-record-visual-proof.ts",
     "proof:browser-product-demo": "bun run scripts/browser-record-product-demo.ts",
