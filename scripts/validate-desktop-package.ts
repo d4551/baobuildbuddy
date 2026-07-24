@@ -7,6 +7,8 @@ import { join } from "node:path";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 const DESKTOP_PACKAGE = "packages/desktop/package.json";
+const SOFT_LINT_SCRIPT_PATTERN = /"lint"\s*:\s*"echo\s+/u;
+const SOFT_TYPECHECK_SCRIPT_PATTERN = /"typecheck"\s*:\s*"echo\s+/u;
 const CARGO_TOML = "packages/desktop/src-tauri/Cargo.toml";
 const TAURI_CONF_CANDIDATES = [
   "packages/desktop/src-tauri/tauri.conf.json",
@@ -24,7 +26,7 @@ const fileExists = async (relativePath: string): Promise<boolean> => {
 export const collectDesktopPackageViolations = async (): Promise<ValidationViolation[]> => {
   const violations: ValidationViolation[] = [];
   const packageJson = await readFile(join(process.cwd(), DESKTOP_PACKAGE), "utf8");
-  if (/"lint"\s*:\s*"echo\s+/u.test(packageJson) || /"typecheck"\s*:\s*"echo\s+/u.test(packageJson)) {
+  if (SOFT_LINT_SCRIPT_PATTERN.test(packageJson) || SOFT_TYPECHECK_SCRIPT_PATTERN.test(packageJson)) {
     violations.push({
       filePath: DESKTOP_PACKAGE,
       line: 1,

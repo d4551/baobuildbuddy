@@ -35,8 +35,7 @@ const page = reactive(useAIDashboardPage());
     >
       <template #actions>
         <button
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"
           @click="page.fetchProviderStats"

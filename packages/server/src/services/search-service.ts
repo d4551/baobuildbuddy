@@ -268,14 +268,17 @@ export class SearchService {
     query: string,
     pattern: string,
   ): Promise<SearchResult[]> {
-    if (type === "jobs") return this.searchJobs(query, pattern);
-    if (type === "studios") return this.searchStudios(pattern, query);
-    if (type === "skills") return this.searchSkills(pattern);
-    if (type === "resumes") return this.searchResumes(pattern);
-    if (type === "cover-letters") return this.searchCoverLetters(pattern);
-    if (type === "portfolio-projects") return this.searchPortfolioProjects(pattern);
-    if (type === "interview-sessions") return this.searchInterviewSessions(pattern);
-    return this.searchAutomationRuns(pattern);
+    const handlers: Record<SearchType, () => Promise<SearchResult[]>> = {
+      jobs: () => this.searchJobs(query, pattern),
+      studios: () => this.searchStudios(pattern, query),
+      skills: () => this.searchSkills(pattern),
+      resumes: () => this.searchResumes(pattern),
+      "cover-letters": () => this.searchCoverLetters(pattern),
+      "portfolio-projects": () => this.searchPortfolioProjects(pattern),
+      "interview-sessions": () => this.searchInterviewSessions(pattern),
+      "automation-runs": () => this.searchAutomationRuns(pattern),
+    };
+    return handlers[type]();
   }
 
   async searchAll(query: string, types?: SearchType[]): Promise<UnifiedSearchResult> {

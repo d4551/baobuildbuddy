@@ -117,8 +117,7 @@ const { t } = useI18n();
         </button>
         <button
           type="button"
-          :class="[OUTLINE_ACTION_CLASS, 'join-item']"
-          :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, 'join-item', TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
           :disabled="isScheduleDisabled"
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"

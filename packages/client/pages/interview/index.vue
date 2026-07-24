@@ -95,8 +95,7 @@ const {
           {{ t("interviewHub.hero.openJobButton") }}
         </button>
         <button
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('interviewHub.hero.openStudioAria')"
           @click="openConfig('studio')"
         >
@@ -178,8 +177,7 @@ const {
                 <div class="flex justify-end">
                   <NuxtLink
                     :to="item.route"
-                    :class="[OUTLINE_ACTION_CLASS]"
-                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('interviewHub.prep.openAria', { title: item.title })"
                   >
                     {{ item.ctaLabel }}

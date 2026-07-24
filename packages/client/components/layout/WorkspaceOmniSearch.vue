@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { settle } from "@bao/shared/utils/promise";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -45,9 +46,12 @@ function focusSearchInput(): void {
 
 function handleOpenOmniSearchEvent(): void {
   open.value = true;
-  nextTick(() => {
-    focusSearchInput();
-  });
+  settle(Promise.resolve(nextTick())).then(
+    () => {
+      focusSearchInput();
+    },
+    () => undefined,
+  );
 }
 
 onMounted(() => {

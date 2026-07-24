@@ -4,6 +4,7 @@ import {
   AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP,
   type AIChatVoiceErrorCode,
 } from "@bao/shared/constants/ai-voice";
+import { settle } from "@bao/shared/utils/promise";
 import type { Ref } from "vue";
 import {
   resolveSpeechLocale,
@@ -221,16 +222,22 @@ const createStartListeningAction =
         if (state.isListening.value) {
           return true;
         }
-        void createMicrophoneRecorder()
-          .then((created) => {
-            recorder = created;
-            created.start();
+        settle(createMicrophoneRecorder()).then(
+          (settled) => {
+            if (settled.status === "rejected") {
+              state.error.value = AI_CHAT_VOICE_ERROR_CODES.audioCapture;
+              state.isListening.value = false;
+              return;
+            }
+            recorder = settled.value;
+            settled.value.start();
             state.isListening.value = true;
-          })
-          .catch(() => {
+          },
+          () => {
             state.error.value = AI_CHAT_VOICE_ERROR_CODES.audioCapture;
             state.isListening.value = false;
-          });
+          },
+        );
         return true;
       }
       if (!state.recognition.value) {
@@ -254,23 +261,38 @@ const createStartListeningAction =
           state.isListening.value = false;
           return;
         }
-        void active
-          .stop()
-          .then((blob) => transcribeAudioViaServer(blob))
-          .then((result) => {
-            if (result.ok) {
-              state.transcript.value = result.text;
-              state.interimTranscript.value = "";
-            } else {
+        settle(active.stop())
+          .then(
+            async (stopSettled) => {
+              if (stopSettled.status === "rejected") {
+                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
+                return;
+              }
+              const transcriptSettled = await settle(transcribeAudioViaServer(stopSettled.value));
+              if (transcriptSettled.status === "rejected") {
+                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
+                return;
+              }
+              const result = transcriptSettled.value;
+              if (result.ok) {
+                state.transcript.value = result.text;
+                state.interimTranscript.value = "";
+              } else {
+                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
+              }
+            },
+            () => {
               state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-            }
-          })
-          .catch(() => {
-            state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-          })
-          .finally(() => {
-            state.isListening.value = false;
-          });
+            },
+          )
+          .then(
+            () => {
+              state.isListening.value = false;
+            },
+            () => {
+              state.isListening.value = false;
+            },
+          );
         return;
       }
       if (state.recognition.value) {

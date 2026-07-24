@@ -4,6 +4,7 @@ import {
   API_ERROR_SPEECH_TRANSCRIBE,
 } from "@bao/shared/constants/api-errors";
 import type { SpeechProviderOption } from "@bao/shared/constants/settings";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { validateLocalAiEndpoint } from "@bao/shared/utils/local-ai-endpoint";
 import { eq } from "drizzle-orm";
@@ -13,6 +14,8 @@ import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
 
 const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const BASE64_PAYLOAD_PATTERN = /^[A-Za-z0-9+/]+=*$/u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 export type SpeechTranscribeInput = {
   readonly audioBase64: string;
@@ -21,7 +24,12 @@ export type SpeechTranscribeInput = {
 };
 
 export type SpeechTranscribeResult =
-  | { readonly ok: true; readonly text: string; readonly provider: SpeechProviderOption; readonly model: string }
+  | {
+      readonly ok: true;
+      readonly text: string;
+      readonly provider: SpeechProviderOption;
+      readonly model: string;
+    }
   | { readonly ok: false; readonly error: string; readonly status: 400 | 422 | 502 };
 
 const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
@@ -33,14 +41,11 @@ const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
 
 const decodeAudio = (audioBase64: string): Uint8Array | null => {
   const trimmed = audioBase64.trim();
-  if (trimmed.length === 0) {
+  if (trimmed.length === 0 || !BASE64_PAYLOAD_PATTERN.test(trimmed)) {
     return null;
   }
-  try {
-    return Uint8Array.from(Buffer.from(trimmed, "base64"));
-  } catch {
-    return null;
-  }
+  const bytes = Uint8Array.from(Buffer.from(trimmed, "base64"));
+  return bytes.byteLength > 0 ? bytes : null;
 };
 
 const resolveUpstreamAuth = async (
@@ -67,7 +72,8 @@ const resolveTranscriptionUrl = (
 ): { readonly ok: true; readonly url: string } | { readonly ok: false; readonly error: string } => {
   const trimmed = endpoint.trim();
   if (provider === "openai") {
-    const base = trimmed.length > 0 ? trimmed.replace(/\/$/u, "") : "https://api.openai.com/v1";
+    const base =
+      trimmed.length > 0 ? trimmed.replace(TRAILING_SLASH_PATTERN, "") : "https://api.openai.com/v1";
     return { ok: true, url: `${base}/audio/transcriptions` };
   }
   if (provider === "huggingface") {
@@ -81,7 +87,7 @@ const resolveTranscriptionUrl = (
     if (!validated.ok) {
       return { ok: false, error: API_ERROR_SPEECH_STT_ENDPOINT_INVALID };
     }
-    const base = validated.endpoint.replace(/\/$/u, "");
+    const base = validated.endpoint.replace(TRAILING_SLASH_PATTERN, "");
     const withV1 = base.endsWith("/v1") ? base : `${base}/v1`;
     return { ok: true, url: `${withV1}/audio/transcriptions` };
   }
@@ -122,15 +128,15 @@ const postOpenAiTranscription = async (input: {
   if (!response.ok) {
     return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, 180)}` };
   }
-  try {
-    const parsed = JSON.parse(bodyText) as { text?: unknown };
-    if (typeof parsed.text !== "string" || parsed.text.trim().length === 0) {
-      return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
-    }
-    return { ok: true, text: parsed.text.trim() };
-  } catch {
+  const parsed = safeParseJson(bodyText);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
   }
+  const textValue = parsed.text;
+  if (typeof textValue !== "string" || textValue.trim().length === 0) {
+    return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
+  }
+  return { ok: true, text: textValue.trim() };
 };
 
 export const transcribeSpeechAudio = async (

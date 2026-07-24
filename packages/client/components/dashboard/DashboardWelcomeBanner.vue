@@ -70,8 +70,7 @@ const { t } = useI18n();
         <NuxtLink
           v-if="showSetupAction && primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
         >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}
         </NuxtLink>

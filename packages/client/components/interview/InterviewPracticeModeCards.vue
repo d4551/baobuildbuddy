@@ -63,8 +63,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            :class="[OUTLINE_ACTION_CLASS]"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureJobAria')"
             @click="emit('openJob')"
           >
@@ -89,8 +88,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            :class="[OUTLINE_ACTION_CLASS]"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureStudioAria')"
             @click="emit('openStudio')"
           >

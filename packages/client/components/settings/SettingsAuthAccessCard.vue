@@ -122,8 +122,7 @@ onMounted(() => {
           </button>
           <button
             type="button"
-            :class="[OUTLINE_ACTION_CLASS]"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('settings.authAccess.revokeAria')"
             :disabled="loading || !configured"
             @click="handleRevoke"

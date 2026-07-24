@@ -3021,6 +3021,43 @@ export declare const app: Elysia<"/api", "local", {
     };
 } & {
     api: {
+        [x: string]: {};
+    } & {
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: {
+                        audioBase64: string;
+                        mimeType: string;
+                        filename?: string | undefined;
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            text: string;
+                            provider: string;
+                            model: string;
+                            message: string;
+                        };
+                        400: {
+                            error: string;
+                        };
+                        422: {
+                            error: string;
+                        };
+                        502: {
+                            error: string;
+                        };
+                    };
+                    error: never;
+                };
+            };
+        };
+    };
+} & {
+    api: {
         [x: string]: {
             progress: {
                 get: {
@@ -3622,7 +3659,7 @@ export declare const app: Elysia<"/api", "local", {
                         200: {
                             query: string;
                             results: {
-                                type: "jobs" | "resumes" | "skills" | "studios";
+                                type: "automation-runs" | "cover-letters" | "interview-sessions" | "jobs" | "portfolio-projects" | "resumes" | "skills" | "studios";
                                 id: string;
                                 title: string;
                                 subtitle: string;
@@ -3634,6 +3671,10 @@ export declare const app: Elysia<"/api", "local", {
                                 studios: number;
                                 skills: number;
                                 resumes: number;
+                                "cover-letters": number;
+                                "portfolio-projects": number;
+                                "interview-sessions": number;
+                                "automation-runs": number;
                             };
                             totalTime: number;
                         };

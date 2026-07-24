@@ -13,15 +13,55 @@
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
+import { API_ENDPOINTS } from "../packages/shared/src/constants/endpoints";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
+
+const RESUME_FROM_QUESTIONS_GENERATE_PATH = API_ENDPOINTS.resumeFromQuestionsGenerate;
+
+const DEMO_LOCATOR_RE_0 = /Generate Questions/i;
+const DEMO_LOCATOR_RE_1 = /Question\s+\d+\s+of\s+\d+/i;
+const DEMO_LOCATOR_RE_2 = /synthesize|generate resume|build resume|finish/i;
+const DEMO_LOCATOR_RE_3 = /^Next$/i;
+const DEMO_LOCATOR_RE_4 = /^Edit$/i;
+const DEMO_LOCATOR_RE_5 = /Export/i;
+const DEMO_LOCATOR_RE_6 = /PDF/i;
+const DEMO_LOCATOR_RE_7 = /Add Project|Add Mapping|Add/i;
+const DEMO_LOCATOR_RE_8 = /title/i;
+const DEMO_LOCATOR_RE_9 = /description|bio/i;
+const DEMO_LOCATOR_RE_10 = /technolog/i;
+const DEMO_LOCATOR_RE_11 = /add technology|add/i;
+const DEMO_LOCATOR_RE_12 = /Save|Create|Add Project/i;
+const DEMO_LOCATOR_RE_13 = /Generate Cover Letter|Generate/i;
+const DEMO_LOCATOR_RE_14 = /company/i;
+const DEMO_LOCATOR_RE_15 = /position|role/i;
+const DEMO_LOCATOR_RE_16 = /job description|description/i;
+const DEMO_LOCATOR_RE_17 = /Generate|Create|Submit/i;
+const DEMO_LOCATOR_RE_18 = /send|submit/i;
+const DEMO_LOCATOR_RE_19 = /Studio Drill|Start Studio/i;
+const DEMO_LOCATOR_RE_20 = /Open studio selector/i;
+const DEMO_LOCATOR_RE_21 = /Riot Games/i;
+const DEMO_LOCATOR_RE_22 = /voice|microphone|enable voice/i;
+const DEMO_LOCATOR_RE_23 = /Start interview session/i;
+const DEMO_LOCATOR_RE_24 = /Start listening|Start voice|Listen/i;
+const DEMO_LOCATOR_RE_25 = /start listening|start voice|listen/i;
+const DEMO_LOCATOR_RE_26 = /Stop listening|Stop voice|Stop/i;
+const DEMO_LOCATOR_RE_27 = /Submit|Send Response|Continue/i;
+const DEMO_BANNED_AI_MARKERS = [
+  /bao-demo-deterministic/i,
+  /buildDeterministicContent/i,
+  /DETERMINISTIC_AI/i,
+] as const;
+const TRAILING_SLASH_PATTERN = /\/$/u;
+const INPUT_NAME_TITLE_SELECTOR = `input[name*="${"title"}" i]`;
+const INPUT_PLACEHOLDER_TECH_SELECTOR = `input[placeholder*="${"tech"}" i]`;
 
 const DEMO_VIEWPORT = { width: 1440, height: 900 } as const;
 const DEMO_CAPTURE_FPS = 12;
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
+  TRAILING_SLASH_PATTERN,
   "",
 );
 const OUT =
@@ -30,23 +70,32 @@ const LOCAL_ENDPOINT = (
   process.env.LOCAL_MODEL_ENDPOINT ??
   process.env.PRODUCT_DEMO_LOCAL_ENDPOINT ??
   "http://127.0.0.1:11434/v1"
-).replace(/\/$/u, "");
+).replace(TRAILING_SLASH_PATTERN, "");
 const WHISPER_ENDPOINT = (
   process.env.WHISPER_ENDPOINT ??
   process.env.PRODUCT_DEMO_WHISPER_ENDPOINT ??
   "http://127.0.0.1:8090/v1"
-).replace(/\/$/u, "");
+).replace(TRAILING_SLASH_PATTERN, "");
 const FAKE_AUDIO_WAV =
   process.env.PRODUCT_DEMO_FAKE_AUDIO ??
   join(OUT, "fixtures", "interview-answer.wav");
-const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
-  /\/$/u,
-  "",
-);
+const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(TRAILING_SLASH_PATTERN, "");
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
 };
+
+const waitWhile = async (
+  predicate: () => Promise<boolean>,
+  options: { readonly attempts: number; readonly delayMs: number; readonly page: Page },
+): Promise<void> => {
+  let attempt = 0;
+  while (attempt < options.attempts && (await predicate())) {
+    await wait(options.page, options.delayMs);
+    attempt += 1;
+  }
+};
+
 
 const shot = async (page: Page, name: string): Promise<void> => {
   await page.screenshot({ path: join(OUT, "stills", `${name}.png`), fullPage: false });
@@ -106,8 +155,7 @@ const assertLiveInference = async (): Promise<LiveModelProbe> => {
     throw new Error("Live AI probe failed: empty completion (refusing mock/empty provider).");
   }
   // Deterministic stub historically echoed canned resume/cover text — reject known markers.
-  const banned = [/bao-demo-deterministic/i, /buildDeterministicContent/i, /DETERMINISTIC_AI/i];
-  if (banned.some((pattern) => pattern.test(sample))) {
+  if (DEMO_BANNED_AI_MARKERS.some((pattern) => pattern.test(sample))) {
     throw new Error("Live AI probe failed: response looks like a mock/deterministic stub.");
   }
   await writeOutput(`live AI ok endpoint=${LOCAL_ENDPOINT} model=${modelId} sample=${sample.slice(0, 120)}`);
@@ -211,17 +259,15 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     await settle(studio.selectOption("epic-games"));
   }
 
-  const generate = page.locator("button", { hasText: /Generate Questions/i }).first();
+  const generate = page.locator("button", { hasText: DEMO_LOCATOR_RE_0 }).first();
   await generate.waitFor({ state: "visible", timeout: 10_000 });
-  for (let attempt = 0; attempt < 20 && (await generate.isDisabled()); attempt += 1) {
-    await wait(page, 250);
-  }
+  await waitWhile(() => generate.isDisabled(), { attempts: 20, delayMs: 250, page });
 
   const answerBox = page.locator("textarea:visible").first();
   let sawGenerateRequest = false;
   const onGenerateRequest = (request: { url: () => string; method: () => string }): void => {
     if (
-      request.url().includes("/resumes/from-questions/generate") &&
+      request.url().includes(RESUME_FROM_QUESTIONS_GENERATE_PATH) &&
       request.method() === "POST"
     ) {
       sawGenerateRequest = true;
@@ -231,7 +277,7 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
   const generateStarted = Date.now();
   const generateResponse = page.waitForResponse(
     (response) =>
-      response.url().includes("/resumes/from-questions/generate") &&
+      response.url().includes(RESUME_FROM_QUESTIONS_GENERATE_PATH) &&
       response.request().method() === "POST",
     { timeout: 300_000 },
   );
@@ -251,15 +297,17 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     `resume generate HTTP ${String(generateResult.value.status())} in ${String(Date.now() - generateStarted)}ms`,
   );
   await page
-    .getByText(/Question\s+\d+\s+of\s+\d+/i)
+    .getByText(DEMO_LOCATOR_RE_1)
     .first()
     .waitFor({ state: "visible", timeout: 30_000 });
   await answerBox.waitFor({ state: "visible", timeout: 15_000 });
   await shot(page, "03-resume-questions");
 
-  for (let step = 0; step < 10; step += 1) {
+  let step = 0;
+  while (step < 10) {
     const visibleAnswer = page.locator("textarea:visible").first();
-    if ((await visibleAnswer.count()) === 0) {
+    const answerCount = await visibleAnswer.count();
+    if (answerCount === 0) {
       break;
     }
     await visibleAnswer.fill(
@@ -268,32 +316,35 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     await wait(page, 400);
 
     const synthesize = page
-      .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
+      .locator("button", { hasText: DEMO_LOCATOR_RE_2 })
       .filter({ hasNot: page.locator("[disabled]") })
       .first();
-    if ((await synthesize.count()) > 0 && !(await synthesize.isDisabled())) {
+    const synthesizeCount = await synthesize.count();
+    const synthesizeDisabled = synthesizeCount > 0 ? await synthesize.isDisabled() : true;
+    if (synthesizeCount > 0 && !synthesizeDisabled) {
       await synthesize.click({ timeout: 10_000 });
       break;
     }
 
-    const next = page.locator("button", { hasText: /^Next$/i }).first();
-    if ((await next.count()) === 0) {
+    const next = page.locator("button", { hasText: DEMO_LOCATOR_RE_3 }).first();
+    const nextCount = await next.count();
+    if (nextCount === 0) {
       break;
     }
-    for (let attempt = 0; attempt < 20 && (await next.isDisabled()); attempt += 1) {
-      await wait(page, 200);
-    }
-    if (await next.isDisabled()) {
+    await waitWhile(() => next.isDisabled(), { attempts: 20, delayMs: 200, page });
+    const nextDisabled = await next.isDisabled();
+    if (nextDisabled) {
       break;
     }
     await next.click();
     await wait(page, 600);
+    step += 1;
   }
 
   // Wait for synthesis / completion UI
   await wait(page, 15_000);
   const lateSynth = page
-    .locator("button", { hasText: /synthesize|generate resume|build resume|finish/i })
+    .locator("button", { hasText: DEMO_LOCATOR_RE_2 })
     .first();
   if ((await lateSynth.count()) > 0 && !(await lateSynth.isDisabled())) {
     await settle(lateSynth.click({ timeout: 10_000 }));
@@ -313,19 +364,19 @@ const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
     timeout: 60_000,
   });
   await wait(page, 1_800);
-  const edit = page.getByRole("button", { name: /^Edit$/i }).first();
+  const edit = page.getByRole("button", { name: DEMO_LOCATOR_RE_4 }).first();
   if ((await edit.count()) > 0) {
     await edit.click();
     await wait(page, 1_200);
   }
-  const exportBtn = page.getByRole("button", { name: /Export/i }).first();
+  const exportBtn = page.getByRole("button", { name: DEMO_LOCATOR_RE_5 }).first();
   if ((await exportBtn.count()) > 0) {
     await exportBtn.click();
     await wait(page, 400);
     const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
     await page
-      .getByRole("menuitem", { name: /PDF/i })
-      .or(page.getByRole("button", { name: /PDF/i }))
+      .getByRole("menuitem", { name: DEMO_LOCATOR_RE_6 })
+      .or(page.getByRole("button", { name: DEMO_LOCATOR_RE_6 }))
       .first()
       .click();
     const downloadResult = await settle(downloadPromise);
@@ -347,14 +398,14 @@ const demoPortfolio = async (page: Page): Promise<void> => {
   await wait(page, 1_800);
   await shot(page, "07-portfolio-empty-or-list");
 
-  const add = page.getByRole("button", { name: /Add Project|Add Mapping|Add/i }).first();
+  const add = page.getByRole("button", { name: DEMO_LOCATOR_RE_7 }).first();
   await settle(add.click({ timeout: 8_000 }));
   await wait(page, 1_000);
 
-  const title = page.getByLabel(/title/i).or(page.locator('input[name*="title" i]')).first();
+  const title = page.getByLabel(DEMO_LOCATOR_RE_8).or(page.locator(INPUT_NAME_TITLE_SELECTOR)).first();
   await settle(title.fill("Combat Sandbox Prototype"));
   const description = page
-    .getByLabel(/description|bio/i)
+    .getByLabel(DEMO_LOCATOR_RE_9)
     .or(page.locator("textarea"))
     .first();
   await settle(
@@ -362,14 +413,17 @@ const demoPortfolio = async (page: Page): Promise<void> => {
       "Encounter pacing lab for co-op readability — Unreal + TypeScript tooling, featured on portfolio.",
     ),
   );
-  const tech = page.getByLabel(/technolog/i).or(page.locator('input[placeholder*="tech" i]')).first();
+  const tech = page
+    .getByLabel(DEMO_LOCATOR_RE_10)
+    .or(page.locator(INPUT_PLACEHOLDER_TECH_SELECTOR))
+    .first();
   if ((await tech.count()) > 0) {
     await settle(tech.fill("Unreal Engine"));
-    const addTech = page.getByRole("button", { name: /add technology|add/i }).first();
+    const addTech = page.getByRole("button", { name: DEMO_LOCATOR_RE_11 }).first();
     await settle(addTech.click());
   }
 
-  const save = page.getByRole("button", { name: /Save|Create|Add Project/i }).last();
+  const save = page.getByRole("button", { name: DEMO_LOCATOR_RE_12 }).last();
   await settle(save.click({ timeout: 8_000 }));
   await wait(page, 2_500);
   await shot(page, "08-portfolio-project-added");
@@ -390,20 +444,20 @@ const demoCoverLetter = async (page: Page): Promise<void> => {
   await wait(page, 1_800);
   await shot(page, "10-cover-letter-hub");
 
-  const generate = page.locator("button", { hasText: /Generate Cover Letter|Generate/i }).first();
+  const generate = page.locator("button", { hasText: DEMO_LOCATOR_RE_13 }).first();
   await generate.click({ timeout: 10_000 });
   await wait(page, 1_200);
 
-  await page.getByLabel(/company/i).first().fill("Hitmarker Studios");
-  await page.getByLabel(/position|role/i).first().fill("Gameplay Programmer");
-  const jobDesc = page.getByLabel(/job description|description/i).first();
+  await page.getByLabel(DEMO_LOCATOR_RE_14).first().fill("Hitmarker Studios");
+  await page.getByLabel(DEMO_LOCATOR_RE_15).first().fill("Gameplay Programmer");
+  const jobDesc = page.getByLabel(DEMO_LOCATOR_RE_16).first();
   if ((await jobDesc.count()) > 0) {
     await jobDesc.fill(
       "Looking for a gameplay programmer to own combat systems, work with design, and ship live updates.",
     );
   }
 
-  const submit = page.locator("button", { hasText: /Generate|Create|Submit/i }).last();
+  const submit = page.locator("button", { hasText: DEMO_LOCATOR_RE_17 }).last();
   await submit.click({ timeout: 10_000 });
   await wait(page, 45_000);
   await shot(page, "11-cover-letter-generated");
@@ -428,7 +482,7 @@ const demoAiChat = async (page: Page): Promise<void> => {
   await input.fill(
     "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
   );
-  const send = page.locator("button", { hasText: /send|submit/i }).first();
+  const send = page.locator("button", { hasText: DEMO_LOCATOR_RE_18 }).first();
   await send.click({ timeout: 8_000 });
   await wait(page, 45_000);
   await shot(page, "14-ai-chat-response");
@@ -442,17 +496,17 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 2_000);
   await shot(page, "15-interview-hub");
 
-  const studio = page.locator("button", { hasText: /Studio Drill|Start Studio/i }).first();
+  const studio = page.locator("button", { hasText: DEMO_LOCATOR_RE_19 }).first();
   await studio.click({ timeout: 10_000 });
   await wait(page, 1_500);
   await shot(page, "16-interview-config");
 
   // StudioSelector is a custom combobox (not a native <select>).
-  const studioToggle = page.getByRole("button", { name: /Open studio selector/i }).first();
+  const studioToggle = page.getByRole("button", { name: DEMO_LOCATOR_RE_20 }).first();
   await studioToggle.waitFor({ state: "visible", timeout: 10_000 });
   await studioToggle.click({ timeout: 8_000 });
   const studioOption = page
-    .getByRole("option", { name: /Riot Games/i })
+    .getByRole("option", { name: DEMO_LOCATOR_RE_21 })
     .or(page.getByRole("option").nth(1))
     .first();
   await studioOption.waitFor({ state: "visible", timeout: 10_000 });
@@ -460,16 +514,14 @@ const demoInterview = async (page: Page): Promise<void> => {
   await wait(page, 800);
 
   // Enable voice mode when the config checkbox exists.
-  const voiceToggle = page.getByLabel(/voice|microphone|enable voice/i).first();
+  const voiceToggle = page.getByLabel(DEMO_LOCATOR_RE_22).first();
   if ((await voiceToggle.count()) > 0) {
     await settle(voiceToggle.check({ force: true }));
   }
 
-  const start = page.getByRole("button", { name: /Start interview session/i }).first();
+  const start = page.getByRole("button", { name: DEMO_LOCATOR_RE_23 }).first();
   await start.waitFor({ state: "visible", timeout: 10_000 });
-  for (let attempt = 0; attempt < 40 && (await start.isDisabled()); attempt += 1) {
-    await wait(page, 250);
-  }
+  await waitWhile(() => start.isDisabled(), { attempts: 40, delayMs: 250, page });
   if (await start.isDisabled()) {
     throw new Error("Interview start stayed disabled after studio selection.");
   }
@@ -479,14 +531,14 @@ const demoInterview = async (page: Page): Promise<void> => {
 
   // Whisper STT via fake mic capture → MediaRecorder → /api/speech/transcribe.
   const micStart = page
-    .locator("button", { hasText: /Start listening|Start voice|Listen/i })
-    .or(page.getByRole("button", { name: /start listening|start voice|listen/i }))
+    .locator("button", { hasText: DEMO_LOCATOR_RE_24 })
+    .or(page.getByRole("button", { name: DEMO_LOCATOR_RE_25 }))
     .first();
   if ((await micStart.count()) > 0) {
     await micStart.click({ timeout: 8_000 });
     await wait(page, 6_500);
     const micStop = page
-      .locator("button", { hasText: /Stop listening|Stop voice|Stop/i })
+      .locator("button", { hasText: DEMO_LOCATOR_RE_26 })
       .first();
     if ((await micStop.count()) > 0) {
       await micStop.click({ timeout: 8_000 });
@@ -503,7 +555,7 @@ const demoInterview = async (page: Page): Promise<void> => {
     );
   }
   const submit = page
-    .locator("button", { hasText: /Submit|Send Response|Continue/i })
+    .locator("button", { hasText: DEMO_LOCATOR_RE_27 })
     .first();
   await submit.click({ timeout: 8_000 });
   await wait(page, 45_000);
@@ -556,10 +608,8 @@ const startDisplayRecorder = async (): Promise<DisplayRecorder> => {
 
   return {
     stop: async () => {
-      try {
+      if (proc.exitCode === null) {
         proc.kill("SIGINT");
-      } catch {
-        // already exited
       }
       const code = await proc.exited;
       if (code !== 0 && code !== 255) {
@@ -567,8 +617,9 @@ const startDisplayRecorder = async (): Promise<DisplayRecorder> => {
         await writeError(`x11grab failed (${String(code)}): ${err.slice(0, 400)}`);
         return { mp4Path: null, webmPath: null };
       }
-      const rawExists = await Bun.file(rawPath).exists();
-      if (!rawExists || (await Bun.file(rawPath).size) < 50_000) {
+      const rawFile = Bun.file(rawPath);
+      const rawExists = await rawFile.exists();
+      if (!rawExists || rawFile.size < 50_000) {
         await writeError("x11grab produced missing/small capture");
         return { mp4Path: null, webmPath: null };
       }
@@ -646,7 +697,8 @@ const main = async (): Promise<void> => {
   });
 
   let tourError: string | null = null;
-  try {
+  const tourSettled = await settle(
+    (async () => {
     await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, {
       waitUntil: "domcontentloaded",
       timeout: 60_000,
@@ -677,8 +729,10 @@ const main = async (): Promise<void> => {
     });
     await wait(page, 2_000);
     await shot(page, "19-dashboard-complete");
-  } catch (error) {
-    tourError = error instanceof Error ? error.message : String(error);
+    })(),
+  );
+  if (tourSettled.status === "rejected") {
+    tourError = tourSettled.reason.message;
     await writeError(`product demo tour failed: ${tourError}`);
     await settle(shot(page, "99-tour-failed"));
   }

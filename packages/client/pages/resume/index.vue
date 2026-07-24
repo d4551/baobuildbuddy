@@ -98,8 +98,7 @@ const {
         </button>
         <NuxtLink
           :to="APP_ROUTES.resumeBuild"
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('resumePage.guidedButtonAria')"
         >
           {{ t("resumePage.guidedButton") }}

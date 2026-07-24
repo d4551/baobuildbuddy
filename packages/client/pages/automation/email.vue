@@ -9,7 +9,6 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   PRIMARY_ACTION_CLASS,
   OUTLINE_ACTION_CLASS,
@@ -56,7 +55,7 @@ useSeoMeta({
       :description="t('automation.email.pageDescription')"
     >
       <template #actions>
-          <NuxtLink
+        <NuxtLink
           :to="APP_ROUTES.automationRuns"
           :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.email.openRunsAria')"

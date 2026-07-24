@@ -6,7 +6,6 @@ import {
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {

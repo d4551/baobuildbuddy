@@ -81,6 +81,8 @@ bun run build
 bun run validate:stack-versions
 ```
 
+**Biome exception (scripts only):** `scripts/browser-record-product-demo.ts` may disable `performance/noAwaitInLoops` because headed Playwright capture must poll UI sequentially (parallel `Promise.all` races the DOM). Product/runtime packages keep the rule as `error`.
+
 Optional interactive stack: `bun run dev` (server + client; Nuxt on `127.0.0.1:3001` by default).
 
 Browser UI proof (Playwright; requires running client):

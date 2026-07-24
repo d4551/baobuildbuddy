@@ -54,8 +54,7 @@ const { t } = useI18n();
         >
           <template #actions>
             <button
-              :class="[OUTLINE_ACTION_CLASS]"
-              :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('jobDetail.interviewAria')"
               @click="emit('interview')"
             >
@@ -76,8 +75,7 @@ const { t } = useI18n();
             </button>
 
             <button
-              :class="[OUTLINE_ACTION_CLASS]"
-              :class="[TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"
             >

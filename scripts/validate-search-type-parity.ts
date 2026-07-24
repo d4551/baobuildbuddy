@@ -58,7 +58,7 @@ export const collectSearchTypeParityViolations = (input: {
   }
 
   for (const key of clientKeys) {
-    if (!expected.has(key as (typeof SEARCH_RESULT_TYPES)[number])) {
+    if (!expected.has(key)) {
       violations.push({
         filePath: CLIENT_ROUTE_FILE,
         line: 1,

@@ -100,8 +100,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
         </NuxtLink>
         <button
           v-if="hasMappings"
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :disabled="analyzing"
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"

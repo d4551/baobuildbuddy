@@ -45,8 +45,7 @@ const page = useJobsIndexPage();
       <template v-if="!page.isCatalogEmpty.value" #actions>
         <button
           type="button"
-          :class="[OUTLINE_ACTION_CLASS]"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('jobsPage.aiMatchAria')"
           :disabled="page.matching.value"
           @click="page.handleAiMatch()"
@@ -179,8 +178,7 @@ const page = useJobsIndexPage();
           <template v-if="page.isCatalogEmpty.value" #actions>
             <button
               type="button"
-              :class="[OUTLINE_ACTION_CLASS]"
-              :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
               :aria-label="t('jobsPage.refreshAria')"
               :disabled="page.refreshing.value"
               @click="page.handleRefresh()"

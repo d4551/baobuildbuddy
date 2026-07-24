@@ -8,6 +8,7 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 
 const NAV_FILE = "packages/client/constants/navigation.ts";
 const SHORTCUT_FILE = "packages/client/composables/useKeyboardShortcuts.ts";
+const KEYBOARD_OPTIONAL_PATTERN = /keyboardOptional:\s*true/u;
 
 const NAV_ITEM_BLOCK_PATTERN =
   /\{\s*id:\s*"([^"]+)"[\s\S]*?includeInSidebar:\s*(true|false)([\s\S]*?)(?=\n\s*\{|\n\];)/gu;
@@ -32,7 +33,7 @@ export const collectKeyboardNavParityViolations = (input: {
     if (!includeInSidebar || id.length === 0) {
       continue;
     }
-    const optional = /keyboardOptional:\s*true/u.test(rest);
+    const optional = KEYBOARD_OPTIONAL_PATTERN.test(rest);
     if (!optional && !shortcutIds.has(id)) {
       violations.push({
         filePath: NAV_FILE,

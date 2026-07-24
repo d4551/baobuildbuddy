@@ -67,8 +67,7 @@ const { t } = useI18n();
             </NuxtLink>
             <NuxtLink
               :to="APP_ROUTES.jobs"
-              :class="[OUTLINE_ACTION_CLASS]"
-              :class="[TOUCH_TARGET_MIN_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             >
               {{ t("dashboard.quickActions.actions.browseJobs") }}
             </NuxtLink>

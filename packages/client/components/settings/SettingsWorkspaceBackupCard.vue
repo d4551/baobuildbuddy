@@ -96,8 +96,7 @@ async function handleImportFile(event: Event): Promise<void> {
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <button
             type="button"
-            :class="[OUTLINE_ACTION_CLASS]"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('settings.preferences.exportAria')"
             :disabled="pending"
             @click="handleExport"
@@ -107,8 +106,7 @@ async function handleImportFile(event: Event): Promise<void> {
           </button>
           <button
             type="button"
-            :class="[OUTLINE_ACTION_CLASS]"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('settings.preferences.importAria')"
             :disabled="pending"
             @click="requestImportPicker"

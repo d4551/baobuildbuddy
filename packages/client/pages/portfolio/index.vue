@@ -160,8 +160,7 @@ function updateProjectForm(value: typeof projectForm): void {
           <template #actions>
             <button
               type="button"
-              :class="[OUTLINE_ACTION_CLASS]"
-              :class="[FLUID_WIDTH_CLASS]"
+              :class="[OUTLINE_ACTION_CLASS, FLUID_WIDTH_CLASS]"
               :aria-label="t('portfolioPage.emptyState.profileButton')"
               @click="showEmptyProfileEditor = !showEmptyProfileEditor"
             >
