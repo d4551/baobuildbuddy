@@ -108,7 +108,11 @@
       }
     },
     {
-      "includes": ["scripts/browser-record-product-demo.ts"],
+      "includes": [
+        "scripts/browser-record-product-demo.ts",
+        "scripts/browser-record-desktop-capabilities.ts",
+        "scripts/browser-record-visual-proof.ts"
+      ],
       "linter": {
         "rules": {
           "performance": {
