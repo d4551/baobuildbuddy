@@ -276,18 +276,6 @@ describe("auth init routes", () => {
   });
 });
 
-describe("auth configured routes", () => {
-  test("GET auth configured reflects key configuration state", async () => {
-    const configured = await requestJson<{ configured: boolean }>(
-      app,
-      "GET",
-      API_ENDPOINTS.authConfigured,
-    );
-    expect(configured.status).toBe(HTTP_STATUS_OK);
-    expect(typeof configured.body.configured).toBe("boolean");
-  });
-});
-
 describe("user routes", () => {
   test("GET user profile auto-creates the default profile", async () => {
     const profile = await requestJson<UserProfileResponse>(app, "GET", API_ENDPOINTS.userProfile);

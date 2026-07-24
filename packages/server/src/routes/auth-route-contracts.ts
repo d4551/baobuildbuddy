@@ -22,10 +22,6 @@ export const authStatusResponseSchema = t.Object({
   setupTokenConfigured: t.Boolean(),
 });
 
-export const authConfiguredResponseSchema = t.Object({
-  configured: t.Boolean(),
-});
-
 export const authInitSuccessResponseSchema = t.Object({
   configured: t.Boolean(),
   apiKey: t.Optional(t.String()),
@@ -34,10 +30,6 @@ export const authInitSuccessResponseSchema = t.Object({
 
 export const authStatusResponses = {
   [HTTP_STATUS_OK]: authStatusResponseSchema,
-} as const;
-
-export const authConfiguredResponses = {
-  [HTTP_STATUS_OK]: authConfiguredResponseSchema,
 } as const;
 
 export const authInitResponses = {
