@@ -1,73 +1,77 @@
 /**
  * Script-side numeric SSOT. Named consts only; noMagicNumbers stays error.
- * Prefer shared package constants when a domain name already exists.
+ * Values that exist in the shared package are re-exported from there — the
+ * shared package owns the definition, this module owns script-only extras.
  */
+
+export {
+  HTTP_STATUS_OK as HTTP_OK,
+  HTTP_STATUS_CREATED as HTTP_CREATED,
+  HTTP_STATUS_BAD_REQUEST as HTTP_BAD_REQUEST,
+  HTTP_STATUS_UNAUTHORIZED as HTTP_UNAUTHORIZED,
+  HTTP_STATUS_FORBIDDEN as HTTP_FORBIDDEN,
+  HTTP_STATUS_NOT_FOUND as HTTP_NOT_FOUND,
+  HTTP_STATUS_CONFLICT as HTTP_CONFLICT,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY as HTTP_UNPROCESSABLE,
+  HTTP_STATUS_TOO_MANY_REQUESTS as HTTP_TOO_MANY_REQUESTS,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR as HTTP_INTERNAL_ERROR,
+  HTTP_STATUS_BAD_GATEWAY as HTTP_BAD_GATEWAY,
+  HTTP_STATUS_SERVICE_UNAVAILABLE as HTTP_SERVICE_UNAVAILABLE,
+} from "../../packages/shared/src/constants/http";
+
+export {
+  PERCENT_MAX,
+  PERCENT_HIGH,
+  PERCENT_MID,
+  PERCENT_LOW,
+  MS_TWO_SECONDS,
+  MS_ONE_AND_HALF_SECONDS,
+  MS_ONE_AND_EIGHT_SECONDS,
+  MS_TWO_AND_HALF_SECONDS,
+  MS_FIVE_SECONDS,
+  MS_TEN_SECONDS,
+  MS_THIRTY_SECONDS,
+  COUNT_THREE,
+  COUNT_FOUR,
+  COUNT_FIVE,
+  COUNT_SIX,
+  COUNT_SEVEN,
+  COUNT_EIGHT,
+  COUNT_TWELVE,
+  COUNT_FIFTEEN,
+  COUNT_SIXTEEN,
+  COUNT_EIGHTEEN,
+  COUNT_TWENTY,
+  COUNT_TWENTY_FIVE,
+  COUNT_THIRTY,
+  COUNT_THIRTY_TWO,
+  COUNT_THIRTY_FOUR,
+  COUNT_THIRTY_SIX,
+  COUNT_FORTY,
+  COUNT_FIFTY,
+  COUNT_SEVENTY,
+  COUNT_ONE_TWENTY,
+  COUNT_ONE_FIFTY,
+  COUNT_TWO_FORTY,
+  COUNT_TWO_FIFTY,
+  COUNT_FIVE_HUNDRED,
+  BYTES_KILO,
+  BYTES_TWO_KILO,
+  RATIO_HALF,
+  RATIO_SEVEN_TENTHS,
+  HTTP_NO_CONTENT,
+} from "../../packages/shared/src/constants/numeric";
 
 export const PAD_LOCALE_WIDTH = 5;
 export const PAD_ROUTE_WIDTH = 26;
 export const PAD_STATUS_WIDTH = 3;
 
-export const HTTP_OK = 200;
-export const HTTP_CREATED = 201;
-export const HTTP_NO_CONTENT = 204;
-export const HTTP_BAD_REQUEST = 400;
-export const HTTP_UNAUTHORIZED = 401;
-export const HTTP_FORBIDDEN = 403;
-export const HTTP_NOT_FOUND = 404;
-export const HTTP_CONFLICT = 409;
-export const HTTP_UNPROCESSABLE = 422;
-export const HTTP_TOO_MANY_REQUESTS = 429;
-export const HTTP_INTERNAL_ERROR = 500;
-export const HTTP_BAD_GATEWAY = 502;
-export const HTTP_SERVICE_UNAVAILABLE = 503;
-
-export const PERCENT_MAX = 100;
-export const PERCENT_HIGH = 80;
-export const PERCENT_MID = 50;
-export const PERCENT_LOW = 20;
-
 export const MS_ONE_HUNDRED = 100;
 export const MS_SECOND = 1000;
-export const MS_TWO_SECONDS = 2_000;
-export const MS_ONE_AND_HALF_SECONDS = 1_500;
-export const MS_ONE_AND_EIGHT_SECONDS = 1_800;
-export const MS_TWO_AND_HALF_SECONDS = 2_500;
-export const MS_FIVE_SECONDS = 5_000;
-export const MS_TEN_SECONDS = 10_000;
-export const MS_THIRTY_SECONDS = 30_000;
 export const MS_MINUTE = 60_000;
 
 export const COUNT_TWO = 2;
-export const COUNT_THREE = 3;
-export const COUNT_FOUR = 4;
-export const COUNT_FIVE = 5;
-export const COUNT_SIX = 6;
-export const COUNT_SEVEN = 7;
-export const COUNT_EIGHT = 8;
-export const COUNT_TWELVE = 12;
-export const COUNT_FIFTEEN = 15;
-export const COUNT_SIXTEEN = 16;
-export const COUNT_EIGHTEEN = 18;
-export const COUNT_TWENTY = 20;
-export const COUNT_TWENTY_FIVE = 25;
-export const COUNT_THIRTY = 30;
-export const COUNT_THIRTY_TWO = 32;
-export const COUNT_THIRTY_FOUR = 34;
-export const COUNT_THIRTY_SIX = 36;
-export const COUNT_FORTY = 40;
-export const COUNT_FIFTY = 50;
-export const COUNT_SEVENTY = 70;
-export const COUNT_ONE_TWENTY = 120;
-export const COUNT_ONE_FIFTY = 150;
 export const COUNT_TWO_HUNDRED = 200;
-export const COUNT_TWO_FORTY = 240;
-export const COUNT_TWO_FIFTY = 250;
-export const COUNT_FIVE_HUNDRED = 500;
-export const BYTES_KILO = 1024;
-export const BYTES_TWO_KILO = 2048;
-
-export const RATIO_HALF = 0.5;
-export const RATIO_SEVEN_TENTHS = 0.7;
 
 /** Owner read/write, group read, other read (`chmod 644`). */
 export const FILE_MODE_RW_R_R = 0o644;

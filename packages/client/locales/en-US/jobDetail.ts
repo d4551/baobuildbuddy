@@ -61,7 +61,6 @@ const jobDetail = {
     invalidIdBody: "Choose a job from the jobs list to review its details.",
     backToJobs: "Back to jobs",
     backToJobsAria: "Return to jobs list",
-    invalidId: "No job selected.",
   },
 } as const;
 

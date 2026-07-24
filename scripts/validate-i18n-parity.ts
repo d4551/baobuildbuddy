@@ -82,6 +82,43 @@ const loadCoverageFloors = (): CoverageFloors => {
   return parsed;
 };
 
+/**
+ * Floors are a ratchet: they may only ever rise. Compare the working-tree
+ * floors against HEAD — any decrease is a softening and fails the gate. When
+ * the file is untracked at HEAD (first introduction) the check is skipped.
+ */
+const loadHeadFloors = (): CoverageFloors | null => {
+  const result = Bun.spawnSync({
+    cmd: ["git", "show", `HEAD:${COVERAGE_FLOORS_PATH}`],
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  if (result.exitCode !== 0) {
+    return null;
+  }
+  const parsed = safeParseJson(result.stdout.toString());
+  return isCoverageFloors(parsed) ? parsed : null;
+};
+
+const collectFloorRatchetViolations = (
+  current: CoverageFloors,
+  head: CoverageFloors | null,
+): ValidationViolation[] => {
+  if (head === null) {
+    return [];
+  }
+  return Object.entries(current.floors)
+    .filter(([localeId, floor]) => {
+      const headFloor = head.floors[localeId];
+      return typeof headFloor === "number" && floor < headFloor;
+    })
+    .map(([localeId, floor]) => ({
+      filePath: COVERAGE_FLOORS_PATH,
+      line: 1,
+      message: `Coverage floor for "${localeId}" was lowered (${head.floors[localeId]}% -> ${floor}%). Floors are a ratchet and may only rise.`,
+    }));
+};
+
 const referenceKeys = new Set(collectPaths(enUSCatalog));
 const criticalPrefixes = loadCriticalPrefixes();
 const criticalReferenceKeys = [...referenceKeys].filter((key) =>
@@ -143,6 +180,7 @@ const collectOrphanKeyViolations = (
 const collectViolations = (): ValidationViolation[] => {
   const floors = loadCoverageFloors();
   const violations: ValidationViolation[] = [];
+  violations.push(...collectFloorRatchetViolations(floors, loadHeadFloors()));
 
   for (const { filePath, localeId, value } of locales) {
     const localeKeys = new Set(collectPaths(value));

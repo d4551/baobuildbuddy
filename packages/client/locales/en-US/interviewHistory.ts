@@ -6,7 +6,6 @@ const interviewHistory = {
     allSessionsTitle: "All Sessions",
     studioFilterAria: "Filter sessions by studio",
     allStudiosOption: "All studios",
-    emptyState: "No interview sessions found.",
     emptyStateTitle: "No interview sessions found",
     emptyStateDescription:
       "Start a new interview from a scraped job or studio drill to populate your practice history.",
@@ -30,7 +29,6 @@ const interviewHistory = {
     questionAria: "Interview question {index}",
     questionHeader: "Q{index}: {score}%",
     overallFeedbackLabel: "Overall Feedback",
-    selectPrompt: "Select a session to view details",
     selectPromptTitle: "Choose a session",
     selectPromptDescription:
       "Open any interview run from the list to inspect scores, answers, and AI feedback.",

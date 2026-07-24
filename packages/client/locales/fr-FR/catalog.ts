@@ -235,7 +235,6 @@ const catalog = {
     retryButton: "Réessayer",
     retryAria: "Réessayer le chargement de l'aperçu du CV",
     loadError: "Impossible de charger l'aperçu du CV.",
-    notFound: "CV introuvable. Veuillez sélectionner un CV à prévisualiser.",
     notFoundTitle: "CV introuvable",
     notFoundDescription: "Sélectionnez un CV enregistré depuis l'espace CV pour ouvrir cet aperçu.",
     websiteLinkAria: "Ouvrir le site web personnel",

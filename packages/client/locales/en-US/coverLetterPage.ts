@@ -6,7 +6,6 @@ const coverLetterPage = {
     generateButton: "Generate Cover Letter",
     generateButtonAria: "Open cover-letter generation dialog",
     notAvailable: "N/A",
-    emptyState: "No cover letters yet. Generate your first one to get started.",
     emptyStateTitle: "No cover letters yet",
     emptyStateDescription: "Generate your first one to get started.",
     filteredEmptyTitle: "No cover letters match these filters",

@@ -242,7 +242,6 @@ const catalog = {
     retryButton: "再試行",
     retryAria: "履歴書プレビューの読み込みを再試行",
     loadError: "履歴書プレビューの読み込みに失敗しました。",
-    notFound: "履歴書が見つかりません。プレビューする履歴書を選択してください。",
     notFoundTitle: "履歴書が見つかりません",
     notFoundDescription:
       "このプレビューを開くには、履歴書ワークスペースから保存済みの履歴書を選択してください。",

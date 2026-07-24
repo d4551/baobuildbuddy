@@ -10,7 +10,6 @@ const resumePreview = {
     retryButton: "Retry",
     retryAria: "Retry loading resume preview",
     loadError: "Failed to load resume preview.",
-    notFound: "Resume not found. Please select a resume to preview.",
     notFoundTitle: "Resume not found",
     notFoundDescription: "Select a saved resume from the resume workspace to open this preview.",
     website: "Website",

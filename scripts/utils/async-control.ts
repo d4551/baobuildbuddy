@@ -49,11 +49,7 @@ export const withCleanup = <T>(
 
 /**
  * Converts a rejection value into a human-readable message.
+ * Definition SSOT: @bao/shared error-helpers (re-exported here so script
+ * call sites keep a single import surface).
  */
-export const toErrorMessage = <T>(error: T, fallback: string = "Unexpected error."): string => {
-  const err = asError(error);
-  if (err.message.trim().length > 0) {
-    return err.message;
-  }
-  return fallback;
-};
+export { toErrorMessage } from "../../packages/shared/src/utils/error-helpers";

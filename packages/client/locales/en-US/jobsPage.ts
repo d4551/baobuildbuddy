@@ -103,7 +103,6 @@ const jobsPage = {
         indie: "Indie",
       },
     },
-    emptyState: "No jobs found. Try adjusting your filters or search query.",
     bootstrapError: "Could not load the job board.",
     bootstrapRetry: "Retry",
     bootstrapRetryAria: "Retry loading the job board",

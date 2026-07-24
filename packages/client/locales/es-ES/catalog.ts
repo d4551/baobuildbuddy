@@ -121,6 +121,8 @@ const catalog = {
       invalidPayload: "Datos de configuración no válidos",
       loadFailed: "Error al cargar configuración",
       missingResponse: "Respuesta de configuración faltante",
+      exportFailed: "Error al exportar configuración",
+      importFailed: "Error al importar configuración",
     },
     user: {
       fetchProfileFailed: "Error al obtener perfil",
@@ -280,6 +282,7 @@ const catalog = {
     onboardingChecklistTitle: "Completa estos pasos de incorporación",
     setupCtaLabel: "Completar Configuración",
     metricsSummaryLabel: "Resumen de {brand}",
+    dailyChallengeXpLabel: "+{xp} XP",
     pipelineTitle: "Flujo de Carrera",
     pipelineDescription:
       "Mantén el impulso en descubrimiento, extracción, personalización de currículum, automatización de solicitudes y progresión de XP.",
@@ -397,6 +400,7 @@ const catalog = {
       "Completa tareas de configuración, inicia la práctica de entrevistas y realiza desafíos diarios para ganar XP y desbloquear logros.",
     emptyStateCta: "Abrir Panel",
     levelPrefix: "Nivel",
+    xpSuffix: "XP",
     xpUntilLevelLabel: "XP hasta el nivel",
     xpMaxLevelLabel: "Nivel máximo alcanzado — cada acción sigue sumando XP",
     currentStreakTitle: "Racha Actual",
@@ -507,7 +511,6 @@ const catalog = {
         cardGame: "Juego de Cartas",
       },
     },
-    emptyState: "No se encontraron empleos. Prueba ajustando filtros o búsqueda.",
     openJobAria: "Abrir detalles del empleo {title} en {company}",
     remoteBadge: "Remoto",
     matchScoreAria: "Puntuación de coincidencia",
@@ -574,7 +577,6 @@ const catalog = {
     retryButton: "Reintentar",
     retryAria: "Reintentar carga de la vista previa del currículum",
     loadError: "Error al cargar la vista previa del currículum.",
-    notFound: "No se encontró el currículum. Selecciona uno para previsualizar.",
     notFoundTitle: "No se encontró el currículum",
     notFoundDescription:
       "Selecciona un currículum guardado desde el espacio de currículums para abrir esta vista previa.",
@@ -713,7 +715,6 @@ const catalog = {
       cancelButton: "Cancelar",
     },
     toasts: {
-      mappingAdded: "Mapeo de habilidad añadido",
       mappingAddedWithXp: "Mapeo de habilidad añadido (+{xp} XP)",
       mappingDeleted: "Mapeo de habilidad eliminado",
       analysisCompleted: "Habilidades analizadas correctamente",
@@ -799,8 +800,6 @@ const catalog = {
         step_learn_careers: "Conoce opciones profesionales de la industria del juego.",
         step_setup_profile: "Configura tu perfil profesional.",
       },
-      emptyState:
-        "Los datos de preparación no están disponibles. Añade mapeos y ejecuta el análisis primero.",
       emptyStateTitle: "Los datos de preparación aún no están disponibles",
       emptyStateDescription:
         "Añade más evidencia de habilidades mapeadas y vuelve a ejecutar el análisis para completar esta sección.",
@@ -817,8 +816,6 @@ const catalog = {
         stable: "Estable",
         declining: "En declive",
       },
-      emptyState:
-        "Sin rutas disponibles. Añade más habilidades mapeadas para generar recomendaciones.",
       emptyStateTitle: "Aún no hay rutas disponibles",
       emptyStateDescription:
         "Amplía las habilidades mapeadas para desbloquear mejores recomendaciones y cobertura de rutas.",
@@ -1135,7 +1132,6 @@ const catalog = {
     generateButton: "Generar Carta de Presentación",
     generateButtonAria: "Abrir diálogo de generación de carta",
     notAvailable: "N/D",
-    emptyState: "Sin cartas aún. Genera tu primera para empezar.",
     emptyStateTitle: "Sin cartas aún",
     emptyStateDescription: "Genera tu primera para empezar.",
     filteredEmptyTitle: "Ninguna carta coincide con estos filtros",
@@ -1569,7 +1565,6 @@ const catalog = {
     invalidIdBody: "Elige un empleo de la lista para revisar sus detalles.",
     backToJobs: "Volver a empleos",
     backToJobsAria: "Volver a la lista de empleos",
-    invalidId: "No hay ningún empleo seleccionado.",
   },
   studioDetail: {
     breadcrumbs: {
@@ -1880,7 +1875,6 @@ const catalog = {
       allStatuses: "Todos los estados",
       tableAriaLabel: "Historial de ejecuciones",
       emptyJobId: "N/D",
-      emptyState: "No se encontraron ejecuciones.",
       emptyStateTitle: "Aún no hay ejecuciones de automatización",
       emptyStateDescription:
         "Inicia un scraper, postulación o correo desde el hub para poblar el historial.",
@@ -2425,7 +2419,6 @@ const catalog = {
     allSessionsTitle: "Todas las Sesiones",
     studioFilterAria: "Filtrar sesiones por estudio",
     allStudiosOption: "Todos los estudios",
-    emptyState: "No se encontraron sesiones de entrevista.",
     emptyStateTitle: "No se encontraron sesiones de entrevista",
     emptyStateDescription:
       "Inicia una nueva entrevista desde un empleo extraído o una práctica por estudio para llenar el historial.",
@@ -2447,7 +2440,6 @@ const catalog = {
     questionAria: "Pregunta de entrevista {index}",
     questionHeader: "P{index}: {score}%",
     overallFeedbackLabel: "Feedback General",
-    selectPrompt: "Selecciona una sesión para ver detalles",
     selectPromptTitle: "Elige una sesión",
     selectPromptDescription:
       "Abre cualquier sesión de la lista para revisar puntuaciones, respuestas y comentarios de IA.",
