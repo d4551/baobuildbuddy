@@ -17,24 +17,24 @@ import {
   buildGamificationChallengeCompleteEndpoint,
 } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import { DEFAULT_SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { requestJson } from "../test-utils";
 
-type SearchCountSnapshot = {
-  jobs: number;
-  studios: number;
-  skills: number;
-  resumes: number;
-};
+type SearchCountSnapshot = Record<SearchResultType, number>;
 
 type SearchResult = {
-  type: "jobs" | "studios" | "skills" | "resumes";
+  type: SearchResultType;
   id: string;
   title: string;
   subtitle: string;
   snippet: string;
   relevance: number;
 };
+
+const EMPTY_SEARCH_COUNTS = Object.fromEntries(
+  DEFAULT_SEARCH_RESULT_TYPES.map((type) => [type, 0]),
+) as SearchCountSnapshot;
 
 type SearchResponse = {
   query: string;
@@ -168,16 +168,7 @@ describe("search routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.query).toBe(SEARCH_QUERY_SHORT);
     expect(res.body.results).toEqual([]);
-    expect(res.body.counts).toEqual({
-      jobs: 0,
-      studios: 0,
-      skills: 0,
-      resumes: 0,
-      "cover-letters": 0,
-      "portfolio-projects": 0,
-      "interview-sessions": 0,
-      "automation-runs": 0,
-    });
+    expect(res.body.counts).toEqual(EMPTY_SEARCH_COUNTS);
     expect(res.body.totalTime).toBeGreaterThanOrEqual(0);
   });
 
