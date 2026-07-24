@@ -143,6 +143,7 @@ export const PADDING_TOKEN_CLASS = {
   pr10: "pr-10",
   pr14: "pr-14",
   pt2: "pt-2",
+  pt3: "pt-3",
   pt4: "pt-4",
 } as const;
 export type PaddingToken = keyof typeof PADDING_TOKEN_CLASS;

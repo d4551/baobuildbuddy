@@ -65,8 +65,13 @@ function sidebarLinkClass(item: NavigationItem): string[] {
     <nav :aria-label="t('a11y.primaryNavigation')" class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, TRUNCATE_FLEX_CHILD_CLASS]">
       <template v-for="group in sidebarGroups" :key="group.id">
         <p
-          class="is-drawer-close:hidden menu-title px-4 pt-3 text-muted"
-          :class="[TYPOGRAPHY_SCALE_CLASS.xs, FONT_WEIGHT_TOKEN_CLASS.semibold]"
+          class="is-drawer-close:hidden menu-title text-muted"
+          :class="[
+            PADDING_TOKEN_CLASS.px4,
+            PADDING_TOKEN_CLASS.pt3,
+            TYPOGRAPHY_SCALE_CLASS.xs,
+            FONT_WEIGHT_TOKEN_CLASS.semibold,
+          ]"
         >
           {{ t(group.labelKey) }}
         </p>
