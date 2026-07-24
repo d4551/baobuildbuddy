@@ -122,7 +122,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
     </nav>
     <div class="border-t border-base-300 is-drawer-close:hidden" :class="[PADDING_TOKEN_CLASS.p4]">
       <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
-        {{ t("layout.shell.versionLabel", { version: APP_SEMVER }) }}
+        {{ t("layout.shell.appVersion", { version: APP_SEMVER }) }}
       </p>
     </div>
   </div>
