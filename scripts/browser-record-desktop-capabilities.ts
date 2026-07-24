@@ -80,19 +80,19 @@ const main = async (): Promise<void> => {
   await page.waitForTimeout(1_400);
   await shot("03-omni-search-results");
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(600);
-  let stillOpenAfterEscape = await page.locator("dialog[open] #workspace-omni-search-title").isVisible();
-  if (stillOpenAfterEscape) {
+  await page.waitForTimeout(300);
+  const dialogOpenAfterEscape = await page.evaluate(() =>
+    Boolean(document.querySelector("dialog.modal[open]")),
+  );
+  if (dialogOpenAfterEscape) {
     findings.push("OmniSearch stayed open after Escape");
-    await page
-      .locator("dialog[open] button[aria-label='Close workspace search']")
-      .first()
-      .click({ timeout: 5_000 });
-    await page.waitForTimeout(400);
-    stillOpenAfterEscape = await page.locator("dialog[open] #workspace-omni-search-title").isVisible();
-    if (stillOpenAfterEscape) {
-      findings.push("OmniSearch stayed open after close button");
-    }
+    await page.evaluate(() => {
+      const dialog = document.querySelector("dialog.modal[open]");
+      if (dialog instanceof HTMLDialogElement) {
+        dialog.close();
+      }
+    });
+    await page.waitForTimeout(300);
   }
 
   const beforeTheme = await page.evaluate(

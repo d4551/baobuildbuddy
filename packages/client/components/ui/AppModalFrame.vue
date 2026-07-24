@@ -57,17 +57,21 @@ watch(
 function requestClose(): void {
   emit("update:open", false);
   emit("close");
-}
-
-function handleNativeClose(): void {
-  emit("close");
-  if (props.open) {
-    emit("update:open", false);
+  const dialog = dialogRef.value;
+  if (dialog?.open) {
+    dialog.close();
   }
 }
 
+function handleNativeClose(): void {
+  if (props.open) {
+    emit("update:open", false);
+  }
+  emit("close");
+}
+
 function handleCancel(event: Event): void {
-  // Escape: prevent default dismiss race, sync Vue open via requestClose → watch → dialog.close().
+  // Escape: own the dismiss path so Vue `open` cannot desync from dialog.open.
   event.preventDefault();
   requestClose();
 }
