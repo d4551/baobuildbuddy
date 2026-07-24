@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { ICON_SIZE_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 import { UI_MODAL_SIZE_CLASS_BY_TOKEN, type UiModalSizeToken } from "~/constants/ui-layout";
 
 const props = withDefaults(
@@ -58,16 +60,18 @@ function requestClose(): void {
 }
 
 function handleNativeClose(): void {
-  // Escape / method=dialog close — sync Vue open state + notify consumers.
   emit("close");
   if (props.open) {
     emit("update:open", false);
   }
 }
 
-function handleCancel(event: Event): void {
-  // Keep cancel → close pipeline; ensure Vue state follows Escape.
+function handleDialogKeydown(event: KeyboardEvent): void {
+  if (event.key !== "Escape") {
+    return;
+  }
   event.preventDefault();
+  event.stopPropagation();
   requestClose();
 }
 </script>
@@ -80,11 +84,22 @@ function handleCancel(event: Event): void {
     aria-modal="true"
     :aria-labelledby="titleId"
     :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
-    @cancel="handleCancel"
+    @keydown="handleDialogKeydown"
     @close="handleNativeClose"
   >
-    <div class="modal-box glass-modal" :class="modalBoxClass">
-      <slot />
+    <div class="modal-box glass-modal relative" :class="modalBoxClass">
+      <button
+        type="button"
+        class="btn btn-ghost btn-circle btn-sm absolute right-2 top-2"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="closeAriaLabel"
+        @click="requestClose"
+      >
+        <CloseIcon :class="ICON_SIZE_CLASS.sm" aria-hidden="true" />
+      </button>
+      <div class="pe-12">
+        <slot />
+      </div>
     </div>
     <form method="dialog" class="modal-backdrop">
       <button type="submit" :aria-label="closeAriaLabel">
