@@ -33,7 +33,7 @@ If parent AGENTS and this file conflict on SSOT shape: **this document wins for 
 | API client types | **Eden Treaty** (`@elysiajs/eden@1.4.9`) | Generated from server. **No Eden 2.x on npm** (latest/experimental still 1.x); keep Eden 1 until upstream publishes Elysia-2-compatible Eden. OpenAPI plugin is `@elysiajs/openapi@2.0.0-exp.0`. |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
 | UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
-| Styling | **Tailwind CSS 4** + **daisyUI 5** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark) |
+| Styling | **Tailwind CSS 4** + **daisyUI 5** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark). CSS entry must `@import "tailwindcss/index.css"` (not bare `"tailwindcss"`) so Vite/postcss-import resolves the package export under bun workspaces. |
 
 ## Non-goals (do not “migrate” without an explicit product decision)
 
