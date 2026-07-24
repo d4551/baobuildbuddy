@@ -13,6 +13,7 @@ import {
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -161,7 +162,7 @@ const {
           </div>
 
           <progress
-            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+            class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
             :value="prepCompletionPercent"
             max="100"
             :aria-label="t('interviewHub.prep.progressAria')"

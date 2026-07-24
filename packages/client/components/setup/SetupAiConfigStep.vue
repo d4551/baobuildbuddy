@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
@@ -67,13 +68,14 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack5]">
     <h2 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("setup.aiConfigTitle") }}</h2>
-    <div role="alert" class="alert alert-info alert-soft">
+    <div role="alert" class="alert alert-soft" :class="[ALERT_VARIANT_CLASS.info]">
       <span>{{ t("setup.localFirstInfo", { brand: brandName }) }}</span>
     </div>
 
     <div 
       role="alert"
-      class="alert alert-info alert-soft alert-vertical items-start sm:alert-horizontal"
+      class="alert alert-soft alert-vertical items-start sm:alert-horizontal"
+      :class="[ALERT_VARIANT_CLASS.info]"
     >
       <IconInfoCircle class="shrink-0 stroke-current text-info" :class="[MARGIN_TOKEN_CLASS.mt1, ICON_SIZE_CLASS[6]]"/>
       <div class="flex-1 overflow-hidden" :class="[FLUID_WIDTH_CLASS]">

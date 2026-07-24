@@ -1,11 +1,14 @@
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { isValidEmail } from "@bao/shared/utils/validation";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { Ref } from "vue";
 import type { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { DATE_FORMAT_OPTIONS, toIsoTimestamp } from "~/composables/schedule-timestamp";
 import { getErrorMessage } from "~/utils/errors";
 import { formatDateWithLocale } from "~/utils/locale-format";
+
+type ApiPayload = Parameters<typeof isRecord>[0];
 
 export type EmailResponseTone = "professional" | "friendly" | "concise";
 
@@ -35,8 +38,7 @@ export const EMAIL_TONE_OPTIONS: readonly EmailResponseTone[] = [
   "concise",
 ] as const;
 
-export const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+export { isRecord };
 
 export const createEmailAutomationForm = () =>
   reactive<EmailFormState>({
@@ -69,7 +71,7 @@ export const createResolvedRecipientEmailComputed = (form: EmailFormState) =>
     return isValidEmail(sender) ? sender : "";
   });
 export const createToLocalizedDateTime =
-  (localeValue: () => unknown, fallbackLocaleValue: () => unknown) =>
+  (localeValue: () => ApiPayload, fallbackLocaleValue: () => ApiPayload) =>
   (value: string): string =>
     formatDateWithLocale(value, localeValue(), fallbackLocaleValue(), DATE_FORMAT_OPTIONS) ?? value;
 

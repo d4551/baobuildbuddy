@@ -7,7 +7,7 @@ interface TimedInterviewSession {
   status: string;
 }
 
-type Translate = (key: string, params?: Record<string, unknown>) => string;
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 const SESSION_TIMER_INTERVAL_MS = 1000;
 const SECONDS_PER_MINUTE = 60;

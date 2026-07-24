@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { STATS_SHELL_VARIANT_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   readinessLabel: string;
@@ -15,7 +15,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+  <div :class="[STATS_SHELL_VARIANT_CLASS.xl]">
     <div class="stat">
       <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
       <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, readinessColorClass]">

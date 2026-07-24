@@ -13,8 +13,10 @@ import {
   FORM_WIDTH_32_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
@@ -90,7 +92,7 @@ useSeoMeta({
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div class="stats stats-vertical lg:stats-horizontal bg-base-200" :class="[FLUID_WIDTH_CLASS]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.lg]">
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.totalStudiosTitle") }}</div>
           <div class="stat-value text-primary">{{ totalStudios }}</div>
@@ -142,7 +144,7 @@ useSeoMeta({
                 <span :class="[BADGE_LG_CLASS]">{{ count }}</span>
               </div>
               <progress
-                class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+                class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
                 :value="count"
                 :max="Math.max(1, totalStudios)"
                 :aria-label="t('studioAnalytics.progressAria', { label: size })"
@@ -168,7 +170,7 @@ useSeoMeta({
               <span class="font-medium" :class="[FORM_WIDTH_32_CLASS]">{{ tech.name }}</span>
               <div class="flex-1">
                 <progress
-                  class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+                  class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
                   :value="tech.count"
                   :max="getMaxCount(topTechnologies)"
                   :aria-label="t('studioAnalytics.progressAria', { label: tech.name })"
@@ -184,7 +186,7 @@ useSeoMeta({
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
-          <div class="stats stats-vertical bg-base-200 sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+          <div :class="[STATS_SHELL_VARIANT_CLASS.sm]">
             <div class="stat">
               <div class="stat-title">
                 {{ t("studioAnalytics.sections.offerRemoteLabel") }}
@@ -207,7 +209,7 @@ useSeoMeta({
 
           <div :class="[MARGIN_TOKEN_CLASS.mt4]">
             <progress
-              class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+              class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
               :value="remoteWorkStudios"
               :max="Math.max(1, totalStudios)"
               :aria-label="t('studioAnalytics.remoteWorkProgressAria', { value: remoteWorkPercentage })"

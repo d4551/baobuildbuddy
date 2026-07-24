@@ -17,7 +17,7 @@ Stack truth: [STACK-CONTRACT.md](./STACK-CONTRACT.md).
 
 Required tools:
 
-- Bun `1.3.14` (root `packageManager` / `engines`; confirm with `bun run validate:stack-versions`)
+- Bun `1.4.0` (root `packageManager` / `engines`; confirm with `bun run validate:stack-versions`)
 - Rust toolchain for desktop builds
 - Playwright Chromium via `bun run automation:browsers:install`
 

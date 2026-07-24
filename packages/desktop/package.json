@@ -21,9 +21,9 @@
     "lint": "echo \"No separate desktop lint task\""
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.10.1"
+    "@tauri-apps/cli": "^2.11.4"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.10.1"
+    "@tauri-apps/api": "^2.11.1"
   }
 }

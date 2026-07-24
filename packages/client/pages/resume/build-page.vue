@@ -4,7 +4,7 @@ const NUM_25 = 25;
 const NUM_50 = 50;
 defineOptions({ name: "PagesResumeBuildPage" });
 
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, PROGRESS_BAR_VARIANT_CLASS } from "~/constants/layout";
 
 definePageMeta({
   path: APP_ROUTES.resumeBuild,
@@ -196,7 +196,7 @@ function backToTarget() {
     />
 
     <progress
-      class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mb8]"
+      class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mb8]"
       :value="progressValue"
       max="100"
       :aria-label="t('resumeBuildPage.progressAria')"

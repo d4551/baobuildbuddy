@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  ALERT_VARIANT_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -217,13 +218,14 @@ function updateRequestBodyValue(event: Event): void {
 
         <div 
           v-if="testerState === 'errorRetryable' || testerState === 'errorNonRetryable' || testerState === 'unauthorized'"
-          class="alert alert-error"
+          class="alert"
+          :class="[ALERT_VARIANT_CLASS.error]"
           role="alert"
         >
           <span>{{ testerErrorMessage || t("apiDocs.tester.errorFallback") }}</span>
         </div>
 
-        <div v-if="testerState === 'empty'" class="alert alert-info" role="status">
+        <div v-if="testerState === 'empty'" class="alert" :class="[ALERT_VARIANT_CLASS.info]" role="status">
           <span>{{ t("apiDocs.tester.emptyResponse") }}</span>
         </div>
 

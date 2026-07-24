@@ -13,10 +13,13 @@ import {
 } from "./api-request";
 import { useApi } from "./useApi";
 
+/** Untrusted API payload entering a boundary decoder — narrowed by isRecord. */
+type ApiPayload = Parameters<typeof isRecord>[0];
+
 interface CreateCoverLetterInput {
   company: string;
   position: string;
-  jobInfo?: Record<string, unknown>;
+  jobInfo?: Record<string, string>;
   content?: CoverLetterData["content"];
   template?: CoverLetterData["template"];
 }
@@ -29,7 +32,7 @@ export interface GenerateCoverLetterInput {
   resumeId?: string;
   template?: CoverLetterData["template"];
   save?: boolean;
-  jobInfo?: Record<string, unknown>;
+  jobInfo?: Record<string, string>;
 }
 
 export type GenerateCoverLetterResult =
@@ -52,7 +55,7 @@ interface CoverLetterContext {
   currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
 }
 
-const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
+const toCoverLetterContent = (value: ApiPayload): CoverLetterData["content"] | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -67,7 +70,7 @@ const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null
   return Object.keys(content).length > 0 ? content : null;
 };
 
-const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult | null => {
+const toGenerateCoverLetterResult = (value: ApiPayload): GenerateCoverLetterResult | null => {
   if (!isRecord(value)) {
     return null;
   }

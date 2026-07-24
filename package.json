@@ -9,9 +9,9 @@
     "url": "https://github.com/d4551/baobuildbuddy/issues"
   },
   "homepage": "https://github.com/d4551/baobuildbuddy#readme",
-  "packageManager": "bun@1.3.14",
+  "packageManager": "bun@1.4.0",
   "engines": {
-    "bun": ">=1.3.14 <1.4.0"
+    "bun": ">=1.4.0 <1.5.0"
   },
   "workspaces": [
     "packages/*"
@@ -122,6 +122,7 @@
     "proof:browser-smoke": "bun run scripts/browser-visual-smoke.ts",
     "proof:browser-burndown": "bun run scripts/browser-interaction-burndown.ts",
     "proof:browser-video": "bun run scripts/browser-record-visual-proof.ts",
+    "proof:setup-wizard": "bun run scripts/verify-setup-wizard-interaction.ts",
     "proof:browser-product-demo": "bun run scripts/browser-record-product-demo.ts",
     "proof:exports": "bun run scripts/proof-export-visual.ts",
     "speech:whisper:serve": "WHISPER_MODEL=tiny WHISPER_PORT=8090 python3 scripts/whisper-openai-server.py",
@@ -155,7 +156,7 @@
     "validate:inset-panel-ssot": "bun run scripts/validate-inset-panel-ssot.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.4",
+    "@biomejs/biome": "^2.5.5",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/cli": "^4.3.3",
     "@types/better-sqlite3": "^7.6.13",
@@ -166,7 +167,7 @@
     "eslint": "^10.0.3",
     "playwright": "1.61.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.64.0",
+    "typescript-eslint": "^8.65.0",
     "vue-router": "^5.0.3"
   }
 }

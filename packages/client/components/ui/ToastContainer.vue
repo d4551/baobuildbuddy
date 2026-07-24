@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import type { ToastType } from "~/composables/useToast";
 import {
+  ALERT_VARIANT_CLASS,
   AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -20,10 +21,10 @@ const { toasts, removeToast } = useToast();
 const { t } = useI18n();
 
 const alertClassByType = {
-  success: "alert-success",
-  error: "alert-error",
-  info: "alert-info",
-  warning: "alert-warning",
+  success: ALERT_VARIANT_CLASS.success,
+  error: ALERT_VARIANT_CLASS.error,
+  info: ALERT_VARIANT_CLASS.info,
+  warning: ALERT_VARIANT_CLASS.warning,
 } satisfies Record<ToastType, string>;
 
 const iconPathByType = {

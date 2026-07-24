@@ -5,6 +5,7 @@ import { settlePromise, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
@@ -130,7 +131,7 @@ async function handleRevoke(): Promise<void> {
           {{ statusLabel }}
         </p>
 
-        <div v-if="rotatedKey" class="alert alert-warning" role="status">
+        <div v-if="rotatedKey" class="alert" :class="[ALERT_VARIANT_CLASS.warning]" role="status">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <p class="font-medium">{{ t("settings.authAccess.newKeyTitle") }}</p>
             <code class="break-all" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ rotatedKey }}</code>

@@ -6,7 +6,7 @@ import { getErrorMessage } from "~/utils/errors";
 
 type ApiClient = ReturnType<typeof useApi>;
 type TestApiKeyInput = NonNullable<Parameters<ApiClient["settings"]["test-api-key"]["post"]>[0]>;
-type Translate = (key: string, params?: Record<string, unknown>) => string;
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 type ProviderTestMessageContext = {
   providerId: AIProviderType;
   valid: boolean;
@@ -110,7 +110,7 @@ async function testProviderConnectivity(input: {
 }
 
 function createDashboardRefreshAction(input: {
-  refreshDashboardBootstrap: () => Promise<unknown>;
+  refreshDashboardBootstrap: () => Promise<void>;
   t: Translate;
   toast: ReturnType<typeof useNuxtApp>["$toast"];
 }) {
@@ -217,7 +217,7 @@ function createDashboardPreferenceAction(
 export function createAIDashboardActions(input: {
   api: ReturnType<typeof useApi>;
   localProviderState: ReturnType<typeof useSettings>["localProviderState"];
-  refreshDashboardBootstrap: () => Promise<unknown>;
+  refreshDashboardBootstrap: () => Promise<void>;
   selectedModel: Ref<string>;
   selectedProvider: Ref<AIProviderType>;
   settings: ReturnType<typeof useSettings>["settings"];

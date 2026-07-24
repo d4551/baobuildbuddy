@@ -14,6 +14,7 @@ defineOptions({ name: "AppErrorPage" });
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   APP_MAIN_CONTENT_ID,
   ERROR_PAGE_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
@@ -40,7 +41,7 @@ const message = computed(() => {
         <p class="text-secondary">
           {{ message }}
         </p>
-        <div role="alert" class="alert alert-info">
+        <div role="alert" class="alert" :class="[ALERT_VARIANT_CLASS.info]">
           <span>{{ t("errorPage.statusLabel") }}: {{ error.statusCode || HTTP_STATUS_INTERNAL_SERVER_ERROR }}</span>
         </div>
         <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

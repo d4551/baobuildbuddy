@@ -11,6 +11,7 @@ import {
   GHOST_ACTION_ERROR_DENSE_CLASS,
   INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
@@ -90,8 +91,8 @@ function normalizedConfidence(confidence: number): number {
           </div>
 
           <progress
-            class="progress progress-primary"
-            :class="[FLUID_WIDTH_CLASS]"
+            class="progress"
+            :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
             :value="normalizedConfidence(mapping.confidence)"
             :max="SKILLS_CONFIDENCE_MAX"
             :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"
@@ -161,8 +162,8 @@ function normalizedConfidence(confidence: number): number {
                   </span>
                 </div>
                 <progress
-                  class="progress progress-primary"
-                  :class="[FLUID_WIDTH_CLASS]"
+                  class="progress"
+                  :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
                   :value="normalizedConfidence(mapping.confidence)"
                   :max="SKILLS_CONFIDENCE_MAX"
                   :aria-label="t('skillsPage.table.confidenceAria', { confidence: mapping.confidence })"

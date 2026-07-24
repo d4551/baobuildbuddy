@@ -19,7 +19,7 @@ export type CoverLetterGenerateForm = {
   template: CoverLetterTemplate;
 };
 
-type TranslateFn = (key: string, values?: Record<string, unknown>) => string;
+type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
 type ToastApi = {
   error(message: string): void;
   success(message: string): void;
@@ -30,8 +30,8 @@ type CoverLetterPageActionServices = {
   generateCoverLetter(payload: GenerateCoverLetterInput): Promise<GenerateCoverLetterResult | null>;
   fetchCoverLetters(): Promise<void>;
   fetchResumes(): Promise<void>;
-  router: { push(path: string): Promise<unknown> };
-  route: { query: Record<string, unknown> };
+  router: { push(path: string): Promise<void> };
+  route: { query: Record<string, string | (string | null)[] | null | undefined> };
   $toast: ToastApi;
   t: TranslateFn;
 };
@@ -86,8 +86,7 @@ function validateGenerateForm(state: CoverLetterPageActionState, toast: ToastApi
     return false;
   }
 
-  const description = state.generateForm.jobDescription.trim();
-  if (description.length > 0 && description.length < COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH) {
+  if (state.generateForm.jobDescription.trim().length < COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH) {
     toast.error(
       t("coverLetterPage.toasts.jobDescriptionMinLength", {
         count: COVER_LETTER_JOB_DESCRIPTION_MIN_LENGTH,
@@ -208,43 +207,10 @@ export function createCoverLetterActions(
     clearFilters,
     coverLetterPageAria,
     editLetter: createEditLetterAction(services),
-    handleDeleteCoverLetter: createDeleteCoverLetterHandler(services, state),
-    handleGenerate: createGenerateCoverLetterHandler(services, state),
+    deleteCoverLetter: createDeleteCoverLetterHandler(services, state),
+    generateCoverLetter: createGenerateCoverLetterHandler(services, state),
+    initializeResumeSelection: () => initializeResumeSelection(state, services.route),
   };
 }
 
-export function useCoverLetterPageBootstrap(
-  services: Pick<
-    CoverLetterPageActionServices,
-    "fetchCoverLetters" | "fetchResumes" | "route" | "$toast" | "t"
-  >,
-  state: Pick<CoverLetterPageActionState, "generateForm" | "initialResumeId">,
-) {
-  return useAsyncData("cover-letter-page-bootstrap", async () => {
-    initializeResumeSelection(state, services.route);
-    const [coverLettersResult, resumesResult] = await Promise.all([
-      settlePromise(services.fetchCoverLetters(), services.t("coverLetterPage.toasts.fetchFailed")),
-      settlePromise(services.fetchResumes(), services.t("apiErrors.resumes.fetchListFailed")),
-    ]);
-
-    if (!coverLettersResult.ok) {
-      const failure = getErrorMessage(
-        coverLettersResult.error,
-        services.t("coverLetterPage.toasts.fetchFailed"),
-      );
-      services.$toast.error(failure);
-      throw coverLettersResult.error;
-    }
-
-    if (!resumesResult.ok) {
-      const failure = getErrorMessage(
-        resumesResult.error,
-        services.t("apiErrors.resumes.fetchListFailed"),
-      );
-      services.$toast.error(failure);
-      throw resumesResult.error;
-    }
-
-    return true;
-  });
-}
+export type CoverLetterPageActions = ReturnType<typeof createCoverLetterActions>;

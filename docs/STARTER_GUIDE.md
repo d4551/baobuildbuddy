@@ -44,7 +44,7 @@ This runs `scripts/dev-stack.ts` to orchestrate startup. It's the recommended pa
 
 | Tool                     | macOS (Homebrew)                               | Ubuntu / Debian                                      | Windows (winget)                    |
 |--------------------------|------------------------------------------------|------------------------------------------------------|-------------------------------------|
-| Bun (`bun@1.3.14`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
+| Bun (`bun@1.4.0`)       | `brew install oven-sh/bun/bun`                 | `curl -fsSL https://bun.sh/install \| bash`          | `winget install --id Oven-sh.Bun -e`|
 | Git                      | `brew install git`                             | `sudo apt-get update && sudo apt-get install -y git`  | `winget install --id Git.Git -e`    |
 | Rust (for desktop builds)| `brew install rustup-init && rustup-init`      | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | `winget install --id Rustlang.Rustup -e` |
 
@@ -70,7 +70,7 @@ Check the Bun version matches the workspace manifest:
 
 ```bash
 bun pm pkg get packageManager
-# -> "bun@1.3.14"
+# -> "bun@1.4.0"
 ```
 
 ---

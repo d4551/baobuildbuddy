@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
+import { MARGIN_TOKEN_CLASS, PROGRESS_BAR_VARIANT_CLASS, STATS_SHELL_VARIANT_CLASS } from "~/constants/layout";
 
 defineProps<{
   inputSummary: string;
@@ -14,7 +14,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+  <div :class="[STATS_SHELL_VARIANT_CLASS.lg]">
     <div class="stat">
       <div class="stat-title">{{ t("automation.runDetail.stats.inputTitle") }}</div>
       <div class="stat-value text-base">{{ inputSummary }}</div>
@@ -32,7 +32,7 @@ const { t } = useI18n();
         {{ t("automation.runDetail.progressSummary", { percent: progressPercent }) }}
       </div>
       <progress 
-        class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mt2]"
+        class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, MARGIN_TOKEN_CLASS.mt2]"
         :value="progressPercent"
         max="100"
         :aria-label="t('automation.runDetail.progressAria')"

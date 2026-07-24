@@ -3,8 +3,10 @@ import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers"
 import {
   BRAND_PREVIEW_STYLES_FILE_PATH,
   collectBrandPreviewThemeViolations,
+  collectDynamicVariantLiteralViolations,
   collectProgressMarkupViolations,
   collectRadialProgressViolations,
+  collectRawStatsClassViolations,
   collectTableMarkupViolations,
   type DaisyUiViolation,
 } from "./validate-daisyui-contracts-markup";
@@ -333,6 +335,8 @@ export function collectDaisyUiContractViolationsForContent(
     ...collectRequiredClassViolations(filePath, fileContent),
     ...collectSemanticModifierViolations(filePath, fileContent),
     ...collectBtnModifierViolations(filePath, fileContent),
+    ...collectRawStatsClassViolations(filePath, fileContent),
+    ...collectDynamicVariantLiteralViolations(filePath, fileContent),
     ...collectFileLevelPartViolations(filePath, fileContent),
     ...collectIncompatibleClassViolations(filePath, fileContent),
     ...collectTableMarkupViolations(filePath, fileContent),

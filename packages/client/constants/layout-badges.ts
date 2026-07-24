@@ -50,3 +50,18 @@ export const BADGE_ACCENT_SM_CLASS = "badge badge-accent badge-sm";
 export const BADGE_OUTLINE_MUTED_CLASS = "badge badge-outline border-current/20 text-current/80";
 export const BADGE_ACCENT_LG_CLASS = "badge badge-accent badge-lg border-0";
 export const BADGE_SECONDARY_OUTLINE_CLASS = "badge badge-secondary badge-outline";
+
+/**
+ * daisyUI badge color variants (daisyUI 5). The base `badge` class stays
+ * static on the element; these tokens supply the semantic color only.
+ * No per-page `'badge-success'` / `'badge-error'` literals in :class.
+ */
+export const BADGE_VARIANT_CLASS = {
+  primary: "badge-primary",
+  success: "badge-success",
+  warning: "badge-warning",
+  error: "badge-error",
+  ghost: "badge-ghost",
+} as const;
+
+export type BadgeVariant = keyof typeof BADGE_VARIANT_CLASS;

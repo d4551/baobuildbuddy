@@ -2,6 +2,7 @@
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -13,6 +14,7 @@ import {
 } from "~/constants/layout";
 import {
   BADGE_SUCCESS_SM_CLASS,
+  BADGE_VARIANT_CLASS,
 } from "~/constants/layout-badges";
 
 type ProviderField =
@@ -38,7 +40,7 @@ defineProps<{
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
   keysSaveState?: "idle" | "saving" | "success" | "error";
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
   providerKeyLabel: (providerId: AIProviderType) => string;
   providerPlaceholder: (providerId: AIProviderType, providerLabel: string) => string;
 }>();
@@ -55,7 +57,7 @@ const emit = defineEmits<{
     <div 
       v-if="showOllamaHotTip"
       role="alert"
-      class="alert alert-info alert-soft alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mb4]"
+      class="alert alert-soft alert-vertical sm:alert-horizontal" :class="[ALERT_VARIANT_CLASS.info, MARGIN_TOKEN_CLASS.mb4]"
     >
       <IconInfoCircle class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]"/>
       <div>
@@ -126,7 +128,7 @@ const emit = defineEmits<{
         <span 
           v-if="testResults[provider.id]"
           class="badge"
-          :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
+          :class="testResults[provider.id]?.valid ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.error"
         >
           {{
             testResults[provider.id]?.valid

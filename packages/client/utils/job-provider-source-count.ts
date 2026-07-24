@@ -1,9 +1,7 @@
 import { safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { JobProviderForm } from "~/components/settings/job-intelligence";
 import { countConfiguredGamingPortals, parseGamingPortalsJson } from "~/utils/gaming-portals-form";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const countEnabledNamedEntries = (rawJson: string): number => {
   const parsed = safeParseJson(rawJson);

@@ -7,6 +7,7 @@ import {
 defineOptions({ name: "PagesAutomationEmailPage" });
 
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
@@ -227,7 +228,7 @@ useSeoMeta({
 
     <UiGlassCard v-if="scheduledRun">
       <div class="card-body">
-        <div role="alert" class="alert alert-info">
+        <div role="alert" class="alert" :class="[ALERT_VARIANT_CLASS.info]">
           <div>
             <h3 class="font-semibold">{{ t("automation.email.schedule.createdTitle") }}</h3>
             <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("automation.email.runIdLabel", { id: scheduledRun.id }) }}</p>
@@ -258,7 +259,7 @@ useSeoMeta({
 
     <UiGlassCard v-if="lastResult">
       <div class="card-body">
-        <div role="alert" class="alert alert-success">
+        <div role="alert" class="alert" :class="[ALERT_VARIANT_CLASS.success]">
           <div>
             <h3 class="font-semibold">
               {{

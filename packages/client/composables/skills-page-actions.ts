@@ -30,8 +30,8 @@ type SkillsPageActionsInput = {
     success: (message: string) => void;
   };
   t: (key: string, params?: Record<string, string | number>) => string;
-  awardXP: (amount: number, reason: string) => Promise<unknown>;
-  fetchProgress: () => Promise<unknown>;
+  awardXP: (amount: number, reason: string) => Promise<void>;
+  fetchProgress: () => Promise<void>;
   mappings: Ref<SkillMapping[]>;
   loading: Ref<boolean>;
   analyzing: Ref<boolean>;

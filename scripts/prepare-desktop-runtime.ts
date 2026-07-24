@@ -32,7 +32,7 @@ import {
   resolveDesktopRuntimeTargetInfoFromTauriTarget,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
 import { FILE_MODE_RW_R_R, FILE_MODE_RWX_RX_RX } from "./constants/numeric-literals";
-import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
+import { asError, captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
@@ -206,14 +206,14 @@ const recordStreamCapture = (
       if (result.status === "rejected") {
         pushBoundedLogLine(
           target,
-          `[${label}] ${toErrorMessage(result.reason, `Failed to capture ${label}.`)}`,
+          `[${label}] ${toErrorMessage(asError(result.reason), `Failed to capture ${label}.`)}`,
         );
       }
     },
     (error) => {
       pushBoundedLogLine(
         target,
-        `[${label}] ${toErrorMessage(error, `Failed to observe ${label}.`)}`,
+        `[${label}] ${toErrorMessage(asError(error), `Failed to observe ${label}.`)}`,
       );
     },
   );

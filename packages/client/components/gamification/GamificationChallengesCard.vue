@@ -7,8 +7,9 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SUCCESS_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
@@ -54,7 +55,7 @@ const { t } = useI18n();
               <span :class="[TYPOGRAPHY_SCALE_CLASS.lg, WIDTH_TOKEN_CLASS.w8]" aria-hidden="true">{{ challenge.icon }}</span>
               <progress 
                 class="progress flex-1"
-                :class="challenge.completed ? 'progress-success' : 'progress-primary'"
+                :class="challenge.completed ? PROGRESS_BAR_VARIANT_CLASS.success : PROGRESS_BAR_VARIANT_CLASS.primary"
                 :value="getChallengeProgress(challenge)"
                 :max="getChallengeGoal(challenge)"
                 :aria-valuenow="getChallengeProgress(challenge)"
@@ -70,7 +71,7 @@ const { t } = useI18n();
             <div v-if="canClaimChallenge(challenge)" class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
               <button
                 type="button"
-                :class="[PRIMARY_ACTION_CLASS, 'btn-success']"
+                :class="[SUCCESS_ACTION_CLASS]"
                 :disabled="completingChallenge === challenge.id"
                 :aria-label="t('gamificationPage.challengeClaimAria', { challenge: challenge.name })"
                 @click="emit('claim', challenge.id)"

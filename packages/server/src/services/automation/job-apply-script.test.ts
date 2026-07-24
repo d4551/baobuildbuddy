@@ -77,26 +77,35 @@ async function runJobApplyScriptFixture(tempDirectory: string): Promise<{
     includeCustomQuestionFields: true,
   });
 
-  return Promise.resolve()
-    .then(async () => {
-      const execution = await runRpaScript({
-        scriptId: "job-apply",
-        scriptInput: buildJobApplyScriptInput(server.port ?? 0, resumeFilePath),
-        executionContext: {
-          runId: generateId(),
-          timeoutMs: JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS,
-          outputDir: outputDirectory,
-        },
-      });
-
-      return {
-        execution,
-        submittedPayload: server.submissions[0] ?? null,
-      };
-    })
-    .finally(async () => {
-      await server.stop();
+  const runTest = async () => {
+    const execution = await runRpaScript({
+      scriptId: "job-apply",
+      scriptInput: buildJobApplyScriptInput(server.port ?? 0, resumeFilePath),
+      executionContext: {
+        runId: generateId(),
+        timeoutMs: JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS,
+        outputDir: outputDirectory,
+      },
     });
+
+    return {
+      execution,
+      submittedPayload: server.submissions[0] ?? null,
+    };
+  };
+
+  return Promise.resolve()
+    .then(runTest)
+    .then(
+      async (value) => {
+        await server.stop();
+        return value;
+      },
+      async (error) => {
+        await server.stop();
+        throw error;
+      },
+    );
 }
 
 describe("job-apply script", () => {

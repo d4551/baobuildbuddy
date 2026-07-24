@@ -14,7 +14,8 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
-  BADGE_GHOST_CLASS,
+  BADGE_GHOST_SM_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
   BADGE_SM_CLASS,
 } from "~/constants/layout-badges";
 import type { RecentInterviewSession } from "~/types/interview";
@@ -84,7 +85,7 @@ const { t } = useI18n();
                   </div>
                   <div class="flex flex-col items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
                     <span
-                      :class="[BADGE_SM_CLASS, session.config.interviewMode === 'job' ? 'badge-primary' : BADGE_GHOST_CLASS]"
+                      :class="session.config.interviewMode === 'job' ? BADGE_PRIMARY_SM_CLASS : BADGE_GHOST_SM_CLASS"
                     >
                       {{ modeLabel(session.config.interviewMode) }}
                     </span>
@@ -124,7 +125,7 @@ const { t } = useI18n();
                   <td>{{ session.role || session.config.roleType }}</td>
                   <td>
                     <span
-                      :class="[BADGE_SM_CLASS, session.config.interviewMode === 'job' ? 'badge-primary' : BADGE_GHOST_CLASS]"
+                      :class="session.config.interviewMode === 'job' ? BADGE_PRIMARY_SM_CLASS : BADGE_GHOST_SM_CLASS"
                     >
                       {{ modeLabel(session.config.interviewMode) }}
                     </span>

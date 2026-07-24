@@ -30,7 +30,9 @@ type AutomationScraperJobView = {
 
 type AutomationScraperDerivedInput = {
   capabilityAuditData: Ref<RpaCapabilityAuditReport | null | undefined>;
-  fallbackLocale: Ref<unknown>;
+  fallbackLocale: Readonly<{
+    value: string | boolean | readonly string[] | Record<string, readonly string[]>;
+  }>;
   jobs: Ref<readonly AutomationScraperJobView[]>;
   lastRunAt: Record<AutomationScrapeTarget, string | null>;
   latestRuns: Record<AutomationScrapeTarget, AutomationRunEnvelope | null>;

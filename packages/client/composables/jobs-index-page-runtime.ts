@@ -9,7 +9,10 @@ export const createJobsPageRuntime = () => {
   const { t } = useI18n();
   const { $toast } = useNuxtApp();
   const { awardForAction } = usePipelineGamification();
-  const { matchJobs } = useAI();
+  const { matchJobs: matchJobsRaw } = useAI();
+  const matchJobs = async (resumeId: string): Promise<void> => {
+    await matchJobsRaw(resumeId);
+  };
   const { resumes, fetchResumes } = useResume();
 
   const searchQuery = ref("");

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
-import { MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { ALERT_VARIANT_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   resolveScheduledRunAt: (run: RpaRunExecutionEnvelope) => string;
@@ -16,7 +16,7 @@ const { t } = useI18n();
 <template>
   <UiGlassCard>
     <div class="card-body">
-      <div role="alert" class="alert alert-info">
+      <div role="alert" class="alert" :class="[ALERT_VARIANT_CLASS.info]">
         <h3 class="font-semibold">{{ t("automation.jobApply.schedule.createdTitle") }}</h3>
         <div>
           <p :class="[MARGIN_TOKEN_CLASS.mb1]">{{ t("automation.jobApply.runIdLabel", { id: run.id }) }}</p>

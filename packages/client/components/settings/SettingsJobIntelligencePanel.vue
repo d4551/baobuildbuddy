@@ -4,10 +4,10 @@ import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
@@ -62,7 +62,7 @@ const taxonomyAssetCount = computed(
     <UiGlassCard>
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
         <SettingsPanelHeader />
-        <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+        <div :class="[STATS_SHELL_VARIANT_CLASS.lg, SHADOW_TOKEN_CLASS.sm]">
           <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
             <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>

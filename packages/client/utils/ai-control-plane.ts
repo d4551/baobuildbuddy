@@ -8,6 +8,9 @@ import {
 } from "@bao/shared/constants/ai-provider";
 import type { AIProviderDiagnostic, AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";
+import { isRecord } from "@bao/shared/utils/type-guards";
+
+type ApiPayload = Parameters<typeof isRecord>[0];
 
 type AppSettingsSnapshot = {
   readonly preferredProvider?: string | null;
@@ -59,16 +62,13 @@ const resolvePreferredProviderId = (value?: string | null): AIProviderType => {
   return candidate && isProviderId(candidate) ? candidate : AI_PROVIDER_DEFAULT;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const asString = (value: unknown): string | undefined =>
+const asString = (value: ApiPayload): string | undefined =>
   typeof value === "string" ? value : undefined;
 
-const asBoolean = (value: unknown): boolean | undefined =>
+const asBoolean = (value: ApiPayload): boolean | undefined =>
   typeof value === "boolean" ? value : undefined;
 
-const asStringArray = (value: unknown): string[] =>
+const asStringArray = (value: ApiPayload): string[] =>
   Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 
 const providerHealthValues = new Set(["healthy", "degraded", "down", "unconfigured"]);
@@ -280,7 +280,7 @@ export function resolveProviderModelSelection(
 }
 
 const normalizeProviderRow = (
-  row: unknown,
+  row: ApiPayload,
   settings: AppSettingsSnapshot | null | undefined,
 ): AIProviderRow | null => {
   if (!isRecord(row)) {
@@ -320,7 +320,7 @@ const normalizeProviderRow = (
  * Normalizes provider rows from the canonical shared AI models payload shape.
  */
 export function normalizeProviderRows(
-  value: unknown,
+  value: ApiPayload,
   settings: AppSettingsSnapshot | null | undefined,
 ): AIProviderRow[] {
   if (!isRecord(value)) {

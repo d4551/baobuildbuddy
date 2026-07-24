@@ -2,6 +2,7 @@
 import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   LEADING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -30,7 +31,7 @@ const { t } = useI18n();
 
       <div 
         class="alert"
-        :class="currentQuestion.score !== undefined ? getAlertClass(currentQuestion.score) : 'alert-info'"
+        :class="currentQuestion.score !== undefined ? getAlertClass(currentQuestion.score) : ALERT_VARIANT_CLASS.info"
         aria-live="polite"
       >
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">

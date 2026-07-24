@@ -1,13 +1,13 @@
 import type { GamingPortalConfig } from "@bao/shared/types/settings";
 import { safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+type ApiPayload = Parameters<typeof isRecord>[0];
 
-const readString = (value: unknown, fallback = ""): string =>
+const readString = (value: ApiPayload, fallback = ""): string =>
   typeof value === "string" ? value : fallback;
 
-const readBoolean = (value: unknown, fallback = false): boolean =>
+const readBoolean = (value: ApiPayload, fallback = false): boolean =>
   typeof value === "boolean" ? value : fallback;
 
 /**

@@ -2,6 +2,7 @@
 import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 import {
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -82,7 +83,7 @@ function removeExperience(index: number): void {
               {{ t("resumePage.experience.itemTitle", { index: index + 1 }) }}
             </h3>
             <button type="button" 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm', BTN_VARIANT_CLASS.error]"
               :aria-label="t('resumePage.experience.removeButtonAria', { index: index + 1 })"
               @click="removeExperience(index)"
             >

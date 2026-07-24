@@ -1,6 +1,9 @@
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
+
+type ApiPayload = Parameters<typeof isRecord>[0];
 
 interface AuthStatus {
   authRequired: boolean;
@@ -14,9 +17,6 @@ interface AuthInitResult {
   apiKey?: string;
   message?: string;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 interface UseAuthState {
   checkAuthStatus: () => Promise<AuthStatus>;
@@ -62,7 +62,7 @@ export function useAuth(): UseAuthState {
     if (error) {
       throw new Error(toErrorMessage(error, AUTH_INIT_FAILED_ERROR_KEY));
     }
-    const payload: unknown = data ?? {};
+    const payload: ApiPayload = data ?? {};
     if (!isRecord(payload)) {
       return { configured: false };
     }

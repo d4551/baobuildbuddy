@@ -1,6 +1,6 @@
 import type { GameGenre, JobExperienceLevel, Platform } from "@bao/shared/types/jobs";
 
-type Translate = (key: string, params?: Record<string, unknown>) => string;
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 const EXPERIENCE_LABEL_KEYS = [
   ["entry", "jobsPage.options.experience.entry"],

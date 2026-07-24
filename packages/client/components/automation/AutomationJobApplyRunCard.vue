@@ -15,7 +15,9 @@ import {
   MARGIN_TOKEN_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
@@ -121,8 +123,8 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         <li :class="lifecycleStepClasses[2]">{{ t("automation.jobApply.stream.steps.completed") }}</li>
       </ul>
 
-      <div 
-        class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[MARGIN_TOKEN_CLASS.mt4]"
+      <div
+        :class="[STATS_SHELL_VARIANT_CLASS.lg, MARGIN_TOKEN_CLASS.mt4]"
         :aria-label="t('automation.jobApply.stream.aria')"
       >
         <div class="stat">
@@ -147,7 +149,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
             }}
           </div>
           <progress 
-            class="progress progress-primary" :class="[MARGIN_TOKEN_CLASS.mt2]"
+            class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, MARGIN_TOKEN_CLASS.mt2]"
             :value="streamProgressValue"
             max="100"
             :aria-label="t('automation.jobApply.stream.progressAria')"

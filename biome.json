@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -178,12 +178,7 @@
         "useVueMultiWordComponentNames": {
           "level": "error",
           "options": {
-            "ignores": [
-              "index",
-              "default",
-              "error",
-              "[id]"
-            ]
+            "ignores": ["index", "default", "error", "[id]"]
           }
         },
         "useVueDefineMacrosOrder": "error",
@@ -214,17 +209,8 @@
         "useSortedClasses": {
           "level": "error",
           "options": {
-            "attributes": [
-              "class",
-              "className",
-              "classList"
-            ],
-            "functions": [
-              "clsx",
-              "cn",
-              "twMerge",
-              "twJoin"
-            ]
+            "attributes": ["class", "className", "classList"],
+            "functions": ["clsx", "cn", "twMerge", "twJoin"]
           }
         },
         "noPlaywrightElementHandle": "error",
@@ -254,9 +240,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "**/*.{ts,js,mjs,cjs}"
-      ],
+      "includes": ["**/*.{ts,js,mjs,cjs}"],
       "linter": {
         "rules": {
           "correctness": {
@@ -268,9 +252,7 @@
       }
     },
     {
-      "includes": [
-        "**/*.vue"
-      ],
+      "includes": ["**/*.vue"],
       "linter": {
         "rules": {
           "correctness": {
@@ -282,12 +264,7 @@
             "useVueMultiWordComponentNames": {
               "level": "error",
               "options": {
-                "ignores": [
-                  "index",
-                  "default",
-                  "error",
-                  "[id]"
-                ]
+                "ignores": ["index", "default", "error", "[id]"]
               }
             },
             "useVueDefineMacrosOrder": "error"
