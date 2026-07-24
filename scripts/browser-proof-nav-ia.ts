@@ -7,17 +7,26 @@ import { join } from "node:path";
 import { chromium, type Page } from "playwright";
 import { DOCK_NAVIGATION_IDS, NAVIGATION_GROUP_IDS } from "../packages/client/constants/navigation";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import { writeError, writeOutput } from "./utils/cli-output";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
   "",
 );
 const OUT_DIR = process.env.NAV_IA_PROOF_OUT ?? "/opt/cursor/artifacts/debug-ia/proof-nav-ia";
+const SETTINGS_CRUMB_PATTERN = /^Settings$/iu;
 
 type Finding = { readonly check: string; readonly ok: boolean; readonly detail: string };
 
-const collectFabRegions = async (page: Page): Promise<number> =>
-  page.locator('.fab[aria-label*="quick actions" i], .fab[role="region"]').count();
+const collectFabRegions = async (page: Page): Promise<number> => page.locator("div.fab").count();
+
+const readFirstBreadcrumb = async (page: Page): Promise<string> => {
+  const crumbs = page.locator(".breadcrumbs");
+  if ((await crumbs.count()) === 0) {
+    return "";
+  }
+  return (await crumbs.first().innerText()).trim();
+};
 
 const main = async (): Promise<void> => {
   await mkdir(OUT_DIR, { recursive: true });
@@ -33,8 +42,7 @@ const main = async (): Promise<void> => {
 
   const groupTitles = await desktop.locator("aside .menu-title").allTextContents();
   const normalizedGroups = groupTitles.map((title) => title.trim().toLowerCase());
-  const expectedGroups = NAVIGATION_GROUP_IDS.map((id) => id);
-  const groupsOk = expectedGroups.every((id) =>
+  const groupsOk = NAVIGATION_GROUP_IDS.every((id) =>
     normalizedGroups.some((title) => title.includes(id)),
   );
   findings.push({
@@ -60,11 +68,10 @@ const main = async (): Promise<void> => {
 
   await desktop.goto(`${CLIENT_BASE}${APP_ROUTES.settings}`, { waitUntil: "networkidle" });
   await desktop.waitForTimeout(700);
-  const crumb = (await desktop.locator(".breadcrumbs").first().innerText().catch(() => "")).trim();
-  const crumbOk = crumb === "Settings" || /^Settings$/iu.test(crumb);
+  const crumb = await readFirstBreadcrumb(desktop);
   findings.push({
     check: "section-only-crumb",
-    ok: crumbOk,
+    ok: SETTINGS_CRUMB_PATTERN.test(crumb),
     detail: `crumb=${JSON.stringify(crumb)}`,
   });
   const alertCount = await desktop.locator(".alert.alert-warning").count();
@@ -111,13 +118,13 @@ const main = async (): Promise<void> => {
   await writeFile(reportPath, `${JSON.stringify({ findings }, null, 2)}\n`, "utf8");
   const failures = findings.filter((finding) => !finding.ok);
   if (failures.length > 0) {
-    console.error("browser-proof-nav-ia FAILED:");
-    for (const failure of failures) {
-      console.error(`- ${failure.check}: ${failure.detail}`);
-    }
+    await writeError("browser-proof-nav-ia FAILED:");
+    await writeError(failures.map((failure) => `- ${failure.check}: ${failure.detail}`).join("\n"));
     process.exit(1);
   }
-  console.log(`browser-proof-nav-ia: ${String(findings.length)} checks passed → ${reportPath}`);
+  await writeOutput(
+    `browser-proof-nav-ia: ${String(findings.length)} checks passed → ${reportPath}`,
+  );
 };
 
 await main();
