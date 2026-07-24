@@ -115,8 +115,8 @@ const main = async (): Promise<void> => {
   await writeOutput(`browser-proof-pdf-live OK (UI) → ${OUT}`);
 };
 
-await main().catch(async (error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-  await writeError(message);
+const runResult = await settle(main());
+if (runResult.status === "rejected") {
+  await writeError(runResult.reason.message);
   process.exit(1);
-});
+}

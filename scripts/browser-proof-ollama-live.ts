@@ -6,6 +6,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
+import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
 
@@ -114,8 +115,8 @@ const main = async (): Promise<void> => {
   await writeOutput(`browser-proof-ollama-live OK (UI) → ${OUT}`);
 };
 
-await main().catch(async (error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-  await writeError(message);
+const runResult = await settle(main());
+if (runResult.status === "rejected") {
+  await writeError(runResult.reason.message);
   process.exit(1);
-});
+}
