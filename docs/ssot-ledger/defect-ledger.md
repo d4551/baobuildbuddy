@@ -76,3 +76,5 @@ Contract: `docs/STACK-CONTRACT.md` wins over parent `.bao` AGENTS (zero `*.bao` 
 | D55 | SOFTENED | desktop package.json echo lint/typecheck | FIXED | validate-desktop-package + no-soft-package-scripts |
 | D56 | GAPPED | OUTLINE_ACTION under-enforced | FIXED | migrate + validate:outline-action-density |
 | D57 | BROKEN | Elysia exp.49 .ws() without websocket() | FIXED | app.use(websocket()) |
+
+| D58 | BROKEN BUILD | Vite/postcss bare `@import "tailwindcss"` → ENOENT packages/client/tailwindcss | FIXED | index.css import + validate:tailwind-css-import mutation red→green |

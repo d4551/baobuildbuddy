@@ -38,3 +38,5 @@
 | I23 | Search fabric types | 4 types | 8 types incl cover/portfolio/interview/runs | Δ: +4 entities | SSOT: constants/search.ts | gate: search-type-parity |
 | I24 | Outline/soft tokens | raw literals | OUTLINE/SOFT_ACTION_CLASS + gate | Δ: 0 quoted btn-outline in .vue | SSOT: layout-tokens | gate: outline-action-density |
 | I25 | Elysia tip | exp.46 | exp.49 + websocket capability | Δ: tip non-downgrade | SSOT: STACK-CONTRACT | gate: stack-versions |
+
+| I26 | Tailwind CSS import | bare `tailwindcss` ENOENT in Vite SSR build | `tailwindcss/index.css` + gate | Δ: CI build green | SSOT: STACK-CONTRACT | gate: validate:tailwind-css-import |
