@@ -15,13 +15,18 @@
 8. **job-apply console 404** — verify/context returns **204** when harness off.
 9. **Scraper Playwright** aligned to **1.61.1**.
 
+## Closed (follow-up grind)
+
+10. **Export toast SSOT** — `runExportWithToast` wired resume/portfolio/cover-letter.
+11. **Env→settings local model seed** — empty DB endpoint filled from `LOCAL_MODEL_*`.
+12. **Burndown nav race** — openRoute retry/skip when click already navigating.
+
 ## Remaining DRY / best-in-class (next)
 
-1. **Export page handlers** — resume/cover/portfolio preview `handleExport` still parallel; shared toast/error path optional.
-2. **`.env` LOCAL_MODEL_* vs settings DB** — still dual source; boot sync optional.
-3. **Cover-letter/portfolio PDF** — same helper, not yet in `proof:pdf-live`.
-4. **STT** — still BLOCKED (no mic in cloud agent).
-5. **Burndown soft warns** — settings section tabs / scraper “Recent Jobs” labels sometimes unmount after prior clicks (warn-only).
+1. **Cover-letter PDF UI proof** — needs letter fixture via UI generate (not yet in `proof:pdf-live`).
+2. **Portfolio PDF** — attempted when Export visible; empty library → skipped.
+3. **STT** — still BLOCKED (no mic in cloud agent).
+4. **Burndown soft warns** — settings/scraper labels still warn-only after unmount.
 
 ## Proof commands
 
