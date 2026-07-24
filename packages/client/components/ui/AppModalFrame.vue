@@ -54,13 +54,21 @@ watch(
 
 function requestClose(): void {
   emit("update:open", false);
+  emit("close");
 }
 
-function handleClose(): void {
+function handleNativeClose(): void {
+  // Escape / method=dialog close — sync Vue open state + notify consumers.
   emit("close");
   if (props.open) {
     emit("update:open", false);
   }
+}
+
+function handleCancel(event: Event): void {
+  // Keep cancel → close pipeline; ensure Vue state follows Escape.
+  event.preventDefault();
+  requestClose();
 }
 </script>
 
@@ -72,13 +80,14 @@ function handleClose(): void {
     aria-modal="true"
     :aria-labelledby="titleId"
     :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
-    @close="handleClose"
+    @cancel="handleCancel"
+    @close="handleNativeClose"
   >
     <div class="modal-box glass-modal" :class="modalBoxClass">
       <slot />
     </div>
     <form method="dialog" class="modal-backdrop">
-      <button type="button" :aria-label="closeAriaLabel" @click="requestClose">
+      <button type="submit" :aria-label="closeAriaLabel">
         {{ backdropButtonLabel }}
       </button>
     </form>
