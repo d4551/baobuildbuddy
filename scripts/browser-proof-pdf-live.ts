@@ -30,6 +30,14 @@ const RE_TARGET_COMPANY = /Target company/i;
 const RE_TARGET_POSITION = /Target position/i;
 const RE_EDIT_COVER = /Edit cover letter/i;
 const COVER_LETTER_DETAIL_URL_PATTERN = /\/cover-letter\/[^/]+/u;
+const RE_OPEN_PROJECT = /Open project creation dialog/i;
+const RE_PROJECT_TITLE = /Project title/i;
+const RE_PROJECT_DESCRIPTION = /Project description/i;
+const RE_TECH_INPUT = /Technology input/i;
+const RE_ADD_TECH = /Add technology to project/i;
+const RE_SAVE_PROJECT = /Save project changes/i;
+const RE_CANCEL_PROJECT = /Cancel project changes|Close project modal/i;
+const RE_EXPORT_PORTFOLIO = /Export portfolio/i;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
@@ -150,9 +158,54 @@ const main = async (): Promise<void> => {
   const coverLetterPdf = await assertRealPdfFile(coverPath);
   await page.screenshot({ path: join(OUT, "stills", "03-cover-letter-pdf-exported.png") });
 
+  // Portfolio: add project via UI if needed, then Export PDF.
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, {
+    waitUntil: "networkidle",
+    timeout: 60_000,
+  });
+  await wait(page, 1_200);
+  await settle(page.getByRole("button", { name: RE_CANCEL_PROJECT }).first().click({ timeout: 2_000 }));
+  await wait(page, 400);
+  const exportPortfolio = page.getByRole("button", { name: RE_EXPORT_PORTFOLIO }).first();
+  if ((await exportPortfolio.count()) === 0 || !(await exportPortfolio.isVisible())) {
+    await page.getByRole("button", { name: RE_OPEN_PROJECT }).click();
+    await wait(page, 600);
+    const title = page.getByLabel(RE_PROJECT_TITLE);
+    await title.click();
+    await title.fill("");
+    await title.pressSequentially("Bao RPA Dungeon Demo", { delay: 15 });
+    const description = page.getByLabel(RE_PROJECT_DESCRIPTION);
+    await description.click();
+    await description.fill("");
+    await description.pressSequentially(
+      "Shipped a multiplayer dungeon crawler prototype with networked combat and live ops tooling for game-industry hiring demos.",
+      { delay: 5 },
+    );
+    const tech = page.getByLabel(RE_TECH_INPUT);
+    await tech.click();
+    await tech.fill("");
+    await tech.pressSequentially("TypeScript", { delay: 15 });
+    await page.getByRole("button", { name: RE_ADD_TECH }).click();
+    await page.getByRole("button", { name: RE_SAVE_PROJECT }).click();
+    await wait(page, 2_000);
+  }
+  await page.screenshot({ path: join(OUT, "stills", "04-portfolio-ready.png") });
+  await page.getByRole("button", { name: RE_EXPORT_PORTFOLIO }).click();
+  await wait(page, 500);
+  const portfolioDownloadPromise = page.waitForEvent("download", { timeout: 45_000 });
+  await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
+  const portfolioDownload = await settle(portfolioDownloadPromise);
+  if (portfolioDownload.status === "rejected") {
+    await page.screenshot({ path: join(OUT, "stills", "portfolio-pdf-failed.png") });
+    throw new Error(`Portfolio PDF download failed: ${portfolioDownload.reason.message}`);
+  }
+  const portfolioPath = await saveDownload(portfolioDownload.value, "portfolio-ui.pdf");
+  const portfolioPdf = await assertRealPdfFile(portfolioPath);
+  await page.screenshot({ path: join(OUT, "stills", "05-portfolio-pdf-exported.png") });
+
   await browser.close();
 
-  if (!resumeAssertion.ok || !coverLetterPdf.ok) {
+  if (!resumeAssertion.ok || !coverLetterPdf.ok || !portfolioPdf.ok) {
     process.exit(1);
   }
   await Bun.write(
@@ -163,6 +216,7 @@ const main = async (): Promise<void> => {
         mode: "ui-click-type",
         resumePdf: resumeAssertion,
         coverLetterPdf,
+        portfolioPdf,
       },
       null,
       2,

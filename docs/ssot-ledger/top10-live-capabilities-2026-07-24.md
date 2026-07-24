@@ -30,10 +30,13 @@
 
 15. **RPA UI proof** — Settings enable WWI → hub → Run Job Scraper → runs 17→18 → Job Apply typed+run (`proof:rpa-live`).
 
+## Closed (portfolio PDF)
+
+16. **Portfolio PDF UI** — Add Project (type title/desc/tech) → Export PDF `%PDF-` 1394B.
+
 ## Remaining DRY / best-in-class (next)
 
-1. **Portfolio PDF UI** — empty library still skips Export.
-2. **STT** — still BLOCKED (no mic in cloud agent).
+1. **STT** — still BLOCKED (no mic in cloud agent).
 
 ## Proof commands
 
