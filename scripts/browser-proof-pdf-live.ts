@@ -111,7 +111,6 @@ const main = async (): Promise<void> => {
   await page.screenshot({ path: join(OUT, "stills", "01-resume-pdf-exported.png") });
 
   // Cover letter: generate via dialog (type company/position) then Export PDF.
-  let coverAssertion: Awaited<ReturnType<typeof assertRealPdfFile>> | null = null;
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.coverLetter}`, {
     waitUntil: "networkidle",
     timeout: 60_000,
@@ -148,12 +147,12 @@ const main = async (): Promise<void> => {
     throw new Error(`Cover letter PDF download failed: ${coverDownload.reason.message}`);
   }
   const coverPath = await saveDownload(coverDownload.value, "cover-letter-ui.pdf");
-  coverAssertion = await assertRealPdfFile(coverPath);
+  const coverLetterPdf = await assertRealPdfFile(coverPath);
   await page.screenshot({ path: join(OUT, "stills", "03-cover-letter-pdf-exported.png") });
 
   await browser.close();
 
-  if (!resumeAssertion.ok || !coverAssertion.ok) {
+  if (!resumeAssertion.ok || !coverLetterPdf.ok) {
     process.exit(1);
   }
   await Bun.write(
@@ -163,7 +162,7 @@ const main = async (): Promise<void> => {
         ok: true,
         mode: "ui-click-type",
         resumePdf: resumeAssertion,
-        coverLetterPdf: coverAssertion,
+        coverLetterPdf,
       },
       null,
       2,
