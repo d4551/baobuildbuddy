@@ -115,7 +115,8 @@
         "scripts/browser-interaction-burndown.ts",
         "scripts/browser-proof-ollama-live.ts",
         "scripts/browser-proof-pdf-live.ts",
-        "scripts/browser-proof-rpa-live.ts"
+        "scripts/browser-proof-rpa-live.ts",
+        "scripts/browser-record-ai-pdf-demo.ts"
       ],
       "linter": {
         "rules": {

@@ -123,8 +123,13 @@ const jobApplyViaUi = async (page: Page): Promise<void> => {
 
 const main = async (): Promise<void> => {
   await mkdir(join(OUT, "stills"), { recursive: true });
+  await mkdir(join(OUT, "raw"), { recursive: true });
   const browser = await chromium.launch({ headless: false, args: ["--disable-dev-shm-usage"] });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext({
+    recordVideo: { dir: join(OUT, "raw"), size: { width: 1440, height: 900 } },
+    viewport: { width: 1440, height: 900 },
+  });
+  const page = await context.newPage();
 
   await enablePortalViaUi(page);
 
@@ -145,22 +150,32 @@ const main = async (): Promise<void> => {
     await writeError(`job-apply UI: ${jobApplyError}`);
   }
 
+  const video = page.video();
+  await context.close();
   await browser.close();
+
+  let videoPath: string | null = null;
+  if (video) {
+    const raw = await video.path();
+    videoPath = join(OUT, "rpa-integration-demo.webm");
+    await Bun.write(videoPath, Bun.file(raw));
+  }
 
   await writeFile(
     join(OUT, "report.json"),
     `${JSON.stringify(
       {
         ok: true,
-        mode: "ui-click-type",
+        mode: "ui-click-type+video",
         scraper: { ran: true, runsBefore: beforeCount, runsAfter: afterCount },
         jobApply: { ok: jobApplyOk, error: jobApplyError },
+        videoPath,
       },
       null,
       2,
     )}\n`,
   );
-  await writeOutput(`browser-proof-rpa-live OK (UI) → ${OUT}`);
+  await writeOutput(`browser-proof-rpa-live OK (UI) video=${videoPath ?? "none"} → ${OUT}`);
 };
 
 const runResult = await settle(main());

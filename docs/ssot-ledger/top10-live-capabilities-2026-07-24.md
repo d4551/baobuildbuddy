@@ -34,6 +34,11 @@
 
 16. **Portfolio PDF UI** — Add Project (type title/desc/tech) → Export PDF `%PDF-` 1394B.
 
+## Closed (video proofs)
+
+17. **AI+themed PDF video** — `proof:ai-pdf-video` (chat nonce + theme flip + resume/cover/portfolio PDFs).
+18. **RPA video** — `proof:rpa-live` records scrape+job-apply webm.
+
 ## Remaining DRY / best-in-class (next)
 
 1. **STT** — still BLOCKED (no mic in cloud agent).
