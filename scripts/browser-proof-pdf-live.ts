@@ -24,6 +24,12 @@ const RE_CREATE_SUBMIT = /^Create resume$/i;
 const RE_CANCEL_CREATE = /Cancel resume creation|Close create resume dialog/i;
 const RE_FULL_NAME = /Full Name|Name/i;
 const RE_SAVE = /^Save$/i;
+const RE_OPEN_COVER_GENERATE = /Open cover-letter generation dialog/i;
+const RE_COVER_GENERATE = /^Generate cover letter$/i;
+const RE_TARGET_COMPANY = /Target company/i;
+const RE_TARGET_POSITION = /Target position/i;
+const RE_EDIT_COVER = /Edit cover letter/i;
+const COVER_LETTER_DETAIL_URL_PATTERN = /\/cover-letter\/[^/]+/u;
 
 const wait = async (page: Page, ms: number): Promise<void> => {
   await page.waitForTimeout(ms);
@@ -104,30 +110,50 @@ const main = async (): Promise<void> => {
   const resumeAssertion = await assertRealPdfFile(resumePath);
   await page.screenshot({ path: join(OUT, "stills", "01-resume-pdf-exported.png") });
 
-  // Portfolio PDF via UI when Export is available (click/type only).
-  let portfolioAssertion: Awaited<ReturnType<typeof assertRealPdfFile>> | null = null;
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, {
+  // Cover letter: generate via dialog (type company/position) then Export PDF.
+  let coverAssertion: Awaited<ReturnType<typeof assertRealPdfFile>> | null = null;
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.coverLetter}`, {
     waitUntil: "networkidle",
     timeout: 60_000,
   });
   await wait(page, 1_500);
-  const portfolioExport = page.getByRole("button", { name: RE_EXPORT }).first();
-  if ((await portfolioExport.count()) > 0 && (await portfolioExport.isVisible())) {
-    await portfolioExport.click();
-    await wait(page, 500);
-    const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
-    await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
-    const downloadResult = await settle(downloadPromise);
-    if (downloadResult.status === "fulfilled") {
-      const portfolioPath = await saveDownload(downloadResult.value, "portfolio-ui.pdf");
-      portfolioAssertion = await assertRealPdfFile(portfolioPath);
-      await page.screenshot({ path: join(OUT, "stills", "02-portfolio-pdf-exported.png") });
-    }
+  const existingCover = page.getByRole("button", { name: RE_EDIT_COVER }).first();
+  if ((await existingCover.count()) > 0 && (await existingCover.isVisible())) {
+    await existingCover.click();
+    await wait(page, 1_500);
+  } else {
+    await page.getByRole("button", { name: RE_OPEN_COVER_GENERATE }).click();
+    await wait(page, 800);
+    const company = page.getByLabel(RE_TARGET_COMPANY);
+    await company.click();
+    await company.fill("");
+    await company.pressSequentially("Riot Games", { delay: 20 });
+    const position = page.getByLabel(RE_TARGET_POSITION);
+    await position.click();
+    await position.fill("");
+    await position.pressSequentially("Gameplay Engineer", { delay: 20 });
+    await page.getByRole("button", { name: RE_COVER_GENERATE }).click();
+    // Live Ollama generation — allow long wait, then land on detail.
+    await page.waitForURL(COVER_LETTER_DETAIL_URL_PATTERN, { timeout: 180_000 });
+    await wait(page, 1_500);
   }
+  await page.screenshot({ path: join(OUT, "stills", "02-cover-letter-detail.png") });
+  await page.getByRole("button", { name: RE_EXPORT }).first().click();
+  await wait(page, 500);
+  const coverDownloadPromise = page.waitForEvent("download", { timeout: 45_000 });
+  await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
+  const coverDownload = await settle(coverDownloadPromise);
+  if (coverDownload.status === "rejected") {
+    await page.screenshot({ path: join(OUT, "stills", "cover-pdf-failed.png") });
+    throw new Error(`Cover letter PDF download failed: ${coverDownload.reason.message}`);
+  }
+  const coverPath = await saveDownload(coverDownload.value, "cover-letter-ui.pdf");
+  coverAssertion = await assertRealPdfFile(coverPath);
+  await page.screenshot({ path: join(OUT, "stills", "03-cover-letter-pdf-exported.png") });
 
   await browser.close();
 
-  if (!resumeAssertion.ok || (portfolioAssertion && !portfolioAssertion.ok)) {
+  if (!resumeAssertion.ok || !coverAssertion.ok) {
     process.exit(1);
   }
   await Bun.write(
@@ -137,7 +163,7 @@ const main = async (): Promise<void> => {
         ok: true,
         mode: "ui-click-type",
         resumePdf: resumeAssertion,
-        portfolioPdf: portfolioAssertion,
+        coverLetterPdf: coverAssertion,
       },
       null,
       2,

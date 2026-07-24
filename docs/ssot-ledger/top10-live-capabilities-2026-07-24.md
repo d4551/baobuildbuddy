@@ -21,12 +21,15 @@
 11. **Env→settings local model seed** — empty DB endpoint filled from `LOCAL_MODEL_*`.
 12. **Burndown nav race** — openRoute retry/skip when click already navigating.
 
+## Closed (cover-letter + burndown)
+
+13. **Cover-letter PDF UI** — Generate dialog type company/position → Export PDF (`%PDF-`, 1930B).
+14. **Burndown soft warns** — Playwright role-click fallback → **0 findings**.
+
 ## Remaining DRY / best-in-class (next)
 
-1. **Cover-letter PDF UI proof** — needs letter fixture via UI generate (not yet in `proof:pdf-live`).
-2. **Portfolio PDF** — attempted when Export visible; empty library → skipped.
-3. **STT** — still BLOCKED (no mic in cloud agent).
-4. **Burndown soft warns** — settings/scraper labels still warn-only after unmount.
+1. **Portfolio PDF UI** — empty library still skips Export.
+2. **STT** — still BLOCKED (no mic in cloud agent).
 
 ## Proof commands
 

@@ -385,7 +385,26 @@ const clickOneLabel = async (
       return false;
     }, label),
   );
-  const clicked = clickResult.status === "fulfilled" && clickResult.value;
+  let clicked = clickResult.status === "fulfilled" && clickResult.value;
+  if (!clicked) {
+    // Fallback: Playwright role click (section tabs / rails often miss evaluate hit-testing).
+    const roleClick = await settle(
+      (async () => {
+        const locator = page
+          .getByRole("link", { name: label, exact: true })
+          .or(page.getByRole("button", { name: label, exact: true }))
+          .or(page.getByRole("tab", { name: label, exact: true }))
+          .first();
+        if ((await locator.count()) === 0) {
+          return false;
+        }
+        await locator.scrollIntoViewIfNeeded();
+        await locator.click({ timeout: 4_000 });
+        return true;
+      })(),
+    );
+    clicked = roleClick.status === "fulfilled" && roleClick.value;
+  }
   if (!clicked) {
     // Prior clicks (refresh/filter) often unmount empty-state CTAs; skip stale labels.
     const stillListedResult = await settle(listClickableControlLabels(page));
