@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared/types/ai";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
+import { useSettings } from "~/composables/useSettings";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
@@ -78,6 +79,26 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { isAiConfigurationIncomplete } = useSettings();
+const emptyCtaTo = computed(() =>
+  isAiConfigurationIncomplete.value
+    ? APP_ROUTE_BUILDERS.settingsSection("aiProviders")
+    : APP_ROUTES.aiDashboard,
+);
+const emptyTitleKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureTitle" : "aiChatPage.emptyTitle",
+);
+const emptyDescriptionKey = computed(() =>
+  isAiConfigurationIncomplete.value
+    ? "aiChatPage.emptyConfigureDescription"
+    : "aiChatPage.emptyDescription",
+);
+const emptyCtaLabelKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCta" : "aiChatPage.emptyCta",
+);
+const emptyCtaAriaKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCtaAria" : "aiChatPage.emptyCtaAria",
+);
 
 const updateInput = (event: Event): void => {
   const target = event.target;
@@ -143,11 +164,11 @@ const updateInput = (event: Event): void => {
         >
           <div :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS]">
             <EmptyState
-              title-key="aiChatPage.emptyTitle"
-              description-key="aiChatPage.emptyDescription"
-              cta-label-key="aiChatPage.emptyCta"
-              cta-aria-key="aiChatPage.emptyCtaAria"
-              :cta-to="APP_ROUTES.aiDashboard"
+              :title-key="emptyTitleKey"
+              :description-key="emptyDescriptionKey"
+              :cta-label-key="emptyCtaLabelKey"
+              :cta-aria-key="emptyCtaAriaKey"
+              :cta-to="emptyCtaTo"
             >
               <template #actions>
                 <ChatPromptChips

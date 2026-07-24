@@ -4,7 +4,7 @@
  * - Job-board scrape via UI (real network + Playwright scrapers)
  * - Browser TTS via speechSynthesis (real synthesis engine)
  *
- * AI chat/completions: Ollama SEGV on this host; cloud keys empty → reported BLOCKED in report.
+ * AI chat/completions: live Ollama probe (fail-closed via assertLiveInference).
  * STT: no microphone device → reported BLOCKED in report.
  */
 import { mkdir, stat } from "node:fs/promises";
@@ -13,6 +13,8 @@ import { chromium, type Download, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { assertLiveInference, type LiveAiProbeResult } from "./utils/live-ai-probe";
+import { assertRealPdfFile } from "./utils/live-pdf-assert";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
   /\/$/u,
@@ -64,11 +66,8 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
     return null;
   }
   const path = await saveDownload(downloadResult.value, "resume-real.pdf");
-  const bytes = (await Bun.file(path).arrayBuffer()).byteLength;
-  const header = Buffer.from(await Bun.file(path).arrayBuffer()).subarray(0, 5).toString("utf8");
-  await writeOutput(`PDF path=${path} bytes=${String(bytes)} header=${header}`);
-  if (header !== "%PDF-" || bytes < 1_000) {
-    await writeError("Downloaded file is not a real PDF");
+  const assertion = await assertRealPdfFile(path);
+  if (!assertion.ok) {
     return null;
   }
   await shot(page, "01-pdf-exported");
@@ -198,6 +197,16 @@ const main = async (): Promise<void> => {
   });
   const page = await context.newPage();
 
+  let aiProbe: LiveAiProbeResult | null = null;
+  let aiError: string | null = null;
+  const aiProbeResult = await settle(assertLiveInference());
+  if (aiProbeResult.status === "fulfilled") {
+    aiProbe = aiProbeResult.value;
+  } else {
+    aiError = aiProbeResult.reason.message;
+    await writeError(`live AI probe failed: ${aiError}`);
+  }
+
   const pdfPath = await exportResumePdf(page);
   const scrapeOk = await enablePortalAndScrape(page);
   const ttsOk = await proveBrowserTts(page);
@@ -217,15 +226,18 @@ const main = async (): Promise<void> => {
   const report = {
     headless: false,
     display: process.env.DISPLAY ?? null,
-    ai: {
-      status: "BLOCKED",
-      reason:
-        "Ollama llama-server SEGV on this host (qwen2.5:0.5b); GEMINI/OPENAI/CLAUDE/HUGGINGFACE keys empty in .env",
-      evidence: [
-        "/opt/cursor/artifacts/baseline/ollama-chat2.txt",
-        "/opt/cursor/artifacts/baseline/ollama-generate-api.txt",
-      ],
-    },
+    ai: aiProbe
+      ? {
+          status: "OK",
+          endpoint: aiProbe.endpoint,
+          modelId: aiProbe.modelId,
+          nonce: aiProbe.nonce,
+          sample: aiProbe.sample,
+        }
+      : {
+          status: "FAIL",
+          reason: aiError ?? "Live Ollama probe failed",
+        },
     stt: {
       status: "BLOCKED",
       reason: "No microphone device / permission in this cloud agent environment for real STT",
@@ -242,7 +254,12 @@ const main = async (): Promise<void> => {
   await Bun.write(join(OUT, "honest-report.json"), JSON.stringify(report, null, 2));
   await writeOutput(JSON.stringify(report, null, 2));
 
-  if (report.pdf.status !== "OK" || report.scrape.status !== "OK" || report.tts.status !== "OK") {
+  if (
+    report.ai.status !== "OK" ||
+    report.pdf.status !== "OK" ||
+    report.scrape.status !== "OK" ||
+    report.tts.status !== "OK"
+  ) {
     process.exitCode = 1;
   }
 };
