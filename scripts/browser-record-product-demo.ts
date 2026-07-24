@@ -17,6 +17,7 @@ import { API_ENDPOINTS } from "../packages/shared/src/constants/endpoints";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { assertLiveInference } from "./utils/live-ai-probe";
 
 const RESUME_FROM_QUESTIONS_GENERATE_PATH = API_ENDPOINTS.resumeFromQuestionsGenerate;
 
@@ -48,11 +49,6 @@ const DEMO_LOCATOR_RE_24 = /Start listening|Start voice|Listen/i;
 const DEMO_LOCATOR_RE_25 = /start listening|start voice|listen/i;
 const DEMO_LOCATOR_RE_26 = /Stop listening|Stop voice|Stop/i;
 const DEMO_LOCATOR_RE_27 = /Submit|Send Response|Continue/i;
-const DEMO_BANNED_AI_MARKERS = [
-  /bao-demo-deterministic/i,
-  /buildDeterministicContent/i,
-  /DETERMINISTIC_AI/i,
-] as const;
 const TRAILING_SLASH_PATTERN = /\/$/u;
 const INPUT_NAME_TITLE_SELECTOR = `input[name*="${"title"}" i]`;
 const INPUT_PLACEHOLDER_TECH_SELECTOR = `input[placeholder*="${"tech"}" i]`;
@@ -99,67 +95,6 @@ const waitWhile = async (
 
 const shot = async (page: Page, name: string): Promise<void> => {
   await page.screenshot({ path: join(OUT, "stills", `${name}.png`), fullPage: false });
-};
-
-type LiveModelProbe = {
-  endpoint: string;
-  modelId: string;
-  sample: string;
-};
-
-const assertLiveInference = async (): Promise<LiveModelProbe> => {
-  const modelsUrl = `${LOCAL_ENDPOINT}/models`;
-  const modelsResponse = await fetch(modelsUrl, { signal: AbortSignal.timeout(10_000) });
-  if (!modelsResponse.ok) {
-    throw new Error(`Live AI probe failed: GET ${modelsUrl} → ${String(modelsResponse.status)}`);
-  }
-  const modelsJson = (await modelsResponse.json()) as {
-    data?: Array<{ id?: string }>;
-  };
-  const modelId =
-    process.env.LOCAL_MODEL_NAME?.trim() ||
-    process.env.PRODUCT_DEMO_MODEL?.trim() ||
-    modelsJson.data?.find((entry) => typeof entry.id === "string" && entry.id.length > 0)?.id;
-  if (!modelId) {
-    throw new Error(`Live AI probe failed: no model id at ${modelsUrl}`);
-  }
-
-  const nonce = `BAO_LIVE_${Date.now().toString(36)}`;
-  const chatResponse = await fetch(`${LOCAL_ENDPOINT}/chat/completions`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    signal: AbortSignal.timeout(120_000),
-    body: JSON.stringify({
-      model: modelId,
-      temperature: 0.2,
-      max_tokens: 48,
-      messages: [
-        {
-          role: "user",
-          content: `Reply with one short sentence that includes the token ${nonce}.`,
-        },
-      ],
-    }),
-  });
-  if (!chatResponse.ok) {
-    const body = await chatResponse.text();
-    throw new Error(
-      `Live AI probe failed: chat/completions → ${String(chatResponse.status)} ${body.slice(0, 240)}`,
-    );
-  }
-  const chatJson = (await chatResponse.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const sample = chatJson.choices?.[0]?.message?.content?.trim() ?? "";
-  if (sample.length < 3) {
-    throw new Error("Live AI probe failed: empty completion (refusing mock/empty provider).");
-  }
-  // Deterministic stub historically echoed canned resume/cover text — reject known markers.
-  if (DEMO_BANNED_AI_MARKERS.some((pattern) => pattern.test(sample))) {
-    throw new Error("Live AI probe failed: response looks like a mock/deterministic stub.");
-  }
-  await writeOutput(`live AI ok endpoint=${LOCAL_ENDPOINT} model=${modelId} sample=${sample.slice(0, 120)}`);
-  return { endpoint: LOCAL_ENDPOINT, modelId, sample };
 };
 
 type LiveWhisperProbe = {
@@ -663,7 +598,7 @@ const main = async (): Promise<void> => {
   await mkdir(join(OUT, "downloads"), { recursive: true });
   await mkdir(join(OUT, "raw-segments"), { recursive: true });
 
-  const live = await assertLiveInference();
+  const live = await assertLiveInference({ endpoint: LOCAL_ENDPOINT });
   const whisper = await assertLiveWhisper();
   await seedSpeechAndAiSettings(live.modelId);
 

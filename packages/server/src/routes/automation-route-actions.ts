@@ -7,6 +7,7 @@ import {
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NO_CONTENT,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
@@ -37,10 +38,8 @@ const routeResult = <const Status extends number, Body>(status: Status, body: Bo
 
 export const handleVerifyAutomationContext = async () => {
   if (!config.enableAutomationVerification) {
-    return routeResult(
-      HTTP_STATUS_NOT_FOUND,
-      toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND),
-    );
+    // Optional verify harness — 204 avoids browser console 404 noise on job-apply.
+    return routeResult(HTTP_STATUS_NO_CONTENT, undefined);
   }
 
   return routeResult(HTTP_STATUS_OK, await ensureAutomationVerifyContext());

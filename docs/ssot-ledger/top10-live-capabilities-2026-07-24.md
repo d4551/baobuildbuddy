@@ -8,13 +8,20 @@
 4. **Chat empty CTA** — routes to Settings AI Providers when `isAiConfigurationIncomplete`.
 5. **App builds** — server `dist/index.js` + Nuxt `.output` (use `NUXT_IGNORE_LOCK=1` while dev stack holds port).
 
+## Closed this pass
+
+6. **UI-only proofs** — `proof:ollama-live` / `proof:pdf-live` click+type (no settings/resume API inject).
+7. **product-demo probe DRY** — uses `scripts/utils/live-ai-probe.ts`.
+8. **job-apply console 404** — verify/context returns **204** when harness off.
+9. **Scraper Playwright** aligned to **1.61.1**.
+
 ## Remaining DRY / best-in-class (next)
 
-1. **product-demo still embeds its own `assertLiveInference`** — migrate to `scripts/utils/live-ai-probe.ts`.
-2. **Export page handlers** — resume/cover/portfolio preview `handleExport` still parallel; shared toast/error path optional.
-3. **`.env` LOCAL_MODEL_* vs settings DB** — still dual source; boot sync optional.
-4. **Cover-letter/portfolio PDF** — same helper, not yet in `proof:pdf-live`.
-5. **STT** — still BLOCKED (no mic in cloud agent).
+1. **Export page handlers** — resume/cover/portfolio preview `handleExport` still parallel; shared toast/error path optional.
+2. **`.env` LOCAL_MODEL_* vs settings DB** — still dual source; boot sync optional.
+3. **Cover-letter/portfolio PDF** — same helper, not yet in `proof:pdf-live`.
+4. **STT** — still BLOCKED (no mic in cloud agent).
+5. **Burndown soft warns** — settings section tabs / scraper “Recent Jobs” labels sometimes unmount after prior clicks (warn-only).
 
 ## Proof commands
 

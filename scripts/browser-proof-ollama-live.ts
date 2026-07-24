@@ -1,9 +1,10 @@
 /**
- * Fail-closed headed proof: Ollama via Settings test + AI Chat UI + API nonce.
+ * Fail-closed headed proof: configure Ollama + chat via UI clicks/typing only.
+ * No settings/chat API injection — raw Ollama probe is infrastructure preflight only.
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { chromium } from "playwright";
+import { chromium, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
@@ -12,121 +13,109 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:300
   /\/$/u,
   "",
 );
-const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
-  /\/$/u,
-  "",
-);
-const OUT = process.env.OLLAMA_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/ollama-live";
+const OUT = process.env.OLLAMA_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/ollama-live-ui";
 const SEND_BUTTON_PATTERN = /send/iu;
+const LOCAL_PROVIDER_PATTERN = /Local Model/i;
+const TEST_ARIA_PATTERN = /Test AI provider connection/i;
+const SAVE_KEYS_ARIA_PATTERN = /Save AI provider credentials/i;
+const CONNECTED_PATTERN = /Connected/i;
+const ENDPOINT_LABEL_PATTERN = /Endpoint URL/i;
+const MODEL_LABEL_PATTERN = /Local model name/i;
+const ENDPOINT =
+  process.env.LOCAL_MODEL_ENDPOINT?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
+const MODEL = process.env.LOCAL_MODEL_NAME?.trim() || "llama3.2:1b";
 
-const wait = async (ms: number): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
+const wait = async (page: Page, ms: number): Promise<void> => {
+  await page.waitForTimeout(ms);
+};
+
+const configureLocalViaUi = async (page: Page): Promise<void> => {
+  await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("aiProviders")}`, {
+    waitUntil: "networkidle",
   });
+  await wait(page, 1_200);
+
+  await page.locator("summary, .collapse-title").filter({ hasText: LOCAL_PROVIDER_PATTERN }).first().click();
+  await wait(page, 800);
+
+  const keyInput = page.getByLabel(ENDPOINT_LABEL_PATTERN);
+  await keyInput.click();
+  await keyInput.fill("");
+  await keyInput.pressSequentially(ENDPOINT, { delay: 15 });
+
+  const modelInput = page.getByLabel(MODEL_LABEL_PATTERN);
+  await modelInput.click();
+  await modelInput.fill("");
+  await modelInput.pressSequentially(MODEL, { delay: 15 });
+
+  const endpointJoin = page.locator(".join").filter({ has: page.getByLabel(ENDPOINT_LABEL_PATTERN) });
+  await endpointJoin.getByRole("button", { name: TEST_ARIA_PATTERN }).click();
+  await wait(page, 12_000);
+  await page.screenshot({ path: join(OUT, "stills", "01-settings-test-clicked.png") });
+
+  const connected = page.getByText(CONNECTED_PATTERN).first();
+  if ((await connected.count()) === 0 || !(await connected.isVisible())) {
+    throw new Error("Settings UI Test did not show Connected badge for Local provider");
+  }
+
+  await page.getByRole("button", { name: SAVE_KEYS_ARIA_PATTERN }).click();
+  await wait(page, 2_000);
+  await page.screenshot({ path: join(OUT, "stills", "02-settings-saved.png") });
+};
+
+const chatViaUi = async (page: Page): Promise<string> => {
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.aiChat}`, { waitUntil: "networkidle" });
+  await wait(page, 1_200);
+  const uiNonce = `BAO_UI_${Date.now().toString(36)}`;
+  const composer = page.locator("textarea").first();
+  await composer.click();
+  await composer.fill("");
+  await composer.pressSequentially(
+    `Reply with ONLY this exact token and nothing else: ${uiNonce}`,
+    { delay: 10 },
+  );
+  await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
+  await wait(page, 60_000);
+  const bodyText = await page.locator("main").innerText();
+  await page.screenshot({ path: join(OUT, "stills", "03-ai-chat-live.png") });
+  if (!bodyText.includes(uiNonce)) {
+    throw new Error(`AI Chat UI missing nonce ${uiNonce}`);
+  }
+  return uiNonce;
 };
 
 const main = async (): Promise<void> => {
   await mkdir(join(OUT, "stills"), { recursive: true });
-  const probe = await assertLiveInference({ modelId: process.env.LOCAL_MODEL_NAME ?? "llama3.2:1b" });
+  const probe = await assertLiveInference({ modelId: MODEL, endpoint: ENDPOINT });
   await writeFile(join(OUT, "raw-probe.json"), `${JSON.stringify(probe, null, 2)}\n`);
-
-  // Ensure app settings point at live Ollama
-  const keysResponse = await fetch(`${SERVER_BASE}/api/settings/api-keys`, {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      localModelEndpoint: probe.endpoint,
-      localModelName: probe.modelId,
-    }),
-  });
-  if (!keysResponse.ok) {
-    throw new Error(`settings api-keys PUT failed: ${String(keysResponse.status)}`);
-  }
-
-  const settingsGet = await fetch(`${SERVER_BASE}/api/settings`);
-  const settingsJson = (await settingsGet.json()) as {
-    aiRouting: Record<string, { provider: string; model?: string | null }>;
-  };
-  const aiRouting = Object.fromEntries(
-    Object.entries(settingsJson.aiRouting).map(([purpose]) => [
-      purpose,
-      { provider: "local", model: probe.modelId },
-    ]),
-  );
-  const routingResponse = await fetch(`${SERVER_BASE}/api/settings`, {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ preferredProvider: "local", aiRouting }),
-  });
-  if (!routingResponse.ok) {
-    throw new Error(`settings routing PUT failed: ${String(routingResponse.status)}`);
-  }
-
-  const testResponse = await fetch(`${SERVER_BASE}/api/settings/test-api-key`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "local", key: probe.endpoint, model: probe.modelId }),
-  });
-  const testJson = (await testResponse.json()) as { valid?: boolean; selectedModel?: string };
-  if (!testResponse.ok || testJson.valid !== true) {
-    throw new Error(`settings test-api-key failed: ${JSON.stringify(testJson)}`);
-  }
-  await writeFile(join(OUT, "settings-test.json"), `${JSON.stringify(testJson, null, 2)}\n`);
-
-  const apiNonce = `BAO_APP_${Date.now().toString(36)}`;
-  const chatApi = await fetch(`${SERVER_BASE}/api/ai/chat`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      message: `Reply with ONLY this exact token and nothing else: ${apiNonce}`,
-    }),
-  });
-  const chatApiJson = (await chatApi.json()) as { message?: string; provider?: string; model?: string };
-  if (!chatApi.ok || !chatApiJson.message?.includes(apiNonce)) {
-    throw new Error(`app /api/ai/chat failed: ${JSON.stringify(chatApiJson).slice(0, 400)}`);
-  }
-  await writeFile(join(OUT, "app-chat-api.json"), `${JSON.stringify(chatApiJson, null, 2)}\n`);
 
   const browser = await chromium.launch({ headless: false, args: ["--disable-dev-shm-usage"] });
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
-  await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("aiProviders")}`, {
-    waitUntil: "networkidle",
-  });
-  await wait(1_200);
-  await page.screenshot({ path: join(OUT, "stills", "01-settings-ai-providers.png") });
-
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.aiChat}`, { waitUntil: "networkidle" });
-  await wait(1_200);
-  const uiNonce = `BAO_UI_${Date.now().toString(36)}`;
-  const composer = page.locator("textarea, [contenteditable=true]").first();
-  await composer.fill(`Reply with ONLY this exact token and nothing else: ${uiNonce}`);
-  await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  await wait(45_000);
-  const bodyText = await page.locator("main").innerText();
-  await page.screenshot({ path: join(OUT, "stills", "02-ai-chat-live.png") });
+  await configureLocalViaUi(page);
+  const uiNonce = await chatViaUi(page);
   await browser.close();
-
-  if (!bodyText.includes(uiNonce)) {
-    await writeError(`AI Chat UI missing nonce ${uiNonce}`);
-    process.exit(1);
-  }
 
   await writeFile(
     join(OUT, "report.json"),
     `${JSON.stringify(
       {
         ok: true,
+        mode: "ui-click-type",
         probe,
-        settingsTest: testJson,
-        chatApi: { provider: chatApiJson.provider, model: chatApiJson.model, nonce: apiNonce },
+        endpoint: ENDPOINT,
+        model: MODEL,
         uiNonce,
       },
       null,
       2,
     )}\n`,
   );
-  await writeOutput(`browser-proof-ollama-live OK → ${OUT}`);
+  await writeOutput(`browser-proof-ollama-live OK (UI) → ${OUT}`);
 };
 
-await main();
+await main().catch(async (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  await writeError(message);
+  process.exit(1);
+});
