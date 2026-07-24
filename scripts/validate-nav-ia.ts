@@ -15,6 +15,7 @@ import {
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 const SIDEBAR_PATH = "packages/client/components/layout/AppSidebar.vue";
+const SIDEBAR_KBD_PATTERN = /<kbd\b/u;
 
 export const collectNavIaViolations = (sidebarSource: string): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];
@@ -41,7 +42,7 @@ export const collectNavIaViolations = (sidebarSource: string): ValidationViolati
     });
   }
 
-  if (/<kbd\b/u.test(sidebarSource)) {
+  if (SIDEBAR_KBD_PATTERN.test(sidebarSource)) {
     violations.push({
       filePath: SIDEBAR_PATH,
       line: 1,
