@@ -50,10 +50,11 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
         >
           <NuxtLink 
             :to="step.to"
-            class="link link-hover inline-flex max-w-full flex-col items-start gap-1 xl:items-center xl:text-center"
+            class="link link-hover inline-flex max-w-full min-w-0 flex-col flex-wrap items-start xl:items-center xl:text-center"
+            :class="[FLEX_GAP_TOKEN_CLASS.gap1]"
             :aria-current="step.status === 'inProgress' ? 'step' : undefined"
           >
-            <span class="whitespace-normal">{{ t(step.labelKey) }}</span>
+            <span class="min-w-0 whitespace-normal">{{ t(step.labelKey) }}</span>
             <span
               class="badge badge-sm shrink-0 whitespace-nowrap"
               :class="statusBadgeClassByStepStatus[step.status]"
