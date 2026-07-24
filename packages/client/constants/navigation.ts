@@ -124,8 +124,6 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     to: APP_ROUTES.aiDashboard,
     includeInSidebar: true,
     includeInDock: false,
-    // Reachable via AI Chat (g c) + in-page nav; avoids colliding with chat shortcut.
-    keyboardOptional: true,
   },
   {
     id: "ai-chat",

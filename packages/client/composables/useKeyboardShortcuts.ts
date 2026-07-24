@@ -32,6 +32,7 @@ export const KEYBOARD_ROUTE_SHORTCUTS: readonly KeyboardRouteShortcut[] = [
   { id: "interview", prefix: "g", key: "i", to: APP_ROUTES.interview },
   { id: "skills", prefix: "g", key: "k", to: APP_ROUTES.skills },
   { id: "studios", prefix: "g", key: "u", to: APP_ROUTES.studios },
+  { id: "ai-dashboard", prefix: "g", key: "b", to: APP_ROUTES.aiDashboard },
   { id: "ai-chat", prefix: "g", key: "c", to: APP_ROUTES.aiChat },
   { id: "automation", prefix: "g", key: "m", to: APP_ROUTES.automation },
   { id: "gamification", prefix: "g", key: "g", to: APP_ROUTES.gamification },

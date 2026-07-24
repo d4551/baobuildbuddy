@@ -66,12 +66,9 @@ function handleNativeClose(): void {
   }
 }
 
-function handleDialogKeydown(event: KeyboardEvent): void {
-  if (event.key !== "Escape") {
-    return;
-  }
+function handleCancel(event: Event): void {
+  // Escape: prevent default dismiss race, sync Vue open via requestClose → watch → dialog.close().
   event.preventDefault();
-  event.stopPropagation();
   requestClose();
 }
 </script>
@@ -84,7 +81,7 @@ function handleDialogKeydown(event: KeyboardEvent): void {
     aria-modal="true"
     :aria-labelledby="titleId"
     :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
-    @keydown="handleDialogKeydown"
+    @cancel="handleCancel"
     @close="handleNativeClose"
   >
     <div class="modal-box glass-modal relative" :class="modalBoxClass">
