@@ -70,7 +70,7 @@ export class JobAggregator {
       }
       this.logger.error(
         `${providerName}: failed`,
-        result.reason instanceof Error ? result.reason.message : String(result.reason),
+        toErrorMessage(result.reason),
       );
       return [];
     });
@@ -128,7 +128,7 @@ export class JobAggregator {
       }
       this.logger.error(
         "Failed to save job:",
-        result.reason instanceof Error ? result.reason.message : String(result.reason),
+        toErrorMessage(result.reason),
       );
     }
 

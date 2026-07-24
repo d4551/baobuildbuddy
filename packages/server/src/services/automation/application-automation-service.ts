@@ -65,7 +65,7 @@ export class ApplicationAutomationService {
       (error) => {
         automationServiceLogger.error(
           "[automation] scheduler recovery failed",
-          error instanceof Error ? error.message : String(error),
+          toErrorMessage(error),
         );
       },
     );

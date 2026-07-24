@@ -64,7 +64,7 @@ export class AutomationProgressEvents {
         (error) => {
           automationProgressLogger.error(
             "Failed to persist progress event",
-            error instanceof Error ? error.message : String(error),
+            toErrorMessage(error),
           );
         },
       );

@@ -20,7 +20,7 @@ process.on("uncaughtException", (error) => {
 });
 
 process.on("unhandledRejection", (reason) => {
-  logger.error("unhandledRejection", reason instanceof Error ? reason.message : String(reason));
+  logger.error("unhandledRejection", toErrorMessage(reason));
   process.exit(1);
 });
 
@@ -31,7 +31,7 @@ const runBackgroundTask = (
   task.then(
     () => undefined,
     (error) => {
-      onError?.(error instanceof Error ? error.message : String(error));
+      onError?.(toErrorMessage(error));
     },
   );
 };
@@ -44,7 +44,7 @@ runBackgroundTask(
     if (seedResult.status === "rejected") {
       logger.error(
         "Seed failed",
-        seedResult.reason instanceof Error ? seedResult.reason.message : String(seedResult.reason),
+        toErrorMessage(seedResult.reason),
       );
     }
   })(),

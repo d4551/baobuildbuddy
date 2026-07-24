@@ -216,7 +216,7 @@ export const runJobApplyInBackground = (runId: string, payload: JobApplyRequestB
     (error) => {
       automationRoutesLogger.error(
         `[automation] job-apply execution failed for runId=${runId}`,
-        error instanceof Error ? error.message : String(error),
+        toErrorMessage(error),
       );
     },
   );

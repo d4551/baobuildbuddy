@@ -31,7 +31,7 @@ export class AutomationRunScheduler {
         (error) => {
           automationSchedulerLogger.error(
             "[automation] scheduled run execution failed",
-            error instanceof Error ? error.message : String(error),
+            toErrorMessage(error),
           );
         },
       );

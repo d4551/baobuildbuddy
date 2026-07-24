@@ -231,7 +231,7 @@ export class GamificationService {
           gamificationLogger.error("trackAction failed", {
             statKey,
             reason,
-            err: result.reason instanceof Error ? result.reason.message : String(result.reason),
+            err: toErrorMessage(result.reason),
           });
         }
       },
