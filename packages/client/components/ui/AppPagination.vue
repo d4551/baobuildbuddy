@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
 import {
-
+computed, ref, watch } from "vue";
+import {
   FLEX_GAP_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 type PageAriaResolver = (page: number) => string;
@@ -155,7 +156,7 @@ watch(
       <nav class="join" :aria-label="navigationAria">
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
+          :class="[OUTLINE_ACTION_CLASS, 'join-item']"
           :aria-label="previousAria"
           :disabled="!canGoPrevious"
           @keydown="handleNavigationKeydown"
@@ -183,7 +184,7 @@ watch(
 
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-outline']"
+          :class="[OUTLINE_ACTION_CLASS, 'join-item']"
           :aria-label="nextAria"
           :disabled="!canGoNext"
           @keydown="handleNavigationKeydown"

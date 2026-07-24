@@ -8,6 +8,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -62,7 +63,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureJobAria')"
             @click="emit('openJob')"
@@ -88,7 +89,7 @@ const { t } = useI18n();
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
           <button
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :class="[TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureStudioAria')"
             @click="emit('openStudio')"

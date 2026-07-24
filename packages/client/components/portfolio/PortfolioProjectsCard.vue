@@ -17,7 +17,8 @@ import {
   SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS
+  TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -156,14 +157,14 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+                :class="[OUTLINE_ACTION_CLASS]"
                 :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"
                 @click="emit('edit', project)"
               >
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-error btn-outline']"
+                :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"
               >

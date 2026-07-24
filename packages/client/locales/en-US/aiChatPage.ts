@@ -14,6 +14,8 @@ const aiChatPage = {
     sendAria: "Send chat message",
     sendButton: "Send",
     emptyTitle: "Your assistant is ready",
+    emptyCta: "Open AI dashboard",
+    emptyCtaAria: "Open the AI control dashboard",
     emptyDescription:
       "Use the suggested prompts or ask for coaching, writing help, opportunity research, or automation guidance.",
     composerHint: "Enter sends · Shift+Enter adds a line.",

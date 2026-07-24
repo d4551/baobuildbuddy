@@ -2,7 +2,6 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
-
   FLUID_WIDTH_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
@@ -12,6 +11,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -106,7 +106,7 @@ function updateProjectForm(value: typeof projectForm): void {
       <template v-if="!isPortfolioEmpty" #actions>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('portfolioPage.actions.previewAria')"
         >
           <svg :class="ICON_SIZE_CLASS['4']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -160,7 +160,7 @@ function updateProjectForm(value: typeof projectForm): void {
           <template #actions>
             <button
               type="button"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :class="[FLUID_WIDTH_CLASS]"
               :aria-label="t('portfolioPage.emptyState.profileButton')"
               @click="showEmptyProfileEditor = !showEmptyProfileEditor"

@@ -11,6 +11,7 @@ import {
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -53,7 +54,7 @@ const { t } = useI18n();
         >
           <template #actions>
             <button
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :class="[TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('jobDetail.interviewAria')"
               @click="emit('interview')"
@@ -75,7 +76,7 @@ const { t } = useI18n();
             </button>
 
             <button
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :class="[TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"

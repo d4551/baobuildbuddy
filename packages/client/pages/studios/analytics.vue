@@ -8,6 +8,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -50,7 +51,7 @@ useSeoMeta({
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.studios"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('studioAnalytics.openDirectoryAria')"
         >
           {{ t("studiosIndex.title") }}

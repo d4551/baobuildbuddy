@@ -8,7 +8,6 @@ import type {
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -17,6 +16,7 @@ import {
   SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 type InterviewCompletionState =
@@ -163,7 +163,7 @@ const { t } = useI18n();
         <div class="flex justify-end">
           <button 
             type="button"
-            class="btn btn-outline btn-error"
+            :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
             :disabled="!canComplete || completionState !== 'ready'"
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"

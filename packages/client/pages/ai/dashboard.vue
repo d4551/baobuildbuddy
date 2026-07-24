@@ -3,6 +3,7 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -34,7 +35,7 @@ const page = reactive(useAIDashboardPage());
     >
       <template #actions>
         <button
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :class="[TOUCH_TARGET_MIN_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"

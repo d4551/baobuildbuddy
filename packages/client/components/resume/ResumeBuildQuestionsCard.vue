@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,

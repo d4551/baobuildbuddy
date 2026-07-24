@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -13,6 +12,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -56,9 +56,9 @@ useSeoMeta({
       :description="t('automation.email.pageDescription')"
     >
       <template #actions>
-        <NuxtLink
+          <NuxtLink
           :to="APP_ROUTES.automationRuns"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.email.openRunsAria')"
         >
           {{ t("automation.email.openRunsButton") }}
@@ -170,7 +170,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTE_BUILDERS.settingsSection('emailDelivery')"
-              class="btn btn-link btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, PADDING_TOKEN_CLASS.px0]"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -200,7 +200,7 @@ useSeoMeta({
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :disabled="pending || !canSubmit || !form.runAt"
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"

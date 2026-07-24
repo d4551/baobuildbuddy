@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,

@@ -4,7 +4,6 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -16,6 +15,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
@@ -204,7 +204,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -225,7 +225,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -253,7 +253,7 @@ function handleScheduleInput(event: Event): void {
           </fieldset>
           <div class="card-actions justify-end">
             <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+              :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
               @click="emit('schedule', capability.target)"

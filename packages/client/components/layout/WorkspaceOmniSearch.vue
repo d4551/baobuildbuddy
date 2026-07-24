@@ -14,9 +14,11 @@ import {
 import {
   resolveWorkspaceSearchResultRoute,
   useWorkspaceSearch,
+  WORKSPACE_OMNI_SEARCH_OPEN_EVENT,
 } from "~/composables/useWorkspaceSearch";
 
 const WORKSPACE_SEARCH_DIALOG_TITLE_ID = "workspace-omni-search-title";
+const WORKSPACE_SEARCH_INPUT_ID = "workspace-omni-search-input";
 
 const { t } = useI18n();
 const {
@@ -32,6 +34,29 @@ const {
   search,
 } = useWorkspaceSearch();
 const router = useRouter();
+
+function focusSearchInput(): void {
+  const input = document.getElementById(WORKSPACE_SEARCH_INPUT_ID);
+  if (input instanceof HTMLInputElement) {
+    input.focus();
+    input.select();
+  }
+}
+
+function handleOpenOmniSearchEvent(): void {
+  open.value = true;
+  nextTick(() => {
+    focusSearchInput();
+  });
+}
+
+onMounted(() => {
+  window.addEventListener(WORKSPACE_OMNI_SEARCH_OPEN_EVENT, handleOpenOmniSearchEvent);
+});
+
+onUnmounted(() => {
+  window.removeEventListener(WORKSPACE_OMNI_SEARCH_OPEN_EVENT, handleOpenOmniSearchEvent);
+});
 
 async function submitSearch(): Promise<void> {
   await search();
@@ -92,6 +117,7 @@ function typeLabel(type: string): string {
           @submit.prevent="submitSearch"
         >
           <input
+            :id="WORKSPACE_SEARCH_INPUT_ID"
             v-model="query"
             type="search"
             class="input"

@@ -54,7 +54,9 @@ useSeoMeta({
 </script>
 
 <template>
-  <div :class="CHAT_PAGE_CONTAINER_CLASS">
+  <PageScaffold tag="section" width-token="wide" labelled-by="ai-chat-page-title">
+    <h1 id="ai-chat-page-title" class="sr-only">{{ t("aiChatPage.title") }}</h1>
+    <div :class="CHAT_PAGE_CONTAINER_CLASS">
     <SectionGrid grid-token="chatSplit">
       <AIChatConversationPanel
         :resolved-brand="resolvedBrand"
@@ -114,5 +116,6 @@ useSeoMeta({
         @prompt="handlePromptSelection"
       />
     </SectionGrid>
-  </div>
+    </div>
+  </PageScaffold>
 </template>

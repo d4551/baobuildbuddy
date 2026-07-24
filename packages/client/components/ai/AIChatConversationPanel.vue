@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared/types/ai";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import {
@@ -8,7 +9,6 @@ import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
-  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
@@ -136,21 +136,27 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
-          <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-                <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
-                <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
-                  {{ t("aiChatPage.emptyDescription") }}
-                </p>
-              </div>
-              <ChatPromptChips
-                :prompts="contextualPrompts"
-                :loading="loading"
-                @prompt="emit('prompt', $event)"
-              />
-            </div>
+        <div
+          v-if="!hasConversation"
+          class="flex items-center justify-center"
+          :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]"
+        >
+          <div :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS]">
+            <EmptyState
+              title-key="aiChatPage.emptyTitle"
+              description-key="aiChatPage.emptyDescription"
+              cta-label-key="aiChatPage.emptyCta"
+              cta-aria-key="aiChatPage.emptyCtaAria"
+              :cta-to="APP_ROUTES.aiDashboard"
+            >
+              <template #actions>
+                <ChatPromptChips
+                  :prompts="contextualPrompts"
+                  :loading="loading"
+                  @prompt="emit('prompt', $event)"
+                />
+              </template>
+            </EmptyState>
           </div>
         </div>
 

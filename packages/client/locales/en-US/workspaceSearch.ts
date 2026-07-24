@@ -1,8 +1,8 @@
 const workspaceSearch = {
   workspaceSearch: {
-    openButtonAria: "Open workspace search",
+    openButtonAria: "Open workspace search (Ctrl or Cmd+K)",
     title: "Search workspace",
-    placeholder: "Search jobs, studios, resumes, skills…",
+    placeholder: "Search jobs, letters, portfolio, interviews, runs…",
     inputAria: "Workspace search query",
     submitAria: "Run workspace search",
     submitButton: "Search",
@@ -20,6 +20,10 @@ const workspaceSearch = {
       studios: "Studio",
       resumes: "Resume",
       skills: "Skill",
+      "cover-letters": "Cover letter",
+      "portfolio-projects": "Portfolio",
+      "interview-sessions": "Interview",
+      "automation-runs": "Automation",
     },
     searchFailed: "Workspace search failed",
     autocompleteFailed: "Failed to fetch autocomplete suggestions",

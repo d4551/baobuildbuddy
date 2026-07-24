@@ -14,6 +14,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -138,7 +139,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     </label>
 
     <button 
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+      :class="[OUTLINE_ACTION_CLASS]"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
       @click="emit('test-provider', 'local')"
@@ -170,7 +171,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               @input="updateProviderCredential($event, provider)"
             />
             <button 
-              class="btn btn-outline join-item"
+              :class="[OUTLINE_ACTION_CLASS, 'join-item']"
               :disabled="testing || !providerCredentials[provider].trim()"
               :aria-label="t('setup.testProviderAria', { provider: providerLabels[provider] })"
               @click="emit('test-provider', provider)"

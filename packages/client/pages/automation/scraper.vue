@@ -8,7 +8,10 @@ import {
   type AutomationScraperSectionId,
   isAutomationScraperSectionId,
 } from "~/components/automation/scraper-sections";
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
+  STACK_SPACE_Y_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+} from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 definePageMeta({
@@ -109,7 +112,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
       density="compact"
     >
       <template #actions>
-        <NuxtLink :to="APP_ROUTES.automationRuns" class="btn btn-outline">
+        <NuxtLink :to="APP_ROUTES.automationRuns" :class="[OUTLINE_ACTION_CLASS]">
           {{ t("automation.hub.viewRunsButton") }}
         </NuxtLink>
       </template>

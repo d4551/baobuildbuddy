@@ -16,6 +16,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -66,7 +67,7 @@ const { t } = useI18n();
             </NuxtLink>
             <NuxtLink
               :to="APP_ROUTES.jobs"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :class="[TOUCH_TARGET_MIN_CLASS]"
             >
               {{ t("dashboard.quickActions.actions.browseJobs") }}

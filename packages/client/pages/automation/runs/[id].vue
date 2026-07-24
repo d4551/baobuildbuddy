@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import {
+  STACK_SPACE_Y_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+} from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
@@ -46,7 +49,7 @@ useSeoMeta({
         <template #actions>
           <NuxtLink
             :to="APP_ROUTES.automationRuns"
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('automation.runDetail.backToRunsAria')"
           >
             {{ t("automation.runDetail.backButton") }}

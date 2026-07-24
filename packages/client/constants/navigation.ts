@@ -32,6 +32,11 @@ export interface NavigationItem {
    * Example: ai-chat matches APP_ROUTES.aiDashboard via APP_ROUTES.ai.
    */
   readonly dockMatchPrefixes?: readonly string[];
+  /**
+   * When true, item is exempt from g-then-key shortcut coverage
+   * (reachable via another shortcut/surface — e.g. AI dashboard via ai-chat).
+   */
+  readonly keyboardOptional?: boolean;
 }
 
 /**
@@ -119,6 +124,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     to: APP_ROUTES.aiDashboard,
     includeInSidebar: true,
     includeInDock: false,
+    // Reachable via AI Chat (g c) + in-page nav; avoids colliding with chat shortcut.
+    keyboardOptional: true,
   },
   {
     id: "ai-chat",

@@ -7,6 +7,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -186,7 +187,7 @@ useSeoMeta({
                   <div class="card-actions justify-end">
                     <NuxtLink
                       :to="primaryCard?.to ?? APP_ROUTES.automationScraper"
-                      class="btn btn-outline"
+                      :class="[OUTLINE_ACTION_CLASS]"
                       :class="[TOUCH_TARGET_MIN_CLASS]"
                       :aria-label="t(primaryCard?.buttonKey ?? 'automation.hub.cards.scraper.button')"
                     >

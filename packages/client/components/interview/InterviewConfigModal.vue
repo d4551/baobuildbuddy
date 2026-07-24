@@ -17,6 +17,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { InterviewHubSessionConfig, StudioSelectorOption } from "~/types/interview";
 
@@ -94,7 +95,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
     <div class="join" :class="[MARGIN_TOKEN_CLASS.mt4]">
       <button 
         type="button"
-        class="btn join-item btn-outline"
+        :class="[OUTLINE_ACTION_CLASS, 'join-item']"
         :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'job' }"
         :aria-label="t('interviewHub.config.switchToJobAria')"
         @click="emit('update:selected-mode', 'job')"
@@ -103,7 +104,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       </button>
       <button 
         type="button"
-        class="btn join-item btn-outline"
+        :class="[OUTLINE_ACTION_CLASS, 'join-item']"
         :class="{ [PRIMARY_BUTTON_VARIANT_CLASS]: selectedMode === 'studio' }"
         :aria-label="t('interviewHub.config.switchToStudioAria')"
         @click="emit('update:selected-mode', 'studio')"

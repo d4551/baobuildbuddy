@@ -22,6 +22,7 @@ import {
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -44,7 +45,7 @@ const page = useJobsIndexPage();
       <template v-if="!page.isCatalogEmpty.value" #actions>
         <button
           type="button"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :class="[TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('jobsPage.aiMatchAria')"
           :disabled="page.matching.value"
@@ -178,7 +179,7 @@ const page = useJobsIndexPage();
           <template v-if="page.isCatalogEmpty.value" #actions>
             <button
               type="button"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
               :aria-label="t('jobsPage.refreshAria')"
               :disabled="page.refreshing.value"
@@ -242,7 +243,7 @@ const page = useJobsIndexPage();
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
                     <button
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+                      :class="[OUTLINE_ACTION_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >

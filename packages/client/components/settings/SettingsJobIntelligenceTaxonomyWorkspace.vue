@@ -2,7 +2,6 @@
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MIN_HEIGHT_EDITOR_CLASS,

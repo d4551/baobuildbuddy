@@ -6,7 +6,8 @@ import {
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS
+  TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   ResumeCompletionQuickAction,
@@ -81,7 +82,7 @@ const { t } = useI18n();
             v-for="action in quickActions"
             :key="action.id"
             :to="action.to"
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t(action.labelKey)"
           >
             {{ t(action.labelKey) }}

@@ -17,8 +17,8 @@
     "build": "bun run ../../scripts/build-desktop-release.ts",
     "build:debug": "bun run ../../scripts/build-desktop-release.ts --debug",
     "format": "bun run --bun biome format .",
-    "typecheck": "echo \"No JS/TS typecheck output; managed by Rust tooling in src-tauri\"",
-    "lint": "echo \"No separate desktop lint task\""
+    "typecheck": "bun run ../../scripts/validate-desktop-package.ts",
+    "lint": "bun run ../../scripts/validate-desktop-package.ts"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.1"

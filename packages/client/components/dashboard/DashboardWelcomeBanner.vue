@@ -18,6 +18,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -69,7 +70,7 @@ const { t } = useI18n();
         <NuxtLink
           v-if="showSetupAction && primaryRoute !== APP_ROUTES.setup"
           :to="APP_ROUTES.setup"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :class="[FLUID_WIDTH_CLASS, RESPONSIVE_WIDTH_SM_AUTO_CLASS, TOUCH_TARGET_MIN_CLASS]"
         >
           {{ t(DASHBOARD_COPY_KEYS.setupCtaLabel) }}

@@ -2,7 +2,6 @@
 import type { SkillCategory } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,

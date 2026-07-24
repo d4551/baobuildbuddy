@@ -3,7 +3,6 @@ import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
@@ -11,6 +10,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -105,7 +105,7 @@ function studioLocation(location: string): string {
         </button>
         <button 
           type="button"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('studiosIndex.preview.openDetailAria', { studio: studio.name })"
           @click="$emit('openDetail', studio.id)"
         >
