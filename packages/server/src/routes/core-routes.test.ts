@@ -168,7 +168,16 @@ describe("search routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.query).toBe(SEARCH_QUERY_SHORT);
     expect(res.body.results).toEqual([]);
-    expect(res.body.counts).toEqual({ jobs: 0, studios: 0, skills: 0, resumes: 0 });
+    expect(res.body.counts).toEqual({
+      jobs: 0,
+      studios: 0,
+      skills: 0,
+      resumes: 0,
+      "cover-letters": 0,
+      "portfolio-projects": 0,
+      "interview-sessions": 0,
+      "automation-runs": 0,
+    });
     expect(res.body.totalTime).toBeGreaterThanOrEqual(0);
   });
 

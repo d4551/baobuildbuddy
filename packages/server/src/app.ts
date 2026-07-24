@@ -10,6 +10,7 @@ import { TRACE_ID_HEADER, TRACE_ID_BYTE_LENGTH } from "@bao/shared/constants/run
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia, setupTypebox, t } from "elysia";
+import { websocket } from "elysia/websocket";
 import { isProductionRuntime } from "./config/env";
 import { RATE_LIMIT_GLOBAL_DURATION_MS, RATE_LIMIT_GLOBAL_MAX_REQUESTS } from "./config/rate-limit";
 import { HEALTHCHECK_PROBE_SQL, sqlite } from "./db/client";
@@ -70,6 +71,7 @@ const OPENAPI_TAGS = [
 ] as const;
 
 export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
+  .use(websocket())
   .use(corsPlugin)
   .model({
     HealthResponse: t.Object(
