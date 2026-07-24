@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DOCK_NAVIGATION_IDS,
   getDockNavigationItems,
   MOBILE_DOCK_MAX_ITEMS,
   NAVIGATION_ITEMS,
@@ -12,18 +13,18 @@ describe("mobile dock navigation SSOT", () => {
     expect(dock.length).toBeLessThanOrEqual(MOBILE_DOCK_MAX_ITEMS);
   });
 
+  it("uses the canonical Home/Work/Create/AI/System dock set", () => {
+    expect(getDockNavigationItems().map((item) => item.id)).toEqual([...DOCK_NAVIGATION_IDS]);
+  });
+
   it("never flags more dock candidates than the cap without slice protection", () => {
     const flagged = NAVIGATION_ITEMS.filter((item) => item.includeInDock);
     expect(flagged.length).toBeLessThanOrEqual(MOBILE_DOCK_MAX_ITEMS);
   });
 
-  it("includes core career destinations and excludes docs/API chrome", () => {
+  it("excludes automation and docs from the dock", () => {
     const ids = getDockNavigationItems().map((item) => item.id);
-    expect(ids).toContain("dashboard");
-    expect(ids).toContain("jobs");
-    expect(ids).toContain("settings");
-    expect(ids).toContain("ai-chat");
-    expect(ids).toContain("automation");
+    expect(ids).not.toContain("automation");
     expect(ids).not.toContain("apiDocs");
   });
 });

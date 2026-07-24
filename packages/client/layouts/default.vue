@@ -117,7 +117,8 @@ onUnmounted(() => {
     </div>
     <ClientOnly>
       <AppDock />
-      <LazyQuickActionFab />
+      <!-- FAB is desktop-only; mobile dock owns primary destinations (IA cutover). -->
+      <LazyQuickActionFab v-if="isDesktopViewport" />
       <LazyFloatingChatWidget v-if="showFloatingChatWidget" />
     </ClientOnly>
   </div>

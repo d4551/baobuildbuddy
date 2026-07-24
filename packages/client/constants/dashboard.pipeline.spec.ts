@@ -38,6 +38,26 @@ describe("resolveDashboardPipelineSteps", () => {
     expect(steps.every((step) => step.status === "complete")).toBe(true);
   });
 
+  it("keeps later metrics pending until earlier steps complete (prefix-linear)", () => {
+    const steps = resolveDashboardPipelineSteps({
+      savedJobs: 0,
+      appliedJobs: 0,
+      resumeCount: 0,
+      coverLetterCount: 0,
+      automationRuns: 9,
+      successfulAutomationRuns: 9,
+      mappedSkillsCount: 0,
+      gamificationXp: 120,
+    });
+
+    const statusById = Object.fromEntries(steps.map((step) => [step.id, step.status]));
+    expect(statusById.search).toBe("inProgress");
+    expect(statusById.scrape).toBe("pending");
+    expect(statusById.customize).toBe("pending");
+    expect(statusById.apply).toBe("pending");
+    expect(statusById.gamify).toBe("pending");
+  });
+
   it("sets customize as in progress when discovery and scraping are complete", () => {
     const steps = resolveDashboardPipelineSteps({
       savedJobs: 5,

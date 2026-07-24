@@ -44,7 +44,13 @@ function resolvePipelineStepStatus(
   firstIncompleteStep: DashboardPipelineStep["id"] | null,
   completion: Record<DashboardPipelineStep["id"], boolean>,
 ): DashboardPipelineStepViewModel["status"] {
-  if (completion[stepId]) {
+  const stepIndex = DASHBOARD_PIPELINE_STEPS.findIndex((step) => step.id === stepId);
+  const firstIncompleteIndex =
+    firstIncompleteStep === null
+      ? DASHBOARD_PIPELINE_STEPS.length
+      : DASHBOARD_PIPELINE_STEPS.findIndex((step) => step.id === firstIncompleteStep);
+  // Prefix-linear: later steps cannot show complete while an earlier step is incomplete.
+  if (stepIndex < firstIncompleteIndex && completion[stepId]) {
     return "complete";
   }
   return stepId === firstIncompleteStep ? "inProgress" : "pending";

@@ -10,8 +10,9 @@ const NAV_FILE = "packages/client/constants/navigation.ts";
 const SHORTCUT_FILE = "packages/client/composables/useKeyboardShortcuts.ts";
 const KEYBOARD_OPTIONAL_PATTERN = /keyboardOptional:\s*true/u;
 
+/** id immediately followed by groupId (excludes NAVIGATION_GROUPS labelKey stubs). */
 const NAV_ITEM_BLOCK_PATTERN =
-  /\{\s*id:\s*"([^"]+)"[\s\S]*?includeInSidebar:\s*(true|false)([\s\S]*?)(?=\n\s*\{|\n\];)/gu;
+  /\{\s*id:\s*"([^"]+)",\s*groupId:\s*"[^"]+"[\s\S]*?includeInSidebar:\s*(true|false)([\s\S]*?)(?=\n\s*\{|\n\];)/gu;
 
 export const collectKeyboardNavParityViolations = (input: {
   navigationSource: string;

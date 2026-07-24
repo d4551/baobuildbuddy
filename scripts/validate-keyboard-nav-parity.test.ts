@@ -8,6 +8,7 @@ describe("validate-keyboard-nav-parity", () => {
 export const NAVIGATION_ITEMS = [
   {
     id: "jobs",
+    groupId: "work",
     labelKey: "nav.jobs",
     iconPath: "x",
     to: "/jobs",
@@ -28,6 +29,7 @@ export const NAVIGATION_ITEMS = [
 export const NAVIGATION_ITEMS = [
   {
     id: "ai-dashboard",
+    groupId: "intelligence",
     labelKey: "nav.aiDashboard",
     iconPath: "x",
     to: "/ai/dashboard",
@@ -47,6 +49,7 @@ export const NAVIGATION_ITEMS = [
 export const NAVIGATION_ITEMS = [
   {
     id: "jobs",
+    groupId: "work",
     labelKey: "nav.jobs",
     iconPath: "x",
     to: "/jobs",
