@@ -79,18 +79,20 @@ const main = async (): Promise<void> => {
   await page.keyboard.press("Enter");
   await page.waitForTimeout(1_400);
   await shot("03-omni-search-results");
+  // Focus dialog chrome then Escape (input may swallow first Escape in some browsers).
+  await page.locator("dialog.modal[open]").focus();
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(250);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(400);
   const dialogOpenAfterEscape = await page.evaluate(() =>
     Boolean(document.querySelector("dialog.modal[open]")),
   );
   if (dialogOpenAfterEscape) {
     findings.push("OmniSearch stayed open after Escape");
-    await page.evaluate(() => {
-      const dialog = document.querySelector("dialog.modal[open]");
-      if (dialog instanceof HTMLDialogElement) {
-        dialog.close();
-      }
+    await page.locator("dialog.modal[open] button[aria-label='Close workspace search']").first().click({
+      force: true,
+      timeout: 5_000,
     });
     await page.waitForTimeout(300);
   }
