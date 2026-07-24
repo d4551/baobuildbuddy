@@ -118,11 +118,35 @@ const openRoute = async (
 ): Promise<void> => {
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
-  await page.goto(`${CLIENT_BASE}${route}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await page.waitForTimeout(600);
+  const target = `${CLIENT_BASE}${route}`;
+  await settle(page.waitForLoadState("domcontentloaded", { timeout: 5_000 }));
+  // If a prior click already landed here, skip competing goto.
+  if (page.url().startsWith(target)) {
+    await page.waitForTimeout(400);
+    return;
+  }
+  let attempt = 0;
+  while (attempt < 4) {
+    const navResult = await settle(
+      page.goto(target, {
+        waitUntil: "domcontentloaded",
+        timeout: 60_000,
+      }),
+    );
+    if (navResult.status === "fulfilled") {
+      await page.waitForTimeout(600);
+      return;
+    }
+    await settle(page.waitForLoadState("domcontentloaded", { timeout: 8_000 }));
+    if (page.url().startsWith(target)) {
+      await page.waitForTimeout(400);
+      return;
+    }
+    if (attempt === 3) {
+      throw navResult.reason;
+    }
+    attempt += 1;
+  }
 };
 
 const collectChromeSignals = async (page: Page) =>
@@ -354,6 +378,7 @@ const clickOneLabel = async (
         if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
           continue;
         }
+        control.scrollIntoView({ block: "nearest", inline: "nearest" });
         control.click();
         return true;
       }

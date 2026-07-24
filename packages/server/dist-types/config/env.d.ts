@@ -22,6 +22,8 @@ export declare function readConfig(): {
     dbPath: string;
     logLevel: string;
     corsOrigins: string[];
+    localModelEndpoint: string | null;
+    localModelName: string | null;
     enableAutomationVerification: boolean;
     allowAutomationPrivateHosts: boolean;
 };

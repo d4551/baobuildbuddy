@@ -3846,6 +3846,7 @@ export declare const app: Elysia<"/api", "local", {
                         headers: unknown;
                         response: {
                             200: unknown;
+                            204: void;
                             404: {
                                 error: {
                                     code: string;

@@ -6,10 +6,8 @@ export declare const handleVerifyAutomationContext: () => Promise<{
         resumeId: string;
     };
 } | {
-    status: 404;
-    body: {
-        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
-    };
+    status: 204;
+    body: undefined;
 }>;
 export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Promise<{
     status: 200;

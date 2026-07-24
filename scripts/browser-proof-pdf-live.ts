@@ -100,17 +100,48 @@ const main = async (): Promise<void> => {
   await page.setViewportSize({ width: 1440, height: 900 });
 
   await ensureResumeViaUi(page);
-  const path = await exportPdfViaUi(page);
-  const assertion = await assertRealPdfFile(path);
-  await page.screenshot({ path: join(OUT, "stills", "01-pdf-exported.png") });
+  const resumePath = await exportPdfViaUi(page);
+  const resumeAssertion = await assertRealPdfFile(resumePath);
+  await page.screenshot({ path: join(OUT, "stills", "01-resume-pdf-exported.png") });
+
+  // Portfolio PDF via UI when Export is available (click/type only).
+  let portfolioAssertion: Awaited<ReturnType<typeof assertRealPdfFile>> | null = null;
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, {
+    waitUntil: "networkidle",
+    timeout: 60_000,
+  });
+  await wait(page, 1_500);
+  const portfolioExport = page.getByRole("button", { name: RE_EXPORT }).first();
+  if ((await portfolioExport.count()) > 0 && (await portfolioExport.isVisible())) {
+    await portfolioExport.click();
+    await wait(page, 500);
+    const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
+    await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
+    const downloadResult = await settle(downloadPromise);
+    if (downloadResult.status === "fulfilled") {
+      const portfolioPath = await saveDownload(downloadResult.value, "portfolio-ui.pdf");
+      portfolioAssertion = await assertRealPdfFile(portfolioPath);
+      await page.screenshot({ path: join(OUT, "stills", "02-portfolio-pdf-exported.png") });
+    }
+  }
+
   await browser.close();
 
-  if (!assertion.ok) {
+  if (!resumeAssertion.ok || (portfolioAssertion && !portfolioAssertion.ok)) {
     process.exit(1);
   }
   await Bun.write(
     join(OUT, "report.json"),
-    `${JSON.stringify({ ok: true, mode: "ui-click-type", pdf: assertion }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        ok: true,
+        mode: "ui-click-type",
+        resumePdf: resumeAssertion,
+        portfolioPdf: portfolioAssertion,
+      },
+      null,
+      2,
+    )}\n`,
   );
   await writeOutput(`browser-proof-pdf-live OK (UI) → ${OUT}`);
 };

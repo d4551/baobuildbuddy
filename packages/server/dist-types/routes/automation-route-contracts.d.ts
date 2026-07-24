@@ -165,6 +165,7 @@ export declare const automationRouteErrorResponses: {
 };
 export declare const automationVerifyContextResponses: {
     readonly 200: import("typebox").TUnknown;
+    readonly 204: import("typebox").TVoid;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TObject<{
             code: import("typebox").TString;

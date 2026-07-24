@@ -7,7 +7,7 @@ import {
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { useI18n } from "vue-i18n";
-import { settlePromise } from "~/composables/async-flow";
+import { runExportWithToast } from "~/composables/export-with-toast";
 import {
   ICON_SIZE_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
@@ -19,7 +19,6 @@ import {
   coverLetterContentToPlainText,
   plainTextToCoverLetterContent,
 } from "~/utils/cover-letter-content";
-import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
   middleware: ["auth"],
@@ -202,22 +201,17 @@ function clearContent() {
 }
 
 async function handleExport(format: "pdf" | "docx") {
-  if (!letterId.value) {
+  const id = letterId.value;
+  if (!id) {
     return;
   }
-
-  const exportResult = await settlePromise(
-    exportDocument(letterId.value, format),
-    t("coverLetterDetailPage.toasts.exportFailed"),
-  );
-  if (!exportResult.ok) {
-    $toast.error(
-      getErrorMessage(exportResult.error, t("coverLetterDetailPage.toasts.exportFailed")),
-    );
-    return;
-  }
-
-  $toast.success(t("coverLetterDetailPage.toasts.exported"));
+  await runExportWithToast({
+    exportFn: () => exportDocument(id, format),
+    failMessage: t("coverLetterDetailPage.toasts.exportFailed"),
+    successMessage: t("coverLetterDetailPage.toasts.exported"),
+    toast: $toast,
+    t,
+  });
 }
 </script>
 

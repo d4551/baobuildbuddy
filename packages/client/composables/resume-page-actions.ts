@@ -3,7 +3,6 @@ import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import type { NuxtApp } from "#app";
-import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import {
   useAiEnhancementProgress,
@@ -13,7 +12,7 @@ import {
 } from "~/composables/resume-page-editor-actions";
 import { useResumeMutationActions } from "~/composables/resume-page-mutation-actions";
 import { useResumeViewActions } from "~/composables/resume-page-view-actions";
-import { getErrorMessage } from "~/utils/errors";
+import { runExportWithToast } from "~/composables/export-with-toast";
 
 function createResumeActionModules(
   input: ResumePageActionsInput,
@@ -75,18 +74,17 @@ export function useResumePageActions(
     ) => Promise<unknown>,
     format: "pdf" | "docx",
   ): Promise<void> {
-    if (!input.selectedResumeId.value) {
+    const resumeId = input.selectedResumeId.value;
+    if (!resumeId) {
       return;
     }
-    const exportResult = await settlePromise(
-      exportResume(input.selectedResumeId.value, undefined, format),
-      t("resumePage.toasts.resumeExportFailed"),
-    );
-    if (!exportResult.ok) {
-      $toast.error(getErrorMessage(exportResult.error, t("resumePage.toasts.resumeExportFailed")));
-      return;
-    }
-    $toast.success(t("resumePage.toasts.resumeExported"));
+    await runExportWithToast({
+      exportFn: () => exportResume(resumeId, undefined, format),
+      failMessage: t("resumePage.toasts.resumeExportFailed"),
+      successMessage: t("resumePage.toasts.resumeExported"),
+      toast: $toast,
+      t,
+    });
   }
 
   return {

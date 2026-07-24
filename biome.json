@@ -111,7 +111,10 @@
       "includes": [
         "scripts/browser-record-product-demo.ts",
         "scripts/browser-record-desktop-capabilities.ts",
-        "scripts/browser-record-visual-proof.ts"
+        "scripts/browser-record-visual-proof.ts",
+        "scripts/browser-interaction-burndown.ts",
+        "scripts/browser-proof-ollama-live.ts",
+        "scripts/browser-proof-pdf-live.ts"
       ],
       "linter": {
         "rules": {
