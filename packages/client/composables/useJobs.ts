@@ -1,6 +1,6 @@
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { Job } from "@bao/shared/types/jobs";
-import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
+import { asJsonArray, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { readRequiredApiPayload } from "~/utils/api-response";
 import { toJob } from "./api-normalizer-jobs";
@@ -11,13 +11,39 @@ const toJobList = (value: unknown): Job[] =>
     ? value.map((entry) => toJob(entry)).filter((entry): entry is Job => entry !== null)
     : [];
 
+/**
+ * Application list entry: the applied job plus pipeline metadata from the API.
+ */
+export interface JobApplicationEntry {
+  readonly id: string;
+  readonly status: string;
+  readonly appliedDate: string;
+  readonly job: Job;
+}
+
+const toJobApplicationEntry = (value: unknown): JobApplicationEntry | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const job = toJob(value.job);
+  if (!job) {
+    return null;
+  }
+  return {
+    id: asString(value.id) ?? "",
+    status: asString(value.status) ?? "",
+    appliedDate: asString(value.appliedDate) ?? "",
+    job,
+  };
+};
+
 interface JobsContext {
   api: ReturnType<typeof useApi>;
   t: ReturnType<typeof useI18n>["t"];
   loading: ReturnType<typeof useState<boolean>>;
   jobs: ReturnType<typeof useState<Job[]>>;
   savedJobs: ReturnType<typeof useState<Job[]>>;
-  applications: ReturnType<typeof useState<Job[]>>;
+  applications: ReturnType<typeof useState<JobApplicationEntry[]>>;
   recommendations: ReturnType<typeof useState<Job[]>>;
   filters: ReturnType<typeof useState<Record<string, string>>>;
 }
@@ -104,17 +130,14 @@ async function fetchApplications(context: JobsContext): Promise<void> {
       return;
     }
     const entries = asJsonArray(data) ?? [];
-    const jobs: Job[] = [];
+    const applications: JobApplicationEntry[] = [];
     for (const entry of entries) {
-      if (!isRecord(entry)) {
-        continue;
-      }
-      const job = toJob(entry.job);
-      if (job) {
-        jobs.push(job);
+      const application = toJobApplicationEntry(entry);
+      if (application) {
+        applications.push(application);
       }
     }
-    context.applications.value = jobs;
+    context.applications.value = applications;
   });
 }
 
@@ -179,7 +202,7 @@ export function useJobs() {
     t: useI18n().t,
     jobs: useState<Job[]>(STATE_KEYS.JOBS_LIST, () => []),
     savedJobs: useState<Job[]>(STATE_KEYS.JOBS_SAVED, () => []),
-    applications: useState<Job[]>(STATE_KEYS.JOBS_APPLICATIONS, () => []),
+    applications: useState<JobApplicationEntry[]>(STATE_KEYS.JOBS_APPLICATIONS, () => []),
     recommendations: useState<Job[]>(STATE_KEYS.JOBS_RECOMMENDATIONS, () => []),
     loading: useState(STATE_KEYS.JOBS_LOADING, () => false),
     filters: useState<Record<string, string>>(STATE_KEYS.JOBS_FILTERS, () => ({})),

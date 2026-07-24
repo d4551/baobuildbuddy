@@ -10,6 +10,8 @@ definePageMeta({
 });
 
 import { useI18n } from "vue-i18n";
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
 const STUDIOS_PREVIEW_DIALOG_TITLE_ID = "studios-index-preview-dialog-title";
@@ -44,7 +46,17 @@ const catalogEmpty = computed(
       :title="t('studiosIndex.title')"
       :description="t('studiosIndex.subtitle')"
       density="comfortable"
-    />
+    >
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.studiosAnalytics"
+          :class="[OUTLINE_ACTION_CLASS]"
+          :aria-label="t('studiosIndex.analyticsAria')"
+        >
+          {{ t("studiosIndex.analyticsButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeroHeader>
 
     <BootstrapErrorAlert
       v-if="page.pageError.value"

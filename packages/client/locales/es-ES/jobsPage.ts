@@ -95,6 +95,44 @@ const jobsPage = {
   "toasts": {
     "searchReward": "Progreso de búsqueda registrado (+{xp} XP)"
   },
+  "tabs": {
+    "aria": "Vistas de la bolsa de empleo",
+    "browse": "Explorar",
+    "browseAria": "Mostrar resultados de descubrimiento de empleos",
+    "saved": "Guardados",
+    "savedAria": "Mostrar empleos guardados",
+    "applied": "Postulados",
+    "appliedAria": "Mostrar postulaciones de empleo"
+  },
+  "saved": {
+    "emptyTitle": "Aún no hay empleos guardados",
+    "emptyDescription": "Guarda roles de la bolsa de empleo para crear una lista para currículums y preparación de entrevistas.",
+    "emptyCta": "Explorar empleos",
+    "emptyCtaAria": "Cambiar a la pestaña de descubrimiento de empleos",
+    "errorTitle": "No se pudieron cargar los empleos guardados.",
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar cargar empleos guardados",
+    "openSavedAria": "Abrir empleo guardado {title} en {company}"
+  },
+  "applied": {
+    "emptyTitle": "Aún no hay postulaciones",
+    "emptyDescription": "Postúlate a roles de la bolsa de empleo y sigue el estado de cada postulación aquí.",
+    "emptyCta": "Explorar empleos",
+    "emptyCtaAria": "Cambiar a la pestaña de descubrimiento de empleos",
+    "errorTitle": "No se pudieron cargar las postulaciones.",
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar cargar postulaciones",
+    "openApplicationAria": "Abrir postulación de {title} en {company}",
+    "appliedOn": "Postulado {date}",
+    "status": {
+      "applied": "Postulado",
+      "reviewing": "En revisión",
+      "interviewing": "Entrevista",
+      "offered": "Oferta",
+      "rejected": "Rechazado",
+      "withdrawn": "Retirado"
+    }
+  },
   "date": {
     "unknown": "Desconocido",
     "today": "Hoy",

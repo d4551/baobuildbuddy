@@ -24,6 +24,7 @@ const gamificationPage = {
   "challengeDoneLabel": "Hecho",
   "challengeCompletionToast": "Desafío completado",
   "challengeCompleteErrorFallback": "Error al completar el desafío",
+  "levelUpToast": "¡Subiste de nivel! Alcanzaste el nivel {level} — {title}",
   "streakDaysSuffix": "días seguidos",
   "longestStreakDesc": "récord personal",
   "noChallengesLabel": "No hay desafíos diarios disponibles.",
@@ -49,6 +50,26 @@ const gamificationPage = {
     "monthlyAchievements": "{count} logros desbloqueados",
     "monthlyStreak": "Racha de {days} días",
     "monthlyEmpty": "Aún no hay estadísticas mensuales: sigue practicando para llenar esta vista."
+  },
+  "activity": {
+    "title": "Actividad semanal y progreso profesional",
+    "description": "Acciones registradas en los últimos siete días y métricas profesionales a largo plazo.",
+    "weeklyTitle": "Esta semana",
+    "weeklyTotalXp": "{xp} XP ganados esta semana",
+    "daySummary": "{count} acciones · {xp} XP",
+    "weeklyEmpty": "No hay acciones registradas en los últimos siete días.",
+    "careerTitle": "Progreso profesional",
+    "skillCoverage": "Cobertura de habilidades: {value}%",
+    "applicationSuccessRate": "Tasa de éxito de postulaciones: {value}%",
+    "interviewSessions": "{count} sesiones de entrevista registradas",
+    "careerEmpty": "Aún no hay métricas de progreso profesional.",
+    "emptyTitle": "Aún no hay actividad registrada",
+    "emptyDescription": "Busca empleos, guarda roles y completa desafíos para empezar a crear actividad semanal y progreso profesional.",
+    "emptyCta": "Explorar empleos",
+    "emptyCtaAria": "Abrir la bolsa de empleo para empezar a registrar actividad",
+    "errorTitle": "Estadísticas de actividad no disponibles",
+    "retryButton": "Reintentar",
+    "retryAria": "Reintentar cargar estadísticas de actividad"
   }
 },
 } as const;

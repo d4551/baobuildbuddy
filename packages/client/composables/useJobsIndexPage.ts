@@ -23,6 +23,24 @@ export function useJobsIndexPage() {
     return true;
   });
 
+  const {
+    error: savedJobsError,
+    status: savedJobsStatus,
+    refresh: refreshSavedJobs,
+  } = useAsyncData("jobs-page-saved", async () => {
+    await runtime.fetchSavedJobs();
+    return true;
+  });
+
+  const {
+    error: applicationsError,
+    status: applicationsStatus,
+    refresh: refreshApplications,
+  } = useAsyncData("jobs-page-applications", async () => {
+    await runtime.fetchApplications();
+    return true;
+  });
+
   const derived = createJobsDerivedState({
     jobs: runtime.jobs,
     searchQuery: runtime.searchQuery,
@@ -30,7 +48,7 @@ export function useJobsIndexPage() {
     currentPage: runtime.currentPage,
     t: runtime.t,
   });
-  const labels = createJobsLabels(runtime.t);
+  const labels = createJobsLabels(runtime.t, runtime.te);
   const actions = createJobsPageActions({
     currentPage: runtime.currentPage,
     searchQuery: runtime.searchQuery,
@@ -57,6 +75,10 @@ export function useJobsIndexPage() {
   });
 
   return {
+    activeTab: runtime.activeTab,
+    applications: runtime.applications,
+    applicationsError,
+    applicationsStatus,
     currentPage: runtime.currentPage,
     jobs: runtime.jobs,
     jobsBootstrapError,
@@ -66,6 +88,11 @@ export function useJobsIndexPage() {
     matching: runtime.matching,
     recommendations: runtime.recommendations,
     refreshing: runtime.refreshing,
+    refreshApplications,
+    refreshSavedJobs,
+    savedJobs: runtime.savedJobs,
+    savedJobsError,
+    savedJobsStatus,
     searchQuery: runtime.searchQuery,
     showFilters: runtime.showFilters,
     ...createJobsFilterOptions(),

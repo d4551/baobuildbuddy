@@ -36,6 +36,7 @@ const api = useApi();
 const { $toast } = useNuxtApp();
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();
+const activity = useGamificationHubActivity();
 const completingChallenge = ref<string | null>(null);
 
 useSeoMeta({
@@ -227,6 +228,36 @@ async function handleCompleteChallenge(challengeId: string) {
       <GamificationAchievementsCard
         :unlocked-achievements="unlockedAchievements"
         :locked-achievements="lockedAchievements"
+      />
+
+      <LoadingSkeleton
+        v-if="activity.status.value === 'pending'"
+        :lines="GAMIFICATION_LOADING_SKELETON_LINES"
+      />
+
+      <BootstrapErrorAlert
+        v-else-if="activity.error.value"
+        :title="t('gamificationPage.activity.errorTitle')"
+        :message="getErrorMessage(activity.error.value, t('gamificationPage.loadErrorFallback'))"
+        :retry-label="t('gamificationPage.activity.retryButton')"
+        :retry-aria-label="t('gamificationPage.activity.retryAria')"
+        @retry="activity.refresh"
+      />
+
+      <EmptyState
+        v-else-if="activity.isActivityEmpty.value"
+        title-key="gamificationPage.activity.emptyTitle"
+        description-key="gamificationPage.activity.emptyDescription"
+        cta-label-key="gamificationPage.activity.emptyCta"
+        cta-aria-key="gamificationPage.activity.emptyCtaAria"
+        :cta-to="APP_ROUTES.jobs"
+      />
+
+      <GamificationActivityCard
+        v-else
+        :weekly="activity.weekly.value"
+        :active-days="activity.activeDays.value"
+        :career="activity.career.value"
       />
     </div>
   </PageScaffold>

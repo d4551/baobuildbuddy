@@ -146,11 +146,15 @@ export const createJobsDerivedState = (input: {
   };
 };
 
-export const createJobsLabels = (t: JobsTranslate) => ({
+export const createJobsLabels = (t: JobsTranslate, te: (key: string) => boolean) => ({
   formatDate(date: string) {
     return formatRelativeTimeForDate(date, (key, params) => translateRelativeDate(t, key, params), {
       keyPrefix: "jobsPage.date",
     });
+  },
+  applicationStatusLabel(status: string): string {
+    const key = `jobsPage.applied.status.${status}`;
+    return te(key) ? t(key) : status;
   },
   experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
     if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.all");

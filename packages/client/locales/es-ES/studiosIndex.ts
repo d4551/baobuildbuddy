@@ -8,6 +8,8 @@ const studiosIndex = {
   "errorBannerAria": "Error del directorio de estudios",
   "retryAria": "Reintentar carga de estudios",
   "retryButton": "Reintentar",
+  "analyticsButton": "Analíticas",
+  "analyticsAria": "Abrir panel de analíticas de estudios",
   "emptyState": "Ningún estudio coincide con tu búsqueda y filtros.",
   "emptyTitle": "Ningún estudio coincide con estos filtros",
   "emptyDescription": "Ajusta la búsqueda actual o la combinación de filtros para mostrar otro perfil de estudio.",
