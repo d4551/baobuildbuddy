@@ -30,7 +30,7 @@ type CoverLetterPageActionServices = {
   generateCoverLetter(payload: GenerateCoverLetterInput): Promise<GenerateCoverLetterResult | null>;
   fetchCoverLetters(): Promise<void>;
   fetchResumes(): Promise<void>;
-  router: { push(path: string): Promise<void> };
+  router: { push(path: string): Promise<unknown> };
   route: { query: Record<string, string | (string | null)[] | null | undefined> };
   $toast: ToastApi;
   t: TranslateFn;
@@ -214,3 +214,19 @@ export function createCoverLetterActions(
 }
 
 export type CoverLetterPageActions = ReturnType<typeof createCoverLetterActions>;
+
+/**
+ * Bootstraps the cover letter list page: seeds the resume selection from the
+ * route query and loads cover letters plus resumes for the generate dialog.
+ */
+export function useCoverLetterPageBootstrap(
+  services: Pick<CoverLetterPageActionServices, "fetchCoverLetters" | "fetchResumes" | "route">,
+  state: Pick<CoverLetterPageActionState, "generateForm" | "initialResumeId">,
+) {
+  initializeResumeSelection(state, services.route);
+  const { pending, error, refresh } = useAsyncData("cover-letter-list-page-bootstrap", async () => {
+    await Promise.all([services.fetchCoverLetters(), services.fetchResumes()]);
+    return true;
+  });
+  return { pending, error, refresh };
+}

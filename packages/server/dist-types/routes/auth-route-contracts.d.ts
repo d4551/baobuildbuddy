@@ -12,9 +12,6 @@ export declare const authStatusResponseSchema: import("typebox").TObject<{
     bootstrapRequired: import("typebox").TBoolean;
     setupTokenConfigured: import("typebox").TBoolean;
 }>;
-export declare const authConfiguredResponseSchema: import("typebox").TObject<{
-    configured: import("typebox").TBoolean;
-}>;
 export declare const authInitSuccessResponseSchema: import("typebox").TObject<{
     configured: import("typebox").TBoolean;
     apiKey: import("typebox").TOptional<import("typebox").TString>;
@@ -26,11 +23,6 @@ export declare const authStatusResponses: {
         authRequired: import("typebox").TBoolean;
         bootstrapRequired: import("typebox").TBoolean;
         setupTokenConfigured: import("typebox").TBoolean;
-    }>;
-};
-export declare const authConfiguredResponses: {
-    readonly 200: import("typebox").TObject<{
-        configured: import("typebox").TBoolean;
     }>;
 };
 export declare const authInitResponses: {

@@ -5,6 +5,7 @@ import {
   type PipelineGamificationReason,
 } from "@bao/shared/constants/gamification";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import type { GamificationLevelUpInfo } from "./useGamification";
 
 type AwardedReasonState = Partial<Record<PipelineGamificationReason, true>>;
 
@@ -18,6 +19,8 @@ export interface PipelineGamificationAwardResult {
   readonly amount: number;
   /** True only when XP was awarded in this call. */
   readonly awarded: boolean;
+  /** Level-up metadata when the award pushed the user to a new level. */
+  readonly levelUp: GamificationLevelUpInfo | null;
 }
 
 /**
@@ -48,10 +51,11 @@ export function usePipelineGamification() {
         reason,
         amount,
         awarded: false,
+        levelUp: null,
       };
     }
 
-    await awardXP(amount, reason);
+    const awardResult = await awardXP(amount, reason);
     awardedReasons.value = {
       ...awardedReasons.value,
       [reason]: true,
@@ -61,6 +65,7 @@ export function usePipelineGamification() {
       reason,
       amount,
       awarded: true,
+      levelUp: awardResult.levelUp,
     };
   }
 

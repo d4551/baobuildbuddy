@@ -14,6 +14,7 @@ import {
   type SkillsGamificationReason,
 } from "~/constants/skills";
 import { getErrorMessage } from "~/utils/errors";
+import type { GamificationAwardResult } from "~/composables/useGamification";
 
 export interface NewSkillMappingFormState {
   gameExpression: string;
@@ -30,7 +31,7 @@ type SkillsPageActionsInput = {
     success: (message: string) => void;
   };
   t: (key: string, params?: Record<string, string | number>) => string;
-  awardXP: (amount: number, reason: string) => Promise<void>;
+  awardXP: (amount: number, reason: string) => Promise<GamificationAwardResult>;
   fetchProgress: () => Promise<void>;
   mappings: Ref<SkillMapping[]>;
   loading: Ref<boolean>;

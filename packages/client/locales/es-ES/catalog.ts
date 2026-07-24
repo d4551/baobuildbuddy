@@ -1,4 +1,5 @@
 import { mergeLocaleCatalog } from "../merge";
+import type { AppTranslationSchema } from "../en-US";
 import a11y from "./a11y";
 import aiChatCommon from "./aiChatCommon";
 import aiChatPage from "./aiChatPage";
@@ -48,7 +49,7 @@ import studioSelector from "./studioSelector";
 import studiosIndex from "./studiosIndex";
 import xpBar from "./xpBar";
 
-const esESCatalog = mergeLocaleCatalog(
+const esESCatalog = mergeLocaleCatalog<AppTranslationSchema>(
   a11y,
   aiChatCommon,
   aiChatPage,

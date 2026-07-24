@@ -9,6 +9,7 @@ import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { withLoadingState } from "./async-flow";
 import { parseAchievementList, parseDailyChallengeList } from "./gamification-entity-normalizers";
+import type { ToastApi } from "./useToast";
 import { readRequiredApiPayload } from "~/utils/api-response";
 import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 const NUM_14 = 14;
@@ -20,6 +21,22 @@ const RATIO_1_25 = 1.25;
 const RATIO_1_5 = 1.5;
 const RATIO_2_0 = 2.0;
 const RATIO_3_0 = 3.0;
+
+/**
+ * Level-up payload returned by the award-xp endpoint.
+ */
+export interface GamificationLevelUpInfo {
+  readonly newLevel: number;
+  readonly newTitle: string;
+}
+
+/**
+ * Parsed award-xp response body used for level-up celebrations.
+ */
+export interface GamificationAwardResult {
+  readonly leveledUp: boolean;
+  readonly levelUp: GamificationLevelUpInfo | null;
+}
 
 interface GamificationState {
   progress: ReturnType<typeof useState<UserGamificationData | null>>;
@@ -33,6 +50,7 @@ interface GamificationState {
 interface GamificationContext extends GamificationState {
   api: ReturnType<typeof useApi>;
   t: ReturnType<typeof useI18n>["t"];
+  toast: Pick<ToastApi, "success">;
 }
 
 type GamificationStatKey = Exclude<keyof UserGamificationData["stats"], "actionHistory">;
@@ -144,15 +162,44 @@ const createFetchProgressAction = (context: GamificationContext) => async () =>
     }
   });
 
+const toLevelUpInfo = (value: unknown): GamificationLevelUpInfo | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const { newLevel, newTitle } = value;
+  if (typeof newLevel !== "number" || typeof newTitle !== "string" || newTitle.length === 0) {
+    return null;
+  }
+  return { newLevel, newTitle };
+};
+
+const toAwardResult = (value: unknown): GamificationAwardResult => {
+  if (!isRecord(value)) {
+    return { leveledUp: false, levelUp: null };
+  }
+  const levelUp = toLevelUpInfo(value.levelUp);
+  return { leveledUp: value.leveledUp === true && levelUp !== null, levelUp };
+};
+
 const createAwardXpAction =
   (context: GamificationContext, fetchProgress: () => Promise<void>) =>
-  async (amount: number, reason: string) =>
+  async (amount: number, reason: string): Promise<GamificationAwardResult> =>
     withLoadingState(context.loading, async () => {
-      await readRequiredApiPayload(
+      const data = await readRequiredApiPayload(
         context.api.gamification["award-xp"].post({ amount, reason }),
         context.t("apiErrors.gamification.awardXPFailed"),
       );
+      const result = toAwardResult(data);
       await fetchProgress();
+      if (result.leveledUp && result.levelUp) {
+        context.toast.success(
+          context.t("gamificationPage.levelUpToast", {
+            level: result.levelUp.newLevel,
+            title: result.levelUp.newTitle,
+          }),
+        );
+      }
+      return result;
     });
 
 const createFetchAchievementsAction = (context: GamificationContext) => async () =>
@@ -262,6 +309,7 @@ export function useGamification() {
     ...state,
     api: useApi(),
     t: useI18n().t,
+    toast: useNuxtApp().$toast,
   };
 
   const fetchProgress = createFetchProgressAction(context);

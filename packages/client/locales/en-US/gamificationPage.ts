@@ -27,6 +27,7 @@ const gamificationPage = {
     challengeDoneLabel: "Done",
     challengeCompletionToast: "Challenge completed",
     challengeCompleteErrorFallback: "Failed to complete challenge",
+    levelUpToast: "Level up! You reached level {level} — {title}",
     streakDaysSuffix: "days in a row",
     longestStreakDesc: "personal best",
     noChallengesLabel: "No daily challenges available.",
