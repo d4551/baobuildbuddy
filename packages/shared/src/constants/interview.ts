@@ -2,6 +2,8 @@
  * Shared interview feature defaults used across client and server layers.
  */
 
+import { COUNT_EIGHT, COUNT_FIVE, COUNT_THREE } from "./numeric";
+
 /**
  * Studio identifier used when creating a job-targeted interview session without a known studio match.
  */
@@ -99,7 +101,7 @@ export const INTERVIEW_HUB_EXPERIENCE_OPTIONS = ["entry", "mid", "senior", "lead
 /**
  * Canonical question-count options displayed in the interview hub setup flow.
  */
-export const INTERVIEW_HUB_QUESTION_COUNT_OPTIONS = [3, 5, 8] as const;
+export const INTERVIEW_HUB_QUESTION_COUNT_OPTIONS = [COUNT_THREE, COUNT_FIVE, COUNT_EIGHT] as const;
 
 /**
  * Maximum allowed question count for interview sessions (validation cap).

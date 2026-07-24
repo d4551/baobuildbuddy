@@ -7,6 +7,7 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_XS_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
@@ -76,7 +77,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.skills }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.skills"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.skillsProgressAria')"
@@ -89,7 +90,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.experience }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.experience"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.experienceProgressAria')"
@@ -102,7 +103,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.location }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.location"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.locationProgressAria')"

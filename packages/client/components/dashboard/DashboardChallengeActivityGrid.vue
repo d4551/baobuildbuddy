@@ -16,6 +16,7 @@ import {
   INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -61,7 +62,7 @@ const canClaimChallenge = computed(() => {
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <progress
               class="progress flex-1"
-              :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+              :class="dailyChallenge.completed ? PROGRESS_BAR_VARIANT_CLASS.success : PROGRESS_BAR_VARIANT_CLASS.primary"
               :value="dailyChallenge.progress"
               :max="dailyChallenge.goal"
               :aria-valuenow="dailyChallenge.progress"

@@ -81,13 +81,13 @@ export const createJobsPageActions = (input: {
   localFilters: JobsFilterState;
   router: ReturnType<typeof useRouter>;
   refreshJobs: ReturnType<typeof useJobs>["refreshJobs"];
-  refreshJobsBootstrap: () => Promise<unknown>;
+  refreshJobsBootstrap: () => Promise<void>;
   awardForAction: ReturnType<typeof usePipelineGamification>["awardForAction"];
   toast: ReturnType<typeof useNuxtApp>["$toast"];
   t: JobsTranslate;
   refreshing: Ref<boolean>;
   matching: Ref<boolean>;
-  matchJobs: (resumeId: string) => Promise<unknown>;
+  matchJobs: (resumeId: string) => Promise<void>;
   fetchResumes: () => Promise<void>;
   resumes: { readonly value: ReadonlyArray<{ readonly id?: string }> };
   fetchRecommendations: () => Promise<void>;

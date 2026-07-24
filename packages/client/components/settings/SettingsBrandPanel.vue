@@ -3,6 +3,7 @@ import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
@@ -136,7 +137,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
         </template>
       </SettingsPanelHeader>
 
-      <div role="alert" class="alert alert-info alert-soft">
+      <div role="alert" class="alert alert-soft" :class="[ALERT_VARIANT_CLASS.info]">
         <svg class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
           <path
             stroke-linecap="round"

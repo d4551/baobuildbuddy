@@ -7,6 +7,7 @@ export const API_ERROR_SCRAPE_STUDIOS_FAILED = "Studio scrape failed";
 export const API_ERROR_SCRAPE_JOBS_FAILED = "Job scrape failed";
 export const API_ERROR_AUTOMATION_PROCESS_FAILED = "Failed to process automation request";
 export const API_ERROR_AUTOMATION_START_FAILED = "Failed to start automation";
+export const API_ERROR_AUTOMATION_VERIFICATION_DISABLED = "Automation verification is disabled";
 export const API_ERROR_GENERATE_QUESTIONS = "Failed to generate questions";
 export const API_ERROR_SYNTHESIZE_RESUME = "Failed to synthesize resume";
 export const API_ERROR_EXPORT_RESUME = "Failed to export resume";

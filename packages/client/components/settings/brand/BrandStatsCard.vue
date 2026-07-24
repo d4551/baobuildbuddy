@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { SHADOW_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { SHADOW_TOKEN_CLASS, STATS_SHELL_VARIANT_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 defineProps<{
   brandDraft: BrandSettings;
@@ -12,7 +12,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="stats stats-vertical border border-base-300 bg-base-100 sm:stats-horizontal xl:stats-vertical" :class="[SHADOW_TOKEN_CLASS.sm]">
+  <div :class="[STATS_SHELL_VARIANT_CLASS.brandResponsive, SHADOW_TOKEN_CLASS.sm]">
     <div class="stat">
       <div class="stat-title">{{ t("settings.brand.stats.product") }}</div>
       <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ brandDraft.name }}</div>

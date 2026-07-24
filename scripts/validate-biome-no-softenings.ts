@@ -10,8 +10,8 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 /**
  * Biome softener gate — zero-tolerance for severity demotions or disabled rules.
  *
- * Binding contract (no allowlist, no "tooling gap" excuse):
- * - "off" forbidden everywhere.
+ * Binding contract (zero softeners — no allowlist, no "tooling gap" excuse):
+ * - "off" forbidden everywhere (root and overrides).
  * - "warn" forbidden everywhere.
  * - "info" forbidden everywhere. Use "error" or delete the rule.
  * - linter.enabled=false forbidden at root and in overrides.
@@ -25,6 +25,9 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
  * in validate-biome-no-softenings.test.ts. Adding them back at any severity below
  * "error" is a softener. Adding them at "error" without the upstream fix is a
  * false-positive generator and also rejected.
+ *
+ * Nuxt reserved filenames use useVueMultiWordComponentNames.options.ignores
+ * (rule stays error). Magic numbers stay error in constants — extract named consts.
  */
 
 const BIOME_CONFIG_PATH = "biome.json";
@@ -114,7 +117,8 @@ const validateDomains = (domains: JsonValue, violations: ValidationViolation[]):
     return;
   }
   const requiredDomains: Record<string, string> = {
-    vue: "all",
+    // recommended — not all: domains.vue=all enables useVueVapor (Nuxt SSR incompatible).
+    vue: "recommended",
     drizzle: "all",
     project: "recommended",
     test: "recommended",

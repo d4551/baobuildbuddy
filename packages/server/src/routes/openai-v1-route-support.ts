@@ -16,12 +16,14 @@ import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { getAIService } from "./ai-route-support";
 import type { OpenAIV1ChatCompletionsBody } from "./openai-v1-route-contracts";
+const NUM_1000 = 1000;
+const NUM_4 = 4;
 
 const isAIProviderType = (value: string): value is AIProviderType =>
   (AI_PROVIDER_IDS as readonly string[]).includes(value);
 
 const MODEL_ID_SEPARATOR = "/";
-const OPENAI_V1_EPOCH_SECONDS = () => Math.floor(Date.now() / 1000);
+const OPENAI_V1_EPOCH_SECONDS = () => Math.floor(Date.now() / NUM_1000);
 
 export type OpenAIV1ModelRecord = {
   id: string;
@@ -136,8 +138,8 @@ const extractSystemPrompt = (
 };
 
 const toOpenAIV1ChatPayload = (model: string, prompt: string, content: string) => {
-  const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-  const completionTokens = Math.max(1, Math.ceil(content.length / 4));
+  const promptTokens = Math.max(1, Math.ceil(prompt.length / NUM_4));
+  const completionTokens = Math.max(1, Math.ceil(content.length / NUM_4));
   return {
     id: `chatcmpl-${generateId()}`,
     object: "chat.completion" as const,

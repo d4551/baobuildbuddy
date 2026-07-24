@@ -6,6 +6,8 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_4 = 4;
+const NUM_52 = 52;
 
 /**
  * Responsive overflow + fluidity gate (design.md §11, §8).
@@ -76,7 +78,7 @@ const collectFixedWidthHits = (
   const fixedWidthMatch = classValue.match(fixedWidthPattern);
   if (!fixedWidthMatch) return [];
   const widthValue = Number.parseInt(fixedWidthMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
-  const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= 52;
+  const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= NUM_52;
   const hasGuard = WIDTH_GUARD_PATTERN.test(classValue);
   const isFluidCap = MAX_W_CAP_PATTERN.test(classValue);
   if (isSmallPrimitive || hasGuard || isFluidCap) return [];
@@ -102,7 +104,7 @@ const collectFixedHeightHits = (
   const hasOverflowGuard = VERTICAL_OVERFLOW_GUARD_PATTERN.test(classValue);
   const isSkeletonRow = SKELETON_CLASS_PATTERN.test(classValue);
   const isSquarePrimitive =
-    heightValue <= SMALL_SIZE_THRESHOLD + 4 && W_ARBITRARY_PATTERN.test(classValue);
+    heightValue <= SMALL_SIZE_THRESHOLD + NUM_4 && W_ARBITRARY_PATTERN.test(classValue);
   if (isSmallPrimitive || hasOverflowGuard || isSkeletonRow || isSquarePrimitive) return [];
   return [
     {

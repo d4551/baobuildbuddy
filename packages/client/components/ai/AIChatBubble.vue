@@ -104,7 +104,6 @@ const ariaLabel = computed(() => {
 <template>
   <article 
     class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
-    role="listitem"
     :aria-label="ariaLabel"
     :aria-busy="isStreaming"
     :aria-live="isStreaming ? 'polite' : 'off'"

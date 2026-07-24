@@ -11,6 +11,10 @@ import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { studios } from "../db/schema/studios";
 import { getJobTaxonomy } from "./jobs/job-taxonomy-service";
+const NUM_150 = 150;
+const RATIO_0_5 = 0.5;
+const RATIO_0_6 = 0.6;
+const RATIO_1_0 = 1.0;
 
 type SearchType = "jobs" | "studios" | "skills" | "resumes";
 
@@ -62,8 +66,8 @@ export class SearchService {
       id: job.id,
       title: job.title || "",
       subtitle: job.company || "",
-      snippet: job.description?.slice(0, 150) || "",
-      relevance: job.title?.toLowerCase().includes(queryLower) ? 1.0 : 0.6,
+      snippet: job.description?.slice(0, NUM_150) || "",
+      relevance: job.title?.toLowerCase().includes(queryLower) ? RATIO_1_0 : RATIO_0_6,
     }));
   }
 
@@ -90,8 +94,8 @@ export class SearchService {
       id: studio.id,
       title: studio.name || "",
       subtitle: `${studio.location || ""} · ${studio.type || ""}`,
-      snippet: studio.description?.slice(0, 150) || "",
-      relevance: studio.name?.toLowerCase().includes(queryLower) ? 1.0 : 0.5,
+      snippet: studio.description?.slice(0, NUM_150) || "",
+      relevance: studio.name?.toLowerCase().includes(queryLower) ? RATIO_1_0 : RATIO_0_5,
     }));
   }
 
@@ -137,7 +141,7 @@ export class SearchService {
       id: resume.id,
       title: resume.name || RESUME_DEFAULT_NAME,
       subtitle: isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
-      snippet: resume.summary?.slice(0, 150) || "",
+      snippet: resume.summary?.slice(0, NUM_150) || "",
       relevance: 0.7,
     }));
   }

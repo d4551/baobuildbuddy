@@ -18,6 +18,8 @@ import {
   waitForRunCompletion,
   waitForSubmissionCount,
 } from "./automation-integration-helpers";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+const NUM_3 = 3;
 
 export { createResumeRecord, upsertDeterministicSettings };
 
@@ -32,7 +34,7 @@ export const startManualJobApplyRun = async (
       resumeId,
     }),
   });
-  if (response.status !== 200) {
+  if (response.status !== HTTP_STATUS_OK) {
     throw new Error(`Manual automation run failed to start: status ${String(response.status)}`);
   }
 
@@ -70,7 +72,7 @@ export const startScheduledJobApplyRun = async (
       runAt,
     }),
   });
-  if (response.status !== 200) {
+  if (response.status !== HTTP_STATUS_OK) {
     throw new Error(`Scheduled automation run failed to start: status ${String(response.status)}`);
   }
 
@@ -138,7 +140,7 @@ export const verifyEmailResponseFlow = async (): Promise<void> => {
       deliverAfterGeneration: true,
     }),
   });
-  if (response.status !== 200) {
+  if (response.status !== HTTP_STATUS_OK) {
     throw new Error(`Email automation failed: status ${String(response.status)}`);
   }
 
@@ -197,5 +199,5 @@ export const verifyRecoveredScheduledRun = async (
 
   const completedRecoveredRun = await waitForRunCompletion(recoveredRunId);
   expect(completedRecoveredRun.status).toBe("success");
-  await waitForSubmissionCount(getSubmissionCount, 3);
+  await waitForSubmissionCount(getSubmissionCount, NUM_3);
 };

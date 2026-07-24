@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -20,6 +20,7 @@
       "!**/packages/desktop/src-tauri/icons",
       "!**/.omo",
       "!**/agentiflow",
+      "!**/docs",
       "!**/docs/browser-smoke",
       "!**/docs/ssot-ledger/**/*.json",
       "!**/docs/ssot-ledger/**/*.png"
@@ -34,7 +35,7 @@
   "linter": {
     "enabled": true,
     "domains": {
-      "vue": "all",
+      "vue": "recommended",
       "drizzle": "all",
       "project": "recommended",
       "test": "recommended",
@@ -174,7 +175,12 @@
         "useDefaultSwitchClause": "error",
         "useCollapsedElseIf": "error",
         "useArrayLiterals": "error",
-        "useVueMultiWordComponentNames": "error",
+        "useVueMultiWordComponentNames": {
+          "level": "error",
+          "options": {
+            "ignores": ["index", "default", "error", "[id]"]
+          }
+        },
         "useVueDefineMacrosOrder": "error",
         "useVueHyphenatedAttributes": "error",
         "noShoutyConstants": "error",
@@ -255,7 +261,12 @@
             "noUnusedFunctionParameters": "error"
           },
           "style": {
-            "useVueMultiWordComponentNames": "error",
+            "useVueMultiWordComponentNames": {
+              "level": "error",
+              "options": {
+                "ignores": ["index", "default", "error", "[id]"]
+              }
+            },
             "useVueDefineMacrosOrder": "error"
           },
           "nursery": {

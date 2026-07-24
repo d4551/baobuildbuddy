@@ -11,6 +11,7 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import { readApiGamificationAward } from "~/utils/gamification-response";
 import { buildInterviewJobNavigation } from "~/utils/interview-navigation";
 import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 import { formatDateWithLocale } from "~/utils/locale-format";
@@ -96,7 +97,12 @@ async function handleSaveToggle() {
     $toast.error(getErrorMessage(saveResult.error, t("jobDetail.errors.saveFailed")));
     return;
   }
-  $toast.success(t("jobDetail.toasts.saved"));
+  const saveAward = readApiGamificationAward(saveResult.value);
+  $toast.success(
+    saveAward
+      ? t("jobDetail.toasts.saveReward", { xp: saveAward.xpAwarded })
+      : t("jobDetail.toasts.saved"),
+  );
 }
 
 async function handleApply() {
@@ -114,7 +120,12 @@ async function handleApply() {
 
   showApplyModal.value = false;
   applicationNotes.value = "";
-  $toast.success(t("jobDetail.toasts.applicationSubmitted"));
+  const applyAward = readApiGamificationAward(applyResult.value);
+  $toast.success(
+    applyAward
+      ? t("jobDetail.toasts.applyReward", { xp: applyAward.xpAwarded })
+      : t("jobDetail.toasts.applicationSubmitted"),
+  );
 }
 
 function formatDate(date: string): string {

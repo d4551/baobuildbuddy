@@ -1,7 +1,7 @@
 import type { RpaCapabilityAuditEntry, RpaCapabilityIssue } from "@bao/shared/constants/automation";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 
-type Translate = (key: string, params?: Record<string, unknown>) => string;
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 interface AutomationCapabilityAction {
   readonly to: string;

@@ -20,6 +20,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { toSkillMapping } from "./api-normalizer-skills";
 import { assertApiResponse, withLoadingState } from "./async-flow";
+import { readRequiredApiPayload } from "~/utils/api-response";
 
 type ApiClient = ReturnType<typeof useApi>;
 type CreateMappingInput = NonNullable<Parameters<ApiClient["skills"]["mappings"]["post"]>[0]>;
@@ -40,20 +41,6 @@ interface SkillMappingContext {
 const SKILL_READINESS_FEEDBACK_ID_SET = new Set<string>(SKILL_READINESS_FEEDBACK_IDS);
 const SKILL_READINESS_IMPROVEMENT_ID_SET = new Set<string>(SKILL_READINESS_IMPROVEMENT_IDS);
 const SKILL_READINESS_NEXT_STEP_ID_SET = new Set<string>(SKILL_READINESS_NEXT_STEP_IDS);
-
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data;
-};
 
 function isSkillReadinessFeedbackId(value: string): value is SkillReadinessFeedbackId {
   return SKILL_READINESS_FEEDBACK_ID_SET.has(value);
@@ -242,7 +229,7 @@ function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
 
 function createSkillMappingActions(context: SkillMappingContext) {
   const loadMappings = async (): Promise<void> => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.skills.mappings.get(),
       context.t("apiErrors.skills.fetchMappingsFailed"),
     );
@@ -257,7 +244,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
 
   const createMapping = (mappingData: CreateMappingInput): Promise<void> =>
     withLoadingState(context.loading, async () => {
-      await readApiData(
+      await readRequiredApiPayload(
         context.api.skills.mappings.post(mappingData),
         context.t("apiErrors.skills.createMappingFailed"),
       );
@@ -266,7 +253,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
 
   const updateMapping = (id: string, updates: UpdateMappingInput): Promise<void> =>
     withLoadingState(context.loading, async () => {
-      await readApiData(
+      await readRequiredApiPayload(
         context.api.skills.mappings({ id }).put(updates),
         context.t("apiErrors.skills.updateMappingFailed"),
       );
@@ -291,7 +278,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
 function createSkillInsightActions(context: SkillMappingContext) {
   const fetchPathways = async () =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.skills.pathways.get(),
         context.t("apiErrors.skills.fetchPathwaysFailed"),
       );
@@ -304,7 +291,7 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const fetchReadiness = async () =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.skills.readiness.get(),
         context.t("apiErrors.skills.fetchReadinessFailed"),
       );
@@ -313,7 +300,7 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const aiAnalyze = async (skills: string[]) =>
     withLoadingState(context.loading, async () => {
-      return readApiData(
+      return readRequiredApiPayload(
         context.api.skills["ai-analyze"].post({
           gameExperience: { skills },
         }),
@@ -323,7 +310,7 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const extractFromText = async (text: string) =>
     withLoadingState(context.loading, async () => {
-      return readApiData(
+      return readRequiredApiPayload(
         context.api.skills["ai-analyze"].post({
           resume: { experience: text },
         }),
@@ -333,7 +320,7 @@ function createSkillInsightActions(context: SkillMappingContext) {
 
   const compareWithJob = async (jobId: string) =>
     withLoadingState(context.loading, async () => {
-      return readApiData(
+      return readRequiredApiPayload(
         context.api.skills.readiness.get({ query: { jobId } }),
         context.t("apiErrors.skills.compareFailed"),
       );

@@ -1,0 +1,79 @@
+/**
+ * Script-side numeric SSOT. Named consts only; noMagicNumbers stays error.
+ * Values that exist in the shared package are re-exported from there — the
+ * shared package owns the definition, this module owns script-only extras.
+ */
+
+export {
+  HTTP_STATUS_OK as HTTP_OK,
+  HTTP_STATUS_CREATED as HTTP_CREATED,
+  HTTP_STATUS_BAD_REQUEST as HTTP_BAD_REQUEST,
+  HTTP_STATUS_UNAUTHORIZED as HTTP_UNAUTHORIZED,
+  HTTP_STATUS_FORBIDDEN as HTTP_FORBIDDEN,
+  HTTP_STATUS_NOT_FOUND as HTTP_NOT_FOUND,
+  HTTP_STATUS_CONFLICT as HTTP_CONFLICT,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY as HTTP_UNPROCESSABLE,
+  HTTP_STATUS_TOO_MANY_REQUESTS as HTTP_TOO_MANY_REQUESTS,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR as HTTP_INTERNAL_ERROR,
+  HTTP_STATUS_BAD_GATEWAY as HTTP_BAD_GATEWAY,
+  HTTP_STATUS_SERVICE_UNAVAILABLE as HTTP_SERVICE_UNAVAILABLE,
+} from "../../packages/shared/src/constants/http";
+
+export {
+  PERCENT_MAX,
+  PERCENT_HIGH,
+  PERCENT_MID,
+  PERCENT_LOW,
+  MS_TWO_SECONDS,
+  MS_ONE_AND_HALF_SECONDS,
+  MS_ONE_AND_EIGHT_SECONDS,
+  MS_TWO_AND_HALF_SECONDS,
+  MS_FIVE_SECONDS,
+  MS_TEN_SECONDS,
+  MS_THIRTY_SECONDS,
+  COUNT_THREE,
+  COUNT_FOUR,
+  COUNT_FIVE,
+  COUNT_SIX,
+  COUNT_SEVEN,
+  COUNT_EIGHT,
+  COUNT_TWELVE,
+  COUNT_FIFTEEN,
+  COUNT_SIXTEEN,
+  COUNT_EIGHTEEN,
+  COUNT_TWENTY,
+  COUNT_TWENTY_FIVE,
+  COUNT_THIRTY,
+  COUNT_THIRTY_TWO,
+  COUNT_THIRTY_FOUR,
+  COUNT_THIRTY_SIX,
+  COUNT_FORTY,
+  COUNT_FIFTY,
+  COUNT_SEVENTY,
+  COUNT_ONE_TWENTY,
+  COUNT_ONE_FIFTY,
+  COUNT_TWO_FORTY,
+  COUNT_TWO_FIFTY,
+  COUNT_FIVE_HUNDRED,
+  BYTES_KILO,
+  BYTES_TWO_KILO,
+  RATIO_HALF,
+  RATIO_SEVEN_TENTHS,
+  HTTP_NO_CONTENT,
+} from "../../packages/shared/src/constants/numeric";
+
+export const PAD_LOCALE_WIDTH = 5;
+export const PAD_ROUTE_WIDTH = 26;
+export const PAD_STATUS_WIDTH = 3;
+
+export const MS_ONE_HUNDRED = 100;
+export const MS_SECOND = 1000;
+export const MS_MINUTE = 60_000;
+
+export const COUNT_TWO = 2;
+export const COUNT_TWO_HUNDRED = 200;
+
+/** Owner read/write, group read, other read (`chmod 644`). */
+export const FILE_MODE_RW_R_R = 0o644;
+/** Owner read/write/execute, group read/execute, other read/execute (`chmod 755`). */
+export const FILE_MODE_RWX_RX_RX = 0o755;

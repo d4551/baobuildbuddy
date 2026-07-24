@@ -13,6 +13,9 @@ import {
 import {
   SECONDARY_ACTION_CLASS,
 } from "~/constants/layout-action-soft";
+import {
+  BADGE_VARIANT_CLASS,
+} from "~/constants/layout-badges";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
@@ -46,7 +49,7 @@ const { t } = useI18n();
         <template #meta>
           <span 
             class="badge"
-            :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+            :class="emailDeliveryConfigured ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.warning"
           >
             {{
               emailDeliveryConfigured

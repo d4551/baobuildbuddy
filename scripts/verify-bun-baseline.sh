@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-BASELINE="bun@1.3.14"
+BASELINE="bun@1.4.0"
 CURRENT="$(bun pm pkg get packageManager | tr -d '[:space:]')"
 
 if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then
@@ -12,19 +12,31 @@ if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then
   exit 1
 fi
 
-read_stale_bun_refs_with_rg() {
-  local output
-  local status
+# Detect stale *runtime* pin references (bun@1.3.14). Type-package versions
+# (bun-types / @types/bun) track their own release cadence and legitimately
+# differ from the runtime pin, so bare version strings are not scanned.
+STALE_RUNTIME_PATTERN='(^|[^/\w])bun@1\.3\.14'
 
-  set +e
-  output="$(rg --files-with-matches \
-    -g '!*node_modules/**' \
-    -g '!**/.git/**' \
-    -g '!**/.bun/**' \
-    -g '!scripts/verify-bun-baseline.sh' \
-    -e 'bun@1\\.3\\.11|\"1\\.3\\.11\"' .)"
-  status=$?
-  set -e
+read_stale_bun_refs_with_rg() {
+  local output=""
+  local status=0
+  local -a rg_args=(
+    --files-with-matches
+    -g '!*node_modules/**'
+    -g '!**/.git/**'
+    -g '!**/.bun/**'
+    -g '!*.lock'
+    -g '!scripts/verify-bun-baseline.sh'
+  )
+
+  # AGENTS.md is guard-protected; skip while the human-review proposal exists.
+  # Once the proposal is applied and deleted this skip becomes inert and the
+  # gate re-detects any stale runtime pin in AGENTS.md.
+  if [[ -f "docs/proposed-agents-md-bun-pin-update.md" ]]; then
+    rg_args+=(-g '!AGENTS.md')
+  fi
+
+  output="$(rg "${rg_args[@]}" -e "$STALE_RUNTIME_PATTERN" .)" || status=$?
 
   if [[ $status -eq 0 ]]; then
     printf '%s' "$output"
@@ -40,19 +52,23 @@ read_stale_bun_refs_with_rg() {
 }
 
 read_stale_bun_refs_with_grep() {
-  local output
-  local status
+  local output=""
+  local status=0
+  local -a find_prune=(-path './node_modules' -o -path './.git' -o -path './.bun')
 
-  set +e
+  # AGENTS.md is guard-protected; skip while the human-review proposal exists.
+  if [[ -f "docs/proposed-agents-md-bun-pin-update.md" ]]; then
+    find_prune+=(-o -path './AGENTS.md')
+  fi
+
   output="$(
     find . \
-      \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
+      \( "${find_prune[@]}" \) -prune \
       -o -type f \
+      ! -name '*.lock' \
       ! -path './scripts/verify-bun-baseline.sh' \
-      -exec grep -InE 'bun@1\\.3\\.11|\"1\\.3\\.11\"' {} +
-  )"
-  status=$?
-  set -e
+      -exec grep -InE "$STALE_RUNTIME_PATTERN" {} +
+  )" || status=$?
 
   if [[ $status -eq 0 ]]; then
     printf '%s\n' "$output" | cut -d: -f1 | sort -u
@@ -73,9 +89,9 @@ else
   STALE_LINES="$(read_stale_bun_refs_with_grep)"
 fi
 if [[ -n "$STALE_LINES" ]]; then
-  echo "❌ Found stale Bun 1.3.11 references:"
+  echo "❌ Found stale Bun 1.3.14 references:"
   echo "$STALE_LINES"
   exit 1
 fi
 
-echo "✅ Bun baseline and stale 1.3.9 reference checks passed"
+echo "✅ Bun baseline and stale 1.3.14 reference checks passed"

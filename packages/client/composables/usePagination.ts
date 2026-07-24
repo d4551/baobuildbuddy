@@ -31,7 +31,11 @@ function createPaginationComputeds<T>(
   );
   const pageNumbers = computed(() => {
     const length = totalPages.value;
-    return Array.from({ length }, (_, index) => index + FIRST_PAGE);
+    const pages: number[] = [];
+    for (let pageNumber = FIRST_PAGE; pageNumber <= length; pageNumber += 1) {
+      pages.push(pageNumber);
+    }
+    return pages;
   });
   const itemsForCurrentPage = computed(() => {
     const startIndex = (currentPage.value - FIRST_PAGE) * normalizedPageSize;

@@ -4,6 +4,7 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -164,7 +165,8 @@ function handleScheduleInput(event: Event): void {
         <div 
           v-if="runState === 'running'"
           aria-live="polite"
-          class="alert alert-info alert-vertical sm:alert-horizontal"
+          class="alert alert-vertical sm:alert-horizontal"
+          :class="[ALERT_VARIANT_CLASS.info]"
         >
           <LoadingSpinner size="xs" :label="t('common.loading')" />
           <span>{{ runStateLabel(runState) }}</span>
@@ -172,14 +174,16 @@ function handleScheduleInput(event: Event): void {
         <div 
           v-else-if="runState === 'success'"
           role="alert"
-          class="alert alert-success alert-vertical sm:alert-horizontal"
+          class="alert alert-vertical sm:alert-horizontal"
+          :class="[ALERT_VARIANT_CLASS.success]"
         >
           <span>{{ runMessage }}</span>
         </div>
         <div 
           v-else-if="runState === 'error'"
           role="alert"
-          class="alert alert-error alert-vertical sm:alert-horizontal"
+          class="alert alert-vertical sm:alert-horizontal"
+          :class="[ALERT_VARIANT_CLASS.error]"
         >
           <span>{{ runMessage }}</span>
         </div>

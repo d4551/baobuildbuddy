@@ -16,6 +16,7 @@ import { generateResponseFeedback } from "./interview-service-response-feedback"
 import { toInterviewSession } from "./interview-service-session-mapper";
 import { calculateInterviewStats } from "./interview-service-stats";
 import { toPersistedRecord } from "./interview-service-value-parsers";
+const RATIO_0_8 = 0.8;
 
 export class InterviewService {
   async startSession(
@@ -97,7 +98,7 @@ export class InterviewService {
       duration: Math.max(1, response.duration),
       transcript: response.transcript.trim(),
       timestamp: response.timestamp || Date.now(),
-      confidence: Math.max(0, Math.min(1, response.confidence || 0.8)),
+      confidence: Math.max(0, Math.min(1, response.confidence || RATIO_0_8)),
       aiAnalysis: analysis,
     };
   }

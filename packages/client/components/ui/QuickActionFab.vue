@@ -74,7 +74,7 @@ function setActiveActionRef(
 
 function getActionIndex(currentIndex: number, direction: number): number {
   const actionItems = getActionItems();
-  if (!actionItems.length) return 0;
+  if (actionItems.length === 0) return 0;
 
   const maxIndex = actionItems.length - 1;
   if (direction === 1) {
@@ -176,9 +176,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
+  <section 
     :class="['fab z-40 hidden lg:flex', FAB_POSITION_CLASS]"
-    role="region"
     :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >
     <button 
@@ -208,6 +207,7 @@ onUnmounted(() => {
         v-if="isOpen"
         :id="quickActionMenuId"
         role="menu"
+        tabindex="-1"
         class="flex flex-col items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
         :aria-label="t('quickFab.menuAria')"
         ref="quickActionMenu"
@@ -235,5 +235,5 @@ onUnmounted(() => {
         </NuxtLink>
       </div>
     </Transition>
-  </div>
+  </section>
 </template>

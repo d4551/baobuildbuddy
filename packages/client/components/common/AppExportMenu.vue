@@ -61,7 +61,7 @@ function focusMenuItem(index: number): void {
 
 function getMenuIndex(currentIndex: number, direction: number): number {
   const menuItems = getMenuItems();
-  if (!menuItems.length) {
+  if (menuItems.length === 0) {
     return 0;
   }
 
@@ -193,19 +193,27 @@ function handleDocumentKeydown(event: KeyboardEvent): void {
 }
 
 function handleMenuFocusOut(event: FocusEvent): void {
-  const nextTarget = event.relatedTarget;
   if (!isOpen.value) {
     return;
   }
 
-  if (!(nextTarget instanceof Node)) {
-    closeMenu();
+  const nextTarget = event.relatedTarget;
+  if (nextTarget instanceof Node && menu.value?.contains(nextTarget)) {
     return;
   }
 
-  if (!menu.value?.contains(nextTarget)) {
+  // relatedTarget is often null under Playwright / synthetic focus moves.
+  // Defer and close only when focus truly left the dropdown root.
+  requestAnimationFrame(() => {
+    if (!isOpen.value) {
+      return;
+    }
+    const active = document.activeElement;
+    if (active instanceof Node && menu.value?.contains(active)) {
+      return;
+    }
     closeMenu();
-  }
+  });
 }
 
 watch(isOpen, async (_nextOpen, previousOpen) => {
@@ -251,18 +259,18 @@ function emitExport(format: ExportFormat): void {
       {{ props.buttonLabel }}
     </button>
 
-    <ul
+    <div
+      role="menu"
       class="menu dropdown-content z-20"
       :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]"
       v-show="isOpen"
       :id="exportMenuId"
-      role="menu"
       aria-orientation="vertical"
       :aria-labelledby="exportTriggerId"
       :aria-label="props.buttonAriaLabel"
       @focusout="handleMenuFocusOut"
     >
-      <li v-for="(format, index) in exportFormats" :key="format" role="none">
+      <div v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
           :id="`${exportMenuId}-${format}`"
           type="button"
@@ -275,7 +283,7 @@ function emitExport(format: ExportFormat): void {
         >
           {{ formatLabels[format] }}
         </button>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
 </template>

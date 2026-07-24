@@ -16,21 +16,23 @@ import {
   SKILLS_READINESS_THRESHOLD_HIGH,
   SKILLS_READINESS_THRESHOLD_MEDIUM,
 } from "~/constants/skills";
+import { PROGRESS_BAR_VARIANT_CLASS } from "~/constants/layout-tokens";
+import { BADGE_VARIANT_CLASS } from "~/constants/layout-badges";
 
 interface SkillsPathwaysPresentationOptions {
-  readonly t: (key: string, params?: Record<string, unknown>) => string;
+  readonly t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const getReadinessColor = (percentage: number): string => {
-  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return "progress-success";
-  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return "progress-warning";
-  return "progress-error";
+  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return PROGRESS_BAR_VARIANT_CLASS.success;
+  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return PROGRESS_BAR_VARIANT_CLASS.warning;
+  return PROGRESS_BAR_VARIANT_CLASS.error;
 };
 
 const getReadinessBadgeColor = (percentage: number): string => {
-  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return "badge-success";
-  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return "badge-warning";
-  return "badge-error";
+  if (percentage >= SKILLS_READINESS_THRESHOLD_HIGH) return BADGE_VARIANT_CLASS.success;
+  if (percentage >= SKILLS_READINESS_THRESHOLD_MEDIUM) return BADGE_VARIANT_CLASS.warning;
+  return BADGE_VARIANT_CLASS.error;
 };
 
 const sortPathways = (pathways: readonly CareerPathway[]): readonly CareerPathway[] =>

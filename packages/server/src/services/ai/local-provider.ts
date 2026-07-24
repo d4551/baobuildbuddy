@@ -20,6 +20,8 @@ import {
   inspectLocalProviderEndpoint,
 } from "./local-provider-diagnostics";
 import { BaseAIProvider } from "./provider-interface";
+const NUM_2048 = 2048;
+const RATIO_0_7 = 0.7;
 
 const buildLocalProviderMessages = (
   prompt: string,
@@ -115,8 +117,8 @@ export class LocalProvider extends BaseAIProvider {
     return this.client.chat.completions.create({
       model,
       messages,
-      max_tokens: options?.maxTokens ?? 2048,
-      temperature: options?.temperature ?? 0.7,
+      max_tokens: options?.maxTokens ?? NUM_2048,
+      temperature: options?.temperature ?? RATIO_0_7,
       top_p: options?.topP ?? 1,
       stream: false,
     });
@@ -174,8 +176,8 @@ export class LocalProvider extends BaseAIProvider {
       this.client.chat.completions.create({
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? NUM_2048,
+        temperature: options?.temperature ?? RATIO_0_7,
         top_p: options?.topP ?? 1,
         stream: true,
       }),

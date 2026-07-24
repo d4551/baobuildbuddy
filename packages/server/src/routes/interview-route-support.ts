@@ -23,11 +23,12 @@ import { interviewService } from "../services/interview-service";
 import { parseResponsePayload, sessionConfigFromUi } from "./interview-route-config";
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 import { sessionWithDerivedFields } from "./interview-route-presentation";
+const NUM_150 = 150;
 
 const buildDefaultResponse = (questionId: string, answer: string): InterviewResponse => ({
   questionId,
   transcript: answer,
-  duration: Math.max(1, answer.length * 150),
+  duration: Math.max(1, answer.length * NUM_150),
   timestamp: Date.now(),
   confidence: 0.8,
 });

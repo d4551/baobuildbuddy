@@ -1,4 +1,6 @@
 import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
+const NUM_36 = 36;
+const NUM_7 = 7;
 
 /**
  * Common interface for all AI providers
@@ -47,7 +49,7 @@ export abstract class BaseAIProvider implements AIProvider {
    * Generate a unique ID for the response
    */
   protected generateId(): string {
-    return `${this.name}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    return `${this.name}-${Date.now()}-${Math.random().toString(NUM_36).substring(NUM_7)}`;
   }
 
   /**

@@ -2,7 +2,7 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import type { ClientApi } from "~/types/client-api";
-import { requireApiResponsePayload } from "~/utils/api-response";
+import { readRequiredApiPayload } from "~/utils/api-response";
 import { toGameStudio } from "./api-normalizer-studios";
 import { requireValue, withLoadingState } from "./async-flow";
 import { useApi } from "./useApi";
@@ -29,18 +29,10 @@ const toStudioList = (value: unknown): GameStudio[] =>
         .filter((entry): entry is GameStudio => entry !== null)
     : [];
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  return requireApiResponsePayload(response, fallbackMessage);
-};
-
 function createReadStudioActions(context: StudioContext) {
   const searchStudios = async (query?: Record<string, string>) =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.studios.get({ query: query || {} }),
         context.t("apiErrors.studios.searchFailed"),
       );
@@ -49,7 +41,7 @@ function createReadStudioActions(context: StudioContext) {
 
   const getStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.studios({ id }).get(),
         context.t("apiErrors.studios.fetchFailed"),
       );
@@ -73,7 +65,7 @@ function createWriteStudioActions(
 ) {
   const createStudio = async (studioData: CreateStudioInput) =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.studios.post(studioData),
         context.t("apiErrors.studios.createFailed"),
       );
@@ -87,7 +79,7 @@ function createWriteStudioActions(
 
   const updateStudio = async (id: string, updates: UpdateStudioInput) =>
     withLoadingState(context.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         context.api.studios({ id }).put(updates),
         context.t("apiErrors.studios.updateFailed"),
       );
@@ -102,7 +94,7 @@ function createWriteStudioActions(
 
   const deleteStudio = async (id: string) =>
     withLoadingState(context.loading, async () => {
-      await readApiData(
+      await readRequiredApiPayload(
         context.api.studios({ id }).delete(),
         context.t("apiErrors.studios.deleteFailed"),
       );

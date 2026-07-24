@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesSkillsIndexPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -127,7 +131,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending && !hasMappings" variant="cards" :lines="6" />
+    <LoadingSkeleton v-if="bootstrapPending && !hasMappings" variant="cards" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="pageError && !hasMappings"

@@ -1,3 +1,7 @@
+const NUM_2000 = 2_000;
+const NUM_240 = 240;
+const NUM_30 = 30;
+const NUM_50000 = 50_000;
 /**
  * Headed product demo video — real local AI + Whisper STT, mock interview,
  * stylized resume / portfolio / cover-letter generation.
@@ -36,13 +40,13 @@ const runProductTour = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "00-dashboard");
   await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("aiProviders")}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "01-ai-providers-configured");
   await writeOutput(`settings shown; live LLM=${liveModelId} whisper=${whisperEndpoint}`);
   await demoResumeGuidedBuild(page);
@@ -54,7 +58,7 @@ const runProductTour = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   await shot(page, "19-dashboard-complete");
 };
 
@@ -78,9 +82,9 @@ const finalizeDemoReport = async (input: {
     CLIENT_BASE,
     liveEndpoint: input.liveEndpoint,
     liveModelId: input.liveModelId,
-    liveSample: input.liveSample.slice(0, 240),
+    liveSample: input.liveSample.slice(0, NUM_240),
     whisperEndpoint: input.whisperEndpoint,
-    whisperSample: input.whisperSample.slice(0, 240),
+    whisperSample: input.whisperSample.slice(0, NUM_240),
     mockUsed: false,
     capture: "ffmpeg-x11grab",
     tourError: input.tourError,
@@ -90,14 +94,14 @@ const finalizeDemoReport = async (input: {
     mp4Path: input.mp4Path,
     mp4Bytes,
     consoleErrorCount: input.consoleErrors.length,
-    consoleErrors: input.consoleErrors.slice(0, 30),
+    consoleErrors: input.consoleErrors.slice(0, NUM_30),
     display: resolveProofEnv("DISPLAY") ?? null,
   };
   await Bun.write(join(OUT, "demo-report.json"), JSON.stringify(report, null, 2));
   await writeOutput(
     `browser-record-product-demo: stills=${String(stillCount)} webm=${input.webmPath ?? "none"} (${String(webmBytes)}) mp4=${input.mp4Path ?? "none"} (${String(mp4Bytes)}) errors=${String(input.consoleErrors.length)} live=${input.liveModelId} tourError=${input.tourError ?? "none"}`,
   );
-  if ((!input.mp4Path || mp4Bytes < 50_000) && (!input.webmPath || webmBytes < 50_000)) {
+  if ((!input.mp4Path || mp4Bytes < NUM_50000) && (!input.webmPath || webmBytes < NUM_50000)) {
     await writeError("Product demo incomplete (missing/small video).");
     process.exitCode = 1;
   } else if (input.tourError) {
@@ -136,11 +140,11 @@ const main = async (): Promise<void> => {
   const consoleErrors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") {
-      consoleErrors.push(message.text().slice(0, 240));
+      consoleErrors.push(message.text().slice(0, NUM_240));
     }
   });
   page.on("pageerror", (error) => {
-    consoleErrors.push(`PAGE:${error.message.slice(0, 240)}`);
+    consoleErrors.push(`PAGE:${error.message.slice(0, NUM_240)}`);
   });
 
   let tourError: string | null = null;

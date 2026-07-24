@@ -1,5 +1,7 @@
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const NUM_3 = 3;
+const NUM_67 = 67;
 
 const getRunMock = vi.fn<(runId: string) => Promise<RpaRunExecutionEnvelope>>();
 const subscribeToRunMock =
@@ -84,8 +86,8 @@ async function assertAppliesEventsAndStopsAtResult(): Promise<void> {
   });
 
   expect(stream.run.value?.currentStep).toBe(2);
-  expect(stream.run.value?.totalSteps).toBe(3);
-  expect(stream.run.value?.progress).toBe(67);
+  expect(stream.run.value?.totalSteps).toBe(NUM_3);
+  expect(stream.run.value?.progress).toBe(NUM_67);
 
   latestEventHandler?.({
     protocolVersion: "1.0",

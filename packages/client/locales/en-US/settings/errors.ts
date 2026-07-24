@@ -3,6 +3,7 @@ const settingserrors = {
     errors: {
       failedToTestProvider: "Failed to test provider",
       failedToSaveApiKeys: "Failed to save API keys",
+      missingProviderCredential: "Add provider credentials before testing the connection.",
       failedToSaveEmailDelivery: "Failed to save email delivery settings",
       failedToSaveEmailDeliveryPassword: "Failed to save email delivery password",
       failedToSaveTheme: "Failed to save theme",

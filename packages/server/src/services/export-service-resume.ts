@@ -8,6 +8,7 @@ import {
   renderResumeSkills,
 } from "./export-service-resume-profile";
 import { renderResumeExperience, renderResumeProjects } from "./export-service-resume-work";
+const NUM_3 = 3;
 
 export async function exportResumePdf(
   resume: ResumeData,
@@ -60,8 +61,8 @@ export async function optimizeResumePdfForOnePage(
   if (pdfDoc.getPageCount() > 1 && optimized.experience) {
     for (const experience of optimized.experience) {
       const achievements = experience.achievements;
-      if (Array.isArray(achievements) && achievements.length > 3) {
-        experience.achievements = achievements.slice(0, 3);
+      if (Array.isArray(achievements) && achievements.length > NUM_3) {
+        experience.achievements = achievements.slice(0, NUM_3);
       }
     }
     pdfBytes = await exportResumePdf(optimized, templateName);

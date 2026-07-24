@@ -6,15 +6,17 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
-const sourceExtensions = new Set([".ts", ".tsx", ".vue"]);
+const sourceExtensions = new Set([".ts", ".tsx", ".vue", ".rs"]);
 const scanRoots = [
   "packages/client",
   "packages/server/src",
   "packages/shared/src",
   "packages/scraper/src",
+  "packages/desktop/src-tauri/src",
 ] as const;
 const maxVueLines = 350;
 const maxTypeScriptLines = 400;
+const maxRustLines = 700;
 const maxFunctionBodyLines = 80;
 const maxParameterCount = 5;
 const maxBranchCount = 15;
@@ -25,6 +27,16 @@ const isIgnoredFile = (filePath: string): boolean =>
   filePath.includes("/dist-types/") ||
   filePath.includes("/db/seed/") ||
   filePath.endsWith("/studios.generated.ts");
+
+const resolveMaxLineCount = (filePath: string): number => {
+  if (filePath.endsWith(".vue")) {
+    return maxVueLines;
+  }
+  if (filePath.endsWith(".rs")) {
+    return maxRustLines;
+  }
+  return maxTypeScriptLines;
+};
 
 const functionPattern =
   /(?:^|\n)(?:export\s+)?(?:async\s+)?function\s+[A-Za-z0-9_]+\s*\(([^)]*)\)\s*(?::[^{=\n]+)?\{/gu;
@@ -168,7 +180,7 @@ export const collectMonolithViolationsForContent = (
   }
 
   const violations: ValidationViolation[] = [];
-  const maxLines = filePath.endsWith(".vue") ? maxVueLines : maxTypeScriptLines;
+  const maxLines = resolveMaxLineCount(filePath);
   const lineCount = countLines(content);
 
   if (lineCount > maxLines) {
@@ -177,6 +189,10 @@ export const collectMonolithViolationsForContent = (
       line: 1,
       message: `File exceeds ${maxLines} lines. Split the monolith into smaller modules.`,
     });
+  }
+
+  if (filePath.endsWith(".rs")) {
+    return violations;
   }
 
   return [

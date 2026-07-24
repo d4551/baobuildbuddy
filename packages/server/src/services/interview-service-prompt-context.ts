@@ -1,6 +1,8 @@
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
 import type { InterviewConfig, InterviewerPersona } from "@bao/shared/types/interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
+const NUM_4 = 4;
+const NUM_8 = 8;
 
 export function buildCandidatePromptContext(candidateContext: CandidateInterviewContext): string {
   return `${candidateContext.profileSummary}
@@ -20,7 +22,7 @@ export function buildStudioPromptContext(studio: StudioContext): string {
 - Type: ${studio.type || DEFAULT_UNSPECIFIED_LABEL}
 - Interview style: ${studio.interviewStyle || DEFAULT_UNSPECIFIED_LABEL}
 - Technologies: ${studio.technologies.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
-- Key titles: ${studio.games.slice(0, 4).join(", ") || DEFAULT_UNSPECIFIED_LABEL}
+- Key titles: ${studio.games.slice(0, NUM_4).join(", ") || DEFAULT_UNSPECIFIED_LABEL}
 - Remote: ${studio.remoteWork ? "supported" : "primarily on-site"}
 - Persona summary: ${studio.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}
 - Hiring signals: ${studio.enrichment?.hiringSignals.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
@@ -39,7 +41,7 @@ export function buildJobPromptContext(config: InterviewConfig): string {
 - Company: ${targetJob.company}
 - Location: ${targetJob.location}
 - Technologies: ${targetJob.technologies?.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
-- Requirements: ${targetJob.requirements?.slice(0, 8).join("; ") || DEFAULT_UNSPECIFIED_LABEL}
+- Requirements: ${targetJob.requirements?.slice(0, NUM_8).join("; ") || DEFAULT_UNSPECIFIED_LABEL}
 - Description: ${targetJob.description || "Not provided"}
 - Source: ${targetJob.source || "Unknown"}
 - Persona summary: ${targetJob.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}

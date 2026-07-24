@@ -11,12 +11,16 @@ import {
   ensureResumeSpace,
   renderResumeSectionHeader,
 } from "./export-service-resume-layout";
+const NUM_15 = 15;
+const NUM_20 = 20;
+const NUM_30 = 30;
+const NUM_50 = 50;
 
 function renderResumeEducationItem(
   context: ResumeRenderContext,
   education: ResumeEducationItem,
 ): void {
-  ensureResumeSpace(context, 50);
+  ensureResumeSpace(context, NUM_50);
   context.page.drawText(`${education.degree} in ${education.field}`, {
     x: context.margin,
     y: context.yPosition,
@@ -24,7 +28,7 @@ function renderResumeEducationItem(
     font: context.boldFont,
     color: context.palette.text,
   });
-  context.yPosition -= 15;
+  context.yPosition -= NUM_15;
 
   const details = [education.school, education.year];
   if (education.gpa) {
@@ -38,7 +42,7 @@ function renderResumeEducationItem(
     font: context.font,
     color: context.palette.line,
   });
-  context.yPosition -= 20;
+  context.yPosition -= NUM_20;
 }
 
 export function renderResumeEducation(context: ResumeRenderContext, resume: ResumeData): void {
@@ -60,7 +64,7 @@ function renderResumeSkillGroup(
     return;
   }
 
-  ensureResumeSpace(context, 30);
+  ensureResumeSpace(context, NUM_30);
   if (options.label) {
     context.page.drawText(options.label, {
       x: context.margin,
@@ -69,7 +73,7 @@ function renderResumeSkillGroup(
       font: context.boldFont,
       color: options.labelColor,
     });
-    context.yPosition -= 15;
+    context.yPosition -= NUM_15;
   }
 
   drawResumeWrappedText(context, {
@@ -178,7 +182,7 @@ export function renderResumeGamingExperience(
 
   renderResumeSectionHeader(context, "GAMING EXPERIENCE");
   for (const item of gamingItems) {
-    ensureResumeSpace(context, 20);
+    ensureResumeSpace(context, NUM_20);
     context.page.drawText(item, {
       x: context.margin,
       y: context.yPosition,
@@ -186,6 +190,6 @@ export function renderResumeGamingExperience(
       font: context.font,
       color: context.palette.text,
     });
-    context.yPosition -= 15;
+    context.yPosition -= NUM_15;
   }
 }

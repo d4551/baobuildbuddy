@@ -1,3 +1,7 @@
+const NUM_220 = 220;
+const NUM_4 = 4;
+const NUM_40 = 40;
+const NUM_8 = 8;
 /**
  * Browser interaction burndown — Playwright only (no curl / API inject).
  * Mobile → tablet → desktop. Canonical proof script for `proof:browser-burndown`.
@@ -90,7 +94,7 @@ const buildFiveQ = (
         ? "landmarks ok"
         : "FAIL: landmarks",
     ssotUx:
-      shell.overflowX <= 8 && !shell.truncatedChrome && !shell.clippedSectionTabs
+      shell.overflowX <= NUM_8 && !shell.truncatedChrome && !shell.clippedSectionTabs
         ? "layout ok"
         : "FAIL: overflow/clip",
     interactions: clicks > 0 ? `clicked ${String(clicks)}` : "no clickable controls",
@@ -130,7 +134,7 @@ const burnRoute = async (
       viewport,
       route,
       "load",
-      loadErrors.slice(0, 4).join(" | "),
+      loadErrors.slice(0, NUM_4).join(" | "),
     );
   }
 
@@ -235,10 +239,10 @@ const main = async (): Promise<void> => {
   if (errors.length > 0) {
     await writeError(
       errors
-        .slice(0, 40)
+        .slice(0, NUM_40)
         .map(
           (finding) =>
-            `- ${finding.viewport} ${finding.route} [${finding.action}]: ${finding.detail.slice(0, 220)}`,
+            `- ${finding.viewport} ${finding.route} [${finding.action}]: ${finding.detail.slice(0, NUM_220)}`,
         )
         .join("\n"),
     );

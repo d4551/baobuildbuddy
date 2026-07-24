@@ -14,10 +14,15 @@ import { db, sqlite } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { CACHE_CONTROL_PRIVATE_NO_STORE } from "../utils/http-response";
 import { automationScreenshotRoutes } from "./automation-screenshots.routes";
+import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
+const NUM_137 = 137;
+const NUM_71 = 71;
+const NUM_78 = 78;
+const NUM_80 = 80;
 
 type ScreenshotApp = { handle: (request: Request) => Response | Promise<Response> };
 
-const PNG_BYTES = new Uint8Array([137, 80, 78, 71]);
+const PNG_BYTES = new Uint8Array([NUM_137, NUM_80, NUM_78, NUM_71]);
 
 let app: ScreenshotApp;
 const createdRunIds = new Set<string>();
@@ -81,7 +86,7 @@ describe("automationScreenshotRoutes", () => {
       new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(await response.json()).toEqual({ error: API_ERROR_SCREENSHOT_FILE_MISSING });
   });
 
@@ -95,7 +100,7 @@ describe("automationScreenshotRoutes", () => {
       new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe("image/png");
     expect(response.headers.get("cache-control")).toBe(CACHE_CONTROL_PRIVATE_NO_STORE);
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(PNG_BYTES);

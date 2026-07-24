@@ -17,6 +17,7 @@
  * defined in assets/css/main.css — no inline style bindings.
  */
 import { computed } from "vue";
+import { UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 import {
   GLASS_CARD_LINK_CONTENT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -78,7 +79,7 @@ const surfaceClass = computed(() => {
 /** Clamp stagger index to 0–11 so it always maps to a defined CSS delay class. */
 const staggerClass = computed(() =>
   props.staggerIndex !== undefined
-    ? `glass-card-enter glass-card-enter-${Math.min(Math.max(props.staggerIndex, 0), 11)}`
+    ? `glass-card-enter glass-card-enter-${Math.min(Math.max(props.staggerIndex, 0), UI_STAGGER_INDEX_MAX)}`
     : "",
 );
 

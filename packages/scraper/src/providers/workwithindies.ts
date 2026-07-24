@@ -2,6 +2,13 @@ import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
+import {
+  SCRAPER_JOB_COMPANY_MAX_LENGTH,
+  SCRAPER_JOB_LOCATION_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MAX_LENGTH,
+} from "@bao/shared/constants/scraper";
+const NUM_3 = 3;
+const NUM_80 = 80;
 
 const WORK_WITH_INDIES_RESULT_LIMIT = 60;
 const HIRING_PATTERN =
@@ -48,7 +55,7 @@ export const extractWorkWithIndiesJobs = async (
     const title = normalizeWhitespace(match[2] ?? "");
     const location = normalizeWhitespace(match[3] ?? "Remote");
 
-    if (title.length < 3 || company.length > 80) {
+    if (title.length < NUM_3 || company.length > NUM_80) {
       continue;
     }
 
@@ -66,9 +73,9 @@ export const extractWorkWithIndiesJobs = async (
   }
 
   return candidates.slice(0, WORK_WITH_INDIES_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100);
-    const location = toBoundedText(row.location, 100) || "Remote";
+    const title = toBoundedText(row.title, SCRAPER_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPER_JOB_COMPANY_MAX_LENGTH);
+    const location = toBoundedText(row.location, SCRAPER_JOB_LOCATION_MAX_LENGTH) || "Remote";
 
     return {
       title,

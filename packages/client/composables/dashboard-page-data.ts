@@ -15,9 +15,13 @@ import {
   resolveDashboardActivityActionLabelKey,
   resolveDashboardActivityType,
 } from "~/constants/dashboard-pipeline";
+import type { ApiEnvelope } from "~/types/client-api-contracts";
 import { getErrorMessage } from "~/utils/errors";
 
-type TranslateFn = (key: string, values?: Record<string, unknown>) => string;
+/** Untrusted API payload entering a boundary decoder — narrowed by isRecord. */
+type ApiPayload = Parameters<typeof isRecord>[0];
+
+type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
 
 function resolveActivityDescription(action: string, t: TranslateFn): string {
   const actionLabelKey = resolveDashboardActivityActionLabelKey(action);
@@ -98,7 +102,7 @@ function getRecentActivity(
 }
 
 async function requestData<T>(
-  request: Promise<{ data: T | null; error?: unknown }>,
+  request: Promise<ApiEnvelope<T>>,
   fallbackMessage: string,
 ): Promise<T> {
   const response = await request;
@@ -116,9 +120,11 @@ export async function fetchDashboardViewModel(
   t: TranslateFn,
 ): Promise<DashboardViewModel> {
   const [profile, stats, gamification, challengeResponse] = await Promise.all([
-    requestData<unknown>(api.user.profile.get(), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)).then(
-      (rawProfile) =>
-        requireValue(toUserProfile(rawProfile), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)),
+    requestData<ApiPayload>(
+      api.user.profile.get(),
+      t(DASHBOARD_ERROR_KEYS.profileLoadFallback),
+    ).then((rawProfile) =>
+      requireValue(toUserProfile(rawProfile), t(DASHBOARD_ERROR_KEYS.profileLoadFallback)),
     ),
     requestData<DashboardStats>(
       api.stats.dashboard.get(),

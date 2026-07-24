@@ -3,12 +3,14 @@ import type { JobApplyRequestBody, RunScrapeRequestBody, ScheduleEmailResponseRe
 export declare const handleVerifyAutomationContext: () => Promise<{
     status: 200;
     body: {
-        resumeId: string;
+        enabled: false;
+        reason: string;
     };
 } | {
-    status: 404;
+    status: 200;
     body: {
-        error: import("@bao/shared/schemas/error-envelope.schema").ErrorEnvelope;
+        resumeId: string;
+        enabled: true;
     };
 }>;
 export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Promise<{

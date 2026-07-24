@@ -3,6 +3,7 @@ import type { CareerProgress, DashboardStats, WeeklyActivity } from "@bao/shared
 import { asNumber, asString, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { withLoadingState } from "./async-flow";
+import { readRequiredApiPayload } from "~/utils/api-response";
 
 type StatisticsState = {
   readonly dashboard: ReturnType<typeof useState<DashboardStats | null>>;
@@ -224,20 +225,6 @@ const toCareerProgress = (value: unknown): CareerProgress | null => {
   };
 };
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) && "data" in response)) {
-    throw new Error(fallbackMessage);
-  }
-  if ("error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  return response.data;
-};
-
 function createStatisticsState(): StatisticsState {
   return {
     dashboard: useState<DashboardStats | null>(STATE_KEYS.STATS_DASHBOARD, () => null),
@@ -254,7 +241,7 @@ function createStatisticsActions(
 ) {
   const fetchDashboard = async () =>
     withLoadingState(state.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         api.stats.dashboard.get(),
         t("apiErrors.statistics.fetchDashboardFailed"),
       );
@@ -263,7 +250,7 @@ function createStatisticsActions(
 
   const fetchWeekly = async () =>
     withLoadingState(state.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         api.stats.weekly.get(),
         t("apiErrors.statistics.fetchWeeklyFailed"),
       );
@@ -272,7 +259,7 @@ function createStatisticsActions(
 
   const fetchCareerProgress = async () =>
     withLoadingState(state.loading, async () => {
-      const data = await readApiData(
+      const data = await readRequiredApiPayload(
         api.stats.career.get(),
         t("apiErrors.statistics.fetchCareerFailed"),
       );

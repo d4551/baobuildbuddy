@@ -21,6 +21,9 @@ export declare const speechRoutes: import("elysia/types").AddRoute<string, "loca
         audioBase64: import("typebox").TString;
         mimeType: import("typebox").TString;
         filename: import("typebox").TOptional<import("typebox").TString>;
+        provider: import("typebox").TOptional<import("typebox").TString>;
+        model: import("typebox").TOptional<import("typebox").TString>;
+        endpoint: import("typebox").TOptional<import("typebox").TString>;
     }>;
     response: {
         200: import("typebox").TObject<{
@@ -73,6 +76,9 @@ export declare const speechRoutes: import("elysia/types").AddRoute<string, "loca
         audioBase64: string;
         mimeType: string;
         filename?: string | undefined;
+        provider?: string | undefined;
+        model?: string | undefined;
+        endpoint?: string | undefined;
     };
     query: Record<string, string | undefined>;
     params: {};

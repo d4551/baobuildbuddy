@@ -1,3 +1,4 @@
+const NUM_3 = 3;
 /**
  * Example usage of the job board service
  * This file demonstrates how to use the job aggregator and matching service
@@ -13,7 +14,7 @@ async function previewCoverLetters() {
   const coverLetters = await coverLetterService.getCoverLetters();
   jobsExampleLogger.info(`✓ Total cover letters: ${coverLetters.length}`);
 
-  for (const coverLetter of coverLetters.slice(0, 3)) {
+  for (const coverLetter of coverLetters.slice(0, NUM_3)) {
     jobsExampleLogger.info(`${coverLetter.company} - ${coverLetter.position}`);
   }
 }

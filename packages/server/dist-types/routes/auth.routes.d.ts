@@ -29,23 +29,6 @@ export declare const authRoutes: Elysia<string, "local", {
 } & {
     [x: string]: {
         [x: string]: {
-            get: {
-                body: unknown;
-                params: {};
-                query: unknown;
-                headers: unknown;
-                response: {
-                    200: {
-                        configured: boolean;
-                    };
-                };
-                error: never;
-            };
-        };
-    };
-} & {
-    [x: string]: {
-        [x: string]: {
             post: {
                 body: {
                     setupToken?: string | undefined;

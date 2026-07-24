@@ -9,6 +9,9 @@ import { resumes } from "../db/schema/resumes";
 import { applicationAutomationService } from "../services/automation/application-automation-service";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
+import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK, HTTP_STATUS_UNPROCESSABLE_ENTITY } from "@bao/shared/constants/http";
+const NUM_300000 = 300_000;
+const NUM_8 = 8;
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 const resumeId = generateId();
@@ -151,7 +154,7 @@ function registerJobApplyValidationTest(): void {
         resumeId,
       },
     );
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     if (typeof res.body === "string") {
       expect(res.body).toContain("Job URL is required");
     } else {
@@ -172,7 +175,7 @@ function registerMissingResumeTest(): void {
         resumeId: "not-found-resume-id",
       },
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error.message).toBe("resume not found: not-found-resume-id");
   });
 }
@@ -195,7 +198,7 @@ function registerJobApplyEnqueueTest(): void {
             resumeId,
           },
         );
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(HTTP_STATUS_OK);
         expect(res.body.status).toBe("running");
         expect(typeof res.body.id).toBe("string");
         expect(res.body.id.length).toBeGreaterThan(0);
@@ -233,14 +236,14 @@ function registerScheduleValidationTest(): void {
       },
     );
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     expect(res.body.error.message).toContain("runAt");
   });
 }
 
 function registerScheduleCreationTest(): void {
   test("POST automation job apply schedule creates a pending run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + NUM_300000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -251,7 +254,7 @@ function registerScheduleCreationTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const scheduleValue =
       res.body.input && typeof res.body.input === "object" && "schedule" in res.body.input
@@ -304,7 +307,7 @@ function registerEmailResponseTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.reply.length).toBeGreaterThan(0);
     expect(res.body.delivered).toBe(true);
@@ -325,7 +328,7 @@ function registerEmailResponseTest(): void {
 
 function registerScheduledEmailResponseTest(): void {
   test("POST automation email response schedule creates a pending email run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + NUM_300000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -338,7 +341,7 @@ function registerScheduledEmailResponseTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -366,7 +369,7 @@ function registerScheduledEmailResponseTest(): void {
 
 function registerScheduledScrapeRunTest(): void {
   test("POST automation scrape schedule creates a pending scrape run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + NUM_300000).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -376,7 +379,7 @@ function registerScheduledScrapeRunTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -434,7 +437,7 @@ function registerImmediateScrapeRunTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.output?.target).toBe("jobs_grackle");
     expect(res.body.output?.enrichment).not.toBeNull();
@@ -460,13 +463,37 @@ function registerCapabilityAuditRouteTest(): void {
       capabilities: Array<{ id: string; target: string | null }>;
     }>(app, "GET", API_ENDPOINTS.automationCapabilities);
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.generatedAt.length).toBeGreaterThan(0);
-    expect(res.body.summary.total).toBeGreaterThanOrEqual(8);
+    expect(res.body.summary.total).toBeGreaterThanOrEqual(NUM_8);
     expect(res.body.capabilities.some((capability) => capability.id === "job_apply")).toBe(true);
     expect(
       res.body.capabilities.some((capability) => capability.target === "jobs_pocketgamer"),
     ).toBe(true);
+  });
+}
+
+function registerVerifyContextDisabledHonestyTest(): void {
+  test("GET automation verify/context returns enabled:false when verification is off", async () => {
+    const previous = process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+    process.env.BAO_ENABLE_AUTOMATION_VERIFY = "false";
+    try {
+      const res = await requestJson<{ enabled?: boolean; resumeId?: string; reason?: string }>(
+        app,
+        "GET",
+        API_ENDPOINTS.automationVerifyContext,
+      );
+      expect(res.status).toBe(HTTP_STATUS_OK);
+      expect(res.body.enabled).toBe(false);
+      expect(res.body.resumeId).toBeUndefined();
+      expect(typeof res.body.reason).toBe("string");
+    } finally {
+      if (previous === undefined) {
+        delete process.env.BAO_ENABLE_AUTOMATION_VERIFY;
+      } else {
+        process.env.BAO_ENABLE_AUTOMATION_VERIFY = previous;
+      }
+    }
   });
 }
 
@@ -481,4 +508,5 @@ describe("automation routes", () => {
   registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
   registerCapabilityAuditRouteTest();
+  registerVerifyContextDisabledHonestyTest();
 });

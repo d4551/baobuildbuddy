@@ -2,6 +2,12 @@ import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
 import { buildScraperHash } from "../runtime/hash";
 import { toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
+import {
+  SCRAPER_JOB_COMPANY_MAX_LENGTH,
+  SCRAPER_JOB_LOCATION_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MAX_LENGTH,
+  SCRAPER_JOB_TITLE_MIN_LENGTH,
+} from "@bao/shared/constants/scraper";
 
 const HITMARKER_SCAN_LIMIT = 60;
 const HITMARKER_RESULT_LIMIT = 40;
@@ -54,7 +60,7 @@ const extractHitmarkerCandidates = ({
     }
 
     const title = lines[0] ?? "";
-    if (title.trim().length < 5) {
+    if (title.trim().length < SCRAPER_JOB_TITLE_MIN_LENGTH) {
       return [];
     }
 
@@ -89,9 +95,9 @@ export const extractHitmarkerJobs = async (
   });
 
   return rows.slice(0, HITMARKER_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100) || "Unknown";
-    const location = toBoundedText(row.location, 100) || "Remote";
+    const title = toBoundedText(row.title, SCRAPER_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPER_JOB_COMPANY_MAX_LENGTH) || "Unknown";
+    const location = toBoundedText(row.location, SCRAPER_JOB_LOCATION_MAX_LENGTH) || "Remote";
 
     return {
       title,

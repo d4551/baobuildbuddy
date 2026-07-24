@@ -5,6 +5,7 @@ import {
   FLUID_WIDTH_CLASS,
   OUTLINE_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
@@ -47,7 +48,7 @@ const { t } = useI18n();
         </span>
       </div>
       <progress 
-        class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+        class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
         :value="completionPercent"
         max="100"
         :aria-label="t('resumePage.completion.progressAria')"

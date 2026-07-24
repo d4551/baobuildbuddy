@@ -55,15 +55,12 @@ export function requireApiResponseData<TData>(
 }
 
 /**
- * Soft unwrap for list bootstraps that treat failures as empty collections.
+ * Async SSOT reader for composable Eden calls — prefer over local `readApiData` forks.
  */
-export async function readApiDataOrEmpty(request: Promise<unknown>): Promise<unknown> {
+export async function readRequiredApiPayload(
+  request: Promise<unknown>,
+  fallbackMessage: string,
+): Promise<unknown> {
   const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    return [];
-  }
-  if (hasApiResponseError(response)) {
-    return [];
-  }
-  return unwrapApiResponsePayload(response);
+  return requireApiResponsePayload(response, fallbackMessage);
 }

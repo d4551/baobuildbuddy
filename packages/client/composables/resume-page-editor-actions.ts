@@ -6,6 +6,9 @@ import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import { RESUME_EMAIL_PATTERN } from "~/composables/resume-page-bootstrap";
 import { getErrorMessage } from "~/utils/errors";
+const NUM_20 = 20;
+const NUM_50 = 50;
+const NUM_900 = 900;
 
 type ResumeEditorSupport = {
   progress: ReturnType<typeof useAiEnhancementProgress>;
@@ -54,7 +57,7 @@ export function useAiEnhancementProgress(aiEnhancementStepLabels: Ref<readonly s
       if (aiEnhancementStepIndex.value < aiEnhancementStepLabels.value.length - 1) {
         aiEnhancementStepIndex.value += 1;
       }
-    }, 900);
+    }, NUM_900);
   }
 
   function stopAiEnhancementProgress(): void {
@@ -104,7 +107,7 @@ export function useResumeFormValidation(
       $toast.error(t("resumePage.toasts.invalidEmail"));
       return false;
     }
-    if (formData.summary.trim().length < 50) {
+    if (formData.summary.trim().length < NUM_50) {
       $toast.error(t("resumePage.toasts.summaryMinLength"));
       return false;
     }
@@ -113,7 +116,7 @@ export function useResumeFormValidation(
       (item) =>
         item.title.trim().length < 2 ||
         item.company.trim().length < 2 ||
-        item.description.trim().length < 20,
+        item.description.trim().length < NUM_20,
     );
     if (hasInvalidExperience) {
       $toast.error(t("resumePage.toasts.invalidExperience"));
@@ -129,7 +132,7 @@ export function useResumeFormValidation(
     }
 
     const hasInvalidProjects = formData.projects.some(
-      (item) => item.name.trim().length < 2 || item.description.trim().length < 20,
+      (item) => item.name.trim().length < 2 || item.description.trim().length < NUM_20,
     );
     if (hasInvalidProjects) {
       $toast.error(t("resumePage.toasts.invalidProjects"));

@@ -1,5 +1,6 @@
 import {
   API_ERROR_AUTOMATION_RUN_NOT_FOUND,
+  API_ERROR_AUTOMATION_VERIFICATION_DISABLED,
   API_ERROR_INVALID_RUN_ID,
   API_ERROR_RUN_NOT_FOUND,
   API_ERROR_SCHEDULED_RUN_NOT_FOUND,
@@ -36,14 +37,19 @@ const routeResult = <const Status extends number, Body>(status: Status, body: Bo
 });
 
 export const handleVerifyAutomationContext = async () => {
+  // Disabled: honest 200 empty context (not 404 "Run not found"). Client treats
+  // missing resumeId as null; 4xx would spam browser console on job-apply load.
   if (!config.enableAutomationVerification) {
-    return routeResult(
-      HTTP_STATUS_NOT_FOUND,
-      toRouteError("OUTPUT_VALIDATION_ERROR", API_ERROR_RUN_NOT_FOUND),
-    );
+    return routeResult(HTTP_STATUS_OK, {
+      enabled: false as const,
+      reason: API_ERROR_AUTOMATION_VERIFICATION_DISABLED,
+    });
   }
 
-  return routeResult(HTTP_STATUS_OK, await ensureAutomationVerifyContext());
+  return routeResult(HTTP_STATUS_OK, {
+    enabled: true as const,
+    ...(await ensureAutomationVerifyContext()),
+  });
 };
 
 export const handleJobApplyRoute = async (payload: JobApplyRequestBody) => {

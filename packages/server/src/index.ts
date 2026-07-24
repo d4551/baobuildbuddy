@@ -1,6 +1,7 @@
 import { API_ENDPOINTS, OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { JOB_AGGREGATOR_CACHE_EXPIRY_MS } from "@bao/shared/constants/jobs";
 import { settle } from "@bao/shared/utils/promise";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { Elysia } from "elysia";
 import { app } from "./app";
 import { config } from "./config/env";
@@ -14,12 +15,12 @@ import { createServerLogger } from "./utils/logger";
 const logger = createServerLogger("server-lifecycle");
 
 process.on("uncaughtException", (error) => {
-  logger.error("uncaughtException", error instanceof Error ? error.message : String(error));
+  logger.error("uncaughtException", toErrorMessage(error));
   process.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
-  logger.error("unhandledRejection", reason instanceof Error ? reason.message : String(reason));
+  logger.error("unhandledRejection", toErrorMessage(reason));
   process.exit(1);
 });
 
@@ -30,7 +31,7 @@ const runBackgroundTask = (
   task.then(
     () => undefined,
     (error) => {
-      onError?.(error instanceof Error ? error.message : String(error));
+      onError?.(toErrorMessage(error));
     },
   );
 };
@@ -43,7 +44,7 @@ runBackgroundTask(
     if (seedResult.status === "rejected") {
       logger.error(
         "Seed failed",
-        seedResult.reason instanceof Error ? seedResult.reason.message : String(seedResult.reason),
+        toErrorMessage(seedResult.reason),
       );
     }
   })(),

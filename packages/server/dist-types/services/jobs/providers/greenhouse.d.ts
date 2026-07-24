@@ -1,6 +1,3 @@
-/**
- * Greenhouse ATS provider.
- */
 import { type JobProvider, type RawJob } from "./provider-interface";
 /**
  * Provider for Greenhouse-hosted boards configured in settings.

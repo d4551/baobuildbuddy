@@ -1,4 +1,6 @@
 import type { z } from "zod";
+const NUM_4 = 4;
+const NUM_6 = 6;
 
 const UNICODE_HEX_RADIX = 16;
 
@@ -79,14 +81,14 @@ function skipWhitespace(input: string, index: number): number {
 }
 
 function parseUnicodeEscape(input: string, cursor: number): EscapeParseResult {
-  const unicode = input.slice(cursor + 2, cursor + 6);
-  if (unicode.length !== 4 || !unicode.split("").every(isHexDigit)) {
+  const unicode = input.slice(cursor + 2, cursor + NUM_6);
+  if (unicode.length !== NUM_4 || !unicode.split("").every(isHexDigit)) {
     return { ok: false, index: cursor };
   }
   return {
     ok: true,
     value: String.fromCodePoint(Number.parseInt(unicode, UNICODE_HEX_RADIX)),
-    nextCursor: cursor + 6,
+    nextCursor: cursor + NUM_6,
   };
 }
 

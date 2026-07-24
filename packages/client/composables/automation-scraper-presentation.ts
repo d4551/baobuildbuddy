@@ -4,6 +4,7 @@ import type { ComputedRef, Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import { RUN_STATE_BADGE_CLASS } from "~/composables/automation-scraper-bootstrap";
 import { DATE_FORMAT_OPTIONS, resolveScheduledRunAt } from "~/composables/schedule-timestamp";
+import { BADGE_VARIANT_CLASS } from "~/constants/layout-badges";
 import type {
   AutomationRunEnvelope,
   AutomationScraperRunState,
@@ -14,7 +15,9 @@ import { formatDateWithLocale } from "~/utils/locale-format";
 
 function createAutomationDateFormatting(
   input: {
-    fallbackLocale: Ref<unknown>;
+    fallbackLocale: Readonly<{
+      value: string | boolean | readonly string[] | Record<string, readonly string[]>;
+    }>;
     locale: Ref<string>;
   },
   t: ComposerTranslation,
@@ -53,12 +56,12 @@ function createCapabilityPresentation(t: ComposerTranslation) {
   return {
     capabilityAvailabilityBadgeClass(capability: ScrapeCapabilityCard): string {
       if (capability.configured) {
-        return "badge-success";
+        return BADGE_VARIANT_CLASS.success;
       }
       if (capability.enabled) {
-        return "badge-warning";
+        return BADGE_VARIANT_CLASS.warning;
       }
-      return "badge-error";
+      return BADGE_VARIANT_CLASS.error;
     },
     capabilityAvailabilityLabel(capability: ScrapeCapabilityCard): string {
       if (capability.configured) {
@@ -165,7 +168,9 @@ function createAutomationRunPresentation(
 
 export function createAutomationPresentation(
   input: {
-    fallbackLocale: Ref<unknown>;
+    fallbackLocale: Readonly<{
+      value: string | boolean | readonly string[] | Record<string, readonly string[]>;
+    }>;
     lastRunAt: Record<AutomationScrapeTarget, string | null>;
     latestRuns: Record<AutomationScrapeTarget, AutomationRunEnvelope | null>;
     locale: Ref<string>;

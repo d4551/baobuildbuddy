@@ -1,3 +1,5 @@
+const NUM_12 = 12;
+const NUM_240 = 240;
 /**
  * Headed proof: enable gaming portal toggles via UI, run scrape, verify jobs feed.
  */
@@ -43,7 +45,7 @@ const captureApiResponse = async (
   api.push({
     s: res.status(),
     u: url.replace(ORIGIN_PREFIX_PATTERN, ""),
-    b: textResult.slice(0, 240),
+    b: textResult.slice(0, NUM_240),
   });
 };
 
@@ -79,7 +81,7 @@ const main = async (): Promise<void> => {
     await Bun.write(videoPath, Bun.file(await video.path()));
   }
 
-  const report = { scraperState, jobs, api: api.slice(-12), videoPath };
+  const report = { scraperState, jobs, api: api.slice(-NUM_12), videoPath };
   await Bun.write(join(OUT, "report.json"), JSON.stringify(report, null, 2));
   await writeOutput(JSON.stringify(report, null, 2));
   if (jobs.empty) {

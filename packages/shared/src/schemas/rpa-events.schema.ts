@@ -13,6 +13,7 @@ import {
   rpaStepStatusSchema,
   rpaTimestampSchema,
 } from "./rpa-protocol.schema";
+const NUM_120 = 120;
 
 /**
  * Step-level execution result emitted by the automation script.
@@ -88,8 +89,8 @@ export const rpaRunExecutionEnvelopeSchema = z.object({
   id: rpaRunIdentifierSchema,
   type: rpaRunTypeSchema,
   status: rpaRunStatusSchema,
-  jobId: z.string().trim().min(1).max(120).nullable(),
-  userId: z.string().trim().min(1).max(120).nullable(),
+  jobId: z.string().trim().min(1).max(NUM_120).nullable(),
+  userId: z.string().trim().min(1).max(NUM_120).nullable(),
   input: jsonObjectSchema.nullable(),
   output: z.union([rpaRunResultSchema, jsonObjectSchema]).nullable(),
   screenshots: z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG)).nullable(),

@@ -28,6 +28,8 @@ import { getErrorMessage } from "~/utils/errors";
 import { settlePromise } from "./async-flow";
 import { fetchDashboardViewModel, isDashboardEmpty, toFlowStats } from "./dashboard-page-data";
 import { useGamification } from "./useGamification";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_4 = 4;
 
 type DashboardAsyncState = Awaited<ReturnType<typeof useDashboardAsyncState>>;
 type DashboardRef = DashboardAsyncState["dashboard"];
@@ -89,7 +91,7 @@ const useDashboardProgress = (dashboard: DashboardRef) => ({
   // Within-level % — must match the XP numerator/denominator shown in the card.
   levelProgress: computed(() => {
     const gamification = dashboard.value?.gamification;
-    return gamification ? Math.round(getXPProgress(gamification.xp).progress * 100) : 0;
+    return gamification ? Math.round(getXPProgress(gamification.xp).progress * PERCENT_MAX) : 0;
   }),
   /** XP earned inside the current level band (not lifetime total). */
   xpIntoLevel: computed(() => {
@@ -142,7 +144,7 @@ const useDashboardFlowActions = (t: ReturnType<typeof useI18n>["t"], dashboard: 
 
   return {
     // Hero owns primaryAction — quick actions are secondary only (no dual primary).
-    dashboardQuickActions: computed(() => recommendedActions.value.slice(0, 4)),
+    dashboardQuickActions: computed(() => recommendedActions.value.slice(0, NUM_4)),
     primaryFlowLabel: computed(() => t(nextStepLabel.value)),
     primaryFlowRoute: computed(() => primaryAction.value.to),
   };

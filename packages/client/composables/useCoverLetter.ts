@@ -4,6 +4,7 @@ import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type { ClientApi } from "~/types/client-api";
+import { readRequiredApiPayload } from "~/utils/api-response";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
   type ClientApiRequestRuntime,
@@ -12,10 +13,13 @@ import {
 } from "./api-request";
 import { useApi } from "./useApi";
 
+/** Untrusted API payload entering a boundary decoder — narrowed by isRecord. */
+type ApiPayload = Parameters<typeof isRecord>[0];
+
 interface CreateCoverLetterInput {
   company: string;
   position: string;
-  jobInfo?: Record<string, unknown>;
+  jobInfo?: Record<string, string>;
   content?: CoverLetterData["content"];
   template?: CoverLetterData["template"];
 }
@@ -28,7 +32,7 @@ export interface GenerateCoverLetterInput {
   resumeId?: string;
   template?: CoverLetterData["template"];
   save?: boolean;
-  jobInfo?: Record<string, unknown>;
+  jobInfo?: Record<string, string>;
 }
 
 export type GenerateCoverLetterResult =
@@ -51,24 +55,7 @@ interface CoverLetterContext {
   currentLetter: ReturnType<typeof useState<CoverLetterData | null>>;
 }
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    throw new Error(fallbackMessage);
-  }
-  if (isRecord(response) && "error" in response && response.error) {
-    throw new Error(fallbackMessage);
-  }
-  if (isRecord(response) && "data" in response) {
-    return response.data;
-  }
-  return response;
-};
-
-const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null => {
+const toCoverLetterContent = (value: ApiPayload): CoverLetterData["content"] | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -83,7 +70,7 @@ const toCoverLetterContent = (value: unknown): CoverLetterData["content"] | null
   return Object.keys(content).length > 0 ? content : null;
 };
 
-const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult | null => {
+const toGenerateCoverLetterResult = (value: ApiPayload): GenerateCoverLetterResult | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -107,7 +94,7 @@ const toGenerateCoverLetterResult = (value: unknown): GenerateCoverLetterResult 
 
 async function fetchCoverLetters(context: CoverLetterContext): Promise<void> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].get(),
     context.t("coverLetterPage.toasts.fetchFailed"),
   );
@@ -124,7 +111,7 @@ async function getCoverLetter(
   id: string,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"]({ id }).get(),
     context.t("coverLetterDetailPage.toasts.loadFailed"),
   );
@@ -145,7 +132,7 @@ async function createCoverLetter(
   letterData: CreateCoverLetterInput,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].post(letterData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );
@@ -167,7 +154,7 @@ async function updateCoverLetter(
   updates: UpdateCoverLetterInput,
 ): Promise<CoverLetterData | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"]({ id }).put(updates),
     context.t("coverLetterDetailPage.toasts.saveFailed"),
   );
@@ -201,7 +188,7 @@ async function generateCoverLetter(
   generationData: GenerateCoverLetterInput,
 ): Promise<GenerateCoverLetterResult | null> {
   context.loading.value = true;
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api["cover-letters"].generate.post(generationData),
     context.t("coverLetterPage.toasts.generateFailed"),
   );

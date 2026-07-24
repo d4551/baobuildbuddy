@@ -2,6 +2,8 @@ import {
   SCORE_PASS_THRESHOLD,
   SCORE_WARNING_THRESHOLD,
 } from "@bao/shared/constants/score-thresholds";
+import { PROGRESS_BAR_VARIANT_CLASS, ALERT_VARIANT_CLASS } from "~/constants/layout-tokens";
+import { BADGE_VARIANT_CLASS } from "~/constants/layout-badges";
 
 export type ScoreLevel = "pass" | "warning" | "developing" | "unknown";
 
@@ -21,17 +23,17 @@ const LEVEL_TEXT_MAP: Record<ScoreLevel, string> = {
 };
 
 const LEVEL_BADGE_MAP: Record<ScoreLevel, string> = {
-  pass: "badge-success",
-  warning: "badge-warning",
-  developing: "badge-error",
-  unknown: "badge-warning",
+  pass: BADGE_VARIANT_CLASS.success,
+  warning: BADGE_VARIANT_CLASS.warning,
+  developing: BADGE_VARIANT_CLASS.error,
+  unknown: BADGE_VARIANT_CLASS.warning,
 };
 
 const LEVEL_PROGRESS_MAP: Record<ScoreLevel, string> = {
-  pass: "progress-success",
-  warning: "progress-warning",
-  developing: "progress-error",
-  unknown: "progress-warning",
+  pass: PROGRESS_BAR_VARIANT_CLASS.success,
+  warning: PROGRESS_BAR_VARIANT_CLASS.warning,
+  developing: PROGRESS_BAR_VARIANT_CLASS.error,
+  unknown: PROGRESS_BAR_VARIANT_CLASS.warning,
 };
 
 const LEVEL_BORDER_MAP: Record<ScoreLevel, string> = {
@@ -49,10 +51,10 @@ const LEVEL_BG_MAP: Record<ScoreLevel, string> = {
 };
 
 const LEVEL_ALERT_MAP: Record<ScoreLevel, string> = {
-  pass: "alert-success",
-  warning: "alert-warning",
-  developing: "alert-error",
-  unknown: "alert-warning",
+  pass: ALERT_VARIANT_CLASS.success,
+  warning: ALERT_VARIANT_CLASS.warning,
+  developing: ALERT_VARIANT_CLASS.error,
+  unknown: ALERT_VARIANT_CLASS.warning,
 };
 
 export function useScoreColor() {

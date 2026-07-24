@@ -21,6 +21,13 @@ import {
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared/constants/runtime";
 import { config } from "../../config/env";
+const NUM_127 = 127;
+const NUM_168 = 168;
+const NUM_169 = 169;
+const NUM_192 = 192;
+const NUM_254 = 254;
+const NUM_255 = 255;
+const NUM_4 = 4;
 
 /** Re-export shared limits for consumers that import from this module. */
 export const MAX_JOB_URL_LENGTH = AUTOMATION_MAX_JOB_URL_LENGTH;
@@ -29,10 +36,10 @@ export const MAX_CUSTOM_ANSWER_VALUE_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_VALUE
 export const MAX_CUSTOM_ANSWER_COUNT = AUTOMATION_MAX_CUSTOM_ANSWER_COUNT;
 
 const DISALLOWED_IPV4_PREFIXES = [
-  [127, 0],
+  [NUM_127, 0],
   [10, 0],
-  [169, 254],
-  [192, 168],
+  [NUM_169, NUM_254],
+  [NUM_192, NUM_168],
 ];
 
 const IP_SEGMENT_REGEX = /^\d+$/;
@@ -197,7 +204,7 @@ function isDisallowedIpv4(hostname: string): boolean {
 
 function isIpv4Address(hostname: string): boolean {
   const segments = hostname.split(".");
-  if (segments.length !== 4) {
+  if (segments.length !== NUM_4) {
     return false;
   }
 
@@ -207,7 +214,7 @@ function isIpv4Address(hostname: string): boolean {
     }
 
     const parsed = Number.parseInt(segment, DECIMAL_RADIX);
-    if (Number.isNaN(parsed) || parsed < 0 || parsed > 255) {
+    if (Number.isNaN(parsed) || parsed < 0 || parsed > NUM_255) {
       return false;
     }
   }

@@ -5,7 +5,7 @@ import type { ResumeData } from "@bao/shared/types/resume";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type { ClientApi } from "~/types/client-api";
-import { requireApiResponsePayload } from "~/utils/api-response";
+import { readRequiredApiPayload } from "~/utils/api-response";
 import { toResumeData } from "./api-normalizer-resume";
 import {
   type ClientApiRequestRuntime,
@@ -58,14 +58,6 @@ interface ResumeExportRequest {
   format?: string;
 }
 
-const readApiData = async (
-  request: Promise<unknown>,
-  fallbackMessage: string,
-): Promise<unknown> => {
-  const response = await request;
-  return requireApiResponsePayload(response, fallbackMessage);
-};
-
 const isResumeSynthesisError = (value: unknown): value is ResumeSynthesisError =>
   isRecord(value) && typeof value.error === "string";
 
@@ -99,7 +91,7 @@ function toExportPayload(template?: ResumeTemplate, format?: string): ExportResu
 
 async function fetchResumes(context: ResumeContext): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes.get(),
       context.t("apiErrors.resumes.fetchListFailed"),
     );
@@ -109,7 +101,7 @@ async function fetchResumes(context: ResumeContext): Promise<void> {
 
 async function getResume(context: ResumeContext, id: string): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes({ id }).get(),
       context.t("apiErrors.resumes.fetchFailed"),
     );
@@ -127,7 +119,7 @@ async function createResume(
   resumeData: CreateResumeInput,
 ): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes.post(resumeData),
       context.t("apiErrors.resumes.createFailed"),
     );
@@ -146,7 +138,7 @@ async function updateResume(
   updates: UpdateResumeInput,
 ): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes({ id }).put(updates),
       context.t("apiErrors.resumes.updateFailed"),
     );
@@ -162,7 +154,7 @@ async function updateResume(
 
 async function deleteResume(context: ResumeContext, id: string): Promise<void> {
   return withLoadingState(context.loading, async () => {
-    await readApiData(
+    await readRequiredApiPayload(
       context.api.resumes({ id }).delete(),
       context.t("apiErrors.resumes.deleteFailed"),
     );
@@ -218,7 +210,7 @@ async function exportResumeOnePage(
 
 async function aiEnhance(context: ResumeContext, id: string): Promise<ResumeData> {
   return withLoadingState(context.loading, async () => {
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes({ id })["ai-enhance"].post({}),
       context.t("apiErrors.resumes.enhanceFailed"),
     );
@@ -239,7 +231,7 @@ async function aiScore(
 ): Promise<ScoreResumeSuccess> {
   return withLoadingState(context.loading, async () => {
     const payload: ScoreResumeInput = { jobId };
-    const data = await readApiData(
+    const data = await readRequiredApiPayload(
       context.api.resumes({ id })["ai-score"].post(payload),
       context.t("apiErrors.resumes.scoreFailed"),
     );
@@ -263,7 +255,7 @@ async function generateCvQuestions(
     experienceLevel?: string;
   },
 ): Promise<Array<{ id: string; question: string; category: string }>> {
-  const data = await readApiData(
+  const data = await readRequiredApiPayload(
     context.api.resumes["from-questions"].generate.post(config),
     context.t("apiErrors.resumes.fetchFailed"),
   );
@@ -283,7 +275,7 @@ async function synthesizeCvResume(
   context: ResumeContext,
   questionsAndAnswers: Array<{ id: string; question: string; answer: string; category: string }>,
 ): Promise<ResumeSynthesisSuccess> {
-  const response = await readApiData(
+  const response = await readRequiredApiPayload(
     context.api.resumes["from-questions"].synthesize.post({ questionsAndAnswers }),
     context.t("apiErrors.resumes.createFailed"),
   );

@@ -5,24 +5,31 @@ import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 /**
- * Route ↔ nav coverage gate — proves every page has a discoverable nav entry
- * (or an explicit headless decl). An orphan page (file exists, no nav slot, no
- * redirect, no parent nav match, no allowlist) is a user-journey gap.
+ * Route ↔ nav coverage gate — every static page must have an **exact** nav registry
+ * entry (primary or secondary) or an explicit headless allowlist decl.
+ *
+ * Soft parent-prefix coverage is banned: child workflows must be registered so
+ * breadcrumbs and discoverability stay honest.
  *
  * Exceptions (headless by design):
- * - `/` (index) — implicit home, nav dashboard
  * - `definePageMeta({ redirect })` — redirect-only, no own surface
- * - Dynamic children (`[id].vue`, `[slug].vue`) — reached via parent nav
- * - Sub-routes of a nav entry (parent `to` is a path prefix)
+ * - Dynamic children (`[id].vue`, `[slug].vue`) — reached via parent list + builders
  * - Explicit allowlist `scripts/route-nav-coverage-allowlist.json` with reason
  */
 
 const PAGES_DIR = "packages/client/pages";
-const NAV_FILE = "packages/client/constants/navigation.ts";
+const NAV_FILES = [
+  "packages/client/constants/navigation.ts",
+  "packages/client/constants/navigation-secondary.ts",
+] as const;
 const ALLOWLIST_PATH = "scripts/route-nav-coverage-allowlist.json";
 
 const DYNAMIC_SEGMENT_PATTERN = /\[([a-zA-Z0-9_-]+)\]/u;
 const REDIRECT_PATTERN = /definePageMeta\s*\(\s*\{[^}]*redirect\b/su;
+/** Canonical URL override from definePageMeta({ path }) — wins over filename route. */
+const PAGE_META_PATH_LITERAL_PATTERN = /\bpath\s*:\s*["']([^"']+)["']/u;
+const PAGE_META_PATH_APP_ROUTES_PATTERN =
+  /\bpath\s*:\s*(?:APP_ROUTES|APP_ROUTE_PATHS)\.(\w+)/u;
 const TO_PATTERN = /to:\s*APP_ROUTES\.(\w+)/gu;
 const VUE_EXTENSION_PATTERN = /\.vue$/u;
 const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;
@@ -37,8 +44,8 @@ const isRouteAllowlistEntry = (value: JsonValue): value is RouteAllowlistEntry =
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
-  const route = value["route"];
-  const reason = value["reason"];
+  const route = value.route;
+  const reason = value.reason;
   return typeof route === "string" && typeof reason === "string";
 };
 
@@ -55,15 +62,17 @@ const loadAllowlist = async (): Promise<RouteAllowlistEntry[]> => {
 };
 
 const collectNavPaths = (): Set<string> => {
-  const content = readFileSync(resolve(process.cwd(), NAV_FILE), "utf-8");
   const paths = new Set<string>();
-  TO_PATTERN.lastIndex = 0;
-  for (const match of content.matchAll(TO_PATTERN)) {
-    const key = match[1];
-    if (key && key in APP_ROUTES) {
-      const value = APP_ROUTES[key as keyof typeof APP_ROUTES];
-      if (typeof value === "string") {
-        paths.add(value);
+  for (const navFile of NAV_FILES) {
+    const content = readFileSync(resolve(process.cwd(), navFile), "utf-8");
+    TO_PATTERN.lastIndex = 0;
+    for (const match of content.matchAll(TO_PATTERN)) {
+      const key = match[1];
+      if (key && key in APP_ROUTES) {
+        const value = APP_ROUTES[key as keyof typeof APP_ROUTES];
+        if (typeof value === "string") {
+          paths.add(value);
+        }
       }
     }
   }
@@ -89,29 +98,32 @@ const collectPageRoutes = async (): Promise<
       }
       return segment;
     });
-    const route = `/${segments.filter((s) => s.length > 0).join("/")}`;
+    const fileDerivedRoute = `/${segments.filter((s) => s.length > 0).join("/")}`;
+    const content = readFileSync(resolve(process.cwd(), normalized), "utf-8");
+    const literalPath = PAGE_META_PATH_LITERAL_PATTERN.exec(content)?.[1];
+    const appRouteKey = PAGE_META_PATH_APP_ROUTES_PATTERN.exec(content)?.[1];
+    let pathOverride: string | undefined;
+    if (appRouteKey && appRouteKey in APP_ROUTES) {
+      const appRoutePath = APP_ROUTES[appRouteKey as keyof typeof APP_ROUTES];
+      if (typeof appRoutePath === "string" && appRoutePath.length > 0) {
+        pathOverride = appRoutePath;
+      }
+    } else if (literalPath && literalPath.length > 0) {
+      pathOverride = literalPath;
+    }
+    const route = pathOverride ?? fileDerivedRoute;
     const normalizedRoute =
       route === "/"
         ? "/"
         : route.replace(MULTIPLE_SLASH_PATTERN, "/").replace(TRAILING_SLASH_PATTERN, "");
-    const content = readFileSync(resolve(process.cwd(), normalized), "utf-8");
     const isRedirect = REDIRECT_PATTERN.test(content);
     const isDynamic = DYNAMIC_SEGMENT_PATTERN.test(relative);
     return { filePath: normalized, route: normalizedRoute, isRedirect, isDynamic };
   });
 };
 
-const isSubRouteOfNav = (pageRoute: string, navPaths: ReadonlySet<string>): boolean => {
-  for (const navPath of navPaths) {
-    if (navPath === "/" && pageRoute === "/") {
-      return true;
-    }
-    if (navPath !== "/" && (pageRoute === navPath || pageRoute.startsWith(`${navPath}/`))) {
-      return true;
-    }
-  }
-  return false;
-};
+const hasExactNavEntry = (pageRoute: string, navPaths: ReadonlySet<string>): boolean =>
+  navPaths.has(pageRoute);
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const navPaths = collectNavPaths();
@@ -122,9 +134,7 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
 };
 
 /**
- * Pure orphan-route detector — given page descriptors, nav paths, and an
- * allowlist, returns violations for routes with no nav coverage. Extracted
- * for testing (VACUOUS_GATE_TEST).
+ * Pure orphan-route detector — exact nav match required for static pages.
  */
 const findOrphanRoutes = (
   pages: readonly { filePath: string; route: string; isRedirect: boolean; isDynamic: boolean }[],
@@ -139,7 +149,7 @@ const findOrphanRoutes = (
     if (page.isDynamic) {
       continue;
     }
-    if (isSubRouteOfNav(page.route, navPaths)) {
+    if (hasExactNavEntry(page.route, navPaths)) {
       continue;
     }
     if (allowlistRoutes.has(page.route)) {
@@ -148,7 +158,7 @@ const findOrphanRoutes = (
     violations.push({
       filePath: page.filePath,
       line: 1,
-      message: `Page route "${page.route}" has no nav entry, no redirect, no dynamic parent, and no allowlist decl. Add a nav item or declare headless in ${ALLOWLIST_PATH}.`,
+      message: `Page route "${page.route}" has no exact nav registry entry, no redirect, no dynamic parent, and no allowlist decl. Register a NAVIGATION_ITEMS entry (secondary ok) or declare headless in ${ALLOWLIST_PATH}.`,
     });
   }
   return violations;
@@ -162,4 +172,10 @@ if (import.meta.main) {
   );
 }
 
-export { collectNavPaths, collectPageRoutes, collectViolations, findOrphanRoutes, isSubRouteOfNav };
+export {
+  collectNavPaths,
+  collectPageRoutes,
+  collectViolations,
+  findOrphanRoutes,
+  hasExactNavEntry,
+};

@@ -9,6 +9,7 @@ import {
 import type { JsonArray, JsonValue } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import type { skillMappings } from "../db/schema/skill-mappings";
+const NUM_50 = 50;
 
 type SkillMappingRow = typeof skillMappings.$inferSelect;
 type DemandLevel = SkillMapping["demandLevel"];
@@ -69,7 +70,7 @@ export const toSkillMapping = (row: SkillMappingRow): SkillMapping => ({
   transferableSkill: row.transferableSkill,
   industryApplications: row.industryApplications || [],
   evidence: row.evidence ?? [],
-  confidence: row.confidence || 50,
+  confidence: row.confidence || NUM_50,
   category: normalizeSkillCategory(row.category),
   demandLevel: normalizeDemandLevel(row.demandLevel),
   verified: false,

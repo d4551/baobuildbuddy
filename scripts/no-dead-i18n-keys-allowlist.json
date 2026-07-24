@@ -1,786 +1,982 @@
 [
   {
     "key": "app.tagline",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "common.relativeTime.justNow",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "common.relativeTime.minutesAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "common.relativeTime.hoursAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "common.relativeTime.daysAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "common.relativeTime.weeksAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "a11y.openSettings",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.resumes.exportFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.resumes.exportOnePageFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.studios.fetchAnalyticsFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.portfolio.exportFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.settings.loadFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.search.searchFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiErrors.search.autocompleteFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiDocs.endpoint.deprecated",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiDocs.tester.sending",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiDocs.tester.requestTraceTitle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "apiDocs.tester.metadata.responseHeaders",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "gamificationPage.noChallengesLabel",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.clearSearchAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.aaa",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.indie",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.mobile",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.vrAr",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.platform",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.esports",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.options.studioType.unknown",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.matchScoreAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.previousPageAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.nextPageAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.pageAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.unknown",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.today",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.yesterday",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.daysAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.weeksAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobsPage.date.monthsAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.viewAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.saveAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.unsaveAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.matchBadge",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.matchBadgeAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.moreTechnologies",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.today",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.yesterday",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.daysAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.weeksAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.monthsAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobCard.relativeTime.unknown",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.github",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.githubLinkAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.experience",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.education",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.skills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.technicalSkills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.softSkills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePreview.gamingIndustrySkills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.completion.quickActions.coverLetterAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.completion.quickActions.portfolioAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.completion.quickActions.interview",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.completion.quickActions.interviewAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.toasts.aiSuggestionsReady",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "resumePage.toasts.aiSuggestionsReadyWithXp",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "coverLetterDetailPage.export.fallbackCompany",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "coverLetterDetailPage.export.fallbackPosition",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "coverLetterDetailPage.export.suffix",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "coverLetterDetailPage.toasts.regenerateFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "coverLetterDetailPage.toasts.exportEmpty",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioPage.preview.exportPdfButton",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioPage.preview.exportPdfAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioPage.projects.reorderCardAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.openLiveAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.openLiveSrOnly",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.openGithubAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.openGithubSrOnly",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.featureAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.unfeatureAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.editAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "portfolioProjectCard.deleteAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewChatComponent.avatarLabelAi",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewChatComponent.avatarLabelUser",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.title",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.progressAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.overallScore",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.strengths",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.areasForImprovement",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewScoreCard.recommendations",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "xpBar.levelBadge",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "xpBar.progressAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobDetail.scoreProgressAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobDetail.matchBreakdownTitle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobDetail.notableGamesTitle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobDetail.applyDialogAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "jobDetail.backToJobsAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studioDetail.errorBannerAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studioDetail.unknownValue",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studiosIndex.errorBannerAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studiosIndex.emptyState",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studiosIndex.preview.dialogAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studiosIndex.preview.closeBackdropAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "studioAnalytics.errorBannerAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.pipelineNextStepLabel",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.issueState.needsAttention",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.issueSummaryAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.tableAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.configured",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.manual",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.scheduled",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.history",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.live",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.coverage",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.issues",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.hub.audit.columns.actions",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.runs.loadingLabel",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.jobApply.runStartedTitle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.runDetail.loadErrorFallback",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.runDetail.loadingAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.runDetail.stats.typeDescription",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.today",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.yesterday",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.daysAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.weeksAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.monthsAgo",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.studioCard.title",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.jobCard.title",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.stats.interviewEntryDescription",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "automation.scraper.schedule.createdTitle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.local.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.local.description",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.gemini.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.gemini.description",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.claude.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.claude.description",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.openai.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.openai.description",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.huggingface.name",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiProviderCatalog.huggingface.description",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiDashboard.providerCard.configuredBadge",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiDashboard.errors.localConnectivityFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiDashboard.errors.providerTestFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewHub.config.dialogAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewHub.config.studioAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewHub.config.selectStudioOption",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewSession.avatarLabelAi",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewSession.jobTargetBadge",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewSession.interviewerLabel",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewSession.interviewerDescription",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "interviewSession.targetDescription",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "settings.saveState.idle",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "settings.aiProviders.expandAria",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "settings.aiProviders.preferredProviderSaved",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "settings.errors.failedToSaveApiKeys",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.domainChip",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.sourceChip",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.routeBadge",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.resume",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.jobSearch",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.interview",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.portfolio",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.skills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.automation",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.contextDomain.general",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.sources.chatPage",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.sources.floatingWidget",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.composerHint",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.focusedEntity",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.resume",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.jobSearch",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.interview",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.portfolio",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.skills",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.automation",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "floatingChat.prompts.general",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.youLabel",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.unsupportedRecognition",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.unsupportedSynthesis",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.startFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.noSpeech",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.aborted",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.audioCapture",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.notAllowed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.serviceNotAllowed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.badGrammar",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.languageNotSupported",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.canceled",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.interrupted",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.audioBusy",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.audioHardware",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.synthesisUnavailable",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.synthesisFailed",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.languageUnavailable",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.voiceUnavailable",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.textTooLong",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.invalidArgument",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   },
   {
     "key": "aiChatCommon.voice.errors.unknown",
-    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21)."
+    "reason": "Pre-existing dead i18n key retained pending per-key consumer audit (autonomous grind 2026-07-21; expiry 2026-08-21).",
+    "expires": "2026-08-21"
   }
 ]

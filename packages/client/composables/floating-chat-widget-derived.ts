@@ -7,6 +7,7 @@ import {
   createStreamingAssistantMessage,
   resolveLatestAssistantMessageIndex,
 } from "~/utils/chat";
+const NUM_96 = 96;
 
 export const createWidgetScrollHandlers = (
   panelBodyRef: ReturnType<typeof useTemplateRef<HTMLElement>>,
@@ -17,7 +18,7 @@ export const createWidgetScrollHandlers = (
     if (!panelBody) return;
     const remainingScrollDistance =
       panelBody.scrollHeight - panelBody.scrollTop - panelBody.clientHeight;
-    shouldStickToBottom.value = remainingScrollDistance <= 96;
+    shouldStickToBottom.value = remainingScrollDistance <= NUM_96;
   };
 
   const scrollToBottom = (force = false): void => {

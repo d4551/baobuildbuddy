@@ -11,6 +11,9 @@ import {
   MAX_CUSTOM_ANSWER_VALUE_LENGTH,
 } from "./automation-validation";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
+const NUM_16 = 16;
+const NUM_31 = 31;
+const NUM_4 = 4;
 
 const SUPPORTED_SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"] as const;
 const RUN_SCREENSHOT_PREFIX = "step";
@@ -69,9 +72,9 @@ const resolveScreenshotExtension = (pathValue: string): string => {
 const hashScreenshotSource = (sourcePath: string): string => {
   let hash = 0;
   for (let index = 0; index < sourcePath.length; index += 1) {
-    hash = (hash * 31 + sourcePath.charCodeAt(index)) >>> 0;
+    hash = (hash * NUM_31 + sourcePath.charCodeAt(index)) >>> 0;
   }
-  return hash.toString(16).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
+  return hash.toString(NUM_16).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
 };
 
 const resolveScreenshotName = (index: number, sourcePath: string): string => {
@@ -85,7 +88,7 @@ const resolveScreenshotName = (index: number, sourcePath: string): string => {
   const fallbackHash = hashScreenshotSource(sourcePath);
   const base = `${RUN_SCREENSHOT_PREFIX}-${stepToken}-`;
   const maxSuffixLength = Math.max(
-    4,
+    NUM_4,
     AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH - base.length - extension.length,
   );
   return `${base}${fallbackHash.slice(0, maxSuffixLength)}${extension}`;

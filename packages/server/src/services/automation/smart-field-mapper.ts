@@ -8,6 +8,7 @@ import {
   type SmartFieldAnalysisResult,
 } from "./smart-field-mapper-contracts";
 import { fetchPageWithRetry } from "./smart-field-mapper-fetch";
+const NUM_20 = 20;
 
 /**
  * AI-powered selector mapper for job-application form fields.
@@ -41,7 +42,7 @@ export class SmartFieldMapper {
         }
 
         const stripped = stripToFormElements(pageResult.html);
-        if (stripped.length < 20) {
+        if (stripped.length < NUM_20) {
           return EMPTY_FIELD_ANALYSIS_RESULT;
         }
 

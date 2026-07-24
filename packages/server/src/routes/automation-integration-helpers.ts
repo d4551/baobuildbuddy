@@ -20,6 +20,8 @@ import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { createVerificationResumePayload } from "../test-support/automation/job-apply-fixture";
+const NUM_400 = 400;
+const NUM_5000 = 5_000;
 
 export const WAIT_INTERVAL_MS = 1_000;
 export const RUN_TIMEOUT_MS = 45_000;
@@ -115,7 +117,7 @@ export const requestJson = async <T>(
         " (status " +
         String(response.status) +
         "): " +
-        rawBody.slice(0, 400),
+        rawBody.slice(0, NUM_400),
     );
   }
   return { status: response.status, body };
@@ -240,7 +242,7 @@ export const subscribeToRunEvents = async (
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(
       () => reject(new Error("Timed out opening automation websocket")),
-      5_000,
+      NUM_5000,
     );
     socket.onopen = () => {
       clearTimeout(timeout);

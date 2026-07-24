@@ -1,6 +1,9 @@
 import { WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { resolveWebSocketEndpoint } from "~/utils/endpoints";
+const NUM_1500 = 1500;
+const NUM_20000 = 20_000;
+const NUM_50 = 50;
 
 export type InterviewResponseFeedbackPayload = {
   type: "response_feedback";
@@ -130,7 +133,7 @@ export function createInterviewRealtimeSocket(input: {
         input.connected.value = true;
         resolve(true);
       };
-      window.setTimeout(() => resolve(socket?.readyState === WebSocket.OPEN), 1500);
+      window.setTimeout(() => resolve(socket?.readyState === WebSocket.OPEN), NUM_1500);
     });
 
   const disconnect = (): void => {
@@ -165,7 +168,7 @@ export async function submitInterviewResponseViaWs(
     return null;
   }
   return await new Promise<InterviewResponseFeedbackPayload | null>((resolve) => {
-    const deadline = Date.now() + 20_000;
+    const deadline = Date.now() + NUM_20000;
     const poll = (): void => {
       const feedback = lastFeedback.value;
       if (feedback && feedback.sessionId === sessionId) {
@@ -176,7 +179,7 @@ export async function submitInterviewResponseViaWs(
         resolve(null);
         return;
       }
-      window.setTimeout(poll, 50);
+      window.setTimeout(poll, NUM_50);
     };
     poll();
   });

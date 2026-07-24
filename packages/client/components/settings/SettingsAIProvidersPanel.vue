@@ -5,15 +5,15 @@ import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -60,6 +60,8 @@ const props = defineProps<{
   testResults: Readonly<Record<AIProviderType, { valid: boolean; message?: string } | null>>;
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
+  providerKeysSaveState?: "idle" | "saving" | "success" | "error";
+  providerRoutingSaveState?: "idle" | "saving" | "success" | "error";
 }>();
 
 const emit = defineEmits<{
@@ -142,7 +144,8 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
 
       <div 
         role="note"
-        class="alert alert-info alert-soft"
+        class="alert alert-soft"
+        :class="[ALERT_VARIANT_CLASS.info]"
         :aria-label="t('settings.aiProviders.openaiV1Aria')"
       >
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1, TRUNCATE_FLEX_CHILD_CLASS]">
@@ -154,7 +157,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
         </div>
       </div>
 
-      <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.lg, SHADOW_TOKEN_CLASS.sm]">
         <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.aiProviders.readinessTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredProviderCount }}</div>
@@ -221,51 +224,13 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
           </div>
         </UiGlassCard>
 
-        <UiGlassCard :aria-label="t('settings.aiProviders.preferredProviderLegend')">
-          <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-            <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-              <h3 class="card-title text-base">{{ t("settings.aiProviders.preferredProviderLegend") }}</h3>
-              <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.preferredProviderHint") }}</p>
-            </div>
-
-            <div class="stats stats-vertical bg-base-100" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-              <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
-                <div class="stat-title">{{ t("settings.aiProviders.preferredProviderLegend") }}</div>
-                <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ selectedProviderLabel }}</div>
-                <div class="stat-desc">{{ t("settings.aiProviders.preferredProviderSaveButton") }}</div>
-              </div>
-            </div>
-
-            <fieldset class="fieldset">
-              <legend class="fieldset-legend">
-                {{ t("settings.aiProviders.preferredProviderLegend") }}
-              </legend>
-              <select 
-                v-model="preferredProviderSelection"
-                class="select" :class="[FLUID_WIDTH_CLASS]"
-                :aria-label="t('settings.aiProviders.preferredProviderAria')"
-              >
-                <option
-                  v-for="provider in props.providerInputs"
-                  :key="provider.id"
-                  :value="provider.id"
-                >
-                  {{ provider.label }}
-                </option>
-              </select>
-            </fieldset>
-
-            <div class="flex justify-end">
-              <button type="button" 
-                :class="[PRIMARY_ACTION_CLASS]"
-                :aria-label="t('settings.aiProviders.preferredProviderAria')"
-                @click="emit('savePreferredProvider')"
-              >
-                {{ t("settings.aiProviders.preferredProviderSaveButton") }}
-              </button>
-            </div>
-          </div>
-        </UiGlassCard>
+        <SettingsAiPreferredProviderCard
+          v-model:preferred-provider-selection="preferredProviderSelection"
+          :provider-inputs="props.providerInputs"
+          :selected-provider-label="selectedProviderLabel"
+          :save-state="props.providerRoutingSaveState"
+          @save="emit('savePreferredProvider')"
+        />
       </SectionGrid>
 
       <SettingsAiRoutingCard
@@ -294,6 +259,7 @@ function providerPlaceholder(providerId: AIProviderType, providerLabel: string):
             :test-results="props.testResults"
             :testing-provider="props.testingProvider"
             :show-ollama-hot-tip="props.showOllamaHotTip"
+            :keys-save-state="props.providerKeysSaveState ?? 'idle'"
             :t="t"
             :provider-key-label="providerKeyLabel"
             :provider-placeholder="providerPlaceholder"

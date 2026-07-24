@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  UI_CHIP_PREVIEW_LIMIT,
+} from "~/constants/numeric-ui";
 import type { InterviewConversationStyle, InterviewMode } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
@@ -234,7 +237,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
             </p>
             <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
               <span 
-                v-for="tech in selectedJob.technologies?.slice(0, 6)"
+                v-for="tech in selectedJob.technologies?.slice(0, UI_CHIP_PREVIEW_LIMIT)"
                 :key="tech"
                 :class="[BADGE_OUTLINE_SM_CLASS]"
               >

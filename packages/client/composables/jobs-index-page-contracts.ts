@@ -10,6 +10,11 @@ import type { GameGenre, JobExperienceLevel, Platform, StudioType } from "@bao/s
 export type FilterSelection<T extends string> = T | typeof JOB_FILTER_ALL_VALUE;
 export type JobsTranslate = (key: string, params?: Record<string, unknown>) => string;
 
+/** Jobs index tab identifiers in display order. */
+export const JOBS_INDEX_TABS = ["browse", "saved", "applied"] as const;
+export type JobsIndexTab = (typeof JOBS_INDEX_TABS)[number];
+export const JOBS_INDEX_DEFAULT_TAB: JobsIndexTab = "browse";
+
 export interface JobsFilterState {
   location: string;
   remote: boolean;

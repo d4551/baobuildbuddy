@@ -6,6 +6,9 @@ import type {
   DashboardQuickAction,
 } from "./dashboard-contracts";
 
+/** Max quick actions surfaced from the incomplete/complete pipeline queue. */
+export const DASHBOARD_FLOW_ACTION_VISIBLE_MAX = 4;
+
 /**
  * End-to-end career workflow sequence shown on dashboard.
  */
@@ -126,7 +129,7 @@ export function resolveDashboardFlowActions(
       ]
     : ["interview", "aiChat", ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER];
   return [...new Set(actionPriorityQueue)]
-    .slice(0, 4)
+    .slice(0, DASHBOARD_FLOW_ACTION_VISIBLE_MAX)
     .map((actionId) => DASHBOARD_FLOW_ACTIONS[actionId]);
 }
 

@@ -2,6 +2,7 @@
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -13,6 +14,7 @@ import {
 } from "~/constants/layout";
 import {
   BADGE_SUCCESS_SM_CLASS,
+  BADGE_VARIANT_CLASS,
 } from "~/constants/layout-badges";
 
 type ProviderField =
@@ -37,7 +39,8 @@ defineProps<{
   testResults: Readonly<Record<AIProviderType, { valid: boolean; message?: string } | null>>;
   testingProvider: AIProviderType | null;
   showOllamaHotTip: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  keysSaveState?: "idle" | "saving" | "success" | "error";
+  t: (key: string, values?: Record<string, string | number>) => string;
   providerKeyLabel: (providerId: AIProviderType) => string;
   providerPlaceholder: (providerId: AIProviderType, providerLabel: string) => string;
 }>();
@@ -54,7 +57,7 @@ const emit = defineEmits<{
     <div 
       v-if="showOllamaHotTip"
       role="alert"
-      class="alert alert-info alert-soft alert-vertical sm:alert-horizontal" :class="[MARGIN_TOKEN_CLASS.mb4]"
+      class="alert alert-soft alert-vertical sm:alert-horizontal" :class="[ALERT_VARIANT_CLASS.info, MARGIN_TOKEN_CLASS.mb4]"
     >
       <IconInfoCircle class="shrink-0 stroke-current" :class="[ICON_SIZE_CLASS[6]]"/>
       <div>
@@ -96,6 +99,7 @@ const emit = defineEmits<{
               type="button"
               :class="[OUTLINE_ACTION_JOIN_CLASS]"
               :aria-label="t('settings.aiProviders.testAria')"
+              :disabled="testingProvider === provider.id || keysSaveState === 'saving'"
               @click="emit('testProvider', provider.id)"
             >
               <LoadingSpinner
@@ -103,7 +107,9 @@ const emit = defineEmits<{
                 size="xs"
                 :label="t('settings.aiProviders.testButton')"
               />
-              {{ t("settings.aiProviders.testButton") }}
+              <template v-else>
+                {{ t("settings.aiProviders.testButton") }}
+              </template>
             </button>
           </div>
         </fieldset>
@@ -122,7 +128,7 @@ const emit = defineEmits<{
         <span 
           v-if="testResults[provider.id]"
           class="badge"
-          :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
+          :class="testResults[provider.id]?.valid ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.error"
         >
           {{
             testResults[provider.id]?.valid
@@ -143,8 +149,21 @@ const emit = defineEmits<{
     </details>
 
     <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
-        {{ t("settings.aiProviders.saveButton") }}
+      <button
+        type="button"
+        :class="[PRIMARY_ACTION_CLASS]"
+        :aria-label="t('settings.aiProviders.saveAria')"
+        :disabled="keysSaveState === 'saving'"
+        @click="emit('saveKeys')"
+      >
+        <LoadingSpinner
+          v-if="keysSaveState === 'saving'"
+          size="xs"
+          :label="t('settings.saveState.saving')"
+        />
+        <template v-else>
+          {{ t("settings.aiProviders.saveButton") }}
+        </template>
       </button>
     </div>
   </div>

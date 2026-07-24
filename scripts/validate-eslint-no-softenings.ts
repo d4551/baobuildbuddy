@@ -53,7 +53,7 @@ const collectOffRules = (content: string): string[] => {
 const hasNuxtPageOverride = (content: string): boolean =>
   NUXT_PAGES_GLOB_PATTERN.test(content) && NUXT_LAYOUTS_GLOB_PATTERN.test(content);
 
-export const collectEslintSofteningViolationsForContent = (
+const collectLayoutSoftenerViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
@@ -82,6 +82,11 @@ export const collectEslintSofteningViolationsForContent = (
         'Client ESLint must use pluginVue.configs["flat/essential"] (quality, no layout mute).',
     });
   }
+  return violations;
+};
+
+const collectOffRuleViolations = (filePath: string, content: string): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
   const offRules = collectOffRules(content);
   for (const rule of offRules) {
     if (ALLOWED_GLOBAL_OFF.has(rule)) {
@@ -96,13 +101,27 @@ export const collectEslintSofteningViolationsForContent = (
       message: `ESLint rule "${rule}" set to off — forbidden softener (allowlist: no-undef; multi-word on Nuxt pages only).`,
     });
   }
-  if (content.includes(': "warn"') || content.includes(": 'warn'")) {
-    violations.push({
+  return violations;
+};
+
+const collectWarnSeverityViolations = (filePath: string, content: string): ValidationViolation[] => {
+  if (!content.includes(': "warn"') && !content.includes(": 'warn'")) {
+    return [];
+  }
+  return [
+    {
       filePath,
       line: 1,
       message: 'ESLint severity "warn" is forbidden softener — use "error".',
-    });
-  }
+    },
+  ];
+};
+
+const collectIgnorePatternViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
   for (const { name, pattern } of IGNORE_PATTERN_BAN_PATTERNS) {
     if (pattern.test(content)) {
       violations.push({
@@ -113,6 +132,18 @@ export const collectEslintSofteningViolationsForContent = (
     }
   }
   return violations;
+};
+
+export const collectEslintSofteningViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  return [
+    ...collectLayoutSoftenerViolations(filePath, content),
+    ...collectOffRuleViolations(filePath, content),
+    ...collectWarnSeverityViolations(filePath, content),
+    ...collectIgnorePatternViolations(filePath, content),
+  ];
 };
 
 const collectViolations = (): ValidationViolation[] => {

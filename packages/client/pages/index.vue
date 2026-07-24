@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesIndexPage" });
 
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
@@ -51,7 +55,7 @@ useSeoMeta({
     <LoadingSkeleton
       v-if="uiState === 'loading' || uiState === 'idle'"
       variant="stats"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <BootstrapErrorAlert

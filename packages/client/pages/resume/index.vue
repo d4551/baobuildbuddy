@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesResumeIndexPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -117,9 +121,9 @@ const {
     />
 
     <LoadingSkeleton
-      v-else-if="resumeBootstrapStatus === 'pending' || (loading && !resumes.length)"
+      v-else-if="resumeBootstrapStatus === 'pending' || (loading && resumes.length === 0)"
       variant="cards"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <ResumeLibraryPanel

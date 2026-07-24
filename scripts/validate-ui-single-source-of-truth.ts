@@ -1,5 +1,7 @@
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
+const NUM_120 = 120;
+const NUM_160 = 160;
 
 type Violation = {
   filePath: string;
@@ -112,8 +114,8 @@ const collectSettingsPanelViolations = (filePath: string, fileContent: string): 
 
 const hasSettingsFetchGuard = (fileContent: string, matchIndex: number): boolean => {
   const contextWindow = fileContent.slice(
-    Math.max(0, matchIndex - 160),
-    Math.min(fileContent.length, matchIndex + 120),
+    Math.max(0, matchIndex - NUM_160),
+    Math.min(fileContent.length, matchIndex + NUM_120),
   );
   return settingsFetchGuardPatterns.some((pattern) => pattern.test(contextWindow));
 };

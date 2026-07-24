@@ -143,6 +143,73 @@ export const collectRadialProgressViolations = (
   return violations;
 };
 
+const STATIC_CLASS_ATTRIBUTE_PATTERN = /\bclass\s*=\s*["']([^"']+)["']/gu;
+const WHITESPACE_SPLIT_PATTERN = /\s+/u;
+
+const extractStaticClassTokens = (value: string): string[] =>
+  value.split(WHITESPACE_SPLIT_PATTERN).filter((token) => token.length > 0);
+
+/**
+ * Stats shell SSOT: no static `class="stats ..."` in Vue files.
+ * All stats rows must use STATS_SHELL_VARIANT_CLASS or STATS_ROW_SHELL_CLASS
+ * from constants/layout.ts via `:class` binding.
+ */
+export const collectRawStatsClassViolations = (
+  filePath: string,
+  fileContent: string,
+): DaisyUiViolation[] => {
+  const violations: DaisyUiViolation[] = [];
+  STATIC_CLASS_ATTRIBUTE_PATTERN.lastIndex = 0;
+  for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
+    const tokens = extractStaticClassTokens(classMatch[1] ?? "");
+    if (tokens.includes("stats")) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(fileContent, classMatch.index ?? 0),
+        message:
+          "Raw `stats` class in a static class attribute is forbidden. Use STATS_SHELL_VARIANT_CLASS or STATS_ROW_SHELL_CLASS from ~/constants/layout via a :class binding.",
+      });
+    }
+  }
+  return violations;
+};
+
+const DYNAMIC_CLASS_BINDING_PATTERN = /:class\s*=\s*"([^"]+)"/gu;
+const DYNAMIC_STRING_LITERAL_PATTERN = /["']([^"']+)["']/gu;
+
+/**
+ * daisyUI semantic color-variant SSOT: no raw `btn-*` / `badge-*` /
+ * `progress-*` / `alert-*` color literals inside `:class` bindings.
+ * Use BTN_VARIANT_CLASS / BADGE_VARIANT_CLASS / PROGRESS_BAR_VARIANT_CLASS /
+ * ALERT_VARIANT_CLASS from ~/constants/layout via a :class binding.
+ */
+const DYNAMIC_VARIANT_LITERAL_PATTERN =
+  /^(?:btn|badge|progress|alert)-(?:primary|secondary|accent|neutral|info|success|warning|error|ghost)$/u;
+
+export const collectDynamicVariantLiteralViolations = (
+  filePath: string,
+  fileContent: string,
+): DaisyUiViolation[] => {
+  const violations: DaisyUiViolation[] = [];
+  DYNAMIC_CLASS_BINDING_PATTERN.lastIndex = 0;
+  for (const bindingMatch of fileContent.matchAll(DYNAMIC_CLASS_BINDING_PATTERN)) {
+    const bindingValue = bindingMatch[1] ?? "";
+    const baseLine = getLineFromOffset(fileContent, bindingMatch.index ?? 0);
+    DYNAMIC_STRING_LITERAL_PATTERN.lastIndex = 0;
+    for (const literalMatch of bindingValue.matchAll(DYNAMIC_STRING_LITERAL_PATTERN)) {
+      const literal = literalMatch[1] ?? "";
+      if (DYNAMIC_VARIANT_LITERAL_PATTERN.test(literal)) {
+        violations.push({
+          filePath,
+          line: baseLine,
+          message: `Raw daisyUI color-variant literal "${literal}" in a :class binding is forbidden. Use BTN_VARIANT_CLASS / BADGE_VARIANT_CLASS / PROGRESS_BAR_VARIANT_CLASS / ALERT_VARIANT_CLASS from ~/constants/layout.`,
+        });
+      }
+    }
+  }
+  return violations;
+};
+
 export const collectBrandPreviewThemeViolations = (
   filePath: string,
   fileContent: string,

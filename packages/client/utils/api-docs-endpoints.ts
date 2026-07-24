@@ -6,6 +6,7 @@ import type {
   OpenApiRequestBody,
   OpenApiSpec,
 } from "~/types/api-docs";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import {
   getOperationParameters,
   getPathParameters,
@@ -18,8 +19,7 @@ import {
   normalizeApiDocsPathForId,
 } from "~/utils/api-docs-status";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+type ApiPayload = Parameters<typeof isRecord>[0];
 
 const dedupeCaseInsensitiveStrings = (values: readonly string[]): string[] => {
   const seen = new Set<string>();
@@ -88,7 +88,7 @@ const getRequestBodyTemplate = (requestBody: OpenApiRequestBody | undefined): st
 };
 
 const readOpenApiOperation = (
-  value: unknown,
+  value: ApiPayload,
   pathParameters: readonly OpenApiParameter[],
 ): OpenApiOperation | null => {
   if (!isRecord(value)) {
@@ -111,7 +111,7 @@ const readOpenApiOperation = (
 
 const collectEndpointsForPath = (
   path: string,
-  pathItem: unknown,
+  pathItem: ApiPayload,
   unknownTagLabel: string,
 ): ApiEndpoint[] => {
   if (!isRecord(pathItem)) {

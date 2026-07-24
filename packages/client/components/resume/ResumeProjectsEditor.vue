@@ -2,6 +2,7 @@
 import type { ResumeFormProject } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 import {
+  BTN_VARIANT_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -79,7 +80,7 @@ function removeProject(index: number): void {
               {{ t("resumePage.projects.itemTitle", { index: index + 1 }) }}
             </h3>
             <button type="button" 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
+              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm', BTN_VARIANT_CLASS.error]"
               :aria-label="t('resumePage.projects.removeButtonAria', { index: index + 1 })"
               @click="removeProject(index)"
             >

@@ -29,6 +29,11 @@ function createHandleTest(state: SettingsPageState) {
         : state.apiKeys[providerFieldById[providerId]]?.trim();
 
     if (!testInput && providerId !== "local") {
+      state.testResults[providerId] = {
+        valid: false,
+        message: state.t("settings.errors.missingProviderCredential"),
+      };
+      state.$toast.error(state.t("settings.errors.missingProviderCredential"));
       return;
     }
 
@@ -73,6 +78,7 @@ function createHandleTest(state: SettingsPageState) {
 
 function createHandleSaveRouting(state: SettingsPageState) {
   return async () => {
+    state.providerRoutingSaveState.value = "saving";
     const aiRouting = buildAiRoutingPayload(state.aiRoutingDraft);
     const savedRouting = await runToastTask(
       state.updateSettings({
@@ -84,10 +90,12 @@ function createHandleSaveRouting(state: SettingsPageState) {
       state.$toast,
     );
     if (savedRouting === null) {
+      state.providerRoutingSaveState.value = "error";
       return;
     }
 
     state.preferredProviderSelection.value = aiRouting.chat.provider;
+    state.providerRoutingSaveState.value = "success";
     state.$toast.success(state.t("settings.aiProviders.routingSaved"));
   };
 }
@@ -104,6 +112,7 @@ function createHandleSavePreferredProvider(
 
 function createHandleSaveKeys(state: SettingsPageState) {
   return async () => {
+    state.providerKeysSaveState.value = "saving";
     const payload = buildProviderKeysPayload(state);
     const saveApiKeysErrorKey = `settings.errors.failedToSave${["Api", "Keys"].join("")}`;
     const savedKeys = await runToastTask(
@@ -112,9 +121,11 @@ function createHandleSaveKeys(state: SettingsPageState) {
       state.$toast,
     );
     if (savedKeys === null) {
+      state.providerKeysSaveState.value = "error";
       return;
     }
 
+    state.providerKeysSaveState.value = "success";
     state.$toast.success(state.t("settings.toasts.apiKeysSaved"));
   };
 }

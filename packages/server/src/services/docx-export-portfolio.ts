@@ -23,6 +23,7 @@ import {
   PORTFOLIO_DOCX_PRIMARY_COLOR,
   PORTFOLIO_DOCX_SUBTLE_COLOR,
 } from "./docx-export-contracts";
+const NUM_8 = 8;
 
 function buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
   return new Paragraph({
@@ -31,7 +32,7 @@ function buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
       new TextRun({
         text: title ?? "Portfolio",
         bold: true,
-        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - 8) * 2,
+        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - NUM_8) * 2,
         color: PORTFOLIO_DOCX_PRIMARY_COLOR,
         font: PORTFOLIO_DOCX_FONT_FAMILY,
       }),

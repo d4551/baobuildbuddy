@@ -8,6 +8,8 @@ import type {
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  ALERT_VARIANT_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -78,7 +80,8 @@ const { t } = useI18n();
 
     <div 
       v-if="completionState === 'completed'"
-      class="alert alert-success"
+      class="alert"
+      :class="[ALERT_VARIANT_CLASS.success]"
       role="status"
       aria-live="polite"
     >
@@ -88,7 +91,7 @@ const { t } = useI18n();
       <span>{{ t("interviewSession.toasts.completed") }}</span>
       <button 
         type="button"
-        :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-success btn-sm']"
+        :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm', BTN_VARIANT_CLASS.success]"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
         @click="$emit('history')"
       >
@@ -125,7 +128,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              :class="[PRIMARY_ACTION_CLASS, { 'btn-error': stt.isListening.value }]"
+              :class="[PRIMARY_ACTION_CLASS, { [BTN_VARIANT_CLASS.error]: stt.isListening.value }]"
               :disabled="completionState !== 'ready' || !canUseVoice"
               :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
               :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"

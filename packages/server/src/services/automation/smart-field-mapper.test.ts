@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { FieldMapperAIClient } from "./smart-field-mapper";
 import { smartFieldMapper } from "./smart-field-mapper";
+import { HTTP_STATUS_OK, HTTP_STATUS_SERVICE_UNAVAILABLE } from "@bao/shared/constants/http";
 
 const originalFetch = globalThis.fetch;
 const TEST_FIELD_EMAIL = "email";
@@ -92,7 +93,7 @@ const analyzeEmailField = (aiClient: FieldMapperAIClient) =>
 
 function registerFetchFailureCase(): void {
   test("returns empty mapping when page fetch status is not successful", async () => {
-    globalThis.fetch = createFetchMock("upstream unavailable", 503);
+    globalThis.fetch = createFetchMock("upstream unavailable", HTTP_STATUS_SERVICE_UNAVAILABLE);
 
     const aiClient: FieldMapperAIClient = {
       generate: () => Promise.resolve(createAiResponse("{}")),
@@ -105,7 +106,7 @@ function registerFetchFailureCase(): void {
 
 function registerInvalidJsonCase(): void {
   test("returns empty mapping for invalid AI selector JSON", async () => {
-    globalThis.fetch = createFetchMock("<form><input name='email' /></form>", 200);
+    globalThis.fetch = createFetchMock("<form><input name='email' /></form>", HTTP_STATUS_OK);
 
     const aiClient: FieldMapperAIClient = {
       generate: () => Promise.resolve(createAiResponse("not-json")),
@@ -118,7 +119,7 @@ function registerInvalidJsonCase(): void {
 
 function registerAiRetryCase(): void {
   test("retries AI generation and returns validated selectors on second attempt", async () => {
-    globalThis.fetch = createFetchMock("<form><input name='email' /></form>", 200);
+    globalThis.fetch = createFetchMock("<form><input name='email' /></form>", HTTP_STATUS_OK);
 
     let callCount = 0;
     const aiClient: FieldMapperAIClient = {

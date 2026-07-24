@@ -1,15 +1,31 @@
 import { useI18n } from "vue-i18n";
-import type { JobsFilterState } from "~/composables/jobs-index-page-contracts";
-import { createJobsFilterState } from "~/composables/jobs-index-page-contracts";
+import type { JobsFilterState, JobsIndexTab } from "~/composables/jobs-index-page-contracts";
+import {
+  createJobsFilterState,
+  JOBS_INDEX_DEFAULT_TAB,
+} from "~/composables/jobs-index-page-contracts";
 
 export const createJobsPageRuntime = () => {
-  const { jobs, loading, searchJobs, refreshJobs, recommendations, fetchRecommendations } =
-    useJobs();
+  const {
+    jobs,
+    loading,
+    searchJobs,
+    refreshJobs,
+    recommendations,
+    fetchRecommendations,
+    savedJobs,
+    applications,
+    fetchSavedJobs,
+    fetchApplications,
+  } = useJobs();
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, te } = useI18n();
   const { $toast } = useNuxtApp();
   const { awardForAction } = usePipelineGamification();
-  const { matchJobs } = useAI();
+  const { matchJobs: matchJobsRaw } = useAI();
+  const matchJobs = async (resumeId: string): Promise<void> => {
+    await matchJobsRaw(resumeId);
+  };
   const { resumes, fetchResumes } = useResume();
 
   const searchQuery = ref("");
@@ -18,12 +34,17 @@ export const createJobsPageRuntime = () => {
   const refreshing = ref(false);
   const matching = ref(false);
   const showFilters = ref(false);
+  const activeTab = ref<JobsIndexTab>(JOBS_INDEX_DEFAULT_TAB);
 
   return {
+    activeTab,
+    applications,
     awardForAction,
     currentPage,
+    fetchApplications,
     fetchRecommendations,
     fetchResumes,
+    fetchSavedJobs,
     jobs,
     loading,
     localFilters,
@@ -34,10 +55,12 @@ export const createJobsPageRuntime = () => {
     refreshJobs,
     resumes,
     router,
+    savedJobs,
     searchJobs,
     searchQuery,
     showFilters,
     t,
+    te,
     toast: $toast,
   };
 };

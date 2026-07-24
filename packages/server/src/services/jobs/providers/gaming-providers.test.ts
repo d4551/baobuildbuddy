@@ -22,7 +22,9 @@ const loggerEntries: {
   info: [],
 };
 
-const noopLogger = (): void => {};
+const noopLogger = (): void => {
+  return;
+};
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const isProviderModule = (value: unknown): value is ProviderModule =>

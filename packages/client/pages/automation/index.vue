@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesAutomationIndexPage" });
 
 import {
@@ -80,11 +84,20 @@ const routeSection = computed<AutomationHubSectionId>(() =>
 
 const activeSection = ref<AutomationHubSectionId>(routeSection.value);
 
-const readinessIssueCount = computed(() =>
-  capabilityEntries.value
-    ? capabilityEntries.value.filter((entry) => entry.issues.length > 0).length
-    : 0,
-);
+const readinessIssueCount = computed(() => {
+  if (!capabilityEntries.value) {
+    return 0;
+  }
+
+  let issueCount = 0;
+  for (const capabilityRecord of capabilityEntries.value) {
+    if (capabilityRecord.issues.length > 0) {
+      issueCount += 1;
+    }
+  }
+
+  return issueCount;
+});
 
 const hubSectionBadgeById = computed<Record<AutomationHubSectionId, number>>(() => ({
   overview: totalRuns.value,
@@ -125,7 +138,7 @@ useSeoMeta({
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="4" />
+    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="LOADING_SKELETON_LINES.short" />
 
     <BootstrapErrorAlert
       v-else-if="uiState === 'error'"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  ALERT_VARIANT_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
@@ -29,8 +30,8 @@ const emit = defineEmits<{
 
 const alertClass = computed(() =>
   props.severity === "warning"
-    ? "alert alert-warning sm:alert-horizontal"
-    : "alert alert-error sm:alert-horizontal",
+    ? `alert ${ALERT_VARIANT_CLASS.warning} sm:alert-horizontal`
+    : `alert ${ALERT_VARIANT_CLASS.error} sm:alert-horizontal`,
 );
 
 const hasRetry = computed(

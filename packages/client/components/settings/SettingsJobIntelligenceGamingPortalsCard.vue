@@ -2,6 +2,7 @@
 import type { GamingPortalConfig } from "@bao/shared/types/settings";
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
@@ -72,8 +73,8 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
       <div
         v-if="parseFailed"
         role="alert"
-        class="alert alert-warning"
-        :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+        class="alert"
+        :class="[ALERT_VARIANT_CLASS.warning, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
         {{ t("settings.jobIntelligence.gamingPortalsParseError") }}
       </div>

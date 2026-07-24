@@ -12,6 +12,8 @@ import {
   toPdfColor,
 } from "./export-service-contracts";
 import { drawResumeWrappedText, renderResumeSectionHeader } from "./export-service-resume-layout";
+const NUM_20 = 20;
+const NUM_3 = 3;
 
 function renderResumeName(context: ResumeRenderContext, name: string): void {
   if (context.layout.headerStyle === "banner") {
@@ -19,7 +21,7 @@ function renderResumeName(context: ResumeRenderContext, name: string): void {
       x: 0,
       y: context.yPosition - 10,
       width: context.width,
-      height: context.fonts.name + 20,
+      height: context.fonts.name + NUM_20,
       color: context.palette.primary,
     });
     context.page.drawText(name, {
@@ -99,7 +101,7 @@ function renderResumeDivider(context: ResumeRenderContext): void {
   if (context.layout.dividerStyle === "accent-bar") {
     context.page.drawRectangle({
       x: context.margin,
-      y: context.yPosition - 3,
+      y: context.yPosition - NUM_3,
       width: context.width - context.margin * 2,
       height: 5,
       color: context.palette.accent,

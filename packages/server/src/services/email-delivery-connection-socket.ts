@@ -13,6 +13,7 @@ import {
   type EmailTransportRuntimeConfig,
   SmtpConnectionClosedError,
 } from "./email-delivery-contracts";
+const NUM_220 = 220;
 
 const createSocketLifecycle = (state: SmtpConnectionState) => ({
   binaryType: "uint8array" as const,
@@ -65,7 +66,7 @@ export const connectSmtpSocket = async (
   state.socket = socketResult.value;
   state.socket.timeout(config.connectionTimeoutSeconds);
   const greeting = await readResponse(state);
-  assertExpectedCode(greeting, [220], "SMTP greeting");
+  assertExpectedCode(greeting, [NUM_220], "SMTP greeting");
 };
 
 const waitForTlsUpgrade = async (

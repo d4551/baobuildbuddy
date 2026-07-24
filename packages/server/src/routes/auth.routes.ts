@@ -38,7 +38,6 @@ import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   authBootstrapBody,
-  authConfiguredResponses,
   authInitResponses,
   authStatusResponses,
 } from "./auth-route-contracts";
@@ -110,21 +109,6 @@ export const authRoutes = new Elysia({
         bootstrapRequired: !hasKey,
         setupTokenConfigured: config.authSetupToken !== null,
       });
-    },
-  )
-  .get(
-    toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
-    {
-      // no inline detail for rotate,revoke routes
-      response: authConfiguredResponses,
-    },
-    async ({ status }) => {
-      if (config.disableAuth) {
-        return status(HTTP_STATUS_OK, { configured: false });
-      }
-      const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-      const hasKey = Boolean(rows[0]?.apiKeyHash);
-      return status(HTTP_STATUS_OK, { configured: hasKey });
     },
   )
   .use(

@@ -115,9 +115,17 @@ describe("automation route integration", () => {
           instantiateService,
         );
       })
-      .finally(async () => {
-        await fixture.stop();
-        smtpHarness.stop();
-      });
+      .then(
+        async (value) => {
+          await fixture.stop();
+          smtpHarness.stop();
+          return value;
+        },
+        async (error) => {
+          await fixture.stop();
+          smtpHarness.stop();
+          throw error;
+        },
+      );
   });
 });

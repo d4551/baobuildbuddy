@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import {
+  BASE36_ID_RADIX,
+  BASE36_ID_SLICE_END,
+  BASE36_ID_SLICE_START,
+} from "~/constants/numeric-ui";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { computed, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -66,7 +72,7 @@ const emit = defineEmits<{
   "update:response": [response: string];
 }>();
 const { t, locale } = useI18n();
-const responseIdSeed = Math.random().toString(36).slice(2, 10);
+const responseIdSeed = Math.random().toString(BASE36_ID_RADIX).slice(BASE36_ID_SLICE_START, BASE36_ID_SLICE_END);
 const responseTextareaId = `interview-chat-response-${responseIdSeed}`;
 const responseHintId = `interview-chat-submit-hint-${responseIdSeed}`;
 const completeMessage = computed(() => t(props.completeMessageKey));
@@ -88,22 +94,22 @@ const responseByQuestionId = computed(() => {
 const chatMessages = computed<ChatMessage[]>(() => {
   const messages: ChatMessage[] = [];
 
-  props.questions.forEach((question) => {
+  for (const questionRecord of props.questions) {
     messages.push({
-      id: `interview-question-${question.id}`,
+      id: `interview-question-${questionRecord.id}`,
       role: "assistant",
-      content: question.text,
+      content: questionRecord.text,
     });
 
-    const response = responseByQuestionId.value.get(question.id);
+    const response = responseByQuestionId.value.get(questionRecord.id);
     if (response) {
       messages.push({
-        id: `interview-response-${question.id}`,
+        id: `interview-response-${questionRecord.id}`,
         role: "user",
         content: response,
       });
     }
-  });
+  }
 
   return messages;
 });
@@ -227,7 +233,7 @@ watch(renderedMessages, async () => {
       </div>
 
       <div :class="[PADDING_TOKEN_CLASS.px6, PADDING_TOKEN_CLASS.py8]" v-else>
-        <div class="alert alert-success">
+        <div class="alert" :class="[ALERT_VARIANT_CLASS.success]">
           <span>{{ completeMessage }}</span>
         </div>
       </div>

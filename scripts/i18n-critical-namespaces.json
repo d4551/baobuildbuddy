@@ -1,0 +1,10 @@
+[
+  "nav",
+  "automation.jobApply",
+  "common.save",
+  "settings.errors.failedToTestProvider",
+  "settings.errors.missingProviderCredential",
+  "settings.aiProviders",
+  "settings.toasts.apiKeysSaved",
+  "a11y"
+]

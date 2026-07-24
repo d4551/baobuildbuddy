@@ -3,6 +3,7 @@ import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
 import {
+  ERROR_ACTION_CLASS,
   GHOST_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -48,7 +49,7 @@ const primaryActionRef = computed(() =>
 );
 
 const confirmButtonClass = computed(() =>
-  props.variant === "danger" ? "btn btn-error h-11 min-h-11" : PRIMARY_ACTION_CLASS,
+  props.variant === "danger" ? ERROR_ACTION_CLASS : PRIMARY_ACTION_CLASS,
 );
 const resolvedConfirmText = computed(() =>
   props.confirmText.trim().length > 0 ? props.confirmText : t("confirmDialog.confirmButton"),

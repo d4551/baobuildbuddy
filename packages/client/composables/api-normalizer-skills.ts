@@ -14,6 +14,7 @@ import {
   isRecord,
 } from "@bao/shared/utils/type-guards";
 import { asEnum, toResumeCollection } from "~/composables/api-normalizer-shared";
+const NUM_50 = 50;
 
 const SKILL_EVIDENCE_TYPES: readonly SkillEvidence["type"][] = SKILL_EVIDENCE_TYPE_IDS;
 const SKILL_EVIDENCE_STATUSES: readonly SkillEvidence["verificationStatus"][] =
@@ -60,7 +61,7 @@ export const toSkillMapping = (value: unknown): SkillMapping | null => {
     transferableSkill,
     industryApplications: asStringArray(value.industryApplications),
     evidence,
-    confidence: asNumber(value.confidence) ?? 50,
+    confidence: asNumber(value.confidence) ?? NUM_50,
     category,
     demandLevel,
     verified: asBoolean(value.verified) ?? false,

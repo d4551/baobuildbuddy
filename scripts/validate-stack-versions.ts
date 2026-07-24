@@ -59,7 +59,7 @@ export const STACK_VERSION_PINS: readonly StackVersionPin[] = [
   },
   {
     packageName: "@tanstack/vue-query",
-    requiredInstalled: "5.101.3",
+    requiredInstalled: "5.101.4",
     requiredPrefix: "5.",
     resolveFromPackage: "packages/client",
   },

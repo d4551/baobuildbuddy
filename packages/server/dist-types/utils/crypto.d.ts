@@ -1,8 +1,4 @@
 /**
- * Cryptographic primitives for API key hashing and provider key encryption.
- * Uses Bun-native APIs and node:crypto exclusively. No external dependencies.
- */
-/**
  * Hash a raw API key using SHA-256 via Bun.CryptoHasher.
  * Only the hash is persisted. Verification compares hashes.
  */

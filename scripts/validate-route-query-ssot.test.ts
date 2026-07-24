@@ -12,7 +12,7 @@ describe("validate-route-query-ssot", () => {
 
   test("allows resolveRouteSectionId import", () => {
     const violations = collectRouteQuerySsotViolationsForContent(
-      "packages/client/pages/settings.vue",
+      "packages/client/pages/settings-page.vue",
       `import { resolveRouteSectionId } from "~/utils/route-query";\nconst key = APP_ROUTE_QUERY_KEYS.section;`,
     );
     expect(violations).toEqual([]);

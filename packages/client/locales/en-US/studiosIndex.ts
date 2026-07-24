@@ -10,6 +10,8 @@ const studiosIndex = {
     errorBannerAria: "Studio directory error",
     retryAria: "Retry loading studios",
     retryButton: "Retry",
+    analyticsButton: "Analytics",
+    analyticsAria: "Open studio analytics dashboard",
     emptyState: "No studios match your current search and filters.",
     emptyTitle: "No studios match these filters",
     emptyDescription:

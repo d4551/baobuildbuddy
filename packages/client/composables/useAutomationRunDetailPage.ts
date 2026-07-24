@@ -15,6 +15,9 @@ import {
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { formatDateWithLocale } from "~/utils/locale-format";
+import {
+  PERCENT_MAX,
+} from "~/constants/numeric-ui";
 
 const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
@@ -65,7 +68,7 @@ const createAutomationRunDetailStreamState = (
     if (typeof value !== "number" || !Number.isFinite(value)) {
       return 0;
     }
-    return Math.max(0, Math.min(100, Math.round(value)));
+    return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
   });
   return {
     streamState,

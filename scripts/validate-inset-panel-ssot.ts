@@ -1,3 +1,4 @@
+const NUM_80 = 80;
 /**
  * Ban raw inset panel / nested surface literals in Vue surfaces.
  * Use INSET_PANEL_CLASS / INSET_PANEL_MUTED_CLASS / INSET_LIST_CLASS / FIELDSET_PANEL_CLASS.
@@ -76,7 +77,7 @@ export const collectInsetPanelSsotViolationsForContent = (
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),
-        message: `${message} (${quoted.slice(0, 80)}…)`,
+        message: `${message} (${quoted.slice(0, NUM_80)}…)`,
       });
     }
   };

@@ -21,18 +21,27 @@ import {
   buildStudioPromptContext,
 } from "./interview-service-prompt-context";
 import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
+const NUM_12 = 12;
+const NUM_140 = 140;
+const NUM_20 = 20;
+const NUM_25 = 25;
+const NUM_35 = 35;
+const NUM_7 = 7;
+const NUM_8 = 8;
+const NUM_80 = 80;
+const NUM_90 = 90;
 
 function fallbackResponseScore(transcript: string): number {
   const normalizedTranscript = transcript.trim().toLowerCase();
-  const base = Math.min(90, 20 + Math.floor(normalizedTranscript.length / 7));
-  if (normalizedTranscript.length < 80) {
-    return Math.max(35, base - 25);
+  const base = Math.min(NUM_90, NUM_20 + Math.floor(normalizedTranscript.length / NUM_7));
+  if (normalizedTranscript.length < NUM_80) {
+    return Math.max(NUM_35, base - NUM_25);
   }
   if (normalizedTranscript.includes("example") || normalizedTranscript.includes("result")) {
-    return base + 12;
+    return base + NUM_12;
   }
   if (normalizedTranscript.includes("metric") || normalizedTranscript.includes("kpi")) {
-    return base + 8;
+    return base + NUM_8;
   }
   return base;
 }
@@ -43,12 +52,12 @@ function fallbackResponseFeedback(
   return {
     score: fallbackResponseScore(transcript),
     feedback:
-      transcript.length >= 140
+      transcript.length >= NUM_140
         ? "Response shows useful depth and relevant structure."
         : "Add measurable outcomes and a clearer step-by-step breakdown.",
     strengths: ["Clear attempt to answer the asked question.", "Shows structured thinking."],
     improvements:
-      transcript.length < 140
+      transcript.length < NUM_140
         ? ["Add specific examples and impact metrics."]
         : ["Keep responses concise and concrete."],
   };

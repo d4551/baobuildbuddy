@@ -13,6 +13,7 @@ import {
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -54,8 +55,8 @@ const { t } = useI18n();
               </p>
             </div>
           </div>
-          <progress 
-            class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"
+          <progress
+            class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.primary, FLUID_WIDTH_CLASS]"
             :value="levelProgress"
             :max="DASHBOARD_GAMIFICATION_PROGRESS_MAX"
             :aria-valuenow="levelProgress"

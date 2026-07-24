@@ -4,6 +4,7 @@ import {
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
+const NUM_400 = 400;
 
 /**
  * Duplicate actionable-control fingerprint gate.
@@ -95,7 +96,7 @@ const pushBtnLabelFingerprints = (
   for (const match of template.matchAll(BTN_CLASS_LIST_PATTERN)) {
     const btnClasses = normalizeBtnClasses(match[1] ?? "btn");
     const matchIndex = match.index ?? 0;
-    const after = template.slice(matchIndex, matchIndex + 400);
+    const after = template.slice(matchIndex, matchIndex + NUM_400);
     TEMPLATE_I18N_KEY_PATTERN.lastIndex = 0;
     const labelMatch = TEMPLATE_I18N_KEY_PATTERN.exec(after);
     if (!labelMatch) continue;

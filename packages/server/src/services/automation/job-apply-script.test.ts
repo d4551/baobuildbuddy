@@ -8,6 +8,7 @@ import {
   type SubmittedJobApplyFixturePayload,
   startJobApplyFixtureServer,
 } from "../../test-support/automation/job-apply-fixture";
+import { TEST_RESUME_PDF_BYTES } from "../../test-support/constants/pdf-test-bytes";
 import { runRpaScript } from "./rpa-runner-protocol";
 
 // Real Playwright apply — never inherit the verification stub into child RPA processes.
@@ -16,7 +17,6 @@ delete Bun.env.BAO_ENABLE_AUTOMATION_VERIFY;
 
 const TEMP_DIRECTORY_PREFIX = "bao-job-apply-script-";
 const TEST_RESUME_FILE_NAME = "candidate-resume.pdf";
-const TEST_RESUME_PDF_BYTES = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37]);
 const JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS = 60_000;
 const FORM_FIELD_NAME_WORK_AUTHORIZATION = "workAuthorization";
 const FORM_FIELD_NAME_REMOTE_PREFERENCE = "remotePreference";
@@ -77,26 +77,35 @@ async function runJobApplyScriptFixture(tempDirectory: string): Promise<{
     includeCustomQuestionFields: true,
   });
 
-  return Promise.resolve()
-    .then(async () => {
-      const execution = await runRpaScript({
-        scriptId: "job-apply",
-        scriptInput: buildJobApplyScriptInput(server.port ?? 0, resumeFilePath),
-        executionContext: {
-          runId: generateId(),
-          timeoutMs: JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS,
-          outputDir: outputDirectory,
-        },
-      });
-
-      return {
-        execution,
-        submittedPayload: server.submissions[0] ?? null,
-      };
-    })
-    .finally(async () => {
-      await server.stop();
+  const runTest = async () => {
+    const execution = await runRpaScript({
+      scriptId: "job-apply",
+      scriptInput: buildJobApplyScriptInput(server.port ?? 0, resumeFilePath),
+      executionContext: {
+        runId: generateId(),
+        timeoutMs: JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS,
+        outputDir: outputDirectory,
+      },
     });
+
+    return {
+      execution,
+      submittedPayload: server.submissions[0] ?? null,
+    };
+  };
+
+  return Promise.resolve()
+    .then(runTest)
+    .then(
+      async (value) => {
+        await server.stop();
+        return value;
+      },
+      async (error) => {
+        await server.stop();
+        throw error;
+      },
+    );
 }
 
 describe("job-apply script", () => {

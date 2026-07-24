@@ -70,7 +70,11 @@ const createJobsPaginationState = (input: {
   const totalPages = computed(() => Math.ceil(input.totalJobs.value / input.pageSize));
   const pageNumbers = computed(() => {
     const length = totalPages.value;
-    return Array.from({ length }, (_, index) => index + 1);
+    const pages: number[] = [];
+    for (let pageNumber = 1; pageNumber <= length; pageNumber += 1) {
+      pages.push(pageNumber);
+    }
+    return pages;
   });
 
   function paginatedItems<T>(items: ComputedRef<T[]>) {
@@ -142,11 +146,15 @@ export const createJobsDerivedState = (input: {
   };
 };
 
-export const createJobsLabels = (t: JobsTranslate) => ({
+export const createJobsLabels = (t: JobsTranslate, te: (key: string) => boolean) => ({
   formatDate(date: string) {
     return formatRelativeTimeForDate(date, (key, params) => translateRelativeDate(t, key, params), {
       keyPrefix: "jobsPage.date",
     });
+  },
+  applicationStatusLabel(status: string): string {
+    const key = `jobsPage.applied.status.${status}`;
+    return te(key) ? t(key) : status;
   },
   experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
     if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.all");

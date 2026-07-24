@@ -5,6 +5,9 @@ import type { AutomationRunStatus, AutomationRunType } from "@bao/shared/constan
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { Composer } from "vue-i18n";
 import { formatDateWithLocale } from "~/utils/locale-format";
+import {
+  PERCENT_MAX,
+} from "~/constants/numeric-ui";
 
 const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
@@ -31,7 +34,7 @@ export function createAutomationRunsFormatters(
 
   const formatRunProgress = (run: RpaRunExecutionEnvelope): string => {
     if (typeof run.progress === "number" && Number.isFinite(run.progress)) {
-      return `${Math.max(0, Math.min(100, Math.round(run.progress)))}%`;
+      return `${Math.max(0, Math.min(PERCENT_MAX, Math.round(run.progress)))}%`;
     }
     return notAvailableValue();
   };

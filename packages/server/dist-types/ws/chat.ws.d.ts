@@ -1,3 +1,4 @@
+declare const noopWebSocketClose: () => void;
 export declare const chatWebSocket: import("elysia/types").AddWSRoute<"", "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
     error: [];
@@ -9,5 +10,6 @@ export declare const chatWebSocket: import("elysia/types").AddWSRoute<"", "local
     readonly beforeHandle: unknown;
     readonly open: unknown;
     readonly message: unknown;
-    readonly close: () => void;
+    readonly close: typeof noopWebSocketClose;
 }, {}, `/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, void>;
+export {};

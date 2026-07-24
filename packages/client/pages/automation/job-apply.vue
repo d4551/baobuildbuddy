@@ -1,10 +1,16 @@
 <script setup lang="ts">
+import {
+  AUTOMATION_LIVE_EVENT_WINDOW,
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const page = useAutomationJobApplyPage();
@@ -25,7 +31,16 @@ useSeoMeta({
       :description="t('automation.hub.cards.jobApply.description')"
     />
 
-    <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="5" />
+    <LoadingSkeleton v-if="page.bootstrapPending.value" :lines="LOADING_SKELETON_LINES.medium" />
+
+    <BootstrapErrorAlert
+      v-else-if="page.bootstrapError.value"
+      :title="t('automation.jobApply.bootstrapError')"
+      :message="getErrorMessage(page.bootstrapError.value, t('automation.jobApply.bootstrapError'))"
+      :retry-label="t('automation.jobApply.bootstrapRetry')"
+      :retry-aria-label="t('automation.jobApply.bootstrapRetryAria')"
+      @retry="page.refreshBootstrap()"
+    />
 
     <EmptyState
       v-else-if="!hasResumes"
@@ -64,7 +79,7 @@ useSeoMeta({
       :run="page.streamRun.value"
       :stream-state="page.streamState.value"
       :stream-error-message="page.streamError.value?.message || ''"
-      :event-rows="[...page.streamEvents.value].slice(-12).reverse()"
+      :event-rows="[...page.streamEvents.value].slice(-AUTOMATION_LIVE_EVENT_WINDOW).reverse()"
       :to-localized-date-time="page.toLocalizedDateTime"
       :run-detail-route="page.runDetailRoute"
       @retry="page.runStream.retry"

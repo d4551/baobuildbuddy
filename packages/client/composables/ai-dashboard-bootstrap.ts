@@ -1,5 +1,7 @@
 import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type {
   DashboardStats,
@@ -12,6 +14,9 @@ import {
   resolveProviderModelSelection,
 } from "~/utils/ai-control-plane";
 
+type ApiPayload = Parameters<typeof isRecord>[0];
+const NUM_100 = 100;
+
 export type DashboardBootstrap = {
   activeModel: string;
   activeProvider: AIProviderType;
@@ -19,19 +24,15 @@ export type DashboardBootstrap = {
   resolvedProviders: ProviderConfig[];
 };
 
-const asNumber = (value: unknown): number | undefined =>
+const asNumber = (value: ApiPayload): number | undefined =>
   typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function readNumberField(payload: Record<string, unknown>, key: string): number | undefined {
+function readNumberField(payload: Record<string, ApiPayload>, key: string): number | undefined {
   return asNumber(payload[key]);
 }
 
 function normalizeDashboardStats(
-  usagePayload: unknown,
+  usagePayload: ApiPayload,
   activeProvider: AIProviderType,
 ): DashboardStats {
   if (!isRecord(usagePayload)) {
@@ -50,9 +51,9 @@ function normalizeDashboardStats(
   const sessions = readNumberField(usagePayload, "sessions") ?? 0;
   let successRate = 0;
   if (userMessages > 0) {
-    successRate = Math.round((assistantMessages / userMessages) * 100);
+    successRate = Math.round((assistantMessages / userMessages) * PERCENT_MAX);
   } else if (totalMessages > 0) {
-    successRate = 100;
+    successRate = NUM_100;
   }
 
   return {

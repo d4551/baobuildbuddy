@@ -7,7 +7,7 @@ const VALID_BIOME = readFileSync(new URL("../biome.json", import.meta.url), "utf
 const BASE_LINTER = {
   enabled: true,
   domains: {
-    vue: "all",
+    vue: "recommended",
     drizzle: "all",
     project: "recommended",
     test: "recommended",
@@ -28,13 +28,25 @@ describe("collectBiomeSofteningViolationsForContent: repo biome.json is fully ha
     expect(violations).toHaveLength(0);
   });
 
-  test("repo biome.json contains no info/off/warn severities anywhere", () => {
+  test("repo biome.json contains zero info/warn/off softeners", () => {
     expect(VALID_BIOME.includes(': "info"')).toBe(false);
-    expect(VALID_BIOME.includes(': "off"')).toBe(false);
     expect(VALID_BIOME.includes(': "warn"')).toBe(false);
     expect(VALID_BIOME.includes('"level": "info"')).toBe(false);
-    expect(VALID_BIOME.includes('"level": "off"')).toBe(false);
     expect(VALID_BIOME.includes('"level": "warn"')).toBe(false);
+    expect(VALID_BIOME.includes('"level": "off"')).toBe(false);
+    expect(VALID_BIOME.includes('"noMagicNumbers": "off"')).toBe(false);
+    expect(VALID_BIOME.includes('"useVueMultiWordComponentNames": "off"')).toBe(false);
+    const offMatches = VALID_BIOME.match(/: "off"/g) ?? [];
+    expect(offMatches).toHaveLength(0);
+  });
+
+  test("repo biome.json keeps multiword at error with Nuxt-reserved ignores only", () => {
+    expect(VALID_BIOME.includes('"useVueMultiWordComponentNames"')).toBe(true);
+    expect(VALID_BIOME.includes('"ignores"')).toBe(true);
+    expect(VALID_BIOME.includes('"index"')).toBe(true);
+    expect(VALID_BIOME.includes('"default"')).toBe(true);
+    expect(VALID_BIOME.includes('"error"')).toBe(true);
+    expect(VALID_BIOME.includes('"[id]"')).toBe(true);
   });
 
   test("repo biome.json enables html.experimentalFullSupportEnabled", () => {
@@ -42,7 +54,7 @@ describe("collectBiomeSofteningViolationsForContent: repo biome.json is fully ha
   });
 });
 
-describe("collectBiomeSofteningViolationsForContent: flags every severity demotion", () => {
+describe("collectBiomeSofteningViolationsForContent: flags core config demotions", () => {
   test("flags root linter.enabled=false", () => {
     const violations = collectBiomeSofteningViolationsForContent(
       JSON.stringify({
@@ -72,48 +84,6 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
     expect(violations.some((v) => v.message.includes("experimentalFullSupportEnabled"))).toBe(true);
   });
 
-  test("flags noUnusedImports info demotion (zero info allowlist)", () => {
-    const sample = VALID_BIOME.replaceAll(
-      '"noUnusedImports": "error"',
-      '"noUnusedImports": "info"',
-    );
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
-  });
-
-  test("flags noUnusedImports warn demotion", () => {
-    const sample = VALID_BIOME.replaceAll(
-      '"noUnusedImports": "error"',
-      '"noUnusedImports": "warn"',
-    );
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
-  });
-
-  test("flags noUnusedImports off demotion", () => {
-    const sample = VALID_BIOME.replaceAll('"noUnusedImports": "error"', '"noUnusedImports": "off"');
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
-  });
-
-  test("flags useVueMultiWordComponentNames info demotion (zero info allowlist)", () => {
-    const sample = VALID_BIOME.replaceAll(
-      '"useVueMultiWordComponentNames": "error"',
-      '"useVueMultiWordComponentNames": "info"',
-    );
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("useVueMultiWordComponentNames"))).toBe(true);
-  });
-
-  test("flags noVueRefAsOperand info demotion (zero info allowlist)", () => {
-    const sample = VALID_BIOME.replaceAll(
-      '"noVueRefAsOperand": "error"',
-      '"noVueRefAsOperand": "info"',
-    );
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("noVueRefAsOperand"))).toBe(true);
-  });
-
   test("flags override linter.enabled=false", () => {
     const violations = collectBiomeSofteningViolationsForContent(
       JSON.stringify({
@@ -139,6 +109,60 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
       }),
     );
     expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
+  });
+
+  test("flags a11y group off", () => {
+    const sample = VALID_BIOME.replaceAll('"a11y": {', '"a11y": "off", "_x": {');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("a11y") || v.message.includes("off"))).toBe(
+      true,
+    );
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags noUnusedImports demotions", () => {
+  test("flags noUnusedImports info demotion (zero info allowlist)", () => {
+    const sample = VALID_BIOME.replaceAll(
+      '"noUnusedImports": "error"',
+      '"noUnusedImports": "info"',
+    );
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
+  });
+
+  test("flags noUnusedImports warn demotion", () => {
+    const sample = VALID_BIOME.replaceAll(
+      '"noUnusedImports": "error"',
+      '"noUnusedImports": "warn"',
+    );
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
+  });
+
+  test("flags noUnusedImports off demotion", () => {
+    const sample = VALID_BIOME.replaceAll('"noUnusedImports": "error"', '"noUnusedImports": "off"');
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noUnusedImports"))).toBe(true);
+  });
+});
+
+describe("collectBiomeSofteningViolationsForContent: flags vue and complexity demotions", () => {
+  test("flags useVueMultiWordComponentNames info demotion (zero info allowlist)", () => {
+    const sample = VALID_BIOME.replaceAll(
+      '"useVueMultiWordComponentNames": {\n          "level": "error"',
+      '"useVueMultiWordComponentNames": {\n          "level": "info"',
+    );
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("useVueMultiWordComponentNames"))).toBe(true);
+  });
+
+  test("flags noVueRefAsOperand info demotion (zero info allowlist)", () => {
+    const sample = VALID_BIOME.replaceAll(
+      '"noVueRefAsOperand": "error"',
+      '"noVueRefAsOperand": "info"',
+    );
+    const violations = collectBiomeSofteningViolationsForContent(sample);
+    expect(violations.some((v) => v.message.includes("noVueRefAsOperand"))).toBe(true);
   });
 
   test("flags noBarrelFile info demotion", () => {
@@ -167,15 +191,9 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noVoid"))).toBe(true);
   });
+});
 
-  test("flags a11y group off", () => {
-    const sample = VALID_BIOME.replaceAll('"a11y": {', '"a11y": "off", "_x": {');
-    const violations = collectBiomeSofteningViolationsForContent(sample);
-    expect(violations.some((v) => v.message.includes("a11y") || v.message.includes("off"))).toBe(
-      true,
-    );
-  });
-
+describe("collectBiomeSofteningViolationsForContent: flags style rule demotions", () => {
   test("flags noMagicNumbers demotion (industry best practice)", () => {
     const sample = VALID_BIOME.replaceAll(
       '"noMagicNumbers": "error"',
@@ -226,7 +244,9 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noTemplateCurlyInString"))).toBe(true);
   });
+});
 
+describe("collectBiomeSofteningViolationsForContent: flags class rule demotions", () => {
   test("flags noUndeclaredClasses demotion", () => {
     const sample = VALID_BIOME.replaceAll(
       '"noFloatingPromises": "error"',
@@ -244,9 +264,17 @@ describe("collectBiomeSofteningViolationsForContent: flags every severity demoti
     const violations = collectBiomeSofteningViolationsForContent(sample);
     expect(violations.some((v) => v.message.includes("noUnusedClasses"))).toBe(true);
   });
+});
 
+describe("collectBiomeSofteningViolationsForContent: intentional repo omissions", () => {
   test("repo biome.json intentionally omits noUndeclaredClasses/noUnusedClasses (Tailwind incompatibility)", () => {
     expect(VALID_BIOME.includes("noUndeclaredClasses")).toBe(false);
     expect(VALID_BIOME.includes("noUnusedClasses")).toBe(false);
+  });
+
+  test("repo biome.json intentionally omits useVueVapor (Nuxt SSR incompatibility)", () => {
+    expect(VALID_BIOME.includes("useVueVapor")).toBe(false);
+    expect(VALID_BIOME.includes('"vue": "all"')).toBe(false);
+    expect(VALID_BIOME.includes('"vue": "recommended"')).toBe(true);
   });
 });

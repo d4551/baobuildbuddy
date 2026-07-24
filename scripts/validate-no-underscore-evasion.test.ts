@@ -1,10 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { collectUnderscoreEvasionViolationsForContent } from "./validate-no-underscore-evasion";
+const NUM_3 = 3;
 
 const SAMPLE_FILE = "packages/client/components/sample.vue";
 const SAMPLE_TS = "packages/client/composables/sample.ts";
 
-describe("validate-no-underscore-evasion", () => {
+describe("validate-no-underscore-evasion: underscore-prefix declarations", () => {
   test("VACUOUS_GATE: underscore-prefix const declarations are flagged", () => {
     const content = "const _unused = 1;\n";
     const violations = collectUnderscoreEvasionViolationsForContent(SAMPLE_TS, content);
@@ -38,7 +39,9 @@ describe("validate-no-underscore-evasion", () => {
     const violations = collectUnderscoreEvasionViolationsForContent(SAMPLE_TS, content);
     expect(violations).toEqual([]);
   });
+});
 
+describe("validate-no-underscore-evasion: exemptions", () => {
   test("test files are exempt", () => {
     const content = "const _fixture = { sample: 1 };\n";
     const violations = collectUnderscoreEvasionViolationsForContent(
@@ -85,7 +88,9 @@ describe("validate-no-underscore-evasion", () => {
     );
     expect(exemptTest).toEqual([]);
   });
+});
 
+describe("validate-no-underscore-evasion: reporting", () => {
   test("clean Vue <script setup> source passes", () => {
     const content = "<script setup>\nconst props = defineProps<{ msg: string }>();\n</script>\n";
     const violations = collectUnderscoreEvasionViolationsForContent(SAMPLE_FILE, content);
@@ -96,6 +101,6 @@ describe("validate-no-underscore-evasion", () => {
     const content = "line1\nline2\nconst _broken = 1;\nline4\n";
     const violations = collectUnderscoreEvasionViolationsForContent(SAMPLE_TS, content);
     expect(violations.length).toBe(1);
-    expect(violations[0]?.line).toBe(3);
+    expect(violations[0]?.line).toBe(NUM_3);
   });
 });

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { dataService } from "./data-service";
 
 beforeAll(async () => {
@@ -9,8 +9,6 @@ beforeAll(async () => {
   initModule.initializeDatabase(dbModule.sqlite);
   seedModule.seedDatabase(dbModule.db);
 });
-
-afterAll(() => {});
 
 describe("data-service", () => {
   test("exportAll returns valid export structure", async () => {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -62,7 +63,8 @@ function updateTextValue(
     <div 
       v-if="authBootstrapRequired && authSetupTokenConfigured"
       role="alert"
-      class="alert alert-info alert-vertical text-start sm:alert-horizontal"
+      class="alert alert-vertical text-start sm:alert-horizontal"
+      :class="[ALERT_VARIANT_CLASS.info]"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.setupTokenTitle") }}</h3>
@@ -73,7 +75,8 @@ function updateTextValue(
     <div 
       v-else-if="authBootstrapRequired"
       role="alert"
-      class="alert alert-warning alert-vertical text-start sm:alert-horizontal"
+      class="alert alert-vertical text-start sm:alert-horizontal"
+      :class="[ALERT_VARIANT_CLASS.warning]"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>

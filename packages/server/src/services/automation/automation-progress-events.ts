@@ -1,5 +1,6 @@
 import { type RpaRunEvent, rpaProgressEventSchema } from "@bao/shared/schemas/rpa-events.schema";
 import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { createServerLogger } from "../../utils/logger";
 import { broadcastAutomationEvent } from "../../ws/automation.ws";
 import { persistProgress } from "./automation-run-persistence";
@@ -63,7 +64,7 @@ export class AutomationProgressEvents {
         (error) => {
           automationProgressLogger.error(
             "Failed to persist progress event",
-            error instanceof Error ? error.message : String(error),
+            toErrorMessage(error),
           );
         },
       );

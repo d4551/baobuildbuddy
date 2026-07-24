@@ -11,6 +11,9 @@ export const speechTranscribeBodySchema = t.Object(
     audioBase64: t.String({ minLength: 1 }),
     mimeType: t.String({ minLength: 3, maxLength: 120 }),
     filename: t.Optional(t.String({ minLength: 1, maxLength: 240 })),
+    provider: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
+    model: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
+    endpoint: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
   },
   { required: ["audioBase64", "mimeType"] },
 );
@@ -19,6 +22,9 @@ export type SpeechTranscribeBody = {
   audioBase64: string;
   mimeType: string;
   filename?: string;
+  provider?: string;
+  model?: string;
+  endpoint?: string;
 };
 
 export const speechTranscribeResponses = {

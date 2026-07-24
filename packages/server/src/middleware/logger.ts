@@ -3,6 +3,7 @@ import { DEFAULT_LOG_LEVEL } from "@bao/shared/constants/runtime";
 import { Elysia } from "elysia";
 import pino from "pino";
 import { config, shouldUsePrettyLogTransport } from "../config/env";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 
 /**
  * Canonical pino root logger for server runtime (SSOT for structured logs).
@@ -31,7 +32,7 @@ export const logger = new Elysia({ name: "request-logger" }).afterHandle(({ requ
     {
       method: request.method,
       path: pathname,
-      status: set.status ?? 200,
+      status: set.status ?? HTTP_STATUS_OK,
     },
     "request",
   );

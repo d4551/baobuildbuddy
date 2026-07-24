@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesPortfolioIndexPage" });
 
 import { APP_ROUTES } from "@bao/shared/constants/routes";
@@ -31,6 +35,9 @@ const {
   await page.loadPortfolio();
   return true;
 });
+// Client hydrate skips the loader when payload exists; form is local reactive and
+// would stay empty while SSR HTML already has metadata — sync from shared useState.
+page.syncPortfolioMetadata(page.portfolio.value?.metadata);
 
 useSeoMeta({
   title: t("portfolioPage.title"),
@@ -139,7 +146,7 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="bootstrapErrorMessage"

@@ -10,6 +10,7 @@ import type {
   EmailResponseRequest,
   EmailResponseResult,
 } from "@bao/shared/schemas/automation-email.schema";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import type { RpaRunEvent } from "@bao/shared/schemas/rpa-events.schema";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
@@ -64,7 +65,7 @@ export class ApplicationAutomationService {
       (error) => {
         automationServiceLogger.error(
           "[automation] scheduler recovery failed",
-          error instanceof Error ? error.message : String(error),
+          toErrorMessage(error),
         );
       },
     );

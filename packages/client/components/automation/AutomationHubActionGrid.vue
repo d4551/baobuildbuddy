@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
@@ -29,7 +32,7 @@ const { t } = useI18n();
       v-for="(card, index) in orderedCards"
       :key="card.id"
       :selected="primaryCardId === card.id"
-      :stagger-index="Math.min(index, 11)"
+      :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
       :extra-class="FLUID_HEIGHT_CLASS"
     >
       <div class="card-body">

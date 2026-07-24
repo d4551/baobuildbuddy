@@ -1,3 +1,12 @@
+const NUM_12 = 12;
+const NUM_200 = 200;
+const NUM_2000 = 2_000;
+const NUM_20000 = 20_000;
+const NUM_2500 = 2_500;
+const NUM_3000 = 3_000;
+const NUM_45000 = 45_000;
+const NUM_48 = 48;
+const NUM_800 = 800;
 /**
  * Portal toggle scrape proof phases (main() size split).
  */
@@ -58,7 +67,7 @@ export const enablePortal = async (
   }
   if (!(await toggle.isChecked())) {
     await toggle.click();
-    await wait(page, 200);
+    await wait(page, NUM_200);
   }
   await writeOutput(`enabled ${label}=${String(await toggle.isChecked())}`);
 };
@@ -72,11 +81,11 @@ export const phaseEnablePortals = async (
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   const jobIntelNav = page.getByRole("button", { name: RE_JOB_INTELLIGENCE }).first();
   if ((await jobIntelNav.count()) > 0) {
     await jobIntelNav.click();
-    await wait(page, 800);
+    await wait(page, NUM_800);
   }
   await shot(page, out, "01-settings-mobile-full");
   const toggleCount = await page
@@ -88,7 +97,7 @@ export const phaseEnablePortals = async (
   await enablePortal(page, RE_ENABLE_REMOTE, "RemoteGameJobs");
   const saveProviders = page.locator("button").filter({ hasText: RE_SAVE_PROVIDERS }).first();
   await saveProviders.click();
-  await wait(page, 2_500);
+  await wait(page, NUM_2500);
   await shot(page, out, "02-saved");
 };
 
@@ -101,14 +110,14 @@ export const phaseRunScraper = async (
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 3_000);
+  await wait(page, NUM_3000);
   const scraperState = await page.evaluate((configuredPatternSource) => {
     const text = document.body.innerText;
     const configuredMatch = new RegExp(configuredPatternSource, "u").exec(text);
     return {
       configured: configuredMatch?.[1] ?? null,
       runButtons: [...document.querySelectorAll("main button")].map((button) => ({
-        t: (button.textContent ?? "").trim().slice(0, 48),
+        t: (button.textContent ?? "").trim().slice(0, NUM_48),
         dis: (button as HTMLButtonElement).disabled,
         a: button.getAttribute("aria-label"),
       })),
@@ -122,7 +131,7 @@ export const phaseRunScraper = async (
   if ((await enabledJobRun.count()) > 0) {
     await writeOutput(`click ${String(await enabledJobRun.getAttribute("aria-label"))}`);
     await enabledJobRun.click();
-    await wait(page, 45_000);
+    await wait(page, NUM_45000);
   }
   await shot(page, out, "04-after-run");
   return scraperState;
@@ -137,11 +146,11 @@ export const phaseVerifyJobs = async (
     waitUntil: "domcontentloaded",
     timeout: 90_000,
   });
-  await wait(page, 2_000);
+  await wait(page, NUM_2000);
   const refresh = page.getByRole("button", { name: RE_REFRESH_JOBS });
   if ((await refresh.count()) > 0) {
     await refresh.click();
-    await wait(page, 20_000);
+    await wait(page, NUM_20000);
   }
   await shot(page, out, "05-jobs");
   return page.evaluate(() => ({
@@ -149,6 +158,6 @@ export const phaseVerifyJobs = async (
     titles: [...document.querySelectorAll("main .card-title, main h3")]
       .map((element) => element.textContent?.trim())
       .filter((value): value is string => Boolean(value))
-      .slice(0, 12),
+      .slice(0, NUM_12),
   }));
 };

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import {
   SKILL_READINESS_FEEDBACK_IDS,
@@ -9,6 +9,7 @@ import {
   type SkillReadinessNextStepId,
 } from "@bao/shared/types/skill-mapping";
 import { requestJson } from "../test-utils";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 const SKILL_MAPPINGS_ROUTE = API_ENDPOINTS.skillMappings;
@@ -31,22 +32,20 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.skillMappingRoutes);
 });
 
-afterAll(() => {});
-
 const createSkillMapping = async (): Promise<string> => {
   const res = await requestJson<{ id: string }>(app, "POST", SKILL_MAPPINGS_ROUTE, {
     gameExpression: "Optimized rendering pipeline",
     transferableSkill: "Performance optimization",
     category: "technical",
   });
-  expect(res.status).toBe(201);
+  expect(res.status).toBe(HTTP_STATUS_CREATED);
   return res.body.id;
 };
 
 describe("skill-mapping list routes", () => {
   test("GET skill mappings returns list", async () => {
     const res = await requestJson<unknown[]>(app, "GET", SKILL_MAPPINGS_ROUTE);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -56,7 +55,7 @@ describe("skill-mapping list routes", () => {
       "GET",
       buildSkillMappingsCategoryPath("technical"),
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 });
@@ -74,7 +73,7 @@ describe("skill-mapping readiness route", () => {
       nextSteps: SkillReadinessNextStepId[];
     }>(app, "GET", API_ENDPOINTS.skillReadiness);
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.technical.feedbackId);
     expect(SKILL_READINESS_FEEDBACK_IDS).toContain(res.body.categories.softSkills.feedbackId);
     expect(SKILL_READINESS_FEEDBACK_IDS).toContain(
@@ -103,7 +102,7 @@ describe("skill-mapping mutation routes", () => {
       transferableSkill: "Performance optimization",
       category: "technical",
     });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.gameExpression).toBe("Optimized rendering pipeline");
     expect(res.body.transferableSkill).toBe("Performance optimization");
     expect(res.body.id).toBeDefined();
@@ -117,7 +116,7 @@ describe("skill-mapping mutation routes", () => {
       `${SKILL_MAPPINGS_ROUTE}/${mappingId}`,
       { transferableSkill: "System performance tuning" },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.transferableSkill).toBe("System performance tuning");
   });
 
@@ -128,7 +127,7 @@ describe("skill-mapping mutation routes", () => {
       "DELETE",
       `${SKILL_MAPPINGS_ROUTE}/${mappingId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.message).toBe("Skill mapping deleted");
     expect(res.body.id).toBe(mappingId);
   });

@@ -13,14 +13,21 @@ import { db } from "../../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
 import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
+const NUM_1024 = 1024;
+const NUM_120000 = 120_000;
+const NUM_180 = 180;
+const NUM_8 = 8;
 
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const MAX_AUDIO_BYTES = NUM_8 * NUM_1024 * NUM_1024;
 const TRAILING_SLASH_RE = /\/$/u;
 
 export type SpeechTranscribeInput = {
   readonly audioBase64: string;
   readonly mimeType: string;
   readonly filename?: string;
+  readonly provider?: string;
+  readonly model?: string;
+  readonly endpoint?: string;
 };
 
 export type SpeechTranscribeResult =
@@ -32,12 +39,16 @@ export type SpeechTranscribeResult =
     }
   | { readonly ok: false; readonly error: string; readonly status: 400 | 422 | 502 };
 
-const SERVER_STT_PROVIDERS = new Set<SpeechProviderOption>([
-  "local",
-  "openai",
-  "huggingface",
-  "custom",
-]);
+const SERVER_STT_PROVIDERS = ["local", "openai", "huggingface", "custom"] as const satisfies readonly SpeechProviderOption[];
+
+const resolveServerSttProvider = (value: string): SpeechProviderOption | null => {
+  for (const option of SERVER_STT_PROVIDERS) {
+    if (option === value) {
+      return option;
+    }
+  }
+  return null;
+};
 
 const BASE64_PAYLOAD_RE = /^[A-Za-z0-9+/]+=*$/;
 
@@ -138,7 +149,7 @@ const postOpenAiTranscription = async (input: {
       method: "POST",
       headers,
       body: form,
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(NUM_120000),
     }),
   );
   if (responseResult.status === "rejected") {
@@ -147,7 +158,7 @@ const postOpenAiTranscription = async (input: {
   const response = responseResult.value;
   const bodyText = await response.text();
   if (!response.ok) {
-    return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, 180)}` };
+    return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, NUM_180)}` };
   }
   const parsed = safeParseJson(bodyText);
   if (!isRecord(parsed) || typeof parsed.text !== "string") {
@@ -164,13 +175,14 @@ export const transcribeSpeechAudio = async (
   input: SpeechTranscribeInput,
 ): Promise<SpeechTranscribeResult> => {
   const automation = await loadAutomationSettings();
-  const provider = automation.speech.stt.provider;
-  const model = automation.speech.stt.model;
-  const endpoint = automation.speech.stt.endpoint;
-
-  if (!SERVER_STT_PROVIDERS.has(provider)) {
+  const provider = resolveServerSttProvider(
+    input.provider?.trim() || automation.speech.stt.provider,
+  );
+  if (!provider) {
     return { ok: false, error: API_ERROR_SPEECH_STT_NOT_CONFIGURED, status: 422 };
   }
+  const model = input.model?.trim() || automation.speech.stt.model;
+  const endpoint = input.endpoint?.trim() || automation.speech.stt.endpoint;
 
   const bytes = decodeAudio(input.audioBase64);
   if (!bytes || bytes.byteLength === 0) {

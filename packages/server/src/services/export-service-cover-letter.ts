@@ -18,6 +18,11 @@ import {
   type CoverLetterRenderContext,
   type CoverLetterUserProfile,
 } from "./export-service-contracts";
+const NUM_15 = 15;
+const NUM_18 = 18;
+const NUM_25 = 25;
+const NUM_28 = 28;
+const NUM_35 = 35;
 
 async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
   const pdfDoc = await PDFDocument.create();
@@ -86,7 +91,7 @@ function renderCoverLetterSender(
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 28;
+  context.yPosition -= NUM_28;
 }
 
 function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): void {
@@ -111,7 +116,7 @@ function renderCoverLetterRecipient(
     font: context.boldFont,
     color: COVER_LETTER_PDF_COLORS.primary,
   });
-  context.yPosition -= 15;
+  context.yPosition -= NUM_15;
 
   context.page.drawText(`RE: ${coverLetter.position}`, {
     x: context.margin,
@@ -120,7 +125,7 @@ function renderCoverLetterRecipient(
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.accent,
   });
-  context.yPosition -= 18;
+  context.yPosition -= NUM_18;
   drawCoverLetterDivider(context);
 }
 
@@ -165,7 +170,7 @@ function renderCoverLetterBody(context: CoverLetterRenderContext, content: unkno
 
 function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName: string): void {
   context.yPosition -= 10;
-  ensureCoverLetterSpace(context, 35);
+  ensureCoverLetterSpace(context, NUM_35);
 
   context.page.drawText(COVER_LETTER_DEFAULT_SIGNATURE, {
     x: context.margin,
@@ -174,7 +179,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 25;
+  context.yPosition -= NUM_25;
 
   context.page.drawText(signerName, {
     x: context.margin,

@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { config } from "../config/env";
+import { HTTP_NO_CONTENT } from "@bao/shared/constants/numeric";
 
 const getRequestOrigin = (request: Request): string | null =>
   request.headers.get("origin") ?? request.headers.get("Origin");
@@ -39,7 +40,7 @@ export const corsPlugin = new Elysia({ name: "cors" })
       set.headers["access-control-allow-headers"] =
         request.headers.get("access-control-request-headers") ?? "authorization,content-type";
       set.headers["access-control-max-age"] = "86400";
-      set.status = 204;
+      set.status = HTTP_NO_CONTENT;
       return new Response(null, {
         status: 204,
         headers: {

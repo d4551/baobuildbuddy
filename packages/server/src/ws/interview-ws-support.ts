@@ -13,6 +13,7 @@ import { settle } from "@bao/shared/utils/promise";
 import { sessionConfigFromUi } from "../routes/interview-route-config";
 import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
 import { interviewService } from "../services/interview-service";
+const NUM_150 = 150;
 
 type InterviewSocket = { send: (data: string) => void };
 
@@ -126,7 +127,7 @@ export async function handleSubmitResponse(socket: InterviewSocket, data: Interv
   const updatedSession = await interviewService.addResponse(data.sessionId, {
     questionId: "",
     transcript: data.content,
-    duration: Math.max(1, data.content.length * 150),
+    duration: Math.max(1, data.content.length * NUM_150),
     timestamp: Date.now(),
     confidence: 0.8,
   });

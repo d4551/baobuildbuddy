@@ -19,6 +19,7 @@ import { createServerLogger } from "../utils/logger";
 import { extractResumeSkills } from "./ai-route-content";
 import type { MatchJobsResponse } from "./ai-route-contracts";
 import { getAIService } from "./ai-route-support";
+const NUM_5 = 5;
 
 const aiRoutesJobMatchingLogger = createServerLogger("ai-route-job-matching");
 
@@ -177,7 +178,7 @@ export const runJobMatchingFlow = async (
   }
 
   const matches = await Promise.all(
-    recentJobs.slice(0, 5).map((job) => analyzeSingleJobMatch(profile, job)),
+    recentJobs.slice(0, NUM_5).map((job) => analyzeSingleJobMatch(profile, job)),
   );
   matches.sort((a, b) => b.score - a.score);
 

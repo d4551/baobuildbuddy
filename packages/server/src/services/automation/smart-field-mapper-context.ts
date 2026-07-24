@@ -1,4 +1,5 @@
 import type { SmartFieldAnalysisContext } from "./smart-field-mapper-contracts";
+const NUM_3 = 3;
 
 const FIELD_CONTEXT_ITEM_LIMIT = 6;
 const FIELD_CONTEXT_TEXT_LIMIT = 280;
@@ -71,7 +72,7 @@ const getProjectHighlights = (resume: Record<string, unknown>): string[] => {
 
     const title = getTrimmedString(entry.title);
     const description = truncateText(getTrimmedString(entry.description));
-    const technologies = uniqueNonEmptyStrings(entry.technologies).slice(0, 3).join(", ");
+    const technologies = uniqueNonEmptyStrings(entry.technologies).slice(0, NUM_3).join(", ");
     const parts = [title, description, technologies].filter((part) => part.length > 0);
     if (parts.length > 0) {
       highlights.push(parts.join(" | "));

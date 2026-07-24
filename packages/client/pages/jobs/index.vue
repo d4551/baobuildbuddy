@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
+
+const NUM_4 = 4;
 defineOptions({ name: "PagesJobsIndexPage" });
 
 definePageMeta({
@@ -7,6 +12,7 @@ definePageMeta({
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { JOBS_INDEX_TABS } from "~/composables/jobs-index-page-contracts";
 import {
   BODY_TEXT_SM_CLASS,
   BODY_TEXT_XS_CLASS,
@@ -74,6 +80,26 @@ const page = useJobsIndexPage();
       </template>
     </PageHeroHeader>
 
+    <nav
+      class="tabs tabs-box"
+      :class="[SECTION_GAP_BOTTOM_CLASS]"
+      :aria-label="t('jobsPage.tabs.aria')"
+    >
+      <button
+        v-for="tab in JOBS_INDEX_TABS"
+        :key="tab"
+        type="button"
+        class="tab"
+        :class="{ 'tab-active': page.activeTab.value === tab }"
+        :aria-label="t(`jobsPage.tabs.${tab}Aria`)"
+        :aria-pressed="page.activeTab.value === tab"
+        @click="page.activeTab.value = tab"
+      >
+        {{ t(`jobsPage.tabs.${tab}`) }}
+      </button>
+    </nav>
+
+    <template v-if="page.activeTab.value === 'browse'">
     <section
       v-if="page.recommendations.value.length > 0"
       :class="[SECTION_GAP_BOTTOM_CLASS]"
@@ -84,11 +110,11 @@ const page = useJobsIndexPage();
       </h2>
       <SectionGrid grid-token="twoColumn">
         <UiGlassCard
-          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          v-for="(job, index) in page.recommendations.value.slice(0, NUM_4)"
           :key="`rec-${job.id}`"
           :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
-          :stagger-index="Math.min(index, 11)"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
           <div class="card-body relative z-10">
             <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
@@ -204,7 +230,7 @@ const page = useJobsIndexPage();
               :key="job.id"
               :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
-              :stagger-index="Math.min(index, 11)"
+              :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             >
               <div class="card-body relative z-10">
                 <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
@@ -282,5 +308,114 @@ const page = useJobsIndexPage();
         </div>
       </div>
     </SectionGrid>
+    </template>
+
+    <section
+      v-else-if="page.activeTab.value === 'saved'"
+      :aria-label="t('jobsPage.tabs.savedAria')"
+    >
+      <LoadingSkeleton
+        v-if="page.savedJobsStatus.value === 'pending'"
+        variant="cards"
+      />
+
+      <BootstrapErrorAlert
+        v-else-if="page.savedJobsError.value"
+        :message="getErrorMessage(page.savedJobsError.value, t('jobsPage.saved.errorTitle'))"
+        :retry-label="t('jobsPage.saved.retryButton')"
+        :retry-aria-label="t('jobsPage.saved.retryAria')"
+        @retry="() => page.refreshSavedJobs()"
+      />
+
+      <EmptyState
+        v-else-if="page.savedJobs.value.length === 0"
+        title-key="jobsPage.saved.emptyTitle"
+        description-key="jobsPage.saved.emptyDescription"
+        cta-label-key="jobsPage.saved.emptyCta"
+        cta-aria-key="jobsPage.saved.emptyCtaAria"
+        @cta="page.activeTab.value = JOBS_INDEX_TABS[0]"
+      />
+
+      <SectionGrid v-else grid-token="twoColumn">
+        <UiGlassCard
+          v-for="(job, index) in page.savedJobs.value"
+          :key="`saved-${job.id}`"
+          :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
+          :link-aria-label="t('jobsPage.saved.openSavedAria', { title: job.title, company: job.company })"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
+        >
+          <div class="card-body relative z-10">
+            <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
+            <p class="font-medium text-secondary">{{ job.company }}</p>
+            <div :class="[STACK_SPACING_SM_CLASS, 'flex flex-wrap', ROW_GAP_XS_CLASS]">
+              <span :class="[BADGE_SM_CLASS]">{{ job.location }}</span>
+              <span v-if="job.remote" :class="[BADGE_SUCCESS_SM_CLASS]">
+                {{ t("jobsPage.remoteBadge") }}
+              </span>
+            </div>
+            <p :class="BODY_TEXT_XS_CLASS">{{ page.formatDate(job.postedDate) }}</p>
+          </div>
+        </UiGlassCard>
+      </SectionGrid>
+    </section>
+
+    <section
+      v-else
+      :aria-label="t('jobsPage.tabs.appliedAria')"
+    >
+      <LoadingSkeleton
+        v-if="page.applicationsStatus.value === 'pending'"
+        variant="cards"
+      />
+
+      <BootstrapErrorAlert
+        v-else-if="page.applicationsError.value"
+        :message="getErrorMessage(page.applicationsError.value, t('jobsPage.applied.errorTitle'))"
+        :retry-label="t('jobsPage.applied.retryButton')"
+        :retry-aria-label="t('jobsPage.applied.retryAria')"
+        @retry="() => page.refreshApplications()"
+      />
+
+      <EmptyState
+        v-else-if="page.applications.value.length === 0"
+        title-key="jobsPage.applied.emptyTitle"
+        description-key="jobsPage.applied.emptyDescription"
+        cta-label-key="jobsPage.applied.emptyCta"
+        cta-aria-key="jobsPage.applied.emptyCtaAria"
+        @cta="page.activeTab.value = JOBS_INDEX_TABS[0]"
+      />
+
+      <SectionGrid v-else grid-token="twoColumn">
+        <UiGlassCard
+          v-for="(application, index) in page.applications.value"
+          :key="`applied-${application.id}`"
+          :to="APP_ROUTE_BUILDERS.jobDetail(application.job.id)"
+          :link-aria-label="
+            t('jobsPage.applied.openApplicationAria', {
+              title: application.job.title,
+              company: application.job.company,
+            })
+          "
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
+        >
+          <div class="card-body relative z-10">
+            <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
+              <h3 :class="CARD_TITLE_LG_CLASS">{{ application.job.title }}</h3>
+              <span :class="[BADGE_OUTLINE_SM_CLASS]">
+                {{ page.applicationStatusLabel(application.status) }}
+              </span>
+            </div>
+            <p class="font-medium text-secondary">{{ application.job.company }}</p>
+            <p :class="BODY_TEXT_XS_CLASS">
+              {{
+                t("jobsPage.applied.appliedOn", {
+                  date: page.formatDate(application.appliedDate),
+                })
+              }}
+            </p>
+          </div>
+        </UiGlassCard>
+      </SectionGrid>
+    </section>
   </PageScaffold>
 </template>

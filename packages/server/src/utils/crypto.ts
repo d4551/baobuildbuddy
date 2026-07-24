@@ -1,3 +1,5 @@
+const NUM_32 = 32;
+const NUM_4 = 4;
 /**
  * Cryptographic primitives for API key hashing and provider key encryption.
  * Uses Bun-native APIs and node:crypto exclusively. No external dependencies.
@@ -8,7 +10,7 @@ import { config } from "../config/env";
 
 const ENCRYPTION_KEY_RAW = config.encryptionKey;
 const ENCRYPTION_KEY_BYTES: Buffer | null = ENCRYPTION_KEY_RAW
-  ? Buffer.from(ENCRYPTION_KEY_RAW.padEnd(32, "\0").slice(0, 32), "utf8")
+  ? Buffer.from(ENCRYPTION_KEY_RAW.padEnd(NUM_32, "\0").slice(0, NUM_32), "utf8")
   : null;
 
 const IV_LENGTH = 12;
@@ -69,7 +71,7 @@ export function decryptProviderKey(ciphertext: string): string {
   if (!ciphertext.startsWith("enc:")) {
     throw new Error("Ciphertext missing encryption prefix");
   }
-  const combined = Buffer.from(ciphertext.slice(4), "base64");
+  const combined = Buffer.from(ciphertext.slice(NUM_4), "base64");
   const iv = combined.subarray(0, IV_LENGTH);
   const ct = combined.subarray(IV_LENGTH, combined.length - AUTH_TAG_LENGTH);
   const authTag = combined.subarray(combined.length - AUTH_TAG_LENGTH);

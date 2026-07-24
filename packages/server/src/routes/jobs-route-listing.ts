@@ -29,10 +29,11 @@ type JobRow = typeof jobs.$inferSelect;
 type SavedJobRow = typeof savedJobs.$inferSelect;
 type ApplicationRow = typeof applications.$inferSelect;
 type RouteErrorBody = { error: string };
+type GamificationAwardBody = { readonly xpAwarded: number; readonly reason: string };
 type SaveJobResult =
   | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
   | { status: null; body: { message: string; saved: SavedJobRow } }
-  | { status: typeof HTTP_STATUS_CREATED; body: SavedJobRow };
+  | { status: typeof HTTP_STATUS_CREATED; body: SavedJobRow & { gamification: GamificationAwardBody } };
 type NewApplicationBody = {
   id: string;
   jobId: string;
@@ -40,6 +41,7 @@ type NewApplicationBody = {
   appliedDate: string;
   notes: string;
   timeline: Array<{ status: string; date: string; notes: string }>;
+  gamification: GamificationAwardBody;
 };
 type CreateApplicationResult =
   | { status: typeof HTTP_STATUS_NOT_FOUND; body: RouteErrorBody }
@@ -156,14 +158,14 @@ export const saveJob = async (jobId: string): Promise<SaveJobResult> => {
   };
 
   await db.insert(savedJobs).values(newSaved);
-  gamificationService.trackActionFireAndForget(
+  const gamification = await gamificationService.trackAction(
     "jobsSaved",
     ROUTE_GAMIFICATION_XP.jobsSaved,
     "job_saved",
   );
   return {
     status: HTTP_STATUS_CREATED,
-    body: newSaved,
+    body: { ...newSaved, gamification },
   };
 };
 
@@ -224,14 +226,14 @@ export const createApplication = async (
   };
 
   await db.insert(applications).values(newApplication);
-  gamificationService.trackActionFireAndForget(
+  const gamification = await gamificationService.trackAction(
     "jobApplications",
     ROUTE_GAMIFICATION_XP.jobApplications,
     "job_applied",
   );
   return {
     status: HTTP_STATUS_CREATED,
-    body: newApplication,
+    body: { ...newApplication, gamification },
   };
 };
 

@@ -1,3 +1,10 @@
+const NUM_10000 = 10_000;
+const NUM_1400 = 1_400;
+const NUM_200 = 200;
+const NUM_300 = 300;
+const NUM_40 = 40;
+const NUM_400 = 400;
+const NUM_500 = 500;
 /**
  * Helpers for browser-record-visual-proof.ts (complexity split).
  */
@@ -45,7 +52,7 @@ const readDataTheme = async (page: Page): Promise<string | null> =>
 export const proveDashboardTheme = async (page: Page, viewportName: string): Promise<void> => {
   const beforeTheme = await readDataTheme(page);
   await page.locator("label.swap").first().click({ timeout: 5_000 });
-  await waitForPageReady(page, 500);
+  await waitForPageReady(page, NUM_500);
   const afterTheme = await readDataTheme(page);
   await writeOutput(`theme ${viewportName}: ${String(beforeTheme)} → ${String(afterTheme)}`);
   if (!beforeTheme || !afterTheme || beforeTheme === afterTheme) {
@@ -53,7 +60,7 @@ export const proveDashboardTheme = async (page: Page, viewportName: string): Pro
     process.exitCode = 1;
   }
   await page.locator("label.swap").first().click({ timeout: 5_000 });
-  await waitForPageReady(page, 300);
+  await waitForPageReady(page, NUM_300);
 };
 
 export const clickSafeMainButton = async (page: Page): Promise<boolean> =>
@@ -110,14 +117,14 @@ export const tourRoute = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await waitForPageReady(page, 1_400);
+  await waitForPageReady(page, NUM_1400);
   if (route.slug === "dashboard") {
     await proveDashboardTheme(page, viewport.name);
   }
   const clicked = await clickSafeMainButton(page);
-  await waitForPageReady(page, 400);
+  await waitForPageReady(page, NUM_400);
   await page.keyboard.press("Escape");
-  await waitForPageReady(page, 200);
+  await waitForPageReady(page, NUM_200);
   await assertNoDevtoolsHud(page, viewport.name, route.slug);
   await page.screenshot({
     path: join(stillsDir, `${viewport.name}-${route.slug}.png`),
@@ -161,13 +168,13 @@ export const finalizeVisualProof = async (input: {
     videoPath: resolvedVideo,
     videoBytes: videoStats?.size ?? 0,
     consoleErrorCount: input.consoleErrors.length,
-    consoleErrors: input.consoleErrors.slice(0, 40),
+    consoleErrors: input.consoleErrors.slice(0, NUM_40),
   };
   await Bun.write(join(input.outDir, "proof-report.json"), JSON.stringify(report, null, 2));
   await writeOutput(
     `browser-record-visual-proof: stills=${String(stillCount)} video=${resolvedVideo ?? "none"} bytes=${String(report.videoBytes)} consoleErrors=${String(input.consoleErrors.length)}`,
   );
-  if (!resolvedVideo || report.videoBytes < 10_000) {
+  if (!resolvedVideo || report.videoBytes < NUM_10000) {
     await writeError("Video proof missing or too small — headed recording failed.");
     process.exitCode = 1;
   }

@@ -92,7 +92,7 @@ function clampPageIndex(index: number): number {
 }
 
 function handleNavigationKeydown(event: KeyboardEvent): void {
-  if (!normalizedPageNumbers.value.length) return;
+  if (normalizedPageNumbers.value.length === 0) return;
 
   if (
     event.key !== "ArrowLeft" &&

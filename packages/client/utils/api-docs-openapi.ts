@@ -5,21 +5,21 @@ import type {
   OpenApiResponse,
   OpenApiSpec,
 } from "~/types/api-docs";
+import { isRecord } from "@bao/shared/utils/type-guards";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+type ApiPayload = Parameters<typeof isRecord>[0];
 
-const isOpenApiParameterIn = (value: unknown): value is OpenApiParameter["in"] =>
+const isOpenApiParameterIn = (value: ApiPayload): value is OpenApiParameter["in"] =>
   value === "path" || value === "query" || value === "header" || value === "cookie";
 
 const toOpenApiMediaExamples = (
-  value: unknown,
-): Record<string, { value?: unknown }> | undefined => {
+  value: ApiPayload,
+): Record<string, { value?: ApiPayload }> | undefined => {
   if (!isRecord(value)) {
     return;
   }
 
-  const output: Record<string, { value?: unknown }> = {};
+  const output: Record<string, { value?: ApiPayload }> = {};
   for (const [key, entry] of Object.entries(value)) {
     if (!isRecord(entry)) {
       continue;
@@ -31,45 +31,45 @@ const toOpenApiMediaExamples = (
   return Object.keys(output).length > 0 ? output : undefined;
 };
 
-const toOpenApiMediaType = (value: unknown): OpenApiMediaType | undefined => {
+const toOpenApiMediaType = (value: ApiPayload): OpenApiMediaType | undefined => {
   if (!isRecord(value)) {
     return;
   }
 
-  const mediaType: OpenApiMediaType = {};
+  const parsed: OpenApiMediaType = {};
   if (value.example !== undefined) {
-    mediaType.example = value.example;
+    parsed.example = value.example;
   }
 
   if (isRecord(value.schema)) {
-    mediaType.schema = value.schema;
+    parsed.schema = value.schema;
   }
 
   const examples = toOpenApiMediaExamples(value.examples);
   if (examples) {
-    mediaType.examples = examples;
+    parsed.examples = examples;
   }
 
-  return Object.keys(mediaType).length > 0 ? mediaType : undefined;
+  return Object.keys(parsed).length > 0 ? parsed : undefined;
 };
 
-const toOpenApiMediaTypeMap = (value: unknown): Record<string, OpenApiMediaType> | undefined => {
+const toOpenApiMediaTypeMap = (value: ApiPayload): Record<string, OpenApiMediaType> | undefined => {
   if (!isRecord(value)) {
     return;
   }
 
   const output: Record<string, OpenApiMediaType> = {};
   for (const [key, entry] of Object.entries(value)) {
-    const mediaType = toOpenApiMediaType(entry);
-    if (mediaType) {
-      output[key] = mediaType;
+    const parsed = toOpenApiMediaType(entry);
+    if (parsed) {
+      output[key] = parsed;
     }
   }
 
   return Object.keys(output).length > 0 ? output : undefined;
 };
 
-const toOpenApiRequestBody = (value: unknown): OpenApiRequestBody | undefined => {
+const toOpenApiRequestBody = (value: ApiPayload): OpenApiRequestBody | undefined => {
   if (!isRecord(value)) {
     return;
   }
@@ -85,7 +85,7 @@ const toOpenApiRequestBody = (value: unknown): OpenApiRequestBody | undefined =>
   return requestBody.required !== undefined || requestBody.content ? requestBody : undefined;
 };
 
-const toOpenApiResponses = (value: unknown): Record<string, OpenApiResponse> | undefined => {
+const toOpenApiResponses = (value: ApiPayload): Record<string, OpenApiResponse> | undefined => {
   if (!isRecord(value)) {
     return;
   }
@@ -109,12 +109,12 @@ const toOpenApiResponses = (value: unknown): Record<string, OpenApiResponse> | u
   return Object.keys(output).length > 0 ? output : undefined;
 };
 
-const toOpenApiPathMap = (value: unknown): Record<string, Record<string, unknown>> => {
+const toOpenApiPathMap = (value: ApiPayload): Record<string, Record<string, ApiPayload>> => {
   if (!isRecord(value)) {
     return {};
   }
 
-  const output: Record<string, Record<string, unknown>> = {};
+  const output: Record<string, Record<string, ApiPayload>> = {};
   for (const [path, entry] of Object.entries(value)) {
     if (isRecord(entry)) {
       output[path] = entry;
@@ -124,7 +124,7 @@ const toOpenApiPathMap = (value: unknown): Record<string, Record<string, unknown
   return output;
 };
 
-export const readOpenApiSpec = (value: unknown): OpenApiSpec | null => {
+export const readOpenApiSpec = (value: ApiPayload): OpenApiSpec | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -156,8 +156,8 @@ const dedupeParameters = (parameters: readonly OpenApiParameter[]): OpenApiParam
   return Array.from(unique.values()).filter((parameter) => parameter.name.length > 0);
 };
 
-export const getPathParameters = (pathItem: Record<string, unknown>): OpenApiParameter[] => {
-  const rawParameters = Array.isArray(pathItem.parameters) ? pathItem.parameters : [];
+export const getPathParameters = (pathItem: Record<string, ApiPayload>): OpenApiParameter[] => {
+  const rawParameters: ApiPayload[] = Array.isArray(pathItem.parameters) ? pathItem.parameters : [];
   const normalized = rawParameters
     .filter((parameter): parameter is OpenApiParameter => {
       if (!isRecord(parameter)) {
@@ -179,14 +179,14 @@ export const getPathParameters = (pathItem: Record<string, unknown>): OpenApiPar
 };
 
 export const getOperationParameters = (
-  value: unknown,
+  value: ApiPayload,
   pathParameters: readonly OpenApiParameter[],
 ): OpenApiParameter[] => {
   if (!isRecord(value)) {
     return [];
   }
 
-  const parameters = Array.isArray(value.parameters) ? value.parameters : [];
+  const parameters: ApiPayload[] = Array.isArray(value.parameters) ? value.parameters : [];
   const operationParameters = parameters.filter((parameter): parameter is OpenApiParameter => {
     if (!isRecord(parameter)) {
       return false;
@@ -202,8 +202,9 @@ export const getOperationParameters = (
   return dedupeParameters([...pathParameters, ...operationParameters]);
 };
 
-export const readOpenApiRequestBody = (value: unknown): OpenApiRequestBody | undefined =>
+export const readOpenApiRequestBody = (value: ApiPayload): OpenApiRequestBody | undefined =>
   toOpenApiRequestBody(value);
 
-export const readOpenApiResponses = (value: unknown): Record<string, OpenApiResponse> | undefined =>
-  toOpenApiResponses(value);
+export const readOpenApiResponses = (
+  value: ApiPayload,
+): Record<string, OpenApiResponse> | undefined => toOpenApiResponses(value);

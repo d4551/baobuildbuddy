@@ -304,64 +304,79 @@ export const validateNurseryUiRatchet = (
   }
 };
 
+const validateRecordOrPush = (
+  value: SoftenerJsonValue | undefined,
+  push: (message: string) => void,
+  missingMessage: string,
+  validate: (record: { [key: string]: SoftenerJsonValue }) => void,
+): void => {
+  if (!isSoftenerRecord(value)) {
+    push(missingMessage);
+    return;
+  }
+  validate(value);
+};
+
 export const validateGroupRatchets = (
   rules: { [key: string]: SoftenerJsonValue },
   violations: ValidationViolation[],
   biomePath: string,
   push: (message: string) => void,
 ): void => {
-  const complexity = rules.complexity;
-  if (!isSoftenerRecord(complexity)) {
-    push("linter.rules.complexity must be a rule object with noVoid/complexity ceilings.");
-  } else {
-    validateComplexityRatchet(complexity, violations, biomePath);
-  }
-  const style = rules.style;
-  if (!isSoftenerRecord(style)) {
-    push("linter.rules.style must be a rule object with UI/control ratchets.");
-  } else {
-    validateStyleUiRatchet(style, violations, biomePath);
-    validateStyleAdditionsRatchet(style, violations, biomePath);
-  }
-  const suspicious = rules.suspicious;
-  if (!isSoftenerRecord(suspicious)) {
-    push("linter.rules.suspicious must be a rule object.");
-  } else {
-    validateSuspiciousUiRatchet(suspicious, violations, biomePath);
-    validateSuspiciousAdditionsRatchet(suspicious, violations, biomePath);
-  }
-  const correctness = rules.correctness;
-  if (!isSoftenerRecord(correctness)) {
-    push("linter.rules.correctness must be a rule object with unused/exhaustive ratchets.");
-  } else {
-    validateCorrectnessUiRatchet(correctness, violations, biomePath);
-  }
-  const security = rules.security;
-  if (!isSoftenerRecord(security)) {
-    push("linter.rules.security must be a rule object.");
-  } else {
-    validateSecurityUiRatchet(security, violations, biomePath);
-  }
-  const a11y = rules.a11y;
-  if (!isSoftenerRecord(a11y)) {
-    push("linter.rules.a11y must be a rule object with full a11y ratchets.");
-  } else {
-    validateA11yRatchet(a11y, violations, biomePath);
-  }
+  validateRecordOrPush(
+    rules.complexity,
+    push,
+    "linter.rules.complexity must be a rule object with noVoid/complexity ceilings.",
+    (complexity) => validateComplexityRatchet(complexity, violations, biomePath),
+  );
+  validateRecordOrPush(
+    rules.style,
+    push,
+    "linter.rules.style must be a rule object with UI/control ratchets.",
+    (style) => {
+      validateStyleUiRatchet(style, violations, biomePath);
+      validateStyleAdditionsRatchet(style, violations, biomePath);
+    },
+  );
+  validateRecordOrPush(
+    rules.suspicious,
+    push,
+    "linter.rules.suspicious must be a rule object.",
+    (suspicious) => {
+      validateSuspiciousUiRatchet(suspicious, violations, biomePath);
+      validateSuspiciousAdditionsRatchet(suspicious, violations, biomePath);
+    },
+  );
+  validateRecordOrPush(
+    rules.correctness,
+    push,
+    "linter.rules.correctness must be a rule object with unused/exhaustive ratchets.",
+    (correctness) => validateCorrectnessUiRatchet(correctness, violations, biomePath),
+  );
+  validateRecordOrPush(
+    rules.security,
+    push,
+    "linter.rules.security must be a rule object.",
+    (security) => validateSecurityUiRatchet(security, violations, biomePath),
+  );
+  validateRecordOrPush(
+    rules.a11y,
+    push,
+    "linter.rules.a11y must be a rule object with full a11y ratchets.",
+    (a11y) => validateA11yRatchet(a11y, violations, biomePath),
+  );
   const performance = rules.performance;
   if (!isSoftenerRecord(performance) || performance.noBarrelFile !== "error") {
     push(
       'linter.rules.performance.noBarrelFile must be "error" (info/off/warn/delete is softener).',
     );
   }
-  const nursery = rules.nursery;
-  if (!isSoftenerRecord(nursery)) {
-    push(
-      "linter.rules.nursery must opt into floating-promise / vue / drizzle / playwright / UI gates.",
-    );
-  } else {
-    validateNurseryUiRatchet(nursery, violations, biomePath);
-  }
+  validateRecordOrPush(
+    rules.nursery,
+    push,
+    "linter.rules.nursery must opt into floating-promise / vue / drizzle / playwright / UI gates.",
+    (nursery) => validateNurseryUiRatchet(nursery, violations, biomePath),
+  );
 };
 
 export const MAX_LINES_PER_FUNCTION_CEILING = MAX_LINES_PER_FUNCTION;

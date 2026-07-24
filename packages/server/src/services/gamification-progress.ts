@@ -14,6 +14,16 @@ import {
   type WeeklyDaySummary,
   type WeeklyProgressResult,
 } from "./gamification-definitions";
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
+const NUM_14 = 14;
+const NUM_3 = 3;
+const NUM_30 = 30;
+const NUM_7 = 7;
+const RATIO_1_0 = 1.0;
+const RATIO_1_25 = 1.25;
+const RATIO_1_5 = 1.5;
+const RATIO_2_0 = 2.0;
+const RATIO_3_0 = 3.0;
 
 export function typeSafeStats(
   stats: Partial<GamificationStats> | null | undefined,
@@ -80,14 +90,14 @@ export function getNumericStat(stats: NumericGamificationStats, key: string): nu
 }
 
 const STREAK_MULTIPLIER_STEPS = [
-  [30, 3.0],
-  [14, 2.0],
-  [7, 1.5],
-  [3, 1.25],
+  [NUM_30, RATIO_3_0],
+  [NUM_14, RATIO_2_0],
+  [NUM_7, RATIO_1_5],
+  [NUM_3, RATIO_1_25],
 ] as const;
 
 export function getStreakMultiplier(currentStreak: number): number {
-  return STREAK_MULTIPLIER_STEPS.find(([threshold]) => currentStreak >= threshold)?.[1] ?? 1.0;
+  return STREAK_MULTIPLIER_STEPS.find(([threshold]) => currentStreak >= threshold)?.[1] ?? RATIO_1_0;
 }
 
 export function areAchievementRequirementsMet(
@@ -210,19 +220,19 @@ export function buildMonthlyStats(input: {
 }) {
   const actionHistory = typeSafeStats(input.stats).actionHistory;
   const now = new Date();
-  const monthAgo = new Date(now.getTime() - 30 * MS_PER_DAY);
+  const monthAgo = new Date(now.getTime() - NUM_30 * MS_PER_DAY);
   const monthActions = filterActionsByDate(actionHistory, monthAgo, now);
   const totalXP = monthActions.reduce((sum, action) => sum + (action.xpGained || 0), 0);
 
   return {
     totalXP,
-    levelsGained: Math.floor(totalXP / 100),
+    levelsGained: Math.floor(totalXP / PERCENT_MAX),
     achievementsUnlocked: monthActions.filter((action) =>
       action.action?.startsWith("Achievement unlocked:"),
     ).length,
     challengesCompleted: countCompletedChallenges(input.dailyChallenges, monthAgo, now),
     actionsCount: monthActions.length,
-    streakDays: Math.min(input.currentStreak, 30),
+    streakDays: Math.min(input.currentStreak, NUM_30),
   };
 }
 

@@ -17,7 +17,7 @@ import {
   resolveProviderMetadata,
 } from "~/utils/ai-control-plane";
 
-type Translate = (key: string, params?: Record<string, unknown>) => string;
+type Translate = (key: string, params?: Record<string, string | number>) => string;
 
 const HEALTH_LABEL_KEY_BY_VALUE: Record<ProviderHealth, string> = {
   healthy: "aiDashboard.health.healthy",
@@ -139,7 +139,7 @@ export function createDashboardStatsPresentation(
 }
 
 export function buildAIDashboardViewModel(input: {
-  dashboardBootstrapError: Ref<unknown>;
+  dashboardBootstrapError: Ref<Error | undefined>;
   loading: ComputedRef<boolean>;
   providerPresentation: ReturnType<typeof createDashboardProviderPresentation>;
   providerStats: ComputedRef<DashboardStats | null>;

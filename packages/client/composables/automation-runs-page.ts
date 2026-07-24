@@ -67,9 +67,13 @@ export function useAutomationRunsPage() {
   const errorMessage = computed(() =>
     error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",
   );
-  const sortedRuns = computed(() =>
-    sortRunsByStatusThenCreated((runs.value || []).map((run) => liveRunById.value[run.id] || run)),
-  );
+  const sortedRuns = computed(() => {
+    const mergedRuns: RpaRunExecutionEnvelope[] = [];
+    for (const runRecord of runs.value || []) {
+      mergedRuns.push(liveRunById.value[runRecord.id] || runRecord);
+    }
+    return sortRunsByStatusThenCreated(mergedRuns);
+  });
   const formatters = createAutomationRunsFormatters(
     t,
     () => locale.value,

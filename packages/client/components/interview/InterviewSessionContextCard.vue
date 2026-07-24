@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  UI_CHIP_PREVIEW_LIMIT,
+} from "~/constants/numeric-ui";
 import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
@@ -20,12 +23,12 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const focusAreas = computed(() =>
-  props.activeSession.config.focusAreas.filter((entry) => entry.trim().length > 0).slice(0, 6),
+  props.activeSession.config.focusAreas.filter((entry) => entry.trim().length > 0).slice(0, UI_CHIP_PREVIEW_LIMIT),
 );
 
 const targetSignals = computed(() => {
   const signals = props.targetJob?.technologies?.filter((entry) => entry.trim().length > 0) ?? [];
-  return signals.slice(0, 6);
+  return signals.slice(0, UI_CHIP_PREVIEW_LIMIT);
 });
 
 const interviewerPersona = computed(() => props.activeSession.interviewerPersona);

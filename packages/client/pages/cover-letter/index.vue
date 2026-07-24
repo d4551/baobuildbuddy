@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+  UI_STAGGER_INDEX_MAX,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesCoverLetterIndexPage" });
 
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
@@ -177,7 +182,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
     <LoadingSkeleton
       v-if="bootstrapPending || (loading && coverLetters.length === 0)"
       variant="cards"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <BootstrapErrorAlert
@@ -210,7 +215,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         :key="letter.id"
         :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
         :link-aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
-        :stagger-index="Math.min(index, 11)"
+        :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
       >
         <div class="card-body relative z-10">
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

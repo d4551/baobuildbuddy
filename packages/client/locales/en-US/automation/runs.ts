@@ -12,7 +12,6 @@ const automationruns = {
       allStatuses: "All statuses",
       tableAriaLabel: "Automation run history",
       emptyJobId: "N/A",
-      emptyState: "No runs found.",
       emptyStateTitle: "No automation runs yet",
       emptyStateDescription:
         "Start a scraper, job-apply, or email automation from the hub to populate run history.",

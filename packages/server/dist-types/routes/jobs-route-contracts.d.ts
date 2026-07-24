@@ -113,10 +113,18 @@ export declare const jobsListResponseSchema: import("typebox").TObject<{
     limit: import("typebox").TNumber;
     total: import("typebox").TNumber;
 }>;
+export declare const gamificationAwardResponseSchema: import("typebox").TObject<{
+    xpAwarded: import("typebox").TNumber;
+    reason: import("typebox").TString;
+}>;
 export declare const savedJobResponseSchema: import("typebox").TObject<{
     id: import("typebox").TString;
     jobId: import("typebox").TString;
     savedAt: import("typebox").TString;
+    gamification: import("typebox").TOptional<import("typebox").TObject<{
+        xpAwarded: import("typebox").TNumber;
+        reason: import("typebox").TString;
+    }>>;
 }>;
 export declare const applicationResponseSchema: import("typebox").TObject<{
     id: import("typebox").TString;
@@ -127,6 +135,10 @@ export declare const applicationResponseSchema: import("typebox").TObject<{
     timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
     createdAt: import("typebox").TOptional<import("typebox").TString>;
     updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    gamification: import("typebox").TOptional<import("typebox").TObject<{
+        xpAwarded: import("typebox").TNumber;
+        reason: import("typebox").TString;
+    }>>;
 }>;
 export declare const jobsRefreshResponseSchema: import("typebox").TObject<{
     message: import("typebox").TString;
@@ -218,6 +230,10 @@ export declare const saveJobResponses: {
             id: import("typebox").TString;
             jobId: import("typebox").TString;
             savedAt: import("typebox").TString;
+            gamification: import("typebox").TOptional<import("typebox").TObject<{
+                xpAwarded: import("typebox").TNumber;
+                reason: import("typebox").TString;
+            }>>;
         }>>;
         id: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
@@ -227,6 +243,10 @@ export declare const saveJobResponses: {
         id: import("typebox").TString;
         jobId: import("typebox").TString;
         savedAt: import("typebox").TString;
+        gamification: import("typebox").TOptional<import("typebox").TObject<{
+            xpAwarded: import("typebox").TNumber;
+            reason: import("typebox").TString;
+        }>>;
     }>;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -291,6 +311,10 @@ export declare const applyJobResponses: {
             timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
             createdAt: import("typebox").TOptional<import("typebox").TString>;
             updatedAt: import("typebox").TOptional<import("typebox").TString>;
+            gamification: import("typebox").TOptional<import("typebox").TObject<{
+                xpAwarded: import("typebox").TNumber;
+                reason: import("typebox").TString;
+            }>>;
         }>>;
         id: import("typebox").TOptional<import("typebox").TString>;
         jobId: import("typebox").TOptional<import("typebox").TString>;
@@ -308,6 +332,10 @@ export declare const applyJobResponses: {
         timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        gamification: import("typebox").TOptional<import("typebox").TObject<{
+            xpAwarded: import("typebox").TNumber;
+            reason: import("typebox").TString;
+        }>>;
     }>;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -327,6 +355,10 @@ export declare const updateApplicationResponses: {
         timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        gamification: import("typebox").TOptional<import("typebox").TObject<{
+            xpAwarded: import("typebox").TNumber;
+            reason: import("typebox").TString;
+        }>>;
     }>;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -346,6 +378,10 @@ export declare const applicationsListResponses: {
         timeline: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TUnknown>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        gamification: import("typebox").TOptional<import("typebox").TObject<{
+            xpAwarded: import("typebox").TNumber;
+            reason: import("typebox").TString;
+        }>>;
     }>>;
 };
 export declare const recommendationsResponses: {

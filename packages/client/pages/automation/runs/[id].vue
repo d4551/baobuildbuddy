@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
+
 defineOptions({ name: "PagesAutomationRunsDetailPage" });
 
 import { OUTLINE_ACTION_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
@@ -96,6 +100,6 @@ useSeoMeta({
       />
     </div>
 
-    <LoadingSkeleton v-else :lines="8" />
+    <LoadingSkeleton v-else :lines="LOADING_SKELETON_LINES.form" />
   </PageScaffold>
 </template>

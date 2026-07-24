@@ -24,6 +24,7 @@ import {
 import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import type { JobApplyStrategy } from "./strategy-registry";
 import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 
 const buildResult = (
   success: boolean,
@@ -67,41 +68,51 @@ const emitRuntimeFailure = (
   return 1;
 };
 
-const detectAndFollowHostedApplyPage = async (page: Page): Promise<void> => {
+type FollowApplyLinkOutcome =
+  | { readonly kind: "already_hosted"; readonly url: string }
+  | { readonly kind: "followed"; readonly url: string }
+  | { readonly kind: "no_link"; readonly url: string }
+  | { readonly kind: "nav_failed"; readonly url: string; readonly href: string };
+
+const detectAndFollowHostedApplyPage = async (page: Page): Promise<FollowApplyLinkOutcome> => {
   const currentUrl = page.url();
   if (currentUrl.includes("greenhouse.io") || currentUrl.includes("lever.co")) {
-    return;
+    return { kind: "already_hosted", url: currentUrl };
   }
 
   const locator = page.locator(APPLY_LINK_SELECTOR).first();
   const countResult = await settle(locator.count());
   if (countResult.status === "rejected" || countResult.value === 0) {
-    return;
+    return { kind: "no_link", url: currentUrl };
   }
 
   const hrefResult = await settle(locator.getAttribute("href"));
   if (hrefResult.status === "rejected" || !hrefResult.value) {
-    return;
+    return { kind: "no_link", url: currentUrl };
   }
 
   const href = hrefResult.value;
   const isKnownHostedApplyPage =
     href.includes("greenhouse") || href.includes("lever") || href.includes("apply");
   if (!isKnownHostedApplyPage) {
-    return;
+    return { kind: "no_link", url: currentUrl };
   }
 
-  await settle(
+  const navigateResult = await settle(
     page.goto(href, {
       waitUntil: "domcontentloaded",
       timeout: automationRuntimeConfig.navigationTimeoutMs,
     }),
   );
+  if (navigateResult.status === "rejected") {
+    return { kind: "nav_failed", url: page.url(), href };
+  }
   await settle(
     page.waitForLoadState("domcontentloaded", {
       timeout: automationRuntimeConfig.secondaryNavigationDelayMs,
     }),
   );
+  return { kind: "followed", url: page.url() };
 };
 
 const countFormFields = async (page: Page): Promise<number> => {
@@ -168,7 +179,7 @@ export const initializeApplicationPage = async (
   addStep(state.steps, "init", "ok", `headless=${String(state.payload.settings.headless)}`);
 
   const timeoutMs = Math.max(
-    state.payload.settings.defaultTimeout * 1_000,
+    state.payload.settings.defaultTimeout * MS_PER_SECOND,
     automationRuntimeConfig.navigationTimeoutMs,
   );
   const navigateResult = await withRetry(() =>
@@ -201,8 +212,31 @@ export const initializeApplicationPage = async (
   });
 
   emitProgress(state.emitter, "follow_apply_link", JOB_APPLY_STEP_INDEX.followApplyLink);
-  await detectAndFollowHostedApplyPage(state.session.page);
-  addStep(state.steps, "follow_apply_link", "ok", state.session.page.url());
+  const followOutcome = await detectAndFollowHostedApplyPage(state.session.page);
+  if (followOutcome.kind === "nav_failed") {
+    return closeWithRuntimeFailure(
+      state,
+      `Unable to follow hosted apply link: ${followOutcome.href}`,
+      JOB_APPLY_STEP_INDEX.followApplyLink,
+    );
+  }
+  if (followOutcome.kind === "already_hosted") {
+    addStep(
+      state.steps,
+      "follow_apply_link",
+      "ok",
+      `Already on hosted apply page: ${followOutcome.url}`,
+    );
+  } else if (followOutcome.kind === "followed") {
+    addStep(state.steps, "follow_apply_link", "ok", `Followed apply link to ${followOutcome.url}`);
+  } else {
+    addStep(
+      state.steps,
+      "follow_apply_link",
+      "ok",
+      `No hosted apply link found; continuing on listing page: ${followOutcome.url}`,
+    );
+  }
   return null;
 };
 

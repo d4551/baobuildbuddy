@@ -1,3 +1,8 @@
+const NUM_180 = 180;
+const NUM_200 = 200;
+const NUM_600 = 600;
+const NUM_8 = 8;
+const NUM_80 = 80;
 /**
  * Interaction actions for browser-interaction-burndown (complexity + size split).
  */
@@ -17,7 +22,7 @@ export type Finding = {
 };
 
 const NON_SLUG_RE = /[^\w-]+/gu;
-export const slugify = (value: string): string => value.replace(NON_SLUG_RE, "_").slice(0, 80);
+export const slugify = (value: string): string => value.replace(NON_SLUG_RE, "_").slice(0, NUM_80);
 
 export const mapSequential = async <TItem, TResult>(
   items: readonly TItem[],
@@ -76,7 +81,7 @@ export const openRoute = async (
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
-  await waitForPageReady(page, 600);
+  await waitForPageReady(page, NUM_600);
 };
 
 const pushShellFinding = async (
@@ -106,7 +111,7 @@ const shellFindingSpecs = (
   {
     action: "overflow-x",
     detail: `document overflowX=${String(shell.overflowX)}`,
-    condition: shell.overflowX > 8,
+    condition: shell.overflowX > NUM_8,
   },
   { action: "truncated-chrome", detail: "navbar ellipsis gut", condition: shell.truncatedChrome },
   {
@@ -171,7 +176,7 @@ const listClickableControlLabels = async (
               const text = control.textContent?.replace(/\s+/gu, " ").trim() ?? "";
               return aria.length > 0 ? aria : text;
             })
-            .filter((label) => label.length > 0 && label.length < 80),
+            .filter((label) => label.length > 0 && label.length < NUM_80),
         ),
       ].slice(0, limit);
     }, maxClicks),
@@ -234,7 +239,7 @@ const clickOneLabel = async (
       );
     }
   }
-  await waitForPageReady(page, 180);
+  await waitForPageReady(page, NUM_180);
   const origin = `${clientBase}${route}`;
   if (!page.url().startsWith(origin)) {
     await openRoute(page, clientBase, route, consoleBucket, pageErrorBucket);
@@ -299,7 +304,7 @@ export const probeFirstTextInput = async (
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
   await input.fill("burndown-probe");
-  await waitForPageReady(page, 200);
+  await waitForPageReady(page, NUM_200);
   if (pageErrorBucket.length > 0) {
     await captureFinding(
       page,

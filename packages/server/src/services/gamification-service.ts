@@ -1,4 +1,5 @@
 import { MS_PER_DAY } from "@bao/shared/constants/time";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { getLevelForXP } from "@bao/shared/constants/xp-levels";
 import type {
   Achievement,
@@ -199,7 +200,7 @@ export class GamificationService {
     statKey: keyof GamificationStats,
     xpAmount: number,
     reason: string,
-  ): Promise<void> {
+  ): Promise<{ readonly xpAwarded: number; readonly reason: string }> {
     const progress = await this.getProgress();
     const currentStats = toNumericStats(progress.stats);
     const updatedStats: Partial<GamificationStats> = {
@@ -216,6 +217,7 @@ export class GamificationService {
 
     await this.awardXP(xpAmount, reason);
     await this.checkAchievements(updatedStats);
+    return { xpAwarded: xpAmount, reason };
   }
 
   trackActionFireAndForget(
@@ -229,7 +231,7 @@ export class GamificationService {
           gamificationLogger.error("trackAction failed", {
             statKey,
             reason,
-            err: result.reason instanceof Error ? result.reason.message : String(result.reason),
+            err: toErrorMessage(result.reason),
           });
         }
       },

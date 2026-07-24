@@ -8,7 +8,7 @@ import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json
 
 /**
  * Dead i18n key detector — flags en-US catalog leaf keys that are never
- * referenced as string literals in any consumer (components, pages,
+ * referenced as quoted string literals in any consumer (components, pages,
  * composables, utils, layouts, middleware, plugins, constants, app/error).
  *
  * Root cause this locks forward: an orphan catalog block
@@ -20,6 +20,12 @@ import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json
  * Dynamic-key consumers (e.g. `t(\`apiDocs.state.${state}\`)`) are allowlisted
  * via `scripts/no-dead-i18n-keys-allowlist.json` (SSOT-declared, with the
  * dynamic prefix that is actually consumed and a justification reason).
+ *
+ * Allowlist hygiene is gated too: exact-key entries must carry a structured
+ * `expires` date, expired entries fail, entries whose key is now literally
+ * consumed fail as stale (the consumer got wired — prune the entry), duplicate
+ * entries fail, and the total entry count is ratchet-capped at
+ * MAX_ALLOWLIST_ENTRIES (may only shrink).
  */
 
 type CatalogNode =
@@ -43,6 +49,14 @@ const isLocaleDefinition = (filePath: string): boolean =>
 
 const ALLOWLIST_PATH = "scripts/no-dead-i18n-keys-allowlist.json";
 
+/**
+ * Allowlist size ratchet: the entry count may never exceed this ceiling.
+ * Lower the constant whenever entries are pruned; never raise it.
+ */
+const MAX_ALLOWLIST_ENTRIES = 196;
+
+const EXPIRES_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
+
 const collectLeafPaths = (value: CatalogNode, prefix = ""): string[] => {
   if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return prefix.length > 0 ? [prefix] : [];
@@ -60,6 +74,7 @@ const collectLeafPaths = (value: CatalogNode, prefix = ""): string[] => {
 type AllowlistEntry = {
   readonly key: string;
   readonly reason: string;
+  readonly expires?: string;
 };
 
 const isAllowlistEntry = (value: JsonValue): value is AllowlistEntry => {
@@ -67,7 +82,10 @@ const isAllowlistEntry = (value: JsonValue): value is AllowlistEntry => {
     return false;
   }
   const record = value;
-  return typeof record["key"] === "string" && typeof record["reason"] === "string";
+  if (typeof record.key !== "string" || typeof record.reason !== "string") {
+    return false;
+  }
+  return record.expires === undefined || typeof record.expires === "string";
 };
 
 const loadAllowlist = async (): Promise<AllowlistEntry[]> => {
@@ -128,41 +146,94 @@ const startsWithDynamicPrefix = (
   return false;
 };
 
-const collectViolations = async (): Promise<ValidationViolation[]> => {
-  const referenceKeys = collectLeafPaths(enUSCatalog);
-  const allowlist = await loadAllowlist();
-
-  const consumerFiles = (
-    await collectProjectFileEntries({
-      scanRoots: [...CONSUMER_SCAN_ROOTS],
-    })
-  ).filter((entry) => !isLocaleDefinition(entry.filePath));
-
-  // Single concatenated corpus: a key is "consumed" if its dotted path appears
-  // as a string literal, OR its prefix is dynamically interpolated. `t("a.b.c")`
-  // and a constants file holding `c: "a.b.c"` surface the literal path string;
-  // `t(`a.b.${x}`)` surfaces a dynamic prefix `a.b`.
-  const corpus = consumerFiles.map((entry) => entry.content).join("\n");
-  return findDeadKeys(referenceKeys, corpus, allowlist);
-};
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
 /**
- * Pure dead-key detector — given key paths, a consumer corpus, and an
- * allowlist, returns violations for keys that are neither literally
- * consumed, dynamically prefixed, nor allowlisted. Extracted for testing.
+ * A key counts as consumed only when it appears as a complete quoted string
+ * literal (single, double, or backtick). Bare substring matches — comments,
+ * prose, or prefixes of longer keys — do not count.
  */
-const findDeadKeys = (
+const isLiterallyConsumed = (keyPath: string, corpus: string): boolean =>
+  new RegExp(`["'\`]${escapeRegExp(keyPath)}["'\`]`, "u").test(corpus);
+
+const allowlistViolation = (message: string): ValidationViolation => ({
+  filePath: ALLOWLIST_PATH,
+  line: 1,
+  message,
+});
+
+const lintAllowlistEntry = (
+  entry: AllowlistEntry,
+  corpus: string,
+  today: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  const isWildcard = entry.key.endsWith(".*");
+  if (!isWildcard && entry.expires === undefined) {
+    violations.push(
+      allowlistViolation(
+        `Allowlist entry "${entry.key}" has no "expires" date. Exact-key debt must be time-boxed (YYYY-MM-DD).`,
+      ),
+    );
+  }
+  if (entry.expires !== undefined && !EXPIRES_PATTERN.test(entry.expires)) {
+    violations.push(
+      allowlistViolation(`Allowlist entry "${entry.key}" has malformed "expires" (need YYYY-MM-DD).`),
+    );
+  }
+  if (entry.expires !== undefined && EXPIRES_PATTERN.test(entry.expires) && entry.expires < today) {
+    violations.push(
+      allowlistViolation(
+        `Allowlist entry "${entry.key}" expired ${entry.expires}. Resolve the key (wire or delete) instead of extending debt.`,
+      ),
+    );
+  }
+  if (!isWildcard && isLiterallyConsumed(entry.key, corpus)) {
+    violations.push(
+      allowlistViolation(
+        `Stale allowlist entry "${entry.key}": the key is literally consumed. Remove the entry so the gate protects it.`,
+      ),
+    );
+  }
+  return violations;
+};
+
+const lintAllowlist = (
+  allowlist: readonly AllowlistEntry[],
+  corpus: string,
+  today: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  if (allowlist.length > MAX_ALLOWLIST_ENTRIES) {
+    violations.push(
+      allowlistViolation(
+        `Allowlist has ${allowlist.length} entries, above the ratchet cap of ${MAX_ALLOWLIST_ENTRIES}. Prune entries; the cap may only shrink.`,
+      ),
+    );
+  }
+  const seen = new Set<string>();
+  for (const entry of allowlist) {
+    if (seen.has(entry.key)) {
+      violations.push(allowlistViolation(`Duplicate allowlist entry "${entry.key}".`));
+    }
+    seen.add(entry.key);
+    violations.push(...lintAllowlistEntry(entry, corpus, today));
+  }
+  return violations;
+};
+
+const collectDeadKeyViolations = (
   keyPaths: readonly string[],
   corpus: string,
   allowlist: readonly AllowlistEntry[],
+  dynamicPrefixes: ReadonlySet<string>,
 ): ValidationViolation[] => {
-  const dynamicPrefixes = collectDynamicPrefixes(corpus);
   const violations: ValidationViolation[] = [];
   for (const keyPath of keyPaths) {
     if (matchesAllowlist(keyPath, allowlist)) {
       continue;
     }
-    if (corpus.includes(keyPath)) {
+    if (isLiterallyConsumed(keyPath, corpus)) {
       continue;
     }
     if (startsWithDynamicPrefix(keyPath, dynamicPrefixes)) {
@@ -175,6 +246,45 @@ const findDeadKeys = (
     });
   }
   return violations;
+};
+
+const collectViolations = async (): Promise<ValidationViolation[]> => {
+  const referenceKeys = collectLeafPaths(enUSCatalog);
+  const allowlist = await loadAllowlist();
+
+  const consumerFiles = (
+    await collectProjectFileEntries({
+      scanRoots: [...CONSUMER_SCAN_ROOTS],
+    })
+  ).filter((entry) => !isLocaleDefinition(entry.filePath));
+
+  // Single concatenated corpus: a key is "consumed" if its dotted path appears
+  // as a quoted string literal, OR its prefix is dynamically interpolated.
+  // `t("a.b.c")` and a constants file holding `c: "a.b.c"` surface the literal
+  // path string; `t(`a.b.${x}`)` surfaces a dynamic prefix `a.b`.
+  const corpus = consumerFiles.map((entry) => entry.content).join("\n");
+  const today = new Date().toISOString().slice(0, 10);
+  return findDeadKeys(referenceKeys, corpus, allowlist, today);
+};
+
+/**
+ * Pure dead-key detector — given key paths, a consumer corpus, an allowlist,
+ * and today's date (YYYY-MM-DD), returns violations for keys that are neither
+ * literally consumed, dynamically prefixed, nor allowlisted, plus violations
+ * for allowlist hygiene (oversize, duplicates, missing/malformed/expired
+ * `expires`, stale entries). Extracted for testing.
+ */
+const findDeadKeys = (
+  keyPaths: readonly string[],
+  corpus: string,
+  allowlist: readonly AllowlistEntry[],
+  today: string,
+): ValidationViolation[] => {
+  const dynamicPrefixes = collectDynamicPrefixes(corpus);
+  return [
+    ...lintAllowlist(allowlist, corpus, today),
+    ...collectDeadKeyViolations(keyPaths, corpus, allowlist, dynamicPrefixes),
+  ];
 };
 
 if (import.meta.main) {

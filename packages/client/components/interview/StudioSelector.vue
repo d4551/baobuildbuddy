@@ -251,7 +251,7 @@ function studioLocationLabel(location: string): string {
         />
       </div>
 
-      <ul class="menu" :id="listboxId" role="listbox" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
+      <ul class="menu" :id="listboxId" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
         <li v-for="(studio, index) in filteredStudios" :key="studio.id">
           <button 
             :id="optionId(studio.id)"

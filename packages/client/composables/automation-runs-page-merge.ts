@@ -1,11 +1,9 @@
-/**
- * Pure merge/progress helpers for automation runs list (live WS events).
- */
 import {
   AUTOMATION_RUN_STATUSES,
   type AutomationRunStatus,
 } from "@bao/shared/constants/automation";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
   AUTOMATION_RUN_STATUSES;
@@ -33,7 +31,7 @@ const computeProgressFromSteps = (
   ) {
     return 0;
   }
-  return Math.max(0, Math.min(100, Math.round((currentStep / totalSteps) * 100)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round((currentStep / totalSteps) * PERCENT_MAX)));
 };
 
 const mergeRunProgressEvent = (
@@ -66,7 +64,7 @@ const mergeRunResultEvent = (
     status: event.result.success ? RUN_STATUS_SUCCESS : RUN_STATUS_ERROR,
     output: event.result,
     error: event.result.success ? null : event.result.error,
-    progress: 100,
+    progress: PERCENT_MAX,
     currentStep: outputSteps,
     totalSteps: outputSteps,
     completedAt: event.timestamp,

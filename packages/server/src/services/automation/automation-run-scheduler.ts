@@ -1,4 +1,5 @@
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
@@ -30,7 +31,7 @@ export class AutomationRunScheduler {
         (error) => {
           automationSchedulerLogger.error(
             "[automation] scheduled run execution failed",
-            error instanceof Error ? error.message : String(error),
+            toErrorMessage(error),
           );
         },
       );

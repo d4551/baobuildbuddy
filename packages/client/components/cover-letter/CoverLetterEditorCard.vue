@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
@@ -13,7 +14,7 @@ const contentText = defineModel<string>("contentText", { required: true });
 
 defineProps<{
   contentCharacterCount: number;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 }>();
 
 const emit = defineEmits<{
@@ -27,7 +28,7 @@ const emit = defineEmits<{
     <div class="card-body">
       <h2 class="card-title">{{ t("coverLetterDetailPage.editor.title") }}</h2>
 
-      <div class="alert alert-info alert-soft" role="status">
+      <div class="alert alert-soft" :class="[ALERT_VARIANT_CLASS.info]" role="status">
         <IconInfoCircle :class="[ICON_SIZE_CLASS[5]]"/>
         <span>{{ t("coverLetterDetailPage.editor.info") }}</span>
       </div>

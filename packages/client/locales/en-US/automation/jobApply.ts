@@ -2,6 +2,9 @@ const automationjobApply = {
   automation: {
     jobApply: {
       title: "Job Application Automation",
+      bootstrapError: "Failed to load job application automation.",
+      bootstrapRetry: "Retry",
+      bootstrapRetryAria: "Retry loading job application automation",
       emptyResumesTitle: "Resume required",
       emptyResumesDescription:
         "Create a resume before running job-apply automation. The run needs a selected resume.",

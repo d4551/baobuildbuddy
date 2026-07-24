@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
@@ -52,7 +55,7 @@ const { t } = useI18n();
         </div>
       </div>
 
-      <LoadingSkeleton v-if="jobsLoading && topJobs.length === 0" :lines="4" />
+      <LoadingSkeleton v-if="jobsLoading && topJobs.length === 0" :lines="LOADING_SKELETON_LINES.short" />
 
       <div v-else-if="topJobs.length === 0" role="alert" class="alert alert-soft">
         <span>{{ t("automation.scraper.table.emptyState") }}</span>

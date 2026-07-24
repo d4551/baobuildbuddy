@@ -5,6 +5,9 @@ import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { HfInference } from "@huggingface/inference";
 import { BaseAIProvider } from "./provider-interface";
+const NUM_1024 = 1024;
+const RATIO_0_7 = 0.7;
+const RATIO_0_95 = 0.95;
 
 type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 const buildChatMessages = (prompt: string, systemPrompt?: string): ChatMessage[] => {
@@ -51,9 +54,9 @@ export class HuggingFaceProvider extends BaseAIProvider {
         provider: HUGGING_FACE_INFERENCE_PROVIDER,
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 1024,
-        temperature: options?.temperature ?? 0.7,
-        top_p: options?.topP ?? 0.95,
+        max_tokens: options?.maxTokens ?? NUM_1024,
+        temperature: options?.temperature ?? RATIO_0_7,
+        top_p: options?.topP ?? RATIO_0_95,
       }),
     );
     if (responseResult.status === "rejected") {
@@ -86,9 +89,9 @@ export class HuggingFaceProvider extends BaseAIProvider {
       provider: HUGGING_FACE_INFERENCE_PROVIDER,
       model,
       messages,
-      max_tokens: options?.maxTokens ?? 1024,
-      temperature: options?.temperature ?? 0.7,
-      top_p: options?.topP ?? 0.95,
+      max_tokens: options?.maxTokens ?? NUM_1024,
+      temperature: options?.temperature ?? RATIO_0_7,
+      top_p: options?.topP ?? RATIO_0_95,
     });
 
     const iterator = stream[Symbol.asyncIterator]();
