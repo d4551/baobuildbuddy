@@ -111,10 +111,10 @@ const baoTheme = EditorView.theme({
     borderRight: "1px solid var(--color-base-300)",
   },
   ".cm-activeLine": {
-    backgroundColor: "color-mix(in oklab, var(--color-primary) 8%, transparent)",
+    backgroundColor: "var(--code-editor-active-line)",
   },
   ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-    backgroundColor: "color-mix(in oklab, var(--color-primary) 28%, transparent)",
+    backgroundColor: "var(--code-editor-selection)",
   },
 });
 

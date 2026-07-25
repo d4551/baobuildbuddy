@@ -19,10 +19,10 @@ const rawPalettePattern =
   /\b(?:bg|text|border|from|to|via|ring|stroke|fill)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/gu;
 const rawMonochromePalettePattern = /\b(?:bg|text|border|fill)-(?:white|black)\b/gu;
 const hexColorLiteralPattern = /#[0-9a-fA-F]{3,8}\b/gu;
-const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch)\s*\(/gu;
+const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color-mix)\s*\(/gu;
 
 const arbitraryTokenPattern =
-  /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-h|rounded|shadow)-\[[^\]]+\]/gu;
+  /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-h|rounded|shadow|text|bg|z)-\[[^\]]+\]/gu;
 
 const inlineUtilityTokenPattern =
   /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-w|rounded)-(?:xs|sm|md|lg|xl|2xl|3xl|full|\d{1,3})\b/gu;
