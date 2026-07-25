@@ -121,14 +121,25 @@ async function reorderProjects(context: PortfolioContext, orderedIds: string[]):
   });
 }
 
-async function exportPortfolio(context: PortfolioContext, format?: string): Promise<void> {
+async function exportPortfolio(
+  context: PortfolioContext,
+  format?: string,
+  template?: string,
+): Promise<void> {
   return withLoadingState(context.loading, async () => {
+    const body: { format?: string; template?: string } = {};
+    if (format) {
+      body.format = format;
+    }
+    if (template) {
+      body.template = template;
+    }
     await downloadApiFile(
       context.runtime,
       `${API_ENDPOINTS.portfolio}/export`,
       {
         method: "POST",
-        body: format ? { format } : {},
+        body,
       },
       `portfolio.${format === "docx" ? "docx" : "pdf"}`,
     );
@@ -159,6 +170,7 @@ export function usePortfolio() {
       updateProject(context, id, updates),
     deleteProject: (id: string) => deleteProject(context, id),
     reorderProjects: (orderedIds: string[]) => reorderProjects(context, orderedIds),
-    exportPortfolio: (format?: string) => exportPortfolio(context, format),
+    exportPortfolio: (format?: string, template?: string) =>
+      exportPortfolio(context, format, template),
   };
 }

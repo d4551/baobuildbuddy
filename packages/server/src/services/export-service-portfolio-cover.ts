@@ -7,7 +7,7 @@ import {
   COUNT_TWENTY_TWO,
 } from "@bao/shared/constants/numeric";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
-import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
+import type { PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
 export function renderPortfolioSocialLinks(
@@ -27,7 +27,7 @@ export function renderPortfolioSocialLinks(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.subtle,
+    color: context.colors.subtle,
   });
   context.yPosition -= COUNT_SIXTEEN;
 }
@@ -41,7 +41,7 @@ function renderPortfolioTitleBlock(
     y: context.yPosition,
     size: 28,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.primary,
+    color: context.colors.primary,
   });
   context.yPosition -= COUNT_EIGHTEEN;
 
@@ -54,7 +54,7 @@ function renderPortfolioTitleBlock(
     y: context.yPosition,
     size: 12,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= COUNT_EIGHTEEN;
 }
@@ -65,7 +65,7 @@ function renderPortfolioKicker(context: PortfolioRenderContext): void {
     y: context.yPosition,
     size: 10,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_TWENTY_TWO;
 }
@@ -83,7 +83,7 @@ function renderPortfolioSummary(
     text: summary,
     x: context.margin,
     size: 11,
-    color: PORTFOLIO_PDF_COLORS.text,
+    color: context.colors.text,
     font: context.font,
     maxWidth: context.width - context.margin * 2,
     lineGap: 3,
@@ -107,7 +107,7 @@ function renderPortfolioContactLine(
     y: context.yPosition,
     size: 10,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_EIGHTEEN;
 }
@@ -117,7 +117,7 @@ function renderPortfolioCoverDivider(context: PortfolioRenderContext): void {
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
     thickness: 1,
-    color: PORTFOLIO_PDF_COLORS.line,
+    color: context.colors.line,
   });
   context.yPosition -= COUNT_TWENTY_SIX;
 }
@@ -143,7 +143,7 @@ export function startPortfolioProjectsSection(context: PortfolioRenderContext): 
     y: context.yPosition,
     size: 16,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.primary,
+    color: context.colors.primary,
   });
   context.yPosition -= COUNT_TWENTY_TWO;
 }

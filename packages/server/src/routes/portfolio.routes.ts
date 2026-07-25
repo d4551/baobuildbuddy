@@ -252,7 +252,7 @@ export const portfolioRoutes = new Elysia({
       }
 
       const exportResult = await settle(
-        exportService.exportPortfolioPDF(metadata, portfolio.projects),
+        exportService.exportPortfolioPDF(metadata, portfolio.projects, body.template),
       );
       if (exportResult.status === "rejected") {
         return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {

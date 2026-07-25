@@ -1307,6 +1307,13 @@ const catalog = {
       previewAria: "Abrir vista previa del portafolio",
       exportButton: "Exportar",
       exportAria: "Exportar portafolio",
+      templateAria: "Plantilla de exportación del portafolio",
+    },
+    exportTemplates: {
+      modern: "Moderno",
+      gaming: "Gaming",
+      minimal: "Minimalista",
+      showcase: "Showcase",
     },
     preview: {
       pageTitle: "Vista Previa del Portafolio",

@@ -17,6 +17,8 @@ import {
   MS_ONE_AND_HALF_SECONDS,
   MS_ONE_TWO_HUNDRED,
   MS_SIX_HUNDRED,
+  MS_SIXTY_SECONDS,
+  MS_TWO_MINUTES,
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
@@ -27,18 +29,21 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:300
   /\/$/u,
   "",
 );
-const OUT = process.env.AI_PDF_DEMO_OUT ?? "/opt/cursor/artifacts/live-capabilities/ai-pdf-video";
+const OUT = process.env.AI_PDF_DEMO_OUT ?? "/opt/cursor/artifacts/baseline/ai-pdf-video";
 const MODEL = process.env.LOCAL_MODEL_NAME?.trim() || "llama3.2:1b";
 const ENDPOINT =
   process.env.LOCAL_MODEL_ENDPOINT?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
 
 const SEND_BUTTON_PATTERN = /send/iu;
-const RE_EXPORT = /Export/i;
 const RE_EXPORT_PDF = /Export PDF|^PDF$/i;
 const RE_EDIT_RESUME = /Edit resume/i;
 const RE_EDIT_COVER = /Edit cover letter/i;
+const RE_EXPORT_RESUME = /Export resume/i;
+const RE_EXPORT_COVER = /Export cover-letter/i;
 const RE_EXPORT_PORTFOLIO = /Export portfolio/i;
-const THEME_SWAP_LOCATOR = "label.swap.swap-rotate";
+const RE_VISIBLE_EDIT = /^Edit$/;
+const THEME_SWAP_LOCATOR = "button.swap.swap-rotate";
+const ASSISTANT_CHAT_LOCATOR = "article.chat-start .chat-bubble";
 
 const wait = settlePage;
 
@@ -52,8 +57,14 @@ const saveDownload = async (download: Download, name: string): Promise<string> =
   return target;
 };
 
-const exportPdf = async (page: Page, filename: string): Promise<string> => {
-  await page.getByRole("button", { name: RE_EXPORT }).first().click();
+const exportPdf = async (
+  page: Page,
+  filename: string,
+  triggerName: RegExp,
+): Promise<string> => {
+  const trigger = page.getByRole("button", { name: triggerName }).first();
+  await trigger.waitFor({ state: "visible", timeout: MS_FORTY_FIVE_SECONDS });
+  await trigger.click();
   await wait(page, MS_FOUR_HUNDRED);
   const downloadPromise = page.waitForEvent("download", { timeout: MS_FORTY_FIVE_SECONDS });
   await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
@@ -62,6 +73,25 @@ const exportPdf = async (page: Page, filename: string): Promise<string> => {
     throw new Error(`PDF download failed for ${filename}: ${result.reason.message}`);
   }
   return saveDownload(result.value, filename);
+};
+
+const waitAssistantNonce = async (page: Page, nonce: string): Promise<void> => {
+  const deadline = Date.now() + MS_TWO_MINUTES;
+  while (Date.now() < deadline) {
+    const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
+    const count = await bubbles.count();
+    for (let index = 0; index < count; index += 1) {
+      const text = (await bubbles.nth(index).innerText()).trim();
+      if (text.includes(nonce)) {
+        const busy = await page.locator("article.chat-start[aria-busy='true']").count();
+        if (busy === 0) {
+          return;
+        }
+      }
+    }
+    await wait(page, MS_ONE_TWO_HUNDRED);
+  }
+  throw new Error(`AI Chat video proof missing assistant nonce ${nonce}`);
 };
 
 const tourAiChat = async (page: Page): Promise<string> => {
@@ -76,13 +106,16 @@ const tourAiChat = async (page: Page): Promise<string> => {
     delay: COUNT_TWELVE,
   });
   await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  await wait(page, MS_FORTY_FIVE_SECONDS);
-  const chatText = await page.locator("main").innerText();
-  if (!chatText.includes(nonce)) {
-    throw new Error(`AI Chat video proof missing nonce ${nonce}`);
-  }
+  await waitAssistantNonce(page, nonce);
   await shot(page, "02-ai-chat-nonce");
   return nonce;
+};
+
+const openEditorByVisibleEdit = async (page: Page, ariaPattern: RegExp): Promise<void> => {
+  const edit = page.getByRole("button", { name: ariaPattern }).filter({ hasText: RE_VISIBLE_EDIT });
+  await edit.first().waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
+  await edit.first().click();
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
 };
 
 const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
@@ -91,33 +124,33 @@ const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
   await shot(page, "03-theme-business");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resume}`, { waitUntil: "domcontentloaded" });
   await wait(page, MS_ONE_TWO_HUNDRED);
-  await page.getByRole("button", { name: RE_EDIT_RESUME }).first().click();
-  await wait(page, MS_ONE_TWO_HUNDRED);
+  await openEditorByVisibleEdit(page, RE_EDIT_RESUME);
+  await page.getByRole("button", { name: RE_EXPORT_RESUME }).first().waitFor({
+    state: "visible",
+    timeout: MS_SIXTY_SECONDS,
+  });
   await shot(page, "04-resume-editor-themed");
-  const resumePdf = await assertRealPdfFile(await exportPdf(page, "resume-themed.pdf"));
+  const resumePdf = await assertRealPdfFile(
+    await exportPdf(page, "resume-themed.pdf", RE_EXPORT_RESUME),
+  );
   await shot(page, "05-resume-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.coverLetter}`, { waitUntil: "domcontentloaded" });
   await wait(page, MS_ONE_TWO_HUNDRED);
-  await page.getByRole("button", { name: RE_EDIT_COVER }).first().click();
-  await wait(page, MS_ONE_AND_HALF_SECONDS);
+  await openEditorByVisibleEdit(page, RE_EDIT_COVER);
+  await page.getByRole("button", { name: RE_EXPORT_COVER }).first().waitFor({
+    state: "visible",
+    timeout: MS_SIXTY_SECONDS,
+  });
   await shot(page, "06-cover-letter-themed");
-  const coverPdf = await assertRealPdfFile(await exportPdf(page, "cover-letter-themed.pdf"));
+  const coverPdf = await assertRealPdfFile(
+    await exportPdf(page, "cover-letter-themed.pdf", RE_EXPORT_COVER),
+  );
   await shot(page, "07-cover-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, { waitUntil: "domcontentloaded" });
   await wait(page, MS_ONE_TWO_HUNDRED);
   await shot(page, "08-portfolio-themed");
-  await page.getByRole("button", { name: RE_EXPORT_PORTFOLIO }).click();
-  await wait(page, MS_FOUR_HUNDRED);
-  const portfolioDownloadPromise = page.waitForEvent("download", {
-    timeout: MS_FORTY_FIVE_SECONDS,
-  });
-  await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
-  const portfolioDownload = await settle(portfolioDownloadPromise);
-  if (portfolioDownload.status === "rejected") {
-    throw new Error(`Portfolio PDF failed: ${portfolioDownload.reason.message}`);
-  }
   const portfolioPdf = await assertRealPdfFile(
-    await saveDownload(portfolioDownload.value, "portfolio-themed.pdf"),
+    await exportPdf(page, "portfolio-themed.pdf", RE_EXPORT_PORTFOLIO),
   );
   await shot(page, "09-portfolio-pdf-exported");
   await page.locator(THEME_SWAP_LOCATOR).first().click();

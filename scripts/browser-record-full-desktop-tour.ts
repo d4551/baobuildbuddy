@@ -27,7 +27,9 @@ import {
   MS_ONE_TWO_HUNDRED,
   MS_SECOND,
   MS_SIX_HUNDRED,
+  MS_SIXTY_SECONDS,
   MS_THREE_HUNDRED,
+  MS_TWO_MINUTES,
   VIEWPORT_HEIGHT_DESKTOP,
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -69,11 +71,13 @@ const ROUTES: readonly { readonly slug: string; readonly path: string }[] = [
 ];
 
 const SEND_BUTTON_PATTERN = /send/iu;
-const RE_EXPORT = /Export/i;
 const RE_EXPORT_PDF = /Export PDF|^PDF$/i;
 const RE_EDIT_RESUME = /Edit resume/i;
+const RE_EXPORT_RESUME = /Export resume/i;
+const RE_VISIBLE_EDIT = /^Edit$/;
 const RE_RUN_JOB_SCRAPER = /Run job scraper/i;
-const THEME_SWAP_LOCATOR = "label.swap.swap-rotate";
+const THEME_SWAP_LOCATOR = "button.swap.swap-rotate";
+const ASSISTANT_CHAT_LOCATOR = "article.chat-start .chat-bubble";
 
 const wait = settlePage;
 
@@ -168,10 +172,25 @@ const proveAiChat = async (page: Page, findings: string[]): Promise<string> => {
     delay: 10,
   });
   await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  await wait(page, MS_FORTY_FIVE_SECONDS);
-  const chatBody = await page.locator("main").innerText();
-  if (!chatBody.includes(nonce)) {
-    findings.push(`AI chat missing nonce ${nonce}`);
+  const deadline = Date.now() + MS_TWO_MINUTES;
+  let assistantHit = false;
+  while (Date.now() < deadline) {
+    const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
+    const count = await bubbles.count();
+    for (let index = 0; index < count; index += 1) {
+      const text = (await bubbles.nth(index).innerText()).trim();
+      if (text.includes(nonce)) {
+        assistantHit = true;
+        break;
+      }
+    }
+    if (assistantHit) {
+      break;
+    }
+    await wait(page, MS_ONE_TWO_HUNDRED);
+  }
+  if (!assistantHit) {
+    findings.push(`AI chat missing assistant nonce ${nonce}`);
   }
   await shot(page, "cap-03-ai-chat-nonce");
   return nonce;
@@ -180,11 +199,17 @@ const proveAiChat = async (page: Page, findings: string[]): Promise<string> => {
 const proveResumePdf = async (page: Page, findings: string[]): Promise<void> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.resume}`, { waitUntil: "domcontentloaded" });
   await wait(page, MS_SECOND);
-  await page.getByRole("button", { name: RE_EDIT_RESUME }).first().click();
+  const edit = page
+    .getByRole("button", { name: RE_EDIT_RESUME })
+    .filter({ hasText: RE_VISIBLE_EDIT });
+  await edit.first().waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
+  await edit.first().click();
   await wait(page, MS_SECOND);
-  await page.getByRole("button", { name: RE_EXPORT }).first().click();
+  const exportTrigger = page.getByRole("button", { name: RE_EXPORT_RESUME }).first();
+  await exportTrigger.waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
+  await exportTrigger.click();
   await wait(page, MS_FOUR_HUNDRED);
-  const downloadPromise = page.waitForEvent("download", { timeout: 45_000 });
+  const downloadPromise = page.waitForEvent("download", { timeout: MS_FORTY_FIVE_SECONDS });
   await page.getByRole("menuitem", { name: RE_EXPORT_PDF }).first().click();
   const downloadResult = await settle(downloadPromise);
   if (downloadResult.status === "rejected") {

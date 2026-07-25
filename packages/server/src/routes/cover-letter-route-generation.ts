@@ -188,6 +188,7 @@ export const exportCoverLetterAttachment = async (
     company: letter.company,
     position: letter.position,
     content: toJsonRecord(letter.content),
+    template: letter.template,
   };
   const sender = await buildCoverLetterSender();
 

@@ -182,7 +182,8 @@
     "validate:biome-no-softenings": "bun run scripts/validate-biome-no-softenings.ts",
     "validate:eslint-no-softenings": "bun run scripts/validate-eslint-no-softenings.ts",
     "validate:biome-softener-ratchet": "bun run scripts/validate-biome-softener-ratchet.ts",
-    "validate:eslint-softener-ratchet": "bun run scripts/validate-eslint-softener-ratchet.ts"
+    "validate:eslint-softener-ratchet": "bun run scripts/validate-eslint-softener-ratchet.ts",
+    "proof:styled-pdfs": "bun run scripts/browser-proof-styled-pdfs.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.5",

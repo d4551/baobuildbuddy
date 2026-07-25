@@ -8,7 +8,7 @@ import {
 } from "@bao/shared/constants/numeric";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
-import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
+import type { PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
 function renderPortfolioProjectHeading(
@@ -21,7 +21,7 @@ function renderPortfolioProjectHeading(
     y: context.yPosition,
     size: 9,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_THIRTEEN;
 
@@ -30,7 +30,7 @@ function renderPortfolioProjectHeading(
     y: context.yPosition,
     size: 18,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.primary,
+    color: context.colors.primary,
   });
   context.yPosition -= COUNT_TWENTY_TWO;
 
@@ -43,7 +43,7 @@ function renderPortfolioProjectHeading(
     y: context.yPosition,
     size: 9,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.featured,
+    color: context.colors.featured,
   });
   context.yPosition -= COUNT_FIFTEEN;
 }
@@ -58,7 +58,7 @@ function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: stri
     y: context.yPosition,
     size: 10,
     font: context.boldFont,
-    color: PORTFOLIO_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= COUNT_FIFTEEN;
 }
@@ -77,7 +77,7 @@ function renderPortfolioProjectTechnologies(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_FIFTEEN;
 }
@@ -104,7 +104,7 @@ function renderPortfolioTechnicalDetails(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= COUNT_FIFTEEN;
 }
@@ -127,7 +127,7 @@ function renderPortfolioProjectLinks(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_FIFTEEN;
 }
@@ -143,7 +143,7 @@ function renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: stri
     y: context.yPosition,
     size: 8,
     font: context.font,
-    color: PORTFOLIO_PDF_COLORS.footer,
+    color: context.colors.footer,
   });
   context.yPosition -= COUNT_TWENTY;
 }
@@ -161,7 +161,7 @@ function renderPortfolioProjectSeparator(
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
     thickness: 0.5,
-    color: PORTFOLIO_PDF_COLORS.line,
+    color: context.colors.line,
   });
   context.yPosition -= COUNT_TWENTY;
 }
@@ -180,7 +180,7 @@ export function renderPortfolioProject(
     text: project.description,
     x: context.margin,
     size: 10,
-    color: PORTFOLIO_PDF_COLORS.text,
+    color: context.colors.text,
     font: context.font,
     maxWidth: context.width - context.margin * 2,
   });

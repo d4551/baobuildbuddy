@@ -34,7 +34,8 @@ type PortfolioPageActionsInput = {
   };
   displayProjects: ComputedRef<readonly PortfolioProject[]>;
   editingProject: Ref<PortfolioProject | null>;
-  exportPortfolio: (format?: "pdf" | "docx") => Promise<unknown>;
+  exportPortfolio: (format?: "pdf" | "docx", template?: string) => Promise<unknown>;
+  exportTemplate: Ref<string>;
   newTech: Ref<string>;
   portfolioForm: PortfolioMetadata;
   projectForm: PortfolioProjectForm;
@@ -239,7 +240,7 @@ function createPortfolioCrudActions(
   return {
     async handleExport(format: "pdf" | "docx"): Promise<void> {
       await runExportWithToast({
-        exportFn: () => input.exportPortfolio(format),
+        exportFn: () => input.exportPortfolio(format, input.exportTemplate.value),
         failMessage: t("portfolioPage.toasts.exportFailed"),
         successMessage: t("portfolioPage.toasts.exported"),
         toast: $toast,

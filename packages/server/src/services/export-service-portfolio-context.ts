@@ -4,22 +4,36 @@ import {
   PORTFOLIO_MARGIN,
   RESUME_BODY_LINE_GAP,
 } from "@bao/shared/constants/export-layout";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import {
   addA4Page,
-  PORTFOLIO_PDF_COLORS,
   type PortfolioRenderContext,
+  toPortfolioPdfColors,
   type WrappedTextOptions,
 } from "./export-service-contracts";
 
-export async function createPortfolioContext(): Promise<PortfolioRenderContext> {
+const fillDarkPortfolioPage = (context: PortfolioRenderContext): void => {
+  if (!context.darkBackground) {
+    return;
+  }
+  context.page.drawRectangle({
+    x: 0,
+    y: 0,
+    width: context.width,
+    height: context.height,
+    color: rgb(0.1, 0.1, 0.14),
+  });
+};
+
+export async function createPortfolioContext(
+  template?: string | null,
+): Promise<PortfolioRenderContext> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
-
-  return {
+  const context: PortfolioRenderContext = {
     pdfDoc,
     page,
     width,
@@ -28,7 +42,11 @@ export async function createPortfolioContext(): Promise<PortfolioRenderContext> 
     yPosition: height - PORTFOLIO_MARGIN,
     font,
     boldFont,
+    colors: toPortfolioPdfColors(template),
+    darkBackground: template === "gaming",
   };
+  fillDarkPortfolioPage(context);
+  return context;
 }
 
 export function ensurePortfolioSpace(context: PortfolioRenderContext, requiredSpace: number): void {
@@ -38,6 +56,7 @@ export function ensurePortfolioSpace(context: PortfolioRenderContext, requiredSp
 
   context.page = addA4Page(context.pdfDoc);
   context.yPosition = context.height - context.margin;
+  fillDarkPortfolioPage(context);
 }
 
 export function drawPortfolioWrappedLine(
@@ -89,7 +108,7 @@ export function addPortfolioPageNumbers(context: PortfolioRenderContext): void {
       y: PORTFOLIO_FOOTER_Y,
       size: 8,
       font: context.font,
-      color: PORTFOLIO_PDF_COLORS.footer,
+      color: context.colors.footer,
     });
   }
 }

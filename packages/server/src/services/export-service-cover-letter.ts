@@ -17,24 +17,38 @@ import {
   formatExportDate,
   toCoverLetterParagraphs,
 } from "@bao/shared/utils/export-contract";
-import { PDFDocument, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 import {
   addA4Page,
-  COVER_LETTER_PDF_COLORS,
   type CoverLetterPayload,
   type CoverLetterRenderContext,
   type CoverLetterUserProfile,
+  toCoverLetterPdfColors,
 } from "./export-service-contracts";
 
-async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
+const fillDarkPage = (context: CoverLetterRenderContext): void => {
+  if (!context.darkBackground) {
+    return;
+  }
+  context.page.drawRectangle({
+    x: 0,
+    y: 0,
+    width: context.width,
+    height: context.height,
+    color: rgb(0.1, 0.1, 0.14),
+  });
+};
+
+async function createCoverLetterContext(
+  template?: string | null,
+): Promise<CoverLetterRenderContext> {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
-
-  return {
+  const context: CoverLetterRenderContext = {
     pdfDoc,
     page,
     width,
@@ -43,7 +57,11 @@ async function createCoverLetterContext(): Promise<CoverLetterRenderContext> {
     yPosition: height - COVER_LETTER_MARGIN,
     font,
     boldFont,
+    colors: toCoverLetterPdfColors(template),
+    darkBackground: template === "gaming",
   };
+  fillDarkPage(context);
+  return context;
 }
 
 function drawCoverLetterDivider(context: CoverLetterRenderContext): void {
@@ -51,7 +69,7 @@ function drawCoverLetterDivider(context: CoverLetterRenderContext): void {
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
     thickness: 1,
-    color: COVER_LETTER_PDF_COLORS.line,
+    color: context.colors.line,
   });
   context.yPosition -= 24;
 }
@@ -63,6 +81,7 @@ function ensureCoverLetterSpace(context: CoverLetterRenderContext, requiredSpace
 
   context.page = addA4Page(context.pdfDoc);
   context.yPosition = context.height - context.margin;
+  fillDarkPage(context);
 }
 
 function renderCoverLetterSender(
@@ -74,7 +93,7 @@ function renderCoverLetterSender(
     y: context.yPosition,
     size: 24,
     font: context.boldFont,
-    color: COVER_LETTER_PDF_COLORS.primary,
+    color: context.colors.primary,
   });
   context.yPosition -= 24;
 
@@ -92,7 +111,7 @@ function renderCoverLetterSender(
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= COUNT_TWENTY_EIGHT;
 }
@@ -103,7 +122,7 @@ function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): v
     y: context.yPosition,
     size: 10,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= 24;
 }
@@ -117,7 +136,7 @@ function renderCoverLetterRecipient(
     y: context.yPosition,
     size: 11,
     font: context.boldFont,
-    color: COVER_LETTER_PDF_COLORS.primary,
+    color: context.colors.primary,
   });
   context.yPosition -= COUNT_FIFTEEN;
 
@@ -126,7 +145,7 @@ function renderCoverLetterRecipient(
     y: context.yPosition,
     size: 10,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.accent,
+    color: context.colors.accent,
   });
   context.yPosition -= COUNT_EIGHTEEN;
   drawCoverLetterDivider(context);
@@ -139,7 +158,7 @@ function drawCoverLetterLine(context: CoverLetterRenderContext, line: string): v
     y: context.yPosition,
     size: COVER_LETTER_PARAGRAPH_SIZE,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.text,
+    color: context.colors.text,
   });
   context.yPosition -= COVER_LETTER_LINE_HEIGHT;
 }
@@ -180,7 +199,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
     y: context.yPosition,
     size: 11,
     font: context.font,
-    color: COVER_LETTER_PDF_COLORS.muted,
+    color: context.colors.muted,
   });
   context.yPosition -= COUNT_TWENTY_FIVE;
 
@@ -189,7 +208,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
     y: context.yPosition,
     size: 11,
     font: context.boldFont,
-    color: COVER_LETTER_PDF_COLORS.text,
+    color: context.colors.text,
   });
 }
 
@@ -197,7 +216,7 @@ export async function exportCoverLetterPdf(
   coverLetter: CoverLetterPayload,
   userProfile: CoverLetterUserProfile,
 ): Promise<Uint8Array> {
-  const context = await createCoverLetterContext();
+  const context = await createCoverLetterContext(coverLetter.template);
   renderCoverLetterSender(context, userProfile);
   renderCoverLetterDate(context, new Date());
   renderCoverLetterRecipient(context, coverLetter);

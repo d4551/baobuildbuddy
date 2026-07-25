@@ -114,6 +114,14 @@ export type PortfolioProjectUpdateRouteBody = Static<typeof portfolioProjectUpda
 
 export const portfolioExportBodySchema = t.Object({
   format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+  template: t.Optional(
+    t.Union([
+      t.Literal("modern"),
+      t.Literal("gaming"),
+      t.Literal("minimal"),
+      t.Literal("showcase"),
+    ]),
+  ),
 });
 export type PortfolioExportRouteBody = Static<typeof portfolioExportBodySchema>;
 

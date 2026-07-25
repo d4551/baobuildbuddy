@@ -1,6 +1,8 @@
 import {
   COVER_LETTER_EXPORT_THEME,
   PORTFOLIO_EXPORT_THEME,
+  resolveCoverLetterPdfPalette,
+  resolvePortfolioPdfPalette,
 } from "@bao/shared/constants/export-document-theme";
 import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
 import { A4_PAGE_HEIGHT, A4_PAGE_SIZE, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
@@ -57,6 +59,7 @@ export interface CoverLetterPayload {
   company: string;
   position: string;
   content: unknown;
+  template?: string;
 }
 
 export interface CoverLetterUserProfile {
@@ -65,6 +68,15 @@ export interface CoverLetterUserProfile {
   phone?: string;
   location?: string;
 }
+
+export type CoverLetterPdfColors = {
+  primary: Color;
+  accent: Color;
+  text: Color;
+  muted: Color;
+  subtle: Color;
+  line: Color;
+};
 
 export interface CoverLetterRenderContext {
   pdfDoc: PDFDocument;
@@ -75,7 +87,20 @@ export interface CoverLetterRenderContext {
   yPosition: number;
   font: PDFFont;
   boldFont: PDFFont;
+  colors: CoverLetterPdfColors;
+  darkBackground: boolean;
 }
+
+export type PortfolioPdfColors = {
+  primary: Color;
+  text: Color;
+  accent: Color;
+  muted: Color;
+  subtle: Color;
+  featured: Color;
+  line: Color;
+  footer: Color;
+};
 
 export interface PortfolioRenderContext {
   pdfDoc: PDFDocument;
@@ -86,6 +111,8 @@ export interface PortfolioRenderContext {
   yPosition: number;
   font: PDFFont;
   boldFont: PDFFont;
+  colors: PortfolioPdfColors;
+  darkBackground: boolean;
 }
 
 const toStaticPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);
@@ -108,6 +135,32 @@ export const PORTFOLIO_PDF_COLORS = {
   featured: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.featured),
   line: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.line),
   footer: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.footer),
+};
+
+export const toCoverLetterPdfColors = (template?: string | null): CoverLetterPdfColors => {
+  const palette = resolveCoverLetterPdfPalette(template);
+  return {
+    primary: toStaticPdfColor(palette.primary),
+    accent: toStaticPdfColor(palette.accent),
+    text: toStaticPdfColor(palette.text),
+    muted: toStaticPdfColor(palette.muted),
+    subtle: toStaticPdfColor(palette.subtle),
+    line: toStaticPdfColor(palette.line),
+  };
+};
+
+export const toPortfolioPdfColors = (template?: string | null): PortfolioPdfColors => {
+  const palette = resolvePortfolioPdfPalette(template);
+  return {
+    primary: toStaticPdfColor(palette.primary),
+    text: toStaticPdfColor(palette.text),
+    accent: toStaticPdfColor(palette.accent),
+    muted: toStaticPdfColor(palette.muted),
+    subtle: toStaticPdfColor(palette.subtle),
+    featured: toStaticPdfColor(palette.featured),
+    line: toStaticPdfColor(palette.line),
+    footer: toStaticPdfColor(palette.footer),
+  };
 };
 
 export const addA4Page = (pdfDoc: PDFDocument): PDFPage => pdfDoc.addPage([...A4_PAGE_SIZE]);

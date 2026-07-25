@@ -27,8 +27,9 @@ export class ExportService {
   async exportPortfolioPDF(
     metadata: PortfolioMetadata,
     projects: PortfolioProject[],
+    template?: string | null,
   ): Promise<Uint8Array> {
-    return exportPortfolioPdf(metadata, projects);
+    return exportPortfolioPdf(metadata, projects, template);
   }
 }
 

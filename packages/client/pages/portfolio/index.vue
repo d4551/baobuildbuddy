@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PORTFOLIO_EXPORT_TEMPLATE_OPTIONS } from "@bao/shared/constants/export-document-theme";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
@@ -44,6 +45,7 @@ const {
   canMove,
   clearDeleteProjectState,
   clearFilters,
+  exportTemplate,
   featuredProjectCount,
   filteredProjects,
   handleDeleteProject,
@@ -106,6 +108,22 @@ function updateProjectForm(value: typeof projectForm): void {
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template v-if="!isPortfolioEmpty" #actions>
+        <label class="form-control">
+          <span class="sr-only">{{ t("portfolioPage.actions.templateAria") }}</span>
+          <select
+            v-model="exportTemplate"
+            class="select select-bordered select-sm"
+            :aria-label="t('portfolioPage.actions.templateAria')"
+          >
+            <option
+              v-for="templateOption in PORTFOLIO_EXPORT_TEMPLATE_OPTIONS"
+              :key="templateOption"
+              :value="templateOption"
+            >
+              {{ t(`portfolioPage.exportTemplates.${templateOption}`) }}
+            </option>
+          </select>
+        </label>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
           :class="[OUTLINE_ACTION_CLASS]"

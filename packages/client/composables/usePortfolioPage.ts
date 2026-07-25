@@ -47,6 +47,7 @@ export function usePortfolioPage() {
       displayProjects: derived.displayProjects,
       editingProject: state.editingProject,
       exportPortfolio: portfolioApi.exportPortfolio,
+      exportTemplate: state.exportTemplate,
       newTech: state.newTech,
       portfolioForm: state.portfolioForm,
       projectForm: state.projectForm,
