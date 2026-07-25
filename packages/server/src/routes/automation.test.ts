@@ -12,16 +12,23 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
-import { applicationAutomationService } from "../services/automation/application-automation-service";
+import type { ApplicationAutomationService } from "../services/automation/application-automation-service";
+import {
+  AutomationRunScheduler,
+  ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE,
+  PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE,
+} from "../services/automation/automation-run-scheduler";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
+let applicationAutomationService: ApplicationAutomationService;
 const resumeId = generateId();
 const createdRunIds: string[] = [];
-type RunJobApply = typeof applicationAutomationService.runJobApply;
-type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
+type RunJobApply = ApplicationAutomationService["runJobApply"];
+type RunEmailResponse = ApplicationAutomationService["runEmailResponse"];
 type ScrapeJobsForTarget = typeof scraperService.scrapeJobsForTarget;
+type AutomationRunInsert = typeof automationRuns.$inferInsert;
 const runJobApplyStub: RunJobApply = () => Promise.resolve();
 const runEmailResponseStub: RunEmailResponse = async (payload) => {
   const now = new Date().toISOString();
@@ -106,10 +113,43 @@ const requestStatusBody = async <T>(
   };
 };
 
+const insertTestAutomationRun = async (
+  values: Pick<AutomationRunInsert, "id" | "status"> & Partial<AutomationRunInsert>,
+): Promise<void> => {
+  const now = new Date().toISOString();
+  await db.insert(automationRuns).values({
+    id: values.id,
+    type: values.type ?? "job_apply",
+    status: values.status,
+    jobId: values.jobId ?? null,
+    userId: values.userId ?? null,
+    input: values.input ?? {
+      jobUrl: "https://example.com/careers/engineering",
+      resumeId,
+    },
+    progress: values.progress ?? 0,
+    currentStep: values.currentStep ?? null,
+    totalSteps: values.totalSteps ?? null,
+    exitCode: values.exitCode ?? null,
+    timedOut: values.timedOut ?? false,
+    aborted: values.aborted ?? false,
+    executionMs: values.executionMs ?? null,
+    startedAt: values.startedAt ?? null,
+    completedAt: values.completedAt ?? null,
+    createdAt: values.createdAt ?? now,
+    updatedAt: values.updatedAt ?? now,
+  });
+};
+
+const readAutomationRun = async (runId: string) => {
+  const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+  expect(rows.length).toBe(1);
+  return rows[0];
+};
+
 beforeAll(async () => {
   const initModule = await import("../db/init");
   const seedModule = await import("../db/seed");
-  const routesModule = await import("./automation.routes");
   const { Elysia } = await import("elysia");
   const dbModule = await import("../db/client");
 
@@ -117,6 +157,9 @@ beforeAll(async () => {
   seedModule.seedDatabase(dbModule.db);
 
   await db.insert(resumes).values({ id: resumeId });
+  const serviceModule = await import("../services/automation/application-automation-service");
+  applicationAutomationService = serviceModule.applicationAutomationService;
+  const routesModule = await import("./automation.routes");
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.automationRoutes);
 });
 
@@ -410,6 +453,85 @@ function registerScheduledScrapeRunTest(): void {
   });
 }
 
+function registerSchedulerRunningReclaimTest(): void {
+  test("startup recovery reclaims orphaned running automation runs", async () => {
+    const runId = generateId();
+    const startedAt = new Date().toISOString();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "running",
+      startedAt,
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.reclaimRunningRuns();
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
+function registerSchedulerPendingWithoutMetadataTest(): void {
+  test("pending recovery fails runs without schedule metadata", async () => {
+    const runId = generateId();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "pending",
+      input: {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+      },
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.restorePendingRuns(10);
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
+function registerSchedulerPendingWithMetadataTest(): void {
+  test("pending recovery leaves scheduled runs pending for queued execution", async () => {
+    const runId = generateId();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "pending",
+      input: {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+        schedule: { runAt },
+      },
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    try {
+      await scheduler.restorePendingRuns(10);
+
+      const run = await readAutomationRun(runId);
+      expect(run.status).toBe("pending");
+      expect(run.error).toBeNull();
+      expect(run.output).toBeNull();
+    } finally {
+      scheduler.clear(runId);
+    }
+  });
+}
+
 function registerImmediateScrapeRunTest(): void {
   test("POST automation scrape executes a scrape run and persists history", async () => {
     originalScrapeJobsForTarget = scraperService.scrapeJobsForTarget.bind(scraperService);
@@ -486,5 +608,8 @@ describe("automation routes", () => {
   registerScheduledEmailResponseTest();
   registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
+  registerSchedulerRunningReclaimTest();
+  registerSchedulerPendingWithoutMetadataTest();
+  registerSchedulerPendingWithMetadataTest();
   registerCapabilityAuditRouteTest();
 });
