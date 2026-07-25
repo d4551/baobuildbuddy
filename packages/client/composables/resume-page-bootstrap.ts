@@ -27,6 +27,7 @@ export const createResumeFormData = (): ResumeFormData => ({
   summary: "",
   linkedIn: "",
   portfolio: "",
+  template: "modern",
   experience: [],
   education: [],
   skills: [],

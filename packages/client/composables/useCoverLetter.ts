@@ -217,15 +217,23 @@ async function exportDocument(
   context: CoverLetterContext,
   id: string,
   format?: string,
+  template?: string,
 ): Promise<void> {
   context.loading.value = true;
   // Binary download stays on downloadApiFile (Eden Treaty JSON envelope unsuitable for blobs).
+  const body: { format?: string; template?: string } = {};
+  if (format) {
+    body.format = format;
+  }
+  if (template) {
+    body.template = template;
+  }
   await downloadApiFile(
     context.runtime,
     buildCoverLetterExportEndpoint(id),
     {
       method: "POST",
-      body: format ? { format } : {},
+      body,
     },
     `cover-letter-${id}.${format === "docx" ? "docx" : "pdf"}`,
   );
@@ -259,6 +267,7 @@ export function useCoverLetter() {
     deleteCoverLetter: (id: string) => deleteCoverLetter(context, id),
     generateCoverLetter: (generationData: GenerateCoverLetterInput) =>
       generateCoverLetter(context, generationData),
-    exportDocument: (id: string, format?: string) => exportDocument(context, id, format),
+    exportDocument: (id: string, format?: string, template?: string) =>
+      exportDocument(context, id, format, template),
   };
 }

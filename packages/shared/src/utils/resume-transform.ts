@@ -1,3 +1,8 @@
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  type ResumeTemplate,
+  isResumeTemplate,
+} from "../constants/resume";
 import type {
   GamingExperience,
   ResumeData,
@@ -19,6 +24,7 @@ export interface ResumeFormData {
   summary: string;
   linkedIn: string;
   portfolio: string;
+  template: ResumeTemplate;
   experience: ResumeFormExperience[];
   education: ResumeFormEducation[];
   skills: string[];
@@ -142,6 +148,9 @@ function buildResumeData(input: {
   return {
     ...(Object.keys(input.personalInfo).length > 0 ? { personalInfo: input.personalInfo } : {}),
     ...(input.form.summary ? { summary: input.form.summary } : {}),
+    ...(input.form.template && isResumeTemplate(input.form.template)
+      ? { template: input.form.template }
+      : {}),
     ...(input.experience.length > 0 ? { experience: input.experience } : {}),
     ...(input.education.length > 0 ? { education: input.education } : {}),
     ...(Object.keys(input.skills).length > 0 ? { skills: input.skills } : {}),
@@ -226,6 +235,7 @@ export function resumeDataToFormData(resume: Partial<ResumeData>): ResumeFormDat
     phone: pi.phone || "",
     location: pi.location || "",
     summary: resume.summary || "",
+    template: isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
     linkedIn: pi.linkedIn || "",
     portfolio: pi.portfolio || "",
     experience: mapResumeExperienceToFormExperience(resume.experience),

@@ -145,6 +145,7 @@ const {
     <!-- Resume Editor -->
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <ResumeEditorToolbar
+        v-model:template="formData.template"
         :enhancing="enhancing"
         :scoring="scoring"
         @back="selectedResumeId = null"

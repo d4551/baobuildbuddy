@@ -78,8 +78,9 @@ export function useResumePageActions(
     if (!resumeId) {
       return;
     }
+    const template = input.formData.template;
     await runExportWithToast({
-      exportFn: () => exportResume(resumeId, undefined, format),
+      exportFn: () => exportResume(resumeId, template, format),
       failMessage: t("resumePage.toasts.resumeExportFailed"),
       successMessage: t("resumePage.toasts.resumeExported"),
       toast: $toast,

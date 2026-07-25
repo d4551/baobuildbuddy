@@ -31,6 +31,35 @@ defineProps<{
 }>();
 
 const { t } = useI18n();
+
+const formatRunJobLabel = (run: RpaRunExecutionEnvelope): string => {
+  if (typeof run.jobId === "string" && run.jobId.trim().length > 0) {
+    return run.jobId;
+  }
+  const input = run.input;
+  if (input && typeof input === "object" && !Array.isArray(input)) {
+    const jobUrl = "jobUrl" in input ? input.jobUrl : undefined;
+    if (typeof jobUrl === "string" && jobUrl.trim().length > 0) {
+      try {
+        return new URL(jobUrl).hostname;
+      } catch {
+        return jobUrl;
+      }
+    }
+    const target = "target" in input ? input.target : undefined;
+    if (typeof target === "string" && target.trim().length > 0) {
+      return target;
+    }
+  }
+  const scraped =
+    run.output && typeof run.output === "object" && !Array.isArray(run.output) && "scraped" in run.output
+      ? run.output.scraped
+      : undefined;
+  if (typeof scraped === "number") {
+    return String(scraped);
+  }
+  return t("automation.runs.emptyJobId");
+};
 </script>
 
 <template>
@@ -89,7 +118,7 @@ const { t } = useI18n();
                 <div class="flex items-baseline justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <dt class="shrink-0 text-muted">{{ t("automation.runs.columns.job") }}</dt>
                   <dd class="truncate font-medium">
-                    {{ run.jobId || t("automation.runs.emptyJobId") }}
+                    {{ formatRunJobLabel(run) }}
                   </dd>
                 </div>
                 <div class="flex items-baseline justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -138,7 +167,7 @@ const { t } = useI18n();
                   </div>
                 </td>
                 <td class="text-end">{{ formatRunProgress(run) }}</td>
-                <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
+                <td class="max-w-48 truncate">{{ formatRunJobLabel(run) }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>
                   <NuxtLink

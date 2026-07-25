@@ -225,7 +225,12 @@ export const coverLetterRoutes = new Elysia({
       status: RouteStatus;
     }) => {
       const state: RouteSetState = {};
-      const result = await exportCoverLetterAttachment(params.id, body.format, state);
+      const result = await exportCoverLetterAttachment(
+        params.id,
+        body.format,
+        state,
+        body.template,
+      );
       if (state.status === HTTP_STATUS_NOT_FOUND) {
         return status(
           HTTP_STATUS_NOT_FOUND,

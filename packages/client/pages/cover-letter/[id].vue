@@ -220,7 +220,7 @@ async function handleExport(format: "pdf" | "docx") {
     }
   }
   await runExportWithToast({
-    exportFn: () => exportDocument(id, format),
+    exportFn: () => exportDocument(id, format, formData.template),
     failMessage: t("coverLetterDetailPage.toasts.exportFailed"),
     successMessage: t("coverLetterDetailPage.toasts.exported"),
     toast: $toast,

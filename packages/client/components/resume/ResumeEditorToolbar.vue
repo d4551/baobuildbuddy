@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  RESUME_TEMPLATE_OPTIONS,
+  type ResumeTemplate,
+} from "@bao/shared/constants/resume";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -15,6 +19,8 @@ interface ResumeEditorToolbarProps {
 }
 
 defineProps<ResumeEditorToolbarProps>();
+
+const template = defineModel<ResumeTemplate>("template", { required: true });
 
 const emit = defineEmits<{
   back: [];
@@ -34,7 +40,23 @@ const { t } = useI18n();
       {{ t("resumePage.backButton") }}
     </button>
 
-    <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+    <div class="flex flex-wrap items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <fieldset class="fieldset">
+        <legend class="sr-only">{{ t("resumePage.createModal.templateLegend") }}</legend>
+        <select
+          v-model="template"
+          class="select select-sm"
+          :aria-label="t('resumePage.createModal.templateAria')"
+        >
+          <option
+            v-for="templateOption in RESUME_TEMPLATE_OPTIONS"
+            :key="templateOption"
+            :value="templateOption"
+          >
+            {{ t(`resumePage.createModal.templates.${templateOption}`) }}
+          </option>
+        </select>
+      </fieldset>
       <button type="button" 
         :class="[OUTLINE_ACTION_CLASS]"
         :disabled="enhancing"

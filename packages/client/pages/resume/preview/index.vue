@@ -86,7 +86,7 @@ async function handleExport(format: "pdf" | "docx") {
     return;
   }
 
-  await exportResume(resumeId.value, undefined, format);
+  await exportResume(resumeId.value, resume.value?.template, format);
 }
 
 function handlePrint() {
