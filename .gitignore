@@ -64,3 +64,4 @@ docs/assets/docs.generated.css
 .desktop-release-artifacts/
 
 # docs/ssot-ledger is tracked evidence SSOT (defect/improvement/baseline hashes)
+packages/desktop/src-tauri/tauri.conf.dev-existing.json

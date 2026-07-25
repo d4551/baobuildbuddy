@@ -39,9 +39,15 @@
 17. **AI+themed PDF video** — `proof:ai-pdf-video` (chat nonce + theme flip + resume/cover/portfolio PDFs).
 18. **RPA video** — `proof:rpa-live` records scrape+job-apply webm.
 
+## Closed (desktop authenticity)
+
+19. **Full desktop tour video** — 19 pages + AI nonce + PDF + RPA (`proof:full-desktop-tour`, 9.2MB webm, 0 findings).
+20. **Native Tauri** — rustc 1.97.1; `bao-build-buddy-desktop` running; X11 window screenshot+15s video. Honest: `gen/runtime` is manifest stub (not full packaged Bun binaries).
+
 ## Remaining DRY / best-in-class (next)
 
 1. **STT** — still BLOCKED (no mic in cloud agent).
+2. **Desktop packaging** — full `gen/runtime` Bun/server/scraper bundle for offline Tauri release.
 
 ## Proof commands
 
