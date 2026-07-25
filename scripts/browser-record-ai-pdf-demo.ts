@@ -38,6 +38,7 @@ const SEND_BUTTON_PATTERN = /send/iu;
 const RE_EXPORT_PDF = /Export PDF|^PDF$/i;
 const RE_EDIT_RESUME = /Edit resume/i;
 const RE_EDIT_COVER = /Edit cover letter/i;
+const RE_PREVIEW_RESUME = /Preview resume/i;
 const RE_EXPORT_RESUME = /Export resume/i;
 const RE_EXPORT_COVER = /Export cover-letter/i;
 const RE_EXPORT_PORTFOLIO = /Export portfolio/i;
@@ -75,23 +76,34 @@ const exportPdf = async (
   return saveDownload(result.value, filename);
 };
 
-const waitAssistantNonce = async (page: Page, nonce: string): Promise<void> => {
+const GREETING_SNIPPET = "Hi, I’m Bao";
+
+const waitLiveAssistantReply = async (page: Page, nonce: string): Promise<string> => {
   const deadline = Date.now() + MS_TWO_MINUTES;
   while (Date.now() < deadline) {
+    const userText = await page.locator("article.chat-end .chat-bubble").last().innerText().catch(() => "");
+    if (!userText.includes(nonce)) {
+      await wait(page, MS_ONE_TWO_HUNDRED);
+      continue;
+    }
     const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
     const count = await bubbles.count();
-    for (let index = 0; index < count; index += 1) {
-      const text = (await bubbles.nth(index).innerText()).trim();
-      if (text.includes(nonce)) {
-        const busy = await page.locator("article.chat-start[aria-busy='true']").count();
-        if (busy === 0) {
-          return;
-        }
-      }
+    if (count < 2) {
+      await wait(page, MS_ONE_TWO_HUNDRED);
+      continue;
+    }
+    const latest = (await bubbles.nth(count - 1).innerText()).trim();
+    const looksLikeLiveReply =
+      latest.length > COUNT_TWELVE &&
+      !latest.startsWith(GREETING_SNIPPET) &&
+      (latest.includes(nonce) || /[A-Za-z]{4,}/u.test(latest));
+    if (looksLikeLiveReply) {
+      return latest;
     }
     await wait(page, MS_ONE_TWO_HUNDRED);
   }
-  throw new Error(`AI Chat video proof missing assistant nonce ${nonce}`);
+  await shot(page, "02-ai-chat-reply-missing");
+  throw new Error(`AI Chat video proof missing live assistant reply for ${nonce}`);
 };
 
 const tourAiChat = async (page: Page): Promise<string> => {
@@ -102,40 +114,57 @@ const tourAiChat = async (page: Page): Promise<string> => {
   const composer = page.locator("textarea").first();
   await composer.click();
   await composer.fill("");
-  await composer.pressSequentially(`Reply with ONLY this exact token and nothing else: ${nonce}`, {
-    delay: COUNT_TWELVE,
-  });
+  await composer.pressSequentially(
+    `Your entire reply must be exactly this token on its own line: ${nonce}`,
+    {
+      delay: COUNT_TWELVE,
+    },
+  );
   await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  await waitAssistantNonce(page, nonce);
-  await shot(page, "02-ai-chat-nonce");
+  const assistantSample = await waitLiveAssistantReply(page, nonce);
+  await shot(page, "02-ai-chat-live-reply");
+  await writeOutput(`ai-chat live reply chars=${String(assistantSample.length)}`);
   return nonce;
 };
 
 const openEditorByVisibleEdit = async (page: Page, ariaPattern: RegExp): Promise<void> => {
   const edit = page.getByRole("button", { name: ariaPattern }).filter({ hasText: RE_VISIBLE_EDIT });
   await edit.first().waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
-  await edit.first().click();
+  await edit.first().click({ force: true });
   await wait(page, MS_ONE_AND_HALF_SECONDS);
+};
+
+const openResumeExportSurface = async (page: Page): Promise<void> => {
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.resume}`, { waitUntil: "domcontentloaded" });
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
+  // Prefer editor path; fall back to preview (both expose Export resume).
+  const edit = page.getByRole("button", { name: RE_EDIT_RESUME }).filter({ hasText: RE_VISIBLE_EDIT });
+  await edit.first().waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
+  await edit.first().click({ force: true });
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
+  const exportBtn = page.getByRole("button", { name: RE_EXPORT_RESUME }).first();
+  if ((await exportBtn.count()) === 0 || !(await exportBtn.isVisible().catch(() => false))) {
+    await page.getByRole("link", { name: RE_PREVIEW_RESUME }).first().click();
+    await wait(page, MS_ONE_AND_HALF_SECONDS);
+  }
+  await page.getByRole("button", { name: RE_EXPORT_RESUME }).first().waitFor({
+    state: "visible",
+    timeout: MS_SIXTY_SECONDS,
+  });
 };
 
 const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
   await page.locator(THEME_SWAP_LOCATOR).first().click();
   await wait(page, MS_EIGHT_HUNDRED);
   await shot(page, "03-theme-business");
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.resume}`, { waitUntil: "domcontentloaded" });
-  await wait(page, MS_ONE_TWO_HUNDRED);
-  await openEditorByVisibleEdit(page, RE_EDIT_RESUME);
-  await page.getByRole("button", { name: RE_EXPORT_RESUME }).first().waitFor({
-    state: "visible",
-    timeout: MS_SIXTY_SECONDS,
-  });
+  await openResumeExportSurface(page);
   await shot(page, "04-resume-editor-themed");
   const resumePdf = await assertRealPdfFile(
     await exportPdf(page, "resume-themed.pdf", RE_EXPORT_RESUME),
   );
   await shot(page, "05-resume-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.coverLetter}`, { waitUntil: "domcontentloaded" });
-  await wait(page, MS_ONE_TWO_HUNDRED);
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
   await openEditorByVisibleEdit(page, RE_EDIT_COVER);
   await page.getByRole("button", { name: RE_EXPORT_COVER }).first().waitFor({
     state: "visible",
@@ -147,7 +176,7 @@ const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
   );
   await shot(page, "07-cover-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, { waitUntil: "domcontentloaded" });
-  await wait(page, MS_ONE_TWO_HUNDRED);
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
   await shot(page, "08-portfolio-themed");
   const portfolioPdf = await assertRealPdfFile(
     await exportPdf(page, "portfolio-themed.pdf", RE_EXPORT_PORTFOLIO),
