@@ -2,6 +2,8 @@
 
 Canonical installer output manifest for this repository baseline
 
+> Public download mirror: <https://bao.builders/releases/> serves the same verified installers (DMG, NSIS, portable zip, deb, rpm, AppImage) plus `sha256.txt` and `provenance.json`. The tree below is the in-repo source of truth these mirrors.
+
 ## Matching-host rule
 
 Desktop release generation is intentionally matching-host only:

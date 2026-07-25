@@ -218,17 +218,18 @@ use [docs/VERIFICATION_RUNBOOK.md](docs/VERIFICATION_RUNBOOK.md) and the route c
 
 ## Non-Technical Install
 
-Use the packaged desktop installers in `packages/desktop/releases` when you want to skip the developer setup entirely.
+Grab a packaged desktop installer and skip the developer setup entirely. The latest verified builds are published at <https://bao.builders/releases/> and mirrored in `packages/desktop/releases` in this repo.
 
-> A wild installer appeared. Choose your OS in `packages/desktop/releases`.
+> A wild installer appeared. Choose your OS:
 
-| Operating System      | Artifact Pattern                                                                         |
-|-----------------------|------------------------------------------------------------------------------------------|
-| macOS (Apple Silicon) | `<PRODUCT_NAME>_<VERSION>_aarch64.dmg`                                                   |
-| Windows (x64)         | `<PRODUCT_NAME>_<VERSION>_x64-setup.exe` or `<PRODUCT_NAME>_<VERSION>_x64-portable.zip`  |
-| Linux (ARM64)         | `<PRODUCT_NAME>_<VERSION>_arm64.deb` or `<PRODUCT_NAME>-<VERSION>-1.aarch64.rpm`         |
+| Operating System      | Download (v0.1.0)                                                                                                                                                   |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| macOS (Apple Silicon) | [BaoBuildBuddy_0.1.0_aarch64.dmg](https://bao.builders/releases/macos/BaoBuildBuddy_0.1.0_aarch64.dmg)                                                              |
+| Windows (x64)         | [x64-setup.exe](https://bao.builders/releases/windows/BaoBuildBuddy_0.1.0_x64-setup.exe) or [x64-portable.zip](https://bao.builders/releases/windows/BaoBuildBuddy_0.1.0_x64-portable.zip) |
+| Linux (x64)          | [amd64.deb](https://bao.builders/releases/linux-x64/BaoBuildBuddy_0.1.0_amd64.deb), [x86_64.rpm](https://bao.builders/releases/linux-x64/BaoBuildBuddy-0.1.0-1.x86_64.rpm), or [amd64.AppImage](https://bao.builders/releases/linux-x64/BaoBuildBuddy_0.1.0_amd64.AppImage) |
+| Linux (ARM64)        | [arm64.deb](https://bao.builders/releases/linux-arm64/BaoBuildBuddy_0.1.0_arm64.deb) or [aarch64.rpm](https://bao.builders/releases/linux-arm64/BaoBuildBuddy-0.1.0-1.aarch64.rpm)        |
 
-Windows builds are 64-bit only. See `packages/desktop/releases/README.md` for the current artifact catalog.
+Windows builds are 64-bit only. Verify downloads against [sha256.txt](https://bao.builders/releases/sha256.txt); see `packages/desktop/releases/README.md` for the full artifact catalog and provenance.
 
 ---
 
