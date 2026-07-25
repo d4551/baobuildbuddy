@@ -8,6 +8,7 @@ import {
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
   INSET_PANEL_CLASS,
+  MAX_W_48_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -167,7 +168,7 @@ const formatRunJobLabel = (run: RpaRunExecutionEnvelope): string => {
                   </div>
                 </td>
                 <td class="text-end">{{ formatRunProgress(run) }}</td>
-                <td class="max-w-48 truncate">{{ formatRunJobLabel(run) }}</td>
+                <td class="truncate" :class="[MAX_W_48_CLASS]">{{ formatRunJobLabel(run) }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>
                   <NuxtLink

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import { STACK_SPACE_Y_TOKEN_CLASS, SECONDARY_ACTION_CLASS } from "~/constants/layout";
 import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 definePageMeta({
@@ -174,7 +174,18 @@ async function handleCompleteChallenge(challengeId: string) {
       title-id="gamification-title"
       :title="t('gamificationPage.pageTitle')"
       :description="t('gamificationPage.metricsSummary', { brand: resolvedBrand.name })"
-    />
+    >
+      <template #actions>
+        <button
+          type="button"
+          :class="[SECONDARY_ACTION_CLASS]"
+          :aria-label="t('gamificationPage.refreshAria')"
+          @click="retryPageLoad"
+        >
+          {{ t("gamificationPage.refreshButtonLabel") }}
+        </button>
+      </template>
+    </PageHeroHeader>
 
     <LoadingSkeleton
       v-if="uiState === 'loading' || uiState === 'idle'"

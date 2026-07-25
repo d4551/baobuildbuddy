@@ -43,6 +43,8 @@ const resumeBuildPage = {
       experienceAria: "Experience level",
       generateButton: "Generate Questions",
       generateAria: "Generate tailored CV questions",
+      backToResumesButton: "Back to resumes",
+      backToResumesAria: "Return to resumes list",
     },
     questions: {
       title: "Question {current} of {total}",
