@@ -33,6 +33,11 @@ jobs:
         with:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
+      - name: Setup Rust (Tauri cargo check in lint)
+        uses: dtolnay/rust-toolchain@1.97.1
+        with:
+          components: rustfmt, clippy
+
       - name: Install workspace dependencies
         run: bun ci
 
