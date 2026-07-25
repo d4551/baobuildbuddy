@@ -64,10 +64,24 @@ import {
 
 type RouteStatus = typeof status;
 
+const omitNullFields = <T extends Record<string, unknown>>(value: T): Partial<T> => {
+  const next: Partial<T> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (entry === null || entry === undefined) {
+      continue;
+    }
+    next[key as keyof T] = entry as T[keyof T];
+  }
+  return next;
+};
+
 const toResumeEntityResponse = (resume: ResumeData) => ({
   id: resume.id ?? "",
   name: resume.name ?? RESUME_DEFAULT_NAME,
-  personalInfo: resume.personalInfo,
+  // JSON nulls in personalInfo fail TypeBox Optional(String) and strip the whole object.
+  personalInfo: resume.personalInfo
+    ? omitNullFields(resume.personalInfo as Record<string, unknown>)
+    : undefined,
   summary: resume.summary ?? "",
   experience: resume.experience ?? [],
   education: resume.education ?? [],
