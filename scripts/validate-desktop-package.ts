@@ -20,10 +20,7 @@ const CARGO_ERROR_DETAIL_MAX_CHARS = 6000;
 
 export const trimCargoFailureDetail = (combined: string): string => {
   const trimmed = combined.trim();
-  if (trimmed.length <= CARGO_ERROR_DETAIL_MAX_CHARS) {
-    return trimmed;
-  }
-  // Prefer the tail — downloads/compile spam is at the head; rustc errors at the end.
+  // Prefer rustc/pkg-config lines even when the blob is short — downloads must not bury the cause.
   const errorLines = trimmed
     .split("\n")
     .filter((line) => /\berror\b|failed to|cannot find|not found|Package /i.test(line));
@@ -33,6 +30,9 @@ export const trimCargoFailureDetail = (combined: string): string => {
       return focused;
     }
     return focused.slice(-CARGO_ERROR_DETAIL_MAX_CHARS);
+  }
+  if (trimmed.length <= CARGO_ERROR_DETAIL_MAX_CHARS) {
+    return trimmed;
   }
   return trimmed.slice(-CARGO_ERROR_DETAIL_MAX_CHARS);
 };
