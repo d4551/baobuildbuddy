@@ -124,6 +124,8 @@
         "scripts/browser-proof-stt-live.ts",
         "scripts/browser-proof-on-device-speech.ts",
         "scripts/browser-proof-kokoro-tts.ts",
+        "scripts/browser-proof-editor-ide.ts",
+        "scripts/browser-proof-whisper-stt.ts",
         "scripts/browser-proof-tts-live.ts"
       ],
       "linter": {

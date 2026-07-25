@@ -13,6 +13,8 @@ import {
   keymap,
   lineNumbers,
   placeholder as cmPlaceholder,
+  rectangularSelection,
+  drawSelection,
 } from "@codemirror/view";
 import { vim } from "@replit/codemirror-vim";
 import { showMinimap } from "@replit/codemirror-minimap";
@@ -25,6 +27,7 @@ import {
   EDITOR_PROSE_MODES,
   type EditorMode,
 } from "~/constants/editor";
+import { createEditorCollabExtension } from "~/composables/editor-collab-broadcast";
 
 const props = withDefaults(
   defineProps<{
@@ -36,6 +39,9 @@ const props = withDefaults(
     readonly minHeightClass?: string;
     readonly enableVim?: boolean;
     readonly enableMinimap?: boolean;
+    /** Same-origin tab collab via BroadcastChannel (local, not cloud Yjs). */
+    readonly enableCollab?: boolean;
+    readonly collabChannel?: string;
   }>(),
   {
     placeholder: "",
@@ -43,6 +49,8 @@ const props = withDefaults(
     minHeightClass: EDITOR_MIN_HEIGHT_CLASS,
     enableVim: undefined,
     enableMinimap: undefined,
+    enableCollab: false,
+    collabChannel: "bao-editor-collab",
   },
 );
 
@@ -152,6 +160,8 @@ function buildExtensions(): Extension[] {
       "data-minimap": minimapEnabled.value ? "on" : "off",
     }),
   ];
+  // Multi-cursor / column selections (Alt+drag) — CM6 rectangularSelection.
+  extensions.push(drawSelection(), rectangularSelection());
   if (vimEnabled.value) {
     extensions.push(vim());
   }
@@ -161,6 +171,9 @@ function buildExtensions(): Extension[] {
         create: () => ({ dom: document.createElement("div") }),
       }),
     );
+  }
+  if (props.enableCollab) {
+    extensions.push(createEditorCollabExtension(props.collabChannel));
   }
   if (!isProse) {
     extensions.push(lineNumbers(), monoTheme);

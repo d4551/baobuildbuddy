@@ -206,6 +206,10 @@ const collectChromeSignals = async (page: Page) =>
       return !intentionalTruncate;
     });
     const duplicateChromeCopy = (() => {
+      // API Docs legitimately repeats OpenAPI operation descriptions in list + detail.
+      if (location.pathname.includes("/docs/api")) {
+        return [] as string[];
+      }
       const texts = [...document.querySelectorAll("p")]
         .filter((el) => !el.closest(".grid, .stats, [role='log']"))
         .map((el) => collapseWs(el.textContent ?? ""))

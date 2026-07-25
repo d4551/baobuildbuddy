@@ -133,7 +133,8 @@ const postOpenAiTranscription = async (input: {
     return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
   }
   const textValue = parsed.text;
-  if (typeof textValue !== "string" || textValue.trim().length === 0) {
+  // Empty string is a valid Whisper result (silence / no speech).
+  if (typeof textValue !== "string") {
     return { ok: false, error: API_ERROR_SPEECH_TRANSCRIBE };
   }
   return { ok: true, text: textValue.trim() };

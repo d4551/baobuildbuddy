@@ -1126,6 +1126,10 @@ bun run release:refresh:all-os
 | `bun run speech:kokoro:serve` | Local Kokoro ONNX OpenAI-compatible TTS (`:8880/v1`) |
 | `bun run proof:kokoro-tts` | Local Kokoro TTS UI+API RIFF WAV; findings=0 |
 | `bun run validate:local-kokoro-tts` | Fail-closed Kokoro wiring (not speechSynthesis-only) |
+| `bun run speech:whisper:serve` | Local Whisper STT OpenAI-compatible (`:8090/v1`) |
+| `bun run proof:whisper-stt` | Local Whisper STT via `/api/speech/transcribe`; findings=0 |
+| `bun run proof:editor-ide` | Vim/minimap/TipTap/Cmd+P IDE surfaces; findings=0 |
+| `bun run validate:zero-capability-debt` | Forbids ledger Remaining theater + requires wiring |
 | `bun run validate:openapi-descriptions` | Every route `detail` has description (no API Docs empty stubs) |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
 | `bun run proof:browser-smoke`   | Multi-viewport screenshots; 0 capture failures       |

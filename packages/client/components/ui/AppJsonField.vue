@@ -83,6 +83,8 @@ function onTextareaInput(event: Event): void {
           :min-height-class="EDITOR_MIN_HEIGHT_CLASS"
           :enable-vim="vimOn"
           :enable-minimap="minimapOn"
+          :enable-collab="true"
+          collab-channel="bao-json-editor-collab"
           @update:model-value="onUpdate"
         />
         <template #fallback>

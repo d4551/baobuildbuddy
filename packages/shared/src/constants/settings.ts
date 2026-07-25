@@ -113,13 +113,16 @@ export const SPEECH_MODEL_OPTIONS = {
 /** TTS providers that ship in-product (cloud OpenAI/HF TTS ignored). */
 export const ON_DEVICE_TTS_PROVIDER_OPTIONS = ["browser", "local"] as const;
 
-const DEFAULT_STT_PROVIDER: SpeechProviderOption = "browser";
+/** Local Whisper via OpenAI-compatible endpoint (scripts/whisper-openai-server.py). */
+const DEFAULT_STT_PROVIDER: SpeechProviderOption = "local";
 /** Local Kokoro ONNX via OpenAI-compatible endpoint — not browser speechSynthesis. */
 const DEFAULT_TTS_PROVIDER: SpeechProviderOption = "local";
 
 /** Default Kokoro OpenAI-compatible base (scripts/kokoro-openai-server.py). */
 export const DEFAULT_LOCAL_TTS_ENDPOINT = "http://127.0.0.1:8880/v1";
 export const DEFAULT_LOCAL_TTS_VOICE = "af_heart";
+/** Default Whisper OpenAI-compatible base (scripts/whisper-openai-server.py). */
+export const DEFAULT_LOCAL_STT_ENDPOINT = "http://127.0.0.1:8090/v1";
 
 /**
  * Default provider/model values for speech recognition and synthesis.
@@ -130,7 +133,7 @@ export const DEFAULT_SPEECH_SETTINGS = {
   stt: {
     provider: DEFAULT_STT_PROVIDER,
     model: SPEECH_MODEL_OPTIONS.stt[DEFAULT_STT_PROVIDER][0],
-    endpoint: "",
+    endpoint: DEFAULT_LOCAL_STT_ENDPOINT,
   },
   tts: {
     provider: DEFAULT_TTS_PROVIDER,
