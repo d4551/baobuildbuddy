@@ -276,6 +276,7 @@ const CARGO_PACKAGE_NAME_PATTERN = /^name = "([^"]+)"/m;
 const LEADING_DOT_SLASH_PATTERN = /^\.\/+/u;
 const LEADING_SLASH_PATTERN = /^\/+/u;
 const ZIP_EXTENSION_PATTERN = /\.zip$/u;
+const PATH_SEGMENT_SPLIT_PATTERN = /[/\\]/u;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -2012,7 +2013,28 @@ const main = async (): Promise<void> => {
   await writeOutput("desktop-release:verify passed.");
 };
 
-await main().then(undefined, async (error: unknown) => {
-  await writeError(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});
+/** Test/CI helper: verify Windows MSI (CFB) or setup EXE (MZ) magic without full release context. */
+export const verifyWindowsArtifactMagicFile = async (
+  absolutePath: string,
+  kind: "msi" | "setup",
+): Promise<VerificationResult> => {
+  const relativePath = absolutePath.split(PATH_SEGMENT_SPLIT_PATTERN).at(-1) ?? absolutePath;
+  return verifyArtifactType({
+    kind,
+    relativePath,
+    absolutePath,
+    target: "windows",
+  });
+};
+
+export const WINDOWS_ARTIFACT_MAGIC = {
+  msi: WINDOWS_MSI_SIGNATURE,
+  setup: WINDOWS_EXE_SIGNATURE,
+} as const;
+
+if (import.meta.main) {
+  await main().then(undefined, async (error: unknown) => {
+    await writeError(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  });
+}

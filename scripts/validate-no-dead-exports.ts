@@ -220,10 +220,14 @@ export const isDeadExportViolation = (options: {
   }
 
   const exportedNames = collectExportedRuntimeNames(content);
+  // Composables: only `use*` hooks must have callers. Co-located constants/types
+  // (e.g. KEYBOARD_ROUTE_SHORTCUTS) do not require separate importers — otherwise
+  // cold clones without .nuxt falsely flag live auto-imported hooks.
+  const useExports = exportedNames.filter((exportName) => exportName.startsWith("use"));
   if (
     filePath.startsWith("packages/client/composables/") &&
-    exportedNames.some((exportName) => exportName.startsWith("use")) &&
-    exportedNames.every((exportName) =>
+    useExports.length > 0 &&
+    useExports.every((exportName) =>
       hasAutoImportConsumer(filePath, exportName, importSources, autoImportNames),
     )
   ) {

@@ -2,55 +2,41 @@ import { describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+  verifyWindowsArtifactMagicFile,
+  WINDOWS_ARTIFACT_MAGIC,
+} from "./verify-desktop-release-artifacts";
 
-const NUM_208 = 208;
-const NUM_207 = 207;
-const NUM_17 = 17;
-const NUM_224 = 224;
-const NUM_161 = 161;
-const NUM_177 = 177;
-const NUM_26 = 26;
-const NUM_225 = 225;
 const MSI_MIN_HEADER_BYTES = 72;
-const WINDOWS_MSI_CFB_SIGNATURE = Uint8Array.from([
-  NUM_208,
-  NUM_207,
-  NUM_17,
-  NUM_224,
-  NUM_161,
-  NUM_177,
-  NUM_26,
-  NUM_225,
-]);
-const MSI_KIND_BRANCH_PATTERN = /artifact\.kind === "msi"/;
+const PE_MZ = WINDOWS_ARTIFACT_MAGIC.setup;
+const CFB_MSI = WINDOWS_ARTIFACT_MAGIC.msi;
 
 /**
- * Regression: MSI is OLE/CFB (D0 CF 11 E0…), not PE MZ. Windows verify used to
- * fall through to WINDOWS_EXE_SIGNATURE and fail green builds.
+ * Behavior regression: MSI is OLE/CFB, not PE MZ. Calls the real magic verifier
+ * (not source-string theater).
  */
 describe("windows MSI magic verification", () => {
-  test("verify:desktop-releases accepts CFB MSI header and rejects PE-as-msi", async () => {
+  test("accepts CFB MSI header and rejects PE masquerading as MSI", async () => {
     const root = await mkdtemp(join(tmpdir(), "bao-msi-magic-"));
     const windowsDir = join(root, "windows");
     await mkdir(windowsDir, { recursive: true });
 
-    const msiPath = join(windowsDir, "BaoBuildBuddy_0.1.0_x64_en-US.msi");
+    const cfbPath = join(windowsDir, "BaoBuildBuddy_0.1.0_x64_en-US.msi");
+    const peAsMsiPath = join(windowsDir, "fake-pe.msi");
     const cfb = new Uint8Array(MSI_MIN_HEADER_BYTES);
-    cfb.set(WINDOWS_MSI_CFB_SIGNATURE, 0);
-    await writeFile(msiPath, cfb);
+    cfb.set(CFB_MSI, 0);
+    await writeFile(cfbPath, cfb);
 
-    // Source-level contract: the verifier must treat msi as CFB, not MZ.
-    const verifySource = await Bun.file(
-      join(import.meta.dir, "verify-desktop-release-artifacts.ts"),
-    ).text();
-    expect(verifySource).toContain("WINDOWS_MSI_SIGNATURE");
-    expect(verifySource).toMatch(MSI_KIND_BRANCH_PATTERN);
-    expect(verifySource).toContain("NUM_208");
-    expect(verifySource).toContain("NUM_207");
-    // Must not only fall through MSI to EXE magic.
-    const msiBranch = verifySource.indexOf('artifact.kind === "msi"');
-    const exeFallthrough = verifySource.lastIndexOf("WINDOWS_EXE_SIGNATURE");
-    expect(msiBranch).toBeGreaterThan(-1);
-    expect(msiBranch).toBeLessThan(exeFallthrough);
+    const pe = new Uint8Array(MSI_MIN_HEADER_BYTES);
+    pe.set(PE_MZ, 0);
+    await writeFile(peAsMsiPath, pe);
+
+    const cfbResult = await verifyWindowsArtifactMagicFile(cfbPath, "msi");
+    expect(cfbResult.ok).toBe(true);
+    expect(cfbResult.details).toContain("msi");
+
+    const peResult = await verifyWindowsArtifactMagicFile(peAsMsiPath, "msi");
+    expect(peResult.ok).toBe(false);
+    expect(peResult.details).toContain("mismatch");
   });
 });

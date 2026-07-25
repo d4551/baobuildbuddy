@@ -69,9 +69,7 @@ function createScopedScrollSpy() {
 }
 
 function assertSyncsFromHash(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");
@@ -96,9 +94,7 @@ function assertSyncsFromHash(): void {
 }
 
 function assertUpdatesActiveSectionFromObserver(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");
@@ -128,9 +124,7 @@ function assertUpdatesActiveSectionFromObserver(): void {
 }
 
 function assertDoesNotDuplicateHashUpdates(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");

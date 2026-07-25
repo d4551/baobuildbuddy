@@ -180,3 +180,16 @@ describe("collectRawDesignTokenViolationsForContent: flags arbitrary text-[Npx] 
     expect(violations.some((v) => v.message.includes("z-[99]"))).toBe(true);
   });
 });
+
+describe("raw-design-token gate source keeps oklab/color-mix/arbitrary coverage", () => {
+  test("validator source still bans oklab, color-mix, and text|bg|z arbitrary tokens", async () => {
+    const source = await Bun.file(
+      new URL("./validate-no-raw-design-tokens.ts", import.meta.url),
+    ).text();
+    expect(source).toContain("oklab");
+    expect(source).toContain("color-mix");
+    expect(source).toContain("text|bg|z");
+    expect(source.includes("arbitraryTokenPattern")).toBe(true);
+    expect(source.includes("cssColorFunctionPattern")).toBe(true);
+  });
+});

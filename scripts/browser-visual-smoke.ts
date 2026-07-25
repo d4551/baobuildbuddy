@@ -55,17 +55,8 @@ const STATIC_ROUTES = [
 const LOADING_STATUS_TEXT_PATTERN = /^Loading$/u;
 
 const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
-  await page
-    .locator("body")
-    .waitFor({ state: "visible", timeout })
-    .then(
-      () => undefined,
-      () => undefined,
-    );
-  await page.waitForLoadState("domcontentloaded", { timeout }).then(
-    () => undefined,
-    () => undefined,
-  );
+  await page.locator("body").waitFor({ state: "visible", timeout });
+  await page.waitForLoadState("domcontentloaded", { timeout });
 };
 
 type RouteResult = {
@@ -87,11 +78,7 @@ const waitForMobileDockActive = async (page: Page, viewportName: string, route: 
   await page
     .locator('nav.dock a[aria-current="page"], nav.dock a.dock-active')
     .first()
-    .waitFor({ state: "attached", timeout: 5_000 })
-    .then(
-      () => undefined,
-      () => undefined,
-    );
+    .waitFor({ state: "attached", timeout: 5_000 });
 };
 
 const smokeRoute = async (

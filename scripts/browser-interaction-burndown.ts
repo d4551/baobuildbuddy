@@ -174,7 +174,8 @@ const burnRoute = async (
     pageErrorBucket,
     routeFindings,
   );
-  const ok = routeFindings.every((finding) => finding.severity !== "error");
+  const fiveQFailed = Object.values(fiveQ).some((value) => value.startsWith("FAIL:"));
+  const ok = !fiveQFailed && routeFindings.every((finding) => finding.severity !== "error");
   return { viewport, route, screenshot, fiveQ, ok };
 };
 
@@ -216,6 +217,7 @@ const main = async (): Promise<void> => {
   await browser.close();
 
   const errors = findings.filter((finding) => finding.severity === "error");
+  const ledgerFailures = ledger.filter((item) => !item.ok);
   const reportPath = join(OUT_DIR, "burndown-report.json");
   const ledgerPath = join(OUT_DIR, "fiveq-ledger.json");
   await Bun.write(
@@ -228,6 +230,7 @@ const main = async (): Promise<void> => {
         errorCount: errors.length,
         ledgerOk: ledger.filter((item) => item.ok).length,
         ledgerTotal: ledger.length,
+        ledgerFailures: ledgerFailures.length,
       },
       null,
       2,
@@ -235,18 +238,23 @@ const main = async (): Promise<void> => {
   );
   await Bun.write(ledgerPath, JSON.stringify(ledger, null, 2));
   await writeOutput(
-    `browser-interaction-burndown: ${String(ledger.length)} page×viewport, ${String(errors.length)} errors, ${String(findings.length)} findings → ${reportPath}`,
+    `browser-interaction-burndown: ${String(ledger.length)} page×viewport, ${String(errors.length)} errors, ${String(ledgerFailures.length)} ledger fails, ${String(findings.length)} findings → ${reportPath}`,
   );
-  if (errors.length > 0) {
-    await writeError(
-      errors
-        .slice(0, NUM_40)
-        .map(
-          (finding) =>
-            `- ${finding.viewport} ${finding.route} [${finding.action}]: ${finding.detail.slice(0, NUM_220)}`,
-        )
-        .join("\n"),
-    );
+  if (errors.length > 0 || ledgerFailures.length > 0) {
+    const findingLines = errors
+      .slice(0, NUM_40)
+      .map(
+        (finding) =>
+          `- ${finding.viewport} ${finding.route} [${finding.action}]: ${finding.detail.slice(0, NUM_220)}`,
+      );
+    const ledgerLines = ledgerFailures.slice(0, NUM_40).map((item) => {
+      const failedKeys = Object.entries(item.fiveQ)
+        .filter(([, value]) => value.startsWith("FAIL:"))
+        .map(([key, value]) => `${key}=${value}`)
+        .join("; ");
+      return `- ${item.viewport} ${item.route}: ${failedKeys || "ledger ok=false"}`;
+    });
+    await writeError([...findingLines, ...ledgerLines].join("\n"));
     process.exitCode = 1;
   }
 };
