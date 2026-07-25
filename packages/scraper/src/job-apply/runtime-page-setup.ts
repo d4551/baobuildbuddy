@@ -74,7 +74,10 @@ type FollowApplyLinkOutcome =
   | { readonly kind: "no_link"; readonly url: string }
   | { readonly kind: "nav_failed"; readonly url: string; readonly href: string };
 
-const detectAndFollowHostedApplyPage = async (page: Page): Promise<FollowApplyLinkOutcome> => {
+/** Exported for unit tests — listing→hosted apply hop honesty. */
+export const detectAndFollowHostedApplyPage = async (
+  page: Page,
+): Promise<FollowApplyLinkOutcome> => {
   const currentUrl = page.url();
   if (currentUrl.includes("greenhouse.io") || currentUrl.includes("lever.co")) {
     return { kind: "already_hosted", url: currentUrl };
@@ -233,7 +236,7 @@ export const initializeApplicationPage = async (
     addStep(
       state.steps,
       "follow_apply_link",
-      "ok",
+      "skipped",
       `No hosted apply link found; continuing on listing page: ${followOutcome.url}`,
     );
   }

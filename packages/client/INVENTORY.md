@@ -110,7 +110,7 @@ Reusable design-system components shared across all features:
 | `WorkPipeline.vue` | Horizontal step pipeline (dashboard flow) |
 | `EmptyState.vue` | Empty-state column with optional CTA (link/button) |
 | `LoadingSkeleton.vue` | Skeleton loaders (stats, lines, variants) |
-| `BootstrapErrorAlert.vue` | Error alert with retry action |
+| `ui/BootstrapErrorAlert.vue` | Error alert with retry action |
 | `ConfirmDialog.vue` | Confirmation dialog (delete confirmations, etc.) |
 | `AppModalFrame.vue` | Modal frame with focus trap, size tokens |
 | `AppBreadcrumbs.vue` | Breadcrumb navigation |

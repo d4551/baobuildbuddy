@@ -1982,6 +1982,7 @@ const catalog = {
         pending: "Pendiente",
         running: "En ejecución",
         success: "Éxito",
+        skipped: "Omitido",
       },
     },
     jobApply: {

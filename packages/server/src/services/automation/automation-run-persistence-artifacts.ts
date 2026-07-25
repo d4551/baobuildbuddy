@@ -20,7 +20,7 @@ const sanitizeStep = (step: {
   action?: unknown;
   status?: unknown;
   message?: unknown;
-}): { action: string; status: "ok" | "error"; message?: string } | null => {
+}): { action: string; status: "ok" | "error" | "skipped"; message?: string } | null => {
   if (!step || typeof step !== "object") {
     return null;
   }
@@ -28,7 +28,10 @@ const sanitizeStep = (step: {
     return null;
   }
 
-  const status = step.status === "error" || step.status === "ok" ? step.status : "ok";
+  const status =
+    step.status === "error" || step.status === "ok" || step.status === "skipped"
+      ? step.status
+      : "ok";
   if (typeof step.message !== "string" || step.message.length > MAX_CUSTOM_ANSWER_VALUE_LENGTH) {
     return { action: step.action, status };
   }
@@ -38,11 +41,14 @@ const sanitizeStep = (step: {
 
 const sanitizeSteps = (
   steps: Array<{ action?: unknown; status?: unknown; message?: unknown }>,
-): Array<{ action: string; status: "ok" | "error"; message?: string }> =>
+): Array<{ action: string; status: "ok" | "error" | "skipped"; message?: string }> =>
   steps
     .map((step) => sanitizeStep(step))
     .filter(
-      (step): step is { action: string; status: "ok" | "error"; message?: string } => step !== null,
+      (
+        step,
+      ): step is { action: string; status: "ok" | "error" | "skipped"; message?: string } =>
+        step !== null,
     );
 
 export const sanitizeRunId = (runId: string, invalidRunIdMessage: string): string => {

@@ -4,7 +4,7 @@ import type { AutomationBrowserSession } from "../runtime/browser";
 import type { ProtocolEmitter } from "../runtime/protocol";
 import type { JobApplySelectorBundle, JobApplyStrategy } from "./strategy-registry";
 
-export type StepStatus = "ok" | "error";
+export type StepStatus = "ok" | "error" | "skipped";
 
 export type StepRecord = {
   action: string;

@@ -15,7 +15,7 @@ export type RunDetailFields = {
 
 export type OutputStep = {
   action: string;
-  status: "ok" | "error";
+  status: "ok" | "error" | "skipped";
   message?: string;
 };
 
@@ -33,7 +33,13 @@ export type StreamEventFields = {
 };
 
 export const toTimelineStatus = (value: string | undefined): TimelineStatus => {
-  if (value === "pending" || value === "running" || value === "success" || value === "error") {
+  if (
+    value === "pending" ||
+    value === "running" ||
+    value === "success" ||
+    value === "error" ||
+    value === "skipped"
+  ) {
     return value;
   }
   return "pending";
@@ -134,7 +140,7 @@ export const projectOutputSteps = (output: JsonValue | null): OutputStep[] => {
     }
     const action = asString(step.action);
     const status = asString(step.status);
-    if (!(action && (status === "ok" || status === "error"))) {
+    if (!(action && (status === "ok" || status === "error" || status === "skipped"))) {
       continue;
     }
     const message = asString(step.message);

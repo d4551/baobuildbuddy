@@ -44,6 +44,7 @@ const automationruns = {
         running: "Running",
         success: "Success",
         error: "Error",
+        skipped: "Skipped",
       },
       list: {
         notAvailable: "N/A",

@@ -3,12 +3,12 @@ import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.sch
 import type { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
-  buildJobApplyBody,
   type ScheduledJobApplyRequestBody,
   useAutomationJobApplyBootstrap,
   useAutomationJobApplyDependencies,
   useAutomationJobApplyForm,
 } from "~/composables/automation-job-apply-page-form";
+import { buildJobApplyBody } from "~/composables/automation-job-apply-select-options";
 import {
   DATE_FORMAT_OPTIONS,
   resolveScheduledRunAt,

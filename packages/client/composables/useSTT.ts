@@ -8,6 +8,7 @@ import {
   type ServerSttRequestOptions,
   transcribeAudioViaServer,
 } from "./speech-server-stt";
+import { createServerSttRequestOptions } from "./speech-stt-request-options";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import { useSettings } from "./useSettings";
 
@@ -246,14 +247,8 @@ export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   const sttProvider = computed(() =>
     resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
   );
-  const getServerSttOptions = (): ServerSttRequestOptions => {
-    const stt = appSettings.value?.automationSettings?.speech?.stt;
-    return {
-      provider: resolveSpeechSttProvider(stt?.provider),
-      model: stt?.model?.trim() || "",
-      endpoint: stt?.endpoint?.trim() || "",
-    };
-  };
+  const getServerSttOptions = (): ServerSttRequestOptions =>
+    createServerSttRequestOptions(appSettings);
 
   onMounted(() => {
     state.useServerStt = shouldUseServerStt(sttProvider.value);

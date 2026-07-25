@@ -7,6 +7,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { hasBootstrapErrorRetry } from "~/utils/bootstrap-error-alert";
 
 const props = withDefaults(
   defineProps<{
@@ -34,8 +35,8 @@ const alertClass = computed(() =>
     : `alert ${ALERT_VARIANT_CLASS.error} sm:alert-horizontal`,
 );
 
-const hasRetry = computed(
-  () => props.retryLabel.trim().length > 0 && props.retryAriaLabel.trim().length > 0,
+const hasRetry = computed(() =>
+  hasBootstrapErrorRetry(props.retryLabel, props.retryAriaLabel),
 );
 </script>
 

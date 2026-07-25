@@ -2,11 +2,14 @@
  * Time constants in milliseconds. Single source of truth for duration calculations.
  */
 
+/** Milliseconds in one second. */
+export const MS_PER_SECOND = 1000;
+
 /** Milliseconds in one day. */
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** Milliseconds in one minute. */
-export const MS_PER_MINUTE = 60 * 1000;
+export const MS_PER_MINUTE = 60 * MS_PER_SECOND;
 
 /** Milliseconds in one hour. */
 export const MS_PER_HOUR = 60 * MS_PER_MINUTE;

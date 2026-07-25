@@ -21,6 +21,18 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
+const mapOutputStepStatusToTimeline = (
+  status: OutputStep["status"],
+): TimelineEntry["status"] => {
+  if (status === "ok") {
+    return "success";
+  }
+  if (status === "skipped") {
+    return "skipped";
+  }
+  return "error";
+};
+
 const createAutomationRunDetailDateFormatter =
   (locale: Readonly<{ value: string }>, fallbackLocale: Readonly<{ value: string }>) =>
   (value: string): string => {
@@ -166,7 +178,7 @@ const createAutomationRunFallbackTimelineEntries = (options: {
       id: `${options.run.value?.id || options.runId.value}-output-${index}`,
       timestamp: options.run.value?.updatedAt || "",
       stage: options.t("automation.runDetail.timeline.stageOutputStep"),
-      status: step.status === "ok" ? "success" : "error",
+      status: mapOutputStepStatusToTimeline(step.status),
       message: step.message || step.action,
     }));
   }
