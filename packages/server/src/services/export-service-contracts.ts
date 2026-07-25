@@ -1,6 +1,8 @@
 import {
   COVER_LETTER_EXPORT_THEME,
+  type CoverLetterExportLayout,
   PORTFOLIO_EXPORT_THEME,
+  type PortfolioExportLayout,
   resolveCoverLetterPdfPalette,
   resolvePortfolioPdfPalette,
 } from "@bao/shared/constants/export-document-theme";
@@ -89,6 +91,7 @@ export interface CoverLetterRenderContext {
   boldFont: PDFFont;
   colors: CoverLetterPdfColors;
   darkBackground: boolean;
+  layout: CoverLetterExportLayout;
 }
 
 export type PortfolioPdfColors = {
@@ -113,6 +116,7 @@ export interface PortfolioRenderContext {
   boldFont: PDFFont;
   colors: PortfolioPdfColors;
   darkBackground: boolean;
+  layout: PortfolioExportLayout;
 }
 
 const toStaticPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);

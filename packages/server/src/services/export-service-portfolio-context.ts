@@ -1,3 +1,4 @@
+import { resolvePortfolioExportLayout } from "@bao/shared/constants/export-document-theme";
 import {
   PORTFOLIO_FOOTER_X_OFFSET,
   PORTFOLIO_FOOTER_Y,
@@ -28,22 +29,25 @@ const fillDarkPortfolioPage = (context: PortfolioRenderContext): void => {
 export async function createPortfolioContext(
   template?: string | null,
 ): Promise<PortfolioRenderContext> {
+  const layout = resolvePortfolioExportLayout(template);
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
+  const margin = layout === "compact" ? PORTFOLIO_MARGIN - 10 : PORTFOLIO_MARGIN;
   const context: PortfolioRenderContext = {
     pdfDoc,
     page,
     width,
     height,
-    margin: PORTFOLIO_MARGIN,
-    yPosition: height - PORTFOLIO_MARGIN,
+    margin,
+    yPosition: height - margin,
     font,
     boldFont,
     colors: toPortfolioPdfColors(template),
-    darkBackground: template === "gaming",
+    darkBackground: layout === "banner-dark",
+    layout,
   };
   fillDarkPortfolioPage(context);
   return context;

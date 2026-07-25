@@ -1,4 +1,5 @@
 import { COVER_LETTER_DEFAULT_SIGNATURE } from "@bao/shared/constants/cover-letter";
+import { resolveCoverLetterExportLayout } from "@bao/shared/constants/export-document-theme";
 import {
   COVER_LETTER_LINE_HEIGHT,
   COVER_LETTER_MARGIN,
@@ -40,12 +41,44 @@ const fillDarkPage = (context: CoverLetterRenderContext): void => {
   });
 };
 
+const drawAccentRail = (context: CoverLetterRenderContext): void => {
+  if (context.layout !== "accent-rail") {
+    return;
+  }
+  context.page.drawRectangle({
+    x: 0,
+    y: 0,
+    width: 14,
+    height: context.height,
+    color: context.colors.primary,
+  });
+};
+
+const drawBannerHeader = (context: CoverLetterRenderContext): void => {
+  if (context.layout !== "banner-dark") {
+    return;
+  }
+  context.page.drawRectangle({
+    x: 0,
+    y: context.height - 72,
+    width: context.width,
+    height: 72,
+    color: context.colors.primary,
+  });
+};
+
 async function createCoverLetterContext(
   template?: string | null,
 ): Promise<CoverLetterRenderContext> {
+  const layout = resolveCoverLetterExportLayout(template);
   const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const useHelvetica = layout === "technical-badge" || layout === "banner-dark";
+  const font = await pdfDoc.embedFont(
+    useHelvetica ? StandardFonts.Helvetica : StandardFonts.TimesRoman,
+  );
+  const boldFont = await pdfDoc.embedFont(
+    useHelvetica ? StandardFonts.HelveticaBold : StandardFonts.TimesRomanBold,
+  );
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
   const context: CoverLetterRenderContext = {
@@ -58,18 +91,28 @@ async function createCoverLetterContext(
     font,
     boldFont,
     colors: toCoverLetterPdfColors(template),
-    darkBackground: template === "gaming",
+    darkBackground: layout === "banner-dark",
+    layout,
   };
   fillDarkPage(context);
+  drawAccentRail(context);
+  drawBannerHeader(context);
+  if (layout === "banner-dark") {
+    context.yPosition = height - 90;
+  }
+  if (layout === "accent-rail") {
+    context.margin = COVER_LETTER_MARGIN + 10;
+  }
   return context;
 }
 
 function drawCoverLetterDivider(context: CoverLetterRenderContext): void {
+  const thickness = context.layout === "centered-formal" ? 2.5 : 1;
   context.page.drawLine({
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
-    thickness: 1,
-    color: context.colors.line,
+    thickness,
+    color: context.layout === "centered-formal" ? context.colors.accent : context.colors.line,
   });
   context.yPosition -= 24;
 }
@@ -82,18 +125,31 @@ function ensureCoverLetterSpace(context: CoverLetterRenderContext, requiredSpace
   context.page = addA4Page(context.pdfDoc);
   context.yPosition = context.height - context.margin;
   fillDarkPage(context);
+  drawAccentRail(context);
+}
+
+function textX(context: CoverLetterRenderContext, text: string, size: number, bold = false): number {
+  if (context.layout !== "centered-formal") {
+    return context.margin;
+  }
+  const font = bold ? context.boldFont : context.font;
+  const width = font.widthOfTextAtSize(text, size);
+  return Math.max(context.margin, (context.width - width) / 2);
 }
 
 function renderCoverLetterSender(
   context: CoverLetterRenderContext,
   userProfile: CoverLetterUserProfile,
 ): void {
+  const nameSize = context.layout === "banner-dark" ? 22 : 24;
+  const nameColor =
+    context.layout === "banner-dark" ? rgb(0.98, 0.98, 1) : context.colors.primary;
   context.page.drawText(userProfile.name, {
-    x: context.margin,
+    x: textX(context, userProfile.name, nameSize, true),
     y: context.yPosition,
-    size: 24,
+    size: nameSize,
     font: context.boldFont,
-    color: context.colors.primary,
+    color: nameColor,
   });
   context.yPosition -= 24;
 
@@ -107,18 +163,19 @@ function renderCoverLetterSender(
   }
 
   context.page.drawText(contactLine, {
-    x: context.margin,
+    x: textX(context, contactLine, 9),
     y: context.yPosition,
     size: 9,
     font: context.font,
-    color: context.colors.muted,
+    color: context.layout === "banner-dark" ? rgb(0.92, 0.92, 0.96) : context.colors.muted,
   });
   context.yPosition -= COUNT_TWENTY_EIGHT;
 }
 
 function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): void {
-  context.page.drawText(formatExportDate(date), {
-    x: context.margin,
+  const dateText = formatExportDate(date);
+  context.page.drawText(dateText, {
+    x: textX(context, dateText, 10),
     y: context.yPosition,
     size: 10,
     font: context.font,
@@ -131,8 +188,38 @@ function renderCoverLetterRecipient(
   context: CoverLetterRenderContext,
   coverLetter: CoverLetterPayload,
 ): void {
+  if (context.layout === "technical-badge") {
+    const badge = `ROLE // ${coverLetter.position.toUpperCase()}`;
+    const badgeWidth = context.boldFont.widthOfTextAtSize(badge, 10) + 16;
+    context.page.drawRectangle({
+      x: context.margin,
+      y: context.yPosition - 4,
+      width: badgeWidth,
+      height: 18,
+      color: context.colors.primary,
+    });
+    context.page.drawText(badge, {
+      x: context.margin + 8,
+      y: context.yPosition,
+      size: 10,
+      font: context.boldFont,
+      color: rgb(1, 1, 1),
+    });
+    context.yPosition -= COUNT_TWENTY_EIGHT;
+    context.page.drawText(coverLetter.company, {
+      x: context.margin,
+      y: context.yPosition,
+      size: 11,
+      font: context.boldFont,
+      color: context.colors.accent,
+    });
+    context.yPosition -= COUNT_EIGHTEEN;
+    drawCoverLetterDivider(context);
+    return;
+  }
+
   context.page.drawText(coverLetter.company, {
-    x: context.margin,
+    x: textX(context, coverLetter.company, 11, true),
     y: context.yPosition,
     size: 11,
     font: context.boldFont,
@@ -140,8 +227,9 @@ function renderCoverLetterRecipient(
   });
   context.yPosition -= COUNT_FIFTEEN;
 
-  context.page.drawText(`RE: ${coverLetter.position}`, {
-    x: context.margin,
+  const reLine = `RE: ${coverLetter.position}`;
+  context.page.drawText(reLine, {
+    x: textX(context, reLine, 10),
     y: context.yPosition,
     size: 10,
     font: context.font,
@@ -195,7 +283,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
   ensureCoverLetterSpace(context, COUNT_THIRTY_FIVE);
 
   context.page.drawText(COVER_LETTER_DEFAULT_SIGNATURE, {
-    x: context.margin,
+    x: textX(context, COVER_LETTER_DEFAULT_SIGNATURE, 11),
     y: context.yPosition,
     size: 11,
     font: context.font,
@@ -204,7 +292,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
   context.yPosition -= COUNT_TWENTY_FIVE;
 
   context.page.drawText(signerName, {
-    x: context.margin,
+    x: textX(context, signerName, 11, true),
     y: context.yPosition,
     size: 11,
     font: context.boldFont,

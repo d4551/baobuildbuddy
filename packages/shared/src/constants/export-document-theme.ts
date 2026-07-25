@@ -286,6 +286,51 @@ export const PORTFOLIO_DOCX_THEME_BY_TEMPLATE = {
   },
 } as const satisfies Record<PortfolioExportTemplate, PortfolioDocxTheme>;
 
+/**
+ * Structural PDF layouts — color palettes alone are not enough for "one style per template".
+ */
+export type CoverLetterExportLayout =
+  | "classic-stack"
+  | "accent-rail"
+  | "banner-dark"
+  | "centered-formal"
+  | "technical-badge";
+
+export type PortfolioExportLayout = "standard" | "banner-dark" | "compact" | "showcase";
+
+export const COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE = {
+  professional: "classic-stack",
+  creative: "accent-rail",
+  gaming: "banner-dark",
+  executive: "centered-formal",
+  technical: "technical-badge",
+} as const satisfies Record<CoverLetterTemplate, CoverLetterExportLayout>;
+
+export const PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE = {
+  modern: "standard",
+  gaming: "banner-dark",
+  minimal: "compact",
+  showcase: "showcase",
+} as const satisfies Record<PortfolioExportTemplate, PortfolioExportLayout>;
+
+export const resolveCoverLetterExportLayout = (
+  template: CoverLetterTemplate | string | undefined | null,
+): CoverLetterExportLayout => {
+  if (template && template in COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE) {
+    return COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE[template as CoverLetterTemplate];
+  }
+  return COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE.professional;
+};
+
+export const resolvePortfolioExportLayout = (
+  template: PortfolioExportTemplate | string | undefined | null,
+): PortfolioExportLayout => {
+  if (template && template in PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE) {
+    return PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE[template as PortfolioExportTemplate];
+  }
+  return PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE.modern;
+};
+
 export const resolveCoverLetterPdfPalette = (
   template: CoverLetterTemplate | string | undefined | null,
 ): CoverLetterPdfPalette => {

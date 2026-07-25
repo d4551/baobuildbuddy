@@ -8,6 +8,7 @@ import {
 } from "@bao/shared/constants/numeric";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
+import { rgb } from "pdf-lib";
 import type { PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
@@ -16,25 +17,53 @@ function renderPortfolioProjectHeading(
   project: PortfolioProject,
   index: number,
 ): void {
-  context.page.drawText(`CASE STUDY ${index + 1}`, {
-    x: context.margin,
-    y: context.yPosition,
-    size: 9,
-    font: context.boldFont,
-    color: context.colors.accent,
-  });
-  context.yPosition -= COUNT_THIRTEEN;
+  if (context.layout !== "compact") {
+    context.page.drawText(
+      context.layout === "showcase" ? `SHIP ${index + 1}` : `CASE STUDY ${index + 1}`,
+      {
+        x: context.margin,
+        y: context.yPosition,
+        size: 9,
+        font: context.boldFont,
+        color: context.colors.accent,
+      },
+    );
+    context.yPosition -= COUNT_THIRTEEN;
+  }
 
-  context.page.drawText(`${index + 1}. ${project.title}`, {
-    x: context.margin,
-    y: context.yPosition,
-    size: 18,
-    font: context.boldFont,
-    color: context.colors.primary,
-  });
+  const titleSize = context.layout === "compact" ? 14 : 18;
+  context.page.drawText(
+    context.layout === "compact" ? project.title : `${index + 1}. ${project.title}`,
+    {
+      x: context.margin,
+      y: context.yPosition,
+      size: titleSize,
+      font: context.boldFont,
+      color: context.colors.primary,
+    },
+  );
   context.yPosition -= COUNT_TWENTY_TWO;
 
   if (!project.featured) {
+    return;
+  }
+
+  if (context.layout === "showcase") {
+    context.page.drawRectangle({
+      x: context.margin,
+      y: context.yPosition - 2,
+      width: 88,
+      height: 14,
+      color: context.colors.featured,
+    });
+    context.page.drawText("FEATURED", {
+      x: context.margin + 8,
+      y: context.yPosition,
+      size: 9,
+      font: context.boldFont,
+      color: rgb(1, 1, 1),
+    });
+    context.yPosition -= COUNT_FIFTEEN;
     return;
   }
 

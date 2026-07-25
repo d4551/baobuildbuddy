@@ -7,6 +7,7 @@ import {
   COUNT_TWENTY_TWO,
 } from "@bao/shared/constants/numeric";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
+import { rgb } from "pdf-lib";
 import type { PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
@@ -36,31 +37,68 @@ function renderPortfolioTitleBlock(
   context: PortfolioRenderContext,
   metadata: PortfolioMetadata,
 ): void {
-  context.page.drawText(metadata.title ?? "Portfolio", {
+  if (context.layout === "showcase") {
+    context.page.drawRectangle({
+      x: 0,
+      y: context.height - 110,
+      width: context.width,
+      height: 110,
+      color: context.colors.primary,
+    });
+    context.yPosition = context.height - 48;
+  } else if (context.layout === "banner-dark") {
+    context.page.drawRectangle({
+      x: 0,
+      y: context.height - 84,
+      width: context.width,
+      height: 84,
+      color: context.colors.primary,
+    });
+    context.yPosition = context.height - 42;
+  }
+
+  const title = metadata.title ?? "Portfolio";
+  const titleSize = context.layout === "compact" ? 22 : context.layout === "showcase" ? 32 : 28;
+  const onBanner = context.layout === "showcase" || context.layout === "banner-dark";
+  const titleColor = onBanner ? rgb(1, 1, 1) : context.colors.primary;
+  context.page.drawText(title, {
     x: context.margin,
     y: context.yPosition,
-    size: 28,
+    size: titleSize,
     font: context.boldFont,
-    color: context.colors.primary,
+    color: titleColor,
   });
   context.yPosition -= COUNT_EIGHTEEN;
 
   if (!metadata.author) {
+    if (onBanner) {
+      context.yPosition = context.height - 130;
+    }
     return;
   }
 
   context.page.drawText(metadata.author, {
     x: context.margin,
     y: context.yPosition,
-    size: 12,
+    size: context.layout === "compact" ? 10 : 12,
     font: context.font,
-    color: context.colors.muted,
+    color: onBanner ? rgb(0.95, 0.95, 0.97) : context.colors.muted,
   });
   context.yPosition -= COUNT_EIGHTEEN;
+  if (onBanner) {
+    context.yPosition = Math.min(context.yPosition, context.height - 130);
+  }
 }
 
 function renderPortfolioKicker(context: PortfolioRenderContext): void {
-  context.page.drawText("CASE STUDIES FOR GAME INDUSTRY HIRING", {
+  if (context.layout === "compact") {
+    return;
+  }
+  const kicker =
+    context.layout === "showcase"
+      ? "FEATURED SHIP WORK"
+      : "CASE STUDIES FOR GAME INDUSTRY HIRING";
+  context.page.drawText(kicker, {
     x: context.margin,
     y: context.yPosition,
     size: 10,
@@ -138,10 +176,16 @@ export function renderPortfolioCoverPage(
 
 export function startPortfolioProjectsSection(context: PortfolioRenderContext): void {
   ensurePortfolioSpace(context, COUNT_THIRTY_TWO);
-  context.page.drawText("SELECTED CASE STUDIES", {
+  const heading =
+    context.layout === "compact"
+      ? "Projects"
+      : context.layout === "showcase"
+        ? "SHOWCASE"
+        : "SELECTED CASE STUDIES";
+  context.page.drawText(heading, {
     x: context.margin,
     y: context.yPosition,
-    size: 16,
+    size: context.layout === "compact" ? 13 : 16,
     font: context.boldFont,
     color: context.colors.primary,
   });

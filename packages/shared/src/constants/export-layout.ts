@@ -297,8 +297,8 @@ export const RESUME_EXPORT_THEME_CONFIGS = {
         margins: { top: 48, right: 48, bottom: 48, left: 48 },
       },
       layout: {
-        headerStyle: "left-aligned",
-        dividerStyle: "line",
+        headerStyle: "centered",
+        dividerStyle: "accent-bar",
         skillsLayout: "2-column",
       },
     },
