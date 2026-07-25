@@ -1,13 +1,16 @@
 import { JOB_QUERY_DEFAULT_LIMIT } from "@bao/shared/constants/jobs";
 import {
-  DEFAULT_SEARCH_RESULT_TYPES,
-  type SearchResultType,
-} from "@bao/shared/constants/search";
+  COUNT_ONE_FIFTY,
+  RATIO_HALF,
+  RATIO_ONE,
+  RATIO_THREE_FIFTHS,
+} from "@bao/shared/constants/numeric";
 import {
   isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_TEMPLATE_DEFAULT,
 } from "@bao/shared/constants/resume";
+import { DEFAULT_SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import type { SearchResult } from "@bao/shared/types/search";
 import { settle } from "@bao/shared/utils/promise";
 import { like, or } from "drizzle-orm";
@@ -78,8 +81,8 @@ export class SearchService {
       id: job.id,
       title: job.title || "",
       subtitle: job.company || "",
-      snippet: job.description?.slice(0, 150) || "",
-      relevance: job.title?.toLowerCase().includes(queryLower) ? 1.0 : 0.6,
+      snippet: job.description?.slice(0, COUNT_ONE_FIFTY) || "",
+      relevance: job.title?.toLowerCase().includes(queryLower) ? RATIO_ONE : RATIO_THREE_FIFTHS,
     }));
   }
 
@@ -106,8 +109,8 @@ export class SearchService {
       id: studio.id,
       title: studio.name || "",
       subtitle: `${studio.location || ""} · ${studio.type || ""}`,
-      snippet: studio.description?.slice(0, 150) || "",
-      relevance: studio.name?.toLowerCase().includes(queryLower) ? 1.0 : 0.5,
+      snippet: studio.description?.slice(0, COUNT_ONE_FIFTY) || "",
+      relevance: studio.name?.toLowerCase().includes(queryLower) ? RATIO_ONE : RATIO_HALF,
     }));
   }
 
@@ -153,7 +156,7 @@ export class SearchService {
       id: resume.id,
       title: resume.name || RESUME_DEFAULT_NAME,
       subtitle: isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
-      snippet: resume.summary?.slice(0, 150) || "",
+      snippet: resume.summary?.slice(0, COUNT_ONE_FIFTY) || "",
       relevance: 0.7,
     }));
   }
@@ -197,7 +200,7 @@ export class SearchService {
       id: row.id,
       title: row.title || "",
       subtitle: row.role || "",
-      snippet: row.description?.slice(0, 150) || "",
+      snippet: row.description?.slice(0, COUNT_ONE_FIFTY) || "",
       relevance: 0.7,
     }));
   }
@@ -248,7 +251,7 @@ export class SearchService {
       id: row.id,
       title: `${row.type} · ${row.status}`,
       subtitle: row.jobId || row.type,
-      snippet: row.error?.slice(0, 150) || `Run ${row.id}`,
+      snippet: row.error?.slice(0, COUNT_ONE_FIFTY) || `Run ${row.id}`,
       relevance: 0.6,
     }));
   }

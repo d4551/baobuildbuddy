@@ -3,6 +3,7 @@ import {
   AI_MAX_TOKENS_QUESTION,
 } from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
+import { COUNT_FIVE } from "@bao/shared/constants/numeric";
 import {
   SCORE_PASS_THRESHOLD,
   SCORE_WARNING_THRESHOLD,
@@ -54,19 +55,28 @@ function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnal
 
   return {
     overallScore: average,
-    strengths: strengths.slice(0, 5),
-    improvements: improvements.slice(0, 5),
-    recommendations:
-      average >= SCORE_PASS_THRESHOLD
-        ? ["Sustain your structured communication and add extra quantification."]
-        : average >= SCORE_WARNING_THRESHOLD
-          ? ["Work on measurable examples and deeper technical justification."]
-          : ["Practice response structure using situation, action, result examples."],
-    feedback:
-      average >= SCORE_PASS_THRESHOLD
-        ? "Strong session across technical and behavioral areas."
-        : "Good foundation; improve depth, metrics, and real project examples.",
+    strengths: strengths.slice(0, COUNT_FIVE),
+    improvements: improvements.slice(0, COUNT_FIVE),
+    recommendations: resolveFinalAnalysisRecommendations(average),
+    feedback: resolveFinalAnalysisFeedback(average),
   };
+}
+
+function resolveFinalAnalysisRecommendations(average: number): string[] {
+  if (average >= SCORE_PASS_THRESHOLD) {
+    return ["Sustain your structured communication and add extra quantification."];
+  }
+  if (average >= SCORE_WARNING_THRESHOLD) {
+    return ["Work on measurable examples and deeper technical justification."];
+  }
+  return ["Practice response structure using situation, action, result examples."];
+}
+
+function resolveFinalAnalysisFeedback(average: number): string {
+  if (average >= SCORE_PASS_THRESHOLD) {
+    return "Strong session across technical and behavioral areas.";
+  }
+  return "Good foundation; improve depth, metrics, and real project examples.";
 }
 
 function buildFinalAnalysisPrompt({

@@ -1,5 +1,7 @@
+import { COUNT_TWO_TWENTY } from "@bao/shared/constants/numeric";
 import { settle } from "@bao/shared/utils/promise";
 import type { PendingDrainReader, SmtpConnectionState } from "./email-delivery-connection-state";
+
 import {
   assertExpectedCode,
   handleClose,
@@ -65,7 +67,7 @@ export const connectSmtpSocket = async (
   state.socket = socketResult.value;
   state.socket.timeout(config.connectionTimeoutSeconds);
   const greeting = await readResponse(state);
-  assertExpectedCode(greeting, [220], "SMTP greeting");
+  assertExpectedCode(greeting, [COUNT_TWO_TWENTY], "SMTP greeting");
 };
 
 const waitForTlsUpgrade = async (

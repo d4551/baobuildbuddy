@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { DEFAULT_LOG_LEVEL } from "@bao/shared/constants/runtime";
 import { Elysia } from "elysia";
 import pino from "pino";
@@ -31,7 +32,7 @@ export const logger = new Elysia({ name: "request-logger" }).afterHandle(({ requ
     {
       method: request.method,
       path: pathname,
-      status: set.status ?? 200,
+      status: set.status ?? HTTP_STATUS_OK,
     },
     "request",
   );

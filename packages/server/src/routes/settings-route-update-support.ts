@@ -28,8 +28,8 @@ import {
   normalizeLocalModelEndpoint,
 } from "@bao/shared/types/settings-normalization";
 import type { settings as settingsTable } from "../db/schema/settings";
-import { resolveKnownProvider } from "./settings-route-contracts";
 import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
+import { resolveKnownProvider } from "./settings-route-contracts";
 
 const automationSettingsPatchSchema = automationSettingsSchema.removeDefault().partial();
 const emailTransportSettingsPatchSchema = emailTransportSettingsSchema.removeDefault().partial();
@@ -232,7 +232,7 @@ export const buildSettingsUpdate = (
   return update;
 };
 
-export const buildApiKeysUpdate = (body: {
+type ApiKeysUpdateBody = {
   geminiApiKey?: string;
   openaiApiKey?: string;
   claudeApiKey?: string;
@@ -240,7 +240,16 @@ export const buildApiKeysUpdate = (body: {
   localModelEndpoint?: string;
   localModelName?: string;
   emailTransportPassword?: string;
-}): Partial<SettingsInsert> => {
+};
+
+const encryptOptionalSecret = (value: string | undefined): string | null | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  return value.length > 0 ? encryptProviderKey(value) : null;
+};
+
+const assertEncryptionReadyForSecrets = (body: ApiKeysUpdateBody): void => {
   const secretWrites = [
     body.geminiApiKey,
     body.openaiApiKey,
@@ -252,21 +261,27 @@ export const buildApiKeysUpdate = (body: {
   if (secretWrites && !isEncryptionAvailable()) {
     throw new Error("BAO_ENCRYPTION_KEY must be set to encrypt provider keys");
   }
+};
+
+export const buildApiKeysUpdate = (body: ApiKeysUpdateBody): Partial<SettingsInsert> => {
+  assertEncryptionReadyForSecrets(body);
 
   const update: Partial<SettingsInsert> = {};
-  if (body.geminiApiKey !== undefined) {
-    update.geminiApiKey = body.geminiApiKey ? encryptProviderKey(body.geminiApiKey) : null;
+  const geminiApiKey = encryptOptionalSecret(body.geminiApiKey);
+  if (geminiApiKey !== undefined) {
+    update.geminiApiKey = geminiApiKey;
   }
-  if (body.openaiApiKey !== undefined) {
-    update.openaiApiKey = body.openaiApiKey ? encryptProviderKey(body.openaiApiKey) : null;
+  const openaiApiKey = encryptOptionalSecret(body.openaiApiKey);
+  if (openaiApiKey !== undefined) {
+    update.openaiApiKey = openaiApiKey;
   }
-  if (body.claudeApiKey !== undefined) {
-    update.claudeApiKey = body.claudeApiKey ? encryptProviderKey(body.claudeApiKey) : null;
+  const claudeApiKey = encryptOptionalSecret(body.claudeApiKey);
+  if (claudeApiKey !== undefined) {
+    update.claudeApiKey = claudeApiKey;
   }
-  if (body.huggingfaceToken !== undefined) {
-    update.huggingfaceToken = body.huggingfaceToken
-      ? encryptProviderKey(body.huggingfaceToken)
-      : null;
+  const huggingfaceToken = encryptOptionalSecret(body.huggingfaceToken);
+  if (huggingfaceToken !== undefined) {
+    update.huggingfaceToken = huggingfaceToken;
   }
   if (body.localModelEndpoint !== undefined) {
     update.localModelEndpoint = normalizeLocalModelEndpoint(body.localModelEndpoint);
@@ -274,11 +289,9 @@ export const buildApiKeysUpdate = (body: {
   if (body.localModelName !== undefined) {
     update.localModelName = body.localModelName;
   }
-  if (body.emailTransportPassword !== undefined) {
-    update.emailTransportPassword =
-      body.emailTransportPassword.length > 0
-        ? encryptProviderKey(body.emailTransportPassword)
-        : null;
+  const emailTransportPassword = encryptOptionalSecret(body.emailTransportPassword);
+  if (emailTransportPassword !== undefined) {
+    update.emailTransportPassword = emailTransportPassword;
   }
   update.updatedAt = new Date().toISOString();
   return update;

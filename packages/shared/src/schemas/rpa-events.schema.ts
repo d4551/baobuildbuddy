@@ -23,7 +23,7 @@ import {
  */
 export const rpaRunStepSchema = z.object({
   action: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  status: z.enum(["ok", "error"]),
+  status: z.enum(["ok", "error", "skipped"]),
   message: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
 });
 

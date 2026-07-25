@@ -1,5 +1,7 @@
+import { COUNT_EIGHT } from "@bao/shared/constants/numeric";
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
+
 import {
   AlignmentType,
   Document,
@@ -31,7 +33,7 @@ function buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
       new TextRun({
         text: title ?? "Portfolio",
         bold: true,
-        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - 8) * 2,
+        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - COUNT_EIGHT) * 2,
         color: PORTFOLIO_DOCX_PRIMARY_COLOR,
         font: PORTFOLIO_DOCX_FONT_FAMILY,
       }),

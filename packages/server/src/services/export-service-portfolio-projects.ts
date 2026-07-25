@@ -1,4 +1,11 @@
 import { PORTFOLIO_PROJECT_SPACE } from "@bao/shared/constants/export-layout";
+import {
+  COUNT_FIFTEEN,
+  COUNT_THIRTEEN,
+  COUNT_TWENTY,
+  COUNT_TWENTY_FIVE,
+  COUNT_TWENTY_TWO,
+} from "@bao/shared/constants/numeric";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import { PORTFOLIO_PDF_COLORS, type PortfolioRenderContext } from "./export-service-contracts";
@@ -16,7 +23,7 @@ function renderPortfolioProjectHeading(
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.accent,
   });
-  context.yPosition -= 13;
+  context.yPosition -= COUNT_THIRTEEN;
 
   context.page.drawText(`${index + 1}. ${project.title}`, {
     x: context.margin,
@@ -25,7 +32,7 @@ function renderPortfolioProjectHeading(
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.primary,
   });
-  context.yPosition -= 22;
+  context.yPosition -= COUNT_TWENTY_TWO;
 
   if (!project.featured) {
     return;
@@ -38,7 +45,7 @@ function renderPortfolioProjectHeading(
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.featured,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: string): void {
@@ -53,7 +60,7 @@ function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: stri
     font: context.boldFont,
     color: PORTFOLIO_PDF_COLORS.muted,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderPortfolioProjectTechnologies(
@@ -64,7 +71,7 @@ function renderPortfolioProjectTechnologies(
     return;
   }
 
-  ensurePortfolioSpace(context, 25);
+  ensurePortfolioSpace(context, COUNT_TWENTY_FIVE);
   context.page.drawText(`Technologies: ${technologies.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
@@ -72,7 +79,7 @@ function renderPortfolioProjectTechnologies(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.accent,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderPortfolioTechnicalDetails(
@@ -91,7 +98,7 @@ function renderPortfolioTechnicalDetails(
     return;
   }
 
-  ensurePortfolioSpace(context, 25);
+  ensurePortfolioSpace(context, COUNT_TWENTY_FIVE);
   context.page.drawText(details.join(" | "), {
     x: context.margin,
     y: context.yPosition,
@@ -99,7 +106,7 @@ function renderPortfolioTechnicalDetails(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.muted,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderPortfolioProjectLinks(
@@ -114,7 +121,7 @@ function renderPortfolioProjectLinks(
     return;
   }
 
-  ensurePortfolioSpace(context, 25);
+  ensurePortfolioSpace(context, COUNT_TWENTY_FIVE);
   context.page.drawText(links.join(" | "), {
     x: context.margin,
     y: context.yPosition,
@@ -122,7 +129,7 @@ function renderPortfolioProjectLinks(
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.accent,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: string[]): void {
@@ -130,7 +137,7 @@ function renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: stri
     return;
   }
 
-  ensurePortfolioSpace(context, 25);
+  ensurePortfolioSpace(context, COUNT_TWENTY_FIVE);
   context.page.drawText(`Tags: ${tags.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
@@ -138,7 +145,7 @@ function renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: stri
     font: context.font,
     color: PORTFOLIO_PDF_COLORS.footer,
   });
-  context.yPosition -= 20;
+  context.yPosition -= COUNT_TWENTY;
 }
 
 function renderPortfolioProjectSeparator(
@@ -149,14 +156,14 @@ function renderPortfolioProjectSeparator(
     return;
   }
 
-  ensurePortfolioSpace(context, 20);
+  ensurePortfolioSpace(context, COUNT_TWENTY);
   context.page.drawLine({
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
     thickness: 0.5,
     color: PORTFOLIO_PDF_COLORS.line,
   });
-  context.yPosition -= 20;
+  context.yPosition -= COUNT_TWENTY;
 }
 
 export function renderPortfolioProject(
@@ -184,6 +191,6 @@ export function renderPortfolioProject(
   renderPortfolioProjectLinks(context, project);
   renderPortfolioProjectTags(context, project.tags);
 
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
   renderPortfolioProjectSeparator(context, index < totalProjects - 1);
 }

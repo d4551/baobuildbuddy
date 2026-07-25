@@ -1,4 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  AI_DEFAULT_MAX_TOKENS_CLAUDE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
@@ -31,8 +35,8 @@ export class ClaudeProvider extends BaseAIProvider {
     const responseResult = await settle(
       this.client.messages.create({
         model,
-        max_tokens: options?.maxTokens ?? 4096,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_CLAUDE,
+        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
         system: options?.systemPrompt,
         messages: [
           {
@@ -77,8 +81,8 @@ export class ClaudeProvider extends BaseAIProvider {
       Promise.resolve(
         this.client.messages.stream({
           model,
-          max_tokens: options?.maxTokens ?? 4096,
-          temperature: options?.temperature ?? 0.7,
+          max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_CLAUDE,
+          temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
           system: options?.systemPrompt,
           messages: [
             {

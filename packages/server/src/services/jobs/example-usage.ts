@@ -3,6 +3,7 @@
  * This file demonstrates how to use the job aggregator and matching service
  */
 
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import { createServerLogger } from "../../utils/logger";
 import { coverLetterService } from "../cover-letter-service";
 
@@ -13,7 +14,7 @@ async function previewCoverLetters() {
   const coverLetters = await coverLetterService.getCoverLetters();
   jobsExampleLogger.info(`✓ Total cover letters: ${coverLetters.length}`);
 
-  for (const coverLetter of coverLetters.slice(0, 3)) {
+  for (const coverLetter of coverLetters.slice(0, COUNT_THREE)) {
     jobsExampleLogger.info(`${coverLetter.company} - ${coverLetter.position}`);
   }
 }

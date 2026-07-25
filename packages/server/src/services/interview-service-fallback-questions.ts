@@ -198,6 +198,10 @@ function buildFallbackQuestionText(
         ],
         tags: [...seed.tags, "candidate-context", "closing"],
       };
+    default: {
+      const _exhaustive: never = seed.type;
+      return _exhaustive;
+    }
   }
 }
 

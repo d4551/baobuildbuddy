@@ -1,3 +1,4 @@
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 import type { ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 import type { JobSearchResult, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
@@ -7,6 +8,7 @@ import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
 import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
+
 import type {
   ScrapeEnrichmentAccumulator,
   ScrapeEnrichmentAttempt,
@@ -82,9 +84,9 @@ export const upsertScrapedJob = async (
   now: string,
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
-  const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
+  const contentHash = String(job.contentHash?.trim().length > 0 ? job.contentHash : job.id).slice(
     0,
-    100,
+    PERCENT_MAX,
   );
 
   await db

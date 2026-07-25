@@ -34,9 +34,9 @@ import { auditLog } from "../db/schema/audit-log";
 import { auth } from "../db/schema/auth";
 import { authenticateApiKey } from "../middleware/auth";
 import { hashApiKey } from "../utils/crypto";
+import { openapiDetail } from "../utils/openapi-detail";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
-import { openapiDetail } from "../utils/openapi-detail";
 import {
   authBootstrapBody,
   authConfiguredResponses,

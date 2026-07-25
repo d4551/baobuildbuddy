@@ -242,7 +242,9 @@ const buildProviderRows = (
 /**
  * Builds the canonical AI control-plane state from one persisted settings row.
  */
-export async function buildAIControlPlaneState(settingsRow: SettingsRow): Promise<AIControlPlaneState> {
+export async function buildAIControlPlaneState(
+  settingsRow: SettingsRow,
+): Promise<AIControlPlaneState> {
   const decryptedKeys = decryptProviderKeys(settingsRow);
   const row = { ...settingsRow, ...decryptedKeys };
   const aiRouting = normalizeAIRouting(

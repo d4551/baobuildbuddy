@@ -4,6 +4,11 @@ import {
   API_ENDPOINTS,
   buildStudioDetailEndpoint,
 } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -21,12 +26,12 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.studioRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 describe("studio routes", () => {
   test("GET studios returns list (includes seeded)", async () => {
     const res = await requestJson<unknown[]>(app, "GET", API_ENDPOINTS.studios);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -40,7 +45,7 @@ describe("studio routes", () => {
         description: "A test",
       },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.name).toBe("Test Studio");
     expect(res.body.id).toBeDefined();
   });
@@ -51,7 +56,7 @@ describe("studio routes", () => {
       "GET",
       buildStudioDetailEndpoint("nonexistent-id"),
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Studio not found");
   });
 });

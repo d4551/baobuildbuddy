@@ -1,5 +1,12 @@
+import {
+  COUNT_FIFTEEN,
+  COUNT_FIFTY,
+  COUNT_THIRTY,
+  COUNT_TWENTY,
+} from "@bao/shared/constants/numeric";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
+
 import type {
   ResumeEducationItem,
   ResumeRenderContext,
@@ -16,7 +23,7 @@ function renderResumeEducationItem(
   context: ResumeRenderContext,
   education: ResumeEducationItem,
 ): void {
-  ensureResumeSpace(context, 50);
+  ensureResumeSpace(context, COUNT_FIFTY);
   context.page.drawText(`${education.degree} in ${education.field}`, {
     x: context.margin,
     y: context.yPosition,
@@ -24,7 +31,7 @@ function renderResumeEducationItem(
     font: context.boldFont,
     color: context.palette.text,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 
   const details = [education.school, education.year];
   if (education.gpa) {
@@ -38,7 +45,7 @@ function renderResumeEducationItem(
     font: context.font,
     color: context.palette.line,
   });
-  context.yPosition -= 20;
+  context.yPosition -= COUNT_TWENTY;
 }
 
 export function renderResumeEducation(context: ResumeRenderContext, resume: ResumeData): void {
@@ -60,7 +67,7 @@ function renderResumeSkillGroup(
     return;
   }
 
-  ensureResumeSpace(context, 30);
+  ensureResumeSpace(context, COUNT_THIRTY);
   if (options.label) {
     context.page.drawText(options.label, {
       x: context.margin,
@@ -69,7 +76,7 @@ function renderResumeSkillGroup(
       font: context.boldFont,
       color: options.labelColor,
     });
-    context.yPosition -= 15;
+    context.yPosition -= COUNT_FIFTEEN;
   }
 
   drawResumeWrappedText(context, {
@@ -178,7 +185,7 @@ export function renderResumeGamingExperience(
 
   renderResumeSectionHeader(context, "GAMING EXPERIENCE");
   for (const item of gamingItems) {
-    ensureResumeSpace(context, 20);
+    ensureResumeSpace(context, COUNT_TWENTY);
     context.page.drawText(item, {
       x: context.margin,
       y: context.yPosition,
@@ -186,6 +193,6 @@ export function renderResumeGamingExperience(
       font: context.font,
       color: context.palette.text,
     });
-    context.yPosition -= 15;
+    context.yPosition -= COUNT_FIFTEEN;
   }
 }

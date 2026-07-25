@@ -1,4 +1,14 @@
 import {
+  COUNT_FIFTY,
+  COUNT_SEVENTY,
+  COUNT_THREE,
+  COUNT_TWENTY,
+  PERCENT_MAX,
+  RATIO_ONE_FIFTH,
+  RATIO_ONE_QUARTER,
+  RATIO_THREE_TENTHS,
+} from "@bao/shared/constants/numeric";
+import {
   SCORE_DEVELOPING_THRESHOLD,
   SCORE_PASS_THRESHOLD,
   SCORE_WARNING_THRESHOLD,
@@ -37,8 +47,8 @@ const calculateCategoryScore = (skills: SkillMapping[]): number => {
   if (skills.length === 0) return 0;
   const averageConfidence =
     skills.reduce((sum, skill) => sum + skill.confidence, 0) / skills.length;
-  const countBonus = Math.min(20, skills.length * 2);
-  return Math.min(100, Math.round(averageConfidence + countBonus));
+  const countBonus = Math.min(COUNT_TWENTY, skills.length * 2);
+  return Math.min(PERCENT_MAX, Math.round(averageConfidence + countBonus));
 };
 
 const calculateReadinessMetrics = (mappings: SkillMapping[]): ReadinessMetrics => {
@@ -54,15 +64,18 @@ const calculateReadinessMetrics = (mappings: SkillMapping[]): ReadinessMetrics =
   const technicalScore = calculateCategoryScore(technicalSkills);
   const softSkillsScore = calculateCategoryScore(softSkills);
   const industryScore = Math.min(
-    100,
+    PERCENT_MAX,
     mappings.flatMap((mapping) => mapping.industryApplications).length * 10,
   );
   const portfolioScore = Math.min(
-    100,
-    mappings.reduce((sum, mapping) => sum + mapping.evidence.length, 0) * 20,
+    PERCENT_MAX,
+    mappings.reduce((sum, mapping) => sum + mapping.evidence.length, 0) * COUNT_TWENTY,
   );
   const overallScore = Math.round(
-    technicalScore * 0.3 + softSkillsScore * 0.25 + industryScore * 0.2 + portfolioScore * 0.25,
+    technicalScore * RATIO_THREE_TENTHS +
+      softSkillsScore * RATIO_ONE_QUARTER +
+      industryScore * RATIO_ONE_FIFTH +
+      portfolioScore * RATIO_ONE_QUARTER,
   );
 
   return {
@@ -84,16 +97,16 @@ const getCategoryFeedback = (score: number): SkillReadinessFeedbackId => {
 };
 
 const getTechnicalImprovements = (score: number): SkillReadinessImprovementId[] =>
-  score >= 70 ? [] : ["imp_tech_map", "imp_conf_up"];
+  score >= COUNT_SEVENTY ? [] : ["imp_tech_map", "imp_conf_up"];
 
 const getSoftSkillImprovements = (score: number): SkillReadinessImprovementId[] =>
-  score >= 70 ? [] : ["imp_lead_comm", "imp_team_examples"];
+  score >= COUNT_SEVENTY ? [] : ["imp_lead_comm", "imp_team_examples"];
 
 const getIndustryImprovements = (score: number): SkillReadinessImprovementId[] =>
-  score >= 70 ? [] : ["imp_industry_research", "imp_role_link"];
+  score >= COUNT_SEVENTY ? [] : ["imp_industry_research", "imp_role_link"];
 
 const getPortfolioImprovements = (score: number): SkillReadinessImprovementId[] =>
-  score >= 70 ? [] : ["imp_evidence_add", "imp_portfolio_build", "imp_achievements_doc"];
+  score >= COUNT_SEVENTY ? [] : ["imp_evidence_add", "imp_portfolio_build", "imp_achievements_doc"];
 
 const getImprovementSuggestions = (
   overall: number,
@@ -106,7 +119,7 @@ const getImprovementSuggestions = (
   if (technical < SCORE_WARNING_THRESHOLD) suggestions.push("imp_transfer_strengthen");
   if (soft < SCORE_WARNING_THRESHOLD) suggestions.push("imp_leadership_highlight");
   if (portfolio < SCORE_WARNING_THRESHOLD) suggestions.push("imp_evidence_add");
-  if (overall < 50) suggestions.push("imp_coverage_broaden");
+  if (overall < COUNT_FIFTY) suggestions.push("imp_coverage_broaden");
 
   if (suggestions.length === 0) {
     suggestions.push("imp_examples_refine", "imp_certs_pursue", "imp_network_pro");
@@ -154,13 +167,17 @@ const buildReadinessAssessment = (metrics: ReadinessMetrics): ReadinessAssessmen
     technical: {
       score: metrics.technicalScore,
       feedbackId: getCategoryFeedback(metrics.technicalScore),
-      strengths: metrics.technicalSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
+      strengths: metrics.technicalSkills
+        .slice(0, COUNT_THREE)
+        .map((mapping) => mapping.transferableSkill),
       improvements: getTechnicalImprovements(metrics.technicalScore),
     },
     softSkills: {
       score: metrics.softSkillsScore,
       feedbackId: getCategoryFeedback(metrics.softSkillsScore),
-      strengths: metrics.softSkills.slice(0, 3).map((mapping) => mapping.transferableSkill),
+      strengths: metrics.softSkills
+        .slice(0, COUNT_THREE)
+        .map((mapping) => mapping.transferableSkill),
       improvements: getSoftSkillImprovements(metrics.softSkillsScore),
     },
     industryKnowledge: {

@@ -2,6 +2,7 @@
  * Greenhouse ATS provider.
  */
 
+import { SCHEMA_MAX_ITEMS_XXLARGE } from "@bao/shared/constants/schema-limits";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
@@ -125,7 +126,7 @@ export class GreenhouseProvider implements JobProvider {
 
     const pageJobs = this.filterMappedJobs(fetchStatus.jobs, company, board, query);
     const nextJobs = [...accumulatedJobs, ...pageJobs];
-    if (fetchStatus.jobs.length < 100) {
+    if (fetchStatus.jobs.length < SCHEMA_MAX_ITEMS_XXLARGE) {
       return nextJobs;
     }
     return this.fetchBoardJobsPage(context, { page: page + 1, accumulatedJobs: nextJobs });

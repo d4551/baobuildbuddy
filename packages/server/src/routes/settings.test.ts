@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
 import { requestJson } from "../test-utils";
 
@@ -39,7 +40,7 @@ const getSettings = () =>
 describe("settings read routes", () => {
   test("GET settings returns settings", async () => {
     const res = await getSettings();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBeDefined();
     if (res.body.geminiApiKey) {
       expect(res.body.geminiApiKey).toMatch(MASKED_KEY_PATTERN);
@@ -56,7 +57,7 @@ describe("settings read routes", () => {
       settings: unknown;
       resumes: unknown[];
     }>(app, "GET", API_ENDPOINTS.settingsExport);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.version).toBe("1.0");
     expect(res.body.exportedAt).toBeDefined();
     expect(Array.isArray(res.body.resumes)).toBe(true);
@@ -87,7 +88,7 @@ describe("settings write routes - preferences", () => {
         connectionTimeoutSeconds: 20,
       },
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
 
     const updated = await getSettings();
@@ -106,13 +107,13 @@ describe("settings write routes - api keys", () => {
       localModelEndpoint: "http://localhost:1234",
       emailTransportPassword: "super-secret-password",
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
   });
 
   test("GET settings exposes email delivery password presence without returning the secret", async () => {
     const res = await getSettings();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.hasEmailTransportPassword).toBe(true);
     expect(res.body.emailTransportPassword).toBeUndefined();
     expect(res.body.emailTransportSettings?.host).toBe("smtp.example.test");
@@ -149,7 +150,7 @@ describe("settings write routes - taxonomy", () => {
       ],
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
     expect(res.body.jobTaxonomy.keywords[0]?.label).toBe("Technical Sound Designer");
 

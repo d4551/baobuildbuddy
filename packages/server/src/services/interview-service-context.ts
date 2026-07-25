@@ -1,17 +1,18 @@
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
 import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
+import { COUNT_FOUR, COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { InterviewCandidateContext, InterviewConfig } from "@bao/shared/types/interview";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { coverLetters } from "../db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { settings } from "../db/schema/settings";
 import { studios } from "../db/schema/studios";
 import { userProfile } from "../db/schema/user";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import type {
   CandidateInterviewContext,
@@ -89,7 +90,7 @@ function summarizeUserProfileContext(row: typeof userProfile.$inferSelect | unde
 - Technical skills: ${joinInterviewList(row.technicalSkills ?? [])}
 - Soft skills: ${joinInterviewList(row.softSkills ?? [])}
 - Gaming specializations: ${joinInterviewList(specializations)}
-- Shipped titles: ${joinInterviewList(shippedTitles, 4)}`;
+- Shipped titles: ${joinInterviewList(shippedTitles, COUNT_FOUR)}`;
 }
 
 function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): string {
@@ -120,8 +121,8 @@ function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): s
   return `Resume context:
 - Resume name: ${parseString(row.name, DEFAULT_UNSPECIFIED_LABEL)}
 - Summary: ${parseString(row.summary, DEFAULT_UNSPECIFIED_LABEL)}
-- Experience highlights: ${joinInterviewList(experience, 4)}
-- Project highlights: ${joinInterviewList(projects, 4)}
+- Experience highlights: ${joinInterviewList(experience, COUNT_FOUR)}
+- Project highlights: ${joinInterviewList(projects, COUNT_FOUR)}
 - Technical skills: ${joinInterviewList(technicalSkills)}
 - Soft skills: ${joinInterviewList(softSkills)}`;
 }
@@ -157,7 +158,7 @@ function summarizePortfolioContext(
     .sort((left, right) => Number(right.featured) - Number(left.featured))
     .map((project) => {
       const technologies = Array.isArray(project.technologies)
-        ? joinInterviewList(project.technologies, 3)
+        ? joinInterviewList(project.technologies, COUNT_THREE)
         : DEFAULT_UNSPECIFIED_LABEL;
       return `${project.title} (${parseString(project.role, "Role not specified")}; tech: ${technologies})`;
     });
@@ -165,7 +166,7 @@ function summarizePortfolioContext(
   return `Portfolio context:
 - Portfolio title: ${parseString(metadata?.title, DEFAULT_UNSPECIFIED_LABEL)}
 - Portfolio summary: ${parseString(metadata?.description, parseString(metadata?.bio, DEFAULT_UNSPECIFIED_LABEL))}
-- Featured work: ${joinInterviewList(featuredProjects, 3)}`;
+- Featured work: ${joinInterviewList(featuredProjects, COUNT_THREE)}`;
 }
 
 async function resolvePreferredResume(candidateContext?: InterviewCandidateContext) {

@@ -11,6 +11,7 @@ import { desc, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   studioAnalyticsResponses,
   studioDeleteResponses,
@@ -21,7 +22,6 @@ import {
   studioMutationBodySchema,
   studioUpdateBodySchema,
 } from "./studio-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -37,7 +37,10 @@ export const studioRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail("Studios", "Retrieve studios resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Studios",
+        "Retrieve studios resource for BaoBuildBuddy career automation.",
+      ),
       query: studioListQuerySchema,
       response: studioListResponses,
     },
@@ -75,7 +78,10 @@ export const studioRoutes = new Elysia({
   .get(
     "/analytics",
     {
-      detail: openapiDetail("Studios", "Retrieve studios analytics for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Studios",
+        "Retrieve studios analytics for BaoBuildBuddy career automation.",
+      ),
       response: studioAnalyticsResponses,
     },
     async ({ status }) => {
@@ -96,7 +102,7 @@ export const studioRoutes = new Elysia({
       }
 
       for (const studio of allStudios) {
-        if (studio.size) {
+        if (studio.size > 0) {
           analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
         }
       }
@@ -136,7 +142,10 @@ export const studioRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail("Studios", "Create or execute studios resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Studios",
+        "Create or execute studios resource for BaoBuildBuddy career automation.",
+      ),
       body: studioMutationBodySchema,
       response: studioEntityResponses,
     },

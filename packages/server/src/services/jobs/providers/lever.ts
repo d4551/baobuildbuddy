@@ -2,6 +2,7 @@
  * Lever ATS provider.
  */
 
+import { SCHEMA_MAX_ITEMS_XXLARGE } from "@bao/shared/constants/schema-limits";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
@@ -150,7 +151,7 @@ export class LeverProvider implements JobProvider {
         return searchText.includes(queryLower);
       });
     const nextJobs = [...accumulatedJobs, ...pageJobs];
-    if (data.length < 100) {
+    if (data.length < SCHEMA_MAX_ITEMS_XXLARGE) {
       return nextJobs;
     }
 

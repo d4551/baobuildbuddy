@@ -6,11 +6,19 @@ import {
   COVER_LETTER_PARAGRAPH_SIZE,
 } from "@bao/shared/constants/export-layout";
 import {
+  COUNT_EIGHTEEN,
+  COUNT_FIFTEEN,
+  COUNT_THIRTY_FIVE,
+  COUNT_TWENTY_EIGHT,
+  COUNT_TWENTY_FIVE,
+} from "@bao/shared/constants/numeric";
+import {
   collectDefinedStringValues,
   formatExportDate,
   toCoverLetterParagraphs,
 } from "@bao/shared/utils/export-contract";
 import { PDFDocument, StandardFonts } from "pdf-lib";
+
 import {
   addA4Page,
   COVER_LETTER_PDF_COLORS,
@@ -86,7 +94,7 @@ function renderCoverLetterSender(
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 28;
+  context.yPosition -= COUNT_TWENTY_EIGHT;
 }
 
 function renderCoverLetterDate(context: CoverLetterRenderContext, date: Date): void {
@@ -111,7 +119,7 @@ function renderCoverLetterRecipient(
     font: context.boldFont,
     color: COVER_LETTER_PDF_COLORS.primary,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 
   context.page.drawText(`RE: ${coverLetter.position}`, {
     x: context.margin,
@@ -120,7 +128,7 @@ function renderCoverLetterRecipient(
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.accent,
   });
-  context.yPosition -= 18;
+  context.yPosition -= COUNT_EIGHTEEN;
   drawCoverLetterDivider(context);
 }
 
@@ -165,7 +173,7 @@ function renderCoverLetterBody(context: CoverLetterRenderContext, content: unkno
 
 function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName: string): void {
   context.yPosition -= 10;
-  ensureCoverLetterSpace(context, 35);
+  ensureCoverLetterSpace(context, COUNT_THIRTY_FIVE);
 
   context.page.drawText(COVER_LETTER_DEFAULT_SIGNATURE, {
     x: context.margin,
@@ -174,7 +182,7 @@ function renderCoverLetterClosing(context: CoverLetterRenderContext, signerName:
     font: context.font,
     color: COVER_LETTER_PDF_COLORS.muted,
   });
-  context.yPosition -= 25;
+  context.yPosition -= COUNT_TWENTY_FIVE;
 
   context.page.drawText(signerName, {
     x: context.margin,

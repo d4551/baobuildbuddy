@@ -13,6 +13,7 @@ import {
 } from "@bao/shared/constants/http";
 import { Elysia } from "elysia";
 import { skillMappingService } from "../services/skill-mapping-service";
+import { openapiDetail } from "../utils/openapi-detail";
 import { skillAnalysisRateLimit } from "../utils/rate-limit";
 import { analyzeSkillMappingsSafely } from "./skill-mapping-route-analysis";
 import {
@@ -38,7 +39,6 @@ import {
   listSkillMappings,
   updateSkillMappingFromBody,
 } from "./skill-mapping-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 export const skillMappingRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.skillsBase),
@@ -47,7 +47,10 @@ export const skillMappingRoutes = new Elysia({
   .get(
     "/mappings",
     {
-      detail: openapiDetail("Skill Mapping", "Retrieve skill mapping mappings for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Retrieve skill mapping mappings for BaoBuildBuddy career automation.",
+      ),
       query: skillMappingsQuerySchema,
       response: skillMappingsListResponses,
     },
@@ -56,7 +59,10 @@ export const skillMappingRoutes = new Elysia({
   .post(
     "/mappings",
     {
-      detail: openapiDetail("Skill Mapping", "Create or execute skill mapping mappings for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Create or execute skill mapping mappings for BaoBuildBuddy career automation.",
+      ),
       body: skillMappingCreateBodySchema,
       response: skillMappingCreateResponses,
     },
@@ -68,7 +74,10 @@ export const skillMappingRoutes = new Elysia({
   .put(
     "/mappings/:id",
     {
-      detail: openapiDetail("Skill Mapping", "Replace skill mapping mappings :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Replace skill mapping mappings :id for BaoBuildBuddy career automation.",
+      ),
       params: skillMappingIdParamsSchema,
       body: skillMappingUpdateBodySchema,
       response: skillMappingUpdateResponses,
@@ -85,7 +94,10 @@ export const skillMappingRoutes = new Elysia({
   .delete(
     "/mappings/:id",
     {
-      detail: openapiDetail("Skill Mapping", "Delete skill mapping mappings :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Delete skill mapping mappings :id for BaoBuildBuddy career automation.",
+      ),
       params: skillMappingIdParamsSchema,
       response: skillMappingDeleteResponses,
     },
@@ -107,7 +119,10 @@ export const skillMappingRoutes = new Elysia({
   .get(
     "/pathways",
     {
-      detail: openapiDetail("Skill Mapping", "Retrieve skill mapping pathways for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Retrieve skill mapping pathways for BaoBuildBuddy career automation.",
+      ),
       response: skillPathwaysResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await skillMappingService.getPathways()),
@@ -115,7 +130,10 @@ export const skillMappingRoutes = new Elysia({
   .get(
     "/readiness",
     {
-      detail: openapiDetail("Skill Mapping", "Retrieve skill mapping readiness for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Retrieve skill mapping readiness for BaoBuildBuddy career automation.",
+      ),
       query: skillReadinessQuerySchema,
       response: skillReadinessResponses,
     },
@@ -124,7 +142,10 @@ export const skillMappingRoutes = new Elysia({
   .post(
     "/ai-analyze",
     {
-      detail: openapiDetail("Skill Mapping", "Create or execute skill mapping ai analyze for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Skill Mapping",
+        "Create or execute skill mapping ai analyze for BaoBuildBuddy career automation.",
+      ),
       body: skillAnalysisBodySchema,
       response: skillAnalysisResponses,
     },

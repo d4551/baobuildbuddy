@@ -1,3 +1,4 @@
+import { COUNT_TWENTY } from "@bao/shared/constants/numeric";
 import { config } from "../../config/env";
 import { generateFieldAnalysisWithRetry, stripToFormElements } from "./smart-field-mapper-analysis";
 import { getCandidateContextSummary } from "./smart-field-mapper-context";
@@ -41,7 +42,7 @@ export class SmartFieldMapper {
         }
 
         const stripped = stripToFormElements(pageResult.html);
-        if (stripped.length < 20) {
+        if (stripped.length < COUNT_TWENTY) {
           return EMPTY_FIELD_ANALYSIS_RESULT;
         }
 

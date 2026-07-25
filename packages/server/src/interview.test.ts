@@ -18,6 +18,8 @@ const INTERVIEW_TEST_TIMEOUT_MS = 15_000;
 setDefaultTimeout(INTERVIEW_TEST_TIMEOUT_MS);
 
 import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import { coverLetters } from "./db/schema/cover-letters";
 import { portfolioProjects, portfolios } from "./db/schema/portfolios";
@@ -79,7 +81,7 @@ beforeEach(() => {
   clearInterviewCandidateFixtures();
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 afterEach(() => {
   clearInterviewCandidateFixtures();
@@ -172,13 +174,13 @@ function registerInterviewSessionDefaultsTest(): void {
 
     expect(created.status).toBe("active");
     expect(created.config.focusAreas).toEqual(["architecture", "collaboration", "problem-solving"]);
-    expect(created.questions).toHaveLength(3);
+    expect(created.questions).toHaveLength(COUNT_THREE);
     expect(created.questions.every((entry) => entry.type !== "technical")).toBe(true);
     expect(created.currentQuestionIndex).toBe(0);
 
     const persisted = await harness.interviewService.getSession(created.id);
     expect(persisted).not.toBeNull();
-    expect(persisted?.totalQuestions).toBe(3);
+    expect(persisted?.totalQuestions).toBe(COUNT_THREE);
   });
 }
 
@@ -298,7 +300,7 @@ function registerRoleTypeCompatibilityTest(): void {
       },
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(HTTP_STATUS_CREATED);
     expect(response.body.studioId).toBe("activision-blizzard");
     expect(response.body.role).toBe("Build Engineer");
     expect(response.body.totalQuestions).toBe(1);
@@ -330,7 +332,7 @@ function registerCanonicalResponsePayloadTest(): void {
       questionIndex: 0,
     });
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.body.status).toBe("completed");
     expect(response.body.totalResponses).toBe(1);
     expect(response.body.message).toBe("Response recorded");
@@ -374,7 +376,7 @@ function registerJobContextPersistenceTest(): void {
       },
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(HTTP_STATUS_CREATED);
     expect(response.body.config.interviewMode).toBe("job");
     expect(response.body.config.candidateContext).toEqual(candidateAssets);
     expect(response.body.config.targetJob?.id).toBe("job-123");
@@ -408,7 +410,7 @@ function registerConversationConfigPersistenceTest(): void {
       },
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(HTTP_STATUS_CREATED);
     expect(response.body.config.conversationStyle).toBe("natural");
     expect(response.body.config.candidateContext).toEqual(candidateAssets);
     expect(response.body.totalQuestions).toBe(1);

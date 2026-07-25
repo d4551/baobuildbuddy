@@ -2,11 +2,11 @@ import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import type { JsonObject } from "@bao/shared/utils/json";
 import {
   asBoolean,
+  asJsonArray,
   asNumber,
   asRecord,
   asString,
   asStringArray,
-  asJsonArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
 import type { chatHistory } from "../db/schema/chat-history";

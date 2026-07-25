@@ -10,8 +10,8 @@ import { safeParseJson } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import { cvQuestionnaireQuestionsPrompt, cvQuestionnaireSynthesizePrompt } from "./ai/prompts-cv";
 

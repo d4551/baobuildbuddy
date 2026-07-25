@@ -54,7 +54,7 @@ beforeAll(async () => {
     throw new Error("Failed to start automation integration app server");
   }
 
-  setIntegrationBaseUrls("http://127.0.0.1:" + String(port), "ws://127.0.0.1:" + String(port));
+  setIntegrationBaseUrls(`http://127.0.0.1:${String(port)}`, `ws://127.0.0.1:${String(port)}`);
 });
 
 beforeEach(async () => {
@@ -87,37 +87,35 @@ describe("automation route integration", () => {
       throw new Error("ApplicationAutomationService is unavailable");
     }
 
-    await Promise.resolve()
-      .then(async () => {
-        await verifyManualJobApplyFlow(resumeId, fixture.baseUrl, () => fixture.submissions.length);
-        expect(fixture.submissions[0]?.fields.name).toBe("Bao Builder");
-        expect(fixture.submissions[0]?.fields.email).toBe("bao@example.com");
-        expect(fixture.submissions[0]?.resumeFileName?.endsWith(".pdf")).toBe(true);
+    try {
+      await verifyManualJobApplyFlow(resumeId, fixture.baseUrl, () => fixture.submissions.length);
+      expect(fixture.submissions[0]?.fields.name).toBe("Bao Builder");
+      expect(fixture.submissions[0]?.fields.email).toBe("bao@example.com");
+      expect(fixture.submissions[0]?.resumeFileName?.endsWith(".pdf")).toBe(true);
 
-        await verifyScheduledJobApplyFlow(
-          resumeId,
-          fixture.baseUrl,
-          () => fixture.submissions.length,
-        );
+      await verifyScheduledJobApplyFlow(
+        resumeId,
+        fixture.baseUrl,
+        () => fixture.submissions.length,
+      );
 
-        await configureDeterministicSmtp(smtpHarness.port);
-        await verifyEmailResponseFlow();
-        expect(
-          smtpHarness.exchange.commands.some((command) => command.startsWith("AUTH PLAIN ")),
-        ).toBe(true);
-        expect(smtpHarness.exchange.message).toContain("To: <recruiter@example.test>");
-        expect(smtpHarness.exchange.message).toContain("Subject: Interview follow-up");
+      await configureDeterministicSmtp(smtpHarness.port);
+      await verifyEmailResponseFlow();
+      expect(
+        smtpHarness.exchange.commands.some((command) => command.startsWith("AUTH PLAIN ")),
+      ).toBe(true);
+      expect(smtpHarness.exchange.message).toContain("To: <recruiter@example.test>");
+      expect(smtpHarness.exchange.message).toContain("Subject: Interview follow-up");
 
-        await verifyRecoveredScheduledRun(
-          resumeId,
-          fixture.baseUrl,
-          () => fixture.submissions.length,
-          instantiateService,
-        );
-      })
-      .finally(async () => {
-        await fixture.stop();
-        smtpHarness.stop();
-      });
+      await verifyRecoveredScheduledRun(
+        resumeId,
+        fixture.baseUrl,
+        () => fixture.submissions.length,
+        instantiateService,
+      );
+    } finally {
+      await fixture.stop();
+      smtpHarness.stop();
+    }
   });
 });

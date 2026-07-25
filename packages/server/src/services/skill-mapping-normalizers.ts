@@ -1,3 +1,4 @@
+import { COUNT_FIFTY } from "@bao/shared/constants/numeric";
 import {
   SKILL_CATEGORY_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
@@ -69,7 +70,7 @@ export const toSkillMapping = (row: SkillMappingRow): SkillMapping => ({
   transferableSkill: row.transferableSkill,
   industryApplications: row.industryApplications || [],
   evidence: row.evidence ?? [],
-  confidence: row.confidence || 50,
+  confidence: row.confidence || COUNT_FIFTY,
   category: normalizeSkillCategory(row.category),
   demandLevel: normalizeDemandLevel(row.demandLevel),
   verified: false,

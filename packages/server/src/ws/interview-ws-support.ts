@@ -9,6 +9,7 @@ import {
   INTERVIEW_MAX_QUESTION_COUNT,
   INTERVIEW_UNKNOWN_STUDIO_NAME,
 } from "@bao/shared/constants/interview";
+import { COUNT_ONE_FIFTY } from "@bao/shared/constants/numeric";
 import { settle } from "@bao/shared/utils/promise";
 import { sessionConfigFromUi } from "../routes/interview-route-config";
 import type { CreateSessionConfigInput } from "../routes/interview-route-contracts";
@@ -126,7 +127,7 @@ export async function handleSubmitResponse(socket: InterviewSocket, data: Interv
   const updatedSession = await interviewService.addResponse(data.sessionId, {
     questionId: "",
     transcript: data.content,
-    duration: Math.max(1, data.content.length * 150),
+    duration: Math.max(1, data.content.length * COUNT_ONE_FIFTY),
     timestamp: Date.now(),
     confidence: 0.8,
   });

@@ -8,6 +8,13 @@ import {
   INTERVIEW_DEFAULT_VOICE_SETTINGS,
   INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
 } from "@bao/shared/constants/interview";
+import {
+  COUNT_FIVE,
+  COUNT_ONE_TWENTY,
+  COUNT_THREE,
+  RATIO_HALF,
+  RATIO_ONE_QUARTER,
+} from "@bao/shared/constants/numeric";
 import type {
   InterviewCandidateContext,
   InterviewConfig,
@@ -18,6 +25,7 @@ import type {
 } from "@bao/shared/types/interview";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import type { InterviewConfigInput } from "./interview-service-contracts";
+
 import {
   isRecord,
   parseBoolean,
@@ -117,8 +125,13 @@ export function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined 
   const speakerId = parseString(raw.speakerId, "");
   const voiceId = parseString(raw.voiceId, "");
   const voiceSettings: VoiceSettings = {
-    rate: parseNumber(raw.rate, INTERVIEW_DEFAULT_VOICE_SETTINGS.rate, 0.25, 3),
-    pitch: parseNumber(raw.pitch, INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch, 0.5, 2),
+    rate: parseNumber(
+      raw.rate,
+      INTERVIEW_DEFAULT_VOICE_SETTINGS.rate,
+      RATIO_ONE_QUARTER,
+      COUNT_THREE,
+    ),
+    pitch: parseNumber(raw.pitch, INTERVIEW_DEFAULT_VOICE_SETTINGS.pitch, RATIO_HALF, 2),
     volume: parseNumber(raw.volume, INTERVIEW_DEFAULT_VOICE_SETTINGS.volume, 0, 2),
     language: parseString(raw.language, INTERVIEW_DEFAULT_VOICE_SETTINGS.language),
   };
@@ -160,7 +173,12 @@ export function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
     1,
     INTERVIEW_SERVICE_MAX_QUESTION_COUNT,
   );
-  const duration = parseNumber(raw.duration, INTERVIEW_DEFAULT_DURATION_MINUTES, 5, 120);
+  const duration = parseNumber(
+    raw.duration,
+    INTERVIEW_DEFAULT_DURATION_MINUTES,
+    COUNT_FIVE,
+    COUNT_ONE_TWENTY,
+  );
   const experienceLevel = normalizeExperienceLevel(
     parseString(raw.experienceLevel, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL),
   );

@@ -1,12 +1,14 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { hashApiKey } from "../utils/crypto";
 import {
   API_ENDPOINTS,
   OPENAI_V1_ENDPOINT_PREFIX,
   toApiScopedPath,
 } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { COUNT_TWELVE } from "@bao/shared/constants/numeric";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { createTestDbPath, requestJson } from "../test-utils";
+import { hashApiKey } from "../utils/crypto";
 
 type OpenApiOperation = {
   tags?: string[];
@@ -97,44 +99,56 @@ beforeAll(async () => {
   app = appModule.app;
 });
 
+const assertOpenApiOperationTagged = (
+  path: string,
+  method: (typeof OPENAPI_METHODS)[number],
+  operation: OpenApiOperation,
+): void => {
+  // WebSocket operations are documented without HTTP OpenAPI tags.
+  if (path.includes("/ws/")) {
+    return;
+  }
+
+  const expectedTag = resolveExpectedTag(path);
+  if (!expectedTag) {
+    // Only allowlisted paths may omit tags; everything else is debt.
+    if (!UNTAGGED_ALLOWLIST.has(toApiScopedPath(path))) {
+      throw new Error(
+        `OpenAPI path has no tag matcher (add matcher or allowlist): ${method.toUpperCase()} ${path}`,
+      );
+    }
+    return;
+  }
+  if (!operation.tags || operation.tags.length === 0) {
+    throw new Error(`OpenAPI operation missing tags: ${method.toUpperCase()} ${path}`);
+  }
+  expect(operation.tags).toContain(expectedTag);
+  const description = operation.description?.trim() ?? "";
+  if (description.length < COUNT_TWELVE) {
+    throw new Error(
+      `OpenAPI operation missing description (≥12 chars): ${method.toUpperCase()} ${path}`,
+    );
+  }
+};
+
+const assertAllOpenApiOperationsTagged = (spec: OpenApiSpec): void => {
+  for (const [path, operations] of Object.entries(spec.paths)) {
+    for (const method of OPENAPI_METHODS) {
+      const operation = operations[method];
+      if (!operation) {
+        continue;
+      }
+      assertOpenApiOperationTagged(path, method, operation);
+    }
+  }
+};
+
 describe("openapi tags", () => {
   test("generated OpenAPI spec tags every documented API operation", async () => {
-    const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, { Authorization: `Bearer ${TEST_AUTH_KEY}` });
-    expect(response.status).toBe(200);
-
-    for (const [path, operations] of Object.entries(response.body.paths)) {
-      for (const method of OPENAPI_METHODS) {
-        const operation = operations[method];
-        if (!operation) {
-          continue;
-        }
-
-        // WebSocket operations are documented without HTTP OpenAPI tags.
-        if (path.includes("/ws/")) {
-          continue;
-        }
-
-        const expectedTag = resolveExpectedTag(path);
-        if (!expectedTag) {
-          // Only allowlisted paths may omit tags; everything else is debt.
-          if (!UNTAGGED_ALLOWLIST.has(toApiScopedPath(path))) {
-            throw new Error(
-              `OpenAPI path has no tag matcher (add matcher or allowlist): ${method.toUpperCase()} ${path}`,
-            );
-          }
-          continue;
-        }
-        if (!operation.tags || operation.tags.length === 0) {
-          throw new Error(`OpenAPI operation missing tags: ${method.toUpperCase()} ${path}`);
-        }
-        expect(operation.tags).toContain(expectedTag);
-        const description = operation.description?.trim() ?? "";
-        if (description.length < 12) {
-          throw new Error(
-            `OpenAPI operation missing description (≥12 chars): ${method.toUpperCase()} ${path}`,
-          );
-        }
-      }
-    }
+    const response = await requestJson<OpenApiSpec>(app, "GET", API_ENDPOINTS.apiDocsJson, {
+      Authorization: `Bearer ${TEST_AUTH_KEY}`,
+    });
+    expect(response.status).toBe(HTTP_STATUS_OK);
+    assertAllOpenApiOperationsTagged(response.body);
   });
 });

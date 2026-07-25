@@ -1,3 +1,4 @@
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 import {
   SKILL_CATEGORY_IDS,
   SKILL_DEMAND_LEVEL_IDS,
@@ -91,7 +92,7 @@ export const normalizeSkillEvidence = (value: JsonValue | undefined): SkillEvide
 
 export const clampConfidence = (value: number | undefined): number =>
   typeof value === "number" && Number.isFinite(value)
-    ? Math.max(0, Math.min(100, Math.round(value)))
+    ? Math.max(0, Math.min(PERCENT_MAX, Math.round(value)))
     : SKILLS_DEFAULT_CONFIDENCE;
 
 export const mapSuggestedMappingToCreateInput = (suggestedMapping: JsonObject) => {
@@ -107,7 +108,7 @@ export const mapSuggestedMappingToCreateInput = (suggestedMapping: JsonObject) =
     confidence:
       typeof suggestedMapping.confidence === "number" &&
       Number.isFinite(suggestedMapping.confidence)
-        ? Math.max(0, Math.min(100, Math.round(suggestedMapping.confidence)))
+        ? Math.max(0, Math.min(PERCENT_MAX, Math.round(suggestedMapping.confidence)))
         : 60,
     category: normalizeCategory(suggestedMapping.category),
     demandLevel: normalizeDemandLevel(suggestedMapping.demandLevel),

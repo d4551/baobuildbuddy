@@ -16,6 +16,7 @@ import {
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { INTERVIEW_FALLBACK_STUDIO_ID } from "@bao/shared/constants/interview";
+import { COUNT_ONE_FIFTY } from "@bao/shared/constants/numeric";
 import type { InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import { asString } from "@bao/shared/utils/type-guards";
 import { gamificationService } from "../services/gamification-service";
@@ -27,7 +28,7 @@ import { sessionWithDerivedFields } from "./interview-route-presentation";
 const buildDefaultResponse = (questionId: string, answer: string): InterviewResponse => ({
   questionId,
   transcript: answer,
-  duration: Math.max(1, answer.length * 150),
+  duration: Math.max(1, answer.length * COUNT_ONE_FIFTY),
   timestamp: Date.now(),
   confidence: 0.8,
 });

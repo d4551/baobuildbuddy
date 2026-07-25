@@ -7,6 +7,13 @@ import {
   API_ENDPOINT_PREFIX,
   buildAutomationScreenshotEndpoint,
 } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import {
+  COUNT_ONE_THIRTY_SEVEN,
+  COUNT_SEVENTY_EIGHT,
+  COUNT_SEVENTY_ONE,
+  PERCENT_HIGH,
+} from "@bao/shared/constants/numeric";
 import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { AUTOMATION_SCREENSHOT_DIR } from "../config/paths";
@@ -17,7 +24,12 @@ import { automationScreenshotRoutes } from "./automation-screenshots.routes";
 
 type ScreenshotApp = { handle: (request: Request) => Response | Promise<Response> };
 
-const PNG_BYTES = new Uint8Array([137, 80, 78, 71]);
+const PNG_BYTES = new Uint8Array([
+  COUNT_ONE_THIRTY_SEVEN,
+  PERCENT_HIGH,
+  COUNT_SEVENTY_EIGHT,
+  COUNT_SEVENTY_ONE,
+]);
 
 let app: ScreenshotApp;
 const createdRunIds = new Set<string>();
@@ -81,7 +93,7 @@ describe("automationScreenshotRoutes", () => {
       new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(await response.json()).toEqual({ error: API_ERROR_SCREENSHOT_FILE_MISSING });
   });
 
@@ -95,7 +107,7 @@ describe("automationScreenshotRoutes", () => {
       new Request(`http://localhost${buildAutomationScreenshotEndpoint(runId, 0)}`),
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe("image/png");
     expect(response.headers.get("cache-control")).toBe(CACHE_CONTROL_PRIVATE_NO_STORE);
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(PNG_BYTES);

@@ -4,6 +4,7 @@ import {
 } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED } from "@bao/shared/constants/api-messages";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
@@ -79,7 +80,7 @@ const runJobApplyScript = async (
       timeoutMs:
         Number.isFinite(preparation.automationSettings.defaultTimeout) &&
         preparation.automationSettings.defaultTimeout > 0
-          ? Math.trunc(preparation.automationSettings.defaultTimeout * 1_000)
+          ? Math.trunc(preparation.automationSettings.defaultTimeout * MS_PER_SECOND)
           : config.automationScriptTimeoutMs,
       outputDir: preparation.runArtifactDir,
     },

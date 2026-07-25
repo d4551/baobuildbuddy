@@ -20,6 +20,7 @@ import {
 import { db } from "../db/client";
 import { settings } from "../db/schema/settings";
 import { updateJobTaxonomy } from "../services/jobs/job-taxonomy-service";
+import { openapiDetail } from "../utils/openapi-detail";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
@@ -44,7 +45,6 @@ import {
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -64,7 +64,10 @@ export const settingsRoutes = new Elysia({
       .get(
         "/",
         {
-          detail: openapiDetail("Settings", "Retrieve settings resource for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Retrieve settings resource for BaoBuildBuddy career automation.",
+          ),
           response: settingsReadResponses,
         },
         async ({ status }: { status: RouteStatus }) => {
@@ -90,7 +93,10 @@ export const settingsRoutes = new Elysia({
       .put(
         "/",
         {
-          detail: openapiDetail("Settings", "Replace settings resource for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Replace settings resource for BaoBuildBuddy career automation.",
+          ),
           body: settingsUpdateBodySchema,
           response: settingsUpdateResponses,
         },
@@ -120,7 +126,10 @@ export const settingsRoutes = new Elysia({
       .put(
         "/job-taxonomy",
         {
-          detail: openapiDetail("Settings", "Replace settings job taxonomy for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Replace settings job taxonomy for BaoBuildBuddy career automation.",
+          ),
           body: jobTaxonomyUpdateBodySchema,
           response: jobTaxonomyUpdateResponses,
         },
@@ -132,12 +141,15 @@ export const settingsRoutes = new Elysia({
       .put(
         "/api-keys",
         {
-          detail: openapiDetail("Settings", "Replace settings api keys for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Replace settings api keys for BaoBuildBuddy career automation.",
+          ),
           body: apiKeysUpdateBodySchema,
           response: apiKeysUpdateResponses,
         },
         async ({ body, status }: { body: ApiKeysUpdateBody; status: RouteStatus }) => {
-          await readOrCreateSettingsRow();
+          await await readOrCreateSettingsRow();
           await db
             .update(settings)
             .set(buildApiKeysUpdate(body))
@@ -149,7 +161,10 @@ export const settingsRoutes = new Elysia({
       .post(
         "/test-api-key",
         {
-          detail: openapiDetail("Settings", "Create or execute settings test api key for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Create or execute settings test api key for BaoBuildBuddy career automation.",
+          ),
           body: providerTestBodySchema,
           response: providerTestResponses,
         },
@@ -159,7 +174,10 @@ export const settingsRoutes = new Elysia({
       .get(
         "/export",
         {
-          detail: openapiDetail("Settings", "Retrieve settings export for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Retrieve settings export for BaoBuildBuddy career automation.",
+          ),
           response: settingsExportResponses,
         },
         async ({ status }: { status: RouteStatus }) => {
@@ -170,7 +188,10 @@ export const settingsRoutes = new Elysia({
       .post(
         "/import",
         {
-          detail: openapiDetail("Settings", "Create or execute settings import for BaoBuildBuddy career automation."),
+          detail: openapiDetail(
+            "Settings",
+            "Create or execute settings import for BaoBuildBuddy career automation.",
+          ),
           body: importSettingsBodySchema,
           response: settingsImportResponses,
         },

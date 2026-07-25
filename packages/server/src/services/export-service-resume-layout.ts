@@ -7,9 +7,11 @@ import {
   RESUME_SECTION_HEADER_SPACING,
   RESUME_SECTION_SPACE,
 } from "@bao/shared/constants/export-layout";
+import { RATIO_HALF } from "@bao/shared/constants/numeric";
 import { RESUME_TEMPLATE_DEFAULT, type ResumeTemplate } from "@bao/shared/constants/resume";
 import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";
 import { PDFDocument, StandardFonts } from "pdf-lib";
+
 import {
   addA4Page,
   type ResumeRenderContext,
@@ -33,7 +35,7 @@ export function resolveResumePdfTemplate(
 }
 
 export function applyResumeBackground(context: ResumeRenderContext, page = context.page): void {
-  if (context.background.r >= 0.5) {
+  if (context.background.r >= RATIO_HALF) {
     return;
   }
 

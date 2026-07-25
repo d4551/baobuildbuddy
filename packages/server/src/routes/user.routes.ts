@@ -6,9 +6,9 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
+import { openapiDetail } from "../utils/openapi-detail";
 import { simpleRouteErrorResponses } from "./route-error-envelope";
 import { userProfileResponseSchema, userProfileUpdateBodySchema } from "./user-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type UserProfileRow = typeof userProfile.$inferSelect;
 

@@ -4,6 +4,7 @@ import {
   RESUME_HEADER_NAME_SPACING,
   RESUME_LINKS_SPACING,
 } from "@bao/shared/constants/export-layout";
+import { COUNT_THREE, COUNT_TWENTY } from "@bao/shared/constants/numeric";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import {
@@ -19,7 +20,7 @@ function renderResumeName(context: ResumeRenderContext, name: string): void {
       x: 0,
       y: context.yPosition - 10,
       width: context.width,
-      height: context.fonts.name + 20,
+      height: context.fonts.name + COUNT_TWENTY,
       color: context.palette.primary,
     });
     context.page.drawText(name, {
@@ -99,7 +100,7 @@ function renderResumeDivider(context: ResumeRenderContext): void {
   if (context.layout.dividerStyle === "accent-bar") {
     context.page.drawRectangle({
       x: context.margin,
-      y: context.yPosition - 3,
+      y: context.yPosition - COUNT_THREE,
       width: context.width - context.margin * 2,
       height: 5,
       color: context.palette.accent,

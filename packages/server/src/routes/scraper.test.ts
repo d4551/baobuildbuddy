@@ -8,6 +8,11 @@ import {
   API_ENDPOINTS,
   buildScraperJobsEndpoint,
 } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 
@@ -77,7 +82,7 @@ function registerStudioScraperRouteTests(): void {
       API_ENDPOINTS.scraperStudios,
     );
 
-    expect(result.status).toBe(200);
+    expect(result.status).toBe(HTTP_STATUS_OK);
     expect(result.body.scraped).toBe(2);
     expect(result.body.upserted).toBe(2);
     expect(Array.isArray(result.body.errors)).toBe(true);
@@ -94,7 +99,7 @@ function registerStudioScraperRouteTests(): void {
       API_ENDPOINTS.scraperStudios,
     );
 
-    expect(result.status).toBe(500);
+    expect(result.status).toBe(HTTP_STATUS_INTERNAL_SERVER_ERROR);
     expect(result.body.error).toBe(API_ERROR_SCRAPE_STUDIOS_FAILED);
     expect(result.body.details).toContain("studio scrape script failed");
   });
@@ -110,7 +115,7 @@ function registerJobScraperRouteTests(): void {
       API_ENDPOINTS.scraperJobsHitmarker,
     );
 
-    expect(result.status).toBe(200);
+    expect(result.status).toBe(HTTP_STATUS_OK);
     expect(result.body.scraped).toBe(2);
     expect(result.body.upserted).toBe(2);
     expect(result.body.errors).toEqual([]);
@@ -126,7 +131,7 @@ function registerJobScraperRouteTests(): void {
       buildScraperJobsEndpoint("grackle"),
     );
 
-    expect(result.status).toBe(500);
+    expect(result.status).toBe(HTTP_STATUS_INTERNAL_SERVER_ERROR);
     expect(result.body.error).toBe(API_ERROR_SCRAPE_JOBS_FAILED);
     expect(result.body.details).toContain("portal scrape script failed");
   });
@@ -138,7 +143,7 @@ function registerJobScraperRouteTests(): void {
       `${API_ENDPOINTS.scraperJobsBase}/not-a-portal`,
     );
 
-    expect(result.status).toBe(400);
+    expect(result.status).toBe(HTTP_STATUS_BAD_REQUEST);
     expect(result.body.error).toBe(API_ERROR_SCRAPE_JOBS_FAILED);
     expect(result.body.details).toContain("Unsupported scraper portal");
   });

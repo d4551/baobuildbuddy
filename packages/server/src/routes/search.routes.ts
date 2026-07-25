@@ -3,6 +3,7 @@ import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { DEFAULT_SEARCH_RESULT_TYPES } from "@bao/shared/constants/search";
 import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type SearchType,
   searchAllResponses,
@@ -11,7 +12,6 @@ import {
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 const searchTypeSet = new Set<string>(searchTypes);
 
@@ -42,7 +42,10 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
     {
-      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Search",
+        "Retrieve search resource for BaoBuildBuddy career automation.",
+      ),
       query: searchQuery,
       response: searchAllResponses,
     },
@@ -63,7 +66,10 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
     {
-      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Search",
+        "Retrieve search resource for BaoBuildBuddy career automation.",
+      ),
       query: searchAutocompleteQuery,
       response: searchAutocompleteResponses,
     },

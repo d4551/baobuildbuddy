@@ -1,3 +1,12 @@
+import {
+  COUNT_THREE_FIFTY_FOUR,
+  COUNT_THREE_THIRTY_FOUR,
+  COUNT_TWO_FIFTY,
+  COUNT_TWO_FIFTY_ONE,
+  COUNT_TWO_THIRTY_FIVE,
+  COUNT_TWO_TWENTY,
+  COUNT_TWO_TWENTY_ONE,
+} from "@bao/shared/constants/numeric";
 import { settle } from "@bao/shared/utils/promise";
 import {
   connectSmtpSocket,
@@ -27,12 +36,12 @@ export class SmtpConnection {
   }
 
   async ehlo(clientHost: string): Promise<SmtpResponse> {
-    return this.command(`EHLO ${clientHost}`, [250], "EHLO");
+    return this.command(`EHLO ${clientHost}`, [COUNT_TWO_FIFTY], "EHLO");
   }
 
   async startTls(): Promise<void> {
     const socket = assertSocket(this.state);
-    await this.command("STARTTLS", [220], "STARTTLS");
+    await this.command("STARTTLS", [COUNT_TWO_TWENTY], "STARTTLS");
 
     this.state.socket = await upgradeSmtpSocket(this.state, this.config, socket);
     this.state.socket.timeout(this.config.connectionTimeoutSeconds);
@@ -40,22 +49,30 @@ export class SmtpConnection {
 
   async authPlain(username: string, password: string): Promise<void> {
     const encoded = encodeBase64Utf8(`\u0000${username}\u0000${password}`);
-    await this.command(`AUTH PLAIN ${encoded}`, [235], "AUTH PLAIN");
+    await this.command(`AUTH PLAIN ${encoded}`, [COUNT_TWO_THIRTY_FIVE], "AUTH PLAIN");
   }
 
   async authLogin(username: string, password: string): Promise<void> {
-    await this.command("AUTH LOGIN", [334], "AUTH LOGIN");
-    await this.command(encodeBase64Utf8(username), [334], "AUTH LOGIN username");
-    await this.command(encodeBase64Utf8(password), [235], "AUTH LOGIN password");
+    await this.command("AUTH LOGIN", [COUNT_THREE_THIRTY_FOUR], "AUTH LOGIN");
+    await this.command(
+      encodeBase64Utf8(username),
+      [COUNT_THREE_THIRTY_FOUR],
+      "AUTH LOGIN username",
+    );
+    await this.command(encodeBase64Utf8(password), [COUNT_TWO_THIRTY_FIVE], "AUTH LOGIN password");
   }
 
   async sendMail(fromEmail: string, recipientEmail: string, message: string): Promise<void> {
-    await this.command(`MAIL FROM:<${fromEmail}>`, [250], "MAIL FROM");
-    await this.command(`RCPT TO:<${recipientEmail}>`, [250, 251], "RCPT TO");
-    await this.command("DATA", [354], "DATA");
+    await this.command(`MAIL FROM:<${fromEmail}>`, [COUNT_TWO_FIFTY], "MAIL FROM");
+    await this.command(
+      `RCPT TO:<${recipientEmail}>`,
+      [COUNT_TWO_FIFTY, COUNT_TWO_FIFTY_ONE],
+      "RCPT TO",
+    );
+    await this.command("DATA", [COUNT_THREE_FIFTY_FOUR], "DATA");
     await this.writeCommand(`${dotStuffMessage(message)}${SMTP_DATA_ENDING}`);
     const dataResult = await readResponse(this.state);
-    assertExpectedCode(dataResult, [250], "message body");
+    assertExpectedCode(dataResult, [COUNT_TWO_FIFTY], "message body");
   }
 
   async quit(): Promise<void> {
@@ -63,7 +80,9 @@ export class SmtpConnection {
       return;
     }
 
-    const quitResult = await settle(this.command(SMTP_QUIT_COMMAND, [221], "QUIT"));
+    const quitResult = await settle(
+      this.command(SMTP_QUIT_COMMAND, [COUNT_TWO_TWENTY_ONE], "QUIT"),
+    );
     if (quitResult.status === "rejected") {
       this.state.logger.warn("smtp quit failed", quitResult.reason);
     }

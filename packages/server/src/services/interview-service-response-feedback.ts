@@ -3,6 +3,17 @@ import {
   AI_MAX_TOKENS_FEEDBACK,
 } from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
+import {
+  COUNT_EIGHT,
+  COUNT_NINETY,
+  COUNT_ONE_FORTY,
+  COUNT_SEVEN,
+  COUNT_THIRTY_FIVE,
+  COUNT_TWELVE,
+  COUNT_TWENTY,
+  COUNT_TWENTY_FIVE,
+  PERCENT_HIGH,
+} from "@bao/shared/constants/numeric";
 import type {
   InterviewConfig,
   InterviewQuestion,
@@ -24,15 +35,18 @@ import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-v
 
 function fallbackResponseScore(transcript: string): number {
   const normalizedTranscript = transcript.trim().toLowerCase();
-  const base = Math.min(90, 20 + Math.floor(normalizedTranscript.length / 7));
-  if (normalizedTranscript.length < 80) {
-    return Math.max(35, base - 25);
+  const base = Math.min(
+    COUNT_NINETY,
+    COUNT_TWENTY + Math.floor(normalizedTranscript.length / COUNT_SEVEN),
+  );
+  if (normalizedTranscript.length < PERCENT_HIGH) {
+    return Math.max(COUNT_THIRTY_FIVE, base - COUNT_TWENTY_FIVE);
   }
   if (normalizedTranscript.includes("example") || normalizedTranscript.includes("result")) {
-    return base + 12;
+    return base + COUNT_TWELVE;
   }
   if (normalizedTranscript.includes("metric") || normalizedTranscript.includes("kpi")) {
-    return base + 8;
+    return base + COUNT_EIGHT;
   }
   return base;
 }
@@ -43,12 +57,12 @@ function fallbackResponseFeedback(
   return {
     score: fallbackResponseScore(transcript),
     feedback:
-      transcript.length >= 140
+      transcript.length >= COUNT_ONE_FORTY
         ? "Response shows useful depth and relevant structure."
         : "Add measurable outcomes and a clearer step-by-step breakdown.",
     strengths: ["Clear attempt to answer the asked question.", "Shows structured thinking."],
     improvements:
-      transcript.length < 140
+      transcript.length < COUNT_ONE_FORTY
         ? ["Add specific examples and impact metrics."]
         : ["Keep responses concise and concrete."],
   };
@@ -107,12 +121,12 @@ function normalizeQuestionFeedback(
     return null;
   }
 
-  const parsedScore =
-    typeof raw.score === "number"
-      ? raw.score
-      : typeof raw.score === "string"
-        ? Number.parseInt(raw.score, 10)
-        : Number.NaN;
+  let parsedScore = Number.NaN;
+  if (typeof raw.score === "number") {
+    parsedScore = raw.score;
+  } else if (typeof raw.score === "string") {
+    parsedScore = Number.parseInt(raw.score, 10);
+  }
   if (!Number.isFinite(parsedScore)) {
     return null;
   }

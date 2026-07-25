@@ -15,6 +15,7 @@ import {
 } from "@bao/shared/constants/http";
 import { Elysia, type status } from "elysia";
 import { toRouteError } from "../utils/automation-route-error";
+import { openapiDetail } from "../utils/openapi-detail";
 import { automationRateLimit } from "../utils/rate-limit";
 import {
   handleAutomationCapabilitiesRoute,
@@ -51,7 +52,6 @@ import {
   scrapeBodySchema,
 } from "./automation-route-contracts";
 import { listAutomationRuns } from "./automation-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -97,7 +97,10 @@ export const automationRoutes = new Elysia({
   .get(
     "/verify/context",
     {
-      detail: openapiDetail("Automation", "Retrieve automation verify context for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Retrieve automation verify context for BaoBuildBuddy career automation.",
+      ),
       response: automationVerifyContextResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -108,7 +111,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/job-apply",
     {
-      detail: openapiDetail("Automation", "Create or execute automation job apply for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation job apply for BaoBuildBuddy career automation.",
+      ),
       body: jobApplyBodySchema,
       response: automationRunResponses,
     },
@@ -133,7 +139,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/job-apply/schedule",
     {
-      detail: openapiDetail("Automation", "Create or execute automation job apply schedule for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation job apply schedule for BaoBuildBuddy career automation.",
+      ),
       body: scheduledJobApplyBodySchema,
       response: automationRunResponses,
     },
@@ -159,7 +168,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response",
     {
-      detail: openapiDetail("Automation", "Create or execute automation email response for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation email response for BaoBuildBuddy career automation.",
+      ),
       body: emailResponseBodySchema,
       response: automationEmailResponseResponses,
     },
@@ -187,7 +199,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response/schedule",
     {
-      detail: openapiDetail("Automation", "Create or execute automation email response schedule for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation email response schedule for BaoBuildBuddy career automation.",
+      ),
       body: scheduledEmailResponseBodySchema,
       response: automationRunResponses,
     },
@@ -219,7 +234,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape",
     {
-      detail: openapiDetail("Automation", "Create or execute automation scrape for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation scrape for BaoBuildBuddy career automation.",
+      ),
       body: scrapeBodySchema,
       response: automationRunResponses,
     },
@@ -238,7 +256,10 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape/schedule",
     {
-      detail: openapiDetail("Automation", "Create or execute automation scrape schedule for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Create or execute automation scrape schedule for BaoBuildBuddy career automation.",
+      ),
       body: scheduledScrapeBodySchema,
       response: automationRunResponses,
     },
@@ -260,7 +281,10 @@ export const automationRoutes = new Elysia({
   .get(
     "/capabilities",
     {
-      detail: openapiDetail("Automation", "Retrieve automation capabilities for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Retrieve automation capabilities for BaoBuildBuddy career automation.",
+      ),
       response: automationCapabilitiesResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -271,7 +295,10 @@ export const automationRoutes = new Elysia({
   .get(
     "/runs",
     {
-      detail: openapiDetail("Automation", "Retrieve automation runs for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Retrieve automation runs for BaoBuildBuddy career automation.",
+      ),
       query: automationRunQuerySchema,
       response: automationRunsListResponses,
     },
@@ -281,7 +308,10 @@ export const automationRoutes = new Elysia({
   .get(
     "/runs/:id",
     {
-      detail: openapiDetail("Automation", "Retrieve automation runs :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Automation",
+        "Retrieve automation runs :id for BaoBuildBuddy career automation.",
+      ),
       params: automationRunIdParamsSchema,
       response: automationRunResponses,
     },

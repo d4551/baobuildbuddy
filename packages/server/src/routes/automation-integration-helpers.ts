@@ -1,4 +1,5 @@
 import { expect } from "bun:test";
+import { COUNT_FOUR_HUNDRED, MS_FIVE_SECONDS } from "@bao/shared/constants/numeric";
 import {
   type RpaRunEvent,
   type RpaRunExecutionEnvelope,
@@ -105,9 +106,7 @@ export const requestJson = async <T>(
   }
   const responseContentType = response.headers.get("content-type") ?? "";
   if (!responseContentType.includes("application/json")) {
-    throw new Error(
-      "Expected JSON response from " + path + ", got content-type " + responseContentType,
-    );
+    throw new Error(`Expected JSON response from ${path}, got content-type ${responseContentType}`);
   }
   const body = parseJson(rawBody, schema);
   if (body === null) {
@@ -117,7 +116,7 @@ export const requestJson = async <T>(
         " (status " +
         String(response.status) +
         "): " +
-        rawBody.slice(0, 400),
+        rawBody.slice(0, COUNT_FOUR_HUNDRED),
     );
   }
   return { status: response.status, body };
@@ -129,7 +128,7 @@ export const requestExecutionEnvelope = async (
 ): Promise<{ status: number; body: RpaRunExecutionEnvelope }> => {
   const response = await requestJson(path, rpaRunExecutionEnvelopeSchema, init);
   if (response.body === null) {
-    throw new Error("Empty execution envelope from " + path);
+    throw new Error(`Empty execution envelope from ${path}`);
   }
   return { status: response.status, body: response.body };
 };
@@ -140,7 +139,7 @@ export const requestEmailResponseBody = async (
 ): Promise<{ status: number; body: EmailResponseBody }> => {
   const response = await requestJson(path, emailResponseBodySchema, init);
   if (response.body === null) {
-    throw new Error("Empty email response body from " + path);
+    throw new Error(`Empty email response body from ${path}`);
   }
   return { status: response.status, body: response.body };
 };
@@ -214,17 +213,14 @@ export const waitForRunCompletion = async (
   runId: string,
 ): Promise<typeof automationRuns.$inferSelect> => {
   let lastRun: typeof automationRuns.$inferSelect | null = null;
-  await waitForCondition(
-    async () => {
-      const run = await readRunRowById(runId);
-      lastRun = run;
-      return run?.status === "success" || run?.status === "error";
-    },
-    "Timed out waiting for automation run " + runId + " to complete",
-  );
+  await waitForCondition(async () => {
+    const run = await readRunRowById(runId);
+    lastRun = run;
+    return run?.status === "success" || run?.status === "error";
+  }, `Timed out waiting for automation run ${runId} to complete`);
 
   if (!lastRun) {
-    throw new Error("Automation run " + runId + " did not produce a terminal state.");
+    throw new Error(`Automation run ${runId} did not produce a terminal state.`);
   }
 
   return lastRun;
@@ -245,7 +241,7 @@ export const subscribeToRunEvents = async (
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(
       () => reject(new Error("Timed out opening automation websocket")),
-      5_000,
+      MS_FIVE_SECONDS,
     );
     socket.onopen = () => {
       clearTimeout(timeout);
@@ -261,11 +257,11 @@ export const subscribeToRunEvents = async (
   const waitForTerminalEvent = async (): Promise<RpaRunEvent> => {
     await waitForCondition(
       () => Promise.resolve(terminalEvent !== null),
-      "Timed out waiting for websocket events for run " + runId,
+      `Timed out waiting for websocket events for run ${runId}`,
       Date.now() + RUN_TIMEOUT_MS,
     );
     if (!terminalEvent) {
-      throw new Error("Automation websocket did not emit a terminal event for run " + runId);
+      throw new Error(`Automation websocket did not emit a terminal event for run ${runId}`);
     }
     return terminalEvent;
   };

@@ -62,6 +62,10 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
       return { error: API_ERROR_EMPTY_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };
     case "ok":
       break;
+    default: {
+      const _exhaustive: never = parsed;
+      return _exhaustive;
+    }
   }
 
   const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));

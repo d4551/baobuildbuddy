@@ -19,6 +19,15 @@ import {
   AUTOMATION_MAX_JOB_URL_LENGTH,
 } from "@bao/shared/constants/automation-limits";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
+import {
+  COUNT_FOUR,
+  COUNT_ONE_NINETY_TWO,
+  COUNT_ONE_SIXTY_EIGHT,
+  COUNT_ONE_SIXTY_NINE,
+  COUNT_ONE_TWENTY_SEVEN,
+  COUNT_TWO_FIFTY_FIVE,
+  COUNT_TWO_FIFTY_FOUR,
+} from "@bao/shared/constants/numeric";
 import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared/constants/runtime";
 import { config } from "../../config/env";
 
@@ -29,10 +38,10 @@ export const MAX_CUSTOM_ANSWER_VALUE_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_VALUE
 export const MAX_CUSTOM_ANSWER_COUNT = AUTOMATION_MAX_CUSTOM_ANSWER_COUNT;
 
 const DISALLOWED_IPV4_PREFIXES = [
-  [127, 0],
+  [COUNT_ONE_TWENTY_SEVEN, 0],
   [10, 0],
-  [169, 254],
-  [192, 168],
+  [COUNT_ONE_SIXTY_NINE, COUNT_TWO_FIFTY_FOUR],
+  [COUNT_ONE_NINETY_TWO, COUNT_ONE_SIXTY_EIGHT],
 ];
 
 const IP_SEGMENT_REGEX = /^\d+$/;
@@ -197,7 +206,7 @@ function isDisallowedIpv4(hostname: string): boolean {
 
 function isIpv4Address(hostname: string): boolean {
   const segments = hostname.split(".");
-  if (segments.length !== 4) {
+  if (segments.length !== COUNT_FOUR) {
     return false;
   }
 
@@ -207,7 +216,7 @@ function isIpv4Address(hostname: string): boolean {
     }
 
     const parsed = Number.parseInt(segment, DECIMAL_RADIX);
-    if (Number.isNaN(parsed) || parsed < 0 || parsed > 255) {
+    if (Number.isNaN(parsed) || parsed < 0 || parsed > COUNT_TWO_FIFTY_FIVE) {
       return false;
     }
   }

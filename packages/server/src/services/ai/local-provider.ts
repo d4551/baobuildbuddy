@@ -1,4 +1,8 @@
 import {
+  AI_DEFAULT_MAX_TOKENS,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+} from "@bao/shared/constants/ai-generation";
+import {
   LOCAL_AI_AUTO_DETECT_MODEL,
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
@@ -115,8 +119,8 @@ export class LocalProvider extends BaseAIProvider {
     return this.client.chat.completions.create({
       model,
       messages,
-      max_tokens: options?.maxTokens ?? 2048,
-      temperature: options?.temperature ?? 0.7,
+      max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+      temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
       top_p: options?.topP ?? 1,
       stream: false,
     });
@@ -174,8 +178,8 @@ export class LocalProvider extends BaseAIProvider {
       this.client.chat.completions.create({
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
         top_p: options?.topP ?? 1,
         stream: true,
       }),

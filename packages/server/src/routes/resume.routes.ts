@@ -24,6 +24,7 @@ import { Elysia, type status } from "elysia";
 import { cvQuestionnaireService } from "../services/cv-questionnaire-service";
 import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type ResumeEnhanceRouteBody,
   type ResumeExportRouteBody,
@@ -60,7 +61,6 @@ import {
   exportResumeAsset,
   handleResumeAiScore,
 } from "./resume-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -99,7 +99,10 @@ export const resumeRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsGenerate),
     {
-      detail: openapiDetail("Resumes", "Retrieve resumes resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+      ),
       body: resumeQuestionGenerateBodySchema,
       response: resumeQuestionGenerateResponses,
     },
@@ -123,7 +126,10 @@ export const resumeRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
     {
-      detail: openapiDetail("Resumes", "Retrieve resumes resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+      ),
       body: resumeQuestionSynthesizeBodySchema,
       response: resumeQuestionSynthesizeResponses,
     },
@@ -161,7 +167,10 @@ export const resumeRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail("Resumes", "Retrieve resumes resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+      ),
       response: resumeListResponses,
     },
     async ({ status }: { status: RouteStatus }) =>
@@ -170,7 +179,10 @@ export const resumeRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail("Resumes", "Create or execute resumes resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Create or execute resumes resource for BaoBuildBuddy career automation.",
+      ),
       body: resumeMutationBodySchema,
       response: resumeCreateResponses,
     },
@@ -242,7 +254,10 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/export",
     {
-      detail: openapiDetail("Resumes", "Create or execute resumes :id export for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Create or execute resumes :id export for BaoBuildBuddy career automation.",
+      ),
       params: resumeIdParamsSchema,
       body: resumeExportBodySchema,
       response: resumeExportResponses,
@@ -276,7 +291,10 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/ai-enhance",
     {
-      detail: openapiDetail("Resumes", "Create or execute resumes :id ai enhance for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Create or execute resumes :id ai enhance for BaoBuildBuddy career automation.",
+      ),
       params: resumeIdParamsSchema,
       body: resumeEnhanceBodySchema,
       response: resumeEnhanceResponses,
@@ -320,7 +338,10 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/ai-score",
     {
-      detail: openapiDetail("Resumes", "Create or execute resumes :id ai score for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Resumes",
+        "Create or execute resumes :id ai score for BaoBuildBuddy career automation.",
+      ),
       params: resumeIdParamsSchema,
       body: resumeScoreBodySchema,
       response: resumeScoreResponses,

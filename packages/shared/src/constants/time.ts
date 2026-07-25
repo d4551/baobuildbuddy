@@ -2,6 +2,8 @@
  * Time constants in milliseconds. Single source of truth for duration calculations.
  */
 
+import { MS_FIVE_MINUTES, MS_TWO_MINUTES } from "./numeric";
+
 /** Milliseconds in one second. */
 export const MS_PER_SECOND = 1000;
 
@@ -28,6 +30,12 @@ export const SECONDS_PER_DAY = HOURS_PER_DAY * SECONDS_PER_HOUR;
 
 /** Milliseconds in one minute. */
 export const MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECOND;
+
+/** Milliseconds in five minutes (scheduler / automation test offsets). */
+export const MS_PER_FIVE_MINUTES = MS_FIVE_MINUTES;
+
+/** Milliseconds in two minutes (speech / long provider timeouts). */
+export const MS_PER_TWO_MINUTES = MS_TWO_MINUTES;
 
 /** Milliseconds in one hour. */
 export const MS_PER_HOUR = MINUTES_PER_HOUR * MS_PER_MINUTE;

@@ -3,6 +3,7 @@ import {
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
   AUTOMATION_MIN_ID_LENGTH,
 } from "@bao/shared/constants/automation-limits";
+import { COUNT_FOUR, COUNT_SIXTEEN, COUNT_THIRTY_ONE } from "@bao/shared/constants/numeric";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { settle } from "@bao/shared/utils/promise";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
@@ -45,9 +46,7 @@ const sanitizeSteps = (
   steps
     .map((step) => sanitizeStep(step))
     .filter(
-      (
-        step,
-      ): step is { action: string; status: "ok" | "error" | "skipped"; message?: string } =>
+      (step): step is { action: string; status: "ok" | "error" | "skipped"; message?: string } =>
         step !== null,
     );
 
@@ -75,9 +74,9 @@ const resolveScreenshotExtension = (pathValue: string): string => {
 const hashScreenshotSource = (sourcePath: string): string => {
   let hash = 0;
   for (let index = 0; index < sourcePath.length; index += 1) {
-    hash = (hash * 31 + sourcePath.charCodeAt(index)) >>> 0;
+    hash = (hash * COUNT_THIRTY_ONE + sourcePath.charCodeAt(index)) >>> 0;
   }
-  return hash.toString(16).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
+  return hash.toString(COUNT_SIXTEEN).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
 };
 
 const resolveScreenshotName = (index: number, sourcePath: string): string => {
@@ -91,7 +90,7 @@ const resolveScreenshotName = (index: number, sourcePath: string): string => {
   const fallbackHash = hashScreenshotSource(sourcePath);
   const base = `${RUN_SCREENSHOT_PREFIX}-${stepToken}-`;
   const maxSuffixLength = Math.max(
-    4,
+    COUNT_FOUR,
     AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH - base.length - extension.length,
   );
   return `${base}${fallbackHash.slice(0, maxSuffixLength)}${extension}`;

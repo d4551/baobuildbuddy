@@ -1,5 +1,6 @@
 import { API_ERROR_RATE_LIMIT_EXCEEDED } from "@bao/shared/constants/api-errors";
 import { HTTP_STATUS_TOO_MANY_REQUESTS } from "@bao/shared/constants/http";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import { Elysia } from "elysia";
 import {
   RATE_LIMIT_DURATION_MS,
@@ -45,7 +46,7 @@ export function createRateLimitPlugin(options: CreateRateLimitOptions) {
     const remaining = Math.max(0, options.max - existing.count);
     set.headers["x-ratelimit-limit"] = String(options.max);
     set.headers["x-ratelimit-remaining"] = String(remaining);
-    set.headers["x-ratelimit-reset"] = String(Math.ceil(existing.resetAt / 1000));
+    set.headers["x-ratelimit-reset"] = String(Math.ceil(existing.resetAt / MS_PER_SECOND));
 
     if (existing.count > options.max) {
       set.status = HTTP_STATUS_TOO_MANY_REQUESTS;

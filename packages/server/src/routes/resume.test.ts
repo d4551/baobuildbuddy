@@ -4,6 +4,11 @@ import {
   API_ENDPOINTS,
   buildResumeExportEndpoint,
 } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
 import { requestJson } from "../test-utils";
 
@@ -39,7 +44,7 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.resumeRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 function registerQuestionnaireRouteTests(): void {
   test("POST resume from questions generate returns interview questionnaire prompts", async () => {
@@ -53,7 +58,7 @@ function registerQuestionnaireRouteTests(): void {
         experienceLevel: "mid",
       },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.questions.length).toBeGreaterThan(0);
     expect(typeof res.body.questions[0]?.question).toBe("string");
   });
@@ -80,7 +85,7 @@ function registerQuestionnaireRouteTests(): void {
         ],
       },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.id).toBeDefined();
     expect(res.body.name.length).toBeGreaterThan(0);
     questionnaireResumeId = res.body.id;
@@ -98,7 +103,7 @@ function registerResumeCrudTests(): void {
         summary: "A test summary",
       },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.name).toBe("Test Resume");
     expect(res.body.id).toBeDefined();
     createdId = res.body.id;
@@ -106,7 +111,7 @@ function registerResumeCrudTests(): void {
 
   test("GET resumes returns list", async () => {
     const res = await requestJson<Array<{ id: string }>>(app, "GET", API_ENDPOINTS.resumes);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -116,7 +121,7 @@ function registerResumeCrudTests(): void {
       "GET",
       `${API_ENDPOINTS.resumes}/${createdId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBe(createdId);
     expect(res.body.name).toBe("Test Resume");
   });
@@ -127,7 +132,7 @@ function registerResumeCrudTests(): void {
       "GET",
       `${API_ENDPOINTS.resumes}/nonexistent-id`,
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Resume not found");
   });
 }
@@ -142,7 +147,7 @@ function registerResumeDynamicFlowTests(): void {
         name: "Updated Resume",
       },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.name).toBe("Updated Resume");
   });
 }
@@ -155,7 +160,7 @@ function registerResumeAiFlowTests(): void {
     }>(app, "POST", `${API_ENDPOINTS.resumes}/${createdId}/ai-enhance`, {
       section: "summary",
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.section).toBe("summary");
     expect(res.body.suggestions.length).toBeGreaterThan(0);
   });
@@ -170,7 +175,7 @@ function registerResumeAiFlowTests(): void {
     }>(app, "POST", `${API_ENDPOINTS.resumes}/${createdId}/ai-score`, {
       jobId,
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.jobId).toBe(jobId);
     expect(typeof res.body.score).toBe("number");
     expect(Array.isArray(res.body.strengths)).toBe(true);
@@ -188,7 +193,7 @@ function registerResumeExportTests(): void {
         body: JSON.stringify({ format: "pdf" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toContain(`resume-${createdId}.pdf`);
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
@@ -202,7 +207,7 @@ function registerResumeExportTests(): void {
         body: JSON.stringify({ format: "docx" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe(
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     );
@@ -218,7 +223,7 @@ function registerResumeDeletionTests(): void {
       "DELETE",
       `${API_ENDPOINTS.resumes}/${createdId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
     expect(res.body.id).toBe(createdId);
   });
@@ -229,7 +234,7 @@ function registerResumeDeletionTests(): void {
       "GET",
       `${API_ENDPOINTS.resumes}/${createdId}`,
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
   });
 
   test("GET resume detail still returns synthesized resumes", async () => {
@@ -238,7 +243,7 @@ function registerResumeDeletionTests(): void {
       "GET",
       `${API_ENDPOINTS.resumes}/${questionnaireResumeId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBe(questionnaireResumeId);
   });
 }

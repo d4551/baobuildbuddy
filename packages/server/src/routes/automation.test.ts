@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
+} from "@bao/shared/constants/http";
+import { COUNT_EIGHT, MS_FIVE_MINUTES } from "@bao/shared/constants/numeric";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { and, eq, inArray } from "drizzle-orm";
@@ -151,7 +157,7 @@ function registerJobApplyValidationTest(): void {
         resumeId,
       },
     );
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     if (typeof res.body === "string") {
       expect(res.body).toContain("Job URL is required");
     } else {
@@ -172,7 +178,7 @@ function registerMissingResumeTest(): void {
         resumeId: "not-found-resume-id",
       },
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error.message).toBe("resume not found: not-found-resume-id");
   });
 }
@@ -195,7 +201,7 @@ function registerJobApplyEnqueueTest(): void {
             resumeId,
           },
         );
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(HTTP_STATUS_OK);
         expect(res.body.status).toBe("running");
         expect(typeof res.body.id).toBe("string");
         expect(res.body.id.length).toBeGreaterThan(0);
@@ -233,14 +239,14 @@ function registerScheduleValidationTest(): void {
       },
     );
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     expect(res.body.error.message).toContain("runAt");
   });
 }
 
 function registerScheduleCreationTest(): void {
   test("POST automation job apply schedule creates a pending run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -251,7 +257,7 @@ function registerScheduleCreationTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const scheduleValue =
       res.body.input && typeof res.body.input === "object" && "schedule" in res.body.input
@@ -304,7 +310,7 @@ function registerEmailResponseTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.reply.length).toBeGreaterThan(0);
     expect(res.body.delivered).toBe(true);
@@ -325,7 +331,7 @@ function registerEmailResponseTest(): void {
 
 function registerScheduledEmailResponseTest(): void {
   test("POST automation email response schedule creates a pending email run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -338,7 +344,7 @@ function registerScheduledEmailResponseTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -366,7 +372,7 @@ function registerScheduledEmailResponseTest(): void {
 
 function registerScheduledScrapeRunTest(): void {
   test("POST automation scrape schedule creates a pending scrape run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -376,7 +382,7 @@ function registerScheduledScrapeRunTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -434,7 +440,7 @@ function registerImmediateScrapeRunTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.output?.target).toBe("jobs_grackle");
     expect(res.body.output?.enrichment).not.toBeNull();
@@ -460,9 +466,9 @@ function registerCapabilityAuditRouteTest(): void {
       capabilities: Array<{ id: string; target: string | null }>;
     }>(app, "GET", API_ENDPOINTS.automationCapabilities);
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.generatedAt.length).toBeGreaterThan(0);
-    expect(res.body.summary.total).toBeGreaterThanOrEqual(8);
+    expect(res.body.summary.total).toBeGreaterThanOrEqual(COUNT_EIGHT);
     expect(res.body.capabilities.some((capability) => capability.id === "job_apply")).toBe(true);
     expect(
       res.body.capabilities.some((capability) => capability.target === "jobs_pocketgamer"),

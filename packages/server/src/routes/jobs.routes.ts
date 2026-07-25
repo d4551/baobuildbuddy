@@ -11,6 +11,7 @@ import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
 import { JobAggregator } from "../services/jobs/job-aggregator";
 import { createServerLogger } from "../utils/logger";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   applicationsListResponses,
   applyJobBodySchema,
@@ -41,7 +42,6 @@ import {
   updateApplication,
 } from "./jobs-route-listing";
 import { getRecommendations } from "./jobs-route-recommendations";
-import { openapiDetail } from "../utils/openapi-detail";
 
 const jobsRoutesLogger = createServerLogger("jobs-routes");
 
@@ -75,7 +75,10 @@ export const jobsRoutes = new Elysia({
   .post(
     "/save",
     {
-      detail: openapiDetail("Jobs", "Create or execute jobs save for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Jobs",
+        "Create or execute jobs save for BaoBuildBuddy career automation.",
+      ),
       body: saveJobBodySchema,
       response: saveJobResponses,
     },
@@ -110,7 +113,10 @@ export const jobsRoutes = new Elysia({
   .post(
     "/apply",
     {
-      detail: openapiDetail("Jobs", "Create or execute jobs apply for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Jobs",
+        "Create or execute jobs apply for BaoBuildBuddy career automation.",
+      ),
       body: applyJobBodySchema,
       response: applyJobResponses,
     },
@@ -144,7 +150,10 @@ export const jobsRoutes = new Elysia({
   .get(
     "/applications",
     {
-      detail: openapiDetail("Jobs", "Retrieve jobs applications for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Jobs",
+        "Retrieve jobs applications for BaoBuildBuddy career automation.",
+      ),
       response: applicationsListResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await listApplications()),
@@ -152,7 +161,10 @@ export const jobsRoutes = new Elysia({
   .get(
     "/recommendations",
     {
-      detail: openapiDetail("Jobs", "Retrieve jobs recommendations for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Jobs",
+        "Retrieve jobs recommendations for BaoBuildBuddy career automation.",
+      ),
       response: recommendationsResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await getRecommendations()),
@@ -160,7 +172,10 @@ export const jobsRoutes = new Elysia({
   .post(
     "/refresh",
     {
-      detail: openapiDetail("Jobs", "Create or execute jobs refresh for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Jobs",
+        "Create or execute jobs refresh for BaoBuildBuddy career automation.",
+      ),
       response: jobsRefreshResponses,
     },
     async ({ status }) => {

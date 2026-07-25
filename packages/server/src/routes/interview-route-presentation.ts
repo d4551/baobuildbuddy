@@ -1,4 +1,5 @@
 import { INTERVIEW_DEFAULT_ROLE_CATEGORY } from "@bao/shared/constants/interview";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type {
   InterviewAnalysis,
   InterviewQuestion,
@@ -13,7 +14,7 @@ import type { SessionPayload } from "./interview-route-contracts";
 
 const formatDurationMs = (startTime: number, endTime?: number | null): string => {
   if (!endTime) return "N/A";
-  const elapsedSeconds = Math.max(0, Math.floor((endTime - startTime) / 1000));
+  const elapsedSeconds = Math.max(0, Math.floor((endTime - startTime) / MS_PER_SECOND));
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
   return `${minutes}m ${seconds}s`;

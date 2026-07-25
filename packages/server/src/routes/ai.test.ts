@@ -1,6 +1,12 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
 import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
+} from "@bao/shared/constants/http";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -23,7 +29,7 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.aiRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 afterEach(() => {
   mock.restore();
@@ -39,7 +45,7 @@ test("GET ai models returns the shared AI control-plane contract", async () => {
     configuredProviders?: string[];
   }>(app, "GET", API_ENDPOINTS.aiModels);
 
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(HTTP_STATUS_OK);
   expect(res.body.aiRouting?.chat?.provider).toBe(res.body.preferredProvider);
   expect(Array.isArray(res.body.providers)).toBe(true);
   expect(Array.isArray(res.body.configuredProviders)).toBe(true);
@@ -62,13 +68,13 @@ test("POST ai chat accepts message", async () => {
       sessionId: "test-session",
     },
   );
-  expect([200, 500]).toContain(res.status);
+  expect([HTTP_STATUS_OK, HTTP_STATUS_INTERNAL_SERVER_ERROR]).toContain(res.status);
   expect(res.body).toBeDefined();
 });
 
 test("POST ai chat requires message (validation error)", async () => {
   const res = await requestJson<{ error?: string }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
-  expect([400, 422]).toContain(res.status);
+  expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNPROCESSABLE_ENTITY]).toContain(res.status);
 });
 
 test("POST ai chat accepts contextual payload without validation drift", async () => {
@@ -108,7 +114,7 @@ test("POST ai chat accepts contextual payload without validation drift", async (
       },
     },
   );
-  expect([200, 500]).toContain(res.status);
+  expect([HTTP_STATUS_OK, HTTP_STATUS_INTERNAL_SERVER_ERROR]).toContain(res.status);
   expect(res.body).toBeDefined();
 });
 
@@ -131,7 +137,7 @@ test("GET ai models preserves configured providers when provider probing fails",
     providers?: Array<{ id?: string; health?: string }>;
   }>(app, "GET", API_ENDPOINTS.aiModels);
 
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(HTTP_STATUS_OK);
   expect(res.body.error).toBe("probe failed");
   expect(res.body.configuredProviders).toContain("local");
   expect(res.body.configuredProviders).toContain("openai");

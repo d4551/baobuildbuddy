@@ -1,3 +1,4 @@
+import { RATIO_FOUR_FIFTHS } from "@bao/shared/constants/numeric";
 import type {
   InterviewQuestion,
   InterviewResponse,
@@ -97,7 +98,7 @@ export class InterviewService {
       duration: Math.max(1, response.duration),
       transcript: response.transcript.trim(),
       timestamp: response.timestamp || Date.now(),
-      confidence: Math.max(0, Math.min(1, response.confidence || 0.8)),
+      confidence: Math.max(0, Math.min(1, response.confidence || RATIO_FOUR_FIFTHS)),
       aiAnalysis: analysis,
     };
   }
