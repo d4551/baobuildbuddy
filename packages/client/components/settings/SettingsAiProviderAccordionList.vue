@@ -2,14 +2,16 @@
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
+  BADGE_SUCCESS_SM_CLASS,
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 type ProviderField =
@@ -19,6 +21,8 @@ type ProviderField =
   | "openaiApiKey"
   | "claudeApiKey"
   | "huggingfaceToken";
+
+const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
 
 defineProps<{
   providerInputs: ReadonlyArray<{
@@ -37,12 +41,11 @@ defineProps<{
   providerPlaceholder: (providerId: AIProviderType, providerLabel: string) => string;
 }>();
 
-const apiKeys = defineModel<Record<ProviderField, string>>("apiKeys", { required: true });
-
 const emit = defineEmits<{
   testProvider: [providerId: AIProviderType];
   saveKeys: [];
 }>();
+
 </script>
 
 <template>
@@ -72,7 +75,7 @@ const emit = defineEmits<{
       <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <AIProviderIcon class="text-primary" :class="[ICON_SIZE_CLASS[5]]" :provider-id="provider.id"/>
         {{ provider.label }}
-        <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
+        <span v-if="providerConfiguredById[provider.id]" :class="BADGE_SUCCESS_SM_CLASS">
           {{ t("settings.aiProviders.configuredBadge") }}
         </span>
       </summary>
@@ -118,7 +121,7 @@ const emit = defineEmits<{
         <span 
           v-if="testResults[provider.id]"
           class="badge"
-          :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
+          :class="testResults[provider.id]?.valid ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.error"
         >
           {{
             testResults[provider.id]?.valid
@@ -139,7 +142,7 @@ const emit = defineEmits<{
     </details>
 
     <div class="flex justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
+      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveAria')" @click="emit('saveKeys')">
         {{ t("settings.aiProviders.saveButton") }}
       </button>
     </div>

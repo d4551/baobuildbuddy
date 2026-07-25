@@ -87,12 +87,15 @@ const fillTextFieldStep = async ({
         )
       : false;
 
-  addStep(
-    state.steps,
-    action,
-    value.trim().length === 0 || filled ? "ok" : "error",
-    value.trim().length === 0 ? emptyMessage : filled ? undefined : missingMessage,
-  );
+  const isEmpty = value.trim().length === 0;
+  let detail: string | undefined;
+  if (isEmpty) {
+    detail = emptyMessage;
+  } else if (!filled) {
+    detail = missingMessage;
+  }
+
+  addStep(state.steps, action, isEmpty || filled ? "ok" : "error", detail);
 };
 
 const uploadResumeStep = async (

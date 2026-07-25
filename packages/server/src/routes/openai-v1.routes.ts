@@ -8,10 +8,12 @@ import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { Elysia } from "elysia";
 import { authenticateApiKey } from "../middleware/auth";
 import { corsPlugin } from "../middleware/cors";
+import { openapiDetail } from "../utils/openapi-detail";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   openaiV1ChatCompletionsBodySchema,
+  openaiV1ModelParamsSchema,
   openaiV1ModelsListResponses,
 } from "./openai-v1-route-contracts";
 import {
@@ -20,7 +22,6 @@ import {
   getOpenAIV1Model,
   listOpenAIV1Models,
 } from "./openai-v1-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 const resolveOpenAIV1AuthErrorCode = (error: string): string => {
   if (error === API_ERROR_INVALID_API_KEY) {
@@ -74,7 +75,10 @@ export const openaiV1Routes = new Elysia({
   .get(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models),
     {
-      detail: openapiDetail("OpenAI V1", "Retrieve openai v1 resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "OpenAI V1",
+        "List available models through the OpenAI-compatible API.",
+      ),
       response: openaiV1ModelsListResponses,
     },
     async ({ status }) => {
@@ -82,15 +86,27 @@ export const openaiV1Routes = new Elysia({
       return status(HTTP_STATUS_OK, { object: "list" as const, data });
     },
   )
-  .get(`${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`, async ({ params, status }) => {
-    const modelId = decodeURIComponent(params["*"] ?? "");
-    const result = await getOpenAIV1Model(modelId);
-    return status(result.status, result.body);
-  })
+  .get(
+    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/:model`,
+    {
+      detail: openapiDetail(
+        "OpenAI V1",
+        "Retrieve a single model by id through the OpenAI-compatible API.",
+      ),
+      params: openaiV1ModelParamsSchema,
+    },
+    async ({ params, status }) => {
+      const result = await getOpenAIV1Model(decodeURIComponent(params.model));
+      return status(result.status, result.body);
+    },
+  )
   .post(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {
-      detail: openapiDetail("OpenAI V1", "Retrieve openai v1 $toOpenAIV1ChildPath(OPENAI V1 ENDPOINTS.models) * for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "OpenAI V1",
+        "Create a chat completion through the OpenAI-compatible API.",
+      ),
       body: openaiV1ChatCompletionsBodySchema,
     },
     async ({ body, status }) => {

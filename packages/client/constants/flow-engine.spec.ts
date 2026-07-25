@@ -1,5 +1,6 @@
 import type { DashboardStats } from "@bao/shared/types/search";
 import { describe, expect, it } from "vitest";
+import { FLOW_PROFILE_COMPLETENESS_EPSILON } from "~/constants/numeric-ui";
 import { createFlowEngineInput, resolveFlowRecommendations } from "./flow-engine";
 import { FLOW_PROFILE_COMPLETENESS_THRESHOLD } from "./flow-engine-types";
 
@@ -127,7 +128,10 @@ describe("resolveFlowRecommendations", () => {
 describe("createFlowEngineInput", () => {
   it("uses canonical readiness thresholds unless explicitly overridden", () => {
     const belowThreshold = createFlowEngineInput(
-      createDashboardStats({ profileCompleteness: FLOW_PROFILE_COMPLETENESS_THRESHOLD - 0.01 }),
+      createDashboardStats({
+        profileCompleteness:
+          FLOW_PROFILE_COMPLETENESS_THRESHOLD - FLOW_PROFILE_COMPLETENESS_EPSILON,
+      }),
     );
     const aboveThreshold = createFlowEngineInput(
       createDashboardStats({ profileCompleteness: FLOW_PROFILE_COMPLETENESS_THRESHOLD }),

@@ -7,13 +7,10 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
-const SKIP_CALL_PATTERN =
-  /\b(?:test|it|describe)\.(?:skip|todo|only)\s*\(/u;
+const SKIP_CALL_PATTERN = /\b(?:test|it|describe)\.(?:skip|todo|only)\s*\(/u;
 const XIT_PATTERN = /\bx(?:it|describe)\s*\(/u;
-const SOFT_MISSING_TAGS_CONTINUE =
-  /if\s*\(\s*!operation\.tags\s*\)\s*\{\s*continue\s*;\s*\}/u;
-const HONEST_STT_HARDCODED_BLOCKED =
-  /stt:\s*\{\s*status:\s*["']BLOCKED["']/u;
+const SOFT_MISSING_TAGS_CONTINUE = /if\s*\(\s*!operation\.tags\s*\)\s*\{\s*continue\s*;\s*\}/u;
+const HONEST_STT_HARDCODED_BLOCKED = /stt:\s*\{\s*status:\s*["']BLOCKED["']/u;
 
 export const collectSoftTestSkipViolations = (
   files: Array<{ filePath: string; content: string }>,
@@ -28,7 +25,8 @@ export const collectSoftTestSkipViolations = (
       violations.push({
         filePath: file.filePath,
         line: 1,
-        message: "Forbidden test.skip / describe.skip / xit — delete or fix the test (no soft skips).",
+        message:
+          "Forbidden test.skip / describe.skip / xit — delete or fix the test (no soft skips).",
       });
     }
     if (

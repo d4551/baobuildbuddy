@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { ReadinessAssessment } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ReadinessCategoryStat } from "~/composables/skills-pathways-page-contracts";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   RADIAL_METER_GEOMETRY,
   STACK_SPACE_Y_TOKEN_CLASS,

@@ -1,3 +1,15 @@
+import {
+  COUNT_FOURTEEN,
+  COUNT_SEVEN,
+  COUNT_THIRTY,
+  COUNT_THREE,
+  PERCENT_MAX,
+  RATIO_FIVE_QUARTERS,
+  RATIO_ONE,
+  RATIO_THREE,
+  RATIO_THREE_HALVES,
+  RATIO_TWO,
+} from "@bao/shared/constants/numeric";
 import { MS_PER_DAY } from "@bao/shared/constants/time";
 import type {
   Achievement,
@@ -5,6 +17,7 @@ import type {
   GamificationStats,
 } from "@bao/shared/types/gamification";
 import { isRecord } from "@bao/shared/utils/type-guards";
+
 import {
   type ActionHistoryEntry,
   DAILY_CHALLENGE_DEFINITIONS,
@@ -80,14 +93,16 @@ export function getNumericStat(stats: NumericGamificationStats, key: string): nu
 }
 
 const STREAK_MULTIPLIER_STEPS = [
-  [30, 3.0],
-  [14, 2.0],
-  [7, 1.5],
-  [3, 1.25],
+  [COUNT_THIRTY, RATIO_THREE],
+  [COUNT_FOURTEEN, RATIO_TWO],
+  [COUNT_SEVEN, RATIO_THREE_HALVES],
+  [COUNT_THREE, RATIO_FIVE_QUARTERS],
 ] as const;
 
 export function getStreakMultiplier(currentStreak: number): number {
-  return STREAK_MULTIPLIER_STEPS.find(([threshold]) => currentStreak >= threshold)?.[1] ?? 1.0;
+  return (
+    STREAK_MULTIPLIER_STEPS.find(([threshold]) => currentStreak >= threshold)?.[1] ?? RATIO_ONE
+  );
 }
 
 export function areAchievementRequirementsMet(
@@ -210,19 +225,19 @@ export function buildMonthlyStats(input: {
 }) {
   const actionHistory = typeSafeStats(input.stats).actionHistory;
   const now = new Date();
-  const monthAgo = new Date(now.getTime() - 30 * MS_PER_DAY);
+  const monthAgo = new Date(now.getTime() - COUNT_THIRTY * MS_PER_DAY);
   const monthActions = filterActionsByDate(actionHistory, monthAgo, now);
   const totalXP = monthActions.reduce((sum, action) => sum + (action.xpGained || 0), 0);
 
   return {
     totalXP,
-    levelsGained: Math.floor(totalXP / 100),
+    levelsGained: Math.floor(totalXP / PERCENT_MAX),
     achievementsUnlocked: monthActions.filter((action) =>
       action.action?.startsWith("Achievement unlocked:"),
     ).length,
     challengesCompleted: countCompletedChallenges(input.dailyChallenges, monthAgo, now),
     actionsCount: monthActions.length,
-    streakDays: Math.min(input.currentStreak, 30),
+    streakDays: Math.min(input.currentStreak, COUNT_THIRTY),
   };
 }
 

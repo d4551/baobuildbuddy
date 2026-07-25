@@ -1,15 +1,5 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared/constants/routes";
-import { useI18n } from "vue-i18n";
-import {
-  APP_MAIN_CONTENT_ID,
-  ERROR_PAGE_MAX_WIDTH_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
-  SHELL_SKIP_LINK_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-} from "~/constants/layout";
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
 
 const props = defineProps<{
   error: {
@@ -18,6 +8,22 @@ const props = defineProps<{
     message?: string;
   };
 }>();
+
+defineOptions({ name: "AppErrorPage" });
+
+import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { useI18n } from "vue-i18n";
+import {
+  ALERT_VARIANT_CLASS,
+  APP_MAIN_CONTENT_ID,
+  ERROR_PAGE_MAX_WIDTH_CLASS,
+  FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
+  SHELL_SKIP_LINK_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();
@@ -35,14 +41,14 @@ const message = computed(() => {
         <p class="text-secondary">
           {{ message }}
         </p>
-        <div role="alert" class="alert alert-info">
-          <span>{{ t("errorPage.statusLabel") }}: {{ error.statusCode || 500 }}</span>
+        <div role="alert" class="alert" :class="[ALERT_VARIANT_CLASS.info]">
+          <span>{{ t("errorPage.statusLabel") }}: {{ error.statusCode || HTTP_STATUS_INTERNAL_SERVER_ERROR }}</span>
         </div>
         <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <NuxtLink :to="APP_ROUTES.dashboard" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('errorPage.backToDashboardButton')">
             {{ t("errorPage.backToDashboardButton") }}
           </NuxtLink>
-          <button class="btn btn-ghost" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">
+          <button type="button" :class="[GHOST_ACTION_CLASS]" :aria-label="t('errorPage.resetButton')" @click="clearError({ redirect: APP_ROUTES.dashboard })">
             {{ t("errorPage.resetButton") }}
           </button>
         </div>

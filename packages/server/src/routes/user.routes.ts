@@ -6,9 +6,9 @@ import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
+import { openapiDetail } from "../utils/openapi-detail";
 import { simpleRouteErrorResponses } from "./route-error-envelope";
 import { userProfileResponseSchema, userProfileUpdateBodySchema } from "./user-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type UserProfileRow = typeof userProfile.$inferSelect;
 
@@ -44,7 +44,7 @@ export const userRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     {
-      detail: openapiDetail("User", "Retrieve user resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("User", "Retrieve the user career profile fields and preferences."),
       response: userProfileResponses,
     },
     async ({ status }) => {
@@ -61,7 +61,7 @@ export const userRoutes = new Elysia({
   .put(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     {
-      detail: openapiDetail("User", "Retrieve user resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("User", "Replace the user career profile fields and preferences."),
       body: userProfileUpdateBodySchema,
       response: userProfileResponses,
     },

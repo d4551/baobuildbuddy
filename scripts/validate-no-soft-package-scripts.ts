@@ -14,8 +14,7 @@ const PACKAGE_JSON_PATHS = [
   "packages/desktop/package.json",
 ] as const;
 
-const SOFT_SCRIPT_PATTERN =
-  /"(lint|typecheck)"\s*:\s*"echo\s+/u;
+const SOFT_SCRIPT_PATTERN = /"(lint|typecheck)"\s*:\s*"echo\s+/u;
 
 export const collectSoftPackageScriptViolations = (
   filePath: string,
@@ -29,7 +28,7 @@ export const collectSoftPackageScriptViolations = (
       filePath,
       line: 1,
       message:
-        'Soft echo stub for lint/typecheck banned. Wire a real check (or cargo/script) — fake-green package scripts are SOFTENED.',
+        "Soft echo stub for lint/typecheck banned. Wire a real check (or cargo/script) — fake-green package scripts are SOFTENED.",
     },
   ];
 };

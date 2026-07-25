@@ -59,6 +59,33 @@ export class ApplicationAutomationService {
       readRunRow: (runId) => this.readRunRow(runId),
       runJobApply: (runId, payload) => this.runJobApply(runId, payload),
     });
+    this.scheduleStartupRecovery();
+  }
+
+  private scheduleStartupRecovery(): void {
+    const timer = setTimeout(() => {
+      this.runStartupRecovery();
+    }, 0);
+    if (
+      typeof timer === "object" &&
+      timer !== null &&
+      "unref" in timer &&
+      typeof timer.unref === "function"
+    ) {
+      timer.unref();
+    }
+  }
+
+  private runStartupRecovery(): void {
+    this.scheduler.reclaimRunningRuns().then(
+      () => undefined,
+      (error) => {
+        automationServiceLogger.error(
+          "[automation] running run startup reclaim failed",
+          error instanceof Error ? error.message : String(error),
+        );
+      },
+    );
     this.scheduler.restorePendingRuns(AutomationRunCreator.maxRecoverableScheduledRuns).then(
       () => undefined,
       (error) => {

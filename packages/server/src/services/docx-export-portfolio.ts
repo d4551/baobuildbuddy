@@ -1,5 +1,8 @@
+import { resolvePortfolioDocxTheme } from "@bao/shared/constants/export-document-theme";
+import { COUNT_EIGHT } from "@bao/shared/constants/numeric";
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
+
 import {
   AlignmentType,
   Document,
@@ -15,31 +18,31 @@ import {
   DOCX_PORTFOLIO_FONT_BODY_PT,
   DOCX_PORTFOLIO_FONT_HEADING_PT,
   DOCX_PORTFOLIO_FONT_TITLE_PT,
-  PORTFOLIO_DOCX_ACCENT_COLOR,
-  PORTFOLIO_DOCX_FONT_FAMILY,
-  PORTFOLIO_DOCX_FOOTER_COLOR,
-  PORTFOLIO_DOCX_LINE_COLOR,
-  PORTFOLIO_DOCX_MUTED_COLOR,
-  PORTFOLIO_DOCX_PRIMARY_COLOR,
-  PORTFOLIO_DOCX_SUBTLE_COLOR,
+  type PortfolioDocxTheme,
 } from "./docx-export-contracts";
 
-function buildPortfolioTitleParagraph(title: string | undefined): Paragraph {
+function buildPortfolioTitleParagraph(
+  title: string | undefined,
+  theme: PortfolioDocxTheme,
+): Paragraph {
   return new Paragraph({
     spacing: { after: 120 },
     children: [
       new TextRun({
         text: title ?? "Portfolio",
         bold: true,
-        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - 8) * 2,
-        color: PORTFOLIO_DOCX_PRIMARY_COLOR,
-        font: PORTFOLIO_DOCX_FONT_FAMILY,
+        size: (DOCX_PORTFOLIO_FONT_TITLE_PT - COUNT_EIGHT) * 2,
+        color: theme.primaryColorHex,
+        font: theme.fontFamily,
       }),
     ],
   });
 }
 
-function buildPortfolioAuthorParagraph(author: string | undefined): Paragraph[] {
+function buildPortfolioAuthorParagraph(
+  author: string | undefined,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   if (!author) return [];
   return [
     new Paragraph({
@@ -48,15 +51,18 @@ function buildPortfolioAuthorParagraph(author: string | undefined): Paragraph[] 
         new TextRun({
           text: author,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_MUTED_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.mutedColorHex,
+          font: theme.fontFamily,
         }),
       ],
     }),
   ];
 }
 
-function buildPortfolioDescriptionParagraph(metadata: PortfolioMetadata): Paragraph[] {
+function buildPortfolioDescriptionParagraph(
+  metadata: PortfolioMetadata,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   const description = metadata.description ?? metadata.bio;
   if (!description) return [];
   return [
@@ -66,15 +72,18 @@ function buildPortfolioDescriptionParagraph(metadata: PortfolioMetadata): Paragr
         new TextRun({
           text: description,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_SUBTLE_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.subtleColorHex,
+          font: theme.fontFamily,
         }),
       ],
     }),
   ];
 }
 
-function buildPortfolioContactParagraph(metadata: PortfolioMetadata): Paragraph[] {
+function buildPortfolioContactParagraph(
+  metadata: PortfolioMetadata,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   const contactParts = collectDefinedStringValues([metadata.website, metadata.email]);
   if (contactParts.length === 0) return [];
   return [
@@ -84,15 +93,15 @@ function buildPortfolioContactParagraph(metadata: PortfolioMetadata): Paragraph[
         new TextRun({
           text: contactParts.join(" | "),
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_ACCENT_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.accentColorHex,
+          font: theme.fontFamily,
         }),
       ],
     }),
   ];
 }
 
-function buildPortfolioProjectsHeading(): Paragraph {
+function buildPortfolioProjectsHeading(theme: PortfolioDocxTheme): Paragraph {
   return new Paragraph({
     heading: HeadingLevel.HEADING_1,
     children: [
@@ -100,15 +109,18 @@ function buildPortfolioProjectsHeading(): Paragraph {
         text: "Selected Case Studies",
         bold: true,
         size: DOCX_PORTFOLIO_FONT_HEADING_PT * 2,
-        color: PORTFOLIO_DOCX_PRIMARY_COLOR,
-        font: PORTFOLIO_DOCX_FONT_FAMILY,
+        color: theme.primaryColorHex,
+        font: theme.fontFamily,
       }),
     ],
     spacing: { before: 120, after: 120 },
   });
 }
 
-function buildPortfolioProjectRole(role: string | undefined): Paragraph[] {
+function buildPortfolioProjectRole(
+  role: string | undefined,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   if (!role) return [];
   return [
     new Paragraph({
@@ -117,8 +129,8 @@ function buildPortfolioProjectRole(role: string | undefined): Paragraph[] {
           text: `Role: ${role}`,
           italics: true,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_MUTED_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.mutedColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 40 },
@@ -126,7 +138,10 @@ function buildPortfolioProjectRole(role: string | undefined): Paragraph[] {
   ];
 }
 
-function buildPortfolioProjectTechnologies(technologies: string[] | undefined): Paragraph[] {
+function buildPortfolioProjectTechnologies(
+  technologies: string[] | undefined,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   if (!(technologies && technologies.length > 0)) return [];
   return [
     new Paragraph({
@@ -135,12 +150,12 @@ function buildPortfolioProjectTechnologies(technologies: string[] | undefined): 
           text: "Technologies: ",
           bold: true,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          font: theme.fontFamily,
         }),
         new TextRun({
           text: technologies.join(", "),
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 40 },
@@ -148,7 +163,10 @@ function buildPortfolioProjectTechnologies(technologies: string[] | undefined): 
   ];
 }
 
-function buildPortfolioProjectTags(tags: string[] | undefined): Paragraph[] {
+function buildPortfolioProjectTags(
+  tags: string[] | undefined,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   if (!(tags && tags.length > 0)) return [];
   return [
     new Paragraph({
@@ -157,8 +175,8 @@ function buildPortfolioProjectTags(tags: string[] | undefined): Paragraph[] {
           text: `Tags: ${tags.join(", ")}`,
           italics: true,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_SUBTLE_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.subtleColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 40 },
@@ -166,7 +184,7 @@ function buildPortfolioProjectTags(tags: string[] | undefined): Paragraph[] {
   ];
 }
 
-function buildPortfolioProjectUrls(urls: string[]): Paragraph[] {
+function buildPortfolioProjectUrls(urls: string[], theme: PortfolioDocxTheme): Paragraph[] {
   if (urls.length === 0) return [];
   return [
     new Paragraph({
@@ -174,8 +192,8 @@ function buildPortfolioProjectUrls(urls: string[]): Paragraph[] {
         new TextRun({
           text: urls.join(" | "),
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_ACCENT_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.accentColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 80 },
@@ -183,7 +201,11 @@ function buildPortfolioProjectUrls(urls: string[]): Paragraph[] {
   ];
 }
 
-function buildPortfolioProjectParagraphs(project: PortfolioProject, index: number): Paragraph[] {
+function buildPortfolioProjectParagraphs(
+  project: PortfolioProject,
+  index: number,
+  theme: PortfolioDocxTheme,
+): Paragraph[] {
   const urls = collectDefinedStringValues([project.liveUrl, project.githubUrl]);
   return [
     new Paragraph({
@@ -192,8 +214,8 @@ function buildPortfolioProjectParagraphs(project: PortfolioProject, index: numbe
           text: `CASE STUDY ${index + 1}`,
           bold: true,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          color: PORTFOLIO_DOCX_ACCENT_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.accentColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { before: 200, after: 20 },
@@ -204,31 +226,31 @@ function buildPortfolioProjectParagraphs(project: PortfolioProject, index: numbe
           text: `${String(index + 1)}. ${project.title}`,
           bold: true,
           size: (DOCX_PORTFOLIO_FONT_HEADING_PT - 1) * 2,
-          color: PORTFOLIO_DOCX_PRIMARY_COLOR,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          color: theme.primaryColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { before: 200, after: 20 },
     }),
-    ...buildPortfolioProjectRole(project.role),
+    ...buildPortfolioProjectRole(project.role, theme),
     new Paragraph({
       children: [
         new TextRun({
           text: project.description,
           size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-          font: PORTFOLIO_DOCX_FONT_FAMILY,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 80 },
     }),
-    ...buildPortfolioProjectTechnologies(project.technologies),
-    ...buildPortfolioProjectTags(project.tags),
-    ...buildPortfolioProjectUrls(urls),
-    createDivider(PORTFOLIO_DOCX_LINE_COLOR),
+    ...buildPortfolioProjectTechnologies(project.technologies, theme),
+    ...buildPortfolioProjectTags(project.tags, theme),
+    ...buildPortfolioProjectUrls(urls, theme),
+    createDivider(theme.lineColorHex),
   ];
 }
 
-function buildPortfolioFooter(): Paragraph {
+function buildPortfolioFooter(theme: PortfolioDocxTheme): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { before: 400 },
@@ -236,14 +258,14 @@ function buildPortfolioFooter(): Paragraph {
       new TextRun({
         text: "Page ",
         size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-        color: PORTFOLIO_DOCX_FOOTER_COLOR,
-        font: PORTFOLIO_DOCX_FONT_FAMILY,
+        color: theme.footerColorHex,
+        font: theme.fontFamily,
       }),
       new TextRun({
         children: [PageNumber.CURRENT],
         size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-        color: PORTFOLIO_DOCX_FOOTER_COLOR,
-        font: PORTFOLIO_DOCX_FONT_FAMILY,
+        color: theme.footerColorHex,
+        font: theme.fontFamily,
       }),
     ],
   });
@@ -252,11 +274,12 @@ function buildPortfolioFooter(): Paragraph {
 function buildPortfolioDocumentSection(
   metadata: PortfolioMetadata,
   projects: PortfolioProject[],
+  theme: PortfolioDocxTheme,
 ): ISectionOptions {
   return {
     children: [
-      buildPortfolioTitleParagraph(metadata.title),
-      ...buildPortfolioAuthorParagraph(metadata.author),
+      buildPortfolioTitleParagraph(metadata.title, theme),
+      ...buildPortfolioAuthorParagraph(metadata.author, theme),
       new Paragraph({
         spacing: { after: 80 },
         children: [
@@ -264,17 +287,19 @@ function buildPortfolioDocumentSection(
             text: "CASE STUDIES FOR GAME INDUSTRY HIRING",
             bold: true,
             size: DOCX_PORTFOLIO_FONT_BODY_PT * 2,
-            color: PORTFOLIO_DOCX_ACCENT_COLOR,
-            font: PORTFOLIO_DOCX_FONT_FAMILY,
+            color: theme.accentColorHex,
+            font: theme.fontFamily,
           }),
         ],
       }),
-      ...buildPortfolioDescriptionParagraph(metadata),
-      ...buildPortfolioContactParagraph(metadata),
-      createDivider(PORTFOLIO_DOCX_LINE_COLOR),
-      buildPortfolioProjectsHeading(),
-      ...projects.flatMap((project, index) => buildPortfolioProjectParagraphs(project, index)),
-      buildPortfolioFooter(),
+      ...buildPortfolioDescriptionParagraph(metadata, theme),
+      ...buildPortfolioContactParagraph(metadata, theme),
+      createDivider(theme.lineColorHex),
+      buildPortfolioProjectsHeading(theme),
+      ...projects.flatMap((project, index) =>
+        buildPortfolioProjectParagraphs(project, index, theme),
+      ),
+      buildPortfolioFooter(theme),
     ],
   };
 }
@@ -282,9 +307,11 @@ function buildPortfolioDocumentSection(
 export async function exportPortfolioDocxDocument(
   metadata: PortfolioMetadata,
   projects: PortfolioProject[],
+  template?: string,
 ): Promise<Uint8Array> {
+  const theme = resolvePortfolioDocxTheme(template);
   const doc = new Document({
-    sections: [buildPortfolioDocumentSection(metadata, projects)],
+    sections: [buildPortfolioDocumentSection(metadata, projects, theme)],
   });
   const buffer = await Packer.toBuffer(doc);
   return new Uint8Array(buffer);

@@ -66,7 +66,12 @@ const auditResponse = async (
 ): Promise<SourceAudit> => {
   const content = await response.text();
   const missingMarkers = source.requiredMarkers.filter((marker) => !content.includes(marker));
-  const failureClass = !response.ok ? "http" : missingMarkers.length > 0 ? "marker" : "none";
+  let failureClass: "http" | "marker" | "none" = "none";
+  if (!response.ok) {
+    failureClass = "http";
+  } else if (missingMarkers.length > 0) {
+    failureClass = "marker";
+  }
 
   return {
     name: source.name,

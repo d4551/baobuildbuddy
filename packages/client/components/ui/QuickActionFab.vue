@@ -42,15 +42,21 @@ watch(isOpen, (nextOpen) => {
   if (nextOpen) {
     activeActionIndex.value = 0;
     actionItemRefs.value = new Array<HTMLAnchorElement | null>(FAB_QUICK_ACTIONS.length).fill(null);
-    void nextTick(() => {
+    nextTick(() => {
       getActionItems()[activeActionIndex.value]?.focus();
-    });
+    }).then(
+      () => undefined,
+      () => undefined,
+    );
     return;
   }
 
-  void nextTick(() => {
+  nextTick(() => {
     actionButtonRef.value?.focus();
-  });
+  }).then(
+    () => undefined,
+    () => undefined,
+  );
 });
 
 function getActionItems(): HTMLAnchorElement[] {
@@ -65,14 +71,18 @@ function setActiveActionRef(
     actionItemRefs.value[index] = null;
     return;
   }
-  const refEl: Element | null =
-    element instanceof Element ? element : element.$el instanceof Element ? element.$el : null;
+  let refEl: Element | null = null;
+  if (element instanceof Element) {
+    refEl = element;
+  } else if (element.$el instanceof Element) {
+    refEl = element.$el;
+  }
   actionItemRefs.value[index] = refEl instanceof HTMLAnchorElement ? refEl : null;
 }
 
 function getActionIndex(currentIndex: number, direction: number): number {
   const actionItems = getActionItems();
-  if (!actionItems.length) return 0;
+  if (actionItems.length === 0) return 0;
 
   const maxIndex = actionItems.length - 1;
   if (direction === 1) {
@@ -174,9 +184,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
+  <section 
     :class="['fab z-40 hidden lg:flex', FAB_POSITION_CLASS]"
-    role="region"
     :aria-label="t('quickFab.groupAria', { brand: resolvedBrand.name })"
   >
     <button 
@@ -209,6 +218,7 @@ onUnmounted(() => {
         class="flex flex-col items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
         :aria-label="t('quickFab.menuAria')"
         ref="quickActionMenu"
+        tabindex="-1"
         @focusout="handleQuickActionMenuFocusOut"
         aria-orientation="vertical"
         :aria-activedescendant="`quick-action-${activeActionIndex}`"
@@ -233,5 +243,5 @@ onUnmounted(() => {
         </NuxtLink>
       </div>
     </Transition>
-  </div>
+  </section>
 </template>

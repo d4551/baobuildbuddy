@@ -1,0 +1,14 @@
+{
+  "biome.json": "21cb2de8b5370942",
+  "packages/client/eslint.config.js": "eb88325238a27c90",
+  "package.json": "d249b21fb3b68779",
+  "scripts/validate-biome-softener-ratchet.ts": "aecd12e85653aeef",
+  "scripts/validate-eslint-softener-ratchet.ts": "9d9fa2c06fa8adcc",
+  "scripts/no-dead-i18n-keys-allowlist.json": "b5b030b25dfb98a5",
+  "metrics": {
+    "biome_off": 5,
+    "biome_enabled_false": 1,
+    "eslint_off": 9,
+    "dead_i18n_allowlist": 247
+  }
+}

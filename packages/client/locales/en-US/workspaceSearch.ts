@@ -7,7 +7,8 @@ const workspaceSearch = {
     submitAria: "Run workspace search",
     submitButton: "Search",
     emptyTitle: "Start typing to search",
-    emptyDescription: "Enter at least two characters to search jobs, letters, portfolio, interviews, and runs.",
+    emptyDescription:
+      "Enter at least two characters to search jobs, letters, portfolio, interviews, and runs.",
     emptyCta: "Browse jobs",
     emptyCtaAria: "Browse the job board",
     noResultsTitle: "No results",

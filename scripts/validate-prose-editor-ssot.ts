@@ -44,8 +44,7 @@ export const collectProseEditorSsotViolations = (
         violations.push({
           filePath: file.filePath,
           line: 1,
-          message:
-            "Use AppProseField for long-form prose (non-chat). Chat composers exempt.",
+          message: "Use AppProseField for long-form prose (non-chat). Chat composers exempt.",
         });
       }
     }

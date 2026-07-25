@@ -4,7 +4,7 @@
 import { readFile } from "node:fs/promises";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
-export const collectLocalKokoroTtsViolations = async (): Promise<ValidationViolation[]> => {
+const collectLocalKokoroTtsViolations = async (): Promise<ValidationViolation[]> => {
   const violations: ValidationViolation[] = [];
   const settingsPath = "packages/shared/src/constants/settings.ts";
   const speakPath = "packages/client/composables/useSpeech.ts";

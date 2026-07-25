@@ -5,12 +5,19 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 import {
+  ACCENT_ACTION_CLASS,
   AUTH_CARD_MAX_WIDTH_CLASS,
+  BADGE_ACCENT_LG_CLASS,
+  BADGE_OUTLINE_CLASS,
+  BADGE_OUTLINE_MUTED_CLASS,
+  BADGE_SECONDARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   OUTLINE_BUTTON_VARIANT_CLASS,
   PADDING_TOKEN_CLASS,
+  SECONDARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -75,7 +82,7 @@ const brandPreviewThemes = computed<
             {{ t("settings.brand.previewSubtitle") }}
           </p>
         </div>
-        <span class="badge badge-outline">{{ brandDraft.assistantName }}</span>
+        <span :class="BADGE_OUTLINE_CLASS">{{ brandDraft.assistantName }}</span>
       </div>
 
       <SectionGrid grid-token="twoColumnXlGap4">
@@ -86,9 +93,9 @@ const brandPreviewThemes = computed<
                 v-if="brandDraft.logoPath.length > 0"
                 :src="brandDraft.logoPath"
                 :alt="t('settings.brand.previewLogoAlt', { brand: brandDraft.name })"
-                class="rounded-box border border-base-300 bg-base-100 object-contain" :class="[SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10], PADDING_TOKEN_CLASS.p1]"
-              />
-              <div class="flex items-center justify-center rounded-box border border-base-300 bg-base-100 font-semibold" v-else :class="[TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10]]">
+ class="object-contain" :class="[INSET_PANEL_CLASS, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10], PADDING_TOKEN_CLASS.p1]"
+ />
+ <div class="flex items-center justify-center font-semibold" v-else :class="[INSET_PANEL_CLASS, TYPOGRAPHY_SCALE_CLASS.sm, SHADOW_TOKEN_CLASS.sm, ICON_SIZE_CLASS[10]]">
                 {{ brandPreviewInitial }}
               </div>
               <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
@@ -100,7 +107,7 @@ const brandPreviewThemes = computed<
                 </p>
               </div>
             </div>
-            <span class="badge badge-outline border-current/20 text-current/80">
+            <span :class="BADGE_OUTLINE_MUTED_CLASS">
               {{ themeSurface.label }}
             </span>
           </div>
@@ -116,25 +123,24 @@ const brandPreviewThemes = computed<
           </div>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt5]">
-            <span class="badge badge-accent badge-lg border-0" :class="[SHADOW_TOKEN_CLASS.sm]">
+ <span :class="[BADGE_ACCENT_LG_CLASS, SHADOW_TOKEN_CLASS.sm]">
               {{ brandDraft.assistantName }}
             </span>
-            <span class="badge badge-secondary badge-outline">
+            <span :class="BADGE_SECONDARY_OUTLINE_CLASS">
               {{ brandDraft.apiName }}
             </span>
           </div>
 
           <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt6]">
             <span
-              class="btn btn-accent border-0"
-              :class="[SHADOW_TOKEN_CLASS.sm]"
-              aria-hidden="true"
-            >
+ 
+ :class="[ACCENT_ACTION_CLASS, SHADOW_TOKEN_CLASS.sm]"
+ aria-hidden="true"
+ >
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>
             <span
-              class="btn btn-secondary"
-              :class="[OUTLINE_BUTTON_VARIANT_CLASS]"
+              :class="[SECONDARY_ACTION_CLASS, OUTLINE_BUTTON_VARIANT_CLASS]"
               aria-hidden="true"
             >
               {{ t("settings.brand.previewSecondaryAction") }}

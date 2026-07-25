@@ -1,3 +1,4 @@
+import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 import { STATISTICS_SKILL_COVERAGE_TARGET } from "@bao/shared/constants/statistics";
 import type { CareerProgress, WeeklyActivity } from "@bao/shared/types/search";
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
@@ -59,13 +60,13 @@ export const buildCareerProgress = (
   applicationStatuses: string[],
 ): CareerProgress => {
   const skillCoverage = Math.min(
-    100,
-    Math.round((mappedSkills / STATISTICS_SKILL_COVERAGE_TARGET) * 100),
+    PERCENT_MAX,
+    Math.round((mappedSkills / STATISTICS_SKILL_COVERAGE_TARGET) * PERCENT_MAX),
   );
   const offeredApplications = applicationStatuses.filter((status) => status === "offered").length;
   const applicationSuccessRate =
     applicationStatuses.length > 0
-      ? Math.round((offeredApplications / applicationStatuses.length) * 100)
+      ? Math.round((offeredApplications / applicationStatuses.length) * PERCENT_MAX)
       : 0;
 
   return {

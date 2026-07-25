@@ -1307,6 +1307,13 @@ const catalog = {
       previewAria: "Abrir vista previa del portafolio",
       exportButton: "Exportar",
       exportAria: "Exportar portafolio",
+      templateAria: "Plantilla de exportación del portafolio",
+    },
+    exportTemplates: {
+      modern: "Moderno",
+      gaming: "Gaming",
+      minimal: "Minimalista",
+      showcase: "Showcase",
     },
     preview: {
       pageTitle: "Vista Previa del Portafolio",
@@ -1982,10 +1989,14 @@ const catalog = {
         pending: "Pendiente",
         running: "En ejecución",
         success: "Éxito",
+        skipped: "Omitido",
       },
     },
     jobApply: {
       title: "Automatización de Solicitudes",
+      bootstrapError: "No se pudo cargar la automatización de solicitudes.",
+      bootstrapRetry: "Reintentar",
+      bootstrapRetryAria: "Reintentar carga de automatización de solicitudes",
       emptyResumesTitle: "Se requiere un currículum",
       emptyResumesDescription:
         "Crea un currículum antes de ejecutar la automatización de solicitud. La ejecución necesita un currículum seleccionado.",
@@ -3086,15 +3097,14 @@ const catalog = {
     menuAria: "Atajos de acciones rápidas",
   },
   floatingChat: {
-    subtitle: "Copiloto de Carrera",
     contextBadge: "Contexto: {context}",
-    contextAria: "Contexto actual del chat: {context}",
+
     focusedEntityBadge: "Enfoque: {entity}",
-    focusedEntityAria: "Entidad enfocada en el chat: {entity}",
+
     domainChip: "Ámbito: {context}",
     sourceChip: "Superficie: {source}",
     routeBadge: "Ruta: {route}",
-    contextChipsAria: "Chips de contexto específico del chat",
+
     contextDomain: {
       resume: "Currículum",
       jobSearch: "Empleos",
@@ -3120,18 +3130,10 @@ const catalog = {
       sessions: "{count} sesión | {count} sesiones",
       projects: "{count} proyecto | {count} proyectos",
     },
-    expandAria: "Abrir página completa de chat",
-    expandButton: "Expandir",
-    clearAria: "Limpiar conversación del chat",
-    clearButton: "Limpiar",
-    closeAria: "Cerrar widget de chat",
-    logAria: "Conversación del chat flotante",
-    youLabel: "Tú",
+
     suggestionsAria: "Sugerencias de prompts contextuales del asistente",
     suggestionAria: "Usar prompt contextual: {prompt}",
-    emptyTitle: "Inicia una revisión rápida",
-    emptyDescription:
-      "Pide próximos pasos, texto de seguimiento o una revisión enfocada desde la página en la que estás.",
+
     composerHint: "Enter envía · Shift+Enter nueva línea.",
     prompts: {
       focusedEntity: "Dame coaching enfocado para {target}.",
@@ -3149,18 +3151,6 @@ const catalog = {
         interviewSession: "Revisa las señales y puntos de coaching de {target}.",
         automationRun: "Explica qué pasó en {target} y qué corregir después.",
       },
-    },
-    inputPlaceholder: "Pregunta sobre preparación de entrevistas, empleos, currículums...",
-    inputAria: "Mensaje del chat flotante",
-    sendAria: "Enviar mensaje del chat flotante",
-    hideAria: "Ocultar asistente de chat flotante",
-    showAria: "Mostrar asistente de chat flotante",
-    unreadAria: "{count} mensajes del asistente sin leer",
-    voiceSettings: {
-      toggleButton: "Voz",
-      toggleAria: "Alternar configuración de perfil de modelos de voz",
-      saveSuccess: "Perfil de voz guardado",
-      saveErrorFallback: "No se pudo guardar el perfil de voz",
     },
   },
   studioSelector: {
@@ -3207,10 +3197,15 @@ const catalog = {
       sttProviderAria: "Selección de proveedor de voz a texto",
       sttModelLabel: "Modelo de voz a texto",
       sttModelAria: "Selección de modelo de voz a texto",
+      sttEndpointLabel: "Endpoint de voz a texto",
+      sttEndpointAria: "URL del endpoint compatible con OpenAI para voz a texto",
       ttsProviderLabel: "Proveedor de texto a voz",
       ttsProviderAria: "Selección de proveedor de texto a voz",
       ttsModelLabel: "Modelo de texto a voz",
       ttsModelAria: "Selección de modelo de texto a voz",
+      ttsEndpointLabel: "Endpoint de texto a voz",
+      ttsEndpointAria: "URL del endpoint compatible con OpenAI para texto a voz",
+      endpointHint: "URL base compatible con OpenAI (p. ej. http://127.0.0.1:8090/v1)",
       hint: "Estos perfiles de proveedor/modelo se guardan para flujos de voz en chat y automatización.",
       saveButton: "Guardar Perfil de Voz",
       saveAria: "Guardar preferencias de proveedor y modelo de voz",
@@ -3221,9 +3216,10 @@ const catalog = {
         browser: "Navegador (en el dispositivo)",
         custom: "Personalizado",
       },
+      onDeviceHint:
+        "Navegador (en el dispositivo) usa la API Web Speech del equipo: el audio no sale de la máquina.",
     },
   },
-      onDeviceHint: "Navegador (en el dispositivo) usa la API Web Speech del equipo: el audio no sale de la máquina.",
   aiChatCommon: {
     youLabel: "Tú",
     defaultGreeting:
@@ -3249,6 +3245,7 @@ const catalog = {
       autoSpeakAria: "Leer respuestas del asistente automáticamente",
       listeningStatus: "Escuchando...",
       speakingStatus: "Leyendo respuesta...",
+      streamingStatus: "Generando respuesta...",
       idleStatus: "Voz lista",
       unsupportedHint: "Los controles de voz no están disponibles en este navegador.",
       recognitionUnsupportedHint: "La entrada de voz no está disponible en este navegador.",

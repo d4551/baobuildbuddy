@@ -5,13 +5,19 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 import type { RecentInterviewSession } from "~/types/interview";
 
 defineProps<{
@@ -36,11 +42,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHub.recent.title") }}</h2>
-        <NuxtLink :to="viewAllTo" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']">
+        <NuxtLink :to="viewAllTo" :class="[GHOST_ACTION_DENSE_CLASS]">
           {{ t("interviewHub.recent.viewAllButton") }}
         </NuxtLink>
       </div>
@@ -65,8 +71,7 @@ const { t } = useI18n();
               <li
                 v-for="session in recentSessions"
                 :key="session.id"
-                class="rounded-box border border-base-300 bg-base-100"
-                :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+                :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
               >
                 <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <div>
@@ -80,19 +85,18 @@ const { t } = useI18n();
                   </div>
                   <div class="flex flex-col items-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
                     <span
-                      class="badge badge-sm"
-                      :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'"
+                      :class="session.config.interviewMode === 'job' ? BADGE_PRIMARY_SM_CLASS : BADGE_GHOST_SM_CLASS"
                     >
                       {{ modeLabel(session.config.interviewMode) }}
                     </span>
-                    <span class="badge badge-sm" :class="getScoreBadgeClass(session.score)">
+                    <span :class="[BADGE_SM_CLASS, getScoreBadgeClass(session.score)]">
                       {{ session.score ?? 0 }}%
                     </span>
                   </div>
                 </div>
                 <button
                   type="button"
-                  :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS, 'btn btn-ghost btn-sm']"
+                  :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS, GHOST_ACTION_DENSE_CLASS]"
                   :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                   @click.stop="emit('viewSession', session.id)"
                 >
@@ -121,14 +125,13 @@ const { t } = useI18n();
                   <td>{{ session.role || session.config.roleType }}</td>
                   <td>
                     <span
-                      class="badge badge-sm"
-                      :class="session.config.interviewMode === 'job' ? 'badge-primary' : 'badge-ghost'"
+                      :class="session.config.interviewMode === 'job' ? BADGE_PRIMARY_SM_CLASS : BADGE_GHOST_SM_CLASS"
                     >
                       {{ modeLabel(session.config.interviewMode) }}
                     </span>
                   </td>
                   <td>
-                    <span class="badge badge-sm" :class="getScoreBadgeClass(session.score)">
+                    <span :class="[BADGE_SM_CLASS, getScoreBadgeClass(session.score)]">
                       {{ session.score ?? 0 }}%
                     </span>
                   </td>
@@ -136,7 +139,7 @@ const { t } = useI18n();
                   <td>
                     <button
                       type="button"
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+                      :class="[GHOST_ACTION_DENSE_CLASS]"
                       :aria-label="t('interviewHub.recent.viewSessionAria', { id: session.id })"
                       @click.stop="emit('viewSession', session.id)"
                     >
@@ -162,5 +165,5 @@ const { t } = useI18n();
         />
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

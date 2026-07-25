@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { collectAiProvenanceViolationsForContent } from "./validate-ai-annotation-provenance";
 
-const AI_CHAT_PAGE = "packages/client/pages/ai/chat.vue";
-const INTERVIEW_PAGE = "packages/client/pages/interview/session.vue";
-const NON_AI_PAGE = "packages/client/pages/settings.vue";
+const AI_CHAT_PAGE = "packages/client/pages/ai/chat-page.vue";
+const INTERVIEW_PAGE = "packages/client/pages/interview/session-page.vue";
+const NON_AI_PAGE = "packages/client/pages/settings-page.vue";
 
-describe("collectAiProvenanceViolationsForContent", () => {
+describe("collectAiProvenanceViolationsForContent: flags AI surface rendering aiMessage without provider", () => {
   test("flags AI surface rendering aiMessage without provider", () => {
     const violations = collectAiProvenanceViolationsForContent(
       AI_CHAT_PAGE,
@@ -18,7 +18,9 @@ describe("collectAiProvenanceViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("provider"))).toBe(true);
   });
+});
 
+describe("collectAiProvenanceViolationsForContent: flags AI surface rendering aiMessage without model", () => {
   test("flags AI surface rendering aiMessage without model", () => {
     const violations = collectAiProvenanceViolationsForContent(
       AI_CHAT_PAGE,
@@ -32,7 +34,9 @@ describe("collectAiProvenanceViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("model"))).toBe(true);
   });
+});
 
+describe("collectAiProvenanceViolationsForContent: allows AI surface that surfaces provider + model", () => {
   test("allows AI surface that surfaces provider + model", () => {
     const violations = collectAiProvenanceViolationsForContent(
       AI_CHAT_PAGE,
@@ -47,7 +51,9 @@ describe("collectAiProvenanceViolationsForContent", () => {
     );
     expect(violations).toHaveLength(0);
   });
+});
 
+describe("collectAiProvenanceViolationsForContent: requires confidence on interview score surface", () => {
   test("requires confidence on interview score surface", () => {
     const violations = collectAiProvenanceViolationsForContent(
       INTERVIEW_PAGE,
@@ -63,7 +69,9 @@ describe("collectAiProvenanceViolationsForContent", () => {
     );
     expect(violations.some((v) => v.message.includes("confidence"))).toBe(true);
   });
+});
 
+describe("collectAiProvenanceViolationsForContent: allows interview surface with provider + model + confidence", () => {
   test("allows interview surface with provider + model + confidence", () => {
     const violations = collectAiProvenanceViolationsForContent(
       INTERVIEW_PAGE,
@@ -79,7 +87,9 @@ describe("collectAiProvenanceViolationsForContent", () => {
     );
     expect(violations).toHaveLength(0);
   });
+});
 
+describe("collectAiProvenanceViolationsForContent: does not flag non-AI pages", () => {
   test("does not flag non-AI pages", () => {
     const violations = collectAiProvenanceViolationsForContent(
       NON_AI_PAGE,

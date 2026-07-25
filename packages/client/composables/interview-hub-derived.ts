@@ -9,6 +9,7 @@ import type { ComputedRef, Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import { cloneJob, type InterviewJobView } from "~/composables/interview-hub-bootstrap";
 import { useInterviewRoleOptions } from "~/composables/interview-hub-role-options";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 type InterviewHubDerivedInput = {
   coverLetters: Ref<readonly { readonly id?: string }[]>;
@@ -97,7 +98,7 @@ function useInterviewHubPrepState(
     },
     {
       id: "portfolio",
-      ready: portfolio.value?.projects.length ? portfolio.value.projects.length > 0 : false,
+      ready: (portfolio.value?.projects?.length ?? 0) > 0,
       title: t("interviewHub.prep.items.portfolio.title"),
       description: t("interviewHub.prep.items.portfolio.description"),
       ctaLabel: t("interviewHub.prep.items.portfolio.cta"),
@@ -113,7 +114,7 @@ function useInterviewHubPrepState(
       if (total === 0) {
         return 0;
       }
-      return Math.round((prepReadyCount.value / total) * 100);
+      return Math.round((prepReadyCount.value / total) * PERCENT_MAX);
     }),
     prepReadyCount,
   };

@@ -1,3 +1,9 @@
+import {
+  COUNT_NINETY,
+  COUNT_THIRTY,
+  COUNT_THREE_HUNDRED,
+  PERCENT_MAX,
+} from "@bao/shared/constants/numeric";
 import type {
   InterviewAnalysis,
   InterviewConfig,
@@ -76,7 +82,12 @@ export function normalizeQuestions(raw: unknown): InterviewQuestion[] {
         type: normalizeQuestionType(value.type, "behavioral"),
         question: value.question.trim(),
         followUps: parseStringArray(followUps),
-        expectedDuration: parseNumber(value.expectedDuration, 90, 30, 300),
+        expectedDuration: parseNumber(
+          value.expectedDuration,
+          COUNT_NINETY,
+          COUNT_THIRTY,
+          COUNT_THREE_HUNDRED,
+        ),
         difficulty: normalizeDifficulty(value.difficulty),
         tags: parseStringArray(value.tags),
       };
@@ -88,7 +99,7 @@ export function normalizeScore(value: number): number {
   if (!Number.isFinite(value)) {
     return 0;
   }
-  return Math.max(0, Math.min(100, Math.round(value)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
 }
 
 export function normalizeAiAnalysisScore(scoreCandidate: unknown): number {

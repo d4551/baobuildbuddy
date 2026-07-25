@@ -1,12 +1,15 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
 import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK, HTTP_STATUS_UNPROCESSABLE_ENTITY } from "@bao/shared/constants/http";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
 import { requestJson } from "../test-utils";
+
+const MESSAGE_REQUIRED_DETAIL = /message/i;
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 
@@ -23,7 +26,7 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.aiRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 afterEach(() => {
   mock.restore();
@@ -39,7 +42,7 @@ test("GET ai models returns the shared AI control-plane contract", async () => {
     configuredProviders?: string[];
   }>(app, "GET", API_ENDPOINTS.aiModels);
 
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(HTTP_STATUS_OK);
   expect(res.body.aiRouting?.chat?.provider).toBe(res.body.preferredProvider);
   expect(Array.isArray(res.body.providers)).toBe(true);
   expect(Array.isArray(res.body.configuredProviders)).toBe(true);
@@ -53,63 +56,96 @@ test("GET ai models returns the shared AI control-plane contract", async () => {
 });
 
 test("POST ai chat accepts message", async () => {
-  const res = await requestJson<{ content?: string; error?: string }>(
-    app,
-    "POST",
-    AI_CHAT_API_ENDPOINT,
-    {
-      message: "Hello, BaoBuildBuddy!",
-      sessionId: "test-session",
-    },
-  );
-  expect([200, 500]).toContain(res.status);
-  expect(res.body).toBeDefined();
+  const service = AIService.fromSettings(undefined);
+  spyOn(service, "generate").mockResolvedValue({
+    id: "mock-chat-1",
+    content: "Hello from mocked provider",
+    provider: "local",
+    model: "mock-model",
+  });
+  spyOn(AIService, "fromSettings").mockReturnValue(service);
+
+  const res = await requestJson<{
+    message?: string;
+    provider?: string;
+    model?: string;
+    error?: string;
+  }>(app, "POST", AI_CHAT_API_ENDPOINT, {
+    message: "Hello, BaoBuildBuddy!",
+    sessionId: "test-session",
+  });
+  expect(res.status).toBe(HTTP_STATUS_OK);
+  expect(res.body.message).toBe("Hello from mocked provider");
+  expect(res.body.provider).toBe("local");
+  expect(res.body.model).toBe("mock-model");
 });
 
 test("POST ai chat requires message (validation error)", async () => {
-  const res = await requestJson<{ error?: string }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
-  expect([400, 422]).toContain(res.status);
+  const res = await requestJson<{
+    type?: string;
+    status?: number;
+    detail?: string;
+    errors?: Array<{ message?: string }>;
+  }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
+  // Elysia body validation is 422 — do not soft-OR with 400.
+  expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
+  expect(res.body.type).toBe("validation");
+  expect(res.body.detail ?? "").toMatch(MESSAGE_REQUIRED_DETAIL);
+  expect(Array.isArray(res.body.errors)).toBe(true);
+  expect((res.body.errors ?? []).length).toBeGreaterThan(0);
 });
 
 test("POST ai chat accepts contextual payload without validation drift", async () => {
-  const res = await requestJson<{ content?: string; error?: string }>(
-    app,
-    "POST",
-    AI_CHAT_API_ENDPOINT,
-    {
-      message: "Help me prep for this role.",
-      sessionId: "context-session",
-      context: {
-        source: "floating-widget",
-        domain: "interview",
-        route: {
-          path: APP_ROUTES.interview,
-          name: "interview",
-          params: {},
-          query: { job: "job-123" },
-        },
-        entity: {
-          type: "job",
-          id: "job-123",
-          label: "Gameplay Engineer at Studio",
-        },
-        state: {
-          hasResumes: true,
-          resumeCount: 2,
-          hasJobs: true,
-          jobCount: 48,
-          hasStudios: true,
-          studioCount: 1,
-          hasInterviewSessions: true,
-          interviewSessionCount: 5,
-          hasPortfolioProjects: false,
-          portfolioProjectCount: 0,
-        },
+  const service = AIService.fromSettings(undefined);
+  spyOn(service, "generate").mockResolvedValue({
+    id: "mock-chat-2",
+    content: "Context-aware mock reply",
+    provider: "local",
+    model: "mock-model",
+  });
+  spyOn(AIService, "fromSettings").mockReturnValue(service);
+
+  const res = await requestJson<{
+    message?: string;
+    provider?: string;
+    model?: string;
+    contextDomain?: string;
+    error?: string;
+  }>(app, "POST", AI_CHAT_API_ENDPOINT, {
+    message: "Help me prep for this role.",
+    sessionId: "context-session",
+    context: {
+      source: "floating-widget",
+      domain: "interview",
+      route: {
+        path: APP_ROUTES.interview,
+        name: "interview",
+        params: {},
+        query: { job: "job-123" },
+      },
+      entity: {
+        type: "job",
+        id: "job-123",
+        label: "Gameplay Engineer at Studio",
+      },
+      state: {
+        hasResumes: true,
+        resumeCount: 2,
+        hasJobs: true,
+        jobCount: 48,
+        hasStudios: true,
+        studioCount: 1,
+        hasInterviewSessions: true,
+        interviewSessionCount: 5,
+        hasPortfolioProjects: false,
+        portfolioProjectCount: 0,
       },
     },
-  );
-  expect([200, 500]).toContain(res.status);
-  expect(res.body).toBeDefined();
+  });
+  expect(res.status).toBe(HTTP_STATUS_OK);
+  expect(res.body.message).toBe("Context-aware mock reply");
+  expect(res.body.contextDomain).toBe("interview");
+  expect(res.body.provider).toBe("local");
 });
 
 test("GET ai models preserves configured providers when provider probing fails", async () => {
@@ -131,7 +167,7 @@ test("GET ai models preserves configured providers when provider probing fails",
     providers?: Array<{ id?: string; health?: string }>;
   }>(app, "GET", API_ENDPOINTS.aiModels);
 
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(HTTP_STATUS_OK);
   expect(res.body.error).toBe("probe failed");
   expect(res.body.configuredProviders).toContain("local");
   expect(res.body.configuredProviders).toContain("openai");

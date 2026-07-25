@@ -52,7 +52,7 @@ describe("initializeDatabase", () => {
     );
     expect(parsedAutomationSettings.success).toBe(true);
     if (!parsedAutomationSettings.success) {
-      return;
+      throw new Error("Expected seeded automationSettings to parse");
     }
 
     expect(parsedAutomationSettings.data.jobProviders).toBeDefined();

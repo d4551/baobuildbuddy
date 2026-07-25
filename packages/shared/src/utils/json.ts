@@ -1,6 +1,11 @@
 import type { z } from "zod";
+import {
+  COUNT_SIXTEEN,
+  UNICODE_ESCAPE_HEX_DIGITS,
+  UNICODE_ESCAPE_SEQUENCE_LENGTH,
+} from "../constants/numeric";
 
-const UNICODE_HEX_RADIX = 16;
+const UNICODE_HEX_RADIX = COUNT_SIXTEEN;
 
 /**
  * Primitive JSON value.
@@ -79,14 +84,14 @@ function skipWhitespace(input: string, index: number): number {
 }
 
 function parseUnicodeEscape(input: string, cursor: number): EscapeParseResult {
-  const unicode = input.slice(cursor + 2, cursor + 6);
-  if (unicode.length !== 4 || !unicode.split("").every(isHexDigit)) {
+  const unicode = input.slice(cursor + 2, cursor + UNICODE_ESCAPE_SEQUENCE_LENGTH);
+  if (unicode.length !== UNICODE_ESCAPE_HEX_DIGITS || !unicode.split("").every(isHexDigit)) {
     return { ok: false, index: cursor };
   }
   return {
     ok: true,
     value: String.fromCodePoint(Number.parseInt(unicode, UNICODE_HEX_RADIX)),
-    nextCursor: cursor + 6,
+    nextCursor: cursor + UNICODE_ESCAPE_SEQUENCE_LENGTH,
   };
 }
 

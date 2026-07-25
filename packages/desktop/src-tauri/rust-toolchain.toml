@@ -1,0 +1,4 @@
+# Pin for Tauri 2 / edition2024 transitive crates (e.g. time ≥ 0.3.47).
+[toolchain]
+channel = "1.97.1"
+components = ["rustfmt", "clippy"]

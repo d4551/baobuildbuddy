@@ -44,12 +44,12 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
 } & {
     v1: {
         [x: string]: {
-            "*": {
+            ":model": {
                 get: {
                     body: unknown;
                     params: {
-                        "*": string;
-                    } & {};
+                        model: string;
+                    };
                     query: unknown;
                     headers: unknown;
                     response: {

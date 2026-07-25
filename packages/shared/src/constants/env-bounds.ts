@@ -5,10 +5,11 @@
 
 import { RPA_STDIO_BUFFER_LIMIT } from "../schemas/rpa-protocol.schema";
 import { DEFAULT_AUTOMATION_SETTINGS } from "../types/settings";
+import { MS_PER_SECOND } from "./time";
 
 /** Automation script timeout: min 1s, max 30min. Default from automation settings (seconds → ms). */
 export const ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT =
-  DEFAULT_AUTOMATION_SETTINGS.defaultTimeout * 1_000;
+  DEFAULT_AUTOMATION_SETTINGS.defaultTimeout * MS_PER_SECOND;
 export const ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MIN = 1_000;
 export const ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_MAX = 1_800_000;
 

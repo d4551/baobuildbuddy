@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { FLUID_HEIGHT_CLASS, FLUID_WIDTH_CLASS, RADIAL_METER_GEOMETRY } from "~/constants/layout";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 const props = withDefaults(
   defineProps<{
@@ -24,13 +25,13 @@ const STROKE_WIDTH = RADIAL_METER_GEOMETRY.strokeWidth;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const clampedValue = computed(() => {
-  const max = props.max > 0 ? props.max : 100;
+  const max = props.max > 0 ? props.max : PERCENT_MAX;
   const raw = Number.isFinite(props.value) ? props.value : 0;
   return Math.min(max, Math.max(0, raw));
 });
 
 const dashOffset = computed(() => {
-  const max = props.max > 0 ? props.max : 100;
+  const max = props.max > 0 ? props.max : PERCENT_MAX;
   const progress = clampedValue.value / max;
   return CIRCUMFERENCE * (1 - progress);
 });

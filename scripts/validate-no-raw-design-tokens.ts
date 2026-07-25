@@ -14,15 +14,23 @@ const isSsotSourceFile = (filePath: string): boolean =>
   isUiSsotAuthority(filePath) || isControlPrimitiveOwner(filePath);
 const isIconPrimitive = (filePath: string): boolean =>
   filePath.startsWith("packages/client/components/icons/");
+/** Spec/unit fixtures may quote banned tokens when asserting the gate — never scan them as product UI. */
+const isTestOrSpecFile = (filePath: string): boolean =>
+  filePath.endsWith(".test.ts") ||
+  filePath.endsWith(".spec.ts") ||
+  filePath.includes("/tests/") ||
+  filePath.includes("\\tests\\") ||
+  filePath.includes("/__tests__/") ||
+  filePath.includes("\\__tests__\\");
 
 const rawPalettePattern =
   /\b(?:bg|text|border|from|to|via|ring|stroke|fill)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/gu;
 const rawMonochromePalettePattern = /\b(?:bg|text|border|fill)-(?:white|black)\b/gu;
 const hexColorLiteralPattern = /#[0-9a-fA-F]{3,8}\b/gu;
-const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch)\s*\(/gu;
+const cssColorFunctionPattern = /\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color-mix)\s*\(/gu;
 
 const arbitraryTokenPattern =
-  /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-h|rounded|shadow)-\[[^\]]+\]/gu;
+  /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-h|rounded|shadow|text|bg|z)-\[[^\]]+\]/gu;
 
 const inlineUtilityTokenPattern =
   /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|space-x|space-y|w|h|min-w|min-h|max-w|max-w|rounded)-(?:xs|sm|md|lg|xl|2xl|3xl|full|\d{1,3})\b/gu;
@@ -96,7 +104,9 @@ const collectClassAttributeViolations = (
   const scanClassValue = (classValue: string, baseLine: number): void => {
     // Match whole utility tokens only — avoid false positives like
     // `max-h-72` → `h-72`, `scroll-mt-24` → `mt-24`, `mt-0.5` → `mt-0`.
-    const classTokens = classValue.split(classTokenSplitPattern).filter((token) => token.length > 0);
+    const classTokens = classValue
+      .split(classTokenSplitPattern)
+      .filter((token) => token.length > 0);
     for (const token of classTokens) {
       if (
         token.includes("text-base") ||
@@ -139,7 +149,7 @@ const collectResponsiveBypassViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isSsotSourceFile(filePath)) return [];
+  if (isSsotSourceFile(filePath) || isTestOrSpecFile(filePath)) return [];
   const violations: ValidationViolation[] = [];
   inlineResponsiveBreakpointBypassPattern.lastIndex = 0;
   for (const match of content.matchAll(inlineResponsiveBreakpointBypassPattern)) {
@@ -156,7 +166,7 @@ const collectDesignTokenPropDefaultViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isSsotSourceFile(filePath)) return [];
+  if (isSsotSourceFile(filePath) || isTestOrSpecFile(filePath)) return [];
   const violations: ValidationViolation[] = [];
   designTokenPropDefaultPattern.lastIndex = 0;
   for (const match of content.matchAll(designTokenPropDefaultPattern)) {
@@ -196,7 +206,7 @@ const collectColorLiteralViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isSsotSourceFile(filePath)) return [];
+  if (isSsotSourceFile(filePath) || isTestOrSpecFile(filePath)) return [];
   if (!filePath.endsWith(".css") && !filePath.endsWith(".vue") && !filePath.endsWith(".ts")) {
     return [];
   }
@@ -228,8 +238,9 @@ const collectScriptSizingLiteralViolations = (
   filePath: string,
   content: string,
 ): ValidationViolation[] => {
-  if (isSsotSourceFile(filePath) || isIconPrimitive(filePath)) return [];
-  if (filePath.endsWith(".test.ts") || filePath.endsWith(".spec.ts")) return [];
+  if (isSsotSourceFile(filePath) || isIconPrimitive(filePath) || isTestOrSpecFile(filePath)) {
+    return [];
+  }
   if (!(filePath.endsWith(".vue") || filePath.endsWith(".ts"))) return [];
   const violations: ValidationViolation[] = [];
   scriptSizingLiteralPattern.lastIndex = 0;

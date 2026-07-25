@@ -1,14 +1,10 @@
 const floatingChat = {
   floatingChat: {
-    subtitle: "Career Copilot",
     contextBadge: "Context: {context}",
-    contextAria: "Current chat context: {context}",
     focusedEntityBadge: "Focus: {entity}",
-    focusedEntityAria: "Focused entity in chat context: {entity}",
     domainChip: "Scope: {context}",
     sourceChip: "Surface: {source}",
     routeBadge: "Route: {route}",
-    contextChipsAria: "Specific chat context chips",
     entityChip: "{type}: {entity}",
     contextDomain: {
       resume: "Resume",
@@ -37,18 +33,8 @@ const floatingChat = {
       sessions: "{count} session | {count} sessions",
       projects: "{count} project | {count} projects",
     },
-    expandAria: "Open full chat page",
-    expandButton: "Expand",
-    clearAria: "Clear chat conversation",
-    clearButton: "Clear",
-    closeAria: "Close chat widget",
-    logAria: "Floating chat conversation",
-    youLabel: "You",
     suggestionsAria: "Contextual assistant prompt suggestions",
     suggestionAria: "Use contextual prompt: {prompt}",
-    emptyTitle: "Start a quick check-in",
-    emptyDescription:
-      "Ask for next steps, follow-up copy, or a focused review from the page you are on.",
     composerHint: "Enter sends · Shift+Enter adds a line.",
     prompts: {
       focusedEntity: "Give me focused coaching for {target}.",
@@ -66,18 +52,6 @@ const floatingChat = {
         interviewSession: "Review the signals and coaching points for {target}.",
         automationRun: "Explain what happened in {target} and what to fix next.",
       },
-    },
-    inputPlaceholder: "Ask about interview prep, jobs, resumes...",
-    inputAria: "Floating chat message",
-    sendAria: "Send floating chat message",
-    hideAria: "Hide floating chat assistant",
-    showAria: "Show floating chat assistant",
-    unreadAria: "{count} unread assistant messages",
-    voiceSettings: {
-      toggleButton: "Speech",
-      toggleAria: "Toggle speech model profile settings",
-      saveSuccess: "Speech profile saved",
-      saveErrorFallback: "Failed to save speech profile",
     },
   },
 } as const;

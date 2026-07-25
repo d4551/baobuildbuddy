@@ -1,7 +1,7 @@
 import { $fetch } from "ofetch";
 import { useRequestURL, useRuntimeConfig } from "#imports";
 import { getStoredApiKey } from "~/plugins/eden";
-import { resolveApiEndpoint } from "~/utils/endpoints";
+import { resolveApiEndpoint, resolveBrowserApiFetchUrl } from "~/utils/endpoints";
 
 const CONTENT_DISPOSITION_ENCODED_FILENAME_PATTERN = /filename\*=UTF-8''([^;]+)/i;
 const CONTENT_DISPOSITION_QUOTED_FILENAME_PATTERN = /filename="([^"]+)"/i;
@@ -123,7 +123,7 @@ function triggerFileDownload(blob: Blob, filename: string): void {
 export async function downloadApiFile(
   runtime: ClientApiRequestRuntime,
   endpoint: string,
-  options: ClientApiRequestOptions = {},
+  options: ClientApiRequestOptions,
   fallbackFilename: string,
 ): Promise<void> {
   const body = createRequestBody(options.body);
@@ -131,7 +131,11 @@ export async function downloadApiFile(
   const shouldSetJsonContentType =
     body !== undefined && !isBodyInitValue(options.body) && !("Content-Type" in headers);
 
-  const response = await fetch(resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint), {
+  const absoluteEndpoint = resolveApiEndpoint(runtime.apiBase, runtime.requestUrl, endpoint);
+  const fetchUrl = import.meta.client
+    ? resolveBrowserApiFetchUrl(absoluteEndpoint, runtime.requestUrl)
+    : absoluteEndpoint;
+  const response = await fetch(fetchUrl, {
     method: options.method ?? "GET",
     body,
     headers: shouldSetJsonContentType

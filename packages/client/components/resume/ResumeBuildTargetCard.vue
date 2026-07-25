@@ -7,6 +7,14 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const targetRole = defineModel<string>("targetRole", { required: true });
+
+const studioName = defineModel<string>("studioName", { required: true });
+
+const studioId = defineModel<string>("studioId", { required: true });
+
+const experienceLevel = defineModel<string>("experienceLevel", { required: true });
+
 defineProps<{
   studios: ReadonlyArray<{ id: string; name: string }>;
   experienceLevelOptions: ReadonlyArray<{ value: string; labelKey: string }>;
@@ -15,14 +23,10 @@ defineProps<{
   t: (key: string, values?: Record<string, unknown>) => string;
 }>();
 
-const targetRole = defineModel<string>("targetRole", { required: true });
-const studioName = defineModel<string>("studioName", { required: true });
-const studioId = defineModel<string>("studioId", { required: true });
-const experienceLevel = defineModel<string>("experienceLevel", { required: true });
-
 const emit = defineEmits<{
   generate: [];
 }>();
+
 </script>
 
 <template>
@@ -85,7 +89,7 @@ const emit = defineEmits<{
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt6]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!canProceedTarget"
           :aria-label="t('resumeBuildPage.target.generateAria')"

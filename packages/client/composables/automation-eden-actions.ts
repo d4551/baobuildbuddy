@@ -152,17 +152,17 @@ export function createAutomationEdenQueries(api: ClientApi) {
   };
 
   const fetchRuns = (params: MaybeRef<FetchRunsParams> = {}): RunListAsyncData =>
-    useAsyncData(
-      "automation-runs-list",
-      async () => getRuns(toValue(params)),
-      { watch: [() => toValue(params)] },
-    ) as RunListAsyncData;
+    useAsyncData("automation-runs-list", async () => getRuns(toValue(params)), {
+      watch: [() => toValue(params)],
+    }) as RunListAsyncData;
 
   const fetchRun = (id: string): RunAsyncData =>
     useAsyncData(`automation-run-${id}`, async () => getRun(id)) as RunAsyncData;
 
   const fetchRpaCapabilities = (): CapabilityAuditAsyncData =>
-    useAsyncData("automation-rpa-capabilities", async () => getRpaCapabilities()) as CapabilityAuditAsyncData;
+    useAsyncData("automation-rpa-capabilities", async () =>
+      getRpaCapabilities(),
+    ) as CapabilityAuditAsyncData;
 
   return {
     getVerifyContext,

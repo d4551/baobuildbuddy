@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
-computed, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type PageAriaResolver = (page: number) => string;
@@ -74,7 +74,7 @@ function getPageButtons(): HTMLButtonElement[] {
 }
 
 function getPageIndex(page: number): number {
-  const index = normalizedPageNumbers.value.findIndex((item) => item === page);
+  const index = normalizedPageNumbers.value.indexOf(page);
   return index >= 0 ? index : 0;
 }
 
@@ -94,7 +94,7 @@ function clampPageIndex(index: number): number {
 }
 
 function handleNavigationKeydown(event: KeyboardEvent): void {
-  if (!normalizedPageNumbers.value.length) return;
+  if (normalizedPageNumbers.value.length === 0) return;
 
   if (
     event.key !== "ArrowLeft" &&
@@ -170,7 +170,7 @@ watch(
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': page === currentPage }]"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': page === currentPage }]"
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
           :tabindex="page === currentPage ? 0 : -1"

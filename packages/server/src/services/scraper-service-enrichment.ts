@@ -2,6 +2,7 @@ import {
   AI_DEFAULT_TEMPERATURE_STRUCTURED,
   AI_MAX_TOKENS_SCRAPE_ENRICHMENT,
 } from "@bao/shared/constants/ai-generation";
+import { COUNT_FOUR } from "@bao/shared/constants/numeric";
 import type { ScrapedJob, ScrapedStudio } from "@bao/shared/schemas/automation-scripts.schema";
 import type { ScrapeEnrichmentRunSummary, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
@@ -11,8 +12,8 @@ import { settle } from "@bao/shared/utils/promise";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
-import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { settings } from "../db/schema/settings";
+import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import { scrapeJobEnrichmentPrompt, scrapeStudioEnrichmentPrompt } from "./ai/prompts-scrape";
 import type {
@@ -24,6 +25,15 @@ import { SCRAPE_ENRICHMENT_WARNING_LIMIT } from "./scraper-service-contracts";
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/iu;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/u;
 const SENTENCE_END_PATTERN = /[.!?]$/u;
+
+const formatRemoteWorkHiringSignal = (
+  remoteWork: boolean | null | undefined,
+): string | undefined => {
+  if (remoteWork === null || remoteWork === undefined) {
+    return undefined;
+  }
+  return remoteWork ? "Remote work is supported." : "Remote work is not emphasized.";
+};
 
 export const createScrapeEnrichmentAccumulator = (): ScrapeEnrichmentAccumulator => ({
   enabled: true,
@@ -101,7 +111,7 @@ const compactList = (items: readonly (string | undefined)[]): string[] => {
     }
     unique.add(normalized);
   }
-  return Array.from(unique).slice(0, 4);
+  return Array.from(unique).slice(0, COUNT_FOUR);
 };
 
 export const buildFallbackJobEnrichment = (jobRow: ScrapedJob): ScrapePersonaEnrichment => {
@@ -144,21 +154,19 @@ export const buildFallbackStudioEnrichment = (
   ),
   hiringSignals: compactList([
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
-    studioRow.size ? `Team size is described as ${studioRow.size}.` : undefined,
+    (studioRow.size?.trim() ?? "").length > 0
+      ? `Team size is described as ${studioRow.size}.`
+      : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
-    studioRow.remoteWork === null
-      ? undefined
-      : studioRow.remoteWork
-        ? "Remote work is supported."
-        : "Remote work is not emphasized.",
+    formatRemoteWorkHiringSignal(studioRow.remoteWork),
   ]),
   interviewFocusAreas: compactList([
     `How your work aligns with ${studioRow.name}.`,
-    studioRow.games?.length
-      ? `Knowledge of games such as ${studioRow.games.slice(0, 2).join(", ")}.`
+    (studioRow.games?.length ?? 0) > 0
+      ? `Knowledge of games such as ${studioRow.games?.slice(0, 2).join(", ")}.`
       : undefined,
-    studioRow.technologies?.length
-      ? `Experience with technologies such as ${studioRow.technologies.slice(0, 2).join(", ")}.`
+    (studioRow.technologies?.length ?? 0) > 0
+      ? `Experience with technologies such as ${studioRow.technologies?.slice(0, 2).join(", ")}.`
       : undefined,
     studioRow.interviewStyle
       ? `Preparation for the stated interview style: ${studioRow.interviewStyle}.`

@@ -39,9 +39,13 @@ export const useApiDocsPageData = ({ t }: ApiDocsPageDataOptions) => {
   const endpointGroups = computed<readonly ApiEndpointGroup[]>(() =>
     buildApiEndpointGroups(parsedSpec.value, t(UNKNOWN_TAG_LABEL_KEY)),
   );
-  const endpointCount = computed(() =>
-    endpointGroups.value.reduce((count, group) => count + group.endpoints.length, 0),
-  );
+  const endpointCount = computed(() => {
+    let total = 0;
+    for (const endpointGroup of endpointGroups.value) {
+      total += endpointGroup.endpoints.length;
+    }
+    return total;
+  });
   const docsUiState = computed<ApiDocsUiState>(() => {
     if (rawSpecStatus.value === "pending") {
       return "loading";

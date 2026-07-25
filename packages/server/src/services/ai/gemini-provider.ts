@@ -1,4 +1,10 @@
+import {
+  AI_DEFAULT_MAX_TOKENS,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_DEFAULT_TOP_P,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
+import { COUNT_FORTY } from "@bao/shared/constants/numeric";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
@@ -33,10 +39,10 @@ export class GeminiProvider extends BaseAIProvider {
     const generativeModel =
       model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
-      temperature: options?.temperature ?? 0.7,
-      maxOutputTokens: options?.maxTokens ?? 2048,
-      topP: options?.topP ?? 0.95,
-      topK: options?.topK ?? 40,
+      temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxOutputTokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+      topP: options?.topP ?? AI_DEFAULT_TOP_P,
+      topK: options?.topK ?? COUNT_FORTY,
     };
 
     let fullPrompt = prompt;
@@ -85,10 +91,10 @@ export class GeminiProvider extends BaseAIProvider {
     const generativeModel =
       model === this.model ? this.generativeModel : this.client.getGenerativeModel({ model });
     const generationConfig = {
-      temperature: options?.temperature ?? 0.7,
-      maxOutputTokens: options?.maxTokens ?? 2048,
-      topP: options?.topP ?? 0.95,
-      topK: options?.topK ?? 40,
+      temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxOutputTokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+      topP: options?.topP ?? AI_DEFAULT_TOP_P,
+      topK: options?.topK ?? COUNT_FORTY,
     };
 
     let fullPrompt = prompt;

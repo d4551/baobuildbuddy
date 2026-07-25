@@ -1,3 +1,4 @@
+import { COUNT_SEVEN, RADIX_BASE36 } from "@bao/shared/constants/numeric";
 import type { AIProviderType, AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 
 /**
@@ -47,7 +48,7 @@ export abstract class BaseAIProvider implements AIProvider {
    * Generate a unique ID for the response
    */
   protected generateId(): string {
-    return `${this.name}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    return `${this.name}-${Date.now()}-${Math.random().toString(RADIX_BASE36).substring(COUNT_SEVEN)}`;
   }
 
   /**

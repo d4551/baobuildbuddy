@@ -1,5 +1,7 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
+
 const TEST_AI_MAX_QUESTION_COUNT = 12;
 const EXACT_QUESTION_COUNT_PATTERN = /exactly\s+(\d+)\s+questions/i;
 const GENERATE_QUESTION_COUNT_PATTERN = /generate\s+(\d+)\s+interview questions/i;
@@ -31,7 +33,7 @@ const parseQuestionCount = (prompt: string): number => {
   const matchedValue = exactMatch?.[1] ?? generateMatch?.[1];
   const parsed = matchedValue ? Number.parseInt(matchedValue, DECIMAL_RADIX) : Number.NaN;
   if (!Number.isFinite(parsed) || parsed < 1) {
-    return 3;
+    return COUNT_THREE;
   }
   return Math.min(parsed, TEST_AI_MAX_QUESTION_COUNT);
 };
@@ -62,7 +64,7 @@ const extractPromptHighlights = (value: string): string[] =>
     .split(PROMPT_HIGHLIGHT_SPLIT_PATTERN)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0 && entry.toLowerCase() !== "not specified")
-    .slice(0, 3);
+    .slice(0, COUNT_THREE);
 
 const buildPromptContext = (prompt: string): DeterministicInterviewPromptContext => {
   const studio =
@@ -118,6 +120,10 @@ const buildQuestionText = (
       return `This opportunity signals ${context.hiringSignal}. How would you ramp up in your first 30 days and prove the ${context.pitchAngle} angle is real?`;
     case "closing":
       return `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.role} at ${context.company} right now?`;
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
 };
 
@@ -151,6 +157,10 @@ const buildFollowUps = (
         "Which accomplishment best proves that claim?",
         "Why does this studio context fit where you want to grow next?",
       ];
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
 };
 

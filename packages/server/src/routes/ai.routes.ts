@@ -4,6 +4,7 @@ import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { Elysia, type status } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
+import { openapiDetail } from "../utils/openapi-detail";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
@@ -34,7 +35,6 @@ import {
   usageTailLimit,
 } from "./ai-route-contracts";
 import { buildProviderModelsResponse } from "./ai-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -50,7 +50,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/chat",
     {
-      detail: openapiDetail("AI", "Create or execute ai chat for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Send a chat completion request to the configured AI provider."),
       body: chatRouteBodySchema,
       response: chatRouteResponses,
     },
@@ -62,7 +62,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/analyze-resume",
     {
-      detail: openapiDetail("AI", "Create or execute ai analyze resume for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Analyze a resume against a target role with AI feedback."),
       body: analyzeResumeRouteBodySchema,
       response: analyzeResumeResponses,
     },
@@ -74,7 +74,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/generate-cover-letter",
     {
-      detail: openapiDetail("AI", "Create or execute ai generate cover letter for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Generate cover letter draft text with the AI provider."),
       body: generateCoverLetterRouteBodySchema,
       response: generateCoverLetterResponses,
     },
@@ -86,7 +86,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/match-jobs",
     {
-      detail: openapiDetail("AI", "Create or execute ai match jobs for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Match the user profile against open jobs with AI ranking."),
       body: matchJobsRouteBodySchema,
       response: matchJobsResponses,
     },
@@ -98,7 +98,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .get(
     "/models",
     {
-      detail: openapiDetail("AI", "Retrieve ai models for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "List AI models available from configured providers."),
       response: aiModelsResponses,
     },
     async ({ status }: { status: RouteStatus }) =>
@@ -107,7 +107,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .get(
     "/usage",
     {
-      detail: openapiDetail("AI", "Retrieve ai usage for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Retrieve AI token and request usage counters."),
       response: aiUsageResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -129,7 +129,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/automation-action",
     {
-      detail: openapiDetail("AI", "Create or execute ai automation action for BaoBuildBuddy career automation."),
+      detail: openapiDetail("AI", "Propose or execute an AI-assisted automation operator action."),
       body: automationActionRouteBodySchema,
       response: automationActionResponses,
     },

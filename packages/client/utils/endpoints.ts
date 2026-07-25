@@ -35,12 +35,14 @@ export function resolveApiRouteBase(configuredBase: string, requestUrl: URL): st
   const resolvedBase = resolveApiBase(configuredBase, requestUrl);
   const parsedUrl = new URL(resolvedBase);
   const normalizedPath = parsedUrl.pathname.replace(TRAILING_SLASH_PATTERN, "");
-  const routeBasePath =
-    normalizedPath === API_ENDPOINT_PREFIX
-      ? "/"
-      : normalizedPath.endsWith(API_ENDPOINT_PREFIX)
-        ? normalizedPath.slice(0, -API_ENDPOINT_PREFIX.length) || "/"
-        : parsedUrl.pathname;
+  let routeBasePath: string;
+  if (normalizedPath === API_ENDPOINT_PREFIX) {
+    routeBasePath = "/";
+  } else if (normalizedPath.endsWith(API_ENDPOINT_PREFIX)) {
+    routeBasePath = normalizedPath.slice(0, -API_ENDPOINT_PREFIX.length) || "/";
+  } else {
+    routeBasePath = parsedUrl.pathname;
+  }
 
   parsedUrl.pathname = routeBasePath;
   return parsedUrl.toString().replace(TRAILING_SLASH_PATTERN, "");
@@ -74,6 +76,22 @@ export function resolveApiEndpoint(
 }
 
 /**
+ * Prefer same-origin `/api/...` paths in the browser so Nuxt's API proxy owns the
+ * request. Absolute cross-origin API hosts break blob downloads and CDP capture.
+ */
+export function resolveBrowserApiFetchUrl(absoluteEndpointUrl: string, pageUrl: URL): string {
+  try {
+    const endpoint = new URL(absoluteEndpointUrl, pageUrl);
+    if (endpoint.pathname === API_ENDPOINT_PREFIX || endpoint.pathname.startsWith(`${API_ENDPOINT_PREFIX}/`)) {
+      return `${endpoint.pathname}${endpoint.search}`;
+    }
+  } catch {
+    /* keep absolute */
+  }
+  return absoluteEndpointUrl;
+}
+
+/**
  * Resolves a WebSocket endpoint URL from runtime config and request context.
  *
  * @param configuredBase Runtime-configured WebSocket or API base.
@@ -88,13 +106,18 @@ export function resolveWebSocketEndpoint(
 ): string {
   const resolvedBase = resolveApiBase(configuredBase, requestUrl);
   const normalizedBase = resolvedBase.endsWith("/") ? resolvedBase.slice(0, -1) : resolvedBase;
-  const wsBase = ABSOLUTE_WS_URL_PATTERN.test(normalizedBase)
-    ? normalizedBase
-    : requestUrl.protocol === "https:"
-      ? normalizedBase
-          .replace(HTTPS_PROTOCOL_PATTERN, "wss:")
-          .replace(HTTP_PROTOCOL_PATTERN, "wss:")
-      : normalizedBase.replace(HTTPS_PROTOCOL_PATTERN, "ws:").replace(HTTP_PROTOCOL_PATTERN, "ws:");
+  let wsBase: string;
+  if (ABSOLUTE_WS_URL_PATTERN.test(normalizedBase)) {
+    wsBase = normalizedBase;
+  } else if (requestUrl.protocol === "https:") {
+    wsBase = normalizedBase
+      .replace(HTTPS_PROTOCOL_PATTERN, "wss:")
+      .replace(HTTP_PROTOCOL_PATTERN, "wss:");
+  } else {
+    wsBase = normalizedBase
+      .replace(HTTPS_PROTOCOL_PATTERN, "ws:")
+      .replace(HTTP_PROTOCOL_PATTERN, "ws:");
+  }
   const normalizedPath = endpointPath.startsWith("/") ? endpointPath : `/${endpointPath}`;
   return `${wsBase}${normalizedPath}`;
 }

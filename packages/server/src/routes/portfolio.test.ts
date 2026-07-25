@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_CREATED, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -19,12 +20,12 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.portfolioRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 function registerPortfolioBaselineTests(): void {
   test("GET portfolio returns or auto-creates portfolio", async () => {
     const res = await requestJson<{ id: string }>(app, "GET", API_ENDPOINTS.portfolio);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBeDefined();
   });
 
@@ -35,7 +36,7 @@ function registerPortfolioBaselineTests(): void {
       API_ENDPOINTS.portfolio,
       { metadata: { title: "My Portfolio" } },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.metadata).toEqual({ title: "My Portfolio" });
   });
 }
@@ -52,7 +53,7 @@ function registerPortfolioProjectMutationTests(): void {
         technologies: ["Unity", "C#"],
       },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.title).toBe("Test Game Project");
     expect(res.body.id).toBeDefined();
     projectId = res.body.id;
@@ -71,7 +72,7 @@ function registerPortfolioProjectOrderingTests(): void {
         technologies: ["Unreal Engine", "C++"],
       },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.id).toBeDefined();
     secondProjectId = res.body.id;
   });
@@ -85,7 +86,7 @@ function registerPortfolioProjectOrderingTests(): void {
         orderedIds: [secondProjectId, projectId],
       },
     );
-    expect(reorderResponse.status).toBe(200);
+    expect(reorderResponse.status).toBe(HTTP_STATUS_OK);
     expect(reorderResponse.body.projects.map((project) => project.id)).toEqual([
       secondProjectId,
       projectId,
@@ -101,7 +102,7 @@ function registerPortfolioProjectLifecycleTests(): void {
       `${API_ENDPOINTS.portfolioProjects}/${projectId}`,
       { title: "Updated Project Title" },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.title).toBe("Updated Project Title");
   });
 
@@ -111,7 +112,7 @@ function registerPortfolioProjectLifecycleTests(): void {
       "DELETE",
       `${API_ENDPOINTS.portfolioProjects}/${projectId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
   });
 }
@@ -125,10 +126,32 @@ function registerPortfolioExportTests(): void {
         body: JSON.stringify({ format: "pdf" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toContain("portfolio-");
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+  });
+
+  test("POST portfolio PDF template gaming embeds SSOT primary fill", async () => {
+    const { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } = await import(
+      "@bao/shared/constants/export-document-theme"
+    );
+    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const response = await app.handle(
+      new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "pdf", template: "gaming" }),
+      }),
+    );
+    expect(response.status).toBe(HTTP_STATUS_OK);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(
+      pdfStreamsContainRgbFill(bytes, PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.gaming.primary),
+    ).toBe(true);
+    expect(
+      pdfStreamsContainRgbFill(bytes, PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.modern.primary),
+    ).toBe(false);
   });
 
   test("POST portfolio export returns a DOCX attachment", async () => {
@@ -139,7 +162,7 @@ function registerPortfolioExportTests(): void {
         body: JSON.stringify({ format: "docx" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe(
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     );
@@ -153,7 +176,7 @@ function registerPortfolioExportTests(): void {
       "DELETE",
       `${API_ENDPOINTS.portfolioProjects}/${secondProjectId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
   });
 }

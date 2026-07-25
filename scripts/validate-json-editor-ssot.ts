@@ -30,7 +30,8 @@ export const collectJsonEditorSsotViolations = (
       violations.push({
         filePath: file.filePath,
         line: 1,
-        message: "Use AppJsonField/AppCodeEditor for JSON/CSS power editors (no raw textarea.font-mono).",
+        message:
+          "Use AppJsonField/AppCodeEditor for JSON/CSS power editors (no raw textarea.font-mono).",
       });
     }
   }

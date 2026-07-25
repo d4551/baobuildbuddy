@@ -13,6 +13,7 @@ import {
   toLocaleCode,
 } from "~/composables/automation-run-detail-projectors";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
@@ -20,6 +21,16 @@ const DATE_FORMAT_OPTIONS = {
   dateStyle: "medium",
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
+
+const mapOutputStepStatusToTimeline = (status: OutputStep["status"]): TimelineEntry["status"] => {
+  if (status === "ok") {
+    return "success";
+  }
+  if (status === "skipped") {
+    return "skipped";
+  }
+  return "error";
+};
 
 const createAutomationRunDetailDateFormatter =
   (locale: Readonly<{ value: string }>, fallbackLocale: Readonly<{ value: string }>) =>
@@ -65,7 +76,7 @@ const createAutomationRunDetailStreamState = (
     if (typeof value !== "number" || !Number.isFinite(value)) {
       return 0;
     }
-    return Math.max(0, Math.min(100, Math.round(value)));
+    return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
   });
   return {
     streamState,
@@ -166,7 +177,7 @@ const createAutomationRunFallbackTimelineEntries = (options: {
       id: `${options.run.value?.id || options.runId.value}-output-${index}`,
       timestamp: options.run.value?.updatedAt || "",
       stage: options.t("automation.runDetail.timeline.stageOutputStep"),
-      status: step.status === "ok" ? "success" : "error",
+      status: mapOutputStepStatusToTimeline(step.status),
       message: step.message || step.action,
     }));
   }

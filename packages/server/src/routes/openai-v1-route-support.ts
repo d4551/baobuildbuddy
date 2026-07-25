@@ -9,7 +9,9 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
+import { COUNT_FOUR } from "@bao/shared/constants/numeric";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import { AI_PROVIDER_IDS, type AIProviderType } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
@@ -21,7 +23,7 @@ const isAIProviderType = (value: string): value is AIProviderType =>
   (AI_PROVIDER_IDS as readonly string[]).includes(value);
 
 const MODEL_ID_SEPARATOR = "/";
-const OPENAI_V1_EPOCH_SECONDS = () => Math.floor(Date.now() / 1000);
+const OPENAI_V1_EPOCH_SECONDS = () => Math.floor(Date.now() / MS_PER_SECOND);
 
 export type OpenAIV1ModelRecord = {
   id: string;
@@ -135,20 +137,7 @@ const extractSystemPrompt = (
   return systemMessages.map((message) => message.content).join("\n\n");
 };
 
-export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
-  const models = await listOpenAIV1Models();
-  const requested = models.find((entry) => entry.id === body.model);
-  if (!requested) {
-    return routeResult(
-      HTTP_STATUS_NOT_FOUND,
-      toOpenAIV1Error(
-        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
-        "invalid_request_error",
-        "model_not_found",
-      ),
-    );
-  }
-
+const generateOpenAIV1ChatContent = async (body: OpenAIV1ChatCompletionsBody) => {
   const parsed = parseOpenAIV1ModelId(body.model);
   const aiService = await getAIService();
   const prompt = extractUserPrompt(body.messages);
@@ -173,38 +162,38 @@ export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletions
   );
 
   if (generationResult.status === "rejected") {
-    return routeResult(
-      HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAIV1Error(
-        toErrorMessage(generationResult.reason, API_ERROR_OPENAI_V1_GENERATION_FAILED),
-        "server_error",
-      ),
-    );
+    return {
+      ok: false as const,
+      error: toErrorMessage(generationResult.reason, API_ERROR_OPENAI_V1_GENERATION_FAILED),
+    };
   }
 
   const response = generationResult.value;
   if (response.error) {
-    return routeResult(
-      HTTP_STATUS_INTERNAL_SERVER_ERROR,
-      toOpenAIV1Error(response.error, "server_error"),
-    );
+    return { ok: false as const, error: response.error };
   }
 
-  const completionId = `chatcmpl-${generateId()}`;
-  const promptTokens = Math.max(1, Math.ceil(prompt.length / 4));
-  const completionTokens = Math.max(1, Math.ceil(response.content.length / 4));
+  return { ok: true as const, prompt, content: response.content };
+};
 
-  return routeResult(HTTP_STATUS_OK, {
-    id: completionId,
+const buildOpenAIV1ChatCompletionBody = (input: {
+  model: string;
+  prompt: string;
+  content: string;
+}) => {
+  const promptTokens = Math.max(1, Math.ceil(input.prompt.length / COUNT_FOUR));
+  const completionTokens = Math.max(1, Math.ceil(input.content.length / COUNT_FOUR));
+  return {
+    id: `chatcmpl-${generateId()}`,
     object: "chat.completion" as const,
     created: OPENAI_V1_EPOCH_SECONDS(),
-    model: body.model,
+    model: input.model,
     choices: [
       {
         index: 0,
         message: {
           role: "assistant" as const,
-          content: response.content,
+          content: input.content,
         },
         finish_reason: "stop" as const,
       },
@@ -214,7 +203,39 @@ export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletions
       completion_tokens: completionTokens,
       total_tokens: promptTokens + completionTokens,
     },
-  });
+  };
+};
+
+export const createOpenAIV1ChatCompletion = async (body: OpenAIV1ChatCompletionsBody) => {
+  const models = await listOpenAIV1Models();
+  const requested = models.find((entry) => entry.id === body.model);
+  if (!requested) {
+    return routeResult(
+      HTTP_STATUS_NOT_FOUND,
+      toOpenAIV1Error(
+        API_ERROR_OPENAI_V1_MODEL_NOT_FOUND,
+        "invalid_request_error",
+        "model_not_found",
+      ),
+    );
+  }
+
+  const generated = await generateOpenAIV1ChatContent(body);
+  if (!generated.ok) {
+    return routeResult(
+      HTTP_STATUS_INTERNAL_SERVER_ERROR,
+      toOpenAIV1Error(generated.error, "server_error"),
+    );
+  }
+
+  return routeResult(
+    HTTP_STATUS_OK,
+    buildOpenAIV1ChatCompletionBody({
+      model: body.model,
+      prompt: generated.prompt,
+      content: generated.content,
+    }),
+  );
 };
 
 export const createOpenAIV1ChatCompletionStream = async (

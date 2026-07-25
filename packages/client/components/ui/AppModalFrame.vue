@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
-import { ICON_SIZE_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
+import { GHOST_ACTION_CIRCLE_DENSE_CLASS, ICON_SIZE_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 import { UI_MODAL_SIZE_CLASS_BY_TOKEN, type UiModalSizeToken } from "~/constants/ui-layout";
 
 const props = withDefaults(
@@ -91,11 +91,11 @@ function handleCancel(event: Event): void {
     <div class="modal-box glass-modal relative" :class="modalBoxClass">
       <button
         type="button"
-        class="btn btn-ghost btn-circle btn-sm absolute right-2 top-2"
-        :class="[TOUCH_TARGET_MIN_CLASS]"
-        :aria-label="closeAriaLabel"
-        @click="requestClose"
-      >
+ class="absolute end-2 top-2"
+ :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="closeAriaLabel"
+ @click="requestClose"
+ >
         <CloseIcon :class="ICON_SIZE_CLASS.sm" aria-hidden="true" />
       </button>
       <div class="pe-12">

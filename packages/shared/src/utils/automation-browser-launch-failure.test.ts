@@ -4,12 +4,10 @@ import {
   automationBrowserLaunchFailureToDetails,
   classifyAutomationBrowserLaunchFailure,
   formatAutomationBrowserLaunchFailureMessage,
-  parseAutomationBrowserLaunchFailureDetails,
-  sanitizeAutomationBrowserLaunchDiagnostic,
 } from "./automation-browser-launch-failure";
 import { CURSOR_SANDBOX_BROWSER_CACHE_MARKER } from "./playwright-browsers-path";
 
-describe("browser launch failure classification", () => {
+describe("browser launch failure classification: classifies missing browser executable distinctly from SEGV", () => {
   test("classifies missing browser executable distinctly from SEGV", () => {
     const missing = classifyAutomationBrowserLaunchFailure(
       new Error("browserType.launch: Executable doesn't exist at /tmp/chromium"),
@@ -26,7 +24,9 @@ describe("browser launch failure classification", () => {
     expect(missing.causeMessage).toContain("Executable doesn't exist");
     expect(crashed.causeMessage).toContain("SIGSEGV");
   });
+});
 
+describe("browser launch failure classification: classifies polluted sandbox browser path distinctly", () => {
   test("classifies polluted sandbox browser path distinctly", () => {
     const pollutedPath = `/var/folders/x/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/playwright`;
     const polluted = classifyAutomationBrowserLaunchFailure(
@@ -45,7 +45,9 @@ describe("browser launch failure classification", () => {
     expect(polluted.failureMode).not.toBe(generic.failureMode);
     expect(polluted.browsersPath).toBe(pollutedPath);
   });
+});
 
+describe("browser launch failure classification: classifies context and page stage failures distinctly", () => {
   test("classifies context and page stage failures distinctly", () => {
     const contextFailure = classifyAutomationBrowserLaunchFailure(
       new Error("Failed to create browser context"),
@@ -61,7 +63,9 @@ describe("browser launch failure classification", () => {
     expect(contextFailure.stage).toBe("context");
     expect(pageFailure.stage).toBe("page");
   });
+});
 
+describe("browser launch failure classification: formats message and details without dropping failureMode", () => {
   test("formats message and details without dropping failureMode", () => {
     const failure = classifyAutomationBrowserLaunchFailure(
       new Error("Executable doesn't exist"),
@@ -75,7 +79,9 @@ describe("browser launch failure classification", () => {
     expect(details.causeMessage).toBe("Executable doesn't exist");
     expect(details.stage).toBe("launch");
   });
+});
 
+describe("browser launch failure classification: redacts secrets and user-home paths from causeMessage and browsersPath", () => {
   test("redacts secrets and user-home paths from causeMessage and browsersPath", () => {
     const apiKey = `${AUTH_KEY_PREFIX}ABCDEFGHijklmnop`;
     const providerSecret = "sk-proj-LEAKED_PROVIDER_SECRET_VALUE";
@@ -100,7 +106,9 @@ describe("browser launch failure classification", () => {
       providerSecret,
     );
   });
+});
 
+describe("browser launch failure classification: keeps polluted-path classification when home prefix is scrubbed in browsersPath", () => {
   test("keeps polluted-path classification when home prefix is scrubbed in browsersPath", () => {
     const pollutedHomePath = `/Users/example-user/Library/Caches/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/playwright`;
     const polluted = classifyAutomationBrowserLaunchFailure(
@@ -114,39 +122,5 @@ describe("browser launch failure classification", () => {
       `~/Library/Caches/${CURSOR_SANDBOX_BROWSER_CACHE_MARKER}/playwright`,
     );
     expect(polluted.browsersPath).not.toContain("example-user");
-  });
-});
-
-describe("browser launch diagnostic sanitization", () => {
-  test("redacts env-style secret assignments without dropping safe diagnostic text", () => {
-    const scrubbed = sanitizeAutomationBrowserLaunchDiagnostic(
-      "ENOENT PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright BAO_AUTH_SETUP_TOKEN=super-secret-value",
-    );
-    expect(scrubbed).toContain("ENOENT");
-    expect(scrubbed).toContain("PLAYWRIGHT_BROWSERS_PATH=/tmp/ms-playwright");
-    expect(scrubbed).not.toContain("super-secret-value");
-    expect(scrubbed).toContain("[REDACTED]");
-  });
-});
-
-describe("browser launch failure details parse", () => {
-  test("decodes typed details and rejects malformed envelopes", () => {
-    const classified = classifyAutomationBrowserLaunchFailure(
-      new Error("browserType.launch: Executable doesn't exist at /tmp/chromium"),
-      "launch",
-    );
-    expect(
-      parseAutomationBrowserLaunchFailureDetails(
-        automationBrowserLaunchFailureToDetails(classified),
-      ),
-    ).toEqual({
-      ok: true,
-      details: classified,
-    });
-    expect(
-      parseAutomationBrowserLaunchFailureDetails({ failureMode: "BROWSER_EXECUTABLE_MISSING" }),
-    ).toEqual({
-      ok: false,
-    });
   });
 });

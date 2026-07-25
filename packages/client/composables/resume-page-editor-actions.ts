@@ -5,6 +5,11 @@ import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import { RESUME_EMAIL_PATTERN } from "~/composables/resume-page-bootstrap";
+import {
+  RESUME_AUTOSAVE_DEBOUNCE_MS,
+  RESUME_DESCRIPTION_MIN_CHARS,
+  RESUME_SUMMARY_MIN_CHARS,
+} from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 
 type ResumeEditorSupport = {
@@ -54,7 +59,7 @@ export function useAiEnhancementProgress(aiEnhancementStepLabels: Ref<readonly s
       if (aiEnhancementStepIndex.value < aiEnhancementStepLabels.value.length - 1) {
         aiEnhancementStepIndex.value += 1;
       }
-    }, 900);
+    }, RESUME_AUTOSAVE_DEBOUNCE_MS);
   }
 
   function stopAiEnhancementProgress(): void {
@@ -104,7 +109,7 @@ export function useResumeFormValidation(
       $toast.error(t("resumePage.toasts.invalidEmail"));
       return false;
     }
-    if (formData.summary.trim().length < 50) {
+    if (formData.summary.trim().length < RESUME_SUMMARY_MIN_CHARS) {
       $toast.error(t("resumePage.toasts.summaryMinLength"));
       return false;
     }
@@ -113,7 +118,7 @@ export function useResumeFormValidation(
       (item) =>
         item.title.trim().length < 2 ||
         item.company.trim().length < 2 ||
-        item.description.trim().length < 20,
+        item.description.trim().length < RESUME_DESCRIPTION_MIN_CHARS,
     );
     if (hasInvalidExperience) {
       $toast.error(t("resumePage.toasts.invalidExperience"));
@@ -129,7 +134,9 @@ export function useResumeFormValidation(
     }
 
     const hasInvalidProjects = formData.projects.some(
-      (item) => item.name.trim().length < 2 || item.description.trim().length < 20,
+      (item) =>
+        item.name.trim().length < 2 ||
+        item.description.trim().length < RESUME_DESCRIPTION_MIN_CHARS,
     );
     if (hasInvalidProjects) {
       $toast.error(t("resumePage.toasts.invalidProjects"));

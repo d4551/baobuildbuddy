@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+  BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -87,14 +90,14 @@ const {
       density="comfortable"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('interviewHub.hero.openJobAria')"
           @click="openConfig('job')"
         >
           {{ t("interviewHub.hero.openJobButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('interviewHub.hero.openStudioAria')"
           @click="openConfig('studio')"
@@ -113,7 +116,7 @@ const {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="interviewHubPending" :lines="6" />
+    <LoadingSkeleton v-if="interviewHubPending" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="interviewHubStatus === 'error'"
@@ -147,7 +150,7 @@ const {
               <h2 class="card-title">{{ t("interviewHub.prep.title") }}</h2>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("interviewHub.prep.subtitle") }}</p>
             </div>
-            <span class="badge badge-primary badge-outline">
+            <span :class="BADGE_PRIMARY_OUTLINE_CLASS">
               {{ t("interviewHub.prep.progressLabel", { done: prepReadyCount, total: prepChecklist.length }) }}
             </span>
           </div>
@@ -163,13 +166,13 @@ const {
             <UiGlassCard
               v-for="(item, index) in prepChecklist"
               :key="item.id"
-              :stagger-index="Math.min(index + 1, 11)"
+              :stagger-index="Math.min(index + 1, UI_STAGGER_INDEX_MAX)"
               variant="subtle"
             >
               <div :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
                 <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <h3 class="font-semibold">{{ item.title }}</h3>
-                  <span class="badge badge-sm" :class="prepStatusBadgeClass(item.ready)">
+ <span :class="[BADGE_SM_CLASS, prepStatusBadgeClass(item.ready)]">
                     {{ item.ready ? t("interviewHub.prep.readyBadge") : t("interviewHub.prep.pendingBadge") }}
                   </span>
                 </div>

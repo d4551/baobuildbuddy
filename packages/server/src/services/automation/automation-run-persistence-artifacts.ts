@@ -3,6 +3,7 @@ import {
   AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH,
   AUTOMATION_MIN_ID_LENGTH,
 } from "@bao/shared/constants/automation-limits";
+import { COUNT_FOUR, COUNT_SIXTEEN, COUNT_THIRTY_ONE } from "@bao/shared/constants/numeric";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { settle } from "@bao/shared/utils/promise";
 import { AUTOMATION_SCREENSHOT_DIR } from "../../config/paths";
@@ -20,7 +21,7 @@ const sanitizeStep = (step: {
   action?: unknown;
   status?: unknown;
   message?: unknown;
-}): { action: string; status: "ok" | "error"; message?: string } | null => {
+}): { action: string; status: "ok" | "error" | "skipped"; message?: string } | null => {
   if (!step || typeof step !== "object") {
     return null;
   }
@@ -28,7 +29,10 @@ const sanitizeStep = (step: {
     return null;
   }
 
-  const status = step.status === "error" || step.status === "ok" ? step.status : "ok";
+  const status =
+    step.status === "error" || step.status === "ok" || step.status === "skipped"
+      ? step.status
+      : "ok";
   if (typeof step.message !== "string" || step.message.length > MAX_CUSTOM_ANSWER_VALUE_LENGTH) {
     return { action: step.action, status };
   }
@@ -38,11 +42,12 @@ const sanitizeStep = (step: {
 
 const sanitizeSteps = (
   steps: Array<{ action?: unknown; status?: unknown; message?: unknown }>,
-): Array<{ action: string; status: "ok" | "error"; message?: string }> =>
+): Array<{ action: string; status: "ok" | "error" | "skipped"; message?: string }> =>
   steps
     .map((step) => sanitizeStep(step))
     .filter(
-      (step): step is { action: string; status: "ok" | "error"; message?: string } => step !== null,
+      (step): step is { action: string; status: "ok" | "error" | "skipped"; message?: string } =>
+        step !== null,
     );
 
 export const sanitizeRunId = (runId: string, invalidRunIdMessage: string): string => {
@@ -69,9 +74,9 @@ const resolveScreenshotExtension = (pathValue: string): string => {
 const hashScreenshotSource = (sourcePath: string): string => {
   let hash = 0;
   for (let index = 0; index < sourcePath.length; index += 1) {
-    hash = (hash * 31 + sourcePath.charCodeAt(index)) >>> 0;
+    hash = (hash * COUNT_THIRTY_ONE + sourcePath.charCodeAt(index)) >>> 0;
   }
-  return hash.toString(16).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
+  return hash.toString(COUNT_SIXTEEN).padStart(AUTOMATION_MIN_ID_LENGTH, "0");
 };
 
 const resolveScreenshotName = (index: number, sourcePath: string): string => {
@@ -85,7 +90,7 @@ const resolveScreenshotName = (index: number, sourcePath: string): string => {
   const fallbackHash = hashScreenshotSource(sourcePath);
   const base = `${RUN_SCREENSHOT_PREFIX}-${stepToken}-`;
   const maxSuffixLength = Math.max(
-    4,
+    COUNT_FOUR,
     AUTOMATION_MAX_SCREENSHOT_NAME_LENGTH - base.length - extension.length,
   );
   return `${base}${fallbackHash.slice(0, maxSuffixLength)}${extension}`;

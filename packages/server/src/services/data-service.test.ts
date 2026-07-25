@@ -10,7 +10,7 @@ beforeAll(async () => {
   seedModule.seedDatabase(dbModule.db);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 describe("data-service", () => {
   test("exportAll returns valid export structure", async () => {

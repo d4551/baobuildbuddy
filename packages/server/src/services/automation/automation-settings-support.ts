@@ -3,6 +3,11 @@ import {
   AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
 } from "@bao/shared/constants/automation-limits";
 import {
+  SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS,
+  SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS,
+} from "@bao/shared/constants/schema-limits";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
+import {
   automationSettingsSchema,
   emailTransportSettingsSchema,
 } from "@bao/shared/schemas/settings.schema";
@@ -11,18 +16,56 @@ import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
 } from "@bao/shared/types/settings-defaults";
+import { normalizeAutomationSettings } from "@bao/shared/types/settings-normalization";
 import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
-import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
+import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { AIService } from "../ai/ai-service";
 import type { EmailTransportRuntimeConfig } from "../email-delivery-service";
 import { AutomationValidationError } from "./automation-errors";
 
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
+const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
+
+type SettingsAutomationRow = {
+  id: string;
+  automationSettings: AutomationSettings | null;
+};
+
+export const normalizeAndPersistAutomationSettings = async (
+  row: SettingsAutomationRow,
+): Promise<AutomationSettings | null> => {
+  if (!row.automationSettings) {
+    return null;
+  }
+
+  const parsedSettings = automationSettingsSchema.safeParse(row.automationSettings);
+  if (!parsedSettings.success) {
+    return null;
+  }
+
+  const normalized = normalizeAutomationSettings(parsedSettings.data);
+  if (
+    parsedSettings.data.defaultTimeout === LEGACY_AUTOMATION_TIMEOUT_SECONDS &&
+    normalized.defaultTimeout !== parsedSettings.data.defaultTimeout
+  ) {
+    await settle(
+      db
+        .update(settings)
+        .set({
+          automationSettings: normalized,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(settings.id, row.id)),
+    );
+  }
+
+  return normalized;
+};
 
 export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   const settingsQueryResult = await settle(
@@ -33,14 +76,24 @@ export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   }
 
   const rows = settingsQueryResult.value;
-  if (rows.length > 0 && rows[0].automationSettings) {
-    const parsedSettings = automationSettingsSchema.safeParse(rows[0].automationSettings);
-    if (parsedSettings.success) {
-      return parsedSettings.data;
-    }
+  if (rows.length > 0) {
+    return (await normalizeAndPersistAutomationSettings(rows[0])) ?? DEFAULT_AUTOMATION_SETTINGS;
   }
 
   return DEFAULT_AUTOMATION_SETTINGS;
+};
+
+/**
+ * Resolve automation script timeout in ms from settings (legacy 30s normalized).
+ */
+export const resolveAutomationTimeoutMs = (settingsValue: AutomationSettings): number => {
+  const normalized = normalizeAutomationSettings(settingsValue);
+  const seconds =
+    Number.isFinite(normalized.defaultTimeout) && normalized.defaultTimeout > 0
+      ? Math.trunc(normalized.defaultTimeout)
+      : SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS;
+  const clamped = Math.min(Math.max(1, seconds), SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS);
+  return clamped * MS_PER_SECOND;
 };
 
 export const resolveMaxConcurrentRuns = (settingsValue: AutomationSettings): number => {

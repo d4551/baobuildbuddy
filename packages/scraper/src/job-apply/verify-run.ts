@@ -1,12 +1,15 @@
 import { basename } from "node:path";
 import { jobApplyScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scripts.schema";
-import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { resumeDataSchema } from "@bao/shared/schemas/resume.schema";
+import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import {
+  VERIFY_PROGRESS_YIELD_MS,
+  VERIFY_STEP_INDEX,
+  VERIFY_TOTAL_STEPS,
+} from "../constants/verify-run";
 import { parseScriptInput } from "../runtime/io";
 import { ProtocolEmitter } from "../runtime/protocol";
-
-const VERIFY_TOTAL_STEPS = 3 as const;
 
 const flattenJsonStrings = (value: JsonValue, parts: string[] = []): string => {
   if (typeof value === "string") {
@@ -77,67 +80,44 @@ const emitProgress = (
   });
 };
 
-/**
- * Deterministic job-apply path for BAO_ENABLE_AUTOMATION_VERIFY.
- * Posts multipart form fields to the job fixture submit URL without Playwright.
- */
-export const emitVerificationRun = async (): Promise<number> => {
-  const inputResult = await parseScriptInput(jobApplyScriptEnvelopeSchema);
-  const runId = inputResult.ok ? inputResult.value.runId : "automation-verify-run";
-  const emitter = new ProtocolEmitter(runId);
-
-  if (!inputResult.ok) {
-    emitter.emitError("OUTPUT_VALIDATION_ERROR", inputResult.message);
-    return 1;
-  }
-
-  const envelope = inputResult.value;
-  const resumeParsed = resumeDataSchema.safeParse(envelope.resume);
-  if (!resumeParsed.success) {
-    emitter.emitError("OUTPUT_VALIDATION_ERROR", "Verification resume payload is invalid.");
-    return 1;
-  }
-
-  emitProgress(
-    emitter,
-    "verify_bootstrap",
-    1,
-    "Preparing deterministic verification automation run.",
-  );
-  await Bun.sleep(50);
-
-  const personalInfo = resumeParsed.data.personalInfo;
+const buildVerificationForm = (
+  personalInfo: {
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  },
+  coverLetterContent: JsonObject | undefined,
+  customAnswers: Record<string, string>,
+): FormData => {
   const form = new FormData();
-  form.set("name", personalInfo?.name?.trim() ?? "");
-  form.set("email", personalInfo?.email?.trim() ?? "");
-  form.set("phone", personalInfo?.phone?.trim() ?? "");
+  form.set("name", personalInfo.name?.trim() ?? "");
+  form.set("email", personalInfo.email?.trim() ?? "");
+  form.set("phone", personalInfo.phone?.trim() ?? "");
 
-  const coverLetterContent: JsonObject | undefined = envelope.coverLetter?.content;
   if (coverLetterContent) {
     form.set("coverLetter", flattenJsonStrings(coverLetterContent));
   }
 
-  for (const [fieldName, fieldValue] of Object.entries(envelope.customAnswers)) {
+  for (const [fieldName, fieldValue] of Object.entries(customAnswers)) {
     form.set(fieldName, fieldValue);
   }
 
-  emitProgress(emitter, "verify_fields", 2, "Applying deterministic verification answers.");
-  await Bun.sleep(50);
+  return form;
+};
 
-  const resumeError = await appendResumeArtifact(form, envelope.resumeFilePath);
-  if (resumeError !== null) {
-    emitter.emitError("SCRIPT_OUTPUT_INVALID", resumeError);
-    return 1;
-  }
-
+const submitVerificationForm = async (
+  emitter: ProtocolEmitter,
+  jobUrl: string,
+  form: FormData,
+): Promise<number> => {
   emitProgress(
     emitter,
     "verify_submission",
-    3,
+    VERIFY_STEP_INDEX.submission,
     "Completing deterministic verification submission.",
   );
 
-  const submitResponse = await fetch(resolveSubmitUrl(envelope.jobUrl), {
+  const submitResponse = await fetch(resolveSubmitUrl(jobUrl), {
     method: "POST",
     body: form,
   });
@@ -163,4 +143,56 @@ export const emitVerificationRun = async (): Promise<number> => {
   };
   emitter.emitResult(result);
   return 0;
+};
+
+/**
+ * Deterministic job-apply path for BAO_ENABLE_AUTOMATION_VERIFY.
+ * Posts multipart form fields to the job fixture submit URL without Playwright.
+ */
+export const emitVerificationRun = async (): Promise<number> => {
+  const inputResult = await parseScriptInput(jobApplyScriptEnvelopeSchema);
+  const runId = inputResult.ok ? inputResult.value.runId : "automation-verify-run";
+  const emitter = new ProtocolEmitter(runId);
+
+  if (!inputResult.ok) {
+    emitter.emitError("OUTPUT_VALIDATION_ERROR", inputResult.message);
+    return 1;
+  }
+
+  const envelope = inputResult.value;
+  const resumeParsed = resumeDataSchema.safeParse(envelope.resume);
+  if (!resumeParsed.success) {
+    emitter.emitError("OUTPUT_VALIDATION_ERROR", "Verification resume payload is invalid.");
+    return 1;
+  }
+
+  emitProgress(
+    emitter,
+    "verify_bootstrap",
+    VERIFY_STEP_INDEX.bootstrap,
+    "Preparing deterministic verification automation run.",
+  );
+  await Bun.sleep(VERIFY_PROGRESS_YIELD_MS);
+
+  const form = buildVerificationForm(
+    resumeParsed.data.personalInfo ?? {},
+    envelope.coverLetter?.content,
+    envelope.customAnswers,
+  );
+
+  emitProgress(
+    emitter,
+    "verify_fields",
+    VERIFY_STEP_INDEX.fields,
+    "Applying deterministic verification answers.",
+  );
+  await Bun.sleep(VERIFY_PROGRESS_YIELD_MS);
+
+  const resumeError = await appendResumeArtifact(form, envelope.resumeFilePath);
+  if (resumeError !== null) {
+    emitter.emitError("SCRIPT_OUTPUT_INVALID", resumeError);
+    return 1;
+  }
+
+  return submitVerificationForm(emitter, envelope.jobUrl, form);
 };

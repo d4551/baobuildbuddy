@@ -27,12 +27,12 @@ import {
   createBinaryResponse,
   MIME_TYPE_OCTET_STREAM,
 } from "../utils/http-response";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type AutomationScreenshotParams,
   automationScreenshotParams,
   automationScreenshotResponses,
 } from "./automation-screenshot-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -120,7 +120,7 @@ export const automationScreenshotRoutes = new Elysia({
 }).get(
   "/:runId/:index",
   {
-    detail: openapiDetail("Automation", "Retrieve automation :runId :index for BaoBuildBuddy career automation."),
+    detail: openapiDetail("Automation", "Serve a screenshot image for an automation run by index."),
     params: automationScreenshotParams,
     response: automationScreenshotResponses,
   },

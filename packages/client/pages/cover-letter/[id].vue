@@ -1,6 +1,10 @@
 <script setup lang="ts">
+const CONTENT_SECTION_SPLIT = /\n{2,}/u;
+
 import {
+  COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_DEFAULT_TEMPLATE,
+  COVER_LETTER_POSITION_MIN_LENGTH,
   type CoverLetterTemplate,
   isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
@@ -10,10 +14,10 @@ import { useI18n } from "vue-i18n";
 import { runExportWithToast } from "~/composables/export-with-toast";
 import {
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import {
   coverLetterContentToPlainText,
@@ -74,7 +78,7 @@ const contentSectionCount = computed(() => {
   if (!formData.contentText.trim()) return 0;
   return formData.contentText
     .trim()
-    .split(/\n{2,}/)
+    .split(CONTENT_SECTION_SPLIT)
     .map((section) => section.trim())
     .filter((section) => section.length > 0).length;
 });
@@ -210,8 +214,15 @@ async function handleExport(format: "pdf" | "docx") {
   if (!id) {
     return;
   }
+  // Export reads DB row — persist dirty template/content first or PDF/DOCX lies.
+  if (buildFormFingerprint() !== lastSavedFingerprint.value) {
+    await handleSave();
+    if (buildFormFingerprint() !== lastSavedFingerprint.value) {
+      return;
+    }
+  }
   await runExportWithToast({
-    exportFn: () => exportDocument(id, format),
+    exportFn: () => exportDocument(id, format, formData.template),
     failMessage: t("coverLetterDetailPage.toasts.exportFailed"),
     successMessage: t("coverLetterDetailPage.toasts.exported"),
     toast: $toast,
@@ -232,7 +243,7 @@ async function handleExport(format: "pdf" | "docx") {
         <AppBreadcrumbs :crumbs="breadcrumbs" />
       </template>
       <template #actions>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="regenerating"
           :aria-label="t('coverLetterDetailPage.actions.regenerateAria')"
@@ -251,7 +262,7 @@ async function handleExport(format: "pdf" | "docx") {
           @export="handleExport"
         />
 
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!hasUnsavedChanges"
           :aria-label="t('coverLetterDetailPage.actions.saveAria')"

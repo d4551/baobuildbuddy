@@ -1,3 +1,7 @@
+import {
+  AI_DEFAULT_MAX_TOKENS,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+} from "@bao/shared/constants/ai-generation";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
@@ -46,8 +50,8 @@ export class OpenAIProvider extends BaseAIProvider {
       this.client.chat.completions.create({
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
         top_p: options?.topP ?? 1,
       }),
     );
@@ -98,8 +102,8 @@ export class OpenAIProvider extends BaseAIProvider {
       this.client.chat.completions.create({
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 2048,
-        temperature: options?.temperature ?? 0.7,
+        max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS,
+        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
         top_p: options?.topP ?? 1,
         stream: true,
       }),

@@ -2,7 +2,10 @@
 import { useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
-import { FLUID_WIDTH_CLASS, ICON_SIZE_CLASS, SHADOW_TOKEN_CLASS,
+import {
+  ICON_SIZE_CLASS,
+  SHADOW_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
@@ -24,8 +27,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div 
-    class="stats stats-vertical sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? `border border-base-300 ${SURFACE_GLASS_SUBTLE_CLASS} glass-card-enter glass-card-enter-0`]"
+  <div
+    :class="[STATS_SHELL_VARIANT_CLASS.sm, SHADOW_TOKEN_CLASS.sm, backgroundClass ?? `border border-base-300 ${SURFACE_GLASS_SUBTLE_CLASS} glass-card-enter glass-card-enter-0`]"
   >
     <div v-for="(stat, index) in stats" :key="index" class="stat">
       <div v-if="stat.figure" class="stat-figure text-primary" aria-hidden="true">

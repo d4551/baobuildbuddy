@@ -43,10 +43,7 @@ const hasCtaAction = (block: string): boolean => {
   return hasToStatic || hasToBound || hasEmit;
 };
 
-const collectViolationsForContent = (
-  filePath: string,
-  content: string,
-): ValidationViolation[] => {
+const collectViolationsForContent = (filePath: string, content: string): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];
   for (const match of content.matchAll(EMPTY_STATE_BLOCK_PATTERN)) {
     const block = match[0] ?? "";

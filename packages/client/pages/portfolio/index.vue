@@ -1,18 +1,21 @@
 <script setup lang="ts">
+import { PORTFOLIO_EXPORT_TEMPLATE_OPTIONS } from "@bao/shared/constants/export-document-theme";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -42,6 +45,7 @@ const {
   canMove,
   clearDeleteProjectState,
   clearFilters,
+  exportTemplate,
   featuredProjectCount,
   filteredProjects,
   handleDeleteProject,
@@ -104,6 +108,22 @@ function updateProjectForm(value: typeof projectForm): void {
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template v-if="!isPortfolioEmpty" #actions>
+        <fieldset class="fieldset">
+          <legend class="sr-only">{{ t("portfolioPage.actions.templateAria") }}</legend>
+          <select
+            v-model="exportTemplate"
+            class="select select-sm"
+            :aria-label="t('portfolioPage.actions.templateAria')"
+          >
+            <option
+              v-for="templateOption in PORTFOLIO_EXPORT_TEMPLATE_OPTIONS"
+              :key="templateOption"
+              :value="templateOption"
+            >
+              {{ t(`portfolioPage.exportTemplates.${templateOption}`) }}
+            </option>
+          </select>
+        </fieldset>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
           :class="[OUTLINE_ACTION_CLASS]"
@@ -138,7 +158,7 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="bootstrapErrorMessage"
@@ -195,7 +215,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button type="button" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

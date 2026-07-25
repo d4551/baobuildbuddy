@@ -5,6 +5,7 @@ import {
   API_MESSAGE_JOB_MATCHING_COMPLETE,
 } from "@bao/shared/constants/api-messages";
 import { DEFAULT_SCORE_NEUTRAL } from "@bao/shared/constants/jobs";
+import { COUNT_FIVE } from "@bao/shared/constants/numeric";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
@@ -177,7 +178,7 @@ export const runJobMatchingFlow = async (
   }
 
   const matches = await Promise.all(
-    recentJobs.slice(0, 5).map((job) => analyzeSingleJobMatch(profile, job)),
+    recentJobs.slice(0, COUNT_FIVE).map((job) => analyzeSingleJobMatch(profile, job)),
   );
   matches.sort((a, b) => b.score - a.score);
 

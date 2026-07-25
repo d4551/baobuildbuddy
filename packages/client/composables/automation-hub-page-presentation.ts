@@ -13,6 +13,11 @@ import type { DashboardPipelineStepViewModel } from "~/constants/dashboard-contr
 import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 import type { FlowActionId } from "~/constants/flow-engine-types";
+import {
+  BADGE_SOFT_ERROR_CLASS,
+  BADGE_SOFT_SUCCESS_CLASS,
+  BADGE_SOFT_WARNING_CLASS,
+} from "~/constants/layout-badges";
 
 const createAutomationPipelineSteps = (stats: Readonly<Ref<DashboardStats | null>>) =>
   computed<readonly DashboardPipelineStepViewModel[]>(() => {
@@ -91,7 +96,14 @@ const createAutomationCardPresentation = (
       return orderedCards.value[0] ?? null;
     }
 
-    return orderedCards.value.find((card) => card.id === currentPrimaryCardId) ?? null;
+    const cards = orderedCards.value;
+    for (const automationCard of cards) {
+      if (automationCard.id === currentPrimaryCardId) {
+        return automationCard;
+      }
+    }
+
+    return null;
   });
 
   return {
@@ -104,12 +116,12 @@ const createAutomationCardPresentation = (
 const createAutomationCapabilityStatusPresentation = (t: AutomationHubTranslate) => ({
   capabilityStatusClass(value: boolean, issueCount = 0): string {
     if (value) {
-      return "badge badge-success badge-soft";
+      return BADGE_SOFT_SUCCESS_CLASS;
     }
     if (issueCount > 0) {
-      return "badge badge-warning badge-soft";
+      return BADGE_SOFT_WARNING_CLASS;
     }
-    return "badge badge-error badge-soft";
+    return BADGE_SOFT_ERROR_CLASS;
   },
   capabilityStatusLabel(value: boolean, issueCount = 0): string {
     if (value) {

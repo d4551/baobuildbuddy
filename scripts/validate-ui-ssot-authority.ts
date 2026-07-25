@@ -26,22 +26,8 @@ const STARTS_WITH_FEATURE_PATTERN =
 const ALLOWLIST_SET_NAME_PATTERN =
   /(?:SSOT_ALLOWLIST_PATHS|ALLOWLIST_PATHS|EXEMPT_PATHS)\s*=\s*new\s+Set/u;
 
-export const collectSsotAuthorityMetaViolationsForContent = (
-  filePath: string,
-  content: string,
-): ValidationViolation[] => {
-  if (!VALIDATOR_FILE_PATTERN.test(filePath)) return [];
-  if (
-    filePath === "scripts/validate-ui-ssot-authority.ts" ||
-    filePath === "scripts/ui-ssot-authority.ts" ||
-    filePath === "scripts/ui-control-primitive-owners.ts"
-  ) {
-    return [];
-  }
-  if (filePath.endsWith(".test.ts")) return [];
-
+const collectStartsWithViolations = (filePath: string, content: string): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];
-
   STARTS_WITH_FEATURE_PATTERN.lastIndex = 0;
   for (const match of content.matchAll(STARTS_WITH_FEATURE_PATTERN)) {
     const prefix = match[1] ?? "";
@@ -66,22 +52,49 @@ export const collectSsotAuthorityMetaViolationsForContent = (
       });
     }
   }
-
-  if (ALLOWLIST_SET_NAME_PATTERN.test(content)) {
-    PATH_LITERAL_PATTERN.lastIndex = 0;
-    for (const match of content.matchAll(PATH_LITERAL_PATTERN)) {
-      const pathLiteral = match[1] ?? "";
-      if (isUiSsotAuthority(pathLiteral)) continue;
-      if (!isForbiddenConsumerExemptionPath(pathLiteral)) continue;
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message: `Consumer path "${pathLiteral}" in an allowlist Set. Delete the exemption; fix the consumer source (ui-ux). Only AUTHORITY_PATHS + CONTROL_PRIMITIVE_OWNERS may be exempt.`,
-      });
-    }
-  }
-
   return violations;
+};
+
+const collectAllowlistSetViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (!ALLOWLIST_SET_NAME_PATTERN.test(content)) {
+    return [];
+  }
+  const violations: ValidationViolation[] = [];
+  PATH_LITERAL_PATTERN.lastIndex = 0;
+  for (const match of content.matchAll(PATH_LITERAL_PATTERN)) {
+    const pathLiteral = match[1] ?? "";
+    if (isUiSsotAuthority(pathLiteral)) continue;
+    if (!isForbiddenConsumerExemptionPath(pathLiteral)) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Consumer path "${pathLiteral}" in an allowlist Set. Delete the exemption; fix the consumer source (ui-ux). Only AUTHORITY_PATHS + CONTROL_PRIMITIVE_OWNERS may be exempt.`,
+    });
+  }
+  return violations;
+};
+
+export const collectSsotAuthorityMetaViolationsForContent = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
+  if (!VALIDATOR_FILE_PATTERN.test(filePath)) return [];
+  if (
+    filePath === "scripts/validate-ui-ssot-authority.ts" ||
+    filePath === "scripts/ui-ssot-authority.ts" ||
+    filePath === "scripts/ui-control-primitive-owners.ts"
+  ) {
+    return [];
+  }
+  if (filePath.endsWith(".test.ts")) return [];
+
+  return [
+    ...collectStartsWithViolations(filePath, content),
+    ...collectAllowlistSetViolations(filePath, content),
+  ];
 };
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {

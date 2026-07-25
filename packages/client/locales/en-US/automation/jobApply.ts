@@ -2,13 +2,16 @@ const automationjobApply = {
   automation: {
     jobApply: {
       title: "Job Application Automation",
+      bootstrapError: "Failed to load job application automation.",
+      bootstrapRetry: "Retry",
+      bootstrapRetryAria: "Retry loading job application automation",
       emptyResumesTitle: "Resume required",
       emptyResumesDescription:
         "Create a resume before running job-apply automation. The run needs a selected resume.",
       emptyResumesCta: "Open Resume Builder",
       emptyResumesCtaAria: "Open resume builder to create a resume for job apply",
       jobUrlLegend: "Job URL",
-      jobUrlPlaceholder: "https://example.com/jobs/123",
+      jobUrlPlaceholder: "Paste the job posting URL",
       jobUrlAria: "Job posting URL",
       resumeLegend: "Resume",
       resumeAria: "Select resume",

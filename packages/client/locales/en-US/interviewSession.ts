@@ -59,7 +59,8 @@ const interviewSession = {
     submitFinishButton: "Submit & Finish",
     notFound: "Session not found. Please start a new interview.",
     notFoundTitle: "Interview session unavailable",
-    notFoundDescription: "This practice session is missing or expired. Start a new interview from the hub.",
+    notFoundDescription:
+      "This practice session is missing or expired. Start a new interview from the hub.",
     emptyStateCta: "Open Interview Hub",
     emptyStateCtaAria: "Return to the interview hub to start a new session",
     retryButtonLabel: "Retry",

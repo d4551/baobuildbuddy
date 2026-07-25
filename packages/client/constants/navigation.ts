@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AppTranslationSchema } from "~/locales/en-US";
+import { NAVIGATION_SECONDARY_ITEMS } from "./navigation-secondary";
 
 type StringKeyOf<T> = Extract<keyof T, string>;
 
@@ -28,13 +29,7 @@ export const NAVIGATION_GROUPS: readonly {
 ] as const;
 
 /** Canonical dock destination ids (Home / Work / Create / AI / System). */
-export const DOCK_NAVIGATION_IDS = [
-  "dashboard",
-  "jobs",
-  "resume",
-  "ai-chat",
-  "settings",
-] as const;
+export const DOCK_NAVIGATION_IDS = ["dashboard", "jobs", "resume", "ai-chat", "settings"] as const;
 
 /**
  * Shared navigation item contract for app chrome components.
@@ -64,6 +59,11 @@ export interface NavigationItem {
    * (reachable via another shortcut/surface).
    */
   readonly keyboardOptional?: boolean;
+  /**
+   * Optional parent nav id for secondary workflow routes (breadcrumb hierarchy).
+   * Secondary items keep includeInSidebar/includeInDock false but remain discoverable.
+   */
+  readonly parentId?: string;
 }
 
 /**
@@ -89,6 +89,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     to: APP_ROUTES.jobs,
     includeInSidebar: true,
     includeInDock: true,
+    /** Automation hub stays out of dock (HIG cap); Jobs owns Work-section wayfinding. */
+    dockMatchPrefixes: [APP_ROUTES.automation],
   },
   {
     id: "studios",
@@ -210,6 +212,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     includeInSidebar: true,
     includeInDock: false,
   },
+  ...NAVIGATION_SECONDARY_ITEMS,
 ] as const;
 
 /**

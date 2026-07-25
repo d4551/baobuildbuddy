@@ -8,6 +8,13 @@ const portfolioPage = {
       previewAria: "Open portfolio preview",
       exportButton: "Export",
       exportAria: "Export portfolio",
+      templateAria: "Portfolio export template",
+    },
+    exportTemplates: {
+      modern: "Modern",
+      gaming: "Gaming",
+      minimal: "Minimal",
+      showcase: "Showcase",
     },
     bootstrap: {
       loadError: "Failed to load portfolio data.",

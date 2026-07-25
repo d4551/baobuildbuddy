@@ -7,9 +7,7 @@ describe("validate-nav-ia", () => {
   });
 
   it("fails when sidebar contains kbd chrome", () => {
-    const violations = collectNavIaViolations(
-      `<template><kbd class="kbd">G</kbd></template>`,
-    );
+    const violations = collectNavIaViolations(`<template><kbd class="kbd">G</kbd></template>`);
     expect(violations.some((v) => v.message.includes("<kbd>"))).toBe(true);
   });
 });

@@ -1,4 +1,4 @@
-export type TimelineStatus = "pending" | "running" | "success" | "error";
+export type TimelineStatus = "pending" | "running" | "success" | "error" | "skipped";
 
 export interface TimelineEntry {
   readonly id: string;

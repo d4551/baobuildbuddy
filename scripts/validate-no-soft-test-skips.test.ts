@@ -21,7 +21,10 @@ describe("validate-no-soft-test-skips", () => {
 
   test("passes clean file", () => {
     const violations = collectSoftTestSkipViolations([
-      { filePath: "packages/server/src/foo.test.ts", content: `test("x", () => { expect(1).toBe(1); });` },
+      {
+        filePath: "packages/server/src/foo.test.ts",
+        content: `test("x", () => { expect(1).toBe(1); });`,
+      },
     ]);
     expect(violations.length).toBe(0);
   });

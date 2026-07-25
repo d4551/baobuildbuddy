@@ -241,7 +241,7 @@ function toReadinessAssessment(value: unknown): ReadinessAssessment | null {
 }
 
 function createSkillMappingActions(context: SkillMappingContext) {
-  const fetchMappings = async () =>
+  const fetchMappings = () =>
     withLoadingState(context.loading, async () => {
       const data = await readApiData(
         context.api.skills.mappings.get(),
@@ -254,7 +254,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
         : [];
     });
 
-  const createMapping = async (mappingData: CreateMappingInput) =>
+  const createMapping = (mappingData: CreateMappingInput) =>
     withLoadingState(context.loading, async () => {
       await readApiData(
         context.api.skills.mappings.post(mappingData),
@@ -263,7 +263,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
       await fetchMappings();
     });
 
-  const updateMapping = async (id: string, updates: UpdateMappingInput) =>
+  const updateMapping = (id: string, updates: UpdateMappingInput) =>
     withLoadingState(context.loading, async () => {
       await readApiData(
         context.api.skills.mappings({ id }).put(updates),
@@ -272,7 +272,7 @@ function createSkillMappingActions(context: SkillMappingContext) {
       await fetchMappings();
     });
 
-  const deleteMapping = async (id: string) =>
+  const deleteMapping = (id: string) =>
     withLoadingState(context.loading, async () => {
       const { error } = await context.api.skills.mappings({ id }).delete();
       assertApiResponse(error, context.t("apiErrors.skills.deleteMappingFailed"));

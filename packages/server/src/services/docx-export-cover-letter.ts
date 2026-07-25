@@ -1,4 +1,5 @@
 import { COVER_LETTER_DEFAULT_SIGNATURE } from "@bao/shared/constants/cover-letter";
+import { resolveCoverLetterDocxTheme } from "@bao/shared/constants/export-document-theme";
 import {
   collectDefinedStringValues,
   formatExportDate,
@@ -6,12 +7,7 @@ import {
 } from "@bao/shared/utils/export-contract";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import {
-  COVER_LETTER_DOCX_ACCENT_COLOR,
-  COVER_LETTER_DOCX_FONT_FAMILY,
-  COVER_LETTER_DOCX_LINE_COLOR,
-  COVER_LETTER_DOCX_MUTED_COLOR,
-  COVER_LETTER_DOCX_PRIMARY_COLOR,
-  COVER_LETTER_DOCX_TEXT_COLOR,
+  type CoverLetterDocxTheme,
   type CoverLetterPayload,
   type CoverLetterUserProfile,
   createDivider,
@@ -19,7 +15,10 @@ import {
   DOCX_COVER_LETTER_FONT_HEADER_PT,
 } from "./docx-export-contracts";
 
-function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[] {
+function buildCoverLetterHeader(
+  userProfile: CoverLetterUserProfile,
+  theme: CoverLetterDocxTheme,
+): Paragraph[] {
   const children = [
     new Paragraph({
       children: [
@@ -27,8 +26,8 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
           text: userProfile.name,
           bold: true,
           size: DOCX_COVER_LETTER_FONT_HEADER_PT * 2,
-          color: COVER_LETTER_DOCX_PRIMARY_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.primaryColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 60 },
@@ -47,8 +46,8 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
           new TextRun({
             text: contactParts.join(" | "),
             size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            color: COVER_LETTER_DOCX_MUTED_COLOR,
-            font: COVER_LETTER_DOCX_FONT_FAMILY,
+            color: theme.mutedColorHex,
+            font: theme.fontFamily,
           }),
         ],
         spacing: { after: 140 },
@@ -62,8 +61,8 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
         new TextRun({
           text: formatExportDate(new Date()),
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_MUTED_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.mutedColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 200 },
@@ -73,7 +72,10 @@ function buildCoverLetterHeader(userProfile: CoverLetterUserProfile): Paragraph[
   return children;
 }
 
-function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragraph[] {
+function buildCoverLetterRecipientBlock(
+  coverLetter: CoverLetterPayload,
+  theme: CoverLetterDocxTheme,
+): Paragraph[] {
   return [
     new Paragraph({
       children: [
@@ -81,8 +83,8 @@ function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragr
           text: coverLetter.company,
           bold: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_PRIMARY_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.primaryColorHex,
+          font: theme.fontFamily,
         }),
       ],
     }),
@@ -92,17 +94,20 @@ function buildCoverLetterRecipientBlock(coverLetter: CoverLetterPayload): Paragr
           text: `Re: ${coverLetter.position}`,
           italics: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_ACCENT_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.accentColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { after: 140 },
     }),
-    createDivider(COVER_LETTER_DOCX_LINE_COLOR),
+    createDivider(theme.lineColorHex),
   ];
 }
 
-function buildCoverLetterBodyParagraphs(content: unknown): Paragraph[] {
+function buildCoverLetterBodyParagraphs(
+  content: unknown,
+  theme: CoverLetterDocxTheme,
+): Paragraph[] {
   return toCoverLetterParagraphs(content).map(
     (paragraph) =>
       new Paragraph({
@@ -110,8 +115,8 @@ function buildCoverLetterBodyParagraphs(content: unknown): Paragraph[] {
           new TextRun({
             text: paragraph,
             size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-            color: COVER_LETTER_DOCX_TEXT_COLOR,
-            font: COVER_LETTER_DOCX_FONT_FAMILY,
+            color: theme.textColorHex,
+            font: theme.fontFamily,
           }),
         ],
         spacing: { after: 160 },
@@ -119,15 +124,18 @@ function buildCoverLetterBodyParagraphs(content: unknown): Paragraph[] {
   );
 }
 
-function buildCoverLetterSignature(userProfile: CoverLetterUserProfile): Paragraph[] {
+function buildCoverLetterSignature(
+  userProfile: CoverLetterUserProfile,
+  theme: CoverLetterDocxTheme,
+): Paragraph[] {
   return [
     new Paragraph({
       children: [
         new TextRun({
           text: COVER_LETTER_DEFAULT_SIGNATURE,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_TEXT_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.textColorHex,
+          font: theme.fontFamily,
         }),
       ],
       spacing: { before: 200, after: 40 },
@@ -138,8 +146,8 @@ function buildCoverLetterSignature(userProfile: CoverLetterUserProfile): Paragra
           text: userProfile.name,
           bold: true,
           size: DOCX_COVER_LETTER_FONT_BODY_PT * 2,
-          color: COVER_LETTER_DOCX_TEXT_COLOR,
-          font: COVER_LETTER_DOCX_FONT_FAMILY,
+          color: theme.textColorHex,
+          font: theme.fontFamily,
         }),
       ],
     }),
@@ -150,14 +158,15 @@ export async function exportCoverLetterDocxDocument(
   coverLetter: CoverLetterPayload,
   userProfile: CoverLetterUserProfile,
 ): Promise<Uint8Array> {
+  const theme = resolveCoverLetterDocxTheme(coverLetter.template);
   const doc = new Document({
     sections: [
       {
         children: [
-          ...buildCoverLetterHeader(userProfile),
-          ...buildCoverLetterRecipientBlock(coverLetter),
-          ...buildCoverLetterBodyParagraphs(coverLetter.content),
-          ...buildCoverLetterSignature(userProfile),
+          ...buildCoverLetterHeader(userProfile, theme),
+          ...buildCoverLetterRecipientBlock(coverLetter, theme),
+          ...buildCoverLetterBodyParagraphs(coverLetter.content, theme),
+          ...buildCoverLetterSignature(userProfile, theme),
         ],
       },
     ],

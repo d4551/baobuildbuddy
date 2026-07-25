@@ -2,6 +2,8 @@
 import { useI18n } from "vue-i18n";
 import AppJsonField from "~/components/ui/AppJsonField.vue";
 import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_GHOST_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -36,7 +38,7 @@ const sourceCollectionCount = computed(
             {{ t("settings.jobIntelligence.advancedCollectionsDescription") }}
           </p>
         </div>
-        <span class="badge badge-ghost badge-sm">
+        <span :class="BADGE_GHOST_SM_CLASS">
           {{ sourceCollectionCount }}
         </span>
       </div>
@@ -46,7 +48,7 @@ const sourceCollectionCount = computed(
           <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.greenhouseBoardsLabel") }}</span>
-              <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
+              <span :class="BADGE_GHOST_XS_CLASS">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
             </span>
           </summary>
           <div class="collapse-content">
@@ -62,7 +64,7 @@ const sourceCollectionCount = computed(
           <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.leverCompaniesLabel") }}</span>
-              <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
+              <span :class="BADGE_GHOST_XS_CLASS">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
             </span>
           </summary>
           <div class="collapse-content">
@@ -78,7 +80,7 @@ const sourceCollectionCount = computed(
           <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.companyBoardsLabel") }}</span>
-              <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
+              <span :class="BADGE_GHOST_XS_CLASS">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
             </span>
           </summary>
           <div class="collapse-content">
@@ -94,7 +96,7 @@ const sourceCollectionCount = computed(
           <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.companyTemplatesLabel") }}</span>
-              <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
+              <span :class="BADGE_GHOST_XS_CLASS">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
             </span>
           </summary>
           <div class="collapse-content">
@@ -110,7 +112,7 @@ const sourceCollectionCount = computed(
           <summary class="collapse-title font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm, PADDING_TOKEN_CLASS.pr10]">
             <span class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <span>{{ t("settings.jobIntelligence.gamingPortalsLabel") }}</span>
-              <span class="badge badge-ghost badge-xs">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
+              <span :class="BADGE_GHOST_XS_CLASS">{{ t("settings.jobIntelligence.advancedBadge") }}</span>
             </span>
           </summary>
           <div class="collapse-content">

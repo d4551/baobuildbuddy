@@ -3,18 +3,22 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
 import {
+  BADGE_OUTLINE_SM_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PAGE_HEADER_DESCRIPTION_MEASURE_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 
 definePageMeta({
@@ -164,7 +168,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         </SectionGrid>
 
         <div class="card-actions justify-end" v-if="hasFiltersApplied">
-          <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
+          <button type="button" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('coverLetterPage.filters.clearAria')" @click="clearFilters">
             {{ t("coverLetterPage.filters.clearButton") }}
           </button>
         </div>
@@ -174,7 +178,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
     <LoadingSkeleton
       v-if="bootstrapPending || (loading && coverLetters.length === 0)"
       variant="cards"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <BootstrapErrorAlert
@@ -207,7 +211,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
         :key="letter.id"
         :to="APP_ROUTE_BUILDERS.coverLetterDetail(letter.id)"
         :link-aria-label="t('coverLetterPage.cards.openAria', { company: letter.company, position: letter.position })"
-        :stagger-index="Math.min(index, 11)"
+        :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
       >
         <div class="card-body relative z-10">
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -215,7 +219,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
               <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ letter.position }}</h2>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ letter.company }}</p>
             </div>
-            <span class="badge badge-outline badge-sm">
+            <span :class="BADGE_OUTLINE_SM_CLASS">
               {{ letter.templateLabel }}
             </span>
           </div>
@@ -230,15 +234,15 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
           </div>
 
           <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('coverLetterPage.cards.editAria', { company: letter.company, position: letter.position })"
               @click.stop="editLetter(letter.id)"
             >
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
-            <button
-              :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+            <button type="button"
+              :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

@@ -5,13 +5,19 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import type { SaveState } from "./save-state";
+
+const preferencesLanguage = defineModel<string>("preferencesLanguage", { required: true });
+
+const notificationForm = defineModel<NotificationPreferences>("notificationForm", {
+  required: true,
+});
 
 defineProps<{
   theme: string;
@@ -19,11 +25,6 @@ defineProps<{
   languageOptions: ReadonlyArray<{ value: string; label: string }>;
   preferencesSaveState: SaveState;
 }>();
-
-const preferencesLanguage = defineModel<string>("preferencesLanguage", { required: true });
-const notificationForm = defineModel<NotificationPreferences>("notificationForm", {
-  required: true,
-});
 
 const emit = defineEmits<{
   save: [];
@@ -140,7 +141,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.preferences.saveAria')"
           :disabled="preferencesSaveState === 'saving'"

@@ -4,14 +4,16 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -87,7 +89,7 @@ const {
     >
       <template #actions>
         <!-- Empty library: EmptyState owns Create; hero keeps Guided only. -->
-        <button
+        <button type="button"
           v-if="resumes.length > 0 || selectedResumeId"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('resumePage.createButtonAria')"
@@ -115,9 +117,9 @@ const {
     />
 
     <LoadingSkeleton
-      v-else-if="resumeBootstrapStatus === 'pending' || (loading && !resumes.length)"
+      v-else-if="resumeBootstrapStatus === 'pending' || (loading && resumes.length === 0)"
       variant="cards"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <ResumeLibraryPanel
@@ -143,6 +145,7 @@ const {
     <!-- Resume Editor -->
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
       <ResumeEditorToolbar
+        v-model:template="formData.template"
         :enhancing="enhancing"
         :scoring="scoring"
         @back="selectedResumeId = null"
@@ -226,14 +229,14 @@ const {
       </fieldset>
 
       <div class="modal-action">
-        <button
-          class="btn btn-ghost"
+        <button type="button"
+          :class="GHOST_ACTION_CLASS"
           :aria-label="t('resumePage.createModal.cancelAria')"
           @click="showCreateModal = false"
         >
           {{ t("resumePage.createModal.cancelButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="creating || !newResumeName.trim()"
           :aria-label="t('resumePage.createModal.createAria')"

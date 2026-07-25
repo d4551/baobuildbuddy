@@ -1,3 +1,4 @@
+import { type CoverLetterDocxTheme, type PortfolioDocxTheme } from "@bao/shared/constants/export-document-theme";
 import { DOCX_COVER_LETTER_FONT_BODY_PT, DOCX_COVER_LETTER_FONT_HEADER_PT, DOCX_PORTFOLIO_FONT_BODY_PT, DOCX_PORTFOLIO_FONT_HEADING_PT, DOCX_PORTFOLIO_FONT_TITLE_PT, DOCX_RESUME_FONT_ACCENT_PT, DOCX_RESUME_FONT_BODY_PT, DOCX_RESUME_FONT_HEADER_PT, DOCX_RESUME_FONT_NAME_PT, RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
 import type { ResumeTemplate } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
@@ -12,6 +13,7 @@ export interface CoverLetterPayload {
     company: string;
     position: string;
     content: unknown;
+    template?: string;
 }
 export interface CoverLetterUserProfile {
     name: string;
@@ -33,6 +35,7 @@ export declare const PORTFOLIO_DOCX_MUTED_COLOR: "666666";
 export declare const PORTFOLIO_DOCX_SUBTLE_COLOR: "999999";
 export declare const PORTFOLIO_DOCX_FOOTER_COLOR: "727782";
 export declare const PORTFOLIO_DOCX_LINE_COLOR: "D0DDEB";
+export type { CoverLetterDocxTheme, PortfolioDocxTheme };
 export declare const createDivider: (color: string) => Paragraph;
 export declare const createSectionHeading: (label: string, color: string, pt: number, fontFamily: string) => Paragraph;
 export { DOCX_COVER_LETTER_FONT_BODY_PT, DOCX_COVER_LETTER_FONT_HEADER_PT, DOCX_PORTFOLIO_FONT_BODY_PT, DOCX_PORTFOLIO_FONT_HEADING_PT, DOCX_PORTFOLIO_FONT_TITLE_PT, DOCX_RESUME_FONT_ACCENT_PT, DOCX_RESUME_FONT_BODY_PT, DOCX_RESUME_FONT_HEADER_PT, DOCX_RESUME_FONT_NAME_PT, RESUME_EXPORT_THEME_CONFIGS, };

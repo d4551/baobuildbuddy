@@ -32,7 +32,7 @@ const collectPaths = (value: unknown, prefix: string = ""): string[] => {
 
 const referenceKeys = new Set(collectPaths(enUS));
 
-const collectViolations = (): ValidationViolation[] =>
+export const collectViolations = (): ValidationViolation[] =>
   locales.flatMap(({ filePath, value }) => {
     const localeKeys = new Set(collectPaths(value));
     const missingKeys = [...referenceKeys].filter((key) => !localeKeys.has(key));

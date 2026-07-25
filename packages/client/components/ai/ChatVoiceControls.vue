@@ -3,8 +3,10 @@ import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared/constants/ai-voice";
 import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
 import {
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -29,9 +31,11 @@ interface ChatVoiceControlsProps {
   readonly ttsProviderOptions?: readonly SpeechProviderOption[];
   readonly sttProvider?: SpeechProviderOption;
   readonly sttModel?: string;
+  readonly sttEndpoint?: string;
   readonly sttModelOptions?: readonly string[];
   readonly ttsProvider?: SpeechProviderOption;
   readonly ttsModel?: string;
+  readonly ttsEndpoint?: string;
   readonly ttsModelOptions?: readonly string[];
   readonly speechConfigSaving?: boolean;
   readonly compact?: boolean;
@@ -44,9 +48,11 @@ const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
   ttsProviderOptions: () => [],
   sttProvider: DEFAULT_SPEECH_SETTINGS.stt.provider,
   sttModel: DEFAULT_SPEECH_SETTINGS.stt.model,
+  sttEndpoint: DEFAULT_SPEECH_SETTINGS.stt.endpoint,
   sttModelOptions: () => [],
   ttsProvider: DEFAULT_SPEECH_SETTINGS.tts.provider,
   ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
+  ttsEndpoint: DEFAULT_SPEECH_SETTINGS.tts.endpoint,
   ttsModelOptions: () => [],
   speechConfigSaving: false,
   joinItem: false,
@@ -57,8 +63,10 @@ const emit = defineEmits<{
   "update:autoSpeakReplies": [value: boolean];
   "update:sttProvider": [value: SpeechProviderOption];
   "update:sttModel": [value: string];
+  "update:sttEndpoint": [value: string];
   "update:ttsProvider": [value: SpeechProviderOption];
   "update:ttsModel": [value: string];
+  "update:ttsEndpoint": [value: string];
   "save-speech-settings": [];
   "toggle-listening": [];
   "replay-assistant": [];
@@ -76,7 +84,9 @@ const showAdvancedSpeechConfig = computed(
     typeof props.sttProvider === "string" &&
     typeof props.ttsProvider === "string" &&
     typeof props.sttModel === "string" &&
-    typeof props.ttsModel === "string",
+    typeof props.ttsModel === "string" &&
+    typeof props.sttEndpoint === "string" &&
+    typeof props.ttsEndpoint === "string",
 );
 
 function handleVoiceSelectionChange(event: Event): void {
@@ -96,26 +106,36 @@ function handleAutoSpeakChange(event: Event): void {
 
   emit("update:autoSpeakReplies", target.checked);
 }
+
+const voiceStatusLabel = computed(() => {
+  if (props.isListening) {
+    return t("aiChatCommon.voice.listeningStatus");
+  }
+  if (props.isSpeaking) {
+    return t("aiChatCommon.voice.speakingStatus");
+  }
+  return t("aiChatCommon.voice.idleStatus");
+});
 </script>
 
 <template>
-  <button
+  <button type="button"
     v-if="props.supportsRecognition"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
-    data-testid="on-device-stt-mic"
-    :title="
-      props.isListening
-        ? t('aiChatCommon.voice.stopTitle')
-        : t('aiChatCommon.voice.startTitle')
-    "
-    :aria-label="
-      props.isListening
-        ? t('aiChatCommon.voice.stopAria')
-        : t('aiChatCommon.voice.startAria')
-    "
-    @click="emit('toggle-listening')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, [BTN_VARIANT_CLASS.warning]: props.isListening }]"
+ data-testid="on-device-stt-mic"
+ :title="
+ props.isListening
+ ? t('aiChatCommon.voice.stopTitle')
+ : t('aiChatCommon.voice.startTitle')
+ "
+ :aria-label="
+ props.isListening
+ ? t('aiChatCommon.voice.stopAria')
+ : t('aiChatCommon.voice.startAria')
+ "
+ @click="emit('toggle-listening')"
+ >
     <svg
       v-if="props.isListening"
       :class="iconClass"
@@ -143,15 +163,15 @@ function handleAutoSpeakChange(event: Event): void {
       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
-  <button
+  <button type="button"
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
-    data-testid="on-device-tts-test"
-    :aria-label="t('aiChatCommon.voice.testOnDeviceAria')"
-    :title="t('aiChatCommon.voice.testOnDeviceTitle')"
-    @click="emit('test-on-device-tts')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+ data-testid="on-device-tts-test"
+ :aria-label="t('aiChatCommon.voice.testOnDeviceAria')"
+ :title="t('aiChatCommon.voice.testOnDeviceTitle')"
+ @click="emit('test-on-device-tts')"
+ >
     <svg
       :class="iconClass"
       fill="none"
@@ -169,16 +189,16 @@ function handleAutoSpeakChange(event: Event): void {
       <circle cx="18" cy="16" r="3" />
     </svg>
   </button>
-  <button
+  <button type="button"
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
-    data-testid="on-device-tts-replay"
-    :aria-label="t('aiChatCommon.voice.replayAria')"
-    :title="t('aiChatCommon.voice.replayTitle')"
-    :disabled="!props.canReplayAssistant || props.loading"
-    @click="emit('replay-assistant')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+ data-testid="on-device-tts-replay"
+ :aria-label="t('aiChatCommon.voice.replayAria')"
+ :title="t('aiChatCommon.voice.replayTitle')"
+ :disabled="!props.canReplayAssistant || props.loading"
+ @click="emit('replay-assistant')"
+ >
     <svg
       :class="iconClass"
       fill="none"
@@ -223,13 +243,7 @@ function handleAutoSpeakChange(event: Event): void {
       />
     </label>
     <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" aria-live="polite">
-      {{
-        props.isListening
-          ? t("aiChatCommon.voice.listeningStatus")
-          : props.isSpeaking
-            ? t("aiChatCommon.voice.speakingStatus")
-            : t("aiChatCommon.voice.idleStatus")
-      }}
+{{ voiceStatusLabel }}
     </p>
   </div>
 
@@ -258,15 +272,19 @@ function handleAutoSpeakChange(event: Event): void {
     :tts-provider-options="props.ttsProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"
+    :stt-endpoint="props.sttEndpoint"
     :tts-provider="props.ttsProvider"
     :tts-model="props.ttsModel"
+    :tts-endpoint="props.ttsEndpoint"
     :stt-model-options="props.sttModelOptions ?? []"
     :tts-model-options="props.ttsModelOptions ?? []"
     :saving="props.speechConfigSaving === true"
     @update:stt-provider="emit('update:sttProvider', $event)"
     @update:stt-model="emit('update:sttModel', $event)"
+    @update:stt-endpoint="emit('update:sttEndpoint', $event)"
     @update:tts-provider="emit('update:ttsProvider', $event)"
     @update:tts-model="emit('update:ttsModel', $event)"
+    @update:tts-endpoint="emit('update:ttsEndpoint', $event)"
     @save="emit('save-speech-settings')"
   />
 </template>

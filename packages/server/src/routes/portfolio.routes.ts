@@ -25,6 +25,7 @@ import { exportService } from "../services/export-service";
 import { gamificationService } from "../services/gamification-service";
 import { portfolioService } from "../services/portfolio-service";
 import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../utils/http-response";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type PortfolioExportRouteBody,
   type PortfolioProjectCreateRouteBody,
@@ -45,7 +46,6 @@ import {
   portfolioResponses,
   portfolioUpdateBodySchema,
 } from "./portfolio-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -80,7 +80,7 @@ export const portfolioRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail("Portfolio", "Retrieve portfolio resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Retrieve the portfolio profile and project summary."),
       response: portfolioResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -93,7 +93,10 @@ export const portfolioRoutes = new Elysia({
   .put(
     "/",
     {
-      detail: openapiDetail("Portfolio", "Replace portfolio resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Portfolio",
+        "Replace portfolio profile fields such as headline and bio.",
+      ),
       body: portfolioUpdateBodySchema,
       response: portfolioMutationResponses,
     },
@@ -107,7 +110,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/projects",
     {
-      detail: openapiDetail("Portfolio", "Create or execute portfolio projects for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Add a new project entry to the portfolio."),
       body: portfolioProjectCreateBodySchema,
       response: portfolioProjectMutationResponses,
     },
@@ -143,7 +146,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/projects/reorder",
     {
-      detail: openapiDetail("Portfolio", "Create or execute portfolio projects reorder for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Reorder portfolio projects for display priority."),
       body: portfolioProjectReorderBodySchema,
       response: portfolioProjectReorderResponses,
     },
@@ -164,7 +167,7 @@ export const portfolioRoutes = new Elysia({
   .put(
     "/projects/:id",
     {
-      detail: openapiDetail("Portfolio", "Replace portfolio projects :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Replace fields on an existing portfolio project."),
       params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
       response: portfolioProjectMutationResponses,
@@ -203,7 +206,7 @@ export const portfolioRoutes = new Elysia({
   .delete(
     "/projects/:id",
     {
-      detail: openapiDetail("Portfolio", "Delete portfolio projects :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Delete a portfolio project by id."),
       params: portfolioProjectIdParamsSchema,
       response: portfolioProjectDeleteResponses,
     },
@@ -219,7 +222,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/export",
     {
-      detail: openapiDetail("Portfolio", "Create or execute portfolio export for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Portfolio", "Export the portfolio as a downloadable package."),
       body: portfolioExportBodySchema,
       response: portfolioExportResponses,
     },
@@ -233,7 +236,7 @@ export const portfolioRoutes = new Elysia({
 
       if (body.format === "docx") {
         const docxResult = await settle(
-          docxExportService.exportPortfolioDocx(metadata, portfolio.projects),
+          docxExportService.exportPortfolioDocx(metadata, portfolio.projects, body.template),
         );
         if (docxResult.status === "rejected") {
           return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
@@ -249,7 +252,7 @@ export const portfolioRoutes = new Elysia({
       }
 
       const exportResult = await settle(
-        exportService.exportPortfolioPDF(metadata, portfolio.projects),
+        exportService.exportPortfolioPDF(metadata, portfolio.projects, body.template),
       );
       if (exportResult.status === "rejected") {
         return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {

@@ -13,6 +13,7 @@ const appModalFramePath = "packages/client/components/ui/AppModalFrame.vue";
 
 const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-chrome.ts",
   "packages/client/constants/ui-layout.ts",
   "packages/client/assets/css/main.css",
   "packages/client/components/ui/LoadingSkeleton.vue",

@@ -29,6 +29,8 @@ import { captureResult, toErrorMessage } from "./utils/async-control";
 import { writeFormattedJsonFile } from "./utils/biome-format";
 import { writeError, writeOutput } from "./utils/cli-output";
 
+const NUM_4 = 4;
+
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
 type DesktopBundleMetadata = {
@@ -161,8 +163,13 @@ type MacosTauriCommandEntry = {
   readonly bundleCommand: readonly string[];
 };
 
-const readEnvValue = (value: string | undefined): string | undefined =>
-  value === undefined ? undefined : value.trim().length > 0 ? value.trim() : undefined;
+const readEnvValue = (value: string | undefined): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
 
 const buildSigningConfigForHost = (
   hostTarget: HostReleaseTarget | undefined,
@@ -1076,7 +1083,7 @@ const stageLinuxArtifacts = async (
     await Promise.all(
       artifactNames.map(async (artifactName) => {
         if (artifactName.endsWith(".sig")) {
-          const unsignedArtifactName = artifactName.slice(0, -4);
+          const unsignedArtifactName = artifactName.slice(0, -NUM_4);
           const unsignedKind = inferLinuxArtifactKind(unsignedArtifactName);
           const signatureBundlePath = buildLinuxBundlePathCandidatesForFileNames(
             target,
@@ -1319,12 +1326,19 @@ const main = async (): Promise<void> => {
   if (!skipBuild && isLinuxReleaseTarget(requestedTarget)) {
     await signLinuxArtifacts(metadata, requestedTarget, stageRequest.profile);
   }
-  const artifactNames =
-    requestedTarget === "macos"
-      ? await stageMacosArtifacts(metadata, outputRoot, stageRequest.profile)
-      : requestedTarget === "windows"
-        ? await stageWindowsArtifacts(metadata, outputRoot, stageRequest.profile)
-        : await stageLinuxArtifacts(metadata, outputRoot, requestedTarget, stageRequest.profile);
+  let artifactNames: string[];
+  if (requestedTarget === "macos") {
+    artifactNames = await stageMacosArtifacts(metadata, outputRoot, stageRequest.profile);
+  } else if (requestedTarget === "windows") {
+    artifactNames = await stageWindowsArtifacts(metadata, outputRoot, stageRequest.profile);
+  } else {
+    artifactNames = await stageLinuxArtifacts(
+      metadata,
+      outputRoot,
+      requestedTarget,
+      stageRequest.profile,
+    );
+  }
   await writeProvenance(hostTarget, outputRoot, artifactNames, buildCommands);
   await writeOutput(
     `desktop-release:${requestedTarget} staged ${artifactNames.join(", ")} in ${join(outputRoot, requestedTarget)}`,

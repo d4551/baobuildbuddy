@@ -1,10 +1,19 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
+import {
+  DEFAULT_AUTOMATION_SETTINGS,
+  DEFAULT_SETTINGS_ID,
+} from "@bao/shared/types/settings-defaults";
+import { eq } from "drizzle-orm";
+import { db } from "../db/client";
+import { settings } from "../db/schema/settings";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 const MASKED_KEY_PATTERN = /^\*\*\*[a-zA-Z0-9]{4}$/;
+const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
 
 beforeAll(async () => {
   const dbModule = await import("../db/client");
@@ -30,22 +39,64 @@ const getSettings = () =>
     hasEmailTransportPassword?: boolean;
     emailTransportPassword?: string | null;
     emailTransportSettings?: { host?: string };
+    automationSettings?: { defaultTimeout: number };
     jobTaxonomy?: {
       keywords: Array<{ id: string; label: string; category: string }>;
       studioRules: Array<{ id: string; keyword: string; studioType: string }>;
     };
   }>(app, "GET", API_ENDPOINTS.settings);
 
+const persistLegacyAutomationTimeout = () =>
+  db
+    .update(settings)
+    .set({
+      automationSettings: {
+        ...DEFAULT_AUTOMATION_SETTINGS,
+        defaultTimeout: LEGACY_AUTOMATION_TIMEOUT_SECONDS,
+      },
+    })
+    .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+
 describe("settings read routes", () => {
   test("GET settings returns settings", async () => {
     const res = await getSettings();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBeDefined();
     if (res.body.geminiApiKey) {
       expect(res.body.geminiApiKey).toMatch(MASKED_KEY_PATTERN);
     }
     expect(Array.isArray(res.body.jobTaxonomy?.keywords)).toBe(true);
     expect(Array.isArray(res.body.jobTaxonomy?.studioRules)).toBe(true);
+  });
+
+  test("GET settings persists normalized legacy automation timeout", async () => {
+    await persistLegacyAutomationTimeout();
+
+    const res = await getSettings();
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.automationSettings?.defaultTimeout).toBe(
+      DEFAULT_AUTOMATION_SETTINGS.defaultTimeout,
+    );
+
+    const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+    expect(rows[0]?.automationSettings?.defaultTimeout).toBe(
+      DEFAULT_AUTOMATION_SETTINGS.defaultTimeout,
+    );
+  });
+
+  test("automation settings loader persists normalized legacy timeout", async () => {
+    await persistLegacyAutomationTimeout();
+
+    const { loadAutomationSettings } = await import(
+      "../services/automation/automation-settings-support"
+    );
+    const automationSettings = await loadAutomationSettings();
+    expect(automationSettings.defaultTimeout).toBe(DEFAULT_AUTOMATION_SETTINGS.defaultTimeout);
+
+    const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID));
+    expect(rows[0]?.automationSettings?.defaultTimeout).toBe(
+      DEFAULT_AUTOMATION_SETTINGS.defaultTimeout,
+    );
   });
 
   test("GET settings export returns export payload", async () => {
@@ -56,7 +107,7 @@ describe("settings read routes", () => {
       settings: unknown;
       resumes: unknown[];
     }>(app, "GET", API_ENDPOINTS.settingsExport);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.version).toBe("1.0");
     expect(res.body.exportedAt).toBeDefined();
     expect(Array.isArray(res.body.resumes)).toBe(true);
@@ -87,7 +138,7 @@ describe("settings write routes - preferences", () => {
         connectionTimeoutSeconds: 20,
       },
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
 
     const updated = await getSettings();
@@ -106,13 +157,13 @@ describe("settings write routes - api keys", () => {
       localModelEndpoint: "http://localhost:1234",
       emailTransportPassword: "super-secret-password",
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
   });
 
   test("GET settings exposes email delivery password presence without returning the secret", async () => {
     const res = await getSettings();
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.hasEmailTransportPassword).toBe(true);
     expect(res.body.emailTransportPassword).toBeUndefined();
     expect(res.body.emailTransportSettings?.host).toBe("smtp.example.test");
@@ -149,7 +200,7 @@ describe("settings write routes - taxonomy", () => {
       ],
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
     expect(res.body.jobTaxonomy.keywords[0]?.label).toBe("Technical Sound Designer");
 

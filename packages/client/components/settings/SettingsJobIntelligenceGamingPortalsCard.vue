@@ -2,12 +2,17 @@
 import type { GamingPortalConfig } from "@bao/shared/types/settings";
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
+} from "~/constants/layout-badges";
 import {
   countConfiguredGamingPortals,
   parseGamingPortalsJson,
@@ -42,10 +47,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
 </script>
 
 <template>
-  <section
-    :class="SURFACE_GLASS_CARD_CLASS"
-    :aria-label="t('settings.jobIntelligence.gamingPortalsTogglesTitle')"
-  >
+  <UiGlassCard :aria-label="t('settings.jobIntelligence.gamingPortalsTogglesTitle')">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
       <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -56,7 +58,10 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
             {{ t("settings.jobIntelligence.gamingPortalsTogglesDescription") }}
           </p>
         </div>
-        <span class="badge badge-sm shrink-0" :class="configuredPortalCount > 0 ? 'badge-success' : 'badge-ghost'">
+        <span
+          class="shrink-0"
+          :class="[configuredPortalCount > 0 ? BADGE_SUCCESS_SM_CLASS : BADGE_GHOST_SM_CLASS]"
+        >
           {{
             t("settings.jobIntelligence.gamingPortalsConfiguredCount", {
               count: configuredPortalCount,
@@ -68,8 +73,8 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
       <div
         v-if="parseFailed"
         role="alert"
-        class="alert alert-warning"
-        :class="[TYPOGRAPHY_SCALE_CLASS.sm]"
+        class="alert"
+        :class="[ALERT_VARIANT_CLASS.warning, TYPOGRAPHY_SCALE_CLASS.sm]"
       >
         {{ t("settings.jobIntelligence.gamingPortalsParseError") }}
       </div>
@@ -83,8 +88,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
         <li
           v-for="portal in portals"
           :key="portal.id"
-          class="list-row items-center rounded-box border border-base-300 bg-base-100"
-          :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]"
+          class="list-row items-center" :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]"
         >
           <div class="list-col-grow" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <span class="font-medium" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ portal.name }}</span>
@@ -106,5 +110,5 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
         </li>
       </ul>
     </div>
-  </section>
+  </UiGlassCard>
 </template>

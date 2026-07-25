@@ -1,3 +1,5 @@
+const NUM_120 = 120;
+
 /**
  * Ban bare `btn-xs` outside icon primitives — Apple HIG touch floor.
  * Pair interactive controls with TOUCH_TARGET_MIN_CLASS (or upgrade to btn-sm + touch).
@@ -35,8 +37,8 @@ export const collectTouchTargetDensityViolations = (
     }
     // Same attribute must also reference TOUCH_TARGET_MIN_CLASS / PRIMARY_ACTION_CLASS nearby.
     const attrStart = match.index ?? 0;
-    const windowStart = Math.max(0, attrStart - 120);
-    const windowEnd = Math.min(content.length, attrStart + (match[0]?.length ?? 0) + 120);
+    const windowStart = Math.max(0, attrStart - NUM_120);
+    const windowEnd = Math.min(content.length, attrStart + (match[0]?.length ?? 0) + NUM_120);
     const nearby = content.slice(windowStart, windowEnd);
     if (TOUCH_FLOOR_PATTERN.test(nearby) || PRIMARY_ACTION_PATTERN.test(nearby)) {
       continue;

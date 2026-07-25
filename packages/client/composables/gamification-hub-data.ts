@@ -83,9 +83,7 @@ export async function requestGamificationData<T>(
   return response.data as T;
 }
 
-export async function fetchOptionalTrend(
-  request: Promise<ApiEnvelope<unknown>>,
-): Promise<unknown> {
+export async function fetchOptionalTrend(request: Promise<ApiEnvelope<unknown>>): Promise<unknown> {
   const response = await request;
   if (response.error) {
     return null;

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UI_RECOMMENDATION_PREVIEW_LIMIT, UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -6,6 +8,9 @@ definePageMeta({
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_OUTLINE_SM_CLASS,
+  BADGE_SM_CLASS,
+  BADGE_SUCCESS_SM_CLASS,
   BODY_TEXT_SM_CLASS,
   BODY_TEXT_XS_CLASS,
   CARD_TITLE_LG_CLASS,
@@ -14,15 +19,15 @@ import {
   ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_XS_ALT_CLASS,
   LABEL_HIDE_BELOW_SM_CLASS,
+  OUTLINE_ACTION_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   ROW_GAP_XS_CLASS,
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
   STACK_SPACING_SM_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -53,7 +58,7 @@ const page = useJobsIndexPage();
           <LoadingSpinner v-if="page.matching.value" size="sm" :label="t('jobsPage.aiMatchButton')" />
           <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
@@ -76,11 +81,11 @@ const page = useJobsIndexPage();
       </h2>
       <SectionGrid grid-token="twoColumn">
         <UiGlassCard
-          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          v-for="(job, index) in page.recommendations.value.slice(0, UI_RECOMMENDATION_PREVIEW_LIMIT)"
           :key="`rec-${job.id}`"
           :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
-          :stagger-index="Math.min(index, 11)"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
           <div class="card-body relative z-10">
             <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
@@ -196,7 +201,7 @@ const page = useJobsIndexPage();
               :key="job.id"
               :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
-              :stagger-index="Math.min(index, 11)"
+              :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             >
               <div class="card-body relative z-10">
                 <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
@@ -207,19 +212,19 @@ const page = useJobsIndexPage();
                 <p class="font-medium text-secondary">{{ job.company }}</p>
 
                 <div :class="[STACK_SPACING_SM_CLASS, 'flex flex-wrap', ROW_GAP_XS_CLASS]">
-                  <span class="badge badge-sm">
-                    <svg :class="['mr-1', ICON_SIZE_CHEVRON_CLASS]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <span :class="BADGE_SM_CLASS">
+                    <svg :class="['me-1', ICON_SIZE_CHEVRON_CLASS]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     {{ job.location }}
                   </span>
 
-                  <span v-if="job.remote" class="badge badge-success badge-sm">
+                  <span v-if="job.remote" :class="BADGE_SUCCESS_SM_CLASS">
                     {{ t("jobsPage.remoteBadge") }}
                   </span>
 
-                  <span v-if="job.experienceLevel" class="badge badge-sm badge-outline">
+                  <span v-if="job.experienceLevel" :class="BADGE_OUTLINE_SM_CLASS">
                     {{ page.experienceOptionLabel(job.experienceLevel) }}
                   </span>
                 </div>
@@ -240,14 +245,14 @@ const page = useJobsIndexPage();
                     {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
-                    <button
+                    <button type="button"
                       :class="[OUTLINE_ACTION_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
-                    <button
+                    <button type="button"
                       :class="[PRIMARY_ACTION_CLASS]"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"

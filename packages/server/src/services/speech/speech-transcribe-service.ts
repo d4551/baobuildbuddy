@@ -3,19 +3,35 @@ import {
   API_ERROR_SPEECH_STT_NOT_CONFIGURED,
   API_ERROR_SPEECH_TRANSCRIBE,
 } from "@bao/shared/constants/api-errors";
+import {
+  BYTES_KILO,
+  COUNT_EIGHT,
+  COUNT_ONE_EIGHTY,
+  MS_TWO_MINUTES,
+} from "@bao/shared/constants/numeric";
 import type { SpeechProviderOption } from "@bao/shared/constants/settings";
 import { safeParseJson } from "@bao/shared/utils/json";
-import { settle } from "@bao/shared/utils/promise";
 import { validateLocalAiEndpoint } from "@bao/shared/utils/local-ai-endpoint";
+import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
-import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { DEFAULT_SETTINGS_ID, settings } from "../../db/schema/settings";
+import { decryptProviderKeys } from "../../utils/settings-decrypt";
 import { loadAutomationSettings } from "../automation/automation-settings-support";
 
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024;
+const MAX_AUDIO_BYTES = COUNT_EIGHT * BYTES_KILO * BYTES_KILO;
 const BASE64_PAYLOAD_PATTERN = /^[A-Za-z0-9+/]+=*$/u;
 const TRAILING_SLASH_PATTERN = /\/$/u;
+
+const resolveRecordingFilename = (mimeType: string): string => {
+  if (mimeType.includes("wav")) {
+    return "recording.wav";
+  }
+  if (mimeType.includes("mp3")) {
+    return "recording.mp3";
+  }
+  return "recording.webm";
+};
 
 export type SpeechTranscribeInput = {
   readonly audioBase64: string;
@@ -51,7 +67,11 @@ const decodeAudio = (audioBase64: string): Uint8Array | null => {
 const resolveUpstreamAuth = async (
   provider: SpeechProviderOption,
 ): Promise<{ readonly apiKey: string | null }> => {
-  const rows = await db.select().from(settings).where(eq(settings.id, DEFAULT_SETTINGS_ID)).limit(1);
+  const rows = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.id, DEFAULT_SETTINGS_ID))
+    .limit(1);
   const row = rows[0];
   if (!row) {
     return { apiKey: null };
@@ -73,7 +93,9 @@ const resolveTranscriptionUrl = (
   const trimmed = endpoint.trim();
   if (provider === "openai") {
     const base =
-      trimmed.length > 0 ? trimmed.replace(TRAILING_SLASH_PATTERN, "") : "https://api.openai.com/v1";
+      trimmed.length > 0
+        ? trimmed.replace(TRAILING_SLASH_PATTERN, "")
+        : "https://api.openai.com/v1";
     return { ok: true, url: `${base}/audio/transcriptions` };
   }
   if (provider === "huggingface") {
@@ -101,7 +123,9 @@ const postOpenAiTranscription = async (input: {
   readonly mimeType: string;
   readonly filename: string;
   readonly model: string;
-}): Promise<{ readonly ok: true; readonly text: string } | { readonly ok: false; readonly error: string }> => {
+}): Promise<
+  { readonly ok: true; readonly text: string } | { readonly ok: false; readonly error: string }
+> => {
   const form = new FormData();
   form.append(
     "file",
@@ -117,7 +141,7 @@ const postOpenAiTranscription = async (input: {
       method: "POST",
       headers,
       body: form,
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(MS_TWO_MINUTES),
     }),
   );
   if (responseResult.status === "rejected") {
@@ -126,7 +150,10 @@ const postOpenAiTranscription = async (input: {
   const response = responseResult.value;
   const bodyText = await response.text();
   if (!response.ok) {
-    return { ok: false, error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, 180)}` };
+    return {
+      ok: false,
+      error: `${API_ERROR_SPEECH_TRANSCRIBE}: ${bodyText.slice(0, COUNT_ONE_EIGHTY)}`,
+    };
   }
   const parsed = safeParseJson(bodyText);
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
@@ -166,13 +193,7 @@ export const transcribeSpeechAudio = async (
   }
 
   const auth = await resolveUpstreamAuth(provider);
-  const filename =
-    input.filename?.trim() ||
-    (input.mimeType.includes("wav")
-      ? "recording.wav"
-      : input.mimeType.includes("mp3")
-        ? "recording.mp3"
-        : "recording.webm");
+  const filename = input.filename?.trim() || resolveRecordingFilename(input.mimeType);
 
   const upstream = await postOpenAiTranscription({
     url: urlResult.url,

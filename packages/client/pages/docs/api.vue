@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { useI18n } from "vue-i18n";
 import { definePageMeta, useSeoMeta } from "#imports";
 
@@ -48,7 +49,7 @@ const {
     />
 
     <div v-if="docsUiState === 'loading'" role="status" aria-live="polite" :aria-label="t('apiDocs.state.loading')">
-      <LoadingSkeleton :lines="6" />
+      <LoadingSkeleton :lines="LOADING_SKELETON_LINES.long" />
     </div>
 
     <EmptyState

@@ -9,14 +9,16 @@ import {
   type ChatDensity,
 } from "~/constants/chat";
 import {
+  BADGE_GHOST_XS_CLASS,
+  BADGE_OUTLINE_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { formatChatTimestamp } from "~/utils/chat";
 
@@ -52,13 +54,15 @@ const avatarClass = computed(() => {
   }
   return props.isLatestAssistantMessage && props.isStreaming ? "avatar-online" : "avatar-offline";
 });
-const avatarLabel = computed(() =>
-  isAssistant.value
-    ? props.isStreaming
-      ? t("aiChatCommon.voice.speakingStatus")
-      : props.assistantLabel
-    : props.userLabel,
-);
+const avatarLabel = computed(() => {
+  if (!isAssistant.value) {
+    return props.userLabel;
+  }
+  if (props.isStreaming) {
+    return t("aiChatCommon.voice.streamingStatus");
+  }
+  return props.assistantLabel;
+});
 const chatBubbleClass = computed(() =>
   isAssistant.value
     ? `border border-base-300 ${SURFACE_GLASS_SUBTLE_CLASS} text-base-content ${SHADOW_TOKEN_CLASS.sm}`
@@ -81,7 +85,7 @@ const isStreamingStatusVisible = computed(
   () => isAssistant.value && props.isLatestAssistantMessage && props.isStreaming,
 );
 const statusText = computed(() => {
-  return isStreamingStatusVisible.value ? t("aiChatCommon.voice.speakingStatus") : "";
+  return isStreamingStatusVisible.value ? t("aiChatCommon.voice.streamingStatus") : "";
 });
 const ariaLabel = computed(() => {
   if (formattedTime.value.length === 0) {
@@ -98,7 +102,6 @@ const ariaLabel = computed(() => {
 <template>
   <article 
     class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
-    role="listitem"
     :aria-label="ariaLabel"
     :aria-busy="isStreaming"
     :aria-live="isStreaming ? 'polite' : 'off'"
@@ -148,16 +151,16 @@ const ariaLabel = computed(() => {
         :aria-label="props.contextChipsAria || undefined"
       >
         <li v-for="chip in props.contextChips" :key="chip">
-          <span class="badge badge-outline badge-xs">{{ chip }}</span>
+          <span :class="BADGE_OUTLINE_XS_CLASS">{{ chip }}</span>
         </li>
       </ul>
       <span 
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"
         role="status"
-        :aria-label="t('aiChatCommon.voice.speakingStatus')"
+        :aria-label="t('aiChatCommon.voice.streamingStatus')"
       >
-        <span class="sr-only">{{ t("aiChatCommon.voice.speakingStatus") }}</span>
+        <span class="sr-only">{{ t("aiChatCommon.voice.streamingStatus") }}</span>
       </span>
       <template v-else>{{ message.content }}</template>
     </div>
@@ -174,9 +177,9 @@ const ariaLabel = computed(() => {
       v-if="isAssistant && (props.message.provider || props.message.model)"
       class="chat-footer flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt1, FLEX_GAP_TOKEN_CLASS.gap1]"
     >
-      <span v-if="props.message.provider" class="badge badge-ghost badge-xs">{{ props.message.provider }}</span>
-      <span v-if="props.message.model" class="badge badge-ghost badge-xs text-muted">{{ props.message.model }}</span>
-      <span v-if="props.message.confidence !== undefined" class="badge badge-outline badge-xs">
+      <span v-if="props.message.provider" :class="BADGE_GHOST_XS_CLASS">{{ props.message.provider }}</span>
+      <span v-if="props.message.model" :class="[BADGE_GHOST_XS_CLASS, 'text-muted']">{{ props.message.model }}</span>
+      <span v-if="props.message.confidence !== undefined" :class="BADGE_OUTLINE_XS_CLASS">
         {{ props.message.confidence }}%
       </span>
     </div>

@@ -1,10 +1,11 @@
-import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import {
-  SEARCH_RESULT_TYPES,
-  type SearchResultType,
-} from "@bao/shared/constants/search";
-import { isRecord } from "@bao/shared/utils/type-guards";
+  APP_ROUTE_BUILDERS,
+  APP_ROUTE_QUERY_KEYS,
+  APP_ROUTES,
+} from "@bao/shared/constants/routes";
+import { SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
@@ -30,7 +31,8 @@ export const SEARCH_TYPE_ROUTE: Record<SearchResultType, (id: string) => string>
   resumes: (id) => APP_ROUTE_BUILDERS.resumeEditor(id),
   skills: () => APP_ROUTES.skills,
   "cover-letters": (id) => APP_ROUTE_BUILDERS.coverLetterDetail(id),
-  "portfolio-projects": () => APP_ROUTES.portfolio,
+  "portfolio-projects": (id) =>
+    `${APP_ROUTES.portfolio}?${APP_ROUTE_QUERY_KEYS.id}=${encodeURIComponent(id)}`,
   "interview-sessions": (id) => APP_ROUTE_BUILDERS.interviewSession(id),
   "automation-runs": (id) => APP_ROUTE_BUILDERS.automationRunDetail(id),
 };
@@ -132,9 +134,7 @@ function createWorkspaceSearchActions(input: {
       return;
     }
     input.suggesting.value = true;
-    const settled = await settle(
-      input.api.search.autocomplete.get({ query: { prefix: trimmed } }),
-    );
+    const settled = await settle(input.api.search.autocomplete.get({ query: { prefix: trimmed } }));
     input.suggesting.value = false;
     if (settled.status !== "fulfilled") {
       return;

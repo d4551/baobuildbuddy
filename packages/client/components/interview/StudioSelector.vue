@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
@@ -218,7 +219,7 @@ function studioLocationLabel(location: string): string {
     >
       <span v-if="selectedStudio" class="flex items-center truncate" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <span class="truncate">{{ selectedStudio.name }}</span>
-        <span class="badge badge-sm" :class="studioTypeBadgeClass(selectedStudio.type)">
+ <span :class="[BADGE_SM_CLASS, studioTypeBadgeClass(selectedStudio.type)]">
           {{ resolvedStudioTypeLabel(selectedStudio.type) }}
         </span>
       </span>
@@ -247,13 +248,13 @@ function studioLocationLabel(location: string): string {
         />
       </div>
 
-      <ul class="menu" :id="listboxId" role="listbox" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
+      <ul class="menu" :id="listboxId" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]" :aria-label="t('studioSelector.menuAria')">
         <li v-for="(studio, index) in filteredStudios" :key="studio.id">
           <button 
             :id="optionId(studio.id)"
             type="button"
             role="option"
-            class="flex cursor-pointer flex-col items-start rounded-box text-left"
+            class="flex cursor-pointer flex-col items-start rounded-box text-start"
             :class="[
               FLEX_GAP_TOKEN_CLASS.gap1,
               PADDING_TOKEN_CLASS.px3,
@@ -273,7 +274,7 @@ function studioLocationLabel(location: string): string {
           >
             <div class="flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
               <span class="font-medium truncate">{{ studio.name }}</span>
-              <span class="badge badge-sm" :class="studioTypeBadgeClass(studio.type)">
+ <span :class="[BADGE_SM_CLASS, studioTypeBadgeClass(studio.type)]">
                 {{ resolvedStudioTypeLabel(studio.type) }}
               </span>
             </div>

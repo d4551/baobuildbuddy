@@ -1,6 +1,11 @@
 import { API_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
 import { describe, expect, it } from "vitest";
-import { resolveApiBase, resolveApiEndpoint, resolveApiRouteBase } from "./endpoints";
+import {
+  resolveApiBase,
+  resolveApiEndpoint,
+  resolveApiRouteBase,
+  resolveBrowserApiFetchUrl,
+} from "./endpoints";
 
 describe("endpoint base resolution", () => {
   const requestUrl = new URL("http://localhost:3004/resume/preview");
@@ -25,5 +30,20 @@ describe("endpoint base resolution", () => {
     expect(
       resolveApiEndpoint(API_ENDPOINT_PREFIX, requestUrl, `${API_ENDPOINT_PREFIX}/settings`),
     ).toBe(`http://localhost:3004${API_ENDPOINT_PREFIX}/settings`);
+  });
+
+  it("rewrites absolute API export URLs to same-origin proxy paths in the browser", () => {
+    expect(
+      resolveBrowserApiFetchUrl(
+        "http://127.0.0.1:3000/api/resumes/abc/export",
+        new URL("http://127.0.0.1:3001/resume"),
+      ),
+    ).toBe("/api/resumes/abc/export");
+    expect(
+      resolveBrowserApiFetchUrl(
+        "http://127.0.0.1:3001/api/portfolio/export",
+        new URL("http://127.0.0.1:3001/portfolio"),
+      ),
+    ).toBe("/api/portfolio/export");
   });
 });

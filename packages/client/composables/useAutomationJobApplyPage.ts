@@ -3,12 +3,12 @@ import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.sch
 import type { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
-  buildJobApplyBody,
   type ScheduledJobApplyRequestBody,
   useAutomationJobApplyBootstrap,
   useAutomationJobApplyDependencies,
   useAutomationJobApplyForm,
 } from "~/composables/automation-job-apply-page-form";
+import { buildJobApplyBody } from "~/composables/automation-job-apply-select-options";
 import {
   DATE_FORMAT_OPTIONS,
   resolveScheduledRunAt,
@@ -205,12 +205,35 @@ function createAutomationScheduledJobApplyAction(input: {
   };
 }
 
+function registerAutomationJobApplyResumePrefill(input: {
+  bootstrap: ReturnType<typeof useAutomationJobApplyBootstrap>;
+  dependencies: ReturnType<typeof useAutomationJobApplyDependencies>;
+  form: ReturnType<typeof useAutomationJobApplyForm>;
+}): void {
+  watch(
+    input.bootstrap.resumesData,
+    async (resumes) => {
+      if (input.form.resumeId.value || !resumes || resumes.length === 0) {
+        return;
+      }
+      const context = await input.dependencies.getVerifyContext();
+      if (!context) {
+        return;
+      }
+      if (resumes.some((resume) => resume.id === context.resumeId)) {
+        input.form.resumeId.value = context.resumeId;
+      }
+    },
+    { immediate: true },
+  );
+}
+
 export function useAutomationJobApplyPage() {
   const dependencies = useAutomationJobApplyDependencies();
   const form = useAutomationJobApplyForm();
   const bootstrap = useAutomationJobApplyBootstrap({
     api: dependencies.api,
-    runtime: dependencies.runtime,
+    t: dependencies.t,
   });
   const state = createAutomationJobApplyState(dependencies.runStream);
   const presentation = createAutomationJobApplyPresentation({
@@ -228,26 +251,11 @@ export function useAutomationJobApplyPage() {
     triggerJobApply: dependencies.triggerJobApply,
   });
 
-  // Prefill resume from verify/context when enabled (404 → no-op).
-  watch(
-    bootstrap.resumesData,
-    async (resumes) => {
-      if (form.resumeId.value || !resumes || resumes.length === 0) {
-        return;
-      }
-      const context = await dependencies.getVerifyContext();
-      if (!context) {
-        return;
-      }
-      if (resumes.some((resume) => resume.id === context.resumeId)) {
-        form.resumeId.value = context.resumeId;
-      }
-    },
-    { immediate: true },
-  );
+  registerAutomationJobApplyResumePrefill({ bootstrap, dependencies, form });
 
   return {
     activeRunId: state.activeRunId,
+    bootstrapError: bootstrap.bootstrapError,
     bootstrapPending: bootstrap.bootstrapPending,
     coverLetterId: form.coverLetterId,
     coverLettersData: bootstrap.coverLettersData,
@@ -257,6 +265,7 @@ export function useAutomationJobApplyPage() {
     jobId: form.jobId,
     jobUrl: form.jobUrl,
     pending: state.pending,
+    refreshBootstrap: bootstrap.refreshBootstrap,
     resolveScheduledRunAt,
     resumeId: form.resumeId,
     resumesData: bootstrap.resumesData,

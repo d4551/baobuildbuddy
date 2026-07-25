@@ -7,6 +7,9 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
+const NUM_4 = 4;
+const NUM_52 = 52;
+
 /**
  * Responsive overflow + fluidity gate (design.md §11, §8).
  *
@@ -67,80 +70,85 @@ const extractTemplateBlocks = (content: string): string => {
   return content.slice(templateStart, templateEnd + "</template>".length);
 };
 
+const collectFixedWidthHits = (
+  filePath: string,
+  classValue: string,
+  baseLine: number,
+): ValidationViolation[] => {
+  fixedWidthPattern.lastIndex = 0;
+  const fixedWidthMatch = classValue.match(fixedWidthPattern);
+  if (!fixedWidthMatch) return [];
+  const widthValue = Number.parseInt(fixedWidthMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
+  const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= NUM_52;
+  const hasGuard = WIDTH_GUARD_PATTERN.test(classValue);
+  const isFluidCap = MAX_W_CAP_PATTERN.test(classValue);
+  if (isSmallPrimitive || hasGuard || isFluidCap) return [];
+  return [
+    {
+      filePath,
+      line: baseLine,
+      message: `Fixed width "${fixedWidthMatch[0]}" risks horizontal overflow without min-w-0 or max-w-* guard. Use the SSOT SHELL_MAIN_INNER_CLASS / PAGE_HERO_ASIDE_CLASS pattern or wrap in min-w-0.`,
+    },
+  ];
+};
+
+const collectFixedHeightHits = (
+  filePath: string,
+  classValue: string,
+  baseLine: number,
+): ValidationViolation[] => {
+  fixedHeightPattern.lastIndex = 0;
+  const fixedHeightMatch = classValue.match(fixedHeightPattern);
+  if (!fixedHeightMatch) return [];
+  const heightValue = Number.parseInt(fixedHeightMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
+  const isSmallPrimitive = Number.isFinite(heightValue) && heightValue <= SMALL_SIZE_THRESHOLD;
+  const hasOverflowGuard = VERTICAL_OVERFLOW_GUARD_PATTERN.test(classValue);
+  const isSkeletonRow = SKELETON_CLASS_PATTERN.test(classValue);
+  const isSquarePrimitive =
+    heightValue <= SMALL_SIZE_THRESHOLD + NUM_4 && W_ARBITRARY_PATTERN.test(classValue);
+  if (isSmallPrimitive || hasOverflowGuard || isSkeletonRow || isSquarePrimitive) return [];
+  return [
+    {
+      filePath,
+      line: baseLine,
+      message: `Fixed height "${fixedHeightMatch[0]}" clips content on short viewports. Prefer min-h-* or add overflow-y-auto/overflow-hidden for bounded scroll, or use the glass-card container query for adaptive density.`,
+    },
+  ];
+};
+
+const collectFixedGridHits = (
+  filePath: string,
+  classValue: string,
+  baseLine: number,
+): ValidationViolation[] => {
+  fixedGridColsPattern.lastIndex = 0;
+  const fixedGridMatch = classValue.match(fixedGridColsPattern);
+  if (!fixedGridMatch || RESPONSIVE_GRID_COLS_PATTERN.test(classValue)) return [];
+  return [
+    {
+      filePath,
+      line: baseLine,
+      message: `Fixed grid columns "${fixedGridMatch[0]}" without responsive sm:/md: guard cramps mobile. Use grid-cols-1 sm:grid-cols-2 md:grid-cols-N or the SectionGrid primitive.`,
+    },
+  ];
+};
+
 const collectOverflowViolations = (filePath: string, content: string): ValidationViolation[] => {
   if (isSsotSourceFile(filePath)) return [];
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
   const violations: ValidationViolation[] = [];
 
-  // For each class attribute, check for fixed width without min-w-0 / max-w guard.
   CLASS_ATTR_PATTERN.lastIndex = 0;
   for (const classMatch of template.matchAll(CLASS_ATTR_PATTERN)) {
     const classValue = classMatch[1] ?? "";
     const baseLine = getLineFromOffset(content, classMatch.index ?? 0);
-
-    fixedWidthPattern.lastIndex = 0;
-    const fixedWidthMatch = classValue.match(fixedWidthPattern);
-    if (fixedWidthMatch) {
-      const widthValue = Number.parseInt(fixedWidthMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
-      // Small widths (w-10..w-52) are dropdowns/menus/badges — not overflow risks.
-      // Only flag large fixed widths (w-64+) that risk pushing content off-screen.
-      const isSmallPrimitive = Number.isFinite(widthValue) && widthValue <= 52;
-      const hasGuard = WIDTH_GUARD_PATTERN.test(classValue);
-      const isFluidCap = MAX_W_CAP_PATTERN.test(classValue);
-      if (!isSmallPrimitive && !hasGuard && !isFluidCap) {
-        violations.push({
-          filePath,
-          line: baseLine,
-          message: `Fixed width "${fixedWidthMatch[0]}" risks horizontal overflow without min-w-0 or max-w-* guard. Use the SSOT SHELL_MAIN_INNER_CLASS / PAGE_HERO_ASIDE_CLASS pattern or wrap in min-w-0.`,
-        });
-      }
-    }
-
-    fixedHeightPattern.lastIndex = 0;
-    const fixedHeightMatch = classValue.match(fixedHeightPattern);
-    if (fixedHeightMatch) {
-      const heightValue = Number.parseInt(fixedHeightMatch[0].replace(DIGITS_ONLY_PATTERN, ""), 10);
-      const isSmallPrimitive = Number.isFinite(heightValue) && heightValue <= SMALL_SIZE_THRESHOLD;
-      // Fixed height with an overflow guard (overflow-hidden/y-auto/y-scroll)
-      // is the canonical bounded scroll region pattern (chat panels, timelines,
-      // modal content). This is correct — not a violation.
-      const hasOverflowGuard = VERTICAL_OVERFLOW_GUARD_PATTERN.test(classValue);
-      // Skeleton rows legitimately use fixed heights.
-      const isSkeletonRow = SKELETON_CLASS_PATTERN.test(classValue);
-      // Aspect-ratio / ratio surfaces (swatches, thumbnails) use fixed h- with
-      // a sibling w- of the same size — these are primitives, not text clips.
-      const isSquarePrimitive =
-        heightValue <= SMALL_SIZE_THRESHOLD + 4 && W_ARBITRARY_PATTERN.test(classValue);
-      if (!isSmallPrimitive && !hasOverflowGuard && !isSkeletonRow && !isSquarePrimitive) {
-        violations.push({
-          filePath,
-          line: baseLine,
-          message: `Fixed height "${fixedHeightMatch[0]}" clips content on short viewports. Prefer min-h-* or add overflow-y-auto/overflow-hidden for bounded scroll, or use the glass-card container query for adaptive density.`,
-        });
-      }
-    }
-
-    fixedGridColsPattern.lastIndex = 0;
-    const fixedGridMatch = classValue.match(fixedGridColsPattern);
-    if (fixedGridMatch) {
-      const hasResponsiveGuard = RESPONSIVE_GRID_COLS_PATTERN.test(classValue);
-      if (!hasResponsiveGuard) {
-        violations.push({
-          filePath,
-          line: baseLine,
-          message: `Fixed grid columns "${fixedGridMatch[0]}" without responsive sm:/md: guard cramps mobile. Use grid-cols-1 sm:grid-cols-2 md:grid-cols-N or the SectionGrid primitive.`,
-        });
-      }
-    }
+    violations.push(
+      ...collectFixedWidthHits(filePath, classValue, baseLine),
+      ...collectFixedHeightHits(filePath, classValue, baseLine),
+      ...collectFixedGridHits(filePath, classValue, baseLine),
+    );
   }
-
-  // The overflow-x-auto scroll container check was a false positive:
-  // ON a scroll container is the canonical Bao pattern for tables/timelines.
-  // The real overflow risk is flex parents with fixed-width children and no
-  // min-w-0/max-w-* guard, which the fixedWidthPattern check above already
-  // catches. min-w-0 is only required for flexbox truncation, not for
-  // overflow-x-auto scroll containers.
 
   return violations;
 };

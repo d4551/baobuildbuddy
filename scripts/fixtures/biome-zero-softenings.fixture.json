@@ -1,0 +1,283 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+  "root": true,
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/dist-types",
+      "!**/.nuxt",
+      "!**/.output",
+      "!**/bun.lock",
+      "!**/packages/desktop/src-tauri/target",
+      "!**/packages/desktop/src-tauri/gen",
+      "!**/packages/desktop/src-tauri/icons",
+      "!**/.omo",
+      "!**/agentiflow",
+      "!**/docs",
+      "!**/docs/browser-smoke",
+      "!**/docs/ssot-ledger/**/*.json",
+      "!**/docs/ssot-ledger/**/*.png"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "vue": "recommended",
+      "drizzle": "all",
+      "project": "recommended",
+      "test": "recommended",
+      "playwright": "all",
+      "types": "recommended",
+      "react": "none",
+      "reactNative": "none",
+      "qwik": "none",
+      "next": "none",
+      "solid": "none",
+      "svelte": "none",
+      "turborepo": "none"
+    },
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "recommended": true,
+        "noAccessKey": "error",
+        "noAmbiguousAnchorText": "error",
+        "noAriaHiddenOnFocusable": "error",
+        "noAriaUnsupportedElements": "error",
+        "noAutofocus": "error",
+        "noDistractingElements": "error",
+        "noHeaderScope": "error",
+        "noInteractiveElementToNoninteractiveRole": "error",
+        "noLabelWithoutControl": "error",
+        "noNoninteractiveElementInteractions": "error",
+        "noNoninteractiveElementToInteractiveRole": "error",
+        "noNoninteractiveTabindex": "error",
+        "noPositiveTabindex": "error",
+        "noRedundantAlt": "error",
+        "noRedundantRoles": "error",
+        "noStaticElementInteractions": "error",
+        "noSvgWithoutTitle": "error",
+        "useAltText": "error",
+        "useAnchorContent": "error",
+        "useAriaActivedescendantWithTabindex": "error",
+        "useAriaPropsForRole": "error",
+        "useAriaPropsSupportedByRole": "error",
+        "useButtonType": "error",
+        "useFocusableInteractive": "error",
+        "useGenericFontNames": "error",
+        "useHeadingContent": "error",
+        "useHtmlLang": "error",
+        "useIframeTitle": "error",
+        "useKeyWithClickEvents": "error",
+        "useKeyWithMouseEvents": "error",
+        "useMediaCaption": "error",
+        "useSemanticElements": "error",
+        "useValidAnchor": "error",
+        "useValidAriaProps": "error",
+        "useValidAriaRole": "error",
+        "useValidAriaValues": "error",
+        "useValidAutocomplete": "error",
+        "useValidLang": "error"
+      },
+      "complexity": {
+        "recommended": true,
+        "noVoid": "error",
+        "noExcessiveCognitiveComplexity": "error",
+        "noUselessContinue": "error",
+        "noUselessStringConcat": "error",
+        "noImplicitCoercions": {
+          "level": "error",
+          "options": {
+            "allowDoubleNegation": false
+          }
+        },
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": {
+            "maxLines": 60
+          }
+        }
+      },
+      "correctness": {
+        "recommended": true,
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedPrivateClassMembers": "error",
+        "noUnusedLabels": "error",
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error"
+      },
+      "performance": {
+        "recommended": true,
+        "noBarrelFile": "error",
+        "noAwaitInLoops": "error",
+        "useTopLevelRegex": "error",
+        "noAccumulatingSpread": "error"
+      },
+      "security": {
+        "recommended": true,
+        "noSecrets": {
+          "level": "error",
+          "options": {
+            "entropyThreshold": 55
+          }
+        },
+        "noDangerouslySetInnerHtml": "error",
+        "noGlobalEval": "error"
+      },
+      "suspicious": {
+        "recommended": true,
+        "noConsole": "error",
+        "noDebugger": "error",
+        "noExplicitAny": "error",
+        "noSkippedTests": "error",
+        "noFocusedTests": "error",
+        "noExportsInTest": "error",
+        "noAlert": "error",
+        "noDocumentCookie": "error",
+        "noConstantBinaryExpressions": "error",
+        "noImplicitAnyLet": "error",
+        "noShadowRestrictedNames": "error",
+        "noEmptyBlockStatements": "error",
+        "noTemplateCurlyInString": "error"
+      },
+      "style": {
+        "recommended": true,
+        "noNonNullAssertion": "error",
+        "noNestedTernary": "error",
+        "noUselessElse": "error",
+        "useConst": "error",
+        "useTemplate": "error",
+        "useExportType": "error",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error",
+        "useNumberNamespace": "error",
+        "useShorthandFunctionType": "error",
+        "useDefaultParameterLast": "error",
+        "useExponentiationOperator": "error",
+        "useAsConstAssertion": "error",
+        "useEnumInitializers": "error",
+        "useDefaultSwitchClause": "error",
+        "useCollapsedElseIf": "error",
+        "useArrayLiterals": "error",
+        "useVueMultiWordComponentNames": {
+          "level": "error",
+          "options": {
+            "ignores": ["index", "default", "error", "[id]"]
+          }
+        },
+        "useVueDefineMacrosOrder": "error",
+        "useVueHyphenatedAttributes": "error",
+        "noShoutyConstants": "error",
+        "noCommonJs": "error",
+        "noMagicNumbers": "error",
+        "useThrowOnlyError": "error",
+        "useExplicitLengthCheck": "error",
+        "noDoneCallback": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "useAwaitThenable": "error",
+        "noVueImportCompilerMacros": "error",
+        "noVueRefAsOperand": "error",
+        "noVueVOnNumberValues": "error",
+        "useVueNextTickPromise": "error",
+        "noDrizzleDeleteWithoutWhere": "error",
+        "noDrizzleUpdateWithoutWhere": "error",
+        "useExhaustiveSwitchCases": "error",
+        "noInlineStyles": "error",
+        "useIframeSandbox": "error",
+        "useScopedStyles": "error",
+        "noExcessiveNestedCallbacks": "error",
+        "noExcessiveSelectorClasses": "error",
+        "useSortedClasses": {
+          "level": "error",
+          "options": {
+            "attributes": ["class", "className", "classList"],
+            "functions": ["clsx", "cn", "twMerge", "twJoin"]
+          }
+        },
+        "noPlaywrightElementHandle": "error",
+        "noPlaywrightEval": "error",
+        "noPlaywrightForceOption": "error",
+        "noPlaywrightMissingAwait": "error",
+        "noPlaywrightNetworkidle": "error",
+        "noPlaywrightPagePause": "error",
+        "noPlaywrightUselessAwait": "error",
+        "noPlaywrightWaitForTimeout": "error"
+      }
+    }
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.{ts,js,mjs,cjs}"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "error",
+            "noUnusedVariables": "error",
+            "noUnusedFunctionParameters": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.vue"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "error",
+            "noUnusedVariables": "error",
+            "noUnusedFunctionParameters": "error"
+          },
+          "style": {
+            "useVueMultiWordComponentNames": {
+              "level": "error",
+              "options": {
+                "ignores": ["index", "default", "error", "[id]"]
+              }
+            },
+            "useVueDefineMacrosOrder": "error"
+          },
+          "nursery": {
+            "noVueRefAsOperand": "error",
+            "noVueImportCompilerMacros": "error",
+            "useVueNextTickPromise": "error",
+            "noInlineStyles": "error",
+            "useScopedStyles": "error"
+          }
+        }
+      }
+    }
+  ]
+}

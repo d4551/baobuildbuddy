@@ -120,7 +120,9 @@ const resolveInstalledPackage = async (
 ): Promise<ResolvedPackageVersion | { packageName: string; error: string }> => {
   const fromPackageDir = join(rootDir, pin.resolveFromPackage);
   const resolveResult = await settle(
-    Promise.resolve().then(() => Bun.resolveSync(`${pin.packageName}/package.json`, fromPackageDir)),
+    Promise.resolve().then(() =>
+      Bun.resolveSync(`${pin.packageName}/package.json`, fromPackageDir),
+    ),
   );
   if (resolveResult.status === "rejected") {
     return {
@@ -140,7 +142,9 @@ const resolveInstalledPackage = async (
   return {
     packageName: pin.packageName,
     installedVersion: version,
-    packageJsonPath: resolvedPath.replace(/\\/gu, "/").replace(`${rootDir.replace(/\\/gu, "/")}/`, ""),
+    packageJsonPath: resolvedPath
+      .replace(/\\/gu, "/")
+      .replace(`${rootDir.replace(/\\/gu, "/")}/`, ""),
   };
 };
 

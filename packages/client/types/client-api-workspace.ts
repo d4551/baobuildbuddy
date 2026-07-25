@@ -34,9 +34,7 @@ export interface SettingsWorkspaceBackupApi {
 }
 
 export interface SearchApi {
-  get(options?: {
-    query?: { q?: string; types?: string };
-  }): ApiRequest<{
+  get(options?: { query?: { q?: string; types?: string } }): ApiRequest<{
     query: string;
     results: Array<{
       type: string;
@@ -61,10 +59,10 @@ export interface AutomationVerifyContextPayload {
 }
 
 export interface AutomationRunsApi {
-  get(options?: {
-    query?: { type?: string; status?: string };
-  }): ApiRequest<unknown>;
-  (params: { id: string }): {
+  get(options?: { query?: { type?: string; status?: string } }): ApiRequest<unknown>;
+  (params: {
+    id: string;
+  }): {
     get(): ApiRequest<unknown>;
   };
 }

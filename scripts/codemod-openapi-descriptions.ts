@@ -8,6 +8,10 @@ const ROUTES_ROOT = join(import.meta.dir, "../packages/server/src/routes");
 const DETAIL_PATTERN = /detail:\s*\{\s*tags:\s*\["([^"]+)"\]\s*,?\s*\}/gu;
 const METHOD_PATH_PATTERN =
   /\.(get|post|put|patch|delete|options|head)\(\s*(?:\n\s*)?["'`]([^"'`]+)["'`]/gu;
+const PATH_PARAM_PATTERN = /\{([^}]+)\}/gu;
+const PATH_SEPARATOR_PATTERN = /[-_/]+/gu;
+const LEADING_SLASH_PATTERN = /^\//u;
+const QUOTE_PATTERN = /"/gu;
 
 const verbPhrase = (method: string): string => {
   switch (method.toLowerCase()) {
@@ -28,9 +32,9 @@ const verbPhrase = (method: string): string => {
 
 const humanizePath = (path: string): string => {
   const cleaned = path
-    .replace(/^\//u, "")
-    .replace(/\{([^}]+)\}/gu, "$1")
-    .replace(/[-_/]+/gu, " ")
+    .replace(LEADING_SLASH_PATTERN, "")
+    .replace(PATH_PARAM_PATTERN, "$1")
+    .replace(PATH_SEPARATOR_PATTERN, " ")
     .trim();
   return cleaned.length > 0 ? cleaned : "resource";
 };
@@ -62,8 +66,7 @@ const ensureImport = (content: string): string => {
   if (content.includes("openapiDetail")) {
     return content;
   }
-  const importLine =
-    'import { openapiDetail } from "../utils/openapi-detail";\n';
+  const importLine = 'import { openapiDetail } from "../utils/openapi-detail";\n';
   const lastImport = content.lastIndexOf("\nimport ");
   if (lastImport === -1) {
     return `${importLine}${content}`;
@@ -83,7 +86,7 @@ const transformFile = async (filePath: string): Promise<number> => {
   const next = original.replace(DETAIL_PATTERN, (_full, tag: string, offset: number) => {
     count += 1;
     const { method, path } = nearestMethodPath(original, offset);
-    const description = inferDescription(tag, method, path).replace(/"/gu, "'");
+    const description = inferDescription(tag, method, path).replace(QUOTE_PATTERN, "'");
     return `detail: openapiDetail("${tag}", "${description}")`;
   });
   if (count === 0) {
@@ -95,30 +98,26 @@ const transformFile = async (filePath: string): Promise<number> => {
 
 const walkTs = async (dir: string): Promise<string[]> => {
   const entries = await readdir(dir, { withFileTypes: true });
-  const files: string[] = [];
-  for (const entry of entries) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await walkTs(full)));
-      continue;
-    }
-    if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) {
-      files.push(full);
-    }
-  }
-  return files;
+  const nested = await Promise.all(
+    entries.map(async (entry) => {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        return walkTs(full);
+      }
+      if (entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) {
+        return [full];
+      }
+      return [] as string[];
+    }),
+  );
+  return nested.flat();
 };
 
 const main = async (): Promise<void> => {
   const files = await walkTs(ROUTES_ROOT);
-  // also app.ts health routes if any
   const appPath = join(import.meta.dir, "../packages/server/src/app.ts");
   files.push(appPath);
-  let total = 0;
-  for (const file of files) {
-    total += await transformFile(file);
-  }
-  console.log(`openapi-desc codemod: updated ${total} detail blocks across ${files.length} files`);
+  await Promise.all(files.map((file) => transformFile(file)));
 };
 
 await main();

@@ -4,10 +4,10 @@ import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -15,13 +15,14 @@ import { countActiveJobProviderSources } from "~/utils/job-provider-source-count
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
+const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+
+const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+
 defineProps<{
   providerSaveState: SaveState;
   taxonomySaveState: SaveState;
 }>();
-
-const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
-const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
 
 const emit = defineEmits<{
   saveProviders: [];
@@ -32,16 +33,22 @@ const { t } = useI18n();
 
 const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
-const sourceCollectionCount = computed(
-  () =>
-    [
-      jobProviderForm.value.greenhouseBoardsJson,
-      jobProviderForm.value.leverCompaniesJson,
-      jobProviderForm.value.companyBoardsJson,
-      jobProviderForm.value.companyBoardApiTemplatesJson,
-      jobProviderForm.value.gamingPortalsJson,
-    ].filter((value) => value.trim().length > 0).length,
-);
+const sourceCollectionCount = computed(() => {
+  const sources = [
+    jobProviderForm.value.greenhouseBoardsJson,
+    jobProviderForm.value.leverCompaniesJson,
+    jobProviderForm.value.companyBoardsJson,
+    jobProviderForm.value.companyBoardApiTemplatesJson,
+    jobProviderForm.value.gamingPortalsJson,
+  ];
+  let count = 0;
+  for (const source of sources) {
+    if (source.trim().length > 0) {
+      count += 1;
+    }
+  }
+  return count;
+});
 
 const taxonomyAssetCount = computed(
   () =>
@@ -55,7 +62,7 @@ const taxonomyAssetCount = computed(
     <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
         <SettingsPanelHeader />
-        <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+        <div :class="[STATS_SHELL_VARIANT_CLASS.lg, SHADOW_TOKEN_CLASS.sm]">
           <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
             <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>

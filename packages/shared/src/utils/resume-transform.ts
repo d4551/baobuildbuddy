@@ -1,3 +1,8 @@
+import {
+  RESUME_TEMPLATE_DEFAULT,
+  type ResumeTemplate,
+  isResumeTemplate,
+} from "../constants/resume";
 import type {
   GamingExperience,
   ResumeData,
@@ -19,6 +24,7 @@ export interface ResumeFormData {
   summary: string;
   linkedIn: string;
   portfolio: string;
+  template: ResumeTemplate;
   experience: ResumeFormExperience[];
   education: ResumeFormEducation[];
   skills: string[];
@@ -103,7 +109,7 @@ function mapFormEducationToResumeEducation(
 }
 
 function buildSkillsFromForm(skillsInput: string[] | undefined): ResumeSkills {
-  return skillsInput?.length ? { technical: skillsInput } : {};
+  return (skillsInput ?? []).length > 0 ? { technical: skillsInput } : {};
 }
 
 function mapFormProjectsToResumeProjects(
@@ -112,7 +118,7 @@ function mapFormProjectsToResumeProjects(
   return (projects || []).map((project) => ({
     title: project.name,
     description: project.description,
-    ...(project.technologies?.length ? { technologies: project.technologies } : {}),
+    ...((project.technologies ?? []).length > 0 ? { technologies: project.technologies } : {}),
     ...(project.url ? { link: project.url } : {}),
   }));
 }
@@ -124,9 +130,9 @@ function buildGamingExperience(gaming: ResumeFormData["gaming"] | undefined): Ga
   const genres = toArray(gaming.genres);
   const achievements = toArray(gaming.achievements);
   return {
-    ...(roles.length ? { gameEngines: roles.join(", ") } : {}),
-    ...(genres.length ? { genres: genres.join(", ") } : {}),
-    ...(achievements.length ? { shippedTitles: achievements.join("; ") } : {}),
+    ...(roles.length > 0 ? { gameEngines: roles.join(", ") } : {}),
+    ...(genres.length > 0 ? { genres: genres.join(", ") } : {}),
+    ...(achievements.length > 0 ? { shippedTitles: achievements.join("; ") } : {}),
   };
 }
 
@@ -142,6 +148,9 @@ function buildResumeData(input: {
   return {
     ...(Object.keys(input.personalInfo).length > 0 ? { personalInfo: input.personalInfo } : {}),
     ...(input.form.summary ? { summary: input.form.summary } : {}),
+    ...(input.form.template && isResumeTemplate(input.form.template)
+      ? { template: input.form.template }
+      : {}),
     ...(input.experience.length > 0 ? { experience: input.experience } : {}),
     ...(input.education.length > 0 ? { education: input.education } : {}),
     ...(Object.keys(input.skills).length > 0 ? { skills: input.skills } : {}),
@@ -226,6 +235,7 @@ export function resumeDataToFormData(resume: Partial<ResumeData>): ResumeFormDat
     phone: pi.phone || "",
     location: pi.location || "",
     summary: resume.summary || "",
+    template: isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
     linkedIn: pi.linkedIn || "",
     portfolio: pi.portfolio || "",
     experience: mapResumeExperienceToFormExperience(resume.experience),

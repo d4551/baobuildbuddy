@@ -1,3 +1,5 @@
+import { MAX_PORT, MIN_PORT } from "../constants/ports";
+import { SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS } from "../constants/schema-limits";
 import type { EmailTransportSettings } from "../types/settings";
 import { isValidEmail } from "./validation";
 
@@ -26,11 +28,11 @@ export function isEmailTransportConfigured(
     return false;
   }
 
-  if (!Number.isFinite(port) || port < 1 || port > 65_535) {
+  if (!Number.isFinite(port) || port < MIN_PORT || port > MAX_PORT) {
     return false;
   }
 
-  if (!Number.isFinite(timeout) || timeout < 1 || timeout > 120) {
+  if (!Number.isFinite(timeout) || timeout < 1 || timeout > SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS) {
     return false;
   }
 

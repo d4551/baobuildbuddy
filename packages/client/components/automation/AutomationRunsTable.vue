@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
+import {
+  BADGE_INFO_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
@@ -27,10 +31,39 @@ defineProps<{
 }>();
 
 const { t } = useI18n();
+
+const formatRunJobLabel = (run: RpaRunExecutionEnvelope): string => {
+  if (typeof run.jobId === "string" && run.jobId.trim().length > 0) {
+    return run.jobId;
+  }
+  const input = run.input;
+  if (input && typeof input === "object" && !Array.isArray(input)) {
+    const jobUrl = "jobUrl" in input ? input.jobUrl : undefined;
+    if (typeof jobUrl === "string" && jobUrl.trim().length > 0) {
+      try {
+        return new URL(jobUrl).hostname;
+      } catch {
+        return jobUrl;
+      }
+    }
+    const target = "target" in input ? input.target : undefined;
+    if (typeof target === "string" && target.trim().length > 0) {
+      return target;
+    }
+  }
+  const scraped =
+    run.output && typeof run.output === "object" && !Array.isArray(run.output) && "scraped" in run.output
+      ? run.output.scraped
+      : undefined;
+  if (typeof scraped === "number") {
+    return String(scraped);
+  }
+  return t("automation.runs.emptyJobId");
+};
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <EmptyState
         v-if="!isLoading && runs.length === 0"
@@ -51,8 +84,7 @@ const { t } = useI18n();
             <li
               v-for="run in runs"
               :key="run.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -71,7 +103,7 @@ const { t } = useI18n();
                   <span :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatRunStatus(run.status) }}</span>
                   <span
                     v-if="isLiveRun(run)"
-                    class="badge badge-info badge-outline"
+                    :class="[BADGE_INFO_OUTLINE_CLASS]"
                     :aria-label="t('automation.runs.liveBadgeAria')"
                   >
                     {{ t("automation.runs.liveBadge") }}
@@ -86,7 +118,7 @@ const { t } = useI18n();
                 <div class="flex items-baseline justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <dt class="shrink-0 text-muted">{{ t("automation.runs.columns.job") }}</dt>
                   <dd class="truncate font-medium">
-                    {{ run.jobId || t("automation.runs.emptyJobId") }}
+                    {{ formatRunJobLabel(run) }}
                   </dd>
                 </div>
                 <div class="flex items-baseline justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -112,7 +144,7 @@ const { t } = useI18n();
                 <th scope="col">{{ t("automation.runs.columns.id") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.type") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.status") }}</th>
-                <th scope="col" class="text-right">{{ t("automation.runs.columns.progress") }}</th>
+                <th scope="col" class="text-end">{{ t("automation.runs.columns.progress") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.job") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.updated") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.actions") }}</th>
@@ -127,21 +159,20 @@ const { t } = useI18n();
                     <span>{{ formatRunStatus(run.status) }}</span>
                     <span
                       v-if="isLiveRun(run)"
-                      class="badge badge-info badge-outline"
+                      :class="[BADGE_INFO_OUTLINE_CLASS]"
                       :aria-label="t('automation.runs.liveBadgeAria')"
                     >
                       {{ t("automation.runs.liveBadge") }}
                     </span>
                   </div>
                 </td>
-                <td class="text-right">{{ formatRunProgress(run) }}</td>
-                <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
+                <td class="text-end">{{ formatRunProgress(run) }}</td>
+                <td class="max-w-48 truncate">{{ formatRunJobLabel(run) }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>
                   <NuxtLink
                     :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                    class="btn btn-ghost"
-                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
                   >
                     {{ t("automation.runs.openButton") }}
@@ -153,5 +184,5 @@ const { t } = useI18n();
         </template>
       </ResponsiveDataSurface>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

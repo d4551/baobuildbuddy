@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { effectScope } from "vue";
+import { SCROLL_SPY_THRESHOLDS } from "~/constants/numeric-ui";
 import { useScrollSpy } from "./useScrollSpy";
 
 class MockIntersectionObserver implements IntersectionObserver {
@@ -68,9 +69,7 @@ function createScopedScrollSpy() {
 }
 
 function assertSyncsFromHash(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");
@@ -95,9 +94,7 @@ function assertSyncsFromHash(): void {
 }
 
 function assertUpdatesActiveSectionFromObserver(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");
@@ -115,7 +112,10 @@ function assertUpdatesActiveSectionFromObserver(): void {
     throw new Error("Observer was not created");
   }
 
-  observer.trigger([createEntry(sectionOne, 0.3), createEntry(sectionTwo, 0.8)]);
+  observer.trigger([
+    createEntry(sectionOne, SCROLL_SPY_THRESHOLDS[1]),
+    createEntry(sectionTwo, SCROLL_SPY_THRESHOLDS[3]),
+  ]);
 
   expect(scrollSpy.activeSectionId.value).toBe("two");
   expect(replaceStateSpy).toHaveBeenCalledWith({}, "", "#two");
@@ -124,9 +124,7 @@ function assertUpdatesActiveSectionFromObserver(): void {
 }
 
 function assertDoesNotDuplicateHashUpdates(): void {
-  if (!hasDomEnvironment()) {
-    return;
-  }
+  expect(hasDomEnvironment(), "happy-dom must provide document/window for scroll spy").toBe(true);
 
   const { scope, scrollSpy } = createScopedScrollSpy();
   const replaceStateSpy = vi.spyOn(window.history, "replaceState");

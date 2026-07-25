@@ -75,5 +75,7 @@ export const interviewWebSocket = new Elysia().ws(toApiScopedPath(WS_ENDPOINTS.i
       }
     }
   },
-  close() {},
+  close() {
+    /* connection teardown handled by Elysia */
+  },
 });

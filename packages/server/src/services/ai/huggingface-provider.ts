@@ -1,3 +1,8 @@
+import {
+  AI_DEFAULT_MAX_TOKENS_HUGGINGFACE,
+  AI_DEFAULT_TEMPERATURE_CREATIVE,
+  AI_DEFAULT_TOP_P,
+} from "@bao/shared/constants/ai-generation";
 import { HUGGING_FACE_DEFAULT_MODEL } from "@bao/shared/constants/ai-provider";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
@@ -51,9 +56,9 @@ export class HuggingFaceProvider extends BaseAIProvider {
         provider: HUGGING_FACE_INFERENCE_PROVIDER,
         model,
         messages,
-        max_tokens: options?.maxTokens ?? 1024,
-        temperature: options?.temperature ?? 0.7,
-        top_p: options?.topP ?? 0.95,
+        max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_HUGGINGFACE,
+        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+        top_p: options?.topP ?? AI_DEFAULT_TOP_P,
       }),
     );
     if (responseResult.status === "rejected") {
@@ -86,9 +91,9 @@ export class HuggingFaceProvider extends BaseAIProvider {
       provider: HUGGING_FACE_INFERENCE_PROVIDER,
       model,
       messages,
-      max_tokens: options?.maxTokens ?? 1024,
-      temperature: options?.temperature ?? 0.7,
-      top_p: options?.topP ?? 0.95,
+      max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_HUGGINGFACE,
+      temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+      top_p: options?.topP ?? AI_DEFAULT_TOP_P,
     });
 
     const iterator = stream[Symbol.asyncIterator]();

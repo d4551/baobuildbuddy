@@ -1,15 +1,20 @@
 {
-  "generatedAt": "2026-07-17T18:42:59.861Z",
+  "generatedAt": "2026-07-25T05:23:14.680Z",
   "repository": {
     "name": "bao-build-buddy",
     "packageManager": "bun@1.3.14",
-    "workspaceGlobs": ["packages/*"]
+    "workspaceGlobs": [
+      "packages/*"
+    ]
   },
   "stack": {
     "runtime": "Bun 1.3.x",
     "language": "TypeScript (strict)",
     "frontend": "Nuxt 4 SSR",
-    "styling": ["Tailwind CSS 4", "DaisyUI 5"],
+    "styling": [
+      "Tailwind CSS 4",
+      "DaisyUI 5"
+    ],
     "backend": "Elysia",
     "database": "Drizzle ORM + SQLite",
     "automation": "Playwright RPA",
@@ -31,7 +36,12 @@
     "missingScripts": []
   },
   "desktop": {
-    "releaseTargets": ["macos", "linux-x64", "linux-arm64", "windows"],
+    "releaseTargets": [
+      "macos",
+      "linux-x64",
+      "linux-arm64",
+      "windows"
+    ],
     "workflowPath": ".github/workflows/desktop-release.yml",
     "releaseScripts": {
       "release:desktop:linux-arm64": "bun run scripts/build-desktop-release.ts --target linux-arm64",
@@ -49,7 +59,10 @@
   },
   "automationRpa": {
     "protocolVersion": "1.0",
-    "docs": ["README.md", "docs/AUTOMATION.md"],
+    "docs": [
+      "README.md",
+      "docs/AUTOMATION.md"
+    ],
     "runtimeScripts": [
       "packages/scraper/src/scripts/job-apply.ts",
       "packages/scraper/src/job-apply/runtime.ts",
@@ -65,18 +78,23 @@
       "packages/shared/src/schemas/rpa-events.schema.ts"
     ],
     "clientPages": [
-      "packages/client/pages/automation/email.vue",
+      "packages/client/pages/automation/email/index.vue",
       "packages/client/pages/automation/index.vue",
       "packages/client/pages/automation/job-apply.vue",
       "packages/client/pages/automation/runs/[id].vue",
       "packages/client/pages/automation/runs/index.vue",
-      "packages/client/pages/automation/scraper.vue"
+      "packages/client/pages/automation/scraper/index.vue"
     ]
   },
   "agentiflow": {
-    "rootRuleCopies": ["AGENTS.md"],
+    "rootRuleCopies": [
+      "AGENTS.md"
+    ],
     "protocolFiles": [],
-    "requiredScripts": ["capability:matrix", "capability:matrix:check"],
+    "requiredScripts": [
+      "capability:matrix",
+      "capability:matrix:check"
+    ],
     "scriptCoverage": {
       "capabilityMatrix": true,
       "capabilityMatrixCheck": true,
@@ -104,12 +122,23 @@
     {
       "name": "@bao/desktop",
       "path": "packages/desktop",
-      "scripts": ["build", "build:debug", "dev", "format", "lint", "typecheck"]
+      "scripts": [
+        "build",
+        "build:debug",
+        "dev",
+        "format",
+        "lint",
+        "typecheck"
+      ]
     },
     {
       "name": "@bao/scraper",
       "path": "packages/scraper",
-      "scripts": ["install:browsers", "test", "typecheck"]
+      "scripts": [
+        "install:browsers",
+        "test",
+        "typecheck"
+      ]
     },
     {
       "name": "@bao/server",
@@ -128,7 +157,10 @@
     {
       "name": "@bao/shared",
       "path": "packages/shared",
-      "scripts": ["test", "typecheck"]
+      "scripts": [
+        "test",
+        "typecheck"
+      ]
     }
   ]
 }

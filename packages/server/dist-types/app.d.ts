@@ -3064,6 +3064,41 @@ export declare const app: Elysia<"/api", "local", {
                 };
             };
         };
+    } & {
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: {
+                        text: string;
+                        voice?: string | undefined;
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            audioBase64: string;
+                            mimeType: "audio/wav";
+                            provider: string;
+                            model: string;
+                            voice: string;
+                            bytes: number;
+                            message: string;
+                        };
+                        400: {
+                            error: string;
+                        };
+                        422: {
+                            error: string;
+                        };
+                        502: {
+                            error: string;
+                        };
+                    };
+                    error: never;
+                };
+            };
+        };
     };
 } & {
     api: {

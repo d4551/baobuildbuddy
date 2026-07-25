@@ -1,3 +1,4 @@
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { PDFDocument } from "pdf-lib";
 import { renderResumeHeader, renderResumeSummary } from "./export-service-resume-header";
@@ -60,8 +61,8 @@ export async function optimizeResumePdfForOnePage(
   if (pdfDoc.getPageCount() > 1 && optimized.experience) {
     for (const experience of optimized.experience) {
       const achievements = experience.achievements;
-      if (Array.isArray(achievements) && achievements.length > 3) {
-        experience.achievements = achievements.slice(0, 3);
+      if (Array.isArray(achievements) && achievements.length > COUNT_THREE) {
+        experience.achievements = achievements.slice(0, COUNT_THREE);
       }
     }
     pdfBytes = await exportResumePdf(optimized, templateName);

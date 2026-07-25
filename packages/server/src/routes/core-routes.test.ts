@@ -16,7 +16,12 @@ import {
   API_ENDPOINTS,
   buildGamificationChallengeCompleteEndpoint,
 } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
+import { COUNT_SEVEN } from "@bao/shared/constants/numeric";
 import { DEFAULT_SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { requestJson } from "../test-utils";
@@ -165,7 +170,7 @@ describe("search routes", () => {
       q: SEARCH_QUERY_SHORT,
     })}`;
     const res = await requestJson<SearchResponse>(app, "GET", shortSearchUrl);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.query).toBe(SEARCH_QUERY_SHORT);
     expect(res.body.results).toEqual([]);
     expect(res.body.counts).toEqual(EMPTY_SEARCH_COUNTS);
@@ -178,7 +183,7 @@ describe("search routes", () => {
       types: SEARCH_FILTER_TYPES,
     })}`;
     const res = await requestJson<SearchResponse>(app, "GET", filteredSearchUrl);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.query).toBe(SEARCH_FILTER_QUERY);
     expect(typeof res.body.counts.jobs).toBe("number");
     expect(typeof res.body.counts.studios).toBe("number");
@@ -193,7 +198,7 @@ describe("search routes", () => {
       "GET",
       shortAutocompleteUrl,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body).toEqual([]);
   });
 
@@ -206,7 +211,7 @@ describe("search routes", () => {
       "GET",
       roleAutocompleteUrl,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.length).toBeGreaterThan(0);
     expect(res.body.some((entry) => entry.type === "role")).toBe(true);
   });
@@ -215,7 +220,7 @@ describe("search routes", () => {
 describe("auth routes", () => {
   test("GET auth status returns auth mode", async () => {
     const res = await requestJson<AuthStatusResponse>(app, "GET", API_ENDPOINTS.authStatus);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(typeof res.body.authRequired).toBe("boolean");
     expect(typeof res.body.configured).toBe("boolean");
     expect(typeof res.body.bootstrapRequired).toBe("boolean");
@@ -253,7 +258,7 @@ describe("auth init routes", () => {
       const res = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {
         setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
       });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(HTTP_STATUS_OK);
       expect(res.body.configured).toBe(true);
       expect(res.body.apiKey).toMatch(AUTH_API_KEY_PREFIX_PATTERN);
       expect(res.body.message).toBe(API_MESSAGE_SAVE_API_KEY_ONCE);
@@ -261,13 +266,13 @@ describe("auth init routes", () => {
       const second = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {
         setupToken: Bun.env.BAO_AUTH_SETUP_TOKEN,
       });
-      expect(second.status).toBe(200);
+      expect(second.status).toBe(HTTP_STATUS_OK);
       expect(second.body.configured).toBe(true);
       expect(second.body.message).toBe(API_MESSAGE_API_KEY_ALREADY_CONFIGURED);
       expect(second.body.apiKey).toBeUndefined();
     } else {
       const res = await requestJson<AuthInitResponse>(app, "POST", API_ENDPOINTS.authInit, {});
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(HTTP_STATUS_OK);
       expect(res.body.apiKey).toBeUndefined();
       expect(res.body.message).toBe(API_MESSAGE_AUTH_DISABLED);
       expect(res.body.configured).toBe(false);
@@ -282,7 +287,7 @@ describe("auth configured routes", () => {
       "GET",
       API_ENDPOINTS.authConfigured,
     );
-    expect(configured.status).toBe(200);
+    expect(configured.status).toBe(HTTP_STATUS_OK);
     expect(typeof configured.body.configured).toBe("boolean");
   });
 });
@@ -290,7 +295,7 @@ describe("auth configured routes", () => {
 describe("user routes", () => {
   test("GET user profile auto-creates the default profile", async () => {
     const profile = await requestJson<UserProfileResponse>(app, "GET", API_ENDPOINTS.userProfile);
-    expect(profile.status).toBe(200);
+    expect(profile.status).toBe(HTTP_STATUS_OK);
     expect(profile.body.id).toBe(DEFAULT_PROFILE_ID);
     expect(profile.body.name).toBe("");
   });
@@ -301,13 +306,13 @@ describe("user routes", () => {
       email: "audit@example.com",
       currentRole: "QA Auditor",
     });
-    expect(updated.status).toBe(200);
+    expect(updated.status).toBe(HTTP_STATUS_OK);
     expect(updated.body.id).toBe(DEFAULT_PROFILE_ID);
     expect(updated.body.name).toBe("Core Route Audit");
     expect(updated.body.email).toBe("audit@example.com");
 
     const readback = await requestJson<UserProfileResponse>(app, "GET", API_ENDPOINTS.userProfile);
-    expect(readback.status).toBe(200);
+    expect(readback.status).toBe(HTTP_STATUS_OK);
     expect(readback.body.name).toBe("Core Route Audit");
     expect(readback.body.email).toBe("audit@example.com");
   });
@@ -320,7 +325,7 @@ describe("gamification routes", () => {
       "GET",
       API_ENDPOINTS.gamificationProgress,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.xp).toBeGreaterThanOrEqual(0);
     expect(res.body.level).toBeGreaterThan(0);
     expect(Array.isArray(res.body.achievements)).toBe(true);
@@ -339,7 +344,7 @@ describe("gamification routes", () => {
       amount: 25,
       reason: "audit",
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.reason).toBe("audit");
     expect(typeof res.body.xp).toBe("number");
     expect(typeof res.body.level).toBe("number");
@@ -353,7 +358,7 @@ describe("gamification routes", () => {
       "GET",
       API_ENDPOINTS.gamificationChallenges,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.challenges.length).toBeGreaterThan(0);
     expect(res.body.totalCount).toBe(res.body.challenges.length);
     expect(res.body.completedCount).toBeGreaterThanOrEqual(0);
@@ -366,7 +371,7 @@ describe("gamification routes", () => {
       "POST",
       buildGamificationChallengeCompleteEndpoint("does-not-exist"),
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.completed).toBe(false);
   });
 });
@@ -374,7 +379,7 @@ describe("gamification routes", () => {
 describe("stats routes", () => {
   test("GET stats dashboard returns aggregate values", async () => {
     const res = await requestJson<DashboardStatsResponse>(app, "GET", API_ENDPOINTS.statsDashboard);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(typeof res.body.profile.completeness).toBe("number");
     expect(typeof res.body.jobs.saved).toBe("number");
     expect(Array.isArray(res.body.automation.recentRuns)).toBe(true);
@@ -382,15 +387,15 @@ describe("stats routes", () => {
 
   test("GET stats weekly returns 7-day activity view", async () => {
     const res = await requestJson<WeeklyActivityResponse>(app, "GET", API_ENDPOINTS.statsWeekly);
-    expect(res.status).toBe(200);
-    expect(res.body.days.length).toBe(7);
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.days.length).toBe(COUNT_SEVEN);
     expect(typeof res.body.topCategory).toBe("string");
     expect(typeof res.body.totalXP).toBe("number");
   });
 
   test("GET stats career returns skill coverage metrics", async () => {
     const res = await requestJson<CareerProgressResponse>(app, "GET", API_ENDPOINTS.statsCareer);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(typeof res.body.skillCoverage).toBe("number");
     expect(typeof res.body.applicationSuccessRate).toBe("number");
     expect(Array.isArray(res.body.interviewTrend)).toBe(true);

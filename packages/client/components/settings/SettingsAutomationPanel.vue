@@ -4,20 +4,20 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
-
-defineProps<{
-  automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
-}>();
 
 const automationForm = defineModel<AutomationSettings>("automationForm", {
   required: true,
 });
+
+defineProps<{
+  automationBrowserOptions: ReadonlyArray<{ value: string; label: string }>;
+}>();
 
 const emit = defineEmits<{
   save: [];
@@ -147,7 +147,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt2]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.automation.saveAria')"
           @click="emit('save')"

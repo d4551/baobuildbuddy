@@ -12,6 +12,7 @@ import {
 } from "@bao/shared/constants/http";
 import { Elysia, type status } from "elysia";
 import type { RouteSetState } from "../types/route-state";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type CoverLetterExportBody,
   type CoverLetterIdParams,
@@ -38,7 +39,6 @@ import {
   listCoverLetters,
   updateCoverLetter,
 } from "./cover-letter-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -91,7 +91,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail("Cover Letters", "Retrieve cover letters resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Cover Letters", "List saved cover letters for the current profile."),
       response: coverLettersListResponses,
     },
     async ({ status }) =>
@@ -100,7 +100,10 @@ export const coverLetterRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail("Cover Letters", "Create or execute cover letters resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Cover Letters",
+        "Create a cover letter from company, role, and body content.",
+      ),
       body: coverLetterMutationBodySchema,
       response: coverLetterEntityResponses,
     },
@@ -112,7 +115,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: openapiDetail("Cover Letters", "Retrieve cover letters :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Cover Letters", "Retrieve a cover letter by id with full content."),
       params: coverLetterIdParamsSchema,
       response: coverLetterEntityResponses,
     },
@@ -128,7 +131,10 @@ export const coverLetterRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: openapiDetail("Cover Letters", "Replace cover letters :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Cover Letters",
+        "Replace cover letter fields for an existing document.",
+      ),
       params: coverLetterIdParamsSchema,
       body: coverLetterUpdateBodySchema,
       response: coverLetterEntityResponses,
@@ -145,7 +151,7 @@ export const coverLetterRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: openapiDetail("Cover Letters", "Delete cover letters :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Cover Letters", "Delete a cover letter by id from saved documents."),
       params: coverLetterIdParamsSchema,
       response: coverLetterDeleteResponses,
     },
@@ -161,7 +167,10 @@ export const coverLetterRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
     {
-      detail: openapiDetail("Cover Letters", "Delete cover letters :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Cover Letters",
+        "Generate a cover letter with AI from job and profile context.",
+      ),
       body: generateCoverLetterBodySchema,
       response: generateCoverLetterResponses,
     },
@@ -201,7 +210,7 @@ export const coverLetterRoutes = new Elysia({
   .post(
     "/:id/export",
     {
-      detail: openapiDetail("Cover Letters", "Create or execute cover letters :id export for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Cover Letters", "Export a cover letter as a downloadable attachment."),
       params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,
       response: coverLetterExportResponses,
@@ -216,7 +225,12 @@ export const coverLetterRoutes = new Elysia({
       status: RouteStatus;
     }) => {
       const state: RouteSetState = {};
-      const result = await exportCoverLetterAttachment(params.id, body.format, state);
+      const result = await exportCoverLetterAttachment(
+        params.id,
+        body.format,
+        state,
+        body.template,
+      );
       if (state.status === HTTP_STATUS_NOT_FOUND) {
         return status(
           HTTP_STATUS_NOT_FOUND,

@@ -1,6 +1,12 @@
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNAUTHORIZED,
+} from "@bao/shared/constants/http";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
 import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import automationJobApplyCatalog from "~/locales/en-US/automation/jobApply";
 import { useAutomation } from "./useAutomation";
 
@@ -63,21 +69,25 @@ const toStreamError = (error: unknown, fallbackMessage: string): StreamError => 
 
   const message =
     typeof error.message === "string" && error.message.length > 0 ? error.message : fallbackMessage;
-  const statusCode =
-    typeof error.status === "number"
-      ? error.status
-      : typeof error.statusCode === "number"
-        ? error.statusCode
-        : undefined;
+  let statusCode: number | undefined;
+  if (typeof error.status === "number") {
+    statusCode = error.status;
+  } else if (typeof error.statusCode === "number") {
+    statusCode = error.statusCode;
+  }
 
   return { message, statusCode };
 };
 
 const toUiStateFromError = (error: StreamError): AutomationRunUiState => {
-  if (error.statusCode === 401) {
+  if (error.statusCode === HTTP_STATUS_UNAUTHORIZED) {
     return "unauthorized";
   }
-  if (!error.statusCode || error.statusCode >= 500 || error.statusCode === 429) {
+  if (
+    !error.statusCode ||
+    error.statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR ||
+    error.statusCode === HTTP_STATUS_TOO_MANY_REQUESTS
+  ) {
     return "errorRetryable";
   }
   return "errorNonRetryable";
@@ -100,7 +110,7 @@ const computeProgressPercent = (step: number | null, totalSteps: number | null):
   if (typeof step !== "number" || typeof totalSteps !== "number" || totalSteps <= 0) {
     return null;
   }
-  return Math.max(0, Math.min(100, Math.round((step / totalSteps) * 100)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round((step / totalSteps) * PERCENT_MAX)));
 };
 
 function createStreamStateRefs(): StreamStateRefs {
@@ -225,12 +235,14 @@ function applyEvent(refs: StreamStateRefs, lifecycle: StreamLifecycle, event: Rp
     return;
   }
 
-  const next =
-    event.eventType === "progress"
-      ? applyProgressEvent(currentRun, event)
-      : event.eventType === "result"
-        ? applyResultEvent(currentRun, event)
-        : applyErrorEvent(currentRun, event);
+  let next: EventApplyResult;
+  if (event.eventType === "progress") {
+    next = applyProgressEvent(currentRun, event);
+  } else if (event.eventType === "result") {
+    next = applyResultEvent(currentRun, event);
+  } else {
+    next = applyErrorEvent(currentRun, event);
+  }
 
   refs.run.value = next.nextRun;
   refs.state.value = next.nextState;

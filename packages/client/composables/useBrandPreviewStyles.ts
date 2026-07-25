@@ -37,7 +37,7 @@ function paletteRules(selector: string, palette: BrandThemePalette, brand: Brand
   --brand-font-body: ${brand.typography.bodyFontFamily};
   --brand-font-mono: ${brand.typography.monoFontFamily};
   background-color: ${palette.base100};
-  border-color: color-mix(in srgb, ${palette.secondary} 24%, ${palette.base100});
+  border-color: ${palette.base300};
   color: ${palette.baseContent};
   font-family: var(--brand-font-body);
 }`;

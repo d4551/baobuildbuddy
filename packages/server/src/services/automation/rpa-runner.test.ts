@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
+import { MS_FIVE_SECONDS, PERCENT_MAX } from "@bao/shared/constants/numeric";
 import { generateId } from "@bao/shared/utils/validation";
 import { SCRAPER_DIR } from "../../config/paths";
 import { runRpaScript } from "./rpa-runner-protocol";
@@ -129,7 +130,7 @@ const createExecutionContext = (timeoutMs: number): { runId: string; timeoutMs: 
 
 const registerSuccessCase = (): void => {
   test("parses NDJSON protocol progress/result events", async () => {
-    const context = createExecutionContext(5_000);
+    const context = createExecutionContext(MS_FIVE_SECONDS);
     const execution = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: {
@@ -148,7 +149,7 @@ const registerSuccessCase = (): void => {
 
 const registerMalformedPayloadCase = (): void => {
   test("returns protocol error for malformed terminal payload", async () => {
-    const context = createExecutionContext(5_000);
+    const context = createExecutionContext(MS_FIVE_SECONDS);
     const execution = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: {
@@ -164,7 +165,7 @@ const registerMalformedPayloadCase = (): void => {
 
 const registerRuntimeFailureCase = (): void => {
   test("returns runtime error when script exits non-zero", async () => {
-    const context = createExecutionContext(5_000);
+    const context = createExecutionContext(MS_FIVE_SECONDS);
     const execution = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: {
@@ -181,7 +182,7 @@ const registerRuntimeFailureCase = (): void => {
 
 const registerUnexpectedProgressCase = (): void => {
   test("returns protocol error when stdout emits unexpected progress events", async () => {
-    const context = createExecutionContext(5_000);
+    const context = createExecutionContext(MS_FIVE_SECONDS);
     const execution = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: {
@@ -197,7 +198,7 @@ const registerUnexpectedProgressCase = (): void => {
 
 const registerTimeoutCase = (): void => {
   test("returns timeout error when process exceeds timeout", async () => {
-    const context = createExecutionContext(100);
+    const context = createExecutionContext(PERCENT_MAX);
     const execution = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: {
@@ -217,17 +218,17 @@ const registerBrowserLaunchFailureDifferentiationCase = (): void => {
     const missing = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: { mode: "browser_missing" },
-      executionContext: createExecutionContext(5_000),
+      executionContext: createExecutionContext(MS_FIVE_SECONDS),
     });
     const crashed = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: { mode: "browser_crash" },
-      executionContext: createExecutionContext(5_000),
+      executionContext: createExecutionContext(MS_FIVE_SECONDS),
     });
     const polluted = await runRpaScript({
       scriptPath: TEST_SCRIPT_NAME,
       scriptInput: { mode: "browser_polluted" },
-      executionContext: createExecutionContext(5_000),
+      executionContext: createExecutionContext(MS_FIVE_SECONDS),
     });
 
     expect(missing.error?.code).toBe("AUTOMATION_RUNTIME_ERROR");

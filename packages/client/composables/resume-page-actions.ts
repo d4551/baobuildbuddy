@@ -3,6 +3,7 @@ import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import type { Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import type { NuxtApp } from "#app";
+import { runExportWithToast } from "~/composables/export-with-toast";
 import type { ResumePageActionsInput } from "~/composables/resume-page-actions-contracts";
 import {
   useAiEnhancementProgress,
@@ -12,7 +13,6 @@ import {
 } from "~/composables/resume-page-editor-actions";
 import { useResumeMutationActions } from "~/composables/resume-page-mutation-actions";
 import { useResumeViewActions } from "~/composables/resume-page-view-actions";
-import { runExportWithToast } from "~/composables/export-with-toast";
 
 function createResumeActionModules(
   input: ResumePageActionsInput,
@@ -78,8 +78,9 @@ export function useResumePageActions(
     if (!resumeId) {
       return;
     }
+    const template = input.formData.template;
     await runExportWithToast({
-      exportFn: () => exportResume(resumeId, undefined, format),
+      exportFn: () => exportResume(resumeId, template, format),
       failMessage: t("resumePage.toasts.resumeExportFailed"),
       successMessage: t("resumePage.toasts.resumeExported"),
       toast: $toast,

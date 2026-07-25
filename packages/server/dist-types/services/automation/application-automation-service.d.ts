@@ -11,6 +11,8 @@ export declare class ApplicationAutomationService {
     private readonly scheduler;
     private readonly scheduledRuns;
     constructor();
+    private scheduleStartupRecovery;
+    private runStartupRecovery;
     /**
      * Load a single automation run row.
      */

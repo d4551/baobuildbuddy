@@ -7,11 +7,13 @@ import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
 import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
+
 import type {
   ScrapeEnrichmentAccumulator,
   ScrapeEnrichmentAttempt,
 } from "./scraper-service-contracts";
 import {
+  CONTENT_HASH_LENGTH,
   DEFAULT_JOB_SOURCE,
   DEFAULT_JOB_TYPE,
   PORTAL_SCRIPT_ID_BY_ID,
@@ -77,53 +79,60 @@ export const upsertStudioRow = async (
     });
 };
 
+const resolveJobContentHash = (job: JobSearchResult["jobs"][number]): string => {
+  const rawContentHash = job.contentHash?.trim() ?? "";
+  const seed = rawContentHash.length > 0 ? rawContentHash : job.id;
+  return String(seed).slice(0, CONTENT_HASH_LENGTH);
+};
+
+const resolveJobSource = (job: JobSearchResult["jobs"][number]): string => {
+  const trimmed = job.source?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed : DEFAULT_JOB_SOURCE;
+};
+
+const resolveJobPostedDate = (job: JobSearchResult["jobs"][number]): string | null => {
+  const postedDate = job.postedDate ?? "";
+  return postedDate.length > 0 ? postedDate : null;
+};
+
+const buildScrapedJobWriteFields = (
+  job: JobSearchResult["jobs"][number],
+  enrichment: ScrapePersonaEnrichment | undefined,
+) => ({
+  title: job.title,
+  company: job.company,
+  location: job.location,
+  remote: Boolean(job.remote),
+  hybrid: false,
+  description: job.description ?? null,
+  url: job.url ?? null,
+  source: resolveJobSource(job),
+  postedDate: resolveJobPostedDate(job),
+  type: DEFAULT_JOB_TYPE,
+  enrichment: enrichment ?? null,
+});
+
 export const upsertScrapedJob = async (
   job: JobSearchResult["jobs"][number],
   now: string,
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
-  const contentHash = String(job.contentHash?.trim().length ? job.contentHash : job.id).slice(
-    0,
-    100,
-  );
+  const contentHash = resolveJobContentHash(job);
+  const writeFields = buildScrapedJobWriteFields(job, enrichment);
 
   await db
     .insert(jobs)
     .values({
       id: generateId(),
-      title: job.title,
-      company: job.company,
-      location: job.location,
-      remote: Boolean(job.remote),
-      hybrid: false,
-      description: job.description ?? null,
-      url: job.url ?? null,
-      source:
-        job.source?.trim() && job.source.trim().length > 0 ? job.source.trim() : DEFAULT_JOB_SOURCE,
+      ...writeFields,
       contentHash,
-      postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
-      type: DEFAULT_JOB_TYPE,
-      enrichment: enrichment ?? null,
       createdAt: now,
       updatedAt: now,
     })
     .onConflictDoUpdate({
       target: jobs.contentHash,
       set: {
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        remote: Boolean(job.remote),
-        hybrid: false,
-        description: job.description ?? null,
-        url: job.url ?? null,
-        source:
-          job.source?.trim() && job.source.trim().length > 0
-            ? job.source.trim()
-            : DEFAULT_JOB_SOURCE,
-        postedDate: job.postedDate && job.postedDate.length > 0 ? job.postedDate : null,
-        type: DEFAULT_JOB_TYPE,
-        enrichment: enrichment ?? null,
+        ...writeFields,
         updatedAt: now,
       },
     });

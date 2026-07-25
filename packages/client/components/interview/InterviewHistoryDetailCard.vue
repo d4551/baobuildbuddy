@@ -7,12 +7,11 @@ import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 defineProps<{
@@ -42,19 +41,19 @@ const { t } = useI18n();
       @retry="emit('retry')"
     />
 
-    <div v-if="detailLoading" :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-if="detailLoading">
       <div class="card-body">
         <p role="status" aria-live="polite">{{ t("interviewHistory.loadingDetails") }}</p>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div v-else-if="selectedSession" :class="[SURFACE_GLASS_CARD_CLASS, 'sticky top-6']">
+    <UiGlassCard v-else-if="selectedSession" extra-class="sticky top-6">
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
           <h3 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t("interviewHistory.detailsTitle") }}</h3>
           <button 
             type="button"
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+            :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
             :aria-label="t('interviewHistory.closeDetailsAria')"
             @click="emit('close')"
           >
@@ -120,9 +119,9 @@ const { t } = useI18n();
           </div>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div v-else :class="SURFACE_GLASS_CARD_CLASS">
+    <UiGlassCard v-else>
       <div class="card-body">
         <EmptyState
           title-key="interviewHistory.selectPromptTitle"
@@ -132,6 +131,6 @@ const { t } = useI18n();
           :cta-to="APP_ROUTES.interview"
         />
       </div>
-    </div>
+    </UiGlassCard>
   </div>
 </template>

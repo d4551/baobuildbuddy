@@ -1,4 +1,13 @@
+import {
+  COUNT_FIFTEEN,
+  COUNT_FIVE,
+  COUNT_THIRTY,
+  COUNT_THREE,
+  COUNT_TWENTY,
+  PERCENT_HIGH,
+} from "@bao/shared/constants/numeric";
 import type { ResumeData } from "@bao/shared/types/resume";
+
 import type {
   ResumeExperienceItem,
   ResumeProjectItem,
@@ -26,7 +35,7 @@ function renderResumeExperienceDate(
     font: context.font,
     color: context.palette.line,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderResumeExperienceDescription(
@@ -45,7 +54,7 @@ function renderResumeExperienceDescription(
     font: context.font,
     maxWidth: context.width - context.margin * 2,
   });
-  context.yPosition -= 5;
+  context.yPosition -= COUNT_FIVE;
 }
 
 function renderResumeExperienceAchievements(
@@ -57,7 +66,7 @@ function renderResumeExperienceAchievements(
   }
 
   for (const achievement of achievements) {
-    ensureResumeSpace(context, 30);
+    ensureResumeSpace(context, COUNT_THIRTY);
     context.page.drawText("•", {
       x: context.margin,
       y: context.yPosition,
@@ -67,13 +76,13 @@ function renderResumeExperienceAchievements(
     });
     drawResumeWrappedText(context, {
       text: achievement,
-      x: context.margin + 15,
+      x: context.margin + COUNT_FIFTEEN,
       size: context.fonts.body,
       color: context.palette.text,
       font: context.font,
-      maxWidth: context.width - context.margin * 2 - 15,
+      maxWidth: context.width - context.margin * 2 - COUNT_FIFTEEN,
     });
-    context.yPosition -= 3;
+    context.yPosition -= COUNT_THREE;
   }
 }
 
@@ -85,7 +94,7 @@ function renderResumeExperienceTechnologies(
     return;
   }
 
-  ensureResumeSpace(context, 20);
+  ensureResumeSpace(context, COUNT_TWENTY);
   context.page.drawText(`Technologies: ${technologies.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
@@ -93,14 +102,14 @@ function renderResumeExperienceTechnologies(
     font: context.font,
     color: context.palette.line,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderResumeExperienceItem(
   context: ResumeRenderContext,
   experience: ResumeExperienceItem,
 ): void {
-  ensureResumeSpace(context, 80);
+  ensureResumeSpace(context, PERCENT_HIGH);
   context.page.drawText(`${experience.title} | ${experience.company}`, {
     x: context.margin,
     y: context.yPosition,
@@ -108,7 +117,7 @@ function renderResumeExperienceItem(
     font: context.boldFont,
     color: context.palette.text,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 
   renderResumeExperienceDate(context, experience);
   renderResumeExperienceDescription(context, experience.description);
@@ -133,7 +142,7 @@ function renderResumeProjectLinks(context: ResumeRenderContext, link?: string): 
     return;
   }
 
-  ensureResumeSpace(context, 20);
+  ensureResumeSpace(context, COUNT_TWENTY);
   context.page.drawText(`Link: ${link}`, {
     x: context.margin,
     y: context.yPosition,
@@ -141,7 +150,7 @@ function renderResumeProjectLinks(context: ResumeRenderContext, link?: string): 
     font: context.font,
     color: context.palette.accent,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderResumeProjectTechnologies(
@@ -152,7 +161,7 @@ function renderResumeProjectTechnologies(
     return;
   }
 
-  ensureResumeSpace(context, 20);
+  ensureResumeSpace(context, COUNT_TWENTY);
   context.page.drawText(`Technologies: ${technologies.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
@@ -160,7 +169,7 @@ function renderResumeProjectTechnologies(
     font: context.font,
     color: context.palette.line,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 }
 
 function renderResumeProjectItem(context: ResumeRenderContext, project: ResumeProjectItem): void {
@@ -172,7 +181,7 @@ function renderResumeProjectItem(context: ResumeRenderContext, project: ResumePr
     font: context.boldFont,
     color: context.palette.text,
   });
-  context.yPosition -= 15;
+  context.yPosition -= COUNT_FIFTEEN;
 
   drawResumeWrappedText(context, {
     text: project.description,
@@ -182,11 +191,11 @@ function renderResumeProjectItem(context: ResumeRenderContext, project: ResumePr
     font: context.font,
     maxWidth: context.width - context.margin * 2,
   });
-  context.yPosition -= 5;
+  context.yPosition -= COUNT_FIVE;
 
   renderResumeProjectTechnologies(context, project.technologies);
   renderResumeProjectLinks(context, project.link);
-  context.yPosition -= 5;
+  context.yPosition -= COUNT_FIVE;
 }
 
 export function renderResumeProjects(context: ResumeRenderContext, resume: ResumeData): void {

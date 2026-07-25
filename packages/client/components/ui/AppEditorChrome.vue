@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {
+  BADGE_SM_CLASS,
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
@@ -38,10 +40,10 @@ const emit = defineEmits<{
     :class="[FLEX_GAP_TOKEN_CLASS.gap2, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py2]"
   >
     <span
-      class="badge badge-sm"
-      :class="isDirty ? 'badge-warning' : 'badge-ghost'"
-      role="status"
-    >
+ 
+ :class="[BADGE_SM_CLASS, isDirty ? BADGE_VARIANT_CLASS.warning : BADGE_VARIANT_CLASS.ghost]"
+ role="status"
+ >
       {{ isDirty ? dirtyLabel : savedLabel }}
     </span>
     <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">

@@ -89,12 +89,12 @@ const readCommand = async (
 
 const checkCommand = async (label: string, command: readonly string[]): Promise<PreflightCheck> => {
   const result = await readCommand(command);
-  const details =
-    result.stdout.length > 0
-      ? result.stdout
-      : result.stderr.length > 0
-        ? result.stderr
-        : `${command[0]} exited with code ${result.exitCode}`;
+  let details = `${command[0]} exited with code ${result.exitCode}`;
+  if (result.stdout.length > 0) {
+    details = result.stdout;
+  } else if (result.stderr.length > 0) {
+    details = result.stderr;
+  }
 
   return {
     label,

@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { settle } from "@bao/shared/utils/promise";
+import { WAV_HEADER_MIN_BYTES } from "~/constants/numeric-ui";
 import { requestApi, useClientApiRequestRuntime } from "./api-request";
 
 export type ServerTtsResult =
@@ -48,7 +49,7 @@ export const synthesizeSpeechViaServer = async (input: {
     return { ok: false, error: result.reason.message };
   }
   const payload = result.value;
-  if (!payload.audioBase64 || payload.bytes < 44) {
+  if (!payload.audioBase64 || payload.bytes < WAV_HEADER_MIN_BYTES) {
     return { ok: false, error: "empty audio" };
   }
   return {

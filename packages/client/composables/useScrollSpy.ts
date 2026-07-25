@@ -1,5 +1,6 @@
 import { escapeRegExp } from "@bao/shared/utils/string";
 import { getCurrentScope, onScopeDispose, readonly, ref } from "vue";
+import { SCROLL_SPY_THRESHOLDS } from "~/constants/numeric-ui";
 
 type ScrollSpyOptions = {
   rootMargin?: string;
@@ -9,7 +10,7 @@ type ScrollSpyOptions = {
 
 const DEFAULT_HASH_PREFIX = "#";
 const DEFAULT_ROOT_MARGIN = "-20% 0px -60% 0px";
-const DEFAULT_THRESHOLD = [0.1, 0.3, 0.5, 0.8];
+const DEFAULT_THRESHOLD = [...SCROLL_SPY_THRESHOLDS];
 const MANUAL_SCROLL_LOCK_MS = 250;
 const normalizeHashValue = (value: string, hashPrefix: string): string =>
   value.replace(new RegExp(`^${escapeRegExp(hashPrefix)}`, "u"), "").trim();

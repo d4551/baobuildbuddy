@@ -2,6 +2,7 @@ import { isRecord } from "@bao/shared/utils/type-guards";
 import type { ComputedRef, Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 
 type AnalyticsByBreakdown = Record<string, number>;
@@ -92,7 +93,7 @@ function createStudioAnalyticsMetrics(
       return 0;
     }
 
-    return Math.round((remoteWorkStudios.value / totalStudios.value) * 100);
+    return Math.round((remoteWorkStudios.value / totalStudios.value) * PERCENT_MAX);
   });
   const byTypeEntries = computed(() => Object.entries(analytics.value?.byType ?? {}));
   const bySizeEntries = computed(() => Object.entries(analytics.value?.bySize ?? {}));

@@ -8,7 +8,6 @@ import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
-import { config } from "../../config/env";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { createServerLogger } from "../../utils/logger";
@@ -19,6 +18,7 @@ import {
   markRunFailed,
   normalizeExecutionResult,
 } from "./automation-run-persistence";
+import { resolveAutomationTimeoutMs } from "./automation-settings-support";
 import type {
   CreateProgressEvent,
   JobApplyExecutionTracking,
@@ -76,11 +76,7 @@ const runJobApplyScript = async (
     },
     executionContext: {
       runId: preparation.runId,
-      timeoutMs:
-        Number.isFinite(preparation.automationSettings.defaultTimeout) &&
-        preparation.automationSettings.defaultTimeout > 0
-          ? Math.trunc(preparation.automationSettings.defaultTimeout * 1_000)
-          : config.automationScriptTimeoutMs,
+      timeoutMs: resolveAutomationTimeoutMs(preparation.automationSettings),
       outputDir: preparation.runArtifactDir,
     },
     automationSettings: preparation.automationSettings,

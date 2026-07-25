@@ -5,7 +5,13 @@
 
 export const UI_SSOT_AUTHORITY_PATHS = new Set<string>([
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-chrome.ts",
   "packages/client/constants/layout-tokens.ts",
+  "packages/client/constants/layout-shell.ts",
+  "packages/client/constants/layout-tokens-actions.ts",
+  "packages/client/constants/layout-badges.ts",
+  "packages/client/constants/layout-action-soft.ts",
+  "packages/client/constants/layout-public-extras.ts",
   "packages/client/constants/ui-layout.ts",
   "packages/client/constants/chat.ts",
   "packages/client/assets/css/main.css",

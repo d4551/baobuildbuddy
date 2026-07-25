@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+
+const answers = defineModel<Record<string, string>>("answers", { required: true });
 
 defineProps<{
   aiQuestions: ReadonlyArray<{ id: string; question: string; category: string }>;
@@ -15,13 +19,12 @@ defineProps<{
   t: (key: string, values?: Record<string, unknown>) => string;
 }>();
 
-const answers = defineModel<Record<string, string>>("answers", { required: true });
-
 const emit = defineEmits<{
   previous: [];
   next: [];
   changeTarget: [];
 }>();
+
 </script>
 
 <template>
@@ -36,8 +39,8 @@ const emit = defineEmits<{
             })
           }}
         </h2>
-        <button 
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+        <button type="button" 
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
         >
@@ -51,8 +54,9 @@ const emit = defineEmits<{
           {{ aiQuestions[currentQuestionIndex]?.question }}
         </label>
         <AppProseField
-          :id="`answer-${aiQuestions[currentQuestionIndex]?.id}`"
-          v-model="answers[aiQuestions[currentQuestionIndex]!.id]"
+          v-if="aiQuestions[currentQuestionIndex]"
+          :id="`answer-${aiQuestions[currentQuestionIndex].id}`"
+          v-model="answers[aiQuestions[currentQuestionIndex].id]"
           :placeholder="
             t('resumeBuildPage.questions.answerPlaceholder', {
               question: aiQuestions[currentQuestionIndex]?.question,
@@ -69,15 +73,15 @@ const emit = defineEmits<{
       <p v-if="errorMessage" class="text-error" :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.sm]">{{ errorMessage }}</p>
 
       <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
-        <button 
-          class="btn btn-ghost"
+        <button type="button" 
+          :class="GHOST_ACTION_CLASS"
           :disabled="currentQuestionIndex === 0"
           :aria-label="t('resumeBuildPage.questions.backAria')"
           @click="emit('previous')"
         >
           {{ t("resumeBuildPage.questions.backButton") }}
         </button>
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!(answers[aiQuestions[currentQuestionIndex]?.id ?? ''] ?? '').trim()"
           :aria-label="t('resumeBuildPage.questions.nextAria')"

@@ -3,13 +3,16 @@ import { useI18n } from "vue-i18n";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
+
+const runAt = defineModel<string>("runAt", { required: true });
+
 
 defineProps<{
   coverLetters: CoverLetterSelectOption[];
@@ -28,7 +31,6 @@ const jobUrl = defineModel<string>("jobUrl", { required: true });
 const resumeId = defineModel<string>("resumeId", { required: true });
 const coverLetterId = defineModel<string>("coverLetterId", { required: true });
 const jobId = defineModel<string>("jobId", { required: true });
-const runAt = defineModel<string>("runAt", { required: true });
 
 const { t } = useI18n();
 </script>

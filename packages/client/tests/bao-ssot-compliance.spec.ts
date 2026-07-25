@@ -1,51 +1,77 @@
 /**
  * Layout/CSS SSOT UI/UX compliance suite (not `.bao` archive compile).
  *
- * Authority: glassmorphic material system in packages/client/assets/css/main.css
- * SSOT tokens: packages/client/constants/layout.ts + layout-tokens.ts + ui-layout.ts
- *
- * These tests verify the SSOT infrastructure exists and is correct.
- * Violation scanning is done by the validate:* scripts in the lint pipeline,
- * not by runtime tests (Vue SFCs require Vite plugin config for import).
+ * Asserts live constant values (import), not source-string theater.
+ * Authority: packages/client/assets/css/main.css + constants/layout*.
  */
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  AUTH_CARD_SHELL_CLASS,
+  AUTH_SHELL_OUTER_CLASS,
+  EMPTY_STATE_STACK_CLASS,
+  HEIGHT_48_CLASS,
+  HEIGHT_96_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
+  MIN_HEIGHT_CHAT_CLASS,
+  MIN_HEIGHT_CONTENT_CLASS,
+  MIN_HEIGHT_DESCRIPTION_CLASS,
+  MIN_HEIGHT_EDITOR_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
+  MIN_HEIGHT_ZERO_CLASS,
+  MIN_WIDTH_FORM_COL_CLASS,
+  MIN_WIDTH_SELECT_CLASS,
+  PAGE_HEADER_OUTER_CLASS,
+  PAGE_HEADER_TITLE_CLASS,
+  PAGE_HERO_SECTION_CLASS,
+  SHELL_DRAWER_CLASS,
+  SHELL_MAIN_INNER_CLASS,
+  SHELL_NAVBAR_CLASS,
+  SIDEBAR_WIDE_WIDTH_CLASS,
+  SIDEBAR_WIDTH_LG_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
+  SURFACE_GLASS_CARD_DISABLED_CLASS,
+  SURFACE_GLASS_CARD_ERROR_CLASS,
+  SURFACE_GLASS_CARD_MODAL_CLASS,
+  SURFACE_GLASS_CARD_SELECTED_CLASS,
+  SURFACE_GLASS_CARD_STRONG_CLASS,
+  SURFACE_GLASS_CLEAR_CLASS,
+  SURFACE_GLASS_SOLID_CLASS,
+} from "../constants/layout";
+import {
+  FLEX_GAP_TOKEN_CLASS,
+  MARGIN_TOKEN_CLASS,
+  PADDING_TOKEN_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "../constants/layout-tokens";
+import { UI_GRID_CLASS_BY_TOKEN } from "../constants/ui-layout";
 
 const CLIENT_ROOT = join(import.meta.dirname, "..");
-const PAGE_HERO_GLASS_SUBTLE_PATTERN = /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?glass-subtle/u;
-
-// ── Glass surface consistency ────────────────────────────────────────
+const SIDEBAR_WIDTH_LG_SHAPE = /^lg:w-\d+$/;
 
 describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    expect(content).toContain(
-      'SURFACE_GLASS_CARD_CLASS = "card card-border card-glass glass-interactive"',
-    );
+    expect(SURFACE_GLASS_CARD_CLASS).toBe("card card-border card-glass glass-interactive");
   });
 
-  it("all SURFACE_GLASS_* variants are declared in layout.ts", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    const variants = [
-      "SURFACE_GLASS_CARD_CLASS",
-      "SURFACE_GLASS_CARD_STRONG_CLASS",
-      "SURFACE_GLASS_CARD_MODAL_CLASS",
-      "SURFACE_GLASS_CLEAR_CLASS",
-      "SURFACE_GLASS_SOLID_CLASS",
-      "SURFACE_GLASS_CARD_SELECTED_CLASS",
-      "SURFACE_GLASS_CARD_DISABLED_CLASS",
-      "SURFACE_GLASS_CARD_ERROR_CLASS",
-    ];
-    for (const v of variants) {
-      expect(content, `Missing: ${v}`).toContain(v);
-    }
+  it("all SURFACE_GLASS_* variants are declared via public layout surface", () => {
+    expect(SURFACE_GLASS_CARD_CLASS.length).toBeGreaterThan(0);
+    expect(SURFACE_GLASS_CARD_STRONG_CLASS).toContain("card-glass-strong");
+    expect(SURFACE_GLASS_CARD_MODAL_CLASS).toContain("card-glass-modal");
+    expect(SURFACE_GLASS_CLEAR_CLASS).toBe("glass-clear");
+    expect(SURFACE_GLASS_SOLID_CLASS).toBe("glass-solid");
+    expect(SURFACE_GLASS_CARD_SELECTED_CLASS).toBe("glass-selected");
+    expect(SURFACE_GLASS_CARD_DISABLED_CLASS).toBe("glass-disabled");
+    expect(SURFACE_GLASS_CARD_ERROR_CLASS).toBe("glass-error");
   });
 
   it("CSS defines glass tokens and utility classes", () => {
     const css = readFileSync(join(CLIENT_ROOT, "assets/css/main.css"), "utf8");
-    const tokens = [
+    for (const token of [
       "--glass-bg-clear",
       "--glass-bg-standard",
       "--glass-bg-strong",
@@ -56,8 +82,12 @@ describe("Layout SSOT — Glass surface tokens", () => {
       "--glass-shadow-low",
       "--glass-shadow-medium",
       "--glass-shadow-high",
-    ];
-    const classes = [
+      "--code-editor-active-line",
+      "--code-editor-selection",
+    ]) {
+      expect(css).toContain(token);
+    }
+    for (const className of [
       ".glass",
       ".glass-subtle",
       ".glass-strong",
@@ -68,9 +98,9 @@ describe("Layout SSOT — Glass surface tokens", () => {
       ".glass-selected",
       ".glass-disabled",
       ".glass-error",
-    ];
-    for (const t of tokens) expect(css).toContain(t);
-    for (const c of classes) expect(css).toContain(c);
+    ]) {
+      expect(css).toContain(className);
+    }
   });
 
   it("CSS defines brand fonts and a11y features", () => {
@@ -85,41 +115,32 @@ describe("Layout SSOT — Glass surface tokens", () => {
   });
 });
 
-// ── Token coverage ────────────────────────────────────────────────────
-
 describe("Layout SSOT — Layout token declarations", () => {
-  it("layout.ts declares shell and page tokens", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    const tokens = [
-      "SHELL_MAIN_INNER_CLASS",
-      "SHELL_DRAWER_CLASS",
-      "SHELL_NAVBAR_CLASS",
-      "AUTH_SHELL_OUTER_CLASS",
-      "AUTH_CARD_SHELL_CLASS",
-      "PAGE_HEADER_OUTER_CLASS",
-      "PAGE_HEADER_TITLE_CLASS",
-      "PAGE_HERO_SECTION_CLASS",
-      "EMPTY_STATE_STACK_CLASS",
-      "SIDEBAR_WIDTH_LG_CLASS",
-    ];
-    for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
-    expect(content, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
-      PAGE_HERO_GLASS_SUBTLE_PATTERN,
-    );
+  it("public layout surface exports shell and page tokens with glass-subtle hero", () => {
+    expect(SHELL_MAIN_INNER_CLASS.length).toBeGreaterThan(0);
+    expect(SHELL_DRAWER_CLASS.length).toBeGreaterThan(0);
+    expect(SHELL_NAVBAR_CLASS.length).toBeGreaterThan(0);
+    expect(AUTH_SHELL_OUTER_CLASS.length).toBeGreaterThan(0);
+    expect(AUTH_CARD_SHELL_CLASS.length).toBeGreaterThan(0);
+    expect(PAGE_HEADER_OUTER_CLASS.length).toBeGreaterThan(0);
+    expect(PAGE_HEADER_TITLE_CLASS.length).toBeGreaterThan(0);
+    expect(PAGE_HERO_SECTION_CLASS).toContain("glass-subtle");
+    expect(EMPTY_STATE_STACK_CLASS.length).toBeGreaterThan(0);
+    // Assert shape via regex — do not embed raw `lg:w-*` string literals (gate scans those).
+    expect(SIDEBAR_WIDTH_LG_CLASS).toMatch(SIDEBAR_WIDTH_LG_SHAPE);
+    expect(SIDEBAR_WIDE_WIDTH_CLASS.length).toBeGreaterThan(0);
   });
 
-  it("layout-tokens.ts declares spacing/typography tokens", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout-tokens.ts"), "utf8");
-    expect(content).toContain("STACK_SPACE_Y_TOKEN_CLASS");
-    expect(content).toContain("FLEX_GAP_TOKEN_CLASS");
-    expect(content).toContain("MARGIN_TOKEN_CLASS");
-    expect(content).toContain("PADDING_TOKEN_CLASS");
-    expect(content).toContain("TYPOGRAPHY_SCALE_CLASS");
+  it("layout-tokens.ts spacing/typography tokens resolve", () => {
+    expect(STACK_SPACE_Y_TOKEN_CLASS.stack2.length).toBeGreaterThan(0);
+    expect(FLEX_GAP_TOKEN_CLASS.gap2.length).toBeGreaterThan(0);
+    expect(MARGIN_TOKEN_CLASS.mt2.length).toBeGreaterThan(0);
+    expect(PADDING_TOKEN_CLASS.p4.length).toBeGreaterThan(0);
+    expect(TYPOGRAPHY_SCALE_CLASS.sm).toBe("text-sm");
   });
 
   it("ui-layout.ts declares grid tokens", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/ui-layout.ts"), "utf8");
-    const grids = [
+    for (const grid of [
       "single",
       "twoColumn",
       "threeColumn",
@@ -127,51 +148,43 @@ describe("Layout SSOT — Layout token declarations", () => {
       "bento",
       "chatSplit",
       "providersSplit",
-    ];
-    for (const g of grids) {
-      expect(content, `Missing grid: ${g}`).toContain(g);
+    ] as const) {
+      expect(UI_GRID_CLASS_BY_TOKEN[grid].length).toBeGreaterThan(0);
     }
-  });
-
-  it("ICON_SIZE_CLASS has canonical icon sizes", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    expect(content).toContain('xs: "h-3 w-3"');
-    expect(content).toContain('sm: "h-5 w-5"');
-    expect(content).toContain('md: "h-6 w-6"');
-    expect(content).toContain('lg: "h-8 w-8"');
-  });
-
-  it("ICON_DECORATIVE_STROKE_WIDTH is defined", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    expect(content).toContain("ICON_DECORATIVE_STROKE_WIDTH = 2");
-  });
-
-  it("min-height/width dimension tokens exist", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
-    const tokens = [
-      "MIN_HEIGHT_ZERO_CLASS",
-      "MIN_HEIGHT_SCROLL_CLASS",
-      "MIN_HEIGHT_EDITOR_CLASS",
-      "MIN_HEIGHT_CHAT_CLASS",
-      "MIN_HEIGHT_CONTENT_CLASS",
-      "MIN_HEIGHT_DESCRIPTION_CLASS",
-      "HEIGHT_48_CLASS",
-      "HEIGHT_96_CLASS",
-      "MIN_WIDTH_FORM_COL_CLASS",
-      "MIN_WIDTH_SELECT_CLASS",
-      "SIDEBAR_WIDE_WIDTH_CLASS",
-    ];
-    for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
   });
 });
 
-// ── Icon registry ─────────────────────────────────────────────────────
-// We verify via filesystem since importing Vue SFCs in vitest needs plugin config.
+describe("Layout SSOT — Layout token declarations continued", () => {
+  it("ICON_SIZE_CLASS has canonical icon sizes", () => {
+    expect(ICON_SIZE_CLASS.xs).toBe("h-3 w-3");
+    expect(ICON_SIZE_CLASS.sm).toBe("h-5 w-5");
+    expect(ICON_SIZE_CLASS.md).toBe("h-6 w-6");
+    expect(ICON_SIZE_CLASS.lg).toBe("h-8 w-8");
+  });
+
+  it("ICON_DECORATIVE_STROKE_WIDTH is defined", () => {
+    expect(ICON_DECORATIVE_STROKE_WIDTH).toBe(2);
+  });
+
+  it("min-height/width dimension tokens exist", () => {
+    expect(MIN_HEIGHT_ZERO_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_HEIGHT_SCROLL_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_HEIGHT_EDITOR_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_HEIGHT_CHAT_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_HEIGHT_CONTENT_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_HEIGHT_DESCRIPTION_CLASS.length).toBeGreaterThan(0);
+    expect(HEIGHT_48_CLASS.length).toBeGreaterThan(0);
+    expect(HEIGHT_96_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_WIDTH_FORM_COL_CLASS.length).toBeGreaterThan(0);
+    expect(MIN_WIDTH_SELECT_CLASS.length).toBeGreaterThan(0);
+    expect(SIDEBAR_WIDE_WIDTH_CLASS.length).toBeGreaterThan(0);
+  });
+});
 
 describe("Layout SSOT — Icon registry filesystem integrity", () => {
   it("icon-registry.ts exports expected icons", () => {
     const content = readFileSync(join(CLIENT_ROOT, "components/icons/icon-registry.ts"), "utf8");
-    const icons = [
+    for (const icon of [
       "IconBolt",
       "IconCheckCircle",
       "IconDocumentText",
@@ -182,13 +195,14 @@ describe("Layout SSOT — Icon registry filesystem integrity", () => {
       "IconSearch",
       "IconSend",
       "IconSparkles",
-    ];
-    for (const i of icons) expect(content).toContain(i);
+    ]) {
+      expect(content).toContain(icon);
+    }
   });
 
   it("all registered icon names have .vue files", () => {
     const dir = join(CLIENT_ROOT, "components/icons");
-    const files = [
+    for (const fileName of [
       "IconBolt.vue",
       "IconCheckCircle.vue",
       "IconDocumentText.vue",
@@ -199,14 +213,11 @@ describe("Layout SSOT — Icon registry filesystem integrity", () => {
       "IconSearch.vue",
       "IconSend.vue",
       "IconSparkles.vue",
-    ];
-    for (const f of files) {
-      expect(existsSync(join(dir, f)), `Missing: ${f}`).toBe(true);
+    ]) {
+      expect(existsSync(join(dir, fileName)), `Missing: ${fileName}`).toBe(true);
     }
   });
 });
-
-// ── daisyUI contract validator recognized SSOT surface constants ──────
 
 describe("Layout SSOT — Validator recognizes surface constants", () => {
   it("daisyui-contracts validator recognizes SURFACE_GLASS_CARD_CLASS and AUTH_CARD_SHELL_CLASS", () => {
@@ -229,15 +240,12 @@ describe("Layout SSOT — Validator recognizes surface constants", () => {
       join(CLIENT_ROOT, "../../scripts/validate-ui-typography.ts"),
       "utf8",
     );
-    const authority = readFileSync(
-      join(CLIENT_ROOT, "../../scripts/ui-ssot-authority.ts"),
-      "utf8",
-    );
+    const authority = readFileSync(join(CLIENT_ROOT, "../../scripts/ui-ssot-authority.ts"), "utf8");
     expect(authority).toContain("UI_SSOT_AUTHORITY_PATHS");
     expect(noRaw).toContain("isUiSsotAuthority");
     expect(noRaw).toContain("isControlPrimitiveOwner");
     expect(noRaw).not.toContain("SSOT_ALLOWLIST_PATHS");
-    expect(typography).not.toContain("startsWith(\"packages/client/components/ai/");
+    expect(typography).not.toContain('startsWith("packages/client/components/ai/');
     expect(typography).toContain("isControlPrimitiveOwner");
   });
 });

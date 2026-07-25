@@ -5,6 +5,8 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
+const NUM_400 = 400;
+
 /**
  * Duplicate actionable-control fingerprint gate.
  *
@@ -56,6 +58,61 @@ const normalizeBtnClasses = (classValue: string): string => {
   return [...new Set(tokens)].sort().join(" ");
 };
 
+const pushAriaLabelFingerprints = (
+  filePath: string,
+  content: string,
+  template: string,
+  templateOffset: number,
+  fingerprints: ControlFingerprint[],
+): void => {
+  ARIA_LABEL_I18N_PATTERN.lastIndex = 0;
+  for (const match of template.matchAll(ARIA_LABEL_I18N_PATTERN)) {
+    const i18nKey = match[1] ?? "";
+    if (i18nKey.length === 0) continue;
+    const matchIndex = match.index ?? 0;
+    const tagStart = template.lastIndexOf("<", matchIndex);
+    const tagEnd = template.indexOf(">", matchIndex);
+    if (tagStart < 0 || tagEnd < tagStart) continue;
+    const openingTag = template.slice(tagStart, tagEnd + 1);
+    if (!NEIGHBORHOOD_BTN_PATTERN.test(openingTag)) continue;
+    BTN_CLASS_LIST_PATTERN.lastIndex = 0;
+    const btnMatch = openingTag.matchAll(BTN_CLASS_LIST_PATTERN).next().value;
+    fingerprints.push({
+      i18nKey,
+      btnClasses: normalizeBtnClasses(btnMatch?.[1] ?? "btn"),
+      filePath,
+      line: getLineFromOffset(content, matchIndex + Math.max(0, templateOffset)),
+    });
+  }
+};
+
+const pushBtnLabelFingerprints = (
+  filePath: string,
+  content: string,
+  template: string,
+  templateOffset: number,
+  fingerprints: ControlFingerprint[],
+): void => {
+  BTN_CLASS_LIST_PATTERN.lastIndex = 0;
+  for (const match of template.matchAll(BTN_CLASS_LIST_PATTERN)) {
+    const btnClasses = normalizeBtnClasses(match[1] ?? "btn");
+    const matchIndex = match.index ?? 0;
+    const after = template.slice(matchIndex, matchIndex + NUM_400);
+    TEMPLATE_I18N_KEY_PATTERN.lastIndex = 0;
+    const labelMatch = TEMPLATE_I18N_KEY_PATTERN.exec(after);
+    if (!labelMatch) continue;
+    const i18nKey = labelMatch[1] ?? "";
+    if (fingerprints.some((fp) => fp.filePath === filePath && fp.i18nKey === i18nKey)) continue;
+    if (!CONTROL_I18N_KEY_SHAPE_PATTERN.test(i18nKey)) continue;
+    fingerprints.push({
+      i18nKey,
+      btnClasses,
+      filePath,
+      line: getLineFromOffset(content, matchIndex + Math.max(0, templateOffset)),
+    });
+  }
+};
+
 /**
  * Extract control fingerprints from a Vue SFC template.
  * Prefer aria-label i18n keys on btn controls; fall back to nearby t('…') keys
@@ -69,55 +126,8 @@ export const extractControlFingerprints = (
   if (template.length === 0) return [];
   const templateOffset = content.indexOf("<template>");
   const fingerprints: ControlFingerprint[] = [];
-
-  // Primary: :aria-label="t('key'…)" on elements that also carry btn classes in the same tag.
-  ARIA_LABEL_I18N_PATTERN.lastIndex = 0;
-  for (const match of template.matchAll(ARIA_LABEL_I18N_PATTERN)) {
-    const i18nKey = match[1] ?? "";
-    if (i18nKey.length === 0) continue;
-    const matchIndex = match.index ?? 0;
-    const tagStart = template.lastIndexOf("<", matchIndex);
-    const tagEnd = template.indexOf(">", matchIndex);
-    if (tagStart < 0 || tagEnd < tagStart) continue;
-    const openingTag = template.slice(tagStart, tagEnd + 1);
-    if (!NEIGHBORHOOD_BTN_PATTERN.test(openingTag)) continue;
-    BTN_CLASS_LIST_PATTERN.lastIndex = 0;
-    const btnMatch = openingTag.matchAll(BTN_CLASS_LIST_PATTERN).next().value;
-    const btnClasses = normalizeBtnClasses(btnMatch?.[1] ?? "btn");
-    fingerprints.push({
-      i18nKey,
-      btnClasses,
-      filePath,
-      line: getLineFromOffset(content, matchIndex + Math.max(0, templateOffset)),
-    });
-  }
-
-  // Secondary: btn class + inner {{ t('key') }} label (no aria-label).
-  BTN_CLASS_LIST_PATTERN.lastIndex = 0;
-  for (const match of template.matchAll(BTN_CLASS_LIST_PATTERN)) {
-    const btnClasses = normalizeBtnClasses(match[1] ?? "btn");
-    const matchIndex = match.index ?? 0;
-    const after = template.slice(matchIndex, matchIndex + 400);
-    TEMPLATE_I18N_KEY_PATTERN.lastIndex = 0;
-    const labelMatch = TEMPLATE_I18N_KEY_PATTERN.exec(after);
-    if (!labelMatch) continue;
-    const i18nKey = labelMatch[1] ?? "";
-    // Skip keys already captured via aria-label path.
-    if (fingerprints.some((fp) => fp.filePath === filePath && fp.i18nKey === i18nKey)) {
-      continue;
-    }
-    // Skip non-control copy keys that are not suggestion/button shaped.
-    if (!CONTROL_I18N_KEY_SHAPE_PATTERN.test(i18nKey)) {
-      continue;
-    }
-    fingerprints.push({
-      i18nKey,
-      btnClasses,
-      filePath,
-      line: getLineFromOffset(content, matchIndex + Math.max(0, templateOffset)),
-    });
-  }
-
+  pushAriaLabelFingerprints(filePath, content, template, templateOffset, fingerprints);
+  pushBtnLabelFingerprints(filePath, content, template, templateOffset, fingerprints);
   return fingerprints;
 };
 

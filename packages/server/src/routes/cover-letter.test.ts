@@ -4,6 +4,11 @@ import {
   API_ENDPOINTS,
   buildCoverLetterExportEndpoint,
 } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
@@ -23,7 +28,7 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.coverLetterRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 function registerCreateAndReadTests(): void {
   test("POST cover letters creates cover letter", async () => {
@@ -33,7 +38,7 @@ function registerCreateAndReadTests(): void {
       API_ENDPOINTS.coverLetters,
       { company: "Test Co", position: "Game Designer" },
     );
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.company).toBe("Test Co");
     expect(res.body.position).toBe("Game Designer");
     expect(res.body.id).toBeDefined();
@@ -42,7 +47,7 @@ function registerCreateAndReadTests(): void {
 
   test("GET cover letters returns list", async () => {
     const res = await requestJson<Array<{ id: string }>>(app, "GET", API_ENDPOINTS.coverLetters);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
@@ -52,7 +57,7 @@ function registerCreateAndReadTests(): void {
       "GET",
       `${API_ENDPOINTS.coverLetters}/${createdId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.id).toBe(createdId);
     expect(res.body.company).toBe("Test Co");
   });
@@ -63,7 +68,7 @@ function registerCreateAndReadTests(): void {
       "GET",
       `${API_ENDPOINTS.coverLetters}/nonexistent-id`,
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Cover letter not found");
   });
 }
@@ -76,7 +81,7 @@ function registerUpdateAndDeleteTests(): void {
       `${API_ENDPOINTS.coverLetters}/${createdId}`,
       { position: "Senior Game Designer" },
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.position).toBe("Senior Game Designer");
   });
 
@@ -86,7 +91,7 @@ function registerUpdateAndDeleteTests(): void {
       "DELETE",
       `${API_ENDPOINTS.coverLetters}/${createdId}`,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.success).toBe(true);
   });
 }
@@ -105,7 +110,7 @@ function registerDynamicGenerationTests(): void {
       },
       save: false,
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.content.introduction.length).toBeGreaterThan(0);
     expect(res.body.content.body.length).toBeGreaterThan(0);
     expect(res.body.content.conclusion.length).toBeGreaterThan(0);
@@ -120,7 +125,7 @@ function registerDynamicGenerationTests(): void {
       position: "Systems Designer",
       save: true,
     });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.coverLetter.id).toBeDefined();
     expect(res.body.coverLetter.company).toBe("Studio Nova");
     generatedId = res.body.coverLetter.id;
@@ -136,12 +141,41 @@ function registerCoverLetterExportTests(): void {
         body: JSON.stringify({ format: "pdf" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe("application/pdf");
     expect(response.headers.get("content-disposition")).toContain(
       `cover-letter-${generatedId}.pdf`,
     );
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
+  });
+
+  test("POST cover letter PDF uses stored template palette (gaming)", async () => {
+    const { COVER_LETTER_EXPORT_THEME_BY_TEMPLATE } = await import(
+      "@bao/shared/constants/export-document-theme"
+    );
+    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const update = await requestJson<{ id: string; template?: string }>(
+      app,
+      "PUT",
+      `${API_ENDPOINTS.coverLetters}/${generatedId}`,
+      { template: "gaming" },
+    );
+    expect(update.status).toBe(HTTP_STATUS_OK);
+    const response = await app.handle(
+      new Request(`http://localhost${buildCoverLetterExportEndpoint(generatedId)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "pdf" }),
+      }),
+    );
+    expect(response.status).toBe(HTTP_STATUS_OK);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(
+      pdfStreamsContainRgbFill(bytes, COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.gaming.primary),
+    ).toBe(true);
+    expect(
+      pdfStreamsContainRgbFill(bytes, COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.professional.primary),
+    ).toBe(false);
   });
 
   test("POST cover letter export returns a DOCX attachment", async () => {
@@ -152,7 +186,7 @@ function registerCoverLetterExportTests(): void {
         body: JSON.stringify({ format: "docx" }),
       }),
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(HTTP_STATUS_OK);
     expect(response.headers.get("content-type")).toBe(
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     );

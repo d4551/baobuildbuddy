@@ -8,7 +8,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-defineProps<{
+const props = defineProps<{
   screenshotPaths: readonly string[];
   screenshotEndpoint: (index: number) => string;
   screenshotLinkLabel: (index: number) => string;
@@ -17,6 +17,14 @@ defineProps<{
 }>();
 
 const { t } = useI18n();
+function bindScreenshotImage(element: Element | null, index: number): void {
+  if (!(element instanceof HTMLImageElement)) {
+    return;
+  }
+  element.onerror = () => {
+    props.markScreenshotError(index);
+  };
+}
 </script>
 
 <template>
@@ -35,10 +43,10 @@ const { t } = useI18n();
           <figure :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.pt4]">
             <img 
               v-if="!screenshotHasError(index)"
+              :ref="(element) => bindScreenshotImage(element as Element | null, index)"
               :src="screenshotEndpoint(index)"
               :class="[RADIUS_TOKEN_CLASS.lg]"
               :alt="t('automation.runDetail.screenshotAlt', { index: index + 1 })"
-              @error="markScreenshotError(index)"
             />
             <div 
               v-else

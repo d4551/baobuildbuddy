@@ -15,6 +15,7 @@ import type {
 } from "./client-api-contracts";
 import type { JobsApi, StudiosApi } from "./client-api-jobs-studios";
 import type { AutomationApi, ScraperApi, SearchApi } from "./client-api-workspace";
+
 export type {
   AutomationApi,
   ScraperApi,

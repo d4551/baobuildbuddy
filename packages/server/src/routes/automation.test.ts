@@ -1,21 +1,35 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_UNPROCESSABLE_ENTITY,
+} from "@bao/shared/constants/http";
+import { COUNT_EIGHT, MS_FIVE_MINUTES } from "@bao/shared/constants/numeric";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import { resumes } from "../db/schema/resumes";
-import { applicationAutomationService } from "../services/automation/application-automation-service";
+import type { ApplicationAutomationService } from "../services/automation/application-automation-service";
+import {
+  AutomationRunScheduler,
+  ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE,
+  PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE,
+  UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE,
+} from "../services/automation/automation-run-scheduler";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
+let applicationAutomationService: ApplicationAutomationService;
 const resumeId = generateId();
 const createdRunIds: string[] = [];
-type RunJobApply = typeof applicationAutomationService.runJobApply;
-type RunEmailResponse = typeof applicationAutomationService.runEmailResponse;
+type RunJobApply = ApplicationAutomationService["runJobApply"];
+type RunEmailResponse = ApplicationAutomationService["runEmailResponse"];
 type ScrapeJobsForTarget = typeof scraperService.scrapeJobsForTarget;
+type AutomationRunInsert = typeof automationRuns.$inferInsert;
 const runJobApplyStub: RunJobApply = () => Promise.resolve();
 const runEmailResponseStub: RunEmailResponse = async (payload) => {
   const now = new Date().toISOString();
@@ -100,10 +114,43 @@ const requestStatusBody = async <T>(
   };
 };
 
+const insertTestAutomationRun = async (
+  values: Pick<AutomationRunInsert, "id" | "status"> & Partial<AutomationRunInsert>,
+): Promise<void> => {
+  const now = new Date().toISOString();
+  await db.insert(automationRuns).values({
+    id: values.id,
+    type: values.type ?? "job_apply",
+    status: values.status,
+    jobId: values.jobId ?? null,
+    userId: values.userId ?? null,
+    input: values.input ?? {
+      jobUrl: "https://example.com/careers/engineering",
+      resumeId,
+    },
+    progress: values.progress ?? 0,
+    currentStep: values.currentStep ?? null,
+    totalSteps: values.totalSteps ?? null,
+    exitCode: values.exitCode ?? null,
+    timedOut: values.timedOut ?? false,
+    aborted: values.aborted ?? false,
+    executionMs: values.executionMs ?? null,
+    startedAt: values.startedAt ?? null,
+    completedAt: values.completedAt ?? null,
+    createdAt: values.createdAt ?? now,
+    updatedAt: values.updatedAt ?? now,
+  });
+};
+
+const readAutomationRun = async (runId: string) => {
+  const rows = await db.select().from(automationRuns).where(eq(automationRuns.id, runId)).limit(1);
+  expect(rows.length).toBe(1);
+  return rows[0];
+};
+
 beforeAll(async () => {
   const initModule = await import("../db/init");
   const seedModule = await import("../db/seed");
-  const routesModule = await import("./automation.routes");
   const { Elysia } = await import("elysia");
   const dbModule = await import("../db/client");
 
@@ -111,6 +158,9 @@ beforeAll(async () => {
   seedModule.seedDatabase(dbModule.db);
 
   await db.insert(resumes).values({ id: resumeId });
+  const serviceModule = await import("../services/automation/application-automation-service");
+  applicationAutomationService = serviceModule.applicationAutomationService;
+  const routesModule = await import("./automation.routes");
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.automationRoutes);
 });
 
@@ -151,7 +201,7 @@ function registerJobApplyValidationTest(): void {
         resumeId,
       },
     );
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     if (typeof res.body === "string") {
       expect(res.body).toContain("Job URL is required");
     } else {
@@ -172,7 +222,7 @@ function registerMissingResumeTest(): void {
         resumeId: "not-found-resume-id",
       },
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error.message).toBe("resume not found: not-found-resume-id");
   });
 }
@@ -195,7 +245,7 @@ function registerJobApplyEnqueueTest(): void {
             resumeId,
           },
         );
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(HTTP_STATUS_OK);
         expect(res.body.status).toBe("running");
         expect(typeof res.body.id).toBe("string");
         expect(res.body.id.length).toBeGreaterThan(0);
@@ -233,14 +283,14 @@ function registerScheduleValidationTest(): void {
       },
     );
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
     expect(res.body.error.message).toContain("runAt");
   });
 }
 
 function registerScheduleCreationTest(): void {
   test("POST automation job apply schedule creates a pending run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -251,7 +301,7 @@ function registerScheduleCreationTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const scheduleValue =
       res.body.input && typeof res.body.input === "object" && "schedule" in res.body.input
@@ -304,7 +354,7 @@ function registerEmailResponseTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.reply.length).toBeGreaterThan(0);
     expect(res.body.delivered).toBe(true);
@@ -325,7 +375,7 @@ function registerEmailResponseTest(): void {
 
 function registerScheduledEmailResponseTest(): void {
   test("POST automation email response schedule creates a pending email run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -338,7 +388,7 @@ function registerScheduledEmailResponseTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -366,7 +416,7 @@ function registerScheduledEmailResponseTest(): void {
 
 function registerScheduledScrapeRunTest(): void {
   test("POST automation scrape schedule creates a pending scrape run", async () => {
-    const runAt = new Date(Date.now() + 300_000).toISOString();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
     const res = await requestJson<{
       id: string;
       status: "pending";
@@ -376,7 +426,7 @@ function registerScheduledScrapeRunTest(): void {
       runAt,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("pending");
     const input = res.body.input;
     const scheduledRunAt =
@@ -401,6 +451,115 @@ function registerScheduledScrapeRunTest(): void {
 
     expect(run.length).toBe(1);
     expect(run[0].status).toBe("pending");
+  });
+}
+
+function registerSchedulerRunningReclaimTest(): void {
+  test("startup recovery reclaims orphaned running automation runs", async () => {
+    const runId = generateId();
+    const startedAt = new Date().toISOString();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "running",
+      startedAt,
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.reclaimRunningRuns();
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
+function registerUnknownStatusNormalizationTest(): void {
+  test("unknown automation run status normalizes to error and is reclaimed on startup", async () => {
+    const runId = generateId();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "failed",
+    });
+
+    const routeRes = await requestJson<{ id: string; status: "error" }>(
+      app,
+      "GET",
+      `${API_ENDPOINTS.automationRuns}/${runId}`,
+    );
+    expect(routeRes.status).toBe(HTTP_STATUS_OK);
+    expect(routeRes.body.status).toBe("error");
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.reclaimRunningRuns();
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
+function registerSchedulerPendingWithoutMetadataTest(): void {
+  test("pending recovery fails runs without schedule metadata", async () => {
+    const runId = generateId();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "pending",
+      input: {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+      },
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.restorePendingRuns(10);
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
+function registerSchedulerPendingWithMetadataTest(): void {
+  test("pending recovery leaves scheduled runs pending for queued execution", async () => {
+    const runId = generateId();
+    const runAt = new Date(Date.now() + MS_FIVE_MINUTES).toISOString();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "pending",
+      input: {
+        jobUrl: "https://example.com/careers/engineering",
+        resumeId,
+        schedule: { runAt },
+      },
+    });
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    try {
+      await scheduler.restorePendingRuns(10);
+
+      const run = await readAutomationRun(runId);
+      expect(run.status).toBe("pending");
+      expect(run.error).toBeNull();
+      expect(run.output).toBeNull();
+    } finally {
+      scheduler.clear(runId);
+    }
   });
 }
 
@@ -434,7 +593,7 @@ function registerImmediateScrapeRunTest(): void {
       }
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.status).toBe("success");
     expect(res.body.output?.target).toBe("jobs_grackle");
     expect(res.body.output?.enrichment).not.toBeNull();
@@ -460,9 +619,9 @@ function registerCapabilityAuditRouteTest(): void {
       capabilities: Array<{ id: string; target: string | null }>;
     }>(app, "GET", API_ENDPOINTS.automationCapabilities);
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(res.body.generatedAt.length).toBeGreaterThan(0);
-    expect(res.body.summary.total).toBeGreaterThanOrEqual(8);
+    expect(res.body.summary.total).toBeGreaterThanOrEqual(COUNT_EIGHT);
     expect(res.body.capabilities.some((capability) => capability.id === "job_apply")).toBe(true);
     expect(
       res.body.capabilities.some((capability) => capability.target === "jobs_pocketgamer"),
@@ -480,5 +639,9 @@ describe("automation routes", () => {
   registerScheduledEmailResponseTest();
   registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
+  registerSchedulerRunningReclaimTest();
+  registerUnknownStatusNormalizationTest();
+  registerSchedulerPendingWithoutMetadataTest();
+  registerSchedulerPendingWithMetadataTest();
   registerCapabilityAuditRouteTest();
 });

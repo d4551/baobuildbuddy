@@ -6,7 +6,8 @@ import {
   toApiScopedPath,
 } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
-import { TRACE_ID_HEADER, TRACE_ID_BYTE_LENGTH } from "@bao/shared/constants/runtime";
+import { COUNT_SIXTEEN } from "@bao/shared/constants/numeric";
+import { TRACE_ID_BYTE_LENGTH, TRACE_ID_HEADER } from "@bao/shared/constants/runtime";
 import { settle } from "@bao/shared/utils/promise";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia, setupTypebox, t } from "elysia";
@@ -36,18 +37,18 @@ import { speechRoutes } from "./routes/speech.routes";
 import { statsRoutes } from "./routes/stats.routes";
 import { studioRoutes } from "./routes/studio.routes";
 import { userRoutes } from "./routes/user.routes";
+import { openapiDetail } from "./utils/openapi-detail";
 import { rateLimit } from "./utils/rate-limit";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
-import { openapiDetail } from "./utils/openapi-detail";
 
 setupTypebox();
 
 const createTraceId = (): string => {
   const bytes = new Uint8Array(TRACE_ID_BYTE_LENGTH);
   crypto.getRandomValues(bytes);
-  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...bytes].map((b) => b.toString(COUNT_SIXTEEN).padStart(2, "0")).join("");
 };
 
 const OPENAPI_TAGS = [
@@ -63,7 +64,10 @@ const OPENAPI_TAGS = [
   { name: "Studios", description: "Studio directory CRUD and analytics endpoints." },
   { name: "Scraper", description: "Manual scraper trigger endpoints." },
   { name: "AI", description: "AI chat, analysis, matching, and provider introspection endpoints." },
-  { name: "Speech", description: "Speech-to-text transcription via Whisper and other STT providers." },
+  {
+    name: "Speech",
+    description: "Speech-to-text transcription via Whisper and other STT providers.",
+  },
   { name: "Gamification", description: "XP, achievements, challenges, and streak endpoints." },
   { name: "Skill Mapping", description: "Transferable skill analysis and CRUD endpoints." },
   { name: "Search", description: "Global search and autocomplete endpoints." },
@@ -140,7 +144,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
       response: {
         [HTTP_STATUS_OK]: "HealthResponse",
       },
-      detail: openapiDetail("Health", "Retrieve health resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Health", "Return API and database health status for uptime probes."),
     },
     async () => {
       const healthResult = await settle(

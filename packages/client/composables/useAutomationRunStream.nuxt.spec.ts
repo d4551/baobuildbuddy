@@ -1,5 +1,6 @@
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AUTOMATION_RUN_PROGRESS_FIXTURE, LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 const getRunMock = vi.fn<(runId: string) => Promise<RpaRunExecutionEnvelope>>();
 const subscribeToRunMock =
@@ -30,7 +31,7 @@ const createRun = (status: RpaRunExecutionEnvelope["status"]): RpaRunExecutionEn
   error: null,
   progress: 0,
   currentStep: 0,
-  totalSteps: 3,
+  totalSteps: LOADING_SKELETON_LINES.compact,
   startedAt: new Date().toISOString(),
   completedAt: null,
   createdAt: new Date().toISOString(),
@@ -84,8 +85,8 @@ async function assertAppliesEventsAndStopsAtResult(): Promise<void> {
   });
 
   expect(stream.run.value?.currentStep).toBe(2);
-  expect(stream.run.value?.totalSteps).toBe(3);
-  expect(stream.run.value?.progress).toBe(67);
+  expect(stream.run.value?.totalSteps).toBe(LOADING_SKELETON_LINES.compact);
+  expect(stream.run.value?.progress).toBe(AUTOMATION_RUN_PROGRESS_FIXTURE);
 
   latestEventHandler?.({
     protocolVersion: "1.0",

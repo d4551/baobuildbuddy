@@ -27,9 +27,12 @@ export const submitApplicationStep = async (
   );
   if (!submitted) {
     await settle(state.session.page.keyboard.press("Enter"));
+    addStep(state.steps, "submit", "error", "Submit control not found");
+  } else {
+    addStep(state.steps, "submit", "ok");
   }
-  addStep(state.steps, "submit", "ok", submitted ? undefined : "Submitted via keyboard");
-  await settle(state.session.page.waitForTimeout(automationRuntimeConfig.postSubmitDelayMs));
+  // Intentional post-submit budget so confirmation copy can render before verify.
+  await Bun.sleep(automationRuntimeConfig.postSubmitDelayMs);
 };
 
 export const verifySubmissionStep = async (state: JobApplyExecutionState): Promise<void> => {
@@ -49,7 +52,7 @@ export const verifySubmissionStep = async (state: JobApplyExecutionState): Promi
   addStep(
     state.steps,
     "verify",
-    "ok",
+    confirmed ? "ok" : "error",
     confirmed ? "Submission confirmation detected" : "No confirmation text detected",
   );
 };

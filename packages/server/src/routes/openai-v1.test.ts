@@ -20,67 +20,99 @@ import { openaiV1Routes } from "./openai-v1.routes";
 
 const createCompatApp = () => new Elysia().use(openaiV1Routes);
 const originalDisableAuth = Bun.env.BAO_DISABLE_AUTH;
+const TEST_API_KEY = "bao_openai_v1_test_key";
+
+const upsertTestApiKey = async (): Promise<void> => {
+  const hashed = hashApiKey(TEST_API_KEY);
+  const createdAt = new Date().toISOString();
+  await db
+    .insert(auth)
+    .values({
+      id: DEFAULT_PROFILE_ID,
+      apiKeyHash: hashed,
+      apiKeyCreatedAt: createdAt,
+      apiKeyExpiresAt: null,
+      apiKeyRevokedAt: null,
+    })
+    .onConflictDoUpdate({
+      target: auth.id,
+      set: {
+        apiKeyHash: hashed,
+        apiKeyCreatedAt: createdAt,
+        apiKeyExpiresAt: null,
+        apiKeyRevokedAt: null,
+      },
+    });
+};
+
+const restoreAuthEnv = async (): Promise<void> => {
+  if (originalDisableAuth === undefined) {
+    Bun.env.BAO_DISABLE_AUTH = undefined;
+  } else {
+    Bun.env.BAO_DISABLE_AUTH = originalDisableAuth;
+  }
+  await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+};
+
+const expectUnauthorizedError = async (
+  response: Response,
+  message: string,
+  code?: string,
+): Promise<void> => {
+  expect(response.status).toBe(HTTP_STATUS_UNAUTHORIZED);
+  const body = (await response.json()) as {
+    error: { message: string; type: string; code?: string | null };
+  };
+  expect(body.error.message).toBe(message);
+  if (code) {
+    expect(body.error.code).toBe(code);
+  } else {
+    expect(body.error.type).toBe("invalid_request_error");
+  }
+};
 
 describe("openai v1 auth default-deny", () => {
   beforeAll(() => {
     initializeDatabase(sqlite);
   });
 
-  afterEach(async () => {
-    if (originalDisableAuth === undefined) {
-      Bun.env.BAO_DISABLE_AUTH = undefined;
-    } else {
-      Bun.env.BAO_DISABLE_AUTH = originalDisableAuth;
-    }
-    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-  });
+  afterEach(restoreAuthEnv);
 
   test("rejects unauthenticated models list when auth is enabled", async () => {
     Bun.env.BAO_DISABLE_AUTH = "false";
-    await db
-      .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
-      .onConflictDoUpdate({
-        target: auth.id,
-        set: { apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null },
-      });
-
+    await upsertTestApiKey();
     const app = createCompatApp();
     const response = await app.handle(new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`));
-    expect(response.status).toBe(HTTP_STATUS_UNAUTHORIZED);
-    const body = (await response.json()) as {
-      error: { message: string; type: string; code?: string | null };
-    };
-    expect(body.error.message).toBe(API_ERROR_MISSING_AUTH_HEADER);
-    expect(body.error.type).toBe("invalid_request_error");
+    await expectUnauthorizedError(response, API_ERROR_MISSING_AUTH_HEADER);
   });
 
   test("rejects invalid bearer token when auth is enabled", async () => {
     Bun.env.BAO_DISABLE_AUTH = "false";
-    await db
-      .insert(auth)
-      .values({ id: DEFAULT_PROFILE_ID, apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null })
-      .onConflictDoUpdate({
-        target: auth.id,
-        set: { apiKeyHash: hashApiKey("bao_openai_v1_test_key"), apiKeyCreatedAt: new Date().toISOString(), apiKeyExpiresAt: null, apiKeyRevokedAt: null },
-      });
-
+    await upsertTestApiKey();
     const app = createCompatApp();
     const response = await app.handle(
       new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`, {
         headers: { authorization: "Bearer wrong-key" },
       }),
     );
-    expect(response.status).toBe(HTTP_STATUS_UNAUTHORIZED);
-    const body = (await response.json()) as {
-      error: { message: string; type: string; code?: string | null };
-    };
-    expect(body.error.message).toBe(API_ERROR_INVALID_API_KEY);
-    expect(body.error.code).toBe("invalid_api_key");
+    await expectUnauthorizedError(response, API_ERROR_INVALID_API_KEY, "invalid_api_key");
   });
 });
 
-describe("openai v1 routes", () => {
+const fetchFirstModelId = async (app: ReturnType<typeof createCompatApp>): Promise<string> => {
+  const modelsResponse = await app.handle(
+    new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`),
+  );
+  const modelsBody = (await modelsResponse.json()) as { data: Array<{ id: string }> };
+  const modelId = modelsBody.data[0]?.id;
+  expect(modelId).toBeDefined();
+  if (!modelId) {
+    throw new Error("expected at least one OpenAI-compatible model id");
+  }
+  return modelId;
+};
+
+describe("openai v1 models", () => {
   test("GET /v1/models returns OpenAI list envelope", async () => {
     const app = createCompatApp();
     const response = await app.handle(new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`));
@@ -94,7 +126,6 @@ describe("openai v1 routes", () => {
     };
     expect(body.object).toBe("list");
     expect(Array.isArray(body.data)).toBe(true);
-    // Deterministic test provider or configured providers may both appear; empty is invalid.
     if (body.data.length === 0) {
       throw new Error(`empty models list: ${raw}`);
     }
@@ -102,7 +133,7 @@ describe("openai v1 routes", () => {
     expect(body.data[0]?.id.includes("/")).toBe(true);
   });
 
-  test("GET /v1/models/* returns 404 for unknown model", async () => {
+  test("GET /v1/models/:model returns 404 for unknown model", async () => {
     const app = createCompatApp();
     const response = await app.handle(
       new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}/local%2Fmissing-model`),
@@ -113,16 +144,12 @@ describe("openai v1 routes", () => {
     expect(body.error.message.length).toBeGreaterThan(0);
     expect(body.error.code).toBe("model_not_found");
   });
+});
 
+describe("openai v1 chat completions", () => {
   test("POST /v1/chat/completions returns OpenAI chat.completion shape", async () => {
     const app = createCompatApp();
-    const modelsResponse = await app.handle(
-      new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`),
-    );
-    const modelsBody = (await modelsResponse.json()) as { data: Array<{ id: string }> };
-    const modelId = modelsBody.data[0]?.id;
-    expect(modelId).toBeDefined();
-
+    const modelId = await fetchFirstModelId(app);
     const response = await app.handle(
       new Request(`http://localhost${OPENAI_V1_ENDPOINTS.chatCompletions}`, {
         method: "POST",
@@ -149,12 +176,7 @@ describe("openai v1 routes", () => {
 
   test("POST /v1/chat/completions stream emits SSE framing", async () => {
     const app = createCompatApp();
-    const modelsResponse = await app.handle(
-      new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}`),
-    );
-    const modelsBody = (await modelsResponse.json()) as { data: Array<{ id: string }> };
-    const modelId = modelsBody.data[0]?.id;
-
+    const modelId = await fetchFirstModelId(app);
     const response = await app.handle(
       new Request(`http://localhost${OPENAI_V1_ENDPOINTS.chatCompletions}`, {
         method: "POST",

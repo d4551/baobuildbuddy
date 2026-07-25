@@ -1,3 +1,4 @@
+import { COUNT_FIVE, PERCENT_MAX } from "@bao/shared/constants/numeric";
 import { STATISTICS_AUTOMATION_RUNS_LIMIT } from "@bao/shared/constants/statistics";
 import type {
   AutomationStats,
@@ -19,6 +20,7 @@ import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
+
 import {
   buildCareerProgress,
   buildWeeklyActivity,
@@ -78,7 +80,7 @@ export class StatisticsService {
         profile.currentRole,
       ];
       const filled = fields.filter((field) => field && String(field).trim().length > 0).length;
-      profileCompleteness = Math.round((filled / fields.length) * 100);
+      profileCompleteness = Math.round((filled / fields.length) * PERCENT_MAX);
     });
     return profileCompleteness;
   }
@@ -211,11 +213,11 @@ export class StatisticsService {
       automationStats.successfulRuns = allRuns.filter((run) => run.status === "success").length;
       automationStats.successRate =
         automationStats.totalRuns > 0
-          ? Math.round((automationStats.successfulRuns / automationStats.totalRuns) * 100)
+          ? Math.round((automationStats.successfulRuns / automationStats.totalRuns) * PERCENT_MAX)
           : 0;
       const today = new Date().toISOString().split("T")[0];
       automationStats.todayRuns = allRuns.filter((run) => run.createdAt?.startsWith(today)).length;
-      automationStats.recentRuns = allRuns.slice(0, 5).map((run) => ({
+      automationStats.recentRuns = allRuns.slice(0, COUNT_FIVE).map((run) => ({
         id: run.id,
         type: run.type,
         status: run.status,

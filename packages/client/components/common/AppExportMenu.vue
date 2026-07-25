@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -60,7 +61,7 @@ function focusMenuItem(index: number): void {
 
 function getMenuIndex(currentIndex: number, direction: number): number {
   const menuItems = getMenuItems();
-  if (!menuItems.length) {
+  if (menuItems.length === 0) {
     return 0;
   }
 
@@ -97,7 +98,7 @@ function toggleMenu(): void {
     return;
   }
 
-  void openMenu();
+  openMenu().then(() => undefined, () => undefined);
 }
 
 function handleTriggerClick(event: MouseEvent): void {
@@ -115,13 +116,13 @@ function handleTriggerKeydown(event: KeyboardEvent): void {
 
   if (event.key === "ArrowDown") {
     event.preventDefault();
-    void openMenu(0);
+    openMenu(0).then(() => undefined, () => undefined);
     return;
   }
 
   if (event.key === "ArrowUp") {
     event.preventDefault();
-    void openMenu(exportFormats.length - 1);
+    openMenu(exportFormats.length - 1).then(() => undefined, () => undefined);
     return;
   }
 
@@ -207,11 +208,14 @@ function handleMenuFocusOut(event: FocusEvent): void {
   }
 }
 
-watch(isOpen, (nextOpen, previousOpen) => {
+watch(isOpen, (_nextOpen, previousOpen) => {
   if (previousOpen) {
-    void nextTick(() => {
+    nextTick(() => {
       trigger.value?.focus();
-    });
+    }).then(
+      () => undefined,
+      () => undefined,
+    );
   }
 });
 
@@ -251,8 +255,8 @@ function emitExport(format: ExportFormat): void {
       {{ props.buttonLabel }}
     </button>
 
-    <ul class="menu dropdown-content z-20 rounded-box border border-base-300 bg-base-100" v-show="isOpen" :id="exportMenuId" :class="[MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]" role="menu" aria-orientation="vertical" :aria-labelledby="exportTriggerId" :aria-label="props.buttonAriaLabel" @focusout="handleMenuFocusOut">
-      <li v-for="(format, index) in exportFormats" :key="format" role="none">
+ <div class="menu dropdown-content z-20" v-show="isOpen" role="menu" :id="exportMenuId" :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]" aria-orientation="vertical" :aria-labelledby="exportTriggerId" :aria-label="props.buttonAriaLabel" @focusout="handleMenuFocusOut">
+      <div v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
           :id="`${exportMenuId}-${format}`"
           type="button"
@@ -265,7 +269,7 @@ function emitExport(format: ExportFormat): void {
         >
           {{ formatLabels[format] }}
         </button>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
 </template>

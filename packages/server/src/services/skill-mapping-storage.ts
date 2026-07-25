@@ -1,3 +1,4 @@
+import { COUNT_FIFTY } from "@bao/shared/constants/numeric";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
@@ -14,7 +15,7 @@ const toSkillMappingInsert = (data: SkillMappingInsert, now: string, id: string)
   transferableSkill: data.transferableSkill,
   industryApplications: data.industryApplications || [],
   evidence: data.evidence || [],
-  confidence: data.confidence || 50,
+  confidence: data.confidence || COUNT_FIFTY,
   category: data.category,
   demandLevel: data.demandLevel,
   aiGenerated: data.aiGenerated,

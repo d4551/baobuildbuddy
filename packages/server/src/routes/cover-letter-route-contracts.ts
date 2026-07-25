@@ -72,6 +72,7 @@ export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterBody
 
 export const coverLetterExportBodySchema = t.Object({
   format: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_MICRO })),
+  template: t.Optional(coverLetterTemplateBodySchema),
 });
 export type CoverLetterExportBody = Static<typeof coverLetterExportBodySchema>;
 

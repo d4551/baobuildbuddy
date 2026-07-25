@@ -1,3 +1,4 @@
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { SmartFieldAnalysisContext } from "./smart-field-mapper-contracts";
 
 const FIELD_CONTEXT_ITEM_LIMIT = 6;
@@ -71,7 +72,7 @@ const getProjectHighlights = (resume: Record<string, unknown>): string[] => {
 
     const title = getTrimmedString(entry.title);
     const description = truncateText(getTrimmedString(entry.description));
-    const technologies = uniqueNonEmptyStrings(entry.technologies).slice(0, 3).join(", ");
+    const technologies = uniqueNonEmptyStrings(entry.technologies).slice(0, COUNT_THREE).join(", ");
     const parts = [title, description, technologies].filter((part) => part.length > 0);
     if (parts.length > 0) {
       highlights.push(parts.join(" | "));

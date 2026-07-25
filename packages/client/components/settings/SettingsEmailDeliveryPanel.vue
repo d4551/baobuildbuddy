@@ -3,15 +3,25 @@ import type { EmailTransportSettings } from "@bao/shared/types/settings-contract
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
+  SECONDARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
+
+const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
+  required: true,
+});
+
+const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
+  required: true,
+});
 
 defineProps<{
   emailDeliveryConfigured: boolean;
@@ -20,13 +30,6 @@ defineProps<{
   securityOptionLabels: ReadonlyArray<{ value: string; label: string }>;
   authModeOptionLabels: ReadonlyArray<{ value: string; label: string }>;
 }>();
-
-const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
-  required: true,
-});
-const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
-  required: true,
-});
 
 const emit = defineEmits<{
   saveSettings: [];
@@ -44,7 +47,7 @@ const { t } = useI18n();
         <template #meta>
           <span 
             class="badge"
-            :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+            :class="emailDeliveryConfigured ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.warning"
           >
             {{
               emailDeliveryConfigured
@@ -213,7 +216,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-        <button 
+        <button type="button" 
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="!hasStoredPassword"
           :aria-label="t('settings.emailDelivery.clearPasswordAria')"
@@ -221,14 +224,14 @@ const { t } = useI18n();
         >
           {{ t("settings.emailDelivery.clearPasswordButton") }}
         </button>
-        <button 
-          class="btn btn-secondary"
+        <button type="button" 
+          :class="SECONDARY_ACTION_CLASS"
           :aria-label="t('settings.emailDelivery.savePasswordAria')"
           @click="emit('savePassword')"
         >
           {{ t("settings.emailDelivery.savePasswordButton") }}
         </button>
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.emailDelivery.saveAria')"
           @click="emit('saveSettings')"

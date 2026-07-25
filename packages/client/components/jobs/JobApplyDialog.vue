@@ -3,10 +3,13 @@ import { useI18n } from "vue-i18n";
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+
+const applicationNotes = defineModel<string>("applicationNotes", { required: true });
 
 defineProps<{
   open: boolean;
@@ -14,8 +17,6 @@ defineProps<{
   applying: boolean;
   jobTitle?: string;
 }>();
-
-const applicationNotes = defineModel<string>("applicationNotes", { required: true });
 
 const emit = defineEmits<{
   "update:open": [value: boolean];
@@ -50,7 +51,7 @@ const { t } = useI18n();
     <div class="modal-action">
       <button 
         type="button"
-        class="btn btn-ghost"
+        :class="GHOST_ACTION_CLASS"
         :aria-label="t('jobDetail.cancelApplyAria')"
         @click="emit('update:open', false)"
       >

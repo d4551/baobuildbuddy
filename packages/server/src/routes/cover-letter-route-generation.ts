@@ -178,6 +178,7 @@ export const exportCoverLetterAttachment = async (
   id: string,
   format: string | undefined,
   set: RouteSetState,
+  templateOverride?: string | null,
 ) => {
   const letter = await getCoverLetterById(id, set);
   if (!letter) {
@@ -188,6 +189,7 @@ export const exportCoverLetterAttachment = async (
     company: letter.company,
     position: letter.position,
     content: toJsonRecord(letter.content),
+    template: templateOverride ?? letter.template ?? undefined,
   };
   const sender = await buildCoverLetterSender();
 

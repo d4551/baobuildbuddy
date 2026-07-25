@@ -50,11 +50,20 @@ export const normalizeJobProviderSettings = (
   };
 };
 
-export const normalizeAutomationSettings = (settings: AutomationSettings): AutomationSettings => ({
-  ...DEFAULT_AUTOMATION_SETTINGS,
-  ...settings,
-  jobProviders: normalizeJobProviderSettings(settings.jobProviders),
-});
+const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
+
+export const normalizeAutomationSettings = (settings: AutomationSettings): AutomationSettings => {
+  const merged: AutomationSettings = {
+    ...DEFAULT_AUTOMATION_SETTINGS,
+    ...settings,
+    jobProviders: normalizeJobProviderSettings(settings.jobProviders),
+  };
+  // Legacy persisted 30s timed out real Greenhouse job-apply; bump to current default.
+  if (merged.defaultTimeout === LEGACY_AUTOMATION_TIMEOUT_SECONDS) {
+    merged.defaultTimeout = DEFAULT_AUTOMATION_SETTINGS.defaultTimeout;
+  }
+  return merged;
+};
 
 export const normalizeLocalModelEndpoint = (value: string | null | undefined): string | null => {
   if (typeof value !== "string") {

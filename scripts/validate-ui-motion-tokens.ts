@@ -28,6 +28,7 @@ const sourceExtensions = new Set([".vue", ".ts", ".css"]);
 const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/assets/css/main.css",
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-chrome.ts",
 ]);
 
 const isSsotSourceFile = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);

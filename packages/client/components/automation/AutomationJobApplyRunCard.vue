@@ -5,23 +5,21 @@ import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.sche
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
+  BADGE_OUTLINE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-
-const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
-  AUTOMATION_RUN_STATUSES;
-const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
-  RUN_STATUS_SUCCESS,
-  RUN_STATUS_ERROR,
-]);
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 const props = defineProps<{
   activeRunId: string;
@@ -33,10 +31,19 @@ const props = defineProps<{
   toLocalizedDateTime: (value: string) => string;
 }>();
 
+
 const emit = defineEmits<{
   cancel: [];
   retry: [];
 }>();
+
+
+const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
+  AUTOMATION_RUN_STATUSES;
+const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
+  RUN_STATUS_SUCCESS,
+  RUN_STATUS_ERROR,
+]);
 
 const { t } = useI18n();
 
@@ -48,7 +55,7 @@ const streamStatusLabel = computed<string>(() => {
 const streamProgressValue = computed<number>(() => {
   const progress = props.run?.progress;
   if (typeof progress === "number" && Number.isFinite(progress)) {
-    return Math.max(0, Math.min(100, progress));
+    return Math.max(0, Math.min(PERCENT_MAX, progress));
   }
   return 0;
 });
@@ -64,12 +71,12 @@ const lifecycleStepClasses = computed<[string, string, string]>(() => {
     runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus)
       ? "step step-primary"
       : "step";
-  const completionStep =
-    runStatus === RUN_STATUS_SUCCESS
-      ? "step step-success"
-      : runStatus === RUN_STATUS_ERROR
-        ? "step step-error"
-        : "step";
+  let completionStep = "step";
+  if (runStatus === RUN_STATUS_SUCCESS) {
+    completionStep = "step step-success";
+  } else if (runStatus === RUN_STATUS_ERROR) {
+    completionStep = "step step-error";
+  }
   return [queueStep, runningStep, completionStep];
 });
 
@@ -115,8 +122,8 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         <li :class="lifecycleStepClasses[2]">{{ t("automation.jobApply.stream.steps.completed") }}</li>
       </ul>
 
-      <div 
-        class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[MARGIN_TOKEN_CLASS.mt4]"
+      <div
+        :class="[STATS_SHELL_VARIANT_CLASS.lg, MARGIN_TOKEN_CLASS.mt4]"
         :aria-label="t('automation.jobApply.stream.aria')"
       >
         <div class="stat">
@@ -159,7 +166,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </NuxtLink>
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
           :disabled="isStreamLoading"
           :aria-label="t('automation.jobApply.stream.retryAria')"
           @click="emit('retry')"
@@ -168,7 +175,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         </button>
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('automation.jobApply.stream.cancelAria')"
           @click="emit('cancel')"
         >
@@ -206,9 +213,9 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
               <li
                 v-for="event in eventRows"
                 :key="`${event.runId}-${event.sequence}`"
-                class="rounded-box border border-base-300 bg-base-100"
-                :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
-              >
+ 
+ :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+ >
                 <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                   <div>
                     <p class="font-semibold">{{ resolveStreamEventStageLabel(event) }}</p>
@@ -216,7 +223,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
                       {{ toLocalizedDateTime(event.timestamp) }}
                     </p>
                   </div>
-                  <span class="badge badge-sm badge-outline">
+                  <span :class="BADGE_OUTLINE_SM_CLASS">
                     {{ resolveStreamEventStatusLabel(event) }}
                   </span>
                 </div>

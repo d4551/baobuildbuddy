@@ -53,17 +53,3 @@ export function requireApiResponseData<TData>(
   }
   return response.data;
 }
-
-/**
- * Soft unwrap for list bootstraps that treat failures as empty collections.
- */
-export async function readApiDataOrEmpty(request: Promise<unknown>): Promise<unknown> {
-  const response = await request;
-  if (!(isRecord(response) || Array.isArray(response))) {
-    return [];
-  }
-  if (hasApiResponseError(response)) {
-    return [];
-  }
-  return unwrapApiResponsePayload(response);
-}

@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import type { AppIconName } from "~/components/icons/icon-registry";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+  BADGE_GHOST_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
@@ -15,10 +16,10 @@ import {
   SECTION_RAIL_LABEL_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
 interface WorkspaceSectionItem {
@@ -158,7 +159,7 @@ const activeDescription = computed<string>(() => {
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
-                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-left"
+                class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-start"
                 active-class=""
                 exact-active-class=""
                 :class="[
@@ -191,7 +192,7 @@ const activeDescription = computed<string>(() => {
 
                 <span
                   v-if="badgeById[section.id] !== undefined"
-                  class="badge badge-ghost badge-xs shrink-0"
+                  :class="[BADGE_GHOST_XS_CLASS, 'shrink-0']"
                   aria-hidden="true"
                 >
                   {{ badgeById[section.id] }}

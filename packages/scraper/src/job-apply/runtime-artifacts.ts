@@ -9,6 +9,7 @@ import {
   RUN_SCREENSHOT_PREFIX,
   type SelectorMapInput,
   type StepRecord,
+  type StepStatus,
   type UploadResumeArtifactOptions,
 } from "./runtime-contracts";
 import { runOnFirstMatchingLocator } from "./runtime-locators";
@@ -71,7 +72,7 @@ const serializeResumeArtifact = (resume: Record<string, unknown>): string => {
 export const addStep = (
   steps: StepRecord[],
   action: string,
-  status: "ok" | "error",
+  status: StepStatus,
   message?: string,
 ): void => {
   steps.push({

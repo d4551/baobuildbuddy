@@ -11,6 +11,7 @@ import { desc, eq } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { studios } from "../db/schema/studios";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   studioAnalyticsResponses,
   studioDeleteResponses,
@@ -21,7 +22,6 @@ import {
   studioMutationBodySchema,
   studioUpdateBodySchema,
 } from "./studio-route-contracts";
-import { openapiDetail } from "../utils/openapi-detail";
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -31,13 +31,57 @@ export interface StudioAnalytics {
   topTechnologies: Array<{ name: string; count: number }>;
 }
 
+const TOP_TECHNOLOGIES_LIMIT = 10;
+
+const incrementCount = (bucket: Record<string, number>, key: string): void => {
+  bucket[key] = (bucket[key] || 0) + 1;
+};
+
+const buildStudioAnalytics = (
+  allStudios: Array<{
+    type: string | null;
+    size: string | null;
+    remoteWork: boolean | null;
+    technologies: string[] | null;
+  }>,
+): StudioAnalytics => {
+  const analytics: StudioAnalytics = {
+    totalStudios: allStudios.length,
+    byType: {},
+    bySize: {},
+    remoteWorkStudios: allStudios.filter((studio) => studio.remoteWork === true).length,
+    topTechnologies: [],
+  };
+
+  const techCount: Record<string, number> = {};
+  for (const studio of allStudios) {
+    if (studio.type) {
+      incrementCount(analytics.byType, studio.type);
+    }
+    const sizeLabel = studio.size?.trim() ?? "";
+    if (sizeLabel.length > 0) {
+      incrementCount(analytics.bySize, sizeLabel);
+    }
+    for (const tech of studio.technologies ?? []) {
+      incrementCount(techCount, tech);
+    }
+  }
+
+  analytics.topTechnologies = Object.entries(techCount)
+    .map(([name, count]) => ({ name, count }))
+    .sort((left, right) => right.count - left.count)
+    .slice(0, TOP_TECHNOLOGIES_LIMIT);
+
+  return analytics;
+};
+
 export const studioRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.studiosBase),
 })
   .get(
     "/",
     {
-      detail: openapiDetail("Studios", "Retrieve studios resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "List game studios with filters and search metadata."),
       query: studioListQuerySchema,
       response: studioListResponses,
     },
@@ -75,53 +119,18 @@ export const studioRoutes = new Elysia({
   .get(
     "/analytics",
     {
-      detail: openapiDetail("Studios", "Retrieve studios analytics for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Retrieve studio analytics such as hiring activity trends."),
       response: studioAnalyticsResponses,
     },
     async ({ status }) => {
       const allStudios = await db.select().from(studios);
-
-      const analytics: StudioAnalytics = {
-        totalStudios: allStudios.length,
-        byType: {},
-        bySize: {},
-        remoteWorkStudios: allStudios.filter((studio) => studio.remoteWork === true).length,
-        topTechnologies: [],
-      };
-
-      for (const studio of allStudios) {
-        if (studio.type) {
-          analytics.byType[studio.type] = (analytics.byType[studio.type] || 0) + 1;
-        }
-      }
-
-      for (const studio of allStudios) {
-        if (studio.size) {
-          analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
-        }
-      }
-
-      const techCount: Record<string, number> = {};
-      for (const studio of allStudios) {
-        if (studio.technologies) {
-          for (const tech of studio.technologies) {
-            techCount[tech] = (techCount[tech] || 0) + 1;
-          }
-        }
-      }
-
-      analytics.topTechnologies = Object.entries(techCount)
-        .map(([name, count]) => ({ name, count }))
-        .sort((left, right) => right.count - left.count)
-        .slice(0, 10);
-
-      return status(HTTP_STATUS_OK, analytics);
+      return status(HTTP_STATUS_OK, buildStudioAnalytics(allStudios));
     },
   )
   .get(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Retrieve studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Retrieve a studio by id with profile and roles."),
       params: studioIdParamsSchema,
       response: studioEntityResponses,
     },
@@ -136,7 +145,7 @@ export const studioRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail("Studios", "Create or execute studios resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Create or ingest a studio profile record."),
       body: studioMutationBodySchema,
       response: studioEntityResponses,
     },
@@ -164,7 +173,7 @@ export const studioRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Replace studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Replace studio profile fields for an existing studio."),
       params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
       response: studioEntityResponses,
@@ -197,7 +206,7 @@ export const studioRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Delete studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Delete a studio profile by id."),
       params: studioIdParamsSchema,
       response: studioDeleteResponses,
     },

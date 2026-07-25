@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_OUTLINE_CLASS,
+  BADGE_PRIMARY_CLASS,
+  BADGE_PRIMARY_LG_CLASS,
+  BADGE_SUCCESS_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -11,7 +17,6 @@ import {
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -53,7 +58,7 @@ const { t } = useI18n();
           density="comfortable"
         >
           <template #actions>
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('jobDetail.interviewAria')"
               @click="emit('interview')"
@@ -65,7 +70,7 @@ const { t } = useI18n();
               {{ t("jobDetail.interviewButton") }}
             </button>
 
-            <button
+            <button type="button"
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('jobDetail.applyAria')"
               @click="emit('apply')"
@@ -74,8 +79,8 @@ const { t } = useI18n();
               {{ t("jobDetail.applyButton") }}
             </button>
 
-            <button
-              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
+            <button type="button"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { [BTN_VARIANT_CLASS.success]: isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"
             >
@@ -105,9 +110,9 @@ const { t } = useI18n();
             {{ job.location }}
           </span>
 
-          <span v-if="job.remote" class="badge badge-success">{{ t("jobDetail.remoteBadge") }}</span>
-          <span v-if="job.experienceLevel" class="badge badge-outline">{{ jobExperienceLabel(job.experienceLevel) }}</span>
-          <span v-if="job.salary" class="badge badge-primary">{{ job.salary }}</span>
+          <span v-if="job.remote" :class="BADGE_SUCCESS_CLASS">{{ t("jobDetail.remoteBadge") }}</span>
+          <span v-if="job.experienceLevel" :class="BADGE_OUTLINE_CLASS">{{ jobExperienceLabel(job.experienceLevel) }}</span>
+          <span v-if="job.salary" :class="BADGE_PRIMARY_CLASS">{{ job.salary }}</span>
         </div>
       </div>
     </div>
@@ -138,7 +143,7 @@ const { t } = useI18n();
       <div class="card-body">
         <h2 class="card-title">{{ t("jobDetail.technologiesTitle") }}</h2>
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <span v-for="tech in job.technologies" :key="tech" class="badge badge-lg badge-primary">
+          <span v-for="tech in job.technologies" :key="tech" :class="BADGE_PRIMARY_LG_CLASS">
             {{ tech }}
           </span>
         </div>

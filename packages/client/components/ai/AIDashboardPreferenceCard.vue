@@ -10,6 +10,9 @@ import {
 } from "~/constants/layout";
 import type { ProviderConfig } from "~/types/ai-dashboard";
 
+const selectedModelValue = defineModel<string>("selectedModel", { required: true });
+
+
 defineProps<{
   loading: boolean;
   providers: readonly ProviderConfig[];
@@ -21,7 +24,6 @@ defineProps<{
 }>();
 
 const selectedProviderModel = defineModel<AIProviderType>("selectedProvider", { required: true });
-const selectedModelValue = defineModel<string>("selectedModel", { required: true });
 </script>
 
 <template>
@@ -67,7 +69,7 @@ const selectedModelValue = defineModel<string>("selectedModel", { required: true
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="!selectedProviderModel || !selectedModelValue || loading"
           :aria-label="t('aiDashboard.preference.saveAria')"

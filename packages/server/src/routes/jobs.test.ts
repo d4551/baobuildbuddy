@@ -5,6 +5,11 @@ import {
   buildJobDetailEndpoint,
   buildJobSaveEndpoint,
 } from "@bao/shared/constants/endpoints";
+import {
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
@@ -25,7 +30,7 @@ beforeAll(async () => {
   app = new Elysia({ prefix: API_ENDPOINT_PREFIX }).use(routesModule.jobsRoutes);
 });
 
-afterAll(() => {});
+afterAll(() => undefined);
 
 function registerListAndLookupTests(): void {
   test("GET jobs returns jobs list", async () => {
@@ -34,7 +39,7 @@ function registerListAndLookupTests(): void {
       "GET",
       API_ENDPOINTS.jobs,
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body.jobs)).toBe(true);
     expect(res.body.page).toBe(1);
   });
@@ -45,7 +50,7 @@ function registerListAndLookupTests(): void {
       "GET",
       buildJobDetailEndpoint("nonexistent-id"),
     );
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Job not found");
   });
 }
@@ -55,7 +60,7 @@ function registerSavedJobTests(): void {
     const res = await requestJson<{ error: string }>(app, "POST", API_ENDPOINTS.jobsSave, {
       jobId: "nonexistent",
     });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Job not found");
   });
 
@@ -72,7 +77,7 @@ function registerSavedJobTests(): void {
     const saveRes = await requestJson<{ jobId: string }>(app, "POST", API_ENDPOINTS.jobsSave, {
       jobId,
     });
-    expect(saveRes.status).toBe(201);
+    expect(saveRes.status).toBe(HTTP_STATUS_CREATED);
     expect(saveRes.body.jobId).toBe(jobId);
 
     const savedRes = await requestJson<Array<{ jobId: string }>>(
@@ -80,7 +85,7 @@ function registerSavedJobTests(): void {
       "GET",
       API_ENDPOINTS.jobsSaved,
     );
-    expect(savedRes.status).toBe(200);
+    expect(savedRes.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(savedRes.body)).toBe(true);
     const found = (savedRes.body as Array<{ jobId: string }>).some((s) => s.jobId === jobId);
     expect(found).toBe(true);
@@ -90,7 +95,7 @@ function registerSavedJobTests(): void {
       "DELETE",
       buildJobSaveEndpoint(jobId),
     );
-    expect(delRes.status).toBe(200);
+    expect(delRes.status).toBe(HTTP_STATUS_OK);
   });
 }
 
@@ -99,13 +104,13 @@ function registerApplicationTests(): void {
     const res = await requestJson<{ error: string }>(app, "POST", API_ENDPOINTS.jobsApply, {
       jobId: "nonexistent",
     });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(HTTP_STATUS_NOT_FOUND);
     expect(res.body.error).toBe("Job not found");
   });
 
   test("GET job applications returns list", async () => {
     const res = await requestJson<unknown[]>(app, "GET", API_ENDPOINTS.jobsApplications);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(HTTP_STATUS_OK);
     expect(Array.isArray(res.body)).toBe(true);
   });
 }

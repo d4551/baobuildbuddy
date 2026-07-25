@@ -2,7 +2,17 @@
  * Date utility helpers
  */
 
-import { MS_PER_DAY, SECONDS_PER_30_DAYS, SECONDS_PER_WEEK } from "../constants/time";
+import {
+  DAYS_PER_MONTH_APPROX,
+  DAYS_PER_WEEK,
+  MS_PER_DAY,
+  MS_PER_SECOND,
+  SECONDS_PER_30_DAYS,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
+  SECONDS_PER_WEEK,
+} from "../constants/time";
 
 export type RelativeTimeTranslator = (key: string, params?: { count?: number }) => string;
 
@@ -28,21 +38,27 @@ export function formatRelativeTime(
   options?: FormatRelativeTimeOptions,
 ): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  const seconds = Math.floor((Date.now() - d.getTime()) / MS_PER_SECOND);
   const prefix = options?.keyPrefix ?? DEFAULT_KEY_PREFIX;
 
-  if (seconds < 60) {
+  if (seconds < SECONDS_PER_MINUTE) {
     if (options?.minOneUnit) {
       return t(`${prefix}.minutesAgo`, { count: 1 });
     }
     return t(`${prefix}.justNow`);
   }
-  if (seconds < 3600)
-    return t(`${prefix}.minutesAgo`, { count: Math.max(1, Math.floor(seconds / 60)) });
-  if (seconds < 86400)
-    return t(`${prefix}.hoursAgo`, { count: Math.max(1, Math.floor(seconds / 3600)) });
+  if (seconds < SECONDS_PER_HOUR)
+    return t(`${prefix}.minutesAgo`, {
+      count: Math.max(1, Math.floor(seconds / SECONDS_PER_MINUTE)),
+    });
+  if (seconds < SECONDS_PER_DAY)
+    return t(`${prefix}.hoursAgo`, {
+      count: Math.max(1, Math.floor(seconds / SECONDS_PER_HOUR)),
+    });
   if (options?.daysOnly || seconds < SECONDS_PER_WEEK)
-    return t(`${prefix}.daysAgo`, { count: Math.max(1, Math.floor(seconds / 86400)) });
+    return t(`${prefix}.daysAgo`, {
+      count: Math.max(1, Math.floor(seconds / SECONDS_PER_DAY)),
+    });
   if (seconds < SECONDS_PER_30_DAYS)
     return t(`${prefix}.weeksAgo`, { count: Math.floor(seconds / SECONDS_PER_WEEK) });
   return d.toLocaleDateString();
@@ -97,7 +113,12 @@ export function formatRelativeTimeForDate(
 
   if (diffDays <= 0) return t(`${options.keyPrefix}.today`);
   if (diffDays === 1) return t(`${options.keyPrefix}.yesterday`);
-  if (diffDays < 7) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
-  if (diffDays < 30) return t(`${options.keyPrefix}.weeksAgo`, { count: Math.floor(diffDays / 7) });
-  return t(`${options.keyPrefix}.monthsAgo`, { count: Math.floor(diffDays / 30) });
+  if (diffDays < DAYS_PER_WEEK) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
+  if (diffDays < DAYS_PER_MONTH_APPROX)
+    return t(`${options.keyPrefix}.weeksAgo`, {
+      count: Math.floor(diffDays / DAYS_PER_WEEK),
+    });
+  return t(`${options.keyPrefix}.monthsAgo`, {
+    count: Math.floor(diffDays / DAYS_PER_MONTH_APPROX),
+  });
 }

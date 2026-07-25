@@ -101,6 +101,11 @@ async function requestAIChatResponseHttp(
   assertApiResponse(error, input.t("apiErrors.ai.sendMessageFailed"));
 
   const response = parseAIChatResponse(data);
+  const message = typeof response.message === "string" ? response.message.trim() : "";
+  if (message.length === 0) {
+    throw new Error(input.t("aiChatCommon.requestErrorToast"));
+  }
+  response.message = message;
   if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
     input.sessionId.value = response.sessionId;
   }
@@ -131,8 +136,12 @@ async function requestAIChatResponseRealtime(
     return null;
   }
   const fullText = streamResult.value.fullText.trim();
+  // Empty stream_end must not fake-success with unableToProcessFallback.
+  if (fullText.length === 0) {
+    return null;
+  }
   const response: AIChatResponse = {
-    message: fullText.length > 0 ? fullText : input.unableToProcessFallback(),
+    message: fullText,
     sessionId: streamResult.value.sessionId,
     timestamp: new Date().toISOString(),
   };

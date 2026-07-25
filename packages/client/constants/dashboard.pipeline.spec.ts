@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { UI_RECOMMENDATION_PREVIEW_LIMIT } from "~/constants/numeric-ui";
 import { resolveDashboardFlowActions, resolveDashboardPipelineSteps } from "./dashboard-pipeline";
 
 describe("resolveDashboardPipelineSteps", () => {
@@ -57,7 +58,9 @@ describe("resolveDashboardPipelineSteps", () => {
     expect(statusById.apply).toBe("pending");
     expect(statusById.gamify).toBe("pending");
   });
+});
 
+describe("resolveDashboardPipelineSteps continued", () => {
   it("sets customize as in progress when discovery and scraping are complete", () => {
     const steps = resolveDashboardPipelineSteps({
       savedJobs: 5,
@@ -95,7 +98,7 @@ describe("dashboard flow action resolver", () => {
     const actions = resolveDashboardFlowActions(pipelineSteps);
 
     expect(actions[0]?.id).toBe("customize");
-    expect(actions.length).toBe(4);
+    expect(actions.length).toBe(UI_RECOMMENDATION_PREVIEW_LIMIT);
   });
 
   it("switches to advanced actions once the full pipeline is complete", () => {
@@ -114,6 +117,6 @@ describe("dashboard flow action resolver", () => {
 
     expect(actions[0]?.id).toBe("interview");
     expect(actions[1]?.id).toBe("ai-chat");
-    expect(actions.length).toBe(4);
+    expect(actions.length).toBe(UI_RECOMMENDATION_PREVIEW_LIMIT);
   });
 });

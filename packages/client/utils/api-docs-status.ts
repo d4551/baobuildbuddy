@@ -1,3 +1,8 @@
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_TOO_MANY_REQUESTS,
+  HTTP_STATUS_UNAUTHORIZED,
+} from "@bao/shared/constants/http";
 import type { ApiDocsUiState, ApiHttpMethod } from "~/types/api-docs";
 
 export const API_DOCS_HTTP_METHODS_ORDER = [
@@ -32,11 +37,15 @@ export const toErrorStatusCode = (error: unknown): number | null => {
 };
 
 export const toApiDocsUiStateFromStatusCode = (statusCode: number | null): ApiDocsUiState => {
-  if (statusCode === 401) {
+  if (statusCode === HTTP_STATUS_UNAUTHORIZED) {
     return "unauthorized";
   }
 
-  if (statusCode === null || statusCode >= 500 || statusCode === 429) {
+  if (
+    statusCode === null ||
+    statusCode >= HTTP_STATUS_INTERNAL_SERVER_ERROR ||
+    statusCode === HTTP_STATUS_TOO_MANY_REQUESTS
+  ) {
     return "errorRetryable";
   }
 

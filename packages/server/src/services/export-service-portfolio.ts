@@ -12,8 +12,9 @@ import { renderPortfolioProject } from "./export-service-portfolio-projects";
 export async function exportPortfolioPdf(
   metadata: PortfolioMetadata,
   projects: PortfolioProject[],
+  template?: string | null,
 ): Promise<Uint8Array> {
-  const context = await createPortfolioContext();
+  const context = await createPortfolioContext(template);
   renderPortfolioCoverPage(context, metadata);
   startPortfolioProjectsSection(context);
 

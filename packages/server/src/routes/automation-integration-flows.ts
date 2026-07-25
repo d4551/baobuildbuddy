@@ -1,18 +1,21 @@
 import { expect } from "bun:test";
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
+import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { db } from "../db/client";
 import { automationRuns } from "../db/schema/automation-runs";
 import type { ApplicationAutomationService } from "../services/automation/application-automation-service";
+
 import {
-  SCHEDULE_LEAD_TIME_MS,
-  SMTP_FROM_NAME,
-  SMTP_PASSWORD,
-  SMTP_USERNAME,
   createResumeRecord,
   readRunRowById,
   requestEmailResponseBody,
   requestExecutionEnvelope,
+  SCHEDULE_LEAD_TIME_MS,
+  SMTP_FROM_NAME,
+  SMTP_PASSWORD,
+  SMTP_USERNAME,
   subscribeToRunEvents,
   upsertDeterministicSettings,
   waitForRunCompletion,
@@ -32,8 +35,8 @@ export const startManualJobApplyRun = async (
       resumeId,
     }),
   });
-  if (response.status !== 200) {
-    throw new Error("Manual automation run failed to start: status " + String(response.status));
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Manual automation run failed to start: status ${String(response.status)}`);
   }
 
   return response.body;
@@ -70,8 +73,8 @@ export const startScheduledJobApplyRun = async (
       runAt,
     }),
   });
-  if (response.status !== 200) {
-    throw new Error("Scheduled automation run failed to start: status " + String(response.status));
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Scheduled automation run failed to start: status ${String(response.status)}`);
   }
 
   return response.body;
@@ -138,8 +141,8 @@ export const verifyEmailResponseFlow = async (): Promise<void> => {
       deliverAfterGeneration: true,
     }),
   });
-  if (response.status !== 200) {
-    throw new Error("Email automation failed: status " + String(response.status));
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Email automation failed: status ${String(response.status)}`);
   }
 
   expect(response.body.status).toBe("success");
@@ -197,5 +200,5 @@ export const verifyRecoveredScheduledRun = async (
 
   const completedRecoveredRun = await waitForRunCompletion(recoveredRunId);
   expect(completedRecoveredRun.status).toBe("success");
-  await waitForSubmissionCount(getSubmissionCount, 3);
+  await waitForSubmissionCount(getSubmissionCount, COUNT_THREE);
 };

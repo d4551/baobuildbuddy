@@ -1,12 +1,19 @@
+import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
-import { eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { createServerLogger } from "../../utils/logger";
 import { parseScheduledRunMetadata } from "./automation-run-inputs";
+import { createFailedRunUpdate } from "./automation-run-persistence-updates";
 import type { AutomationRunRow } from "./automation-service-contracts";
 
 const automationSchedulerLogger = createServerLogger("automation-run-scheduler");
+export const ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE = "Orphaned running run reclaimed on startup";
+export const UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE =
+  "Unknown automation run status normalized to error on startup";
+export const PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE =
+  "Pending automation run missing schedule metadata";
 
 type SchedulerTimer = ReturnType<typeof setTimeout>;
 
@@ -57,30 +64,56 @@ export class AutomationRunScheduler {
     this.scheduledRunTimers.delete(runId);
   }
 
+  async reclaimRunningRuns(): Promise<void> {
+    await db
+      .update(automationRuns)
+      .set(createFailedRunUpdate(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE))
+      .where(notInArray(automationRuns.status, [...AUTOMATION_RUN_STATUSES]));
+
+    await db
+      .update(automationRuns)
+      .set(createFailedRunUpdate(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE))
+      .where(eq(automationRuns.status, "running"));
+  }
+
   async restorePendingRuns(limit: number): Promise<void> {
     if (this.recoveryInFlight) {
       return;
     }
 
     this.recoveryInFlight = true;
-    const pendingRows = await db
-      .select()
-      .from(automationRuns)
-      .where(eq(automationRuns.status, "pending"))
-      .limit(limit);
+    try {
+      const pendingRows = await db
+        .select()
+        .from(automationRuns)
+        .where(eq(automationRuns.status, "pending"))
+        .limit(limit);
+      const pendingRunsWithoutSchedule: string[] = [];
 
-    for (const row of pendingRows satisfies AutomationRunRow[]) {
-      const metadata = parseScheduledRunMetadata(asJsonRecord(row.input));
-      if (!metadata) {
-        automationSchedulerLogger.warn(
-          `[automation] skipping pending run without schedule metadata: ${row.id}`,
-        );
-        continue;
+      for (const row of pendingRows satisfies AutomationRunRow[]) {
+        const metadata = parseScheduledRunMetadata(asJsonRecord(row.input));
+        if (!metadata) {
+          pendingRunsWithoutSchedule.push(row.id);
+          continue;
+        }
+
+        this.queue(row.id, metadata.runAt);
       }
 
-      this.queue(row.id, metadata.runAt);
+      await Promise.all(
+        pendingRunsWithoutSchedule.map((runId) =>
+          this.markPendingRunWithoutScheduleMetadata(runId),
+        ),
+      );
+    } finally {
+      this.recoveryInFlight = false;
     }
+  }
 
-    this.recoveryInFlight = false;
+  private async markPendingRunWithoutScheduleMetadata(runId: string): Promise<void> {
+    await db
+      .update(automationRuns)
+      .set(createFailedRunUpdate(PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE))
+      .where(and(eq(automationRuns.id, runId), eq(automationRuns.status, "pending")));
   }
 }

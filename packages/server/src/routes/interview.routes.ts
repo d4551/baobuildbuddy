@@ -7,6 +7,7 @@ import {
 } from "@bao/shared/constants/http";
 import { Elysia, type status } from "elysia";
 import { interviewService } from "../services/interview-service";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   type CreateSessionBody,
   completeInterviewSessionResponses,
@@ -29,7 +30,6 @@ import {
   getInterviewSession,
   submitInterviewResponse,
 } from "./interview-route-support";
-import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -39,7 +39,10 @@ export const interviewRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions),
     {
-      detail: openapiDetail("Interview", "Retrieve interview resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "Create a new interview practice session for a studio and config.",
+      ),
       body: createSessionBodySchema,
       response: createInterviewSessionResponses,
     },
@@ -51,7 +54,10 @@ export const interviewRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions),
     {
-      detail: openapiDetail("Interview", "Retrieve interview resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "List interview practice sessions with derived progress fields.",
+      ),
       response: interviewSessionsListResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -62,7 +68,10 @@ export const interviewRoutes = new Elysia({
   .get(
     `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id`,
     {
-      detail: openapiDetail("Interview", "Retrieve interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "Retrieve an interview session by id, including derived progress fields.",
+      ),
       params: interviewSessionParamsSchema,
       response: interviewSessionResponses,
     },
@@ -77,7 +86,10 @@ export const interviewRoutes = new Elysia({
   .post(
     `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id/response`,
     {
-      detail: openapiDetail("Interview", "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id response for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "Submit an answer for the current interview session question.",
+      ),
       params: interviewSessionParamsSchema,
       body: submitResponseBodySchema,
       response: submitInterviewResponseResponses,
@@ -104,7 +116,10 @@ export const interviewRoutes = new Elysia({
   .post(
     `${toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewSessions)}/:id/complete`,
     {
-      detail: openapiDetail("Interview", "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id complete for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "Complete an interview session and finalize scoring feedback.",
+      ),
       params: interviewSessionParamsSchema,
       response: completeInterviewSessionResponses,
     },
@@ -119,7 +134,10 @@ export const interviewRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.interviewBase, API_ENDPOINTS.interviewStats),
     {
-      detail: openapiDetail("Interview", "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id complete for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Interview",
+        "Retrieve aggregate interview practice statistics for the user.",
+      ),
       response: interviewStatsResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await getInterviewStats()),

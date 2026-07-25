@@ -217,9 +217,16 @@ const normalizeSpeechSettings = (value: unknown): AutomationSettings["speech"] =
 export const normalizeAutomationSettings = (value: unknown): AutomationSettings | undefined => {
   if (!isRecord(value)) return;
 
+  const legacyTimeoutSeconds = 30;
+  const parsedTimeout = asNumber(value.defaultTimeout);
+  const defaultTimeout =
+    parsedTimeout === legacyTimeoutSeconds || parsedTimeout === undefined
+      ? DEFAULT_AUTOMATION_SETTINGS.defaultTimeout
+      : parsedTimeout;
+
   return {
     headless: asBoolean(value.headless) ?? DEFAULT_AUTOMATION_SETTINGS.headless,
-    defaultTimeout: asNumber(value.defaultTimeout) ?? DEFAULT_AUTOMATION_SETTINGS.defaultTimeout,
+    defaultTimeout,
     screenshotRetention:
       asNumber(value.screenshotRetention) ?? DEFAULT_AUTOMATION_SETTINGS.screenshotRetention,
     maxConcurrentRuns:

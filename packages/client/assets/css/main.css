@@ -74,6 +74,10 @@
   --focus-color: var(--color-primary);
   --focus-ring-offset: 3px;
 
+  /* CodeMirror editor chrome (AppCodeEditor) — color-mix stays in CSS SSOT. */
+  --code-editor-active-line: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  --code-editor-selection: color-mix(in oklab, var(--color-primary) 28%, transparent);
+
   /* Motion (§7.2/§7.3). Shared easing vocabulary. */
   --motion-fast: 120ms;
   --motion-standard: 220ms;

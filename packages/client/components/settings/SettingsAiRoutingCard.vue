@@ -5,18 +5,21 @@ import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  INSET_PANEL_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MIN_WIDTH_FORM_COL_CLASS,
   MIN_WIDTH_SELECT_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
+
+const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
 
 defineProps<{
   providerInputs: ReadonlyArray<{
@@ -34,11 +37,10 @@ defineProps<{
   t: ComposerTranslation;
 }>();
 
-const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
-
 const emit = defineEmits<{
   save: [];
 }>();
+
 </script>
 
 <template>
@@ -49,7 +51,7 @@ const emit = defineEmits<{
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
-        <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
+        <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
         </button>
       </div>
@@ -64,9 +66,9 @@ const emit = defineEmits<{
             <li
               v-for="section in aiRoutingSections"
               :key="section.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
-            >
+ 
+ :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p3]"
+ >
               <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
                 <p class="font-medium">{{ section.label }}</p>
                 <p class="text-muted" :class="[LEADING_TOKEN_CLASS.leading5, TYPOGRAPHY_SCALE_CLASS.xs]">

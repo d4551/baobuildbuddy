@@ -5,20 +5,24 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import {
+  BADGE_PRIMARY_XS_CLASS,
+  BADGE_XS_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   HEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
-  TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -53,7 +57,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
   <section :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]" aria-labelledby="portfolio-projects-title">
     <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl]" id="portfolio-projects-title">{{ t("portfolioPage.projects.title") }}</h2>
-      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
+      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.projects.addAria')" @click="emit('openAdd')">
         <IconPlus :class="[ICON_SIZE_CLASS[4]]"/>
         {{ t("portfolioPage.projects.addButton") }}
       </button>
@@ -107,20 +111,20 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             <span 
               v-for="tech in project.technologies.slice(0, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT)"
               :key="tech"
-              class="badge badge-xs"
+              :class="BADGE_XS_CLASS"
             >
               {{ tech }}
             </span>
             <span
               v-if="project.technologies.length > PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT"
-              class="badge badge-xs"
+              :class="BADGE_XS_CLASS"
             >
               +{{ project.technologies.length - PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT }}
             </span>
           </div>
 
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-            <span v-if="project.featured" class="badge badge-primary badge-xs">
+            <span v-if="project.featured" :class="BADGE_PRIMARY_XS_CLASS">
               {{ t("portfolioPage.projects.featuredBadge") }}
             </span>
             <a 
@@ -137,16 +141,16 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
 
           <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="join">
-              <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
+              <button type="button" 
+                :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, 'join-item']"
                 :disabled="!props.canMove(project.id, 'up') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
                 @click="emit('move', project.id, 'up')"
               >
                 {{ t("portfolioPage.projects.moveUpButton") }}
               </button>
-              <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
+              <button type="button" 
+                :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, 'join-item']"
                 :disabled="!props.canMove(project.id, 'down') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
                 @click="emit('move', project.id, 'down')"
@@ -156,15 +160,15 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             </div>
 
             <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-              <button 
+              <button type="button" 
                 :class="[OUTLINE_ACTION_CLASS]"
                 :aria-label="t('portfolioPage.projects.editAria', { title: project.title })"
                 @click="emit('edit', project)"
               >
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
-              <button 
-                :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+              <button type="button" 
+                :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"
               >

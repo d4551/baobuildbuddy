@@ -3,15 +3,11 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import AppProseField from "~/components/ui/AppProseField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS,
-  PRIMARY_ACTION_CLASS,
+import { FLUID_WIDTH_CLASS, 
+  PRIMARY_ACTION_CLASS,SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./save-state";
-
-const props = defineProps<{
-  profileSaveState: SaveState;
-}>();
 
 const profileForm = defineModel<{
   name: string;
@@ -28,6 +24,10 @@ const profileForm = defineModel<{
   technicalSkillsText: string;
   softSkillsText: string;
 }>("profileForm", { required: true });
+
+const props = defineProps<{
+  profileSaveState: SaveState;
+}>();
 
 const emit = defineEmits<{
   save: [];
@@ -185,7 +185,7 @@ const profileSaveStateLabel = computed(() => {
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.profile.saveAria')"
           :disabled="profileSaveState === 'saving'"

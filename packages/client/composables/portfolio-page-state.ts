@@ -1,3 +1,7 @@
+import {
+  PORTFOLIO_EXPORT_TEMPLATE_OPTIONS,
+  type PortfolioExportTemplate,
+} from "@bao/shared/constants/export-document-theme";
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 
 type DeepReadonly<T> = T extends (...args: never[]) => unknown
@@ -137,6 +141,7 @@ export function usePortfolioPageState() {
   const metadata = createPortfolioMetadataSync(portfolioForm);
   const searchQuery = ref("");
   const reorderingProjectId = ref<string | null>(null);
+  const exportTemplate = ref<PortfolioExportTemplate>(PORTFOLIO_EXPORT_TEMPLATE_OPTIONS[0]);
 
   function clearProjectForm(): void {
     projectForm.title = "";
@@ -154,6 +159,7 @@ export function usePortfolioPageState() {
     clearProjectForm,
     closeDeleteProjectDialog: () => deleteState.closeDeleteProjectDialog(),
     editingProject: modalState.editingProject,
+    exportTemplate,
     newTech: modalState.newTech,
     openAddModal: () => modalActions.openAddModal(clearProjectForm),
     openEditModal: (project: PortfolioProject) => modalActions.openEditModal(project),

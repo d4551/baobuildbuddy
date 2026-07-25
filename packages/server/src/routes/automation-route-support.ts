@@ -6,6 +6,10 @@ import {
   type RpaRunExecutionEnvelope,
   rpaRunExecutionEnvelopeSchema,
 } from "@bao/shared/schemas/rpa-events.schema";
+import {
+  isDishonestJobApplySuccess,
+  resolveHonestAutomationRunStatus,
+} from "@bao/shared/utils/automation-run-honesty";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -18,7 +22,6 @@ import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
   AUTOMATION_STATUS_ERROR,
-  AUTOMATION_STATUS_PENDING,
 } from "./automation-route-contracts";
 
 type AutomationDbRow = typeof automationRuns.$inferSelect;
@@ -83,16 +86,33 @@ const normalizeRunError = (
 };
 
 const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope => {
+  const type = isAutomationRunType(run.type) ? run.type : AUTOMATION_RUN_TYPES[0];
+  const rawStatus = isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_ERROR;
+  const output = toJsonObject(run.output);
+  const honestStatus = resolveHonestAutomationRunStatus({
+    type,
+    status: rawStatus,
+    output,
+    error: run.error,
+  });
+  const status = isAutomationRunStatus(honestStatus) ? honestStatus : AUTOMATION_STATUS_ERROR;
+  const repairedError =
+    status === AUTOMATION_STATUS_ERROR &&
+    isDishonestJobApplySuccess({ type, status: rawStatus, output, error: run.error })
+      ? normalizeRunError(run.error) ||
+        "Job apply success repaired to error — step ledger failed honesty checks"
+      : normalizeRunError(run.error);
+
   const normalizedCandidate = {
     id: run.id,
-    type: isAutomationRunType(run.type) ? run.type : AUTOMATION_RUN_TYPES[0],
-    status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_PENDING,
+    type,
+    status,
     jobId: run.jobId,
     userId: run.userId,
     input: toJsonObject(run.input),
-    output: toJsonObject(run.output),
+    output,
     screenshots: run.screenshots ?? null,
-    error: normalizeRunError(run.error),
+    error: repairedError,
     progress: run.progress ?? null,
     currentStep: run.currentStep ?? null,
     totalSteps: run.totalSteps ?? null,

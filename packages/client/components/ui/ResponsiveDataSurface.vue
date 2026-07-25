@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import {
   VISIBILITY_HIDE_BELOW_LG_CLASS,
   VISIBILITY_SHOW_BELOW_LG_CLASS,
 } from "~/constants/ui-layout";
-import { FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 </script>
 
 <template>

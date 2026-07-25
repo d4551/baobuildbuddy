@@ -12,12 +12,17 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
+  INSET_LIST_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_PRIMARY_CLASS,
+} from "~/constants/layout-badges";
 import type { DashboardActivity, DashboardChallengeViewModel } from "./dashboard-page-contracts";
 
 const props = defineProps<{
@@ -44,20 +49,20 @@ const canClaimChallenge = computed(() => {
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div v-if="dailyChallenge" :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+    <UiGlassCard v-if="dailyChallenge" :extra-class="FLUID_HEIGHT_CLASS">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.dailyChallengeTitle) }}</h2>
-        <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
+        <div :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">
           <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <h3 class="font-semibold">{{ dailyChallenge.name }}</h3>
-            <span class="badge badge-primary">
+            <span :class="[BADGE_PRIMARY_CLASS]">
               {{ t(DASHBOARD_DAILY_CHALLENGE_XP_LABEL_KEY, { xp: dailyChallenge.xpReward }) }}
             </span>
           </div>
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <progress
               class="progress flex-1"
-              :class="dailyChallenge.completed ? 'progress-success' : 'progress-primary'"
+              :class="dailyChallenge.completed ? PROGRESS_BAR_VARIANT_CLASS.success : PROGRESS_BAR_VARIANT_CLASS.primary"
               :value="dailyChallenge.progress"
               :max="dailyChallenge.goal"
               :aria-valuenow="dailyChallenge.progress"
@@ -80,7 +85,7 @@ const canClaimChallenge = computed(() => {
               <LoadingSpinner
                 v-if="claimingChallengeId === dailyChallenge.id"
                 size="xs"
-                label="Loading"
+                :label="t('common.loading')"
                 aria-hidden="true"
               />
               {{ t("dashboard.claimChallengeLabel") }}
@@ -95,14 +100,15 @@ const canClaimChallenge = computed(() => {
           </p>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
 
-    <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_HEIGHT_CLASS]">
+    <UiGlassCard :extra-class="FLUID_HEIGHT_CLASS">
       <div class="card-body" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul
           v-if="recentActivity.length > 0"
-          class="list rounded-box border border-base-300 bg-base-100"
+          class="list"
+          :class="[INSET_LIST_CLASS]"
         >
           <li
             v-for="(activity, index) in recentActivity"
@@ -139,6 +145,6 @@ const canClaimChallenge = computed(() => {
           :cta-to="APP_ROUTES.jobs"
         />
       </div>
-    </div>
+    </UiGlassCard>
   </SectionGrid>
 </template>

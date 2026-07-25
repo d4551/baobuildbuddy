@@ -5,9 +5,9 @@ import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
@@ -65,7 +65,7 @@ function removeProject(index: number): void {
   <div class="card-body">
     <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb4]">
       <h2 class="card-title">{{ t("resumePage.projects.title") }}</h2>
-      <button 
+      <button type="button" 
         :class="[PRIMARY_ACTION_CLASS]"
         :aria-label="t('resumePage.projects.addButtonAria')"
         @click="addProject"
@@ -84,7 +84,7 @@ function removeProject(index: number): void {
             <h3 class="font-semibold">
               {{ t("resumePage.projects.itemTitle", { index: index + 1 }) }}
             </h3>
-            <button 
+            <button type="button" 
               :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-error btn-sm']"
               :aria-label="t('resumePage.projects.removeButtonAria', { index: index + 1 })"
               @click="removeProject(index)"
