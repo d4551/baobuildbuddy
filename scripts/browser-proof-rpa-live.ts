@@ -6,6 +6,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
+import { API_ENDPOINTS } from "../packages/shared/src/constants/endpoints";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import {
@@ -58,11 +59,11 @@ const enablePortalViaUi = async (page: Page): Promise<void> => {
 const API_BASE = (process.env.PAGE_PROOF_API_BASE ?? "http://127.0.0.1:3000").replace(/\/$/u, "");
 
 const countRunsViaApi = async (): Promise<number> => {
-  const response = await fetch(`${API_BASE}/api/automation/runs`, {
+  const response = await fetch(`${API_BASE}${API_ENDPOINTS.automationRuns}`, {
     signal: AbortSignal.timeout(MS_TEN_SECONDS),
   });
   if (!response.ok) {
-    throw new Error(`GET /api/automation/runs → ${String(response.status)}`);
+    throw new Error(`GET ${API_ENDPOINTS.automationRuns} → ${String(response.status)}`);
   }
   const body = (await response.json()) as unknown;
   return Array.isArray(body) ? body.length : 0;

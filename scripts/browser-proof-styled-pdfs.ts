@@ -20,6 +20,13 @@ import {
   RESUME_TEMPLATE_OPTIONS,
   type ResumeTemplate,
 } from "../packages/shared/src/constants/resume";
+import {
+  API_ENDPOINTS,
+  buildCoverLetterDetailEndpoint,
+  buildCoverLetterExportEndpoint,
+  buildResumeDetailEndpoint,
+  buildResumeExportEndpoint,
+} from "../packages/shared/src/constants/endpoints";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import {
@@ -143,7 +150,10 @@ const ensureResumeId = async (page: Page): Promise<string> => {
     }
   }
   await page.screenshot({ path: join(OUT, "stills", "00-resume-editor.png") });
-  const list = await apiJson<{ id?: string }[] | { data?: { id?: string }[] }>("GET", "/api/resumes");
+  const list = await apiJson<{ id?: string }[] | { data?: { id?: string }[] }>(
+    "GET",
+    API_ENDPOINTS.resumes,
+  );
   const resumes = Array.isArray(list.body)
     ? list.body
     : Array.isArray((list.body as { data?: { id?: string }[] }).data)
@@ -159,7 +169,7 @@ const ensureResumeId = async (page: Page): Promise<string> => {
 const ensureCoverLetterId = async (page: Page): Promise<string> => {
   const existing = await apiJson<{ id?: string }[] | { data?: { id?: string }[] }>(
     "GET",
-    "/api/cover-letters",
+    API_ENDPOINTS.coverLetters,
   );
   const letters = Array.isArray(existing.body)
     ? existing.body
@@ -170,7 +180,7 @@ const ensureCoverLetterId = async (page: Page): Promise<string> => {
   if (!id) {
     const created = await apiJson<{ id?: string; coverLetter?: { id?: string } }>(
       "POST",
-      "/api/cover-letters",
+      API_ENDPOINTS.coverLetters,
       {
         company: "Riot Games",
         position: "Gameplay Engineer",
@@ -200,10 +210,10 @@ const ensureCoverLetterId = async (page: Page): Promise<string> => {
 const ensurePortfolioProject = async (page: Page): Promise<void> => {
   const portfolio = await apiJson<{
     projects?: Array<{ id?: string }>;
-  }>("GET", "/api/portfolio");
+  }>("GET", API_ENDPOINTS.portfolio);
   const projectCount = portfolio.body.projects?.length ?? 0;
   if (projectCount === 0) {
-    const created = await apiJson("POST", "/api/portfolio/projects", {
+    const created = await apiJson("POST", API_ENDPOINTS.portfolioProjects, {
       title: "Bao Style Showcase",
       description:
         "Styled portfolio PDF proof project with networked combat systems and live-ops tooling.",
@@ -232,7 +242,7 @@ const ensurePortfolioProject = async (page: Page): Promise<void> => {
 };
 
 const enrichResumeContent = async (resumeId: string): Promise<void> => {
-  const put = await apiJson("PUT", `/api/resumes/${resumeId}`, {
+  const put = await apiJson("PUT", buildResumeDetailEndpoint(resumeId), {
     name: "Bao Style Proof CV",
     personalInfo: {
       name: "Bao Style Proof",
@@ -293,12 +303,12 @@ const proveResumeStyles = async (
   await enrichResumeContent(resumeId);
   const results: PdfStyleResult[] = [];
   for (const template of RESUME_TEMPLATE_OPTIONS) {
-    const put = await apiJson("PUT", `/api/resumes/${resumeId}`, { template });
+    const put = await apiJson("PUT", buildResumeDetailEndpoint(resumeId), { template });
     if (put.status >= 400) {
       throw new Error(`PUT resume template ${template} failed status=${String(put.status)}`);
     }
     const pdfPath = await downloadPdf(
-      `/api/resumes/${resumeId}/export`,
+      buildResumeExportEndpoint(resumeId),
       { format: "pdf", template },
       `resume-${template}.pdf`,
     );
@@ -327,12 +337,12 @@ const proveCoverLetterStyles = async (
 ): Promise<PdfStyleResult[]> => {
   const results: PdfStyleResult[] = [];
   for (const template of COVER_LETTER_TEMPLATE_OPTIONS) {
-    const put = await apiJson("PUT", `/api/cover-letters/${coverLetterId}`, { template });
+    const put = await apiJson("PUT", buildCoverLetterDetailEndpoint(coverLetterId), { template });
     if (put.status >= 400) {
       throw new Error(`PUT cover template ${template} failed status=${String(put.status)}`);
     }
     const pdfPath = await downloadPdf(
-      `/api/cover-letters/${coverLetterId}/export`,
+      buildCoverLetterExportEndpoint(coverLetterId),
       { format: "pdf" },
       `cover-${template}.pdf`,
     );
@@ -359,7 +369,7 @@ const provePortfolioStyles = async (browser: Browser): Promise<PdfStyleResult[]>
   const results: PdfStyleResult[] = [];
   for (const template of PORTFOLIO_EXPORT_TEMPLATE_OPTIONS) {
     const pdfPath = await downloadPdf(
-      "/api/portfolio/export",
+      `${API_ENDPOINTS.portfolio}/export`,
       { format: "pdf", template },
       `portfolio-${template}.pdf`,
     );
