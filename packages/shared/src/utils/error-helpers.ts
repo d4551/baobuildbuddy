@@ -5,7 +5,7 @@
 import { API_ERROR_UNKNOWN } from "../constants/api-errors";
 import { isRecord } from "./type-guards";
 
-function toMessage(value: string | number | boolean | null | object | undefined): string | null {
+function toMessage(value: string | undefined): string | null {
   if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }
@@ -20,49 +20,31 @@ function toMessage(value: string | number | boolean | null | object | undefined)
  * @param fallback - Fallback when no message can be extracted. Defaults to API_ERROR_UNKNOWN.
  */
 export function toErrorMessage<T>(error: T, fallback?: string): string {
+  const resolvedFallback = fallback ?? API_ERROR_UNKNOWN;
+
   if (error instanceof Error) {
-    const message = toMessage(error.message);
-    if (message) {
-      return message;
-    }
+    return toMessage(error.message) ?? resolvedFallback;
   }
 
-  if (isRecord(error)) {
-    const messageValue = error.message;
-    const directMessage = toMessage(
-      typeof messageValue === "string" ||
-        typeof messageValue === "number" ||
-        typeof messageValue === "boolean" ||
-        messageValue === null ||
-        typeof messageValue === "object"
-        ? messageValue
-        : undefined,
-    );
-    if (directMessage) {
-      return directMessage;
-    }
-
-    const value = error.value;
-    if (isRecord(value)) {
-      const nestedValue = value.message;
-      const nestedMessage = toMessage(
-        typeof nestedValue === "string" ||
-          typeof nestedValue === "number" ||
-          typeof nestedValue === "boolean" ||
-          nestedValue === null ||
-          typeof nestedValue === "object"
-          ? nestedValue
-          : undefined,
-      );
-      if (nestedMessage) {
-        return nestedMessage;
-      }
-    }
+  if (typeof error === "string") {
+    return toMessage(error) ?? resolvedFallback;
   }
 
-  if (typeof error === "string" && error.trim().length > 0) {
-    return error;
+  if (!isRecord(error)) {
+    return resolvedFallback;
   }
 
-  return fallback ?? API_ERROR_UNKNOWN;
+  const direct = toMessage(typeof error.message === "string" ? error.message : undefined);
+  if (direct) {
+    return direct;
+  }
+
+  const nested = error.value;
+  if (!isRecord(nested)) {
+    return resolvedFallback;
+  }
+
+  return (
+    toMessage(typeof nested.message === "string" ? nested.message : undefined) ?? resolvedFallback
+  );
 }

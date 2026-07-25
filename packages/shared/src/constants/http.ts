@@ -5,6 +5,8 @@
 export const HTTP_STATUS_OK = 200;
 export const HTTP_STATUS_CREATED = 201;
 export const HTTP_STATUS_NO_CONTENT = 204;
+/** First 3xx status — exclusive upper bound for 2xx success checks. */
+export const HTTP_STATUS_MULTIPLE_CHOICES = 300;
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_UNAUTHORIZED = 401;
 export const HTTP_STATUS_FORBIDDEN = 403;

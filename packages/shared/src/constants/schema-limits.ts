@@ -39,6 +39,24 @@ export const RUN_ID_SAFE_PATTERN_SOURCE = "^[0-9a-fA-F-]+$";
 /** Max result limit for company/gaming board queries in settings. */
 export const SCHEMA_MAX_BOARD_RESULT_LIMIT = 200;
 
+/** Max priority value for company board configs. */
+export const SCHEMA_MAX_BOARD_PRIORITY = 1000;
+
+/** Max automation default timeout in seconds. */
+export const SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS = 120;
+
+/** Max screenshot retention days in automation settings. */
+export const SCHEMA_MAX_SCREENSHOT_RETENTION_DAYS = 30;
+
+/** Max concurrent automation runs in settings. */
+export const SCHEMA_MAX_CONCURRENT_RUNS = 5;
+
+/** Default automation timeout in seconds. */
+export const SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS = 30;
+
+/** Default screenshot retention days. */
+export const SCHEMA_DEFAULT_SCREENSHOT_RETENTION_DAYS = 7;
+
 /** Minimum provider timeout in ms for AI settings. */
 export const SCHEMA_PROVIDER_TIMEOUT_MIN_MS = 1_000;
 

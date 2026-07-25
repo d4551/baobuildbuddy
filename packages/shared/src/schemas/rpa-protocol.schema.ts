@@ -1,6 +1,12 @@
 import z from "zod";
 import { AUTOMATION_RUN_STATUSES, AUTOMATION_RUN_TYPES } from "../constants/automation";
-import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
+import {
+  RUN_ID_MIN_LENGTH,
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_RUN_ID,
+  SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
+  SCHEMA_MAX_LENGTH_SHORT,
+} from "../constants/schema-limits";
 
 /**
  * Canonical protocol version emitted by Bun automation scripts.
@@ -20,7 +26,11 @@ export const rpaProtocolVersionSchema = z.literal(RPA_PROTOCOL_VERSION);
 /**
  * Stable run identifier used across API, websocket, and script payloads.
  */
-export const rpaRunIdentifierSchema = z.string().trim().min(8).max(128);
+export const rpaRunIdentifierSchema = z
+  .string()
+  .trim()
+  .min(RUN_ID_MIN_LENGTH)
+  .max(SCHEMA_MAX_LENGTH_RUN_ID);
 
 /**
  * Monotonic sequence value for script-emitted events.
@@ -34,7 +44,7 @@ export const rpaTimestampSchema = z
   .string()
   .trim()
   .min(1)
-  .refine((value) => Number.isFinite(Date.parse(value)), "Invalid timestamp");
+  .refine((value) => Number.isFinite(Date.parse(value)), { error: "Invalid timestamp" });
 
 /**
  * Supported protocol event kinds.
@@ -55,11 +65,11 @@ export const rpaArtifactKindSchema = z.enum(["screenshot", "trace", "document", 
  * Normalized artifact metadata contract.
  */
 export const rpaArtifactMetadataSchema = z.object({
-  id: z.string().trim().min(1).max(120),
+  id: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SETTINGS_LABEL),
   kind: rpaArtifactKindSchema,
   path: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG),
   label: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT).optional(),
-  mimeType: z.string().trim().min(1).max(120).optional(),
+  mimeType: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SETTINGS_LABEL).optional(),
 });
 
 /**

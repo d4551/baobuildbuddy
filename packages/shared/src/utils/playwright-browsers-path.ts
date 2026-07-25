@@ -1,4 +1,10 @@
 import { join } from "node:path";
+import {
+  COUNT_FIFTEEN,
+  DARWIN_KERNEL_MAJOR_CATALINA,
+  DARWIN_KERNEL_MAJOR_MOJAVE,
+  DARWIN_KERNEL_TO_MACOS_MAJOR_OFFSET,
+} from "../constants/numeric";
 
 /** Marker injected by Cursor agent sandboxes into incomplete Playwright caches. */
 export const CURSOR_SANDBOX_BROWSER_CACHE_MARKER = "cursor-sandbox-cache";
@@ -77,15 +83,15 @@ export const resolvePlaywrightHostPlatformOverride = (
     return null;
   }
 
-  const LAST_STABLE_MACOS_MAJOR_VERSION = 15;
-  const macVersion =
-    major < 18
-      ? "mac10.13"
-      : major === 18
-        ? "mac10.14"
-        : major === 19
-          ? "mac10.15"
-          : `mac${String(Math.min(major - 9, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
+  const LAST_STABLE_MACOS_MAJOR_VERSION = COUNT_FIFTEEN;
+  let macVersion = `mac${String(Math.min(major - DARWIN_KERNEL_TO_MACOS_MAJOR_OFFSET, LAST_STABLE_MACOS_MAJOR_VERSION))}`;
+  if (major < DARWIN_KERNEL_MAJOR_MOJAVE) {
+    macVersion = "mac10.13";
+  } else if (major === DARWIN_KERNEL_MAJOR_MOJAVE) {
+    macVersion = "mac10.14";
+  } else if (major === DARWIN_KERNEL_MAJOR_CATALINA) {
+    macVersion = "mac10.15";
+  }
 
   return architecture === "arm64" ? `${macVersion}-arm64` : macVersion;
 };

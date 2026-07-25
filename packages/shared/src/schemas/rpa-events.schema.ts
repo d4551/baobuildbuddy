@@ -1,5 +1,9 @@
 import z from "zod";
-import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
+import {
+  SCHEMA_MAX_LENGTH_LONG,
+  SCHEMA_MAX_LENGTH_SETTINGS_LABEL,
+  SCHEMA_MAX_LENGTH_SHORT,
+} from "../constants/schema-limits";
 import { rpaErrorEnvelopeSchema } from "./error-envelope.schema";
 import { jsonObjectSchema } from "./json.schema";
 import {
@@ -19,7 +23,7 @@ import {
  */
 export const rpaRunStepSchema = z.object({
   action: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  status: z.enum(["ok", "error", "skipped"]),
+  status: z.enum(["ok", "error"]),
   message: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG).optional(),
 });
 
@@ -88,8 +92,8 @@ export const rpaRunExecutionEnvelopeSchema = z.object({
   id: rpaRunIdentifierSchema,
   type: rpaRunTypeSchema,
   status: rpaRunStatusSchema,
-  jobId: z.string().trim().min(1).max(120).nullable(),
-  userId: z.string().trim().min(1).max(120).nullable(),
+  jobId: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SETTINGS_LABEL).nullable(),
+  userId: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SETTINGS_LABEL).nullable(),
   input: jsonObjectSchema.nullable(),
   output: z.union([rpaRunResultSchema, jsonObjectSchema]).nullable(),
   screenshots: z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_LONG)).nullable(),

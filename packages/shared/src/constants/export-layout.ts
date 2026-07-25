@@ -5,8 +5,13 @@
 
 import type { ResumeTemplate } from "./resume";
 
+/** A4 width in PDF points. */
+export const A4_PAGE_WIDTH_PT = 595.28;
+/** A4 height in PDF points. */
+export const A4_PAGE_HEIGHT_PT = 841.89;
+
 /** A4 page size in PDF points (width, height). */
-export const A4_PAGE_SIZE: [number, number] = [595.28, 841.89];
+export const A4_PAGE_SIZE: [number, number] = [A4_PAGE_WIDTH_PT, A4_PAGE_HEIGHT_PT];
 
 export const A4_PAGE_WIDTH = A4_PAGE_SIZE[0];
 export const A4_PAGE_HEIGHT = A4_PAGE_SIZE[1];

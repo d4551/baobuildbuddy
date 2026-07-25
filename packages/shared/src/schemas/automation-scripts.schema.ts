@@ -6,6 +6,7 @@ import {
   AUTOMATION_MAX_JOB_URL_LENGTH,
 } from "../constants/automation-limits";
 import {
+  SCHEMA_MAX_ITEMS_SMALL,
   SCHEMA_MAX_LENGTH_DATE,
   SCHEMA_MAX_LENGTH_DESCRIPTION,
   SCHEMA_MAX_LENGTH_LONG,
@@ -125,7 +126,7 @@ export const jobApplyCoverLetterSchema = z.object({
  */
 export const jobApplySelectorMapSchema = z.record(
   z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT),
-  z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT)).max(20),
+  z.array(z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_SHORT)).max(SCHEMA_MAX_ITEMS_SMALL),
 );
 
 /**
@@ -136,10 +137,9 @@ export const jobApplyCustomAnswersSchema = z
     z.string().trim().min(1).max(AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH),
     z.string().trim().max(AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH),
   )
-  .refine(
-    (answers) => Object.keys(answers).length <= AUTOMATION_MAX_CUSTOM_ANSWER_COUNT,
-    `Maximum ${AUTOMATION_MAX_CUSTOM_ANSWER_COUNT} custom answers allowed`,
-  );
+  .refine((answers) => Object.keys(answers).length <= AUTOMATION_MAX_CUSTOM_ANSWER_COUNT, {
+    error: `Maximum ${AUTOMATION_MAX_CUSTOM_ANSWER_COUNT} custom answers allowed`,
+  });
 
 /**
  * Shared business-level input payload contract for job-apply automation.
