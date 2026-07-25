@@ -44,10 +44,17 @@
 19. **Full desktop tour video** — 19 pages + AI nonce + PDF + RPA (`proof:full-desktop-tour`, 9.2MB webm, 0 findings).
 20. **Native Tauri** — rustc 1.97.1; `bao-build-buddy-desktop` running; X11 window screenshot+15s video. Honest: `gen/runtime` is manifest stub (not full packaged Bun binaries).
 
-## Remaining DRY / best-in-class (next)
+## Closed (non-IDE debt cleanup)
 
-1. **STT** — still BLOCKED (no mic in cloud agent).
-2. **Desktop packaging** — full `gen/runtime` Bun/server/scraper bundle for offline Tauri release.
+21. Brand content JSON → AppJsonField; API docs tester → AppCodeEditor; resume prose fields → AppProseField.
+22. Dual FAB eliminated (floating chat removed; quick FAB only). Fix Setup → PRIMARY.
+23. Playwright **1.62.0**, vue-i18n **11.4.7**. proof:debt-cleanup video findings=0.
+
+## Remaining (honest)
+
+1. **STT** — no mic in cloud agent (env).
+2. **Desktop packaging** — full offline `gen/runtime` Bun/server/scraper bundle.
+3. **IDE editor goals** (Vim/multi-cursor/TipTap/Cmd+P) — deferred by product owner ("don't worry about IDE").
 
 ## Proof commands
 

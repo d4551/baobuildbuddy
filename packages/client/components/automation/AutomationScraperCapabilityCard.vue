@@ -204,7 +204,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_CLASS]">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>
@@ -225,7 +225,7 @@ function handleScheduleInput(event: Event): void {
             </li>
           </ul>
           <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[OUTLINE_ACTION_CLASS]">
+            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
               {{ t("automation.hub.audit.actions.fixSetup") }}
             </NuxtLink>
           </div>

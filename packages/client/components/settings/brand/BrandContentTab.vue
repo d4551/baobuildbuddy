@@ -3,6 +3,7 @@ import {
   RESPONSIVE_PADDING_MD_P6_CLASS,
 } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
+import AppJsonField from "~/components/ui/AppJsonField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -66,13 +67,11 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.contentOverridesLegend") }}
           </legend>
-          <textarea 
+          <AppJsonField
             v-model="brandForm.contentOverridesJson"
-            class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
-            rows="10"
-            :aria-describedby="props.hintIds.contentOverrides"
+            :label="t('settings.brand.contentOverridesLegend')"
             :aria-label="t('settings.brand.contentOverridesAria')"
-          ></textarea>
+          />
           <p :id="props.hintIds.contentOverrides" class="label whitespace-normal">
             {{ t("settings.brand.contentOverridesHint") }}
           </p>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
   APP_DRAWER_ID,
@@ -23,16 +22,11 @@ let desktopMediaQueryList: MediaQueryList | null = null;
 let removeMediaQueryListener: (() => void) | null = null;
 
 /**
- * Floating chat is desktop-only. Below lg the dock owns AI Chat — dual chrome
- * crowds the dock and fails Apple HIG primary-destination clarity.
+ * Floating chat widget removed from shell: AI Chat lives in sidebar/dock +
+ * Cmd/Ctrl+Shift+K. Keeping both floating chat + quick-action FAB violated
+ * single primary-destination clarity (Apple HIG).
  */
-const showFloatingChatWidget = computed(() => {
-  const path = route.path;
-  if (path === APP_ROUTES.ai || path.startsWith(`${APP_ROUTES.ai}/`)) {
-    return false;
-  }
-  return isDesktopViewport.value;
-});
+const showQuickActionFab = computed(() => isDesktopViewport.value);
 
 useKeyboardShortcuts();
 
@@ -117,9 +111,7 @@ onUnmounted(() => {
     </div>
     <ClientOnly>
       <AppDock />
-      <!-- FAB is desktop-only; mobile dock owns primary destinations (IA cutover). -->
-      <LazyQuickActionFab v-if="isDesktopViewport" />
-      <LazyFloatingChatWidget v-if="showFloatingChatWidget" />
+      <LazyQuickActionFab v-if="showQuickActionFab" />
     </ClientOnly>
   </div>
 </template>
