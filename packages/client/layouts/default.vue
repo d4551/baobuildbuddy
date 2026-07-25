@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { useKeyboardShortcuts } from "~/composables/useKeyboardShortcuts";
 import {
   APP_DRAWER_ID,
   APP_MAIN_CONTENT_ID,
