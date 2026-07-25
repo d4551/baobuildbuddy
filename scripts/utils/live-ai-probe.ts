@@ -2,6 +2,14 @@
  * Shared live local-AI probe (Ollama OpenAI-compatible /v1).
  * Fail-closed: empty, missing model, or mock markers → throw.
  */
+import {
+  COUNT_ONE_TWENTY,
+  COUNT_THIRTY_SIX,
+  COUNT_THREE,
+  COUNT_TWO_FORTY,
+  MS_TEN_SECONDS,
+  MS_TWO_MINUTES,
+} from "../constants/numeric-literals";
 import { writeOutput } from "./cli-output";
 
 const TRAILING_SLASH_PATTERN = /\/$/u;
@@ -37,10 +45,13 @@ export const assertLiveInference = async (
     readonly timeoutMs?: number;
   } = {},
 ): Promise<LiveAiProbeResult> => {
-  const endpoint = (options.endpoint ?? resolveLocalAiEndpoint()).replace(TRAILING_SLASH_PATTERN, "");
-  const timeoutMs = options.timeoutMs ?? 120_000;
+  const endpoint = (options.endpoint ?? resolveLocalAiEndpoint()).replace(
+    TRAILING_SLASH_PATTERN,
+    "",
+  );
+  const timeoutMs = options.timeoutMs ?? MS_TWO_MINUTES;
   const modelsUrl = `${endpoint}/models`;
-  const modelsResponse = await fetch(modelsUrl, { signal: AbortSignal.timeout(10_000) });
+  const modelsResponse = await fetch(modelsUrl, { signal: AbortSignal.timeout(MS_TEN_SECONDS) });
   if (!modelsResponse.ok) {
     throw new Error(`Live AI probe failed: GET ${modelsUrl} → ${String(modelsResponse.status)}`);
   }
@@ -56,7 +67,7 @@ export const assertLiveInference = async (
     throw new Error(`Live AI probe failed: no model id at ${modelsUrl}`);
   }
 
-  const nonce = `BAO_LIVE_${Date.now().toString(36)}`;
+  const nonce = `BAO_LIVE_${Date.now().toString(COUNT_THIRTY_SIX)}`;
   const chatResponse = await fetch(`${endpoint}/chat/completions`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -80,14 +91,14 @@ export const assertLiveInference = async (
   if (!chatResponse.ok) {
     const body = await chatResponse.text();
     throw new Error(
-      `Live AI probe failed: chat/completions → ${String(chatResponse.status)} ${body.slice(0, 240)}`,
+      `Live AI probe failed: chat/completions → ${String(chatResponse.status)} ${body.slice(0, COUNT_TWO_FORTY)}`,
     );
   }
   const chatJson = (await chatResponse.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const sample = chatJson.choices?.[0]?.message?.content?.trim() ?? "";
-  if (sample.length < 3) {
+  if (sample.length < COUNT_THREE) {
     throw new Error("Live AI probe failed: empty completion (refusing mock/empty provider).");
   }
   if (BANNED_AI_MARKERS.some((pattern) => pattern.test(sample))) {
@@ -95,9 +106,11 @@ export const assertLiveInference = async (
   }
   if (!sample.includes(nonce)) {
     throw new Error(
-      `Live AI probe failed: nonce missing from sample (got ${sample.slice(0, 120)}).`,
+      `Live AI probe failed: nonce missing from sample (got ${sample.slice(0, COUNT_ONE_TWENTY)}).`,
     );
   }
-  await writeOutput(`live AI ok endpoint=${endpoint} model=${modelId} sample=${sample.slice(0, 120)}`);
+  await writeOutput(
+    `live AI ok endpoint=${endpoint} model=${modelId} sample=${sample.slice(0, COUNT_ONE_TWENTY)}`,
+  );
   return { endpoint, modelId, nonce, sample };
 };

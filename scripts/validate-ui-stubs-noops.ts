@@ -6,6 +6,9 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
+const NUM_40 = 40;
+const NUM_80 = 80;
+
 /**
  * Stub / noop / placeholder detection gate (AGENTS.md prohibited debt vocabulary).
  *
@@ -103,13 +106,13 @@ const hasControlWiring = (tagName: string, attrs: string): boolean => {
 const extractControlInnerPreview = (template: string, openTagEnd: number): string => {
   const after = template.slice(openTagEnd);
   const closeIdx = after.search(CLOSE_TAG_START_PATTERN);
-  const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, 80);
+  const inner = closeIdx >= 0 ? after.slice(0, closeIdx) : after.slice(0, NUM_80);
   return inner
     .replace(NESTED_TAG_STRIP_PATTERN, " ")
     .replace(I18N_BINDING_STRIP_PATTERN, " ")
     .replace(WHITESPACE_COLLAPSE_PATTERN, " ")
     .trim()
-    .slice(0, 40);
+    .slice(0, NUM_40);
 };
 
 const collectInertHandlerViolations = (
@@ -142,6 +145,27 @@ const collectInertHandlerViolations = (
   return violations;
 };
 
+const isExemptDeadControl = (
+  tagName: string,
+  attrs: string,
+  template: string,
+  openTagEnd: number,
+): boolean => {
+  if (!isActionableControlTag(tagName, attrs)) return true;
+  if (CONTROL_DISABLED_PATTERN.test(attrs)) return true;
+  if (ARIA_HIDDEN_TRUE_PATTERN.test(attrs)) return true;
+  if (hasControlWiring(tagName, attrs)) return true;
+  const normalized = tagName.toLowerCase();
+  if (normalized === "summary") return true;
+  if (
+    normalized === "label" &&
+    (SWAP_CLASS_PATTERN.test(attrs) || hasNestedNativeControl(template, openTagEnd, tagName))
+  ) {
+    return true;
+  }
+  return false;
+};
+
 const collectDeadControlViolations = (filePath: string, content: string): ValidationViolation[] => {
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
@@ -152,21 +176,8 @@ const collectDeadControlViolations = (filePath: string, content: string): Valida
   for (const match of template.matchAll(OPENING_TAG_PATTERN)) {
     const tagName = match[1] ?? "";
     const attrs = match[2] ?? "";
-    if (!isActionableControlTag(tagName, attrs)) continue;
-    if (CONTROL_DISABLED_PATTERN.test(attrs)) continue;
-    if (ARIA_HIDDEN_TRUE_PATTERN.test(attrs)) continue;
-    if (hasControlWiring(tagName, attrs)) continue;
-
-    const normalized = tagName.toLowerCase();
     const openTagEnd = (match.index ?? 0) + match[0].length;
-    // Native disclosure / labelled control chrome (daisyUI swap, details).
-    if (normalized === "summary") continue;
-    if (
-      normalized === "label" &&
-      (SWAP_CLASS_PATTERN.test(attrs) || hasNestedNativeControl(template, openTagEnd, tagName))
-    ) {
-      continue;
-    }
+    if (isExemptDeadControl(tagName, attrs, template, openTagEnd)) continue;
 
     const preview = extractControlInnerPreview(template, openTagEnd);
     const label = preview.length > 0 ? preview : `(icon-only ${tagName})`;

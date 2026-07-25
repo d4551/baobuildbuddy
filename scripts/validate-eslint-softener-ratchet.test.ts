@@ -3,15 +3,17 @@ import { collectEslintSoftenerRatchetViolations } from "./validate-eslint-soften
 
 describe("collectEslintSoftenerRatchetViolations", () => {
   test("flags off-rule growth beyond ratchet", () => {
-    const rules = Array.from({ length: 10 }, (_, index) => `"rule${String(index)}": "off"`).join(
+    const rules = Array.from({ length: 3 }, (_, index) => `"rule${String(index)}": "off"`).join(
       ", ",
     );
-    const violations = collectEslintSoftenerRatchetViolations(`export default [{ rules: { ${rules} } }];`);
+    const violations = collectEslintSoftenerRatchetViolations(
+      `export default [{ rules: { ${rules} } }];`,
+    );
     expect(violations.some((v) => v.message.includes('"off"'))).toBe(true);
   });
 
   test("passes at current off ceiling", () => {
-    const rules = Array.from({ length: 9 }, (_, index) => `"rule${String(index)}": "off"`).join(
+    const rules = Array.from({ length: 2 }, (_, index) => `"rule${String(index)}": "off"`).join(
       ", ",
     );
     expect(

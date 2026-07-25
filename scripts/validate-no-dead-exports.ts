@@ -58,8 +58,6 @@ const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.startsWith("packages/client/plugins/") ||
   filePath.startsWith("packages/client/layouts/") ||
   filePath.startsWith("packages/client/middleware/") ||
-  // Lint CLI entrypoints (`bun run scripts/validate-*.ts`) are consumers of their own exports.
-  /^scripts\/validate-[^/]+\.ts$/u.test(filePath) ||
   isLocaleCatalogEntrypoint(filePath);
 
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {
@@ -222,15 +220,13 @@ export const isDeadExportViolation = (options: {
   }
 
   const exportedNames = collectExportedRuntimeNames(content);
-  const composableHooks = exportedNames.filter((exportName) => exportName.startsWith("use"));
   if (
     filePath.startsWith("packages/client/composables/") &&
-    composableHooks.length > 0 &&
-    composableHooks.every((exportName) =>
+    exportedNames.some((exportName) => exportName.startsWith("use")) &&
+    exportedNames.every((exportName) =>
       hasAutoImportConsumer(filePath, exportName, importSources, autoImportNames),
     )
   ) {
-    // Companion const/type exports (shortcuts tables, contracts) may ship with the hook.
     return [];
   }
 

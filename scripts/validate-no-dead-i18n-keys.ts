@@ -1,10 +1,10 @@
 import enUSCatalog from "../packages/client/locales/en-US";
+import { type JsonValue, safeParseJson } from "../packages/shared/src/utils/json";
 import {
   collectProjectFileEntries,
   reportViolations,
   type ValidationViolation,
 } from "./utils/validation-helpers";
-import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json";
 
 /**
  * Dead i18n key detector — flags en-US catalog leaf keys that are never
@@ -179,7 +179,9 @@ const lintAllowlistEntry = (
   }
   if (entry.expires !== undefined && !EXPIRES_PATTERN.test(entry.expires)) {
     violations.push(
-      allowlistViolation(`Allowlist entry "${entry.key}" has malformed "expires" (need YYYY-MM-DD).`),
+      allowlistViolation(
+        `Allowlist entry "${entry.key}" has malformed "expires" (need YYYY-MM-DD).`,
+      ),
     );
   }
   if (entry.expires !== undefined && EXPIRES_PATTERN.test(entry.expires) && entry.expires < today) {

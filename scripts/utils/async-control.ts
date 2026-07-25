@@ -1,7 +1,23 @@
 /**
  * Tagged result for operations that may fail.
  */
-export type OperationResult<T> = { ok: true; value: T } | { ok: false; error: unknown };
+export type OperationResult<T> = { ok: true; value: T } | { ok: false; error: Error };
+
+/**
+ * Narrows an arbitrary runtime value to a stable Error instance.
+ * Kept generic so callers may pass values typed as `any` (e.g. Promise
+ * rejection reasons) without widening the public contract to the unsafe top
+ * type.
+ */
+export const asError = <T>(value: T): Error => {
+  if (value instanceof Error) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    return new Error(value);
+  }
+  return new Error(String(value));
+};
 
 /**
  * Captures a sync or async operation result without using try/catch syntax.
@@ -11,7 +27,7 @@ export const captureResult = <T>(operation: () => Promise<T> | T): Promise<Opera
     .then(operation)
     .then(
       (value) => ({ ok: true, value }),
-      (error: unknown) => ({ ok: false, error }),
+      (error) => ({ ok: false, error: asError(error) }),
     );
 
 /**
@@ -23,17 +39,26 @@ export const withCleanup = <T>(
 ): Promise<T> =>
   Promise.resolve()
     .then(operation)
-    .finally(() => cleanup());
+    .then(
+      (value) => Promise.resolve(cleanup()).then(() => value),
+      (error) =>
+        Promise.resolve(cleanup()).then(() => {
+          throw asError(error);
+        }),
+    );
 
 /**
- * Converts an unknown error payload into a stable human-readable message.
+ * Converts a rejection value into a human-readable message.
  */
 export const toErrorMessage = (error: unknown, fallback: string = "Unexpected error."): string => {
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
   }
-  if (typeof error === "string" && error.trim().length > 0) {
+  if (valueIsNonEmptyString(error)) {
     return error;
   }
   return fallback;
 };
+
+const valueIsNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;

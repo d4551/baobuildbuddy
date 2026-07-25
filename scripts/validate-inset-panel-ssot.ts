@@ -1,4 +1,5 @@
 const NUM_80 = 80;
+
 /**
  * Ban raw inset panel / nested surface literals in Vue surfaces.
  * Use INSET_PANEL_CLASS / INSET_PANEL_MUTED_CLASS / INSET_LIST_CLASS / FIELDSET_PANEL_CLASS.

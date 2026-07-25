@@ -6,8 +6,8 @@ describe("collectMissingLayoutTokenImportViolationsForContent", () => {
     const violations = collectMissingLayoutTokenImportViolationsForContent(
       "packages/client/components/settings/Example.vue",
       [
-        "<script setup lang=\"ts\">",
-        "import { FLEX_GAP_TOKEN_CLASS } from \"~/constants/layout\";",
+        '<script setup lang="ts">',
+        'import { FLEX_GAP_TOKEN_CLASS } from "~/constants/layout";',
         "</script>",
         "<template>",
         '  <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]"></div>',
@@ -21,8 +21,8 @@ describe("collectMissingLayoutTokenImportViolationsForContent", () => {
     const violations = collectMissingLayoutTokenImportViolationsForContent(
       "packages/client/error.vue",
       [
-        "<script setup lang=\"ts\">",
-        "import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from \"~/constants/layout\";",
+        '<script setup lang="ts">',
+        'import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";',
         "</script>",
         "<template>",
         '  <h1 :class="[TYPOGRAPHY_SCALE_CLASS.xl4]">x</h1>',

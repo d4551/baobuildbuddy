@@ -16,11 +16,13 @@ describe("validate-eslint-no-softenings", () => {
     expect(violations.length).toBeGreaterThan(0);
   });
 
-  test("live eslint.config.js still has softeners (ratchet owns growth; zero-cutover not claimed)", () => {
+  test("live eslint.config.js is zero-softener (flat/essential + allowed offs only)", () => {
     const violations = collectEslintSofteningViolationsForContent(
       "packages/client/eslint.config.js",
       LIVE_ESLINT,
     );
-    expect(violations.length).toBeGreaterThan(0);
+    expect(violations).toHaveLength(0);
+    expect(LIVE_ESLINT.includes("flat/essential")).toBe(true);
+    expect(LIVE_ESLINT.includes("argsIgnorePattern")).toBe(false);
   });
 });

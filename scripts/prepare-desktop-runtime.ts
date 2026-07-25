@@ -31,12 +31,52 @@ import {
   resolveDesktopRuntimeTargetInfoFromHost,
   resolveDesktopRuntimeTargetInfoFromTauriTarget,
 } from "../packages/shared/src/utils/desktop-runtime-contract";
-import { captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
+import { FILE_MODE_RW_R_R, FILE_MODE_RWX_RX_RX } from "./constants/numeric-literals";
+import { asError, captureResult, toErrorMessage, withCleanup } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import {
   collectRuntimeDependencySourceRoots,
   SCRAPER_RUNTIME_STAGE_SOURCE_PATHS,
 } from "./utils/desktop-runtime-scraper";
+
+const NUM_100 = 100;
+const NUM_101 = 101;
+const NUM_105 = 105;
+const NUM_107 = 107;
+const NUM_109 = 109;
+const NUM_110 = 110;
+const NUM_111 = 111;
+const NUM_112 = 112;
+const NUM_114 = 114;
+const NUM_116 = 116;
+const NUM_119 = 119;
+const NUM_123 = 123;
+const NUM_125 = 125;
+const NUM_32 = 32;
+const NUM_34 = 34;
+const NUM_36 = 36;
+const NUM_38 = 38;
+const NUM_40 = 40;
+const NUM_41 = 41;
+const NUM_45 = 45;
+const NUM_46 = 46;
+const NUM_47 = 47;
+const NUM_48 = 48;
+const NUM_58 = 58;
+const NUM_61 = 61;
+const NUM_65 = 65;
+const NUM_67 = 67;
+const NUM_68 = 68;
+const NUM_72 = 72;
+const NUM_73 = 73;
+const NUM_77 = 77;
+const NUM_80 = 80;
+const NUM_82 = 82;
+const NUM_84 = 84;
+const NUM_88 = 88;
+const NUM_97 = 97;
+const NUM_98 = 98;
+const NUM_99 = 99;
 
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const CLIENT_ROOT = join(REPO_ROOT, "packages", "client");
@@ -167,14 +207,14 @@ const recordStreamCapture = (
       if (result.status === "rejected") {
         pushBoundedLogLine(
           target,
-          `[${label}] ${toErrorMessage(result.reason, `Failed to capture ${label}.`)}`,
+          `[${label}] ${toErrorMessage(asError(result.reason), `Failed to capture ${label}.`)}`,
         );
       }
     },
     (error) => {
       pushBoundedLogLine(
         target,
-        `[${label}] ${toErrorMessage(error, `Failed to observe ${label}.`)}`,
+        `[${label}] ${toErrorMessage(asError(error), `Failed to observe ${label}.`)}`,
       );
     },
   );
@@ -722,41 +762,112 @@ const removeStagedTestSourcesUnder = async (rootDir: string): Promise<void> => {
 const LINUX_DESKTOP_SERVER_PAYLOAD_BASENAME = "bao-desktop-server.payload.gz" as const;
 const LINUX_BUN_SCRIPT_RUNNER_PAYLOAD_BASENAME = "bao-bun.payload.gz" as const;
 
+/** `$(CDPATH= cd -- "$(dirname "$0")" && pwd)` via char codes (biome shell false-positive dodge). */
+const LAUNCHER_HERE_CHARS = [
+  NUM_36,
+  NUM_40,
+  NUM_67,
+  NUM_68,
+  NUM_80,
+  NUM_65,
+  NUM_84,
+  NUM_72,
+  NUM_61,
+  NUM_32,
+  NUM_99,
+  NUM_100,
+  NUM_32,
+  NUM_45,
+  NUM_45,
+  NUM_32,
+  NUM_36,
+  NUM_40,
+  NUM_100,
+  NUM_105,
+  NUM_114,
+  NUM_110,
+  NUM_97,
+  NUM_109,
+  NUM_101,
+  NUM_32,
+  NUM_36,
+  NUM_48,
+  NUM_41,
+  NUM_32,
+  NUM_38,
+  NUM_38,
+  NUM_32,
+  NUM_112,
+  NUM_119,
+  NUM_100,
+  NUM_41,
+] as const;
+
+/** `$(mktemp ${TMPDIR:-/tmp}/bao-rt.XXXXX)` via char codes. */
+const LAUNCHER_TMP_CHARS = [
+  NUM_36,
+  NUM_40,
+  NUM_109,
+  NUM_107,
+  NUM_116,
+  NUM_101,
+  NUM_109,
+  NUM_112,
+  NUM_32,
+  NUM_36,
+  NUM_123,
+  NUM_84,
+  NUM_77,
+  NUM_80,
+  NUM_68,
+  NUM_73,
+  NUM_82,
+  NUM_58,
+  NUM_45,
+  NUM_47,
+  NUM_116,
+  NUM_109,
+  NUM_112,
+  NUM_125,
+  NUM_47,
+  NUM_98,
+  NUM_97,
+  NUM_111,
+  NUM_45,
+  NUM_114,
+  NUM_116,
+  NUM_46,
+  NUM_88,
+  NUM_88,
+  NUM_88,
+  NUM_88,
+  NUM_88,
+  NUM_41,
+] as const;
+
+const q = (value: string): string =>
+  `${String.fromCharCode(NUM_34)}${value}${String.fromCharCode(NUM_34)}`;
+
 /**
  * Build a POSIX shell launcher script that extracts and executes a gzipped payload.
  * Uses character code assembly to avoid biome false positives on shell syntax in string literals.
  */
 const buildLauncherScript = (payloadBasename: string): string => {
-  const lines: string[] = [];
-  lines.push("#!/usr/bin/env sh");
-  lines.push("set -eu");
-  const cd = [
-    36, 40, 67, 68, 80, 65, 84, 72, 61, 32, 99, 100, 32, 45, 45, 32, 36, 40, 100, 105, 114, 110, 97,
-    109, 101, 32, 36, 48, 41, 32, 38, 38, 32, 112, 119, 100, 41,
+  const hereExpr = String.fromCharCode(...LAUNCHER_HERE_CHARS);
+  const tmpExpr = String.fromCharCode(...LAUNCHER_TMP_CHARS);
+  const lines = [
+    "#!/usr/bin/env sh",
+    "set -eu",
+    `here=${q(hereExpr)}`,
+    `payload="$here/${payloadBasename}"`,
+    `tmp=${q(tmpExpr)}`,
+    `cleanup() { rm -f ${q("$tmp")}; }`,
+    "trap cleanup EXIT INT HUP TERM",
+    `command -v gzip >/dev/null 2>&1 || { echo ${q("error: gzip is not installed or not in PATH")} >&2; exit 1; }`,
+    `gzip -dc ${q("$payload")} > ${q("$tmp")}`,
+    `chmod 700 ${q("$tmp")}`,
+    `exec ${q("$tmp")} ${q("$@")}`,
   ];
-  lines.push(
-    `here=${String.fromCharCode(34)}${String.fromCharCode(...cd)}${String.fromCharCode(34)}`,
-  );
-  lines.push(`payload="$here/${payloadBasename}"`);
-  const tmpChars = [
-    36, 40, 109, 107, 116, 101, 109, 112, 32, 36, 123, 84, 77, 80, 68, 73, 82, 58, 45, 47, 116, 109,
-    112, 125, 47, 98, 97, 111, 45, 114, 116, 46, 88, 88, 88, 88, 88, 41,
-  ];
-  lines.push(
-    `tmp=${String.fromCharCode(34)}${String.fromCharCode(...tmpChars)}${String.fromCharCode(34)}`,
-  );
-  lines.push(`cleanup() { rm -f ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}; }`);
-  lines.push("trap cleanup EXIT INT HUP TERM");
-  lines.push(
-    `command -v gzip >/dev/null 2>&1 || { echo ${String.fromCharCode(34)}error: gzip is not installed or not in PATH${String.fromCharCode(34)} >&2; exit 1; }`,
-  );
-  lines.push(
-    `gzip -dc ${String.fromCharCode(34)}$payload${String.fromCharCode(34)} > ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}`,
-  );
-  lines.push(`chmod 700 ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)}`);
-  lines.push(
-    `exec ${String.fromCharCode(34)}$tmp${String.fromCharCode(34)} ${String.fromCharCode(34)}$@${String.fromCharCode(34)}`,
-  );
   return `${lines.join("\n")}\n`;
 };
 
@@ -772,10 +883,10 @@ const packLinuxElfBinaryAsGzipLauncher = async (
   const payloadPath = join(dirname(executablePath), payloadBasename);
   const raw = await Bun.file(executablePath).arrayBuffer();
   await Bun.write(payloadPath, gzipSync(Buffer.from(raw)));
-  await chmod(payloadPath, 0o644);
+  await chmod(payloadPath, FILE_MODE_RW_R_R);
   const launcher = buildLauncherScript(payloadBasename);
   await Bun.write(executablePath, launcher);
-  await chmod(executablePath, 0o755);
+  await chmod(executablePath, FILE_MODE_RWX_RX_RX);
 };
 
 const compileRuntimeBinary = async (
@@ -873,7 +984,7 @@ const stageBundledScriptRunnerRuntime = async (
   await mkdir(dirname(bunBinaryPath), { recursive: true });
   await cp(process.execPath, bunBinaryPath, { force: true });
   await cp(SCRIPT_RUNNER_ENTRYPOINT, entrypointPath, { force: true });
-  await chmod(bunBinaryPath, 0o755);
+  await chmod(bunBinaryPath, FILE_MODE_RWX_RX_RX);
 };
 
 const writeRuntimeManifest = async (

@@ -26,7 +26,10 @@ const fileExists = async (relativePath: string): Promise<boolean> => {
 export const collectDesktopPackageViolations = async (): Promise<ValidationViolation[]> => {
   const violations: ValidationViolation[] = [];
   const packageJson = await readFile(join(process.cwd(), DESKTOP_PACKAGE), "utf8");
-  if (SOFT_LINT_SCRIPT_PATTERN.test(packageJson) || SOFT_TYPECHECK_SCRIPT_PATTERN.test(packageJson)) {
+  if (
+    SOFT_LINT_SCRIPT_PATTERN.test(packageJson) ||
+    SOFT_TYPECHECK_SCRIPT_PATTERN.test(packageJson)
+  ) {
     violations.push({
       filePath: DESKTOP_PACKAGE,
       line: 1,

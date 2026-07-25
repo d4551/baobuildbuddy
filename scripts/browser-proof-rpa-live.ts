@@ -2,12 +2,23 @@
  * Fail-closed headed RPA proof — UI click/type only (no API inject).
  * Flow: Settings enable portal → Scraper Run → Runs history → Job Apply.
  */
+
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
+import {
+  COUNT_FIVE_HUNDRED,
+  MS_ONE_AND_HALF_SECONDS,
+  MS_SECOND,
+  MS_TEN_SECONDS,
+  MS_TWELVE_SECONDS,
+  MS_TWO_AND_HALF_SECONDS,
+  MS_TWO_SECONDS,
+} from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { settlePage } from "./utils/playwright-settle";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
@@ -28,9 +39,7 @@ const SCRAPER_URL_PATTERN = /\/automation\/scraper/u;
 const RUNS_URL_PATTERN = /\/automation\/runs/u;
 const RUN_STATUS_SIGNAL_PATTERN = /queued|running|completed|success|failed|scrape/iu;
 
-const wait = async (page: Page, ms: number): Promise<void> => {
-  await page.waitForTimeout(ms);
-};
+const wait = settlePage;
 
 const shot = async (page: Page, name: string): Promise<void> => {
   await page.screenshot({ path: join(OUT, "stills", `${name}.png`), fullPage: false });
@@ -38,36 +47,35 @@ const shot = async (page: Page, name: string): Promise<void> => {
 
 const enablePortalViaUi = async (page: Page): Promise<void> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("jobIntelligence")}`, {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
-  await wait(page, 1_500);
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
   const toggle = page.getByLabel(RE_ENABLE_WWI);
   await toggle.scrollIntoViewIfNeeded();
   if (!(await toggle.isChecked())) {
     await toggle.click();
   }
   await page.getByRole("button", { name: RE_SAVE_PROVIDERS }).click();
-  await wait(page, 2_000);
+  await wait(page, MS_TWO_SECONDS);
   await shot(page, "01-providers-enabled");
 };
 
 const runScraperViaUi = async (page: Page): Promise<void> => {
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.automation}`, { waitUntil: "networkidle" });
-  await wait(page, 1_000);
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.automation}`, { waitUntil: "domcontentloaded" });
+  await wait(page, MS_SECOND);
   await page.getByRole("link", { name: RE_OPEN_SCRAPER }).first().click();
   await page.waitForURL(SCRAPER_URL_PATTERN, { timeout: 30_000 });
-  await wait(page, 1_500);
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
   await shot(page, "02-scraper-hub");
 
   const jobRun = page.getByRole("button", { name: RE_RUN_JOB_SCRAPER }).first();
   const studioRun = page.getByRole("button", { name: RE_RUN_STUDIO_SCRAPER }).first();
-  const runner =
-    (await jobRun.count()) > 0 && !(await jobRun.isDisabled()) ? jobRun : studioRun;
+  const runner = (await jobRun.count()) > 0 && !(await jobRun.isDisabled()) ? jobRun : studioRun;
   if ((await runner.count()) === 0 || (await runner.isDisabled())) {
     throw new Error("No enabled Run Scraper button in UI");
   }
   await runner.click();
-  await wait(page, 12_000);
+  await wait(page, MS_TWELVE_SECONDS);
   await shot(page, "03-scraper-clicked");
 };
 
@@ -80,16 +88,16 @@ const assertRunsViaUi = async (page: Page, beforeCount: number): Promise<number>
     await viewRuns.click();
     await page.waitForURL(RUNS_URL_PATTERN, { timeout: 30_000 });
   } else {
-    await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationRuns}`, { waitUntil: "networkidle" });
+    await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationRuns}`, {
+      waitUntil: "domcontentloaded",
+    });
   }
-  await wait(page, 2_500);
+  await wait(page, MS_TWO_AND_HALF_SECONDS);
   await shot(page, "04-runs-history");
   const afterCount = await countRunRows(page);
   const body = await page.locator("main").innerText();
   const hasRunSignal =
-    afterCount > beforeCount ||
-    afterCount > 0 ||
-    RUN_STATUS_SIGNAL_PATTERN.test(body);
+    afterCount > beforeCount || afterCount > 0 || RUN_STATUS_SIGNAL_PATTERN.test(body);
   if (!hasRunSignal) {
     throw new Error("Runs history empty after scraper click — RPA not integrated");
   }
@@ -98,9 +106,9 @@ const assertRunsViaUi = async (page: Page, beforeCount: number): Promise<number>
 
 const jobApplyViaUi = async (page: Page): Promise<void> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationJobApply}`, {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
-  await wait(page, 1_500);
+  await wait(page, MS_ONE_AND_HALF_SECONDS);
   const urlInput = page.getByLabel(RE_JOB_URL);
   await urlInput.click();
   await urlInput.fill("");
@@ -109,7 +117,7 @@ const jobApplyViaUi = async (page: Page): Promise<void> => {
   });
   const resumeSelect = page.getByLabel(RE_SELECT_RESUME);
   await resumeSelect.selectOption({ index: 1 });
-  await wait(page, 500);
+  await wait(page, COUNT_FIVE_HUNDRED);
   const runApply = page.getByRole("button", { name: RE_RUN_APPLICATION });
   if (await runApply.isDisabled()) {
     // Some hosts gate private URLs — still prove form wiring with typed URL + resume.
@@ -117,7 +125,7 @@ const jobApplyViaUi = async (page: Page): Promise<void> => {
     throw new Error("Run Application stayed disabled after typing URL + selecting resume");
   }
   await runApply.click();
-  await wait(page, 10_000);
+  await wait(page, MS_TEN_SECONDS);
   await shot(page, "05-job-apply-ran");
 };
 
@@ -133,8 +141,8 @@ const main = async (): Promise<void> => {
 
   await enablePortalViaUi(page);
 
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationRuns}`, { waitUntil: "networkidle" });
-  await wait(page, 1_000);
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationRuns}`, { waitUntil: "domcontentloaded" });
+  await wait(page, MS_SECOND);
   const beforeCount = await countRunRows(page);
 
   await runScraperViaUi(page);

@@ -14,6 +14,9 @@ import {
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 import { writeError, writeOutput } from "./utils/cli-output";
 
+const NUM_26 = 26;
+const NUM_5 = 5;
+
 type RouteVerificationResult = {
   locale: string;
   route: string;
@@ -292,7 +295,7 @@ const writeRouteSummary = async (
 
   const successLines = successes.map(
     (success) =>
-      `[ok] ${success.locale.padEnd(5)} ${success.status} ${success.route.padEnd(26)} ${success.heading} | ${success.title}`,
+      `[ok] ${success.locale.padEnd(NUM_5)} ${success.status} ${success.route.padEnd(NUM_26)} ${success.heading} | ${success.title}`,
   );
   if (successLines.length > 0) {
     await writeOutput(successLines.join("\n"));
@@ -312,7 +315,7 @@ const writeRouteSummary = async (
     failures
       .map(
         (failure) =>
-          `[fail] ${failure.locale.padEnd(5)} ${failure.status} ${failure.route.padEnd(26)} ${failure.reason}`,
+          `[fail] ${failure.locale.padEnd(NUM_5)} ${failure.status} ${failure.route.padEnd(NUM_26)} ${failure.reason}`,
       )
       .join("\n"),
   );

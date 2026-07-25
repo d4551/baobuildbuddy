@@ -10,8 +10,7 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 const CLIENT_ROUTE_FILE = "packages/client/composables/useWorkspaceSearch.ts";
 const SERVER_CONTRACT_FILE = "packages/server/src/routes/search-route-contracts.ts";
 
-const ROUTE_MAP_BLOCK_PATTERN =
-  /export const SEARCH_TYPE_ROUTE[\s\S]*?=\s*\{([\s\S]*?)\};/u;
+const ROUTE_MAP_BLOCK_PATTERN = /export const SEARCH_TYPE_ROUTE[\s\S]*?=\s*\{([\s\S]*?)\};/u;
 const ROUTE_KEY_PATTERN = /["']?([a-z-]+)["']?\s*:/gu;
 
 export const collectSearchTypeParityViolations = (input: {
@@ -25,7 +24,8 @@ export const collectSearchTypeParityViolations = (input: {
     violations.push({
       filePath: SERVER_CONTRACT_FILE,
       line: 1,
-      message: "search-route-contracts must import SEARCH_RESULT_TYPES from @bao/shared/constants/search",
+      message:
+        "search-route-contracts must import SEARCH_RESULT_TYPES from @bao/shared/constants/search",
     });
   }
 

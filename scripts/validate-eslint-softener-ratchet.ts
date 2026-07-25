@@ -6,8 +6,8 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 
 const ESLINT_PATH = "packages/client/eslint.config.js";
 /** Shrink-only ceilings — lower when offs/ignore-patterns are removed; never raise. */
-const MAX_OFF_RULES = 9;
-const MAX_UNUSED_IGNORE_EVASIONS = 3;
+const MAX_OFF_RULES = 2;
+const MAX_UNUSED_IGNORE_EVASIONS = 0;
 const FORBIDDEN_IGNORE_KEYS = [
   "argsIgnorePattern",
   "varsIgnorePattern",

@@ -5,6 +5,8 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
+const NUM_3 = 3;
+
 /**
  * Data surface primitives gate (design.md §5, §11).
  *
@@ -58,7 +60,8 @@ const TABLE_BASE_CLASS_PATTERN = /\bclass\s*=\s*["'][^"']*\btable\b[^"']*["']/u;
 // Hoisted: overflow-x-auto / overflow-x-scroll containment detection.
 const OVERFLOW_X_SCROLL_PATTERN = /\boverflow-x-(?:auto|scroll)\b/u;
 // Wide zebra tables (not table-sm) must ship a mobile card surface — not scroll-trap @320.
-const WIDE_ZEBRA_TABLE_PATTERN = /<table\b[^>]*class\s*=\s*["'][^"']*\btable-zebra\b[^"']*["'][^>]*>/u;
+const WIDE_ZEBRA_TABLE_PATTERN =
+  /<table\b[^>]*class\s*=\s*["'][^"']*\btable-zebra\b[^"']*["'][^>]*>/u;
 const TABLE_SM_IN_TAG_PATTERN = /\btable-sm\b/u;
 const RESPONSIVE_DATA_SURFACE_PATTERN = /<ResponsiveDataSurface\b/u;
 const DUAL_SURFACE_TOKEN_PATTERN =
@@ -105,69 +108,97 @@ const collectPaginationViolations = (filePath: string, content: string): Validat
   return violations;
 };
 
+const hasTableDualSurface = (content: string, template: string): boolean =>
+  RESPONSIVE_DATA_SURFACE_PATTERN.test(content) ||
+  DUAL_SURFACE_TOKEN_PATTERN.test(content) ||
+  LEGACY_MD_DUAL_SURFACE_PATTERN.test(template);
+
+const collectRawTableClassViolations = (
+  filePath: string,
+  content: string,
+  template: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  rawTablePattern.lastIndex = 0;
+  for (const match of template.matchAll(rawTablePattern)) {
+    if (TABLE_BASE_CLASS_PATTERN.test(match[0])) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Raw <table> without class="table". Opt into the daisyUI table primitive.`,
+    });
+  }
+  return violations;
+};
+
+const collectTableOverflowViolations = (
+  filePath: string,
+  content: string,
+  template: string,
+): ValidationViolation[] => {
+  if (!tableWithoutOverflowScrollPattern.test(template)) return [];
+  if (OVERFLOW_X_SCROLL_PATTERN.test(template) || RESPONSIVE_DATA_SURFACE_PATTERN.test(template)) {
+    return [];
+  }
+  return [
+    {
+      filePath,
+      line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
+      message: `<table class="table"> without an overflow-x-auto scroll container ancestor. Tables overflow on mobile without horizontal scroll containment.`,
+    },
+  ];
+};
+
+const collectWideZebraViolations = (
+  filePath: string,
+  content: string,
+  template: string,
+): ValidationViolation[] => {
+  const violations: ValidationViolation[] = [];
+  WIDE_ZEBRA_TABLE_PATTERN.lastIndex = 0;
+  for (const match of template.matchAll(new RegExp(WIDE_ZEBRA_TABLE_PATTERN.source, "gu"))) {
+    const tableTag = match[0] ?? "";
+    if (TABLE_SM_IN_TAG_PATTERN.test(tableTag)) continue;
+    if (hasTableDualSurface(content, template)) continue;
+    violations.push({
+      filePath,
+      line: getLineFromOffset(content, match.index ?? 0),
+      message: `Wide table-zebra without mobile card dual-surface. Wrap with <ResponsiveDataSurface> (cards + table slots) or VISIBILITY_SHOW_BELOW_LG_CLASS / VISIBILITY_HIDE_BELOW_LG_CLASS so @320 is not a horizontal UUID scroll trap.`,
+    });
+  }
+  return violations;
+};
+
+const collectMultiColumnTableViolations = (
+  filePath: string,
+  content: string,
+  template: string,
+): ValidationViolation[] => {
+  const thCount = (template.match(/<th\b/gu) ?? []).length;
+  if (thCount < NUM_3) return [];
+  if (!tableWithoutOverflowScrollPattern.test(template)) return [];
+  if (RESPONSIVE_DATA_SURFACE_PATTERN.test(content) || DUAL_SURFACE_TOKEN_PATTERN.test(content)) {
+    return [];
+  }
+  return [
+    {
+      filePath,
+      line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
+      message: `Multi-column table (${thCount} <th>) uses overflow-only escape. Wrap with <ResponsiveDataSurface> so mobile gets a card stack, not a horizontal scroll trap.`,
+    },
+  ];
+};
+
 const collectTableViolations = (filePath: string, content: string): ValidationViolation[] => {
   if (isSsotPrimitive(filePath)) return [];
   const template = extractTemplateBlocks(content);
   if (template.length === 0) return [];
-  const violations: ValidationViolation[] = [];
-
-  rawTablePattern.lastIndex = 0;
-  for (const match of template.matchAll(rawTablePattern)) {
-    if (!TABLE_BASE_CLASS_PATTERN.test(match[0])) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message: `Raw <table> without class="table". Opt into the daisyUI table primitive.`,
-      });
-    }
-  }
-
-  if (tableWithoutOverflowScrollPattern.test(template)) {
-    if (!OVERFLOW_X_SCROLL_PATTERN.test(template) && !RESPONSIVE_DATA_SURFACE_PATTERN.test(template)) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
-        message: `<table class="table"> without an overflow-x-auto scroll container ancestor. Tables overflow on mobile without horizontal scroll containment.`,
-      });
-    }
-  }
-
-  WIDE_ZEBRA_TABLE_PATTERN.lastIndex = 0;
-  for (const match of template.matchAll(new RegExp(WIDE_ZEBRA_TABLE_PATTERN.source, "gu"))) {
-    const tableTag = match[0] ?? "";
-    if (TABLE_SM_IN_TAG_PATTERN.test(tableTag)) {
-      continue;
-    }
-    const hasDualSurface =
-      RESPONSIVE_DATA_SURFACE_PATTERN.test(content) ||
-      DUAL_SURFACE_TOKEN_PATTERN.test(content) ||
-      LEGACY_MD_DUAL_SURFACE_PATTERN.test(template);
-    if (!hasDualSurface) {
-      violations.push({
-        filePath,
-        line: getLineFromOffset(content, match.index ?? 0),
-        message: `Wide table-zebra without mobile card dual-surface. Wrap with <ResponsiveDataSurface> (cards + table slots) or VISIBILITY_SHOW_BELOW_LG_CLASS / VISIBILITY_HIDE_BELOW_LG_CLASS so @320 is not a horizontal UUID scroll trap.`,
-      });
-    }
-  }
-
-  // Overflow-only escapes miss dense table-sm / multi-column surfaces @320.
-  // 3+ header cells ⇒ require ResponsiveDataSurface (card + table dual surface).
-  const thCount = (template.match(/<th\b/gu) ?? []).length;
-  if (
-    thCount >= 3 &&
-    tableWithoutOverflowScrollPattern.test(template) &&
-    !RESPONSIVE_DATA_SURFACE_PATTERN.test(content) &&
-    !DUAL_SURFACE_TOKEN_PATTERN.test(content)
-  ) {
-    violations.push({
-      filePath,
-      line: getLineFromOffset(content, template.indexOf("<table") ?? 0),
-      message: `Multi-column table (${thCount} <th>) uses overflow-only escape. Wrap with <ResponsiveDataSurface> so mobile gets a card stack, not a horizontal scroll trap.`,
-    });
-  }
-
-  return violations;
+  return [
+    ...collectRawTableClassViolations(filePath, content, template),
+    ...collectTableOverflowViolations(filePath, content, template),
+    ...collectWideZebraViolations(filePath, content, template),
+    ...collectMultiColumnTableViolations(filePath, content, template),
+  ];
 };
 
 export const collectPaginationTableViolationsForContent = (

@@ -104,7 +104,10 @@ const collectOffRuleViolations = (filePath: string, content: string): Validation
   return violations;
 };
 
-const collectWarnSeverityViolations = (filePath: string, content: string): ValidationViolation[] => {
+const collectWarnSeverityViolations = (
+  filePath: string,
+  content: string,
+): ValidationViolation[] => {
   if (!content.includes(': "warn"') && !content.includes(": 'warn'")) {
     return [];
   }

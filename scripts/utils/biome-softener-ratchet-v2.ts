@@ -16,8 +16,8 @@
  * scripts/docs/biome-tailwind-incompatibility.md).
  */
 import type { SoftenerJsonValue } from "./biome-softener-ratchet";
-import type { ValidationViolation } from "./validation-helpers";
 import { isSoftenerRecord, requireRuleError } from "./biome-softener-ratchet";
+import type { ValidationViolation } from "./validation-helpers";
 
 export const validateStyleAdditionsRatchet = (
   style: { [key: string]: SoftenerJsonValue },

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
-import { safeParseJson, type JsonValue } from "../packages/shared/src/utils/json";
+import { type JsonValue, safeParseJson } from "../packages/shared/src/utils/json";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 /**
@@ -28,8 +28,7 @@ const DYNAMIC_SEGMENT_PATTERN = /\[([a-zA-Z0-9_-]+)\]/u;
 const REDIRECT_PATTERN = /definePageMeta\s*\(\s*\{[^}]*redirect\b/su;
 /** Canonical URL override from definePageMeta({ path }) — wins over filename route. */
 const PAGE_META_PATH_LITERAL_PATTERN = /\bpath\s*:\s*["']([^"']+)["']/u;
-const PAGE_META_PATH_APP_ROUTES_PATTERN =
-  /\bpath\s*:\s*(?:APP_ROUTES|APP_ROUTE_PATHS)\.(\w+)/u;
+const PAGE_META_PATH_APP_ROUTES_PATTERN = /\bpath\s*:\s*(?:APP_ROUTES|APP_ROUTE_PATHS)\.(\w+)/u;
 const TO_PATTERN = /to:\s*APP_ROUTES\.(\w+)/gu;
 const VUE_EXTENSION_PATTERN = /\.vue$/u;
 const MULTIPLE_SLASH_PATTERN = /\/{2,}/gu;

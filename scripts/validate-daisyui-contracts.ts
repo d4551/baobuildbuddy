@@ -1,13 +1,15 @@
+import { writeError, writeOutput } from "./utils/cli-output";
+import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 import {
   BRAND_PREVIEW_STYLES_FILE_PATH,
   collectBrandPreviewThemeViolations,
+  collectDynamicVariantLiteralViolations,
   collectProgressMarkupViolations,
   collectRadialProgressViolations,
+  collectRawStatsClassViolations,
   collectTableMarkupViolations,
   type DaisyUiViolation,
 } from "./validate-daisyui-contracts-markup";
-import { writeError, writeOutput } from "./utils/cli-output";
-import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
 type Violation = DaisyUiViolation;
 
@@ -114,6 +116,14 @@ const SSOT_SURFACE_CONSTANTS_WITH_CARD = [
   "UiGlassCard",
 ] as const;
 
+/** SSOT constants that already include daisyUI base `list`. */
+const SSOT_SURFACE_CONSTANTS_WITH_LIST = ["INSET_LIST_CLASS"] as const;
+
+const SSOT_LIST_CONSTANT_USAGE_PATTERN = new RegExp(
+  `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_LIST.join("|")})\\b`,
+  "u",
+);
+
 const SSOT_SURFACE_CONSTANT_USAGE_PATTERN = new RegExp(
   `:class=["'](?:\\[.*?)?(${SSOT_SURFACE_CONSTANTS_WITH_CARD.join("|")})\\b`,
   "u",
@@ -193,11 +203,11 @@ const collectSemanticModifierViolations = (filePath: string, fileContent: string
   return violations;
 };
 
-const collectFileLevelPartViolations = (filePath: string, fileContent: string): Violation[] => {
+const collectStaticClassTokens = (
+  fileContent: string,
+): { classTokens: Set<string>; firstLineByClass: Map<string, number> } => {
   const firstLineByClass = new Map<string, number>();
   const classTokens = new Set<string>();
-
-  // Scan static class="..." attributes
   for (const classMatch of fileContent.matchAll(STATIC_CLASS_ATTRIBUTE_PATTERN)) {
     const line = getLineFromOffset(fileContent, classMatch.index ?? 0);
     for (const token of extractClassTokens(classMatch[1])) {
@@ -207,27 +217,53 @@ const collectFileLevelPartViolations = (filePath: string, fileContent: string): 
       }
     }
   }
-  // Scan SSOT surface constant bindings that carry `card` implicitly
+  return { classTokens, firstLineByClass };
+};
+
+const markImplicitCardToken = (
+  fileContent: string,
+  classTokens: Set<string>,
+  firstLineByClass: Map<string, number>,
+): void => {
   if (SSOT_SURFACE_CONSTANT_USAGE_PATTERN.test(fileContent)) {
     classTokens.add("card");
-    // Find the first SURFACE_GLASS_CARD_CLASS occurrence for line reporting
-    // Reset the global variant since .test() advanced lastIndex on the non-global won't matter
     SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.lastIndex = 0;
     const firstSurfaceMatch = SSOT_SURFACE_CONSTANT_USAGE_PATTERN_GLOBAL.exec(fileContent);
     if (firstSurfaceMatch && !firstLineByClass.has("card")) {
       firstLineByClass.set("card", getLineFromOffset(fileContent, firstSurfaceMatch.index));
     }
   }
-  // UiGlassCard component usage implicitly carries the `card` class
-  if (UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) {
-    classTokens.add("card");
-    if (!firstLineByClass.has("card")) {
-      const match = UI_GLASS_CARD_TAG_PATTERN.exec(fileContent);
-      if (match) {
-        firstLineByClass.set("card", getLineFromOffset(fileContent, match.index));
-      }
-    }
+  if (!UI_GLASS_CARD_TAG_PATTERN.test(fileContent)) return;
+  classTokens.add("card");
+  if (firstLineByClass.has("card")) return;
+  const match = UI_GLASS_CARD_TAG_PATTERN.exec(fileContent);
+  if (match) {
+    firstLineByClass.set("card", getLineFromOffset(fileContent, match.index));
   }
+};
+
+const markImplicitListToken = (
+  fileContent: string,
+  classTokens: Set<string>,
+  firstLineByClass: Map<string, number>,
+): void => {
+  if (!SSOT_LIST_CONSTANT_USAGE_PATTERN.test(fileContent)) {
+    return;
+  }
+  classTokens.add("list");
+  if (firstLineByClass.has("list")) {
+    return;
+  }
+  const match = SSOT_LIST_CONSTANT_USAGE_PATTERN.exec(fileContent);
+  if (match) {
+    firstLineByClass.set("list", getLineFromOffset(fileContent, match.index));
+  }
+};
+
+const collectFileLevelPartViolations = (filePath: string, fileContent: string): Violation[] => {
+  const { classTokens, firstLineByClass } = collectStaticClassTokens(fileContent);
+  markImplicitCardToken(fileContent, classTokens, firstLineByClass);
+  markImplicitListToken(fileContent, classTokens, firstLineByClass);
 
   return FILE_LEVEL_PART_REQUIREMENTS.flatMap((requirement) =>
     requirement.partClasses
@@ -299,6 +335,8 @@ export function collectDaisyUiContractViolationsForContent(
     ...collectRequiredClassViolations(filePath, fileContent),
     ...collectSemanticModifierViolations(filePath, fileContent),
     ...collectBtnModifierViolations(filePath, fileContent),
+    ...collectRawStatsClassViolations(filePath, fileContent),
+    ...collectDynamicVariantLiteralViolations(filePath, fileContent),
     ...collectFileLevelPartViolations(filePath, fileContent),
     ...collectIncompatibleClassViolations(filePath, fileContent),
     ...collectTableMarkupViolations(filePath, fileContent),

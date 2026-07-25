@@ -3,7 +3,7 @@ import { findDeadKeys } from "./validate-no-dead-i18n-keys";
 
 const TODAY = "2026-07-24";
 
-describe("findDeadKeys", () => {
+describe("findDeadKeys consumers", () => {
   test("flags a key with no literal or dynamic consumer (VACUOUS_GATE_TEST)", () => {
     const keys = ["app.tagline", "app.consumed", "dashboard.dynamic.metric"];
     const corpus = ['t("app.consumed")', `t(\`dashboard.dynamic.\${variable}\`)`].join("\n");
@@ -40,7 +40,9 @@ describe("findDeadKeys", () => {
     const violations = findDeadKeys(keys, corpus, [], TODAY);
     expect(violations).toHaveLength(0);
   });
+});
 
+describe("findDeadKeys allowlist", () => {
   test("allows an exact key in the allowlist with a future expires date", () => {
     const keys = ["legacy.unused"];
     const allowlist = [
@@ -71,9 +73,7 @@ describe("findDeadKeys", () => {
   });
 
   test("fails a stale allowlist entry whose key is now literally consumed", () => {
-    const allowlist = [
-      { key: "jobs.saved", reason: "Consumer wired.", expires: "2026-12-31" },
-    ];
+    const allowlist = [{ key: "jobs.saved", reason: "Consumer wired.", expires: "2026-12-31" }];
     const violations = findDeadKeys([], 't("jobs.saved")', allowlist, TODAY);
     expect(violations).toHaveLength(1);
     expect(violations[0]?.message).toContain("Stale allowlist entry");

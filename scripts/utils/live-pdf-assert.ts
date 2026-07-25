@@ -1,6 +1,7 @@
 /**
  * Shared PDF download assertions — magic header + minimum size.
  */
+import { COUNT_FIVE } from "../constants/numeric-literals";
 import { writeError, writeOutput } from "./cli-output";
 
 export const PDF_MAGIC = "%PDF-";
@@ -23,7 +24,7 @@ export const assertRealPdfFile = async (path: string): Promise<PdfAssertResult> 
     return { ok: false, path, bytes: 0, header: "" };
   }
   const buffer = Buffer.from(await file.arrayBuffer());
-  const header = buffer.subarray(0, 5).toString("utf8");
+  const header = buffer.subarray(0, COUNT_FIVE).toString("utf8");
   const bytes = buffer.byteLength;
   await writeOutput(`PDF path=${path} bytes=${String(bytes)} header=${header}`);
   const ok = header === PDF_MAGIC && bytes >= PDF_MIN_BYTES;

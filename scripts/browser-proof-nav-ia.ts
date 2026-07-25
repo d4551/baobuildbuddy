@@ -2,12 +2,22 @@
  * Headed proof for Navigation IA cutover (contract-escalation-ia-2026-07-24).
  * Asserts groups, dock set, no sidebar kbd, section-only crumb, FAB desktop-only.
  */
+
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
 import { DOCK_NAVIGATION_IDS, NAVIGATION_GROUP_IDS } from "../packages/client/constants/navigation";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
+import {
+  MS_NINE_HUNDRED,
+  MS_SEVEN_HUNDRED,
+  VIEWPORT_HEIGHT_DESKTOP,
+  VIEWPORT_HEIGHT_MOBILE_PROOF,
+  VIEWPORT_WIDTH_DESKTOP,
+  VIEWPORT_WIDTH_MOBILE_PROOF,
+} from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { settlePage } from "./utils/playwright-settle";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
   /\/$/u,
@@ -28,18 +38,9 @@ const readFirstBreadcrumb = async (page: Page): Promise<string> => {
   return (await crumbs.first().innerText()).trim();
 };
 
-const main = async (): Promise<void> => {
-  await mkdir(OUT_DIR, { recursive: true });
-  const findings: Finding[] = [];
-  const browser = await chromium.launch({
-    headless: false,
-    args: ["--disable-dev-shm-usage"],
-  });
-
-  const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await desktop.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, { waitUntil: "networkidle" });
-  await desktop.waitForTimeout(900);
-
+const probeDesktopDashboard = async (desktop: Page, findings: Finding[]): Promise<void> => {
+  await desktop.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, { waitUntil: "domcontentloaded" });
+  await settlePage(desktop, MS_NINE_HUNDRED);
   const groupTitles = await desktop.locator("aside .menu-title").allTextContents();
   const normalizedGroups = groupTitles.map((title) => title.trim().toLowerCase());
   const groupsOk = NAVIGATION_GROUP_IDS.every((id) =>
@@ -50,14 +51,12 @@ const main = async (): Promise<void> => {
     ok: groupsOk,
     detail: `titles=${JSON.stringify(groupTitles)}`,
   });
-
   const kbdCount = await desktop.locator("aside kbd").count();
   findings.push({
     check: "no-sidebar-kbd",
     ok: kbdCount === 0,
     detail: `kbdCount=${String(kbdCount)}`,
   });
-
   const desktopFabCount = await collectFabRegions(desktop);
   findings.push({
     check: "desktop-fab-present",
@@ -65,9 +64,11 @@ const main = async (): Promise<void> => {
     detail: `fabCount=${String(desktopFabCount)}`,
   });
   await desktop.screenshot({ path: join(OUT_DIR, "desktop-dashboard.png") });
+};
 
-  await desktop.goto(`${CLIENT_BASE}${APP_ROUTES.settings}`, { waitUntil: "networkidle" });
-  await desktop.waitForTimeout(700);
+const probeDesktopSettings = async (desktop: Page, findings: Finding[]): Promise<void> => {
+  await desktop.goto(`${CLIENT_BASE}${APP_ROUTES.settings}`, { waitUntil: "domcontentloaded" });
+  await settlePage(desktop, MS_SEVEN_HUNDRED);
   const crumb = await readFirstBreadcrumb(desktop);
   findings.push({
     check: "section-only-crumb",
@@ -81,10 +82,11 @@ const main = async (): Promise<void> => {
     detail: `alertCount=${String(alertCount)}`,
   });
   await desktop.screenshot({ path: join(OUT_DIR, "desktop-settings.png") });
+};
 
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
-  await mobile.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, { waitUntil: "networkidle" });
-  await mobile.waitForTimeout(900);
+const probeMobileDock = async (mobile: Page, findings: Finding[]): Promise<void> => {
+  await mobile.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, { waitUntil: "domcontentloaded" });
+  await settlePage(mobile, MS_NINE_HUNDRED);
   const dockHrefs = await mobile
     .locator("nav.dock a")
     .evaluateAll((els) => els.map((el) => el.getAttribute("href") ?? ""));
@@ -103,7 +105,6 @@ const main = async (): Promise<void> => {
     ok: dockOk,
     detail: `dock=${JSON.stringify(dockHrefs)}`,
   });
-
   const mobileFabCount = await collectFabRegions(mobile);
   findings.push({
     check: "mobile-fab-absent",
@@ -111,9 +112,25 @@ const main = async (): Promise<void> => {
     detail: `fabCount=${String(mobileFabCount)}`,
   });
   await mobile.screenshot({ path: join(OUT_DIR, "mobile-dock.png") });
+};
 
+const main = async (): Promise<void> => {
+  await mkdir(OUT_DIR, { recursive: true });
+  const findings: Finding[] = [];
+  const browser = await chromium.launch({
+    headless: false,
+    args: ["--disable-dev-shm-usage"],
+  });
+  const desktop = await browser.newPage({
+    viewport: { width: VIEWPORT_WIDTH_DESKTOP, height: VIEWPORT_HEIGHT_DESKTOP },
+  });
+  await probeDesktopDashboard(desktop, findings);
+  await probeDesktopSettings(desktop, findings);
+  const mobile = await browser.newPage({
+    viewport: { width: VIEWPORT_WIDTH_MOBILE_PROOF, height: VIEWPORT_HEIGHT_MOBILE_PROOF },
+  });
+  await probeMobileDock(mobile, findings);
   await browser.close();
-
   const reportPath = join(OUT_DIR, "report.json");
   await writeFile(reportPath, `${JSON.stringify({ findings }, null, 2)}\n`, "utf8");
   const failures = findings.filter((finding) => !finding.ok);

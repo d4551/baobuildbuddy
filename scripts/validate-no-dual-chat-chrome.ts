@@ -42,8 +42,7 @@ export const collectDualChatChromeViolations = async (): Promise<ValidationViola
     violations.push({
       filePath: layoutPath,
       line: 1,
-      message:
-        "Floating chat must hide on APP_ROUTES.ai (and children) when dock owns AI Chat.",
+      message: "Floating chat must hide on APP_ROUTES.ai (and children) when dock owns AI Chat.",
     });
   }
 

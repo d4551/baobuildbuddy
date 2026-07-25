@@ -10,15 +10,18 @@ const BIOME_PATH = "biome.json";
 const MAX_OFF_SEVERITIES = 5;
 const MAX_LINTER_ENABLED_FALSE = 1;
 
+const OFF_SEVERITY_PATTERN = /:\s*"off"/gu;
+const ENABLED_FALSE_PATTERN = /"enabled"\s*:\s*false/gu;
+const WARN_SEVERITY_PATTERN = /:\s*"warn"/u;
+const INFO_SEVERITY_PATTERN = /:\s*"info"/u;
+
 const countMatches = (content: string, pattern: RegExp): number =>
   (content.match(pattern) ?? []).length;
 
-export const collectBiomeSoftenerRatchetViolations = (
-  content: string,
-): ValidationViolation[] => {
+export const collectBiomeSoftenerRatchetViolations = (content: string): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];
-  const offCount = countMatches(content, /:\s*"off"/gu);
-  const enabledFalseCount = countMatches(content, /"enabled"\s*:\s*false/gu);
+  const offCount = countMatches(content, OFF_SEVERITY_PATTERN);
+  const enabledFalseCount = countMatches(content, ENABLED_FALSE_PATTERN);
   if (offCount > MAX_OFF_SEVERITIES) {
     violations.push({
       filePath: BIOME_PATH,
@@ -33,7 +36,7 @@ export const collectBiomeSoftenerRatchetViolations = (
       message: `biome.json has ${String(enabledFalseCount)} linter.enabled=false (cap ${String(MAX_LINTER_ENABLED_FALSE)}). Shrink only.`,
     });
   }
-  if (/:\s*"warn"/u.test(content) || /:\s*"info"/u.test(content)) {
+  if (WARN_SEVERITY_PATTERN.test(content) || INFO_SEVERITY_PATTERN.test(content)) {
     violations.push({
       filePath: BIOME_PATH,
       line: 1,

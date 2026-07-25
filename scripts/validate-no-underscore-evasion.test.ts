@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { collectUnderscoreEvasionViolationsForContent } from "./validate-no-underscore-evasion";
+
 const NUM_3 = 3;
 
 const SAMPLE_FILE = "packages/client/components/sample.vue";

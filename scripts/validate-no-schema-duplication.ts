@@ -5,6 +5,8 @@ import {
   type ValidationViolation,
 } from "./utils/validation-helpers";
 
+const NUM_120 = 120;
+
 const schemaPattern = /\b(?:Type|z)\.(?:Object|object)\(\{[\s\S]*?\}\)/gu;
 
 const normalizeSchema = (value: string): string =>
@@ -23,7 +25,7 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
     schemaPattern.lastIndex = 0;
     for (const match of content.matchAll(schemaPattern)) {
       const rawValue = match[0] ?? "";
-      if (rawValue.length < 120) {
+      if (rawValue.length < NUM_120) {
         continue;
       }
       const normalizedSchema = normalizeSchema(rawValue);

@@ -7,8 +7,7 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 
 const DESKTOP_MAIN = "packages/desktop/src-tauri/src/main.rs";
 const HARDCODED_DISABLE_AUTH = /\.env\(\s*"BAO_DISABLE_AUTH"\s*,\s*"true"\s*\)/u;
-const UNSAFE_INLINE_SCRIPT =
-  /script-src[^;]*'unsafe-inline'/u;
+const UNSAFE_INLINE_SCRIPT = /script-src[^;]*'unsafe-inline'/u;
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const violations: ValidationViolation[] = [];
@@ -24,7 +23,8 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
 
   const mainContent = await mainFile.text();
   if (HARDCODED_DISABLE_AUTH.test(mainContent)) {
-    const line = mainContent.split("\n").findIndex((entry) => HARDCODED_DISABLE_AUTH.test(entry)) + 1;
+    const line =
+      mainContent.split("\n").findIndex((entry) => HARDCODED_DISABLE_AUTH.test(entry)) + 1;
     violations.push({
       filePath: DESKTOP_MAIN,
       line: Math.max(line, 1),
@@ -59,4 +59,3 @@ if (import.meta.main) {
 }
 
 export { collectViolations };
-
