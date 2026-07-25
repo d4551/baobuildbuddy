@@ -2,7 +2,9 @@
 const CONTENT_SECTION_SPLIT = /\n{2,}/u;
 
 import {
+  COVER_LETTER_COMPANY_MIN_LENGTH,
   COVER_LETTER_DEFAULT_TEMPLATE,
+  COVER_LETTER_POSITION_MIN_LENGTH,
   type CoverLetterTemplate,
   isCoverLetterTemplate,
 } from "@bao/shared/constants/cover-letter";
