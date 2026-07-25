@@ -51,6 +51,44 @@ const RELEASE_WORKSPACE_ROOT = (() => {
 
 const REPLACE_RELEASE_TREE_FLAG = "--replace-release-tree";
 const SKIP_VERIFY_FLAG = "--skip-verify";
+const LINUX_APPIMAGE_FLAG = "--include-linux-appimage";
+const LINUX_SIGNING_FLAG = "--include-linux-signatures";
+const WINDOWS_MSI_FLAG = "--include-windows-msi";
+const MACOS_ARCH_FLAG = "--macos-architectures";
+const RELEASE_FLAG = "--release";
+
+/**
+ * Profile flags accepted by `build-desktop-release.ts` and `verify-desktop-release-artifacts.ts`.
+ * The refresh step copies staged artifacts verbatim, so it does not interpret these flags itself,
+ * but it must forward them to the verifier so the verifier's expected artifact set matches what
+ * was staged (e.g. an AppImage on linux-x64, or a Windows MSI).
+ */
+const PROFILE_VALUE_FLAGS = new Set([MACOS_ARCH_FLAG]);
+const PROFILE_BOOLEAN_FLAGS = new Set([
+  LINUX_APPIMAGE_FLAG,
+  LINUX_SIGNING_FLAG,
+  WINDOWS_MSI_FLAG,
+  RELEASE_FLAG,
+]);
+
+const collectVerifierProfileArgs = (argv: readonly string[]): readonly string[] => {
+  const forwarded: string[] = [];
+  for (let index = 0; index < argv.length; index += 1) {
+    const argument = argv[index];
+    if (PROFILE_BOOLEAN_FLAGS.has(argument)) {
+      forwarded.push(argument);
+      continue;
+    }
+    if (PROFILE_VALUE_FLAGS.has(argument)) {
+      const value = argv[index + 1];
+      if (typeof value === "string" && value.length > 0) {
+        forwarded.push(argument, value);
+        index += 1;
+      }
+    }
+  }
+  return forwarded;
+};
 
 const DESKTOP_RELEASE_ROOT = join(RELEASE_WORKSPACE_ROOT, "packages", "desktop", "releases");
 const DESKTOP_RELEASE_ASSEMBLED_PROVENANCE_PATH = join(
@@ -121,9 +159,32 @@ const pathExists = async (absolutePath: string): Promise<boolean> =>
     () => false,
   );
 
+const GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
+const GIT_LFS_OID_PATTERN = /^oid sha256:([a-f0-9]{64})$/mu;
+/** LFS pointer files are always a few hundred bytes; only probe small files to avoid reading gigabyte binaries into memory. */
+const GIT_LFS_POINTER_PROBE_MAX_BYTES = 1024;
+
+/**
+ * Computes the SHA-256 of a release artifact's real content. When the working-tree file is a
+ * Git LFS pointer (e.g. other canonical targets whose binaries were not `git lfs pull`-ed on this
+ * host), returns the pointer's `oid sha256:<hash>` value, which is the hash of the actual binary
+ * content users download. This keeps `sha256.txt` correct for every canonical target whether or
+ * not LFS objects are present locally, matching the canonical CI assemble flow where all binaries
+ * are real on disk.
+ */
 const computeSha256 = async (absolutePath: string): Promise<string> => {
-  const hasher = createHash("sha256");
   const file = Bun.file(absolutePath);
+  const fileSize = file.size;
+  if (fileSize > 0 && fileSize < GIT_LFS_POINTER_PROBE_MAX_BYTES) {
+    const text = await file.text();
+    if (text.trimStart().startsWith(GIT_LFS_POINTER_PREFIX)) {
+      const oidMatch = text.match(GIT_LFS_OID_PATTERN);
+      if (oidMatch?.[1]) {
+        return oidMatch[1];
+      }
+    }
+  }
+  const hasher = createHash("sha256");
   hasher.update(Buffer.from(await file.arrayBuffer()));
   return hasher.digest("hex");
 };
@@ -336,7 +397,10 @@ const writeChecksumManifest = async (): Promise<void> => {
   await writeFile(DESKTOP_RELEASE_CHECKSUM_PATH, `${sortedEntries.join("\n")}\n`);
 };
 
-const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<void> => {
+const runVerifier = async (
+  targets: readonly DesktopReleaseTarget[],
+  profileArgs: readonly string[],
+): Promise<void> => {
   const verifierExitCode = await Bun.spawn(
     [
       process.execPath,
@@ -344,6 +408,7 @@ const runVerifier = async (targets: readonly DesktopReleaseTarget[]): Promise<vo
       "scripts/verify-desktop-release-artifacts.ts",
       "--targets",
       targets.join(","),
+      ...profileArgs,
     ],
     {
       cwd: MONOREPO_ROOT,
@@ -469,7 +534,7 @@ const main = async (): Promise<void> => {
       : `desktop-release:refreshed ${targets.join(", ")} from ${config.sourceRoot} into ${DESKTOP_RELEASE_ROOT} (other canonical targets preserved; pass ${REPLACE_RELEASE_TREE_FLAG} to prune them)`,
   );
   if (!config.skipVerify) {
-    await runVerifier(targets);
+    await runVerifier(targets, collectVerifierProfileArgs(config.argv));
   }
   await writeOutput("desktop-release:refresh complete");
 };
