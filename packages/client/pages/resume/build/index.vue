@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { RESUME_BUILD_PROGRESS } from "~/constants/numeric-ui";
-import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
+import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, SECONDARY_ACTION_CLASS } from "~/constants/layout";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
@@ -185,7 +185,17 @@ function backToTarget() {
       title-id="resume-build-title"
       :title="t('resumeBuildPage.title')"
       :description="t('resumeBuildPage.subtitle')"
-    />
+    >
+      <template #actions>
+        <NuxtLink
+          :to="APP_ROUTES.resume"
+          :class="[SECONDARY_ACTION_CLASS]"
+          :aria-label="t('resumeBuildPage.target.backToResumesAria')"
+        >
+          {{ t("resumeBuildPage.target.backToResumesButton") }}
+        </NuxtLink>
+      </template>
+    </PageHeaderBlock>
 
     <progress
       class="progress progress-primary" :class="[FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS.mb8]"

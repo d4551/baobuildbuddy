@@ -235,6 +235,7 @@ export const PRINT_PADDING_RESET_CLASS = tokens.PRINT_PADDING_RESET_CLASS;
 export const MAX_W_2XL_CLASS = tokens.MAX_W_2XL_CLASS;
 export const MAX_W_3XL_CLASS = tokens.MAX_W_3XL_CLASS;
 export const MAX_W_40_CLASS = tokens.MAX_W_40_CLASS;
+export const MAX_W_48_CLASS = tokens.MAX_W_48_CLASS;
 export const MAX_W_64_CLASS = tokens.MAX_W_64_CLASS;
 export const MAX_W_XS_CLASS = tokens.MAX_W_XS_CLASS;
 export const STATS_SHELL_VARIANT_CLASS = tokens.STATS_SHELL_VARIANT_CLASS;

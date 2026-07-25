@@ -8,6 +8,8 @@ const gamificationPage = {
     loadErrorFallback: "Failed to load gamification data",
     retryButtonLabel: "Retry",
     retryAria: "Retry loading gamification data",
+    refreshButtonLabel: "Refresh",
+    refreshAria: "Refresh gamification data",
     emptyStateTitle: "No progression data yet",
     emptyStateDescription:
       "Complete setup tasks, start interview practice, and take daily challenges to begin earning XP and unlocking achievements.",

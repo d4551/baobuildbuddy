@@ -8,6 +8,7 @@ import { usePortfolioPageActions } from "~/composables/portfolio-page-actions";
 import { usePortfolioPageDerived } from "~/composables/portfolio-page-derived";
 import {
   PORTFOLIO_PROJECT_DIALOG_TITLE_ID,
+  normalizePortfolioProject,
   usePortfolioPageState,
 } from "~/composables/portfolio-page-state";
 
@@ -39,7 +40,7 @@ export function usePortfolioPage() {
     if (typeof projectId === "string" && projectId.length > 0) {
       const match = portfolioApi.projects.value.find((project) => project.id === projectId);
       if (match) {
-        state.openEditModal(match);
+        state.openEditModal(normalizePortfolioProject(match));
       }
     }
   }
