@@ -70,7 +70,7 @@ Binding detail: see **BINDING: product SSOT** above. Consumers import constants;
 | Empty state | `packages/client/components/ui/EmptyState.vue` |
 | Loading skeleton | `packages/client/components/ui/LoadingSkeleton.vue` |
 | Toasts | `packages/client/components/ui/ToastContainer.vue` |
-| Bootstrap / API error + retry | `packages/client/components/BootstrapErrorAlert.vue` (and similar patterns per feature) |
+| Bootstrap / API error + retry | `packages/client/components/ui/BootstrapErrorAlert.vue` |
 
 ## Verification (local)
 

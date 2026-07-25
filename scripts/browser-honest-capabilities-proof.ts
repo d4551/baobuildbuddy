@@ -16,8 +16,8 @@ const NUM_8 = 8;
  * - Job-board scrape via UI (real network + Playwright scrapers)
  * - Browser TTS via speechSynthesis (real synthesis engine)
  *
- * AI chat/completions: Ollama SEGV on this host; cloud keys empty → reported BLOCKED in report.
- * STT: no microphone device → reported BLOCKED in report.
+ * AI chat/completions: Ollama/cloud may be unavailable → reported FAIL with reason (not soft skip).
+ * STT: probes local Whisper health (product SSOT) — FAIL if server down; mic theater banned.
  */
 import { mkdir, stat } from "node:fs/promises";
 import { join } from "node:path";
@@ -170,6 +170,29 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   return empty === 0 && titles.length > 0;
 };
 
+const WHISPER_BASE = (process.env.WHISPER_OPENAI_BASE ?? "http://127.0.0.1:8090").replace(
+  /\/$/u,
+  "",
+);
+
+const probeLocalWhisperStt = async (): Promise<{
+  status: "OK" | "FAIL";
+  reason: string;
+}> => {
+  const health = await settle(fetch(`${WHISPER_BASE}/health`));
+  if (health.status === "rejected" || !health.value.ok) {
+    return {
+      status: "FAIL",
+      reason: `Whisper not healthy at ${WHISPER_BASE} — run bun run speech:whisper:serve`,
+    };
+  }
+  const body = (await health.value.json()) as { status?: string; model?: string };
+  return {
+    status: "OK",
+    reason: `Whisper healthy model=${body.model ?? "unknown"}`,
+  };
+};
+
 const proveBrowserTts = async (page: Page): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.interview}`, {
     waitUntil: "domcontentloaded",
@@ -228,6 +251,7 @@ const main = async (): Promise<void> => {
   const pdfPath = await exportResumePdf(page);
   const scrapeOk = await enablePortalAndScrape(page);
   const ttsOk = await proveBrowserTts(page);
+  const sttProbe = await probeLocalWhisperStt();
 
   const video = page.video();
   await context.close();
@@ -245,18 +269,11 @@ const main = async (): Promise<void> => {
     headless: false,
     display: process.env.DISPLAY ?? null,
     ai: {
-      status: "BLOCKED",
+      status: "FAIL",
       reason:
-        "Ollama llama-server SEGV on this host (qwen2.5:0.5b); GEMINI/OPENAI/CLAUDE/HUGGINGFACE keys empty in .env",
-      evidence: [
-        "/opt/cursor/artifacts/baseline/ollama-chat2.txt",
-        "/opt/cursor/artifacts/baseline/ollama-generate-api.txt",
-      ],
+        "Local/cloud AI not probed in this script — use proof:ollama-live / Settings AI providers",
     },
-    stt: {
-      status: "BLOCKED",
-      reason: "No microphone device / permission in this cloud agent environment for real STT",
-    },
+    stt: sttProbe,
     pdf: {
       status: pdfPath && pdfStat && pdfStat.size > NUM_1000 ? "OK" : "FAIL",
       path: pdfPath,
@@ -269,7 +286,12 @@ const main = async (): Promise<void> => {
   await Bun.write(join(OUT, "honest-report.json"), JSON.stringify(report, null, 2));
   await writeOutput(JSON.stringify(report, null, 2));
 
-  if (report.pdf.status !== "OK" || report.scrape.status !== "OK" || report.tts.status !== "OK") {
+  if (
+    report.pdf.status !== "OK" ||
+    report.scrape.status !== "OK" ||
+    report.tts.status !== "OK" ||
+    report.stt.status !== "OK"
+  ) {
     process.exitCode = 1;
   }
 };

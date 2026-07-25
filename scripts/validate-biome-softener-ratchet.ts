@@ -7,8 +7,8 @@ import { reportViolations, type ValidationViolation } from "./utils/validation-h
 
 const BIOME_PATH = "biome.json";
 /** Shrink-only ceilings — lower when offs are removed; never raise. */
-const MAX_OFF_SEVERITIES = 5;
-const MAX_LINTER_ENABLED_FALSE = 1;
+const MAX_OFF_SEVERITIES = 0;
+const MAX_LINTER_ENABLED_FALSE = 0;
 
 const OFF_SEVERITY_PATTERN = /:\s*"off"/gu;
 const ENABLED_FALSE_PATTERN = /"enabled"\s*:\s*false/gu;

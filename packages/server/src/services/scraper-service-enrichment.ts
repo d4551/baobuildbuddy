@@ -154,7 +154,7 @@ export const buildFallbackStudioEnrichment = (
   ),
   hiringSignals: compactList([
     studioRow.location ? `Studio location is ${studioRow.location}.` : undefined,
-    studioRow.size && studioRow.size.length > 0
+    (studioRow.size?.trim() ?? "").length > 0
       ? `Team size is described as ${studioRow.size}.`
       : undefined,
     studioRow.type ? `Studio type is listed as ${studioRow.type}.` : undefined,
