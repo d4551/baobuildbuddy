@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import {
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_MUTED_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -25,6 +26,7 @@ import {
   isAutomationHubSectionId,
 } from "~/components/automation/hub-sections";
 import { getErrorMessage } from "~/utils/errors";
+import { resolveRouteSectionId } from "~/utils/route-query";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -68,19 +70,13 @@ const {
   uiState: page.uiState,
 };
 
-const routeSection = computed<AutomationHubSectionId>(() => {
-  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
-  const candidateSection =
-    typeof sectionQueryValue === "string"
-      ? sectionQueryValue
-      : Array.isArray(sectionQueryValue)
-        ? sectionQueryValue[0]
-        : null;
-
-  return candidateSection && isAutomationHubSectionId(candidateSection)
-    ? candidateSection
-    : AUTOMATION_HUB_DEFAULT_SECTION_ID;
-});
+const routeSection = computed<AutomationHubSectionId>(() =>
+  resolveRouteSectionId(
+    route.query[APP_ROUTE_QUERY_KEYS.section],
+    isAutomationHubSectionId,
+    AUTOMATION_HUB_DEFAULT_SECTION_ID,
+  ),
+);
 
 const activeSection = ref<AutomationHubSectionId>(routeSection.value);
 
@@ -177,7 +173,7 @@ useSeoMeta({
                     {{ t("automation.hub.nextAction.description") }}
                   </p>
                 </div>
-                <div class="rounded-box border border-base-300 bg-base-200" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p4]">
+ <div :class="[INSET_PANEL_MUTED_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, PADDING_TOKEN_CLASS.p4]">
                   <p class="font-medium text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                     {{ nextPipelineStepLabel }}
                   </p>

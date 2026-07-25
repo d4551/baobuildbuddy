@@ -3,16 +3,17 @@ import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
-  MIN_H_36_CLASS,
   MIN_HEIGHT_SCROLL_CLASS,
+  MIN_H_36_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -237,7 +238,7 @@ useSeoMeta({
         <div class="card-actions justify-end">
           <NuxtLink
             :to="APP_ROUTE_BUILDERS.automationRunDetail(scheduledRun.id)"
-            class="btn btn-ghost"
+            :class="GHOST_ACTION_CLASS"
             :aria-label="t('automation.email.openRunDetailAria', { id: scheduledRun.id })"
           >
             {{ t("automation.email.openRunDetailButton") }}
@@ -281,7 +282,7 @@ useSeoMeta({
         <div class="card-actions justify-end">
           <NuxtLink
             :to="APP_ROUTE_BUILDERS.automationRunDetail(lastResult.runId)"
-            class="btn btn-ghost"
+            :class="GHOST_ACTION_CLASS"
             :aria-label="t('automation.email.openRunDetailAria', { id: lastResult.runId })"
           >
             {{ t("automation.email.openRunDetailButton") }}

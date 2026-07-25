@@ -1018,9 +1018,9 @@ const catalog = {
         local: "ローカル",
         custom: "カスタム",
       },
+      onDeviceHint: "ブラウザ（オンデバイス）は端末の Web Speech API を使います。音声は端末外に出ません。",
     },
   },
-      onDeviceHint: "ブラウザ（オンデバイス）は端末の Web Speech API を使います。音声は端末外に出ません。",
   aiChatCommon: {
     timeAt: "{time} の時刻",
     voice: {

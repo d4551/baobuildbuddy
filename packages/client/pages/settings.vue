@@ -18,6 +18,7 @@ import { useSettings } from "~/composables/useSettings";
 import { useSettingsPage } from "~/composables/useSettingsPage";
 import { PRIMARY_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
+import { resolveRouteSectionId } from "~/utils/route-query";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -89,19 +90,13 @@ const {
   handleClearEmailDeliveryPassword,
 } = useSettingsPage();
 
-const routeSection = computed<SettingsSectionId>(() => {
-  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
-  const candidateSection =
-    typeof sectionQueryValue === "string"
-      ? sectionQueryValue
-      : Array.isArray(sectionQueryValue)
-        ? sectionQueryValue[0]
-        : null;
-
-  return candidateSection && isSettingsSectionId(candidateSection)
-    ? candidateSection
-    : SETTINGS_DEFAULT_SECTION_ID;
-});
+const routeSection = computed<SettingsSectionId>(() =>
+  resolveRouteSectionId(
+    route.query[APP_ROUTE_QUERY_KEYS.section],
+    isSettingsSectionId,
+    SETTINGS_DEFAULT_SECTION_ID,
+  ),
+);
 const activeSection = ref<SettingsSectionId>(routeSection.value);
 
 watch(

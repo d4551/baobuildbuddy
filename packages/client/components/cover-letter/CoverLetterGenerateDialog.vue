@@ -6,10 +6,11 @@ import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -134,7 +135,7 @@ defineEmits<{
 
     <div class="modal-action">
       <button 
-        class="btn btn-ghost"
+        :class="GHOST_ACTION_CLASS"
         :aria-label="$t('coverLetterPage.generate.cancelAria')"
         @click="open = false"
       >

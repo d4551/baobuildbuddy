@@ -4,6 +4,8 @@ import type { DailyChallenge } from "@bao/shared/types/gamification";
 import { useI18n } from "vue-i18n";
 import { GAMIFICATION_PROGRESS_MIN } from "~/constants/gamification";
 import {
+  BADGE_PRIMARY_CLASS,
+  BADGE_SUCCESS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -44,8 +46,8 @@ const { t } = useI18n();
             <div class="flex items-center justify-between" :class="[MARGIN_TOKEN_CLASS.mb2]">
               <h3 class="font-semibold">{{ challenge.name }}</h3>
               <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-                <span class="badge badge-primary">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
-                <span v-if="challenge.completed" class="badge badge-success">
+                <span :class="BADGE_PRIMARY_CLASS">+{{ challenge.xpReward }} {{ t("gamificationPage.xpSuffix") }}</span>
+                <span v-if="challenge.completed" :class="BADGE_SUCCESS_CLASS">
                   {{ t("gamificationPage.challengeDoneLabel") }}
                 </span>
               </div>

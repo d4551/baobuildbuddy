@@ -47,7 +47,7 @@ export type FlexGapToken = keyof typeof FLEX_GAP_TOKEN_CLASS;
 export const MARGIN_TOKEN_CLASS = {
   ml1: "ml-1",
   ml2: "ml-2",
-  mr1: "mr-1",
+  mr1: "me-1",
   mr2: "mr-2",
   mt0: "mt-0",
   mtHalf: "mt-0.5",

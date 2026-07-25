@@ -3,9 +3,11 @@ import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import type { ToastType } from "~/composables/useToast";
 import {
+  ALERT_VARIANT_CLASS,
   AUTH_CARD_MAX_WIDTH_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -13,17 +15,16 @@ import {
   TOAST_CONTAINER_DOM_ID,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS
 } from "~/constants/layout";
 
 const { toasts, removeToast } = useToast();
 const { t } = useI18n();
 
 const alertClassByType = {
-  success: "alert-success",
-  error: "alert-error",
-  info: "alert-info",
-  warning: "alert-warning",
+  success: ALERT_VARIANT_CLASS.success,
+  error: ALERT_VARIANT_CLASS.error,
+  info: ALERT_VARIANT_CLASS.info,
+  warning: ALERT_VARIANT_CLASS.warning,
 } satisfies Record<ToastType, string>;
 
 const iconPathByType = {
@@ -77,7 +78,7 @@ function resolveIconPath(type: ToastType): string {
 
         <button 
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-circle btn-sm']"
+          :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS]"
           :aria-label="t('a11y.dismissNotification')"
           @click="removeToast(toast.id)"
         >

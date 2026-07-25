@@ -3,14 +3,21 @@ import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import {
+  BADGE_GHOST_CLASS,
+  BADGE_OUTLINE_CLASS,
+  BADGE_PRIMARY_CLASS,
+  BADGE_SUCCESS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
-  PRIMARY_ACTION_CLASS,
   OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
@@ -48,7 +55,8 @@ function studioLocation(location: string): string {
   >
     <button 
       type="button"
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-circle btn-ghost absolute right-2 top-2']"
+      class="absolute end-2 top-2"
+      :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS]"
       :aria-label="t('studiosIndex.preview.closeButtonAria')"
       @click="$emit('close')"
     >
@@ -64,28 +72,28 @@ function studioLocation(location: string): string {
       </p>
 
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt4]">
-        <span class="badge badge-primary">{{ studioTypeLabel(t, studio.type) }}</span>
-        <span class="badge badge-outline">{{ studioSizeLabel(t, studio.size) }}</span>
-        <span class="badge badge-ghost">{{ studioLocation(studio.location) }}</span>
-        <span v-if="studio.remoteWork" class="badge badge-success">
+        <span :class="BADGE_PRIMARY_CLASS">{{ studioTypeLabel(t, studio.type) }}</span>
+        <span :class="BADGE_OUTLINE_CLASS">{{ studioSizeLabel(t, studio.size) }}</span>
+        <span :class="BADGE_GHOST_CLASS">{{ studioLocation(studio.location) }}</span>
+        <span v-if="studio.remoteWork" :class="BADGE_SUCCESS_CLASS">
           {{ t("studiosIndex.card.remoteBadge") }}
         </span>
       </div>
 
       <SectionGrid :class="[MARGIN_TOKEN_CLASS.mt5]" grid-token="threeColumnMd">
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div :class="[INSET_PANEL_CLASS, 'stat']">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.interviewReadyTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("studiosIndex.preview.stats.interviewReadyValue") }}</div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.interviewReadyDesc") }}</div>
         </div>
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div :class="[INSET_PANEL_CLASS, 'stat']">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.locationTitle") }}</div>
           <div class="stat-value text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studioLocation(studio.location) }}
           </div>
           <div class="stat-desc">{{ t("studiosIndex.preview.stats.locationDesc") }}</div>
         </div>
-        <div class="stat rounded-box border border-base-300 bg-base-100">
+        <div :class="[INSET_PANEL_CLASS, 'stat']">
           <div class="stat-title">{{ t("studiosIndex.preview.stats.remoteTitle") }}</div>
           <div class="stat-value text-accent" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">
             {{ studio.remoteWork ? t("studiosIndex.preview.remoteYes") : t("studiosIndex.preview.remoteNo") }}
@@ -113,7 +121,7 @@ function studioLocation(location: string): string {
         </button>
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="GHOST_ACTION_CLASS"
           :aria-label="t('studiosIndex.preview.closeButtonAria')"
           @click="$emit('close')"
         >

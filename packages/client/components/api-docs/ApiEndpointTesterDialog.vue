@@ -5,10 +5,11 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { EDITOR_MIN_HEIGHT_CLASS } from "~/constants/editor";
 import {
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
-  RADIUS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -209,7 +210,7 @@ function updateRequestBodyValue(value: string): void {
         </button>
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="GHOST_ACTION_CLASS"
           :aria-label="t('apiDocs.tester.closeAria')"
           @click="emit('update:open', false)"
         >

@@ -8,17 +8,18 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 import {
+  BADGE_SOFT_PRIMARY_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -36,7 +37,7 @@ const { t } = useI18n();
   <section :class="[SURFACE_GLASS_CARD_CLASS, 'overflow-hidden', 'glass-card-enter glass-card-enter-0']">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3, PADDING_TOKEN_CLASS.p4]">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-        <div class="badge badge-primary badge-soft w-fit">
+        <div :class="[BADGE_SOFT_PRIMARY_CLASS, 'w-fit']">
           {{ t(DASHBOARD_COPY_KEYS.pipelineTitle) }}
         </div>
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, RESPONSIVE_TEXT_MD_3XL_CLASS]">

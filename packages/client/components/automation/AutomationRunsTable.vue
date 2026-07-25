@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import { APP_ROUTES, APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
+import {
+  BADGE_INFO_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   runs: ReadonlyArray<RpaRunExecutionEnvelope>;
@@ -30,7 +34,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <EmptyState
         v-if="!isLoading && runs.length === 0"
@@ -51,8 +55,7 @@ const { t } = useI18n();
             <li
               v-for="run in runs"
               :key="run.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, resolveRowClass(run), STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div :class="[TRUNCATE_FLEX_CHILD_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
@@ -71,7 +74,7 @@ const { t } = useI18n();
                   <span :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ formatRunStatus(run.status) }}</span>
                   <span
                     v-if="isLiveRun(run)"
-                    class="badge badge-info badge-outline"
+                    :class="[BADGE_INFO_OUTLINE_CLASS]"
                     :aria-label="t('automation.runs.liveBadgeAria')"
                   >
                     {{ t("automation.runs.liveBadge") }}
@@ -112,7 +115,7 @@ const { t } = useI18n();
                 <th scope="col">{{ t("automation.runs.columns.id") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.type") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.status") }}</th>
-                <th scope="col" class="text-right">{{ t("automation.runs.columns.progress") }}</th>
+                <th scope="col" class="text-end">{{ t("automation.runs.columns.progress") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.job") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.updated") }}</th>
                 <th scope="col">{{ t("automation.runs.columns.actions") }}</th>
@@ -127,21 +130,20 @@ const { t } = useI18n();
                     <span>{{ formatRunStatus(run.status) }}</span>
                     <span
                       v-if="isLiveRun(run)"
-                      class="badge badge-info badge-outline"
+                      :class="[BADGE_INFO_OUTLINE_CLASS]"
                       :aria-label="t('automation.runs.liveBadgeAria')"
                     >
                       {{ t("automation.runs.liveBadge") }}
                     </span>
                   </div>
                 </td>
-                <td class="text-right">{{ formatRunProgress(run) }}</td>
+                <td class="text-end">{{ formatRunProgress(run) }}</td>
                 <td>{{ run.jobId || t("automation.runs.emptyJobId") }}</td>
                 <td>{{ formatDate(run.updatedAt) }}</td>
                 <td>
                   <NuxtLink
                     :to="APP_ROUTE_BUILDERS.automationRunDetail(run.id)"
-                    class="btn btn-ghost"
-                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('automation.runs.openRunDetailAria', { id: run.id })"
                   >
                     {{ t("automation.runs.openButton") }}
@@ -153,5 +155,5 @@ const { t } = useI18n();
         </template>
       </ResponsiveDataSurface>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

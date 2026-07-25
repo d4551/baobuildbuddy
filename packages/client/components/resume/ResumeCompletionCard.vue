@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
+  BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   ResumeCompletionQuickAction,
@@ -38,7 +40,7 @@ const { t } = useI18n();
     <div class="card-body" :class="[PADDING_TOKEN_CLASS.py4]">
       <div class="flex flex-wrap items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <h3 class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.completion.title") }}</h3>
-        <span class="badge badge-primary badge-outline">
+        <span :class="BADGE_PRIMARY_OUTLINE_CLASS">
           {{ t("resumePage.completion.percentLabel", { percent: completionPercent }) }}
         </span>
       </div>
@@ -60,11 +62,11 @@ const { t } = useI18n();
         <button 
           v-for="section in sections"
           :key="section.id"
-          class="badge badge-sm cursor-pointer"
-          :class="section.completed ? 'badge-success' : 'badge-ghost'"
-          :aria-label="t('resumePage.completion.jumpAria', { section: tabLabel(section.id) })"
-          @click="emit('selectTab', section.id)"
-        >
+ class="cursor-pointer"
+ :class="[BADGE_SM_CLASS, section.completed ? 'badge-success' : 'badge-ghost']"
+ :aria-label="t('resumePage.completion.jumpAria', { section: tabLabel(section.id) })"
+ @click="emit('selectTab', section.id)"
+ >
           {{ tabLabel(section.id) }}
         </button>
       </div>

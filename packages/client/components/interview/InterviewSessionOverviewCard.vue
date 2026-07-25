@@ -3,6 +3,7 @@ import type { InterviewSession, InterviewTargetJob } from "@bao/shared/types/int
 import { useI18n } from "vue-i18n";
 import PageHeaderBlock from "~/components/ui/PageHeaderBlock.vue";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
@@ -69,7 +70,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         heading-tag="h2"
       >
         <template #actions>
-          <div class="badge badge-outline badge-primary" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+ <div :class="[BADGE_PRIMARY_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
             {{ sessionProgressLabel }}
           </div>
         </template>

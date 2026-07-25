@@ -2,13 +2,11 @@
 import AppBlockEditor from "~/components/ui/AppBlockEditor.vue";
 import AppEditorChrome from "~/components/ui/AppEditorChrome.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
-import {
-  EDITOR_HOST_CLASS,
-  EDITOR_WRITING_MIN_HEIGHT_CLASS,
-} from "~/constants/editor";
+import { EDITOR_HOST_CLASS, EDITOR_WRITING_MIN_HEIGHT_CLASS } from "~/constants/editor";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -125,7 +123,7 @@ function onTextareaInput(event: Event): void {
         </span>
         <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <button
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost']"
+            :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
             :aria-label="t('coverLetterDetailPage.editor.clearAria')"
             @click="emit('clear')"
           >

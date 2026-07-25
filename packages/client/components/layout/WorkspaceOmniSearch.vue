@@ -3,8 +3,11 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { settle } from "@bao/shared/utils/promise";
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_SOFT_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -92,13 +95,13 @@ function typeLabel(type: string): string {
   <div>
     <button
       type="button"
-      class="btn btn-ghost btn-circle"
-      :class="[TOUCH_TARGET_MIN_CLASS]"
-      :aria-label="t('workspaceSearch.openButtonAria')"
-      :aria-expanded="open"
-      :aria-controls="WORKSPACE_SEARCH_DIALOG_TITLE_ID"
-      @click="open = true"
-    >
+ 
+ :class="[GHOST_ACTION_CIRCLE_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="t('workspaceSearch.openButtonAria')"
+ :aria-expanded="open"
+ :aria-controls="WORKSPACE_SEARCH_DIALOG_TITLE_ID"
+ @click="open = true"
+ >
       <IconSearch :class="ICON_SIZE_CLASS.sm" />
     </button>
 
@@ -150,12 +153,12 @@ function typeLabel(type: string): string {
           <li v-for="suggestion in suggestions" :key="`${suggestion.type}-${suggestion.text}`">
             <button
               type="button"
-              class="btn btn-ghost justify-start text-left"
-              :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
-              :aria-label="t('workspaceSearch.suggestionAria', { text: suggestion.text })"
-              @click="applySuggestion(suggestion)"
-            >
-              <span class="badge badge-soft badge-sm shrink-0">{{ typeLabel(suggestion.type) }}</span>
+ class="justify-start text-start"
+ :class="[GHOST_ACTION_CLASS, FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="t('workspaceSearch.suggestionAria', { text: suggestion.text })"
+ @click="applySuggestion(suggestion)"
+ >
+              <span :class="[BADGE_SOFT_SM_CLASS, 'shrink-0']">{{ typeLabel(suggestion.type) }}</span>
               <span class="truncate" :class="[TRUNCATE_FLEX_CHILD_CLASS]">{{ suggestion.text }}</span>
             </button>
           </li>
@@ -191,12 +194,12 @@ function typeLabel(type: string): string {
           <li v-for="result in results" :key="`${result.type}-${result.id}`">
             <button
               type="button"
-              class="btn btn-ghost justify-start text-left"
-              :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
-              :aria-label="t('workspaceSearch.resultAria', { title: result.title })"
-              @click="openResult(result)"
-            >
-              <span class="badge badge-soft badge-sm shrink-0">{{ typeLabel(result.type) }}</span>
+ class="justify-start text-start"
+ :class="[GHOST_ACTION_CLASS, FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="t('workspaceSearch.resultAria', { title: result.title })"
+ @click="openResult(result)"
+ >
+              <span :class="[BADGE_SOFT_SM_CLASS, 'shrink-0']">{{ typeLabel(result.type) }}</span>
               <span class="flex-1 truncate" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
                 <span class="font-medium">{{ result.title }}</span>
                 <span v-if="result.subtitle" class="text-secondary block truncate" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">

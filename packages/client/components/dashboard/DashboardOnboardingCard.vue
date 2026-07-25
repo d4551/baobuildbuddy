@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_PADDING_LG_P8_CLASS,
-} from "~/constants/ui-layout";
+import { RESPONSIVE_PADDING_LG_P8_CLASS } from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
 import { DASHBOARD_ONBOARDING_STEPS } from "~/constants/dashboard-core";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
@@ -16,7 +16,6 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -33,7 +32,7 @@ const { t } = useI18n();
       <div :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS]">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap5, PADDING_TOKEN_CLASS.p6, RESPONSIVE_PADDING_LG_P8_CLASS]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-            <div class="badge badge-primary badge-outline w-fit">
+            <div :class="[BADGE_PRIMARY_OUTLINE_CLASS, 'w-fit']">
               {{ t(DASHBOARD_COPY_KEYS.pageTitle) }}
             </div>
             <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">

@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import type { AutomationHubCard } from "~/composables/automation-hub-page-contracts";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   ICON_SIZE_CLASS,
@@ -38,7 +39,7 @@ const { t } = useI18n();
             </span>
             <h2 class="card-title">{{ t(card.titleKey) }}</h2>
           </div>
-          <span v-if="primaryCardId === card.id" class="badge badge-primary badge-outline">
+          <span v-if="primaryCardId === card.id" :class="BADGE_PRIMARY_OUTLINE_CLASS">
             {{ t("automation.hub.pipelineTitle") }}
           </span>
         </div>

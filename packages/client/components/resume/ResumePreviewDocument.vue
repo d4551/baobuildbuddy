@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -11,6 +12,9 @@ import {
   SHADOW_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_OUTLINE_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   resume: ResumeData;
@@ -23,8 +27,7 @@ const { t } = useI18n();
 
 <template>
   <div
-    class="mx-auto max-w-4xl rounded-box border border-base-300 bg-base-100 text-base-content print:rounded-none print:border-0"
-    :class="[PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
+    class="mx-auto max-w-4xl text-base-content print:rounded-none print:border-0" :class="[INSET_PANEL_CLASS, PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
   >
     <div class="border-b-2 border-base-content/30 text-center" :class="[MARGIN_TOKEN_CLASS.mb8, PADDING_TOKEN_CLASS.pb4]">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
@@ -87,7 +90,7 @@ const { t } = useI18n();
             <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ experience.title }}</h3>
             <p class="text-base font-semibold">{{ experience.company }}</p>
           </div>
-          <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+          <div class="text-end" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             <p>{{ experience.startDate }} - {{ experience.endDate || t("resumePreview.present") }}</p>
             <p v-if="experience.location">{{ experience.location }}</p>
           </div>
@@ -115,7 +118,7 @@ const { t } = useI18n();
             <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ education.degree }}</h3>
             <p class="text-base">{{ education.school }}</p>
           </div>
-          <div class="text-right" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+          <div class="text-end" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             <p>{{ education.year }}</p>
             <p v-if="education.gpa">{{ t("resumePreview.gpaLabel", { gpa: education.gpa }) }}</p>
           </div>
@@ -131,7 +134,7 @@ const { t } = useI18n();
         :class="[MARGIN_TOKEN_CLASS.mb3]"
       />
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" class="badge badge-outline" :class="[PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
+        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" :class="[BADGE_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ skill }}
         </span>
       </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { CareerPathway } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -8,9 +8,12 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_SM_CLASS,
+  BADGE_XS_CLASS,
+} from "~/constants/layout-badges";
 
 defineProps<{
   pathways: readonly CareerPathway[];
@@ -24,23 +27,19 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title">{{ t("skillsPathwaysPage.pathways.title") }}</h2>
 
       <SectionGrid grid-token="threeColumn">
-        <article 
-          v-for="pathway in pathways"
-          :key="pathway.id"
-          :class="SURFACE_GLASS_CARD_CLASS"
-        >
+        <UiGlassCard v-for="pathway in pathways" :key="pathway.id">
           <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
             <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
               <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span :class="[TYPOGRAPHY_SCALE_CLASS.xl2]" aria-hidden="true">{{ getPathwayIcon(pathway.id) }}</span>
                 <h3 class="card-title text-base">{{ pathway.title }}</h3>
               </div>
-              <span class="badge badge-sm" :class="getReadinessBadgeColor(pathway.matchScore)">
+              <span :class="[BADGE_SM_CLASS, getReadinessBadgeColor(pathway.matchScore)]">
                 {{ pathway.matchScore }}%
               </span>
             </div>
@@ -53,7 +52,7 @@ const { t } = useI18n();
             <div>
               <p class="font-semibold" :class="[MARGIN_TOKEN_CLASS.mb1, TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPathwaysPage.pathways.requiredSkillsTitle") }}</p>
               <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
-                <span v-for="skill in pathway.requiredSkills" :key="skill" class="badge badge-xs">
+                <span v-for="skill in pathway.requiredSkills" :key="skill" :class="[BADGE_XS_CLASS]">
                   {{ skill }}
                 </span>
               </div>
@@ -83,7 +82,7 @@ const { t } = useI18n();
               </span>
             </p>
           </div>
-        </article>
+        </UiGlassCard>
       </SectionGrid>
 
       <EmptyState
@@ -94,5 +93,5 @@ const { t } = useI18n();
         :cta-to="APP_ROUTES.skills"
       />
     </div>
-  </section>
+  </UiGlassCard>
 </template>

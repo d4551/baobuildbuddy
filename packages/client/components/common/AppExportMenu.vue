@@ -2,6 +2,7 @@
 import { useI18n } from "vue-i18n";
 import {
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -251,7 +252,7 @@ function emitExport(format: ExportFormat): void {
       {{ props.buttonLabel }}
     </button>
 
-    <ul class="menu dropdown-content z-20 rounded-box border border-base-300 bg-base-100" v-show="isOpen" :id="exportMenuId" :class="[MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]" role="menu" aria-orientation="vertical" :aria-labelledby="exportTriggerId" :aria-label="props.buttonAriaLabel" @focusout="handleMenuFocusOut">
+ <ul class="menu dropdown-content z-20" v-show="isOpen" :id="exportMenuId" :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, SHADOW_TOKEN_CLASS.lg, WIDTH_TOKEN_CLASS.w40, PADDING_TOKEN_CLASS.p2]" role="menu" aria-orientation="vertical" :aria-labelledby="exportTriggerId" :aria-label="props.buttonAriaLabel" @focusout="handleMenuFocusOut">
       <li v-for="(format, index) in exportFormats" :key="format" role="none">
         <button
           :id="`${exportMenuId}-${format}`"

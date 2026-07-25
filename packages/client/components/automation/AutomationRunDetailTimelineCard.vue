@@ -3,7 +3,9 @@ import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import type { TimelineEntry } from "~/composables/automation-run-detail-page-contracts";
 import {
+  BADGE_OUTLINE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -39,9 +41,9 @@ const { t } = useI18n();
             <li
               v-for="entry in timelineEntries"
               :key="entry.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
-            >
+ 
+ :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+ >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div>
                   <p class="font-semibold">{{ entry.stage }}</p>
@@ -49,7 +51,7 @@ const { t } = useI18n();
                     {{ toLocalizedDateTime(entry.timestamp) }}
                   </p>
                 </div>
-                <span class="badge badge-sm badge-outline">
+                <span :class="BADGE_OUTLINE_SM_CLASS">
                   {{ t(`automation.runs.statusOptions.${entry.status}`) }}
                 </span>
               </div>

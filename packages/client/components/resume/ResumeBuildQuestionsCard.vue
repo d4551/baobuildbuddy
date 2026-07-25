@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -37,7 +39,7 @@ const emit = defineEmits<{
           }}
         </h2>
         <button 
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
           :aria-label="t('resumeBuildPage.questions.changeTargetAria')"
           @click="emit('changeTarget')"
         >
@@ -70,7 +72,7 @@ const emit = defineEmits<{
 
       <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt6]">
         <button 
-          class="btn btn-ghost"
+          :class="GHOST_ACTION_CLASS"
           :disabled="currentQuestionIndex === 0"
           :aria-label="t('resumeBuildPage.questions.backAria')"
           @click="emit('previous')"

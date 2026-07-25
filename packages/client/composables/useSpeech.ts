@@ -11,7 +11,11 @@ import {
   resolveSpeechRecognitionConstructor,
   resolveSpeechSynthesis,
 } from "../utils/speech";
-import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import {
+  createMicrophoneRecorder,
+  type ServerSttRequestOptions,
+  transcribeAudioViaServer,
+} from "./speech-server-stt";
 import { playBase64Audio, synthesizeSpeechViaServer } from "./speech-server-tts";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import {
@@ -255,7 +259,11 @@ const createStopSpeakingAction = (state: SpeechState) => (): void => {
 };
 
 const createStartListeningAction =
-  (state: SpeechState, getProvider: () => ReturnType<typeof resolveSpeechSttProvider>) => {
+  (
+    state: SpeechState,
+    getProvider: () => ReturnType<typeof resolveSpeechSttProvider>,
+    getServerSttOptions: () => ServerSttRequestOptions,
+  ) => {
     let recorder: MicrophoneRecorder | null = null;
     const startListening = (locale?: string): boolean => {
       state.error.value = null;
@@ -311,7 +319,9 @@ const createStartListeningAction =
                 state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
                 return;
               }
-              const transcriptSettled = await settle(transcribeAudioViaServer(stopSettled.value));
+              const transcriptSettled = await settle(
+                transcribeAudioViaServer(stopSettled.value, getServerSttOptions()),
+              );
               if (transcriptSettled.status === "rejected") {
                 state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
                 return;
@@ -386,12 +396,20 @@ export function useSpeech() {
     resolveSpeechTtsProvider(appSettings.value?.automationSettings?.speech?.tts?.provider);
   const getTtsVoice = () =>
     appSettings.value?.automationSettings?.speech?.tts?.voice?.trim() || "af_heart";
+  const getServerSttOptions = (): ServerSttRequestOptions => {
+    const stt = appSettings.value?.automationSettings?.speech?.stt;
+    return {
+      provider: resolveSpeechSttProvider(stt?.provider),
+      model: stt?.model?.trim() || "",
+      endpoint: stt?.endpoint?.trim() || "",
+    };
+  };
   const state = createSpeechState();
   const loadVoices = createLoadVoicesAction(state);
   setupSpeechApis(state, loadVoices);
 
   const speechSupport = createSpeechSupportState(state, getSttProvider, getTtsProvider);
-  const listeningActions = createStartListeningAction(state, getSttProvider);
+  const listeningActions = createStartListeningAction(state, getSttProvider, getServerSttOptions);
   const actions = {
     speak: createSpeakAction(state, getTtsProvider, getTtsVoice),
     stopSpeaking: createStopSpeakingAction(state),

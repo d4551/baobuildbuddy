@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {
-computed, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type PageAriaResolver = (page: number) => string;
@@ -170,7 +170,7 @@ watch(
           v-for="(page, index) in normalizedPageNumbers"
           :key="page"
           type="button"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': page === currentPage }]"
+          :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': page === currentPage }]"
           :aria-label="pageAria(page)"
           :aria-current="page === currentPage ? 'page' : undefined"
           :tabindex="page === currentPage ? 0 : -1"

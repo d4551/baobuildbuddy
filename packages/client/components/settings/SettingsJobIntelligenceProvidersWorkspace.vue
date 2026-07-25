@@ -4,23 +4,28 @@ import type { SaveState } from "~/components/settings/save-state";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_NEUTRAL_SM_CLASS,
+  BADGE_SM_CLASS,
+} from "~/constants/layout-badges";
 import { countActiveJobProviderSources } from "~/utils/job-provider-source-count";
 import type { JobProviderForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
 
+const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+
 const props = defineProps<{
   providerSaveState: SaveState;
 }>();
-
-const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
 
 const emit = defineEmits<{
   save: [];
@@ -45,7 +50,7 @@ const sourceCollectionCount = computed(
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap6]">
       <SettingsPanelHeader
         :title="t('settings.jobIntelligence.providersTitle')"
@@ -53,17 +58,16 @@ const sourceCollectionCount = computed(
       >
         <template #meta>
           <div class="flex flex-wrap items-center justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-            <span class="badge badge-neutral badge-sm" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
+            <span :class="[BADGE_NEUTRAL_SM_CLASS]" :aria-label="t('settings.jobIntelligence.summarySourcesTitle')">
               {{ configuredSourceCount }}
             </span>
             <span 
               v-if="providerSaveStateLabelKey"
-              class="badge badge-sm"
-              :class="getSaveStateBadgeClass(providerSaveState)"
+              :class="[BADGE_SM_CLASS, getSaveStateBadgeClass(providerSaveState)]"
             >
               {{ t(providerSaveStateLabelKey) }}
             </span>
-            <button
+            <button type="button"
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveProvidersAria')"
               @click="emit('save')"
@@ -78,7 +82,7 @@ const sourceCollectionCount = computed(
         </template>
       </SettingsPanelHeader>
 
-      <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.lg, SHADOW_TOKEN_CLASS.sm]">
         <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("settings.jobIntelligence.summarySourcesTitle") }}</div>
           <div class="stat-value text-primary" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ configuredSourceCount }}</div>
@@ -98,7 +102,7 @@ const sourceCollectionCount = computed(
         </div>
       </div>
 
-      <section :class="SURFACE_GLASS_CARD_CLASS" :aria-label="t('settings.jobIntelligence.defaultsTitle')">
+      <UiGlassCard :aria-label="t('settings.jobIntelligence.defaultsTitle')">
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.defaultsTitle") }}</h3>
@@ -166,7 +170,7 @@ const sourceCollectionCount = computed(
 
             <fieldset class="fieldset">
               <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerEnabledLabel") }}</legend>
-              <label class="flex items-center justify-between rounded-box border border-base-300 bg-base-100" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
+              <label class="flex items-center justify-between" :class="[INSET_PANEL_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
                 <span class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
                   {{ t("settings.jobIntelligence.hitmarkerEnabledHint") }}
                 </span>
@@ -180,7 +184,7 @@ const sourceCollectionCount = computed(
             </fieldset>
           </SectionGrid>
         </div>
-      </section>
+      </UiGlassCard>
 
       <SettingsJobIntelligenceSourcesGrid v-model:job-provider-form="jobProviderForm" />
 
@@ -188,5 +192,5 @@ const sourceCollectionCount = computed(
 
       <SettingsJobIntelligenceCollectionsCard v-model:job-provider-form="jobProviderForm" />
     </div>
-  </div>
+  </UiGlassCard>
 </template>

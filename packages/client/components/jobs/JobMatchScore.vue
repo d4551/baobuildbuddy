@@ -3,14 +3,18 @@ import { useI18n } from "vue-i18n";
 import { useScoreColor } from "~/composables/useScoreColor";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_XS_CLASS,
+  PROGRESS_BAR_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   WIDTH_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_LG_CLASS,
+} from "~/constants/layout-badges";
 
 interface MatchBreakdown {
   skills: number;
@@ -38,7 +42,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
 </script>
 
 <template>
-  <div class="shrink-0 text-right" v-if="compact" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, WIDTH_TOKEN_CLASS.w20]">
+  <div class="shrink-0 text-end" v-if="compact" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, WIDTH_TOKEN_CLASS.w20]">
     <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm, scoreTextClass]">
       {{ score }}%
     </p>
@@ -53,7 +57,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
   <div v-else class="flex flex-col items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
     <div class="text-center" :class="[FLUID_WIDTH_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack3, MAX_W_XS_CLASS]">
       <div class="flex justify-center">
-        <span class="badge badge-lg" :class="scoreBadgeClass">
+        <span :class="[BADGE_LG_CLASS, scoreBadgeClass]">
           {{ score }}%
         </span>
       </div>
@@ -73,7 +77,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.skills }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.skills"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.skillsProgressAria')"
@@ -86,7 +90,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.experience }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.experience"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.experienceProgressAria')"
@@ -99,7 +103,7 @@ const scoreBadgeClass = computed(() => getScoreBadgeClass(props.score));
           <span class="font-medium">{{ breakdown.location }}%</span>
         </div>
         <progress 
-          class="progress progress-success" :class="[FLUID_WIDTH_CLASS]"
+          class="progress" :class="[PROGRESS_BAR_VARIANT_CLASS.success, FLUID_WIDTH_CLASS]"
           :value="breakdown.location"
           max="100"
           :aria-label="t('jobsPage.matchBreakdown.locationProgressAria')"

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   POINTER_EVENTS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -30,16 +33,16 @@ const { t } = useI18n();
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <h2 class="card-title">{{ t("interviewHub.cards.jobPracticeTitle") }}</h2>
-          <span class="badge badge-primary badge-outline">{{ t("interviewHub.cards.recommendedBadge") }}</span>
+          <span :class="BADGE_PRIMARY_OUTLINE_CLASS">{{ t("interviewHub.cards.recommendedBadge") }}</span>
         </div>
         <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ t("interviewHub.cards.jobPracticeDescription") }}
         </p>
         <div
           v-if="selectedJob"
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3, STACK_SPACE_Y_TOKEN_CLASS.stack2]"
-        >
+ 
+ :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3, STACK_SPACE_Y_TOKEN_CLASS.stack2]"
+ >
           <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <div>
               <h3 class="font-semibold">{{ t("interviewHub.cards.selectedJobTitle") }}</h3>
@@ -53,7 +56,7 @@ const { t } = useI18n();
               </div>
             </div>
             <button
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost', POINTER_EVENTS_TOKEN_CLASS.auto]"
+              :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, POINTER_EVENTS_TOKEN_CLASS.auto]"
               :aria-label="t('interviewHub.cards.changeJobAria')"
               @click="emit('openJob')"
             >
@@ -81,9 +84,9 @@ const { t } = useI18n();
         </p>
         <div
           v-if="selectedStudioName"
-          class="rounded-box border border-base-300 bg-base-100"
-          :class="[MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3]"
-        >
+ 
+ :class="[INSET_PANEL_CLASS, MARGIN_TOKEN_CLASS.mt2, PADDING_TOKEN_CLASS.p3]"
+ >
           <span>{{ t("interviewHub.cards.currentStudio", { studio: selectedStudioName }) }}</span>
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">

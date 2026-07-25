@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
@@ -101,21 +102,21 @@ function handleAutoSpeakChange(event: Event): void {
 <template>
   <button
     v-if="props.supportsRecognition"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
-    data-testid="on-device-stt-mic"
-    :title="
-      props.isListening
-        ? t('aiChatCommon.voice.stopTitle')
-        : t('aiChatCommon.voice.startTitle')
-    "
-    :aria-label="
-      props.isListening
-        ? t('aiChatCommon.voice.stopAria')
-        : t('aiChatCommon.voice.startAria')
-    "
-    @click="emit('toggle-listening')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
+ data-testid="on-device-stt-mic"
+ :title="
+ props.isListening
+ ? t('aiChatCommon.voice.stopTitle')
+ : t('aiChatCommon.voice.startTitle')
+ "
+ :aria-label="
+ props.isListening
+ ? t('aiChatCommon.voice.stopAria')
+ : t('aiChatCommon.voice.startAria')
+ "
+ @click="emit('toggle-listening')"
+ >
     <svg
       v-if="props.isListening"
       :class="iconClass"
@@ -145,13 +146,13 @@ function handleAutoSpeakChange(event: Event): void {
   </button>
   <button
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
-    data-testid="on-device-tts-test"
-    :aria-label="t('aiChatCommon.voice.testOnDeviceAria')"
-    :title="t('aiChatCommon.voice.testOnDeviceTitle')"
-    @click="emit('test-on-device-tts')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+ data-testid="on-device-tts-test"
+ :aria-label="t('aiChatCommon.voice.testOnDeviceAria')"
+ :title="t('aiChatCommon.voice.testOnDeviceTitle')"
+ @click="emit('test-on-device-tts')"
+ >
     <svg
       :class="iconClass"
       fill="none"
@@ -171,14 +172,14 @@ function handleAutoSpeakChange(event: Event): void {
   </button>
   <button
     v-if="props.supportsSynthesis"
-    class="btn btn-ghost"
-    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
-    data-testid="on-device-tts-replay"
-    :aria-label="t('aiChatCommon.voice.replayAria')"
-    :title="t('aiChatCommon.voice.replayTitle')"
-    :disabled="!props.canReplayAssistant || props.loading"
-    @click="emit('replay-assistant')"
-  >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+ data-testid="on-device-tts-replay"
+ :aria-label="t('aiChatCommon.voice.replayAria')"
+ :title="t('aiChatCommon.voice.replayTitle')"
+ :disabled="!props.canReplayAssistant || props.loading"
+ @click="emit('replay-assistant')"
+ >
     <svg
       :class="iconClass"
       fill="none"

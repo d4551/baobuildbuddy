@@ -4,18 +4,22 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+  BADGE_SM_CLASS,
+  BADGE_SOFT_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_MUTED_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type {
   AutomationRunEnvelope,
@@ -86,10 +90,10 @@ function handleScheduleInput(event: Event): void {
               </span>
             </span>
             <h2 class="card-title">{{ capability.name }}</h2>
-            <span class="badge badge-soft badge-sm" :class="capabilityAvailabilityBadgeClass(capability)">
+ <span :class="[BADGE_SOFT_SM_CLASS, capabilityAvailabilityBadgeClass(capability)]">
               {{ capabilityAvailabilityLabel(capability) }}
             </span>
-            <span class="badge badge-sm" :class="runStateBadgeClass(runState)">
+ <span :class="[BADGE_SM_CLASS, runStateBadgeClass(runState)]">
               {{ runStateLabel(runState) }}
             </span>
           </div>
@@ -104,7 +108,7 @@ function handleScheduleInput(event: Event): void {
           />
         </div>
 
-        <NuxtLink :to="latestRunRoute" :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']">
+        <NuxtLink :to="latestRunRoute" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]">
           {{
             latestRun
               ? t("automation.scraper.latestRun.openButton")
@@ -192,8 +196,8 @@ function handleScheduleInput(event: Event): void {
 
       <div
         v-if="issueCount > 0 && compactMode"
-        class="rounded-box border border-base-300 bg-base-200 text-secondary" :class="[PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
-      >
+ class="text-secondary" :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
+ >
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
           <p class="font-semibold text-base-content">
             {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
@@ -213,7 +217,7 @@ function handleScheduleInput(event: Event): void {
 
       <details
         v-else-if="issueCount > 0"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
@@ -234,7 +238,7 @@ function handleScheduleInput(event: Event): void {
 
       <details 
         v-if="showOperations"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ t("automation.scraper.schedule.disclosureTitle") }}
@@ -267,7 +271,7 @@ function handleScheduleInput(event: Event): void {
 
       <details 
         v-if="showOperations && latestRun"
-        class="collapse collapse-arrow rounded-box border border-base-300 bg-base-200"
+        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
       >
         <summary class="collapse-title text-base font-semibold">
           {{ latestRunNoticeText(capability.target) }}
@@ -279,7 +283,7 @@ function handleScheduleInput(event: Event): void {
           <div class="card-actions justify-end">
             <NuxtLink 
               :to="buildRunDetailRoute(latestRun.id)"
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+              :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
               :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"
             >
               {{ t("automation.scraper.openRunDetailButton") }}

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {
+  ALERT_VARIANT_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
-  TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -29,8 +30,8 @@ const emit = defineEmits<{
 
 const alertClass = computed(() =>
   props.severity === "warning"
-    ? "alert alert-warning sm:alert-horizontal"
-    : "alert alert-error sm:alert-horizontal",
+    ? `alert ${ALERT_VARIANT_CLASS.warning} sm:alert-horizontal`
+    : `alert ${ALERT_VARIANT_CLASS.error} sm:alert-horizontal`,
 );
 
 const hasRetry = computed(
@@ -59,7 +60,7 @@ const hasRetry = computed(
     <button 
       v-if="hasRetry"
       type="button"
-      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-ghost shrink-0']"
+      :class="[GHOST_ACTION_DENSE_CLASS, 'shrink-0']"
       :aria-label="retryAriaLabel"
       @click="emit('retry')"
     >

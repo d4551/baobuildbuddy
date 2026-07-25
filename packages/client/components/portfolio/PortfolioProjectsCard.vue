@@ -5,20 +5,23 @@ import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import {
+  BADGE_PRIMARY_XS_CLASS,
+  BADGE_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   HEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
-  TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -107,20 +110,20 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
             <span 
               v-for="tech in project.technologies.slice(0, PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT)"
               :key="tech"
-              class="badge badge-xs"
+              :class="BADGE_XS_CLASS"
             >
               {{ tech }}
             </span>
             <span
               v-if="project.technologies.length > PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT"
-              class="badge badge-xs"
+              :class="BADGE_XS_CLASS"
             >
               +{{ project.technologies.length - PORTFOLIO_PROJECT_TECH_PREVIEW_LIMIT }}
             </span>
           </div>
 
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-            <span v-if="project.featured" class="badge badge-primary badge-xs">
+            <span v-if="project.featured" :class="BADGE_PRIMARY_XS_CLASS">
               {{ t("portfolioPage.projects.featuredBadge") }}
             </span>
             <a 
@@ -138,7 +141,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
           <div class="card-actions justify-between" :class="[MARGIN_TOKEN_CLASS.mt4]">
             <div class="join">
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
+                :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, 'join-item']"
                 :disabled="!props.canMove(project.id, 'up') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveUpAria', { title: project.title })"
                 @click="emit('move', project.id, 'up')"
@@ -146,7 +149,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 {{ t("portfolioPage.projects.moveUpButton") }}
               </button>
               <button 
-                :class="[TOUCH_TARGET_MIN_CLASS, 'btn join-item btn-sm btn-ghost']"
+                :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, 'join-item']"
                 :disabled="!props.canMove(project.id, 'down') || props.reorderingProjectId === project.id"
                 :aria-label="t('portfolioPage.projects.moveDownAria', { title: project.title })"
                 @click="emit('move', project.id, 'down')"

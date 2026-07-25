@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  BADGE_ACCENT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
@@ -47,7 +48,7 @@ const { t } = useI18n();
     <div class="card-body">
       <div class="flex justify-between items-start">
         <h2 class="card-title">{{ challenge.title }}</h2>
-        <div class="badge badge-accent" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
+ <div :class="[BADGE_ACCENT_CLASS, FLEX_GAP_TOKEN_CLASS.gap1]">
           <IconSparkles :class="[ICON_SIZE_CLASS[3]]"/>
           {{ t("dashboard.dailyChallengeXpLabel", { xp: challenge.xpReward }) }}
         </div>

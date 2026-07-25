@@ -3,7 +3,12 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { definePageMeta, useSeoMeta } from "#imports";
 import { useSkillsPathwaysPage } from "~/composables/useSkillsPathwaysPage";
-import { TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_PRIMARY_SM_CLASS,
+  GHOST_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -31,10 +36,10 @@ useSeoMeta({
         <NuxtLink
           v-if="page.gamificationReady.value"
           :to="APP_ROUTES.gamification"
-          class="btn btn-ghost"
+          :class="GHOST_ACTION_CLASS"
           :aria-label="t('skillsPathwaysPage.gamification.openProgressAria')"
         >
-          <span class="badge badge-primary badge-sm">
+          <span :class="BADGE_PRIMARY_SM_CLASS">
             {{ t("skillsPathwaysPage.gamification.levelLabel", { level: page.gamificationLevel.value }) }}
           </span>
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{
@@ -46,7 +51,7 @@ useSeoMeta({
             page.gamificationStatus.value === 'pending' ||
               page.gamificationStatus.value === 'idle'
           "
-          class="badge badge-ghost badge-sm"
+          :class="BADGE_GHOST_SM_CLASS"
         >
           {{ t("skillsPathwaysPage.gamification.unavailableHint") }}
         </span>

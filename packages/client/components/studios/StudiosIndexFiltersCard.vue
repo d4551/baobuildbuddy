@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -81,7 +82,7 @@ const { t } = useI18n();
           <span class="label">{{ t("studiosIndex.filters.remoteLabel") }}</span>
         </label>
 
-        <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
+        <button :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
           {{ t("studiosIndex.filters.clearButton") }}
         </button>
       </div>

@@ -7,22 +7,25 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
 import {
+  BADGE_PRIMARY_CLASS,
+  BADGE_SM_CLASS,
   CONTENT_H_48_CLASS,
   CONTENT_H_64_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_PRINT_HIDDEN_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
-  PROSE_MEASURE_CENTER_CLASS,
   PRIMARY_ACTION_CLASS,
+  PROSE_MEASURE_CENTER_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -77,7 +80,7 @@ async function handleExport(format: "pdf" | "docx") {
     >
       <template #actions>
         <button
-          class="btn btn-ghost print:hidden"
+          :class="GHOST_ACTION_PRINT_HIDDEN_CLASS"
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
         >
@@ -181,7 +184,7 @@ async function handleExport(format: "pdf" | "docx") {
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
-                  class="badge badge-primary"
+                  :class="BADGE_PRIMARY_CLASS"
                 >
                   {{ tech }}
                 </span>
@@ -230,7 +233,7 @@ async function handleExport(format: "pdf" | "docx") {
                 <span
                   v-for="tech in project.technologies"
                   :key="tech"
-                  class="badge badge-sm"
+                  :class="BADGE_SM_CLASS"
                 >
                   {{ tech }}
                 </span>

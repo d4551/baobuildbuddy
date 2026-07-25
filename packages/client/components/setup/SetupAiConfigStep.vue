@@ -3,18 +3,20 @@ import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_SQUARE_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_SUBTLE_CLASS,
   SVG_SIZE_13,
   SVG_STROKE_WIDTH_DEFAULT,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  SURFACE_GLASS_SUBTLE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { CloudProvider, SetupProvider } from "./setup-page-contracts";
 
@@ -100,7 +102,8 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
             <span class="text-muted" :class="[MARGIN_TOKEN_CLASS.mr2]">$</span>{{ ollamaCommand }}
           </div>
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS, 'btn btn-square btn-sm btn-ghost absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors']"
+            class="absolute end-1.5 top-1/2 -translate-y-1/2 transition-colors"
+            :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS, SURFACE_GLASS_SUBTLE_CLASS]"
             type="button"
             :aria-label="t('setup.ollamaCommandCopyAria')"
             :title="t('setup.ollamaCommandCopyTitle')"
@@ -186,11 +189,11 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
     <div class="flex justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button
         type="button"
-        class="btn btn-ghost"
-        :class="[TOUCH_TARGET_MIN_CLASS]"
-        :aria-label="t('setup.backToProfileAria')"
-        @click="emit('back')"
-      >
+ 
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="t('setup.backToProfileAria')"
+ @click="emit('back')"
+ >
         {{ t("setup.backButton") }}
       </button>
       <button

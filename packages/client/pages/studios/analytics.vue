@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import {
+  BADGE_LG_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FORM_WIDTH_32_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -129,7 +130,7 @@ useSeoMeta({
             >
               <div class="flex justify-between items-center" :class="[MARGIN_TOKEN_CLASS.mb2]">
                 <span class="font-medium">{{ size }}</span>
-                <span class="badge badge-lg">{{ count }}</span>
+                <span :class="BADGE_LG_CLASS">{{ count }}</span>
               </div>
               <progress
                 class="progress progress-primary" :class="[FLUID_WIDTH_CLASS]"

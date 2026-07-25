@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import type { InterviewSession } from "@bao/shared/types/interview";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import type { InterviewHistoryView } from "~/composables/useInterviewHistoryPage";
-import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -57,21 +59,21 @@ const viewSession = (id: string): void => {
 </script>
 
 <template>
-  <div :class="SURFACE_GLASS_CARD_CLASS">
+  <UiGlassCard>
     <div class="card-body">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb4]">
         <h2 class="card-title">{{ t("interviewHistory.allSessionsTitle") }}</h2>
         <div class="flex flex-col sm:flex-row sm:items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <div class="join">
-            <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': historyView === 'table' }]"
+            <button type="button" 
+              :class="[GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': historyView === 'table' }]"
               :aria-label="t('interviewHistory.tableAriaLabel')"
               @click="selectHistoryView('table')"
             >
               {{ t("interviewHistory.viewModes.table") }}
             </button>
-            <button 
-              :class="[TOUCH_TARGET_MIN_CLASS, 'join-item btn btn-sm btn-ghost', { 'btn-active': historyView === 'timeline' }]"
+            <button type="button" 
+              :class="[GHOST_ACTION_DENSE_CLASS, 'join-item', { 'btn-active': historyView === 'timeline' }]"
               :aria-label="t('interviewHistory.timelineAriaLabel')"
               @click="selectHistoryView('timeline')"
             >
@@ -111,8 +113,7 @@ const viewSession = (id: string): void => {
             <li
               v-for="session in filteredSessions"
               :key="session.id"
-              class="rounded-box border border-base-300 bg-base-100"
-              :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+              :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
             >
               <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <div>
@@ -129,8 +130,7 @@ const viewSession = (id: string): void => {
               </div>
               <button
                 type="button"
-                class="btn btn-ghost"
-                :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+                :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
               >
@@ -165,8 +165,7 @@ const viewSession = (id: string): void => {
                 <td>
                   <button
                     type="button"
-                    class="btn btn-ghost"
-                    :class="[TOUCH_TARGET_MIN_CLASS]"
+                    :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
                     :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                     @click="viewSession(session.id)"
                   >
@@ -195,8 +194,8 @@ const viewSession = (id: string): void => {
               <p class="font-semibold">{{ session.studioName }}</p>
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ session.role }}</p>
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ props.formatDuration(session.duration ?? 0) }}</p>
-              <button 
-                class="btn btn-ghost btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, MARGIN_TOKEN_CLASS.mt2]"
+              <button type="button" 
+                :class="[GHOST_ACTION_DENSE_CLASS, TOUCH_TARGET_MIN_CLASS, MARGIN_TOKEN_CLASS.mt2]"
                 :aria-label="t('interviewHistory.viewSessionAria', { id: session.id })"
                 @click="viewSession(session.id)"
               >
@@ -211,5 +210,5 @@ const viewSession = (id: string): void => {
         </ul>
       </div>
     </div>
-  </div>
+  </UiGlassCard>
 </template>

@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import {
-  PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
-  PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
-} from "@bao/shared/constants/portfolio";
+import { PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH, PORTFOLIO_PROJECT_TITLE_MIN_LENGTH } from "@bao/shared/constants/portfolio";
 import { useI18n } from "vue-i18n";
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CIRCLE_DENSE_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS
+  STACK_SPACE_Y_TOKEN_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type PortfolioProjectForm = {
@@ -189,7 +188,7 @@ function updateFeaturedFlag(event: Event): void {
             {{ tech }}
             <button 
               type="button"
-              :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm btn-circle']"
+              :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_CIRCLE_DENSE_CLASS]"
               :aria-label="t('portfolioPage.modal.removeTechnologyAria', { tech })"
               @click="emit('removeTechnology', idx)"
             >
@@ -212,7 +211,7 @@ function updateFeaturedFlag(event: Event): void {
     </div>
 
     <div class="modal-action">
-      <button class="btn btn-ghost" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
+      <button :class="GHOST_ACTION_CLASS" :aria-label="t('portfolioPage.modal.cancelAria')" @click="emit('update:open', false)">
         {{ t("portfolioPage.modal.cancelButton") }}
       </button>
       <button 

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-import type {
-  DashboardPipelineStatus,
-  DashboardPipelineStepViewModel,
-} from "~/constants/dashboard-contracts";
+import { DashboardPipelineStepViewModel, useI18n } from "vue-i18n";
+import type {   DashboardPipelineStatus,
+  } from "~/constants/dashboard-contracts";
 import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";
 import {
+  BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -56,9 +55,9 @@ const statusBadgeClassByStepStatus: Record<DashboardPipelineStatus, string> = {
           >
             <span class="min-w-0 whitespace-normal">{{ t(step.labelKey) }}</span>
             <span
-              class="badge badge-sm shrink-0 whitespace-nowrap"
-              :class="statusBadgeClassByStepStatus[step.status]"
-            >
+ class="shrink-0 whitespace-nowrap"
+ :class="[BADGE_SM_CLASS, statusBadgeClassByStepStatus[step.status]]"
+ >
               {{ t(DASHBOARD_PIPELINE_STATUS_KEYS[step.status]) }}
             </span>
           </NuxtLink>

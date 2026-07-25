@@ -1,10 +1,14 @@
-import type { SpeechProviderOption } from "@bao/shared/constants/settings";
+import { AI_CHAT_VOICE_ERROR_CODES, AI_CHAT_VOICE_ERROR_MESSAGE_KEYS } from "@bao/shared/constants/ai-voice";
 import type { VoiceSettings } from "@bao/shared/types/interview";
-import { settle } from "@bao/shared/utils/promise";
 import type { Ref } from "vue";
-import { computed, onMounted, readonly, ref } from "#imports";
+import { computed, onMounted, onUnmounted, readonly, ref } from "#imports";
 import { resolveSpeechLocale, resolveSpeechRecognitionConstructor } from "~/utils/speech";
-import { createMicrophoneRecorder, transcribeAudioViaServer } from "./speech-server-stt";
+import {
+  createMicrophoneRecorder,
+  type ServerSttRequestOptions,
+  transcribeAudioViaServer,
+} from "./speech-server-stt";
+import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import { useSettings } from "./useSettings";
 
 interface RecognitionUpdate {
@@ -14,6 +18,27 @@ interface RecognitionUpdate {
 }
 
 type MicrophoneRecorder = Awaited<ReturnType<typeof createMicrophoneRecorder>>;
+
+interface SttMutableState {
+  transcript: Ref<string>;
+  interimTranscript: Ref<string>;
+  isListening: Ref<boolean>;
+  confidence: Ref<number>;
+  error: Ref<string | null>;
+  recognition: SpeechRecognition | null;
+  recorder: MicrophoneRecorder | null;
+  useServerStt: boolean;
+  /** Tracked mic lifecycle promise — observed so the chain is never floating. */
+  micPromise: Promise<void> | null;
+}
+
+function isSpeechRecognitionEvent(event: Event): event is SpeechRecognitionEvent {
+  return "resultIndex" in event && "results" in event;
+}
+
+function isSpeechRecognitionErrorEvent(event: Event): event is SpeechRecognitionErrorEvent {
+  return "error" in event;
+}
 
 function processRecognitionResults(event: SpeechRecognitionEvent): RecognitionUpdate {
   let finalTranscript = "";
@@ -61,150 +86,142 @@ function toFullTranscript(transcript: string, interimTranscript: string): string
   return combined.trim();
 }
 
-const resolveConfiguredSttProvider = (
-  settingsSpeechProvider: string | undefined,
-): SpeechProviderOption => {
-  if (
-    settingsSpeechProvider === "local" ||
-    settingsSpeechProvider === "openai" ||
-    settingsSpeechProvider === "huggingface" ||
-    settingsSpeechProvider === "custom" ||
-    settingsSpeechProvider === "browser"
-  ) {
-    return settingsSpeechProvider;
-  }
-  return "browser";
-};
-
-type SttRuntime = {
-  transcript: Ref<string>;
-  interimTranscript: Ref<string>;
-  isListening: Ref<boolean>;
-  confidence: Ref<number>;
-  error: Ref<string | null>;
-  settings?: Ref<VoiceSettings | undefined>;
-  getRecognition: () => SpeechRecognition | null;
-  setRecognition: (value: SpeechRecognition | null) => void;
-  getRecorder: () => MicrophoneRecorder | null;
-  setRecorder: (value: MicrophoneRecorder | null) => void;
-  getUseServerStt: () => boolean;
-  setUseServerStt: (value: boolean) => void;
-  sttProvider: Ref<SpeechProviderOption>;
-};
-
-async function startServerListening(runtime: SttRuntime): Promise<void> {
-  const settled = await settle(createMicrophoneRecorder());
-  if (settled.status === "rejected") {
-    runtime.error.value = settled.reason.message || "Failed to start microphone";
-    runtime.isListening.value = false;
+function bindBrowserRecognitionHandlers(state: SttMutableState): void {
+  const recognition = state.recognition;
+  if (!recognition) {
     return;
   }
-  runtime.setRecorder(settled.value);
-  settled.value.start();
-  runtime.isListening.value = true;
+  recognition.addEventListener("result", (event: Event) => {
+    if (!isSpeechRecognitionEvent(event)) {
+      return;
+    }
+    const update = processRecognitionResults(event);
+    if (update.finalTranscript.length > 0) {
+      state.transcript.value += update.finalTranscript;
+    }
+    state.interimTranscript.value = update.interimTranscript;
+    if (update.confidence > 0) {
+      state.confidence.value = update.confidence;
+    }
+  });
+  recognition.addEventListener("error", (event: Event) => {
+    if (!isSpeechRecognitionErrorEvent(event)) {
+      return;
+    }
+    state.error.value = `${event.error}: ${event.message ?? ""}`;
+  });
+  recognition.addEventListener("end", () => {
+    state.isListening.value = false;
+  });
 }
 
-function startBrowserListening(runtime: SttRuntime, locale?: string): boolean {
-  const recognition = runtime.getRecognition();
-  if (!recognition) {
-    runtime.error.value = "Speech recognition not supported in this browser";
-    return false;
-  }
-  if (runtime.isListening.value) {
+function startServerSttListening(state: SttMutableState): boolean {
+  if (state.isListening.value) {
     return true;
   }
-  recognition.lang = resolveSpeechLocale(locale ?? runtime.settings?.value?.language);
-  recognition.start();
-  runtime.isListening.value = true;
+  const micPromise = createMicrophoneRecorder()
+    .then(
+      (created) => {
+        state.recorder = created;
+        created.start();
+        state.isListening.value = true;
+      },
+      () => {
+        state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.audioCapture];
+        state.isListening.value = false;
+      },
+    )
+    .then(
+      () => undefined,
+      (error: Error) => {
+        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.startFailed];
+      },
+    );
+  state.micPromise = micPromise;
   return true;
 }
 
-function startListening(runtime: SttRuntime, locale?: string): boolean {
-  runtime.error.value = null;
-  runtime.transcript.value = "";
-  runtime.interimTranscript.value = "";
-  runtime.confidence.value = 0;
-  runtime.setUseServerStt(runtime.sttProvider.value !== "browser");
-
-  if (runtime.getUseServerStt()) {
-    if (runtime.isListening.value) {
-      return true;
-    }
-    settle(startServerListening(runtime)).then(() => undefined, () => undefined);
+function startBrowserSttListening(
+  state: SttMutableState,
+  locale: string | undefined,
+  settings?: Ref<VoiceSettings | undefined>,
+): boolean {
+  if (!state.recognition) {
+    state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition];
+    return false;
+  }
+  if (state.isListening.value) {
     return true;
   }
-
-  return startBrowserListening(runtime, locale);
+  state.recognition.lang = resolveSpeechLocale(locale ?? settings?.value?.language);
+  state.recognition.start();
+  state.isListening.value = true;
+  return true;
 }
 
-async function finalizeServerStop(
-  runtime: SttRuntime,
-  recorder: MicrophoneRecorder,
-): Promise<void> {
-  const stopSettled = await settle(recorder.stop());
-  if (stopSettled.status === "rejected") {
-    runtime.error.value = stopSettled.reason.message || "Failed to transcribe audio";
-    runtime.isListening.value = false;
-    return;
+function startSttListening(
+  state: SttMutableState,
+  locale: string | undefined,
+  settings: Ref<VoiceSettings | undefined> | undefined,
+  provider: ReturnType<typeof resolveSpeechSttProvider>,
+): boolean {
+  state.error.value = null;
+  state.transcript.value = "";
+  state.interimTranscript.value = "";
+  state.confidence.value = 0;
+  state.useServerStt = shouldUseServerStt(provider);
+  if (state.useServerStt) {
+    return startServerSttListening(state);
   }
-  const transcriptSettled = await settle(transcribeAudioViaServer(stopSettled.value));
-  if (transcriptSettled.status === "rejected") {
-    runtime.error.value = transcriptSettled.reason.message || "Failed to transcribe audio";
-    runtime.isListening.value = false;
-    return;
-  }
-  const result = transcriptSettled.value;
-  if (result.ok) {
-    runtime.transcript.value = result.text;
-    runtime.interimTranscript.value = "";
-    runtime.confidence.value = 1;
-  } else {
-    runtime.error.value = result.error;
-  }
-  runtime.isListening.value = false;
+  return startBrowserSttListening(state, locale, settings);
 }
 
-function stopListening(runtime: SttRuntime): void {
-  if (runtime.getUseServerStt()) {
-    const activeRecorder = runtime.getRecorder();
-    runtime.setRecorder(null);
-    if (!activeRecorder) {
-      runtime.isListening.value = false;
-      return;
-    }
-    settle(finalizeServerStop(runtime, activeRecorder)).then(() => undefined, () => undefined);
+function stopServerSttListening(
+  state: SttMutableState,
+  options: ServerSttRequestOptions,
+): void {
+  const activeRecorder = state.recorder;
+  state.recorder = null;
+  if (!activeRecorder) {
+    state.isListening.value = false;
     return;
   }
-  runtime.getRecognition()?.stop();
-  runtime.isListening.value = false;
+  const micPromise = activeRecorder
+    .stop()
+    .then((blob) => transcribeAudioViaServer(blob, options))
+    .then(
+      (result) => {
+        if (result.ok) {
+          state.transcript.value = result.text;
+          state.interimTranscript.value = "";
+          state.confidence.value = 1;
+        } else {
+          state.error.value = result.error;
+        }
+      },
+      () => {
+        state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
+      },
+    )
+    .then(() => {
+      state.isListening.value = false;
+    })
+    .then(
+      () => undefined,
+      (error: Error) => {
+        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
+      },
+    );
+  state.micPromise = micPromise;
 }
 
-function bindBrowserRecognition(runtime: SttRuntime): void {
-  runtime.setUseServerStt(runtime.sttProvider.value !== "browser");
-  if (runtime.getUseServerStt()) {
+function stopSttListening(state: SttMutableState, options: ServerSttRequestOptions): void {
+  if (state.useServerStt) {
+    stopServerSttListening(state, options);
     return;
   }
-  const recognition = createRecognitionInstance(runtime.settings);
-  runtime.setRecognition(recognition);
-  if (!recognition) {
-    return;
-  }
-  recognition.onresult = (event: SpeechRecognitionEvent) => {
-    const update = processRecognitionResults(event);
-    if (update.finalTranscript.length > 0) {
-      runtime.transcript.value += update.finalTranscript;
-    }
-    runtime.interimTranscript.value = update.interimTranscript;
-    if (update.confidence > 0) {
-      runtime.confidence.value = update.confidence;
-    }
-  };
-  recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-    runtime.error.value = `${event.error}: ${event.message ?? ""}`;
-  };
-  recognition.onend = () => {
-    runtime.isListening.value = false;
-  };
+  state.recognition?.stop();
+  state.isListening.value = false;
 }
 
 /**
@@ -214,64 +231,68 @@ function bindBrowserRecognition(runtime: SttRuntime): void {
  */
 export function useSTT(settings?: Ref<VoiceSettings | undefined>) {
   const { settings: appSettings } = useSettings();
-  const transcript = ref("");
-  const interimTranscript = ref("");
-  const isListening = ref(false);
-  const confidence = ref(0);
-  const error = ref<string | null>(null);
-  let recognition: SpeechRecognition | null = null;
-  let recorder: MicrophoneRecorder | null = null;
-  let useServerStt = false;
+  const state: SttMutableState = {
+    transcript: ref(""),
+    interimTranscript: ref(""),
+    isListening: ref(false),
+    confidence: ref(0),
+    error: ref<string | null>(null),
+    recognition: null,
+    recorder: null,
+    useServerStt: false,
+    micPromise: null,
+  };
 
   const sttProvider = computed(() =>
-    resolveConfiguredSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
+    resolveSpeechSttProvider(appSettings.value?.automationSettings?.speech?.stt?.provider),
   );
-
-  const runtime: SttRuntime = {
-    transcript,
-    interimTranscript,
-    isListening,
-    confidence,
-    error,
-    settings,
-    getRecognition: () => recognition,
-    setRecognition: (value) => {
-      recognition = value;
-    },
-    getRecorder: () => recorder,
-    setRecorder: (value) => {
-      recorder = value;
-    },
-    getUseServerStt: () => useServerStt,
-    setUseServerStt: (value) => {
-      useServerStt = value;
-    },
-    sttProvider,
+  const getServerSttOptions = (): ServerSttRequestOptions => {
+    const stt = appSettings.value?.automationSettings?.speech?.stt;
+    return {
+      provider: resolveSpeechSttProvider(stt?.provider),
+      model: stt?.model?.trim() || "",
+      endpoint: stt?.endpoint?.trim() || "",
+    };
   };
 
   onMounted(() => {
-    bindBrowserRecognition(runtime);
+    state.useServerStt = shouldUseServerStt(sttProvider.value);
+    if (state.useServerStt) {
+      return;
+    }
+    state.recognition = createRecognitionInstance(settings);
+    bindBrowserRecognitionHandlers(state);
+  });
+
+  onUnmounted(() => {
+    if (state.recognition) {
+      state.recognition.stop();
+      state.recognition = null;
+    }
+    state.recorder = null;
+    state.isListening.value = false;
   });
 
   const fullTranscript = computed(() =>
-    toFullTranscript(transcript.value, interimTranscript.value),
+    toFullTranscript(state.transcript.value, state.interimTranscript.value),
   );
   const isSupported = computed(
     () =>
-      sttProvider.value !== "browser" ||
+      shouldUseServerStt(sttProvider.value) ||
       resolveSpeechRecognitionConstructor() !== null ||
       typeof navigator !== "undefined",
   );
 
   return {
-    startListening: (locale?: string) => startListening(runtime, locale),
-    stopListening: () => stopListening(runtime),
-    transcript: readonly(transcript),
-    interimTranscript: readonly(interimTranscript),
+    startListening: (locale?: string) =>
+      startSttListening(state, locale, settings, sttProvider.value),
+    stopListening: () => stopSttListening(state, getServerSttOptions()),
+    transcript: readonly(state.transcript),
+    interimTranscript: readonly(state.interimTranscript),
     fullTranscript,
-    isListening: readonly(isListening),
-    confidence: readonly(confidence),
-    error: readonly(error),
+    isListening: readonly(state.isListening),
+    confidence: readonly(state.confidence),
+    error: readonly(state.error),
     isSupported: readonly(isSupported),
   };
 }

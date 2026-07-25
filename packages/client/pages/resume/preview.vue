@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import {
-  ICON_DECORATIVE_STROKE_WIDTH, ICON_SIZE_CLASS, PRIMARY_ACTION_CLASS,
+  GHOST_ACTION_PRINT_HIDDEN_CLASS,
+  ICON_DECORATIVE_STROKE_WIDTH,
+  ICON_SIZE_CLASS,
   OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -105,7 +108,7 @@ function handlePrint() {
     >
       <template #actions>
         <button
-          class="btn btn-ghost print:hidden"
+          :class="GHOST_ACTION_PRINT_HIDDEN_CLASS"
           :aria-label="t('resumePage.backButtonAria')"
           @click="router.back()"
         >

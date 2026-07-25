@@ -3,14 +3,15 @@ import type { InterviewQuestion } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  BADGE_PRIMARY_OUTLINE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 const props = defineProps<{
@@ -106,7 +107,7 @@ const promptExpectedMinutes = computed(() => {
           <span 
             v-for="tag in promptTags"
             :key="tag"
-            class="badge badge-outline badge-primary"
+            :class="BADGE_PRIMARY_OUTLINE_CLASS"
           >
             {{ tag }}
           </span>

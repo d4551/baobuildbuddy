@@ -3,10 +3,12 @@ import { APP_SEMVER } from "@bao/shared/constants/app-version";
 import { useI18n } from "vue-i18n";
 import {
   APP_DRAWER_ID,
+  BADGE_WARNING_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
@@ -87,7 +89,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
               <span class="indicator">
                 <span
                   v-if="item.id === 'settings' && isAiConfigurationIncomplete"
-                  class="indicator-item badge badge-warning badge-xs"
+                  :class="[BADGE_WARNING_XS_CLASS, 'indicator-item']"
                   role="status"
                   :aria-label="t('a11y.aiConfigIncompleteAria')"
                   :title="t('a11y.aiConfigIncompleteAria')"
@@ -105,13 +107,13 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         <li :class="[PADDING_TOKEN_CLASS.pt4]">
           <button 
             type="button"
-            class="btn btn-ghost justify-start is-drawer-close:btn-square"
-            :class="[FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
-            :aria-label="t('a11y.toggleSidebarNavigation')"
-            :aria-controls="APP_DRAWER_ID"
-            :aria-expanded="isDrawerOpen"
-            @click="setDrawerToggleState(!isDrawerOpen)"
-          >
+ class="justify-start is-drawer-close:btn-square"
+ :class="[GHOST_ACTION_CLASS, FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
+ :aria-label="t('a11y.toggleSidebarNavigation')"
+ :aria-controls="APP_DRAWER_ID"
+ :aria-expanded="isDrawerOpen"
+ @click="setDrawerToggleState(!isDrawerOpen)"
+ >
             <svg :class="[ICON_SIZE_CLASS.sm, 'transition-transform duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-open:rotate-y-180']" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 19l-7-7 7-7" />
             </svg>

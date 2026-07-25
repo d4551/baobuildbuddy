@@ -4,12 +4,17 @@ import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
+  BADGE_OUTLINE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_HEIGHT_TOKEN_CLASS,
   MAX_W_64_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   PRIMARY_BUTTON_VARIANT_CLASS,
@@ -17,7 +22,6 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { InterviewHubSessionConfig, StudioSelectorOption } from "~/types/interview";
 
@@ -149,17 +153,17 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                   <li
                     v-for="job in paginatedJobs"
                     :key="job.id"
-                    class="rounded-box border border-base-300 bg-base-100"
-                    :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
-                  >
+ 
+ :class="[INSET_PANEL_CLASS, STACK_SPACE_Y_TOKEN_CLASS.stack2, PADDING_TOKEN_CLASS.p3]"
+ >
                     <div>
                       <p class="font-semibold">{{ job.title }}</p>
                       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ job.company }}</p>
                     </div>
                     <button
                       type="button"
-                      class="btn btn-sm btn-ghost"
                       :class="[
+                        GHOST_ACTION_DENSE_CLASS,
                         TOUCH_TARGET_MIN_CLASS,
                         FLUID_WIDTH_CLASS,
                         { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId },
@@ -191,11 +195,14 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
                     <tr v-for="job in paginatedJobs" :key="job.id" class="hover:bg-base-200">
                       <td class="truncate" :class="[MAX_W_64_CLASS]">{{ job.title }}</td>
                       <td>{{ job.company }}</td>
-                      <td class="text-right">
+                      <td class="text-end">
                         <button
                           type="button"
-                          class="btn btn-sm btn-ghost"
-                          :class="[TOUCH_TARGET_MIN_CLASS, { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId }]"
+                          :class="[
+                            GHOST_ACTION_DENSE_CLASS,
+                            TOUCH_TARGET_MIN_CLASS,
+                            { [PRIMARY_BUTTON_VARIANT_CLASS]: job.id === selectedJobId },
+                          ]"
                           :aria-label="t('interviewHub.config.selectJobAria', { title: job.title, company: job.company })"
                           @click="emit('selectJob', job.id)"
                         >
@@ -236,7 +243,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
               <span 
                 v-for="tech in selectedJob.technologies?.slice(0, 6)"
                 :key="tech"
-                class="badge badge-sm badge-outline"
+                :class="BADGE_OUTLINE_SM_CLASS"
               >
                 {{ tech }}
               </span>
@@ -280,7 +287,7 @@ function updateTextValue(event: Event, emitEvent: "update:job-search-term"): voi
       <div class="modal-action">
         <button 
           type="button"
-          class="btn btn-ghost"
+          :class="GHOST_ACTION_CLASS"
           :aria-label="t('interviewHub.config.cancelAria')"
           @click="emit('update:open', false)"
         >

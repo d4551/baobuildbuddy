@@ -2,10 +2,11 @@
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 interface ResumeEditorToolbarProps {
@@ -28,7 +29,7 @@ const { t } = useI18n();
 
 <template>
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-    <button :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
+    <button :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
       <IconArrowLeft :class="[ICON_SIZE_CLASS[4]]"/>
       {{ t("resumePage.backButton") }}
     </button>

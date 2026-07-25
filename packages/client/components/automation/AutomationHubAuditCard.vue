@@ -7,16 +7,20 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
+  BADGE_GHOST_SM_CLASS,
+  BADGE_SOFT_SUCCESS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
+  INSET_PANEL_MUTED_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
   resolveAutomationCapabilityAction,
@@ -139,8 +143,8 @@ const readyEntries = computed(() =>
                 <div 
                   v-for="capability in needsAttentionEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
-                >
+ :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4]"
+ >
                   <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -160,7 +164,7 @@ const readyEntries = computed(() =>
                           {{ capabilityStatusLabel(capability.configured, capabilityIssueCount(capability)) }}
                         </span>
                       </div>
-                      <span class="badge badge-ghost badge-sm">{{ capabilityTypeLabel(capability) }}</span>
+                      <span :class="BADGE_GHOST_SM_CLASS">{{ capabilityTypeLabel(capability) }}</span>
                       <AutomationCoverageChips
                         :manual-run-available="capability.manualRunAvailable"
                         :scheduled-run-available="capability.scheduledRunAvailable"
@@ -205,8 +209,8 @@ const readyEntries = computed(() =>
                 <div 
                   v-for="capability in readyEntries"
                   :key="capability.id"
-                  class="rounded-box border border-base-300 bg-base-200" :class="[PADDING_TOKEN_CLASS.p4]"
-                >
+ :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4]"
+ >
                   <div class="flex flex-wrap items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
                     <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
                       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -217,11 +221,11 @@ const readyEntries = computed(() =>
                           </span>
                         </span>
                         <p class="font-semibold">{{ capabilityDisplayName(capability) }}</p>
-                        <span class="badge badge-success badge-soft whitespace-nowrap">
+                        <span :class="[BADGE_SOFT_SUCCESS_CLASS, 'whitespace-nowrap']">
                           {{ t("automation.hub.audit.issueState.ready") }}
                         </span>
                       </div>
-                      <span class="badge badge-ghost badge-sm">{{ capabilityTypeLabel(capability) }}</span>
+                      <span :class="BADGE_GHOST_SM_CLASS">{{ capabilityTypeLabel(capability) }}</span>
                       <AutomationCoverageChips
                         :manual-run-available="capability.manualRunAvailable"
                         :scheduled-run-available="capability.scheduledRunAvailable"
@@ -232,7 +236,7 @@ const readyEntries = computed(() =>
 
                     <NuxtLink 
                       :to="capabilityAction(capability).to"
-                      :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-ghost btn-sm']"
+                      :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
                       :aria-label="capabilityAction(capability).ariaLabel"
                     >
                       {{ capabilityAction(capability).label }}

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
+  ALERT_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FONT_WEIGHT_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
+  FONT_WEIGHT_TOKEN_CLASS,
+  GHOST_ACTION_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -61,7 +63,8 @@ function updateTextValue(
     <div 
       v-if="authBootstrapRequired && authSetupTokenConfigured"
       role="alert"
-      class="alert alert-info alert-vertical text-left sm:alert-horizontal"
+      class="alert alert-vertical text-start sm:alert-horizontal"
+      :class="[ALERT_VARIANT_CLASS.info]"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.setupTokenTitle") }}</h3>
@@ -72,7 +75,8 @@ function updateTextValue(
     <div 
       v-else-if="authBootstrapRequired"
       role="alert"
-      class="alert alert-warning alert-vertical text-left sm:alert-horizontal"
+      class="alert alert-vertical text-start sm:alert-horizontal"
+      :class="[ALERT_VARIANT_CLASS.warning]"
     >
       <div>
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold]">{{ t("setup.auth.bootstrapUnavailableTitle") }}</h3>
@@ -80,7 +84,7 @@ function updateTextValue(
       </div>
     </div>
 
-    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
+    <label v-if="authBootstrapRequired && authSetupTokenConfigured" class="floating-label text-start" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.setupTokenLegend") }}</span>
       <input 
         :value="authSetupToken"
@@ -92,7 +96,7 @@ function updateTextValue(
       />
     </label>
 
-    <label v-if="needsStoredApiKey" class="floating-label text-left" :class="[FLUID_WIDTH_CLASS]">
+    <label v-if="needsStoredApiKey" class="floating-label text-start" :class="[FLUID_WIDTH_CLASS]">
       <span>{{ t("setup.auth.apiKeyLegend") }}</span>
       <input 
         :value="existingApiKey"
@@ -107,8 +111,7 @@ function updateTextValue(
     <div class="flex justify-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button
         type="button"
-        class="btn btn-ghost"
-        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
         :aria-label="t('setup.backToAiConfigAria')"
         @click="emit('back')"
       >
@@ -121,7 +124,7 @@ function updateTextValue(
         :aria-label="t('setup.launchAria')"
         @click="emit('complete')"
       >
-        <LoadingSpinner size="xs" label="Loading" v-if="saving" />
+        <LoadingSpinner size="xs" :label="t('common.loading')" v-if="saving" />
         {{ t("setup.launchButton", { brand: brandName }) }}
       </button>
     </div>

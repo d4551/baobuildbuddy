@@ -6,10 +6,14 @@ import { useBrandPreviewStyles } from "~/composables/useBrandPreviewStyles";
 import {
   BRAND_SWATCH_SURFACE_CLASS,
   FLEX_GAP_TOKEN_CLASS,
+  INSET_PANEL_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
 } from "~/constants/layout";
+import {
+  BADGE_GHOST_CLASS,
+} from "~/constants/layout-badges";
 
 const props = defineProps<{
   brandDraft: BrandSettings;
@@ -25,17 +29,17 @@ const brandDarkSwatchLabel = t("settings.brand.darkThemeLegend");
 
 <template>
   <SectionGrid grid-token="twoColumn" :extra-class="FLEX_GAP_TOKEN_CLASS.gap3">
-    <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, SHADOW_TOKEN_CLASS.sm]">
+    <div :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p4, SHADOW_TOKEN_CLASS.sm]">
       <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb3]">
         <h4 class="font-medium">{{ brandLightSwatchLabel }}</h4>
-        <span class="badge badge-ghost">{{ themeNames.light }}</span>
+        <span :class="[BADGE_GHOST_CLASS]">{{ themeNames.light }}</span>
       </div>
       <div class="brand-swatch-light rounded-box border border-base-300" :class="[BRAND_SWATCH_SURFACE_CLASS, SHADOW_TOKEN_CLASS.inner]"></div>
     </div>
-    <div class="rounded-box border border-base-300 bg-base-100" :class="[PADDING_TOKEN_CLASS.p4, SHADOW_TOKEN_CLASS.sm]">
+    <div :class="[INSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p4, SHADOW_TOKEN_CLASS.sm]">
       <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mb3]">
         <h4 class="font-medium">{{ brandDarkSwatchLabel }}</h4>
-        <span class="badge badge-ghost">{{ themeNames.dark }}</span>
+        <span :class="[BADGE_GHOST_CLASS]">{{ themeNames.dark }}</span>
       </div>
       <div class="brand-swatch-dark rounded-box border border-base-300" :class="[BRAND_SWATCH_SURFACE_CLASS, SHADOW_TOKEN_CLASS.inner]"></div>
     </div>

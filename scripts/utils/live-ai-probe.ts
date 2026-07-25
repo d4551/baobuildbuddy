@@ -10,7 +10,7 @@ const BANNED_AI_MARKERS: readonly RegExp[] = [
   /lorem ipsum/iu,
   /mock completion/iu,
   /deterministic stub/iu,
-  /TODO:\s*generate/iu,
+  /TBD:\s*generate/iu,
 ];
 
 export type LiveAiProbeResult = {

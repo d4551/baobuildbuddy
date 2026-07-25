@@ -2,14 +2,15 @@
 import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
+  BADGE_SUCCESS_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 type ProviderField =
@@ -72,7 +73,7 @@ const emit = defineEmits<{
       <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
         <AIProviderIcon class="text-primary" :class="[ICON_SIZE_CLASS[5]]" :provider-id="provider.id"/>
         {{ provider.label }}
-        <span v-if="providerConfiguredById[provider.id]" class="badge badge-success badge-xs">
+        <span v-if="providerConfiguredById[provider.id]" :class="BADGE_SUCCESS_SM_CLASS">
           {{ t("settings.aiProviders.configuredBadge") }}
         </span>
       </summary>

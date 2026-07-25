@@ -2,7 +2,13 @@
 import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AppModalFrame from "~/components/ui/AppModalFrame.vue";
-import { PADDING_TOKEN_CLASS, PRIMARY_ACTION_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import {
+  ERROR_ACTION_CLASS,
+  GHOST_ACTION_CLASS,
+  PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
+} from "~/constants/layout";
 
 type ConfirmDialogVariant = "default" | "danger";
 
@@ -43,7 +49,7 @@ const primaryActionRef = computed(() =>
 );
 
 const confirmButtonClass = computed(() =>
-  props.variant === "danger" ? "btn btn-error h-11 min-h-11" : PRIMARY_ACTION_CLASS,
+  props.variant === "danger" ? ERROR_ACTION_CLASS : PRIMARY_ACTION_CLASS,
 );
 const resolvedConfirmText = computed(() =>
   props.confirmText.trim().length > 0 ? props.confirmText : t("confirmDialog.confirmButton"),
@@ -67,21 +73,20 @@ function applyActionTabOrder(): void {
   confirmButtonRef.value.tabIndex = -1;
 }
 
-function setFocusOnOpen(): void {
-  void nextTick(() => {
-    applyActionTabOrder();
-    primaryActionRef.value?.focus();
-  });
+async function setFocusOnOpen(): Promise<void> {
+  await nextTick();
+  applyActionTabOrder();
+  primaryActionRef.value?.focus();
 }
 
 watch(
   () => props.open,
-  (isOpen) => {
+  async (isOpen) => {
     if (!isOpen) {
       return;
     }
 
-    setFocusOnOpen();
+    await setFocusOnOpen();
   },
   { immediate: true },
 );
@@ -135,7 +140,7 @@ function handleClose(): void {
       <button 
         ref="cancelButton"
         type="button"
-        class="btn btn-ghost"
+        :class="[GHOST_ACTION_CLASS]"
         :aria-label="resolvedCancelText"
         @click="handleCancel"
       >

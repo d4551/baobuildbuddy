@@ -64,6 +64,11 @@ export interface NavigationItem {
    * (reachable via another shortcut/surface).
    */
   readonly keyboardOptional?: boolean;
+  /**
+   * Optional parent nav id for secondary workflow routes (breadcrumb hierarchy).
+   * Secondary items keep includeInSidebar/includeInDock false but remain discoverable.
+   */
+  readonly parentId?: string;
 }
 
 /**

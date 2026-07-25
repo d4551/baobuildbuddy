@@ -3,13 +3,14 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   ProviderConfig,
@@ -74,7 +75,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
               <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ providerDescription(provider.id) }}</p>
             </div>
           </div>
-          <span class="badge badge-sm shrink-0" :class="resolveProviderStatus(provider).badgeClass">
+ <span class="shrink-0" :class="[BADGE_SM_CLASS, resolveProviderStatus(provider).badgeClass]">
             {{ resolveProviderStatus(provider).label }}
           </span>
         </div>

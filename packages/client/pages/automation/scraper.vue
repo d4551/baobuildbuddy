@@ -13,6 +13,7 @@ import {
   OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
+import { resolveRouteSectionId } from "~/utils/route-query";
 
 definePageMeta({
   middleware: ["auth"],
@@ -64,19 +65,13 @@ const {
   jobInterviewFocusAreas,
 } = useAutomationScraperPage();
 
-const routeSection = computed<AutomationScraperSectionId>(() => {
-  const sectionQueryValue = route.query[APP_ROUTE_QUERY_KEYS.section];
-  const candidateSection =
-    typeof sectionQueryValue === "string"
-      ? sectionQueryValue
-      : Array.isArray(sectionQueryValue)
-        ? sectionQueryValue[0]
-        : null;
-
-  return candidateSection && isAutomationScraperSectionId(candidateSection)
-    ? candidateSection
-    : AUTOMATION_SCRAPER_DEFAULT_SECTION_ID;
-});
+const routeSection = computed<AutomationScraperSectionId>(() =>
+  resolveRouteSectionId(
+    route.query[APP_ROUTE_QUERY_KEYS.section],
+    isAutomationScraperSectionId,
+    AUTOMATION_SCRAPER_DEFAULT_SECTION_ID,
+  ),
+);
 
 const activeSection = ref<AutomationScraperSectionId>(routeSection.value);
 
