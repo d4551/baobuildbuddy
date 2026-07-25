@@ -177,6 +177,11 @@ export const tourRoute = async (
     await proveDashboardTheme(page, viewport.name);
   }
   const clicked = await clickSafeMainButton(page);
+  if (!clicked) {
+    throw new Error(
+      `Visual proof false-green blocked: no safe main button clicked on ${route.slug} (${viewport.name})`,
+    );
+  }
   await waitForPageReady(page, NUM_400);
   await page.keyboard.press("Escape");
   await waitForPageReady(page, NUM_200);

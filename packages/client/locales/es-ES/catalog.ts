@@ -3245,6 +3245,7 @@ const catalog = {
       autoSpeakAria: "Leer respuestas del asistente automáticamente",
       listeningStatus: "Escuchando...",
       speakingStatus: "Leyendo respuesta...",
+      streamingStatus: "Generando respuesta...",
       idleStatus: "Voz lista",
       unsupportedHint: "Los controles de voz no están disponibles en este navegador.",
       recognitionUnsupportedHint: "La entrada de voz no está disponible en este navegador.",

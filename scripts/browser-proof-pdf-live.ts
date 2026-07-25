@@ -18,7 +18,8 @@ import {
   MS_TWO_SECONDS,
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
-import { assertRealPdfFile } from "./utils/live-pdf-assert";
+import { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } from "../packages/shared/src/constants/export-document-theme";
+import { assertPdfContainsRgbFill, assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
@@ -196,6 +197,10 @@ const ensurePortfolioProject = async (page: Page): Promise<void> => {
 
 const proofPortfolioPdf = async (page: Page) => {
   await ensurePortfolioProject(page);
+  const templateSelect = page.getByLabel("Portfolio export template");
+  await templateSelect.waitFor({ state: "visible", timeout: 30_000 });
+  await templateSelect.selectOption("gaming");
+  await wait(page, COUNT_FIVE_HUNDRED);
   await page.screenshot({ path: join(OUT, "stills", "04-portfolio-ready.png") });
   await page.getByRole("button", { name: RE_EXPORT_PORTFOLIO }).click();
   await wait(page, COUNT_FIVE_HUNDRED);
@@ -208,6 +213,14 @@ const proofPortfolioPdf = async (page: Page) => {
   }
   const portfolioPath = await saveDownload(portfolioDownload.value, "portfolio-ui.pdf");
   const portfolioPdf = await assertRealPdfFile(portfolioPath);
+  const paletteOk = await assertPdfContainsRgbFill(
+    portfolioPath,
+    PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.gaming.primary,
+    "portfolio-gaming-primary",
+  );
+  if (!paletteOk) {
+    throw new Error("Portfolio gaming PDF missing SSOT primary fill");
+  }
   await page.screenshot({ path: join(OUT, "stills", "05-portfolio-pdf-exported.png") });
   return portfolioPdf;
 };

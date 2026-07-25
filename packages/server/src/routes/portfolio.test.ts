@@ -132,6 +132,28 @@ function registerPortfolioExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
+  test("POST portfolio PDF template gaming embeds SSOT primary fill", async () => {
+    const { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } = await import(
+      "@bao/shared/constants/export-document-theme"
+    );
+    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const response = await app.handle(
+      new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "pdf", template: "gaming" }),
+      }),
+    );
+    expect(response.status).toBe(HTTP_STATUS_OK);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(
+      pdfStreamsContainRgbFill(bytes, PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.gaming.primary),
+    ).toBe(true);
+    expect(
+      pdfStreamsContainRgbFill(bytes, PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.modern.primary),
+    ).toBe(false);
+  });
+
   test("POST portfolio export returns a DOCX attachment", async () => {
     const response = await app.handle(
       new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {

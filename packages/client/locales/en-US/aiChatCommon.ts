@@ -27,6 +27,7 @@ const aiChatCommon = {
       autoSpeakAria: "Automatically read assistant replies",
       listeningStatus: "Listening...",
       speakingStatus: "Reading response...",
+      streamingStatus: "Generating response...",
       idleStatus: "Voice ready",
       unsupportedHint: "Voice controls are unavailable in this browser.",
       recognitionUnsupportedHint: "Voice input is unavailable in this browser.",

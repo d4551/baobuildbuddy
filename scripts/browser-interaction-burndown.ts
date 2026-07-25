@@ -106,7 +106,7 @@ const buildFiveQ = (
       shell.overflowX <= NUM_8 && !shell.truncatedChrome && !shell.clippedSectionTabs
         ? "layout ok"
         : "FAIL: overflow/clip",
-    interactions: clicks > 0 ? `clicked ${String(clicks)}` : "no clickable controls",
+    interactions: clicks > 0 ? `clicked ${String(clicks)}` : "FAIL: no clickable controls",
     glassDry:
       !shell.rawGlass && shell.duplicateChromeCopy.length === 0
         ? "no raw glass; chrome copy unique"

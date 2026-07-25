@@ -61,5 +61,31 @@ describe("browser-record-visual-proof-helpers honesty", () => {
     expect(source.includes("__vue_app__")).toBe(true);
     expect(SWALLOWED_LOADSTATE_PATTERN.test(source)).toBe(false);
     expect(source.includes('waitForLoadState("networkidle"')).toBe(false);
+    expect(source.includes("no safe main button clicked")).toBe(true);
+  });
+});
+
+describe("browser-interaction-burndown honesty", () => {
+  test("zero clicks is FAIL not soft ok", async () => {
+    const source = await readScript("browser-interaction-burndown.ts");
+    expect(source.includes("FAIL: no clickable controls")).toBe(true);
+    expect(source.includes(': "no clickable controls"')).toBe(false);
+  });
+});
+
+describe("browser-proof-pdf-live / ai-pdf-demo document-template honesty", () => {
+  test("pdf-live switches portfolio export template before download", async () => {
+    const source = await readScript("browser-proof-pdf-live.ts");
+    expect(source.includes("Portfolio export template")).toBe(true);
+    expect(source.includes('selectOption("gaming")')).toBe(true);
+    expect(source.includes("assertPdfContainsRgbFill")).toBe(true);
+  });
+
+  test("ai-pdf-demo does not falsely label daisyUI swap as document theme proof", async () => {
+    const source = await readScript("browser-record-ai-pdf-demo.ts");
+    expect(source.includes("tourThemedPdfs")).toBe(false);
+    expect(source.includes("tourDocumentExportPdfs")).toBe(true);
+    expect(source.includes("Portfolio export template")).toBe(true);
+    expect(source.includes("assertPdfContainsRgbFill")).toBe(true);
   });
 });

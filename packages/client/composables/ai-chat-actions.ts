@@ -131,8 +131,12 @@ async function requestAIChatResponseRealtime(
     return null;
   }
   const fullText = streamResult.value.fullText.trim();
+  // Empty stream_end must not fake-success with unableToProcessFallback.
+  if (fullText.length === 0) {
+    return null;
+  }
   const response: AIChatResponse = {
-    message: fullText.length > 0 ? fullText : input.unableToProcessFallback(),
+    message: fullText,
     sessionId: streamResult.value.sessionId,
     timestamp: new Date().toISOString(),
   };

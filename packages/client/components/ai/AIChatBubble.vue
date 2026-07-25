@@ -59,7 +59,7 @@ const avatarLabel = computed(() => {
     return props.userLabel;
   }
   if (props.isStreaming) {
-    return t("aiChatCommon.voice.speakingStatus");
+    return t("aiChatCommon.voice.streamingStatus");
   }
   return props.assistantLabel;
 });
@@ -85,7 +85,7 @@ const isStreamingStatusVisible = computed(
   () => isAssistant.value && props.isLatestAssistantMessage && props.isStreaming,
 );
 const statusText = computed(() => {
-  return isStreamingStatusVisible.value ? t("aiChatCommon.voice.speakingStatus") : "";
+  return isStreamingStatusVisible.value ? t("aiChatCommon.voice.streamingStatus") : "";
 });
 const ariaLabel = computed(() => {
   if (formattedTime.value.length === 0) {
@@ -158,9 +158,9 @@ const ariaLabel = computed(() => {
         v-if="isStreaming && !message.content"
         class="loading loading-dots loading-sm"
         role="status"
-        :aria-label="t('aiChatCommon.voice.speakingStatus')"
+        :aria-label="t('aiChatCommon.voice.streamingStatus')"
       >
-        <span class="sr-only">{{ t("aiChatCommon.voice.speakingStatus") }}</span>
+        <span class="sr-only">{{ t("aiChatCommon.voice.streamingStatus") }}</span>
       </span>
       <template v-else>{{ message.content }}</template>
     </div>

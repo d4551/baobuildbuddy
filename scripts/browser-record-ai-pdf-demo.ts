@@ -22,7 +22,8 @@ import {
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
-import { assertRealPdfFile } from "./utils/live-pdf-assert";
+import { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } from "../packages/shared/src/constants/export-document-theme";
+import { assertPdfContainsRgbFill, assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
@@ -153,14 +154,14 @@ const openResumeExportSurface = async (page: Page): Promise<void> => {
   });
 };
 
-const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
+const tourDocumentExportPdfs = async (page: Page): Promise<Record<string, unknown>> => {
   await page.locator(THEME_SWAP_LOCATOR).first().click();
   await wait(page, MS_EIGHT_HUNDRED);
-  await shot(page, "03-theme-business");
+  await shot(page, "03-ui-theme-business");
   await openResumeExportSurface(page);
-  await shot(page, "04-resume-editor-themed");
+  await shot(page, "04-resume-editor");
   const resumePdf = await assertRealPdfFile(
-    await exportPdf(page, "resume-themed.pdf", RE_EXPORT_RESUME),
+    await exportPdf(page, "resume-export.pdf", RE_EXPORT_RESUME),
   );
   await shot(page, "05-resume-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.coverLetter}`, { waitUntil: "domcontentloaded" });
@@ -170,27 +171,38 @@ const tourThemedPdfs = async (page: Page): Promise<Record<string, unknown>> => {
     state: "visible",
     timeout: MS_SIXTY_SECONDS,
   });
-  await shot(page, "06-cover-letter-themed");
+  await shot(page, "06-cover-letter-editor");
   const coverPdf = await assertRealPdfFile(
-    await exportPdf(page, "cover-letter-themed.pdf", RE_EXPORT_COVER),
+    await exportPdf(page, "cover-letter-export.pdf", RE_EXPORT_COVER),
   );
   await shot(page, "07-cover-pdf-exported");
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.portfolio}`, { waitUntil: "domcontentloaded" });
   await wait(page, MS_ONE_AND_HALF_SECONDS);
-  await shot(page, "08-portfolio-themed");
-  const portfolioPdf = await assertRealPdfFile(
-    await exportPdf(page, "portfolio-themed.pdf", RE_EXPORT_PORTFOLIO),
+  const templateSelect = page.getByLabel("Portfolio export template");
+  await templateSelect.waitFor({ state: "visible", timeout: MS_SIXTY_SECONDS });
+  await templateSelect.selectOption("gaming");
+  await wait(page, MS_FOUR_HUNDRED);
+  await shot(page, "08-portfolio-gaming-template");
+  const portfolioPath = await exportPdf(page, "portfolio-gaming.pdf", RE_EXPORT_PORTFOLIO);
+  const portfolioPdf = await assertRealPdfFile(portfolioPath);
+  const paletteOk = await assertPdfContainsRgbFill(
+    portfolioPath,
+    PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.gaming.primary,
+    "portfolio-gaming-primary",
   );
+  if (!paletteOk) {
+    throw new Error("Portfolio gaming PDF missing SSOT primary fill");
+  }
   await shot(page, "09-portfolio-pdf-exported");
   await page.locator(THEME_SWAP_LOCATOR).first().click();
   await wait(page, MS_SIX_HUNDRED);
-  await shot(page, "10-theme-corporate");
-  return { resumePdf, coverPdf, portfolioPdf };
+  await shot(page, "10-ui-theme-corporate");
+  return { resumePdf, coverPdf, portfolioPdf, portfolioTemplate: "gaming" };
 };
 
 const tour = async (page: Page): Promise<Record<string, unknown>> => {
   const nonce = await tourAiChat(page);
-  const pdfs = await tourThemedPdfs(page);
+  const pdfs = await tourDocumentExportPdfs(page);
   return { nonce, ...pdfs };
 };
 
