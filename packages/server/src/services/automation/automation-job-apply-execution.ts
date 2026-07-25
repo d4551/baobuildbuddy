@@ -4,12 +4,10 @@ import {
 } from "@bao/shared/constants/api-errors";
 import { API_MESSAGE_JOB_APPLICATION_AUTOMATION_COMPLETED } from "@bao/shared/constants/api-messages";
 import { ROUTE_GAMIFICATION_XP } from "@bao/shared/constants/gamification";
-import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
-import { config } from "../../config/env";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { createServerLogger } from "../../utils/logger";
@@ -20,6 +18,7 @@ import {
   markRunFailed,
   normalizeExecutionResult,
 } from "./automation-run-persistence";
+import { resolveAutomationTimeoutMs } from "./automation-settings-support";
 import type {
   CreateProgressEvent,
   JobApplyExecutionTracking,
@@ -77,11 +76,7 @@ const runJobApplyScript = async (
     },
     executionContext: {
       runId: preparation.runId,
-      timeoutMs:
-        Number.isFinite(preparation.automationSettings.defaultTimeout) &&
-        preparation.automationSettings.defaultTimeout > 0
-          ? Math.trunc(preparation.automationSettings.defaultTimeout * MS_PER_SECOND)
-          : config.automationScriptTimeoutMs,
+      timeoutMs: resolveAutomationTimeoutMs(preparation.automationSettings),
       outputDir: preparation.runArtifactDir,
     },
     automationSettings: preparation.automationSettings,

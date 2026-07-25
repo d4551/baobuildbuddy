@@ -142,7 +142,7 @@ export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
  */
 export const DEFAULT_AUTOMATION_SETTINGS: AutomationSettings = {
   headless: true,
-  defaultTimeout: 30,
+  defaultTimeout: 90,
   screenshotRetention: 7,
   maxConcurrentRuns: 1,
   defaultBrowser: "chrome",

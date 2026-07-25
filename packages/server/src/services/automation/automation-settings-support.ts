@@ -3,6 +3,11 @@ import {
   AUTOMATION_MAX_SCHEDULE_LEAD_TIME_MS,
 } from "@bao/shared/constants/automation-limits";
 import {
+  SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS,
+  SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS,
+} from "@bao/shared/constants/schema-limits";
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
+import {
   automationSettingsSchema,
   emailTransportSettingsSchema,
 } from "@bao/shared/schemas/settings.schema";
@@ -23,6 +28,18 @@ import { AutomationValidationError } from "./automation-errors";
 
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
+/** Pre-90s installs persisted 30s; Greenhouse job-apply routinely exceeds that. */
+const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
+
+const normalizeAutomationSettings = (value: AutomationSettings): AutomationSettings => {
+  if (value.defaultTimeout !== LEGACY_AUTOMATION_TIMEOUT_SECONDS) {
+    return value;
+  }
+  return {
+    ...value,
+    defaultTimeout: SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS,
+  };
+};
 
 export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   const settingsQueryResult = await settle(
@@ -36,11 +53,26 @@ export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   if (rows.length > 0 && rows[0].automationSettings) {
     const parsedSettings = automationSettingsSchema.safeParse(rows[0].automationSettings);
     if (parsedSettings.success) {
-      return parsedSettings.data;
+      return normalizeAutomationSettings(parsedSettings.data);
     }
   }
 
   return DEFAULT_AUTOMATION_SETTINGS;
+};
+
+/**
+ * Resolve automation script timeout in ms from settings (legacy 30s normalized).
+ */
+export const resolveAutomationTimeoutMs = (settingsValue: AutomationSettings): number => {
+  const normalized = normalizeAutomationSettings(settingsValue);
+  const seconds = Number.isFinite(normalized.defaultTimeout) && normalized.defaultTimeout > 0
+    ? Math.trunc(normalized.defaultTimeout)
+    : SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS;
+  const clamped = Math.min(
+    Math.max(1, seconds),
+    SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS,
+  );
+  return clamped * MS_PER_SECOND;
 };
 
 export const resolveMaxConcurrentRuns = (settingsValue: AutomationSettings): number => {

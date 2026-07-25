@@ -51,8 +51,8 @@ export const SCHEMA_MAX_SCREENSHOT_RETENTION_DAYS = 30;
 /** Max concurrent automation runs in settings. */
 export const SCHEMA_MAX_CONCURRENT_RUNS = 5;
 
-/** Default automation timeout in seconds. */
-export const SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS = 30;
+/** Default automation timeout in seconds (job-apply Greenhouse flows need >30s). */
+export const SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS = 90;
 
 /** Default screenshot retention days. */
 export const SCHEMA_DEFAULT_SCREENSHOT_RETENTION_DAYS = 7;
