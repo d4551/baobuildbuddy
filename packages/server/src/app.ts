@@ -40,6 +40,7 @@ import { rateLimit } from "./utils/rate-limit";
 import { automationWebSocket } from "./ws/automation.ws";
 import { chatWebSocket } from "./ws/chat.ws";
 import { interviewWebSocket } from "./ws/interview.ws";
+import { openapiDetail } from "./utils/openapi-detail";
 
 setupTypebox();
 
@@ -119,15 +120,27 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
       set.headers["strict-transport-security"] = "max-age=63072000; includeSubDomains; preload";
     }
   })
+  .use(
+    openapi({
+      path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
+      specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
+      documentation: {
+        info: {
+          title: APP_BRAND.apiName,
+          version: OPENAPI_VERSION,
+          description: "AI-powered career assistant for the video game industry",
+        },
+        tags: [...OPENAPI_TAGS],
+      },
+    }),
+  )
   .get(
     toApiScopedPath(API_ENDPOINTS.health),
     {
       response: {
         [HTTP_STATUS_OK]: "HealthResponse",
       },
-      detail: {
-        tags: ["Health"],
-      },
+      detail: openapiDetail("Health", "Retrieve health resource for BaoBuildBuddy career automation."),
     },
     async () => {
       const healthResult = await settle(
@@ -147,20 +160,6 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
   )
   .use(authRoutes)
   .use(authGuard)
-  .use(
-    openapi({
-      path: toApiScopedPath(API_ENDPOINTS.apiDocsUi),
-      specPath: toApiScopedPath(API_ENDPOINTS.apiDocsJson),
-      documentation: {
-        info: {
-          title: APP_BRAND.apiName,
-          version: OPENAPI_VERSION,
-          description: "AI-powered career assistant for the video game industry",
-        },
-        tags: [...OPENAPI_TAGS],
-      },
-    }),
-  )
   .use(userRoutes)
   .use(settingsRoutes)
   .use(jobsRoutes)

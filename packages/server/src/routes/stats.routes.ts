@@ -7,6 +7,7 @@ import {
   statsDashboardResponses,
   statsWeeklyResponses,
 } from "./stats-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 export const statsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.statsBase),
@@ -14,7 +15,7 @@ export const statsRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsDashboard),
     {
-      detail: { tags: ["Stats"] },
+      detail: openapiDetail("Stats", "Retrieve stats resource for BaoBuildBuddy career automation."),
       response: statsDashboardResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await statisticsService.getDashboardStats()),
@@ -22,7 +23,7 @@ export const statsRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsWeekly),
     {
-      detail: { tags: ["Stats"] },
+      detail: openapiDetail("Stats", "Retrieve stats resource for BaoBuildBuddy career automation."),
       response: statsWeeklyResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await statisticsService.getWeeklyActivity()),
@@ -30,7 +31,7 @@ export const statsRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.statsBase, API_ENDPOINTS.statsCareer),
     {
-      detail: { tags: ["Stats"] },
+      detail: openapiDetail("Stats", "Retrieve stats resource for BaoBuildBuddy career automation."),
       response: statsCareerResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await statisticsService.getCareerProgress()),

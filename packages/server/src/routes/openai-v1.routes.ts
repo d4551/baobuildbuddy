@@ -20,6 +20,7 @@ import {
   getOpenAIV1Model,
   listOpenAIV1Models,
 } from "./openai-v1-route-support";
+import { openapiDetail } from "../utils/openapi-detail";
 
 const resolveOpenAIV1AuthErrorCode = (error: string): string => {
   if (error === API_ERROR_INVALID_API_KEY) {
@@ -73,7 +74,7 @@ export const openaiV1Routes = new Elysia({
   .get(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models),
     {
-      detail: { tags: ["OpenAI V1"] },
+      detail: openapiDetail("OpenAI V1", "Retrieve openai v1 resource for BaoBuildBuddy career automation."),
       response: openaiV1ModelsListResponses,
     },
     async ({ status }) => {
@@ -89,7 +90,7 @@ export const openaiV1Routes = new Elysia({
   .post(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {
-      detail: { tags: ["OpenAI V1"] },
+      detail: openapiDetail("OpenAI V1", "Retrieve openai v1 $toOpenAIV1ChildPath(OPENAI V1 ENDPOINTS.models) * for BaoBuildBuddy career automation."),
       body: openaiV1ChatCompletionsBodySchema,
     },
     async ({ body, status }) => {

@@ -11,6 +11,7 @@ import {
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 const searchTypeSet = new Set<string>(searchTypes);
 
@@ -41,7 +42,7 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
     {
-      detail: { tags: ["Search"] },
+      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
       query: searchQuery,
       response: searchAllResponses,
     },
@@ -62,7 +63,7 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
     {
-      detail: { tags: ["Search"] },
+      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
       query: searchAutocompleteQuery,
       response: searchAutocompleteResponses,
     },

@@ -14,6 +14,7 @@ import { settle } from "@bao/shared/utils/promise";
 import { Elysia } from "elysia";
 import { scraperService } from "../services/scraper-service";
 import { scraperOperationResponses, scraperPortalParamsSchema } from "./scraper-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 const SCRAPER_BASE_PATH = API_ENDPOINTS.scraperBase;
 
@@ -23,7 +24,7 @@ export const scraperRoutes = new Elysia({
   .post(
     toApiChildPath(SCRAPER_BASE_PATH, API_ENDPOINTS.scraperStudios),
     {
-      detail: { tags: ["Scraper"] },
+      detail: openapiDetail("Scraper", "Retrieve scraper resource for BaoBuildBuddy career automation."),
       response: scraperOperationResponses,
     },
     async ({ status }) => {
@@ -43,7 +44,7 @@ export const scraperRoutes = new Elysia({
   .post(
     toApiChildPath(SCRAPER_BASE_PATH, `${API_ENDPOINTS.scraperJobsBase}/:portalId`),
     {
-      detail: { tags: ["Scraper"] },
+      detail: openapiDetail("Scraper", "Retrieve scraper resource for BaoBuildBuddy career automation."),
       params: scraperPortalParamsSchema,
       response: scraperOperationResponses,
     },

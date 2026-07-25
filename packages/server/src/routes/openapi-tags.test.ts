@@ -6,6 +6,7 @@ import { createTestDbPath, requestJson } from "../test-utils";
 
 type OpenApiOperation = {
   tags?: string[];
+  description?: string;
 };
 
 type OpenApiSpec = {
@@ -32,6 +33,7 @@ const routeTagMatchers = [
   { prefix: toApiScopedPath(API_ENDPOINTS.searchBase), tag: "Search" },
   { prefix: toApiScopedPath(API_ENDPOINTS.statsBase), tag: "Stats" },
   { prefix: toApiScopedPath(API_ENDPOINTS.automationBase), tag: "Automation" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.speechBase), tag: "Speech" },
 ] as const;
 
 const resolveExpectedTag = (path: string): string | null => {
@@ -109,13 +111,18 @@ describe("openapi tags", () => {
         if (!expectedTag) {
           continue;
         }
-        // Tags may not be present on routes registered before the openapi plugin
-        if (!operation.tags) {
-          continue;
+        // Fail-closed: documented API ops under known prefixes must publish tags + description.
+        // Log path/method on failure for LDL debugging.
+        if (!operation.tags || operation.tags.length === 0) {
+          throw new Error(`OpenAPI operation missing tags: ${method.toUpperCase()} ${path}`);
         }
-        expect(operation.tags).toBeArray();
-        expect(operation.tags?.length).toBeGreaterThan(0);
         expect(operation.tags).toContain(expectedTag);
+        const description = operation.description?.trim() ?? "";
+        if (description.length < 12) {
+          throw new Error(
+            `OpenAPI operation missing description (≥12 chars): ${method.toUpperCase()} ${path}`,
+          );
+        }
       }
     }
   });

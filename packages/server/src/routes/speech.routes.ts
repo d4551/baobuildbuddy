@@ -15,6 +15,7 @@ import {
   speechTranscribeBodySchema,
   speechTranscribeResponses,
 } from "./speech-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 export const speechRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.speechBase) })
   .use(
@@ -28,7 +29,7 @@ export const speechRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.s
   .post(
     toApiChildPath(API_ENDPOINTS.speechBase, API_ENDPOINTS.speechTranscribe),
     {
-      detail: { tags: ["Speech"] },
+      detail: openapiDetail("Speech", "Retrieve speech resource for BaoBuildBuddy career automation."),
       body: speechTranscribeBodySchema,
       response: speechTranscribeResponses,
     },
