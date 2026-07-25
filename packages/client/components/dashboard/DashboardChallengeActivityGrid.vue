@@ -107,6 +107,7 @@ const canClaimChallenge = computed(() => {
         <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.lg]">{{ t(DASHBOARD_COPY_KEYS.recentActivityTitle) }}</h2>
         <ul
           v-if="recentActivity.length > 0"
+          class="list"
           :class="[INSET_LIST_CLASS]"
         >
           <li
