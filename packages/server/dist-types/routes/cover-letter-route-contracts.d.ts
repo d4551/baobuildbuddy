@@ -39,6 +39,7 @@ export declare const generateCoverLetterBodySchema: import("typebox").TObject<{
 export type GenerateCoverLetterRouteBody = Static<typeof generateCoverLetterBodySchema>;
 export declare const coverLetterExportBodySchema: import("typebox").TObject<{
     format: import("typebox").TOptional<import("typebox").TString>;
+    template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
 }>;
 export type CoverLetterExportBody = Static<typeof coverLetterExportBodySchema>;
 export declare const coverLetterEntityResponseSchema: import("typebox").TObject<{

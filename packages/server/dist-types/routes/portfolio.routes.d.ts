@@ -185,6 +185,7 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
     };
     body: import("typebox").TObject<{
         format: import("typebox").TOptional<import("typebox").TString>;
+        template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"modern">, import("typebox").TLiteral<"gaming">, import("typebox").TLiteral<"minimal">, import("typebox").TLiteral<"showcase">]>>;
     }>;
     response: {
         200: import("typebox").TUnknown;

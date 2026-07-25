@@ -1,4 +1,5 @@
 export declare const ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE = "Orphaned running run reclaimed on startup";
+export declare const UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE = "Unknown automation run status normalized to error on startup";
 export declare const PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE = "Pending automation run missing schedule metadata";
 export declare class AutomationRunScheduler {
     private readonly executeScheduledRun;

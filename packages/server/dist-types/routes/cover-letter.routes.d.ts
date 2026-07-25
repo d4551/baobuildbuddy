@@ -246,6 +246,7 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
     }>;
     body: import("typebox").TObject<{
         format: import("typebox").TOptional<import("typebox").TString>;
+        template: import("typebox").TOptional<import("typebox").TUnion<import("typebox").TLiteral<"creative" | "executive" | "gaming" | "professional" | "technical">[]>>;
     }>;
     response: {
         200: import("typebox").TUnknown;

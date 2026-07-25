@@ -45,6 +45,7 @@ export declare const portfolioProjectUpdateBodySchema: import("typebox").TObject
 export type PortfolioProjectUpdateRouteBody = Static<typeof portfolioProjectUpdateBodySchema>;
 export declare const portfolioExportBodySchema: import("typebox").TObject<{
     format: import("typebox").TOptional<import("typebox").TString>;
+    template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"modern">, import("typebox").TLiteral<"gaming">, import("typebox").TLiteral<"minimal">, import("typebox").TLiteral<"showcase">]>>;
 }>;
 export type PortfolioExportRouteBody = Static<typeof portfolioExportBodySchema>;
 export declare const portfolioProjectResponseSchema: import("typebox").TObject<{

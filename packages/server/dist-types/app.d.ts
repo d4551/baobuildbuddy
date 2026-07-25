@@ -1861,6 +1861,7 @@ export declare const app: Elysia<"/api", "local", {
                     post: {
                         body: {
                             format?: string | undefined;
+                            template?: undefined;
                         };
                         params: {
                             id: string;
@@ -2069,6 +2070,7 @@ export declare const app: Elysia<"/api", "local", {
                 post: {
                     body: {
                         format?: string | undefined;
+                        template?: "gaming" | "minimal" | "modern" | "showcase" | undefined;
                     };
                     params: {};
                     query: unknown;
