@@ -378,6 +378,9 @@ export {
   type ShadowToken,
   STACK_SPACE_Y_TOKEN_CLASS,
   type StackSpaceYToken,
+  STATS_ROW_SHELL_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
+  type StatsShellVariant,
   SVG_STROKE_WIDTH_DEFAULT,
   TRACKING_TOKEN_CLASS,
   type TrackingToken,
@@ -385,6 +388,10 @@ export {
   type TypographyScaleToken,
   WIDTH_TOKEN_CLASS,
   type WidthToken,
+  PROGRESS_BAR_VARIANT_CLASS,
+  type ProgressBarVariant,
+  ALERT_VARIANT_CLASS,
+  type AlertVariant,
 } from "./layout-tokens";
 
 export * from "./layout-public-extras";

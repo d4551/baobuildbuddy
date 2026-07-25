@@ -24,11 +24,22 @@
 | Softener LDL | Fixture-based zero-softener tests; **ratchet gates in lint** (biome offs≤5, eslint offs≤9) |
 | Fail-open reader | Deleted `readApiDataOrEmpty` |
 
-## Remaining (honest)
+## E2E verified this turn (no false greens)
 
-- Full biome/eslint zero-softener cutover ≈1913 diagnostics — blocked by ratchet, not claimed green.
-- Headed capability proofs (`proof:whisper-stt` / `proof:kokoro-tts` / browser burndown) require stack + browsers — run in this grind after unit green.
-- Dead-i18n allowlist still 247 dynamic/deferred keys — shrink-only ratchet.
+| Proof | Result |
+|-------|--------|
+| `proof:browser-smoke` | **69/0** failures |
+| `proof:browser-burndown` | **57×viewport, 0 errors** |
+| Honesty surfaces (job-apply / ai-chat dock / settings) | console=0, mobile dock active=1 |
+| Artifacts | `/opt/cursor/artifacts/test-debt-grind/` (+ video) |
+
+Also fixed unwired SSOT that made SSR 500: `ALERT_VARIANT_CLASS` / progress / stats tokens; `AIChatBubble` density imports from `~/constants/chat`.
+
+## Remaining (honest, ratchet-enforced — not ignored)
+
+- Full biome/eslint zero-softener cutover ≈1913 diagnostics — **lint ratchets** block growth (offs≤5 / eslint offs≤9); zero-cutover not claimed.
+- Dead-i18n allowlist **247** (was 293) — shrink-only `MAX_ALLOWLIST_ENTRIES`.
+- Whisper/Kokoro live speech proofs need local model servers (not claimed this turn).
 
 ## Remaining ledger for capability debt
 

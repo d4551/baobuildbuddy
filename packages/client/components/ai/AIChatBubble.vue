@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import {
-  CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
-  CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
-  DEFAULT_APP_LANGUAGE,
-} from "@bao/shared/constants/settings";
+import { DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
-import { CHAT_AVATAR_SIZE_CLASS_BY_DENSITY, type ChatDensity } from "~/constants/chat";
+import {
+  CHAT_AVATAR_SIZE_CLASS_BY_DENSITY,
+  CHAT_BUBBLE_SIZE_CLASS_BY_DENSITY,
+  CHAT_MESSAGE_WIDTH_CLASS_BY_DENSITY,
+  type ChatDensity,
+} from "~/constants/chat";
 import {
   BADGE_GHOST_XS_CLASS,
   BADGE_OUTLINE_XS_CLASS,

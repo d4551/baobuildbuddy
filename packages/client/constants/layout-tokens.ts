@@ -318,3 +318,49 @@ export const MAX_W_3XL_CLASS = "max-w-3xl";
 export const MAX_W_40_CLASS = "max-w-40";
 export const MAX_W_64_CLASS = "max-w-64";
 export const MAX_W_XS_CLASS = "max-w-xs";
+
+/**
+ * Canonical daisyUI stats shell variants. Every stats row must reference one —
+ * no per-page `stats stats-*` class chains.
+ */
+export const STATS_SHELL_VARIANT_CLASS = {
+  default: "stats stats-vertical w-full border border-base-300 bg-base-200 sm:stats-horizontal",
+  lg: "stats stats-vertical w-full bg-base-200 lg:stats-horizontal",
+  sm: "stats stats-vertical w-full bg-base-200 sm:stats-horizontal",
+  surfaceLg: "stats stats-vertical w-full border border-base-300 bg-base-100 lg:stats-horizontal",
+  xl: "stats stats-vertical w-full border border-base-300 bg-base-200 xl:stats-horizontal",
+  vertical: "stats stats-vertical w-full bg-base-100",
+  brandResponsive:
+    "stats stats-vertical w-full border border-base-300 bg-base-100 sm:stats-horizontal xl:stats-vertical",
+} as const;
+
+export type StatsShellVariant = keyof typeof STATS_SHELL_VARIANT_CLASS;
+
+/** Canonical daisyUI stats row shell (vertical @mobile → horizontal @sm). */
+export const STATS_ROW_SHELL_CLASS = STATS_SHELL_VARIANT_CLASS.default;
+
+/**
+ * Canonical daisyUI progress bar color variants. Base `progress` stays static;
+ * these tokens supply semantic color only.
+ */
+export const PROGRESS_BAR_VARIANT_CLASS = {
+  primary: "progress-primary",
+  success: "progress-success",
+  warning: "progress-warning",
+  error: "progress-error",
+} as const;
+
+export type ProgressBarVariant = keyof typeof PROGRESS_BAR_VARIANT_CLASS;
+
+/**
+ * Canonical daisyUI alert color variants. Base `alert` stays static;
+ * these tokens supply semantic color only.
+ */
+export const ALERT_VARIANT_CLASS = {
+  info: "alert-info",
+  success: "alert-success",
+  warning: "alert-warning",
+  error: "alert-error",
+} as const;
+
+export type AlertVariant = keyof typeof ALERT_VARIANT_CLASS;
