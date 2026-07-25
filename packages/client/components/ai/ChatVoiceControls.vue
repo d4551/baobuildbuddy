@@ -30,9 +30,11 @@ interface ChatVoiceControlsProps {
   readonly ttsProviderOptions?: readonly SpeechProviderOption[];
   readonly sttProvider?: SpeechProviderOption;
   readonly sttModel?: string;
+  readonly sttEndpoint?: string;
   readonly sttModelOptions?: readonly string[];
   readonly ttsProvider?: SpeechProviderOption;
   readonly ttsModel?: string;
+  readonly ttsEndpoint?: string;
   readonly ttsModelOptions?: readonly string[];
   readonly speechConfigSaving?: boolean;
   readonly compact?: boolean;
@@ -45,9 +47,11 @@ const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
   ttsProviderOptions: () => [],
   sttProvider: DEFAULT_SPEECH_SETTINGS.stt.provider,
   sttModel: DEFAULT_SPEECH_SETTINGS.stt.model,
+  sttEndpoint: DEFAULT_SPEECH_SETTINGS.stt.endpoint,
   sttModelOptions: () => [],
   ttsProvider: DEFAULT_SPEECH_SETTINGS.tts.provider,
   ttsModel: DEFAULT_SPEECH_SETTINGS.tts.model,
+  ttsEndpoint: DEFAULT_SPEECH_SETTINGS.tts.endpoint,
   ttsModelOptions: () => [],
   speechConfigSaving: false,
   joinItem: false,
@@ -58,8 +62,10 @@ const emit = defineEmits<{
   "update:autoSpeakReplies": [value: boolean];
   "update:sttProvider": [value: SpeechProviderOption];
   "update:sttModel": [value: string];
+  "update:sttEndpoint": [value: string];
   "update:ttsProvider": [value: SpeechProviderOption];
   "update:ttsModel": [value: string];
+  "update:ttsEndpoint": [value: string];
   "save-speech-settings": [];
   "toggle-listening": [];
   "replay-assistant": [];
@@ -77,7 +83,9 @@ const showAdvancedSpeechConfig = computed(
     typeof props.sttProvider === "string" &&
     typeof props.ttsProvider === "string" &&
     typeof props.sttModel === "string" &&
-    typeof props.ttsModel === "string",
+    typeof props.ttsModel === "string" &&
+    typeof props.sttEndpoint === "string" &&
+    typeof props.ttsEndpoint === "string",
 );
 
 function handleVoiceSelectionChange(event: Event): void {
@@ -259,15 +267,19 @@ function handleAutoSpeakChange(event: Event): void {
     :tts-provider-options="props.ttsProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"
+    :stt-endpoint="props.sttEndpoint"
     :tts-provider="props.ttsProvider"
     :tts-model="props.ttsModel"
+    :tts-endpoint="props.ttsEndpoint"
     :stt-model-options="props.sttModelOptions ?? []"
     :tts-model-options="props.ttsModelOptions ?? []"
     :saving="props.speechConfigSaving === true"
     @update:stt-provider="emit('update:sttProvider', $event)"
     @update:stt-model="emit('update:sttModel', $event)"
+    @update:stt-endpoint="emit('update:sttEndpoint', $event)"
     @update:tts-provider="emit('update:ttsProvider', $event)"
     @update:tts-model="emit('update:ttsModel', $event)"
+    @update:tts-endpoint="emit('update:ttsEndpoint', $event)"
     @save="emit('save-speech-settings')"
   />
 </template>

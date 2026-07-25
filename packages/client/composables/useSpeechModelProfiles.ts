@@ -1,27 +1,21 @@
 import {
-  DEFAULT_SPEECH_SETTINGS,
   ON_DEVICE_TTS_PROVIDER_OPTIONS,
-  SPEECH_MODEL_OPTIONS,
   SPEECH_PROVIDER_OPTIONS,
-  type SpeechProviderOption,
 } from "@bao/shared/constants/settings";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import type { ComputedRef, Ref } from "vue";
 import { computed, reactive, ref, watch } from "vue";
 import { settlePromise } from "./async-flow";
+import {
+  buildNextSpeechConfigFromProfile,
+  createDefaultSpeechModelProfileState,
+  isSpeechModelProfileDirty,
+  mapPersistedSpeechToProfileState,
+  resolveDefaultSpeechModel,
+  resolveProviderModels,
+  type SpeechModelProfileState,
+} from "./speech-model-profile-state";
 import { useSettings } from "./useSettings";
-
-type SpeechModelProfileKind = "stt" | "tts";
-
-/**
- * Reactive editable speech profile model used by chat surfaces.
- */
-export interface SpeechModelProfileState {
-  sttProvider: SpeechProviderOption;
-  sttModel: string;
-  ttsProvider: SpeechProviderOption;
-  ttsModel: string;
-}
 
 /**
  * Result envelope for saving speech model profile preferences.
@@ -46,32 +40,8 @@ interface SaveSpeechConfigActionOptions {
   locale: Ref<string>;
 }
 
-const resolveProviderModels = (
-  kind: SpeechModelProfileKind,
-  provider: SpeechProviderOption,
-): readonly string[] => SPEECH_MODEL_OPTIONS[kind][provider];
-
-const resolveDefaultModel = (
-  kind: SpeechModelProfileKind,
-  provider: SpeechProviderOption,
-): string => {
-  const configuredModels = resolveProviderModels(kind, provider);
-  if (configuredModels.length === 0) {
-    return kind === "stt" ? DEFAULT_SPEECH_SETTINGS.stt.model : DEFAULT_SPEECH_SETTINGS.tts.model;
-  }
-  return configuredModels[0] ?? "";
-};
-
-const createSpeechConfigState = (): SpeechModelProfileState => {
-  const sttProvider = DEFAULT_SPEECH_SETTINGS.stt.provider;
-  const ttsProvider = DEFAULT_SPEECH_SETTINGS.tts.provider;
-  return reactive<SpeechModelProfileState>({
-    sttProvider,
-    sttModel: resolveDefaultModel("stt", sttProvider),
-    ttsProvider,
-    ttsModel: resolveDefaultModel("tts", ttsProvider),
-  });
-};
+const createSpeechConfigState = (): SpeechModelProfileState =>
+  reactive<SpeechModelProfileState>(createDefaultSpeechModelProfileState());
 
 const createPersistedSpeechConfig = (
   settings: ReturnType<typeof useSettings>["settings"],
@@ -79,25 +49,14 @@ const createPersistedSpeechConfig = (
   computed<SpeechModelProfileState>(() => {
     const persistedSpeech =
       settings.value?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
-    return {
-      sttProvider: persistedSpeech.stt.provider,
-      sttModel: persistedSpeech.stt.model,
-      ttsProvider: persistedSpeech.tts.provider,
-      ttsModel: persistedSpeech.tts.model,
-    };
+    return mapPersistedSpeechToProfileState(persistedSpeech);
   });
 
 const createSpeechConfigDirtyState = (
   speechConfig: SpeechModelProfileState,
   persistedSpeechConfig: ComputedRef<SpeechModelProfileState>,
 ): ComputedRef<boolean> =>
-  computed(
-    () =>
-      speechConfig.sttProvider !== persistedSpeechConfig.value.sttProvider ||
-      speechConfig.sttModel.trim() !== persistedSpeechConfig.value.sttModel ||
-      speechConfig.ttsProvider !== persistedSpeechConfig.value.ttsProvider ||
-      speechConfig.ttsModel.trim() !== persistedSpeechConfig.value.ttsModel,
-  );
+  computed(() => isSpeechModelProfileDirty(speechConfig, persistedSpeechConfig.value));
 
 const syncSpeechConfigFromSettings = (
   settings: ReturnType<typeof useSettings>["settings"],
@@ -108,10 +67,13 @@ const syncSpeechConfigFromSettings = (
     (currentSettings) => {
       const persistedSpeech =
         currentSettings?.automationSettings?.speech ?? DEFAULT_AUTOMATION_SETTINGS.speech;
-      speechConfig.sttProvider = persistedSpeech.stt.provider;
-      speechConfig.sttModel = persistedSpeech.stt.model;
-      speechConfig.ttsProvider = persistedSpeech.tts.provider;
-      speechConfig.ttsModel = persistedSpeech.tts.model;
+      const mapped = mapPersistedSpeechToProfileState(persistedSpeech);
+      speechConfig.sttProvider = mapped.sttProvider;
+      speechConfig.sttModel = mapped.sttModel;
+      speechConfig.sttEndpoint = mapped.sttEndpoint;
+      speechConfig.ttsProvider = mapped.ttsProvider;
+      speechConfig.ttsModel = mapped.ttsModel;
+      speechConfig.ttsEndpoint = mapped.ttsEndpoint;
     },
     { immediate: true },
   );
@@ -125,7 +87,7 @@ const registerSttProviderWatcher = (speechConfig: SpeechModelProfileState) => {
       if (optionsForProvider.includes(speechConfig.sttModel)) {
         return;
       }
-      speechConfig.sttModel = resolveDefaultModel("stt", provider);
+      speechConfig.sttModel = resolveDefaultSpeechModel("stt", provider);
     },
   );
 };
@@ -138,7 +100,7 @@ const registerTtsProviderWatcher = (speechConfig: SpeechModelProfileState) => {
       if (optionsForProvider.includes(speechConfig.ttsModel)) {
         return;
       }
-      speechConfig.ttsModel = resolveDefaultModel("tts", provider);
+      speechConfig.ttsModel = resolveDefaultSpeechModel("tts", provider);
     },
   );
 };
@@ -150,22 +112,11 @@ const buildNextSpeechConfig = (
 ) => {
   const existingAutomationSettings =
     settings.value?.automationSettings ?? DEFAULT_AUTOMATION_SETTINGS;
-  const sttModel = speechConfig.sttModel.trim();
-  const ttsModel = speechConfig.ttsModel.trim();
-  return {
-    ...existingAutomationSettings.speech,
-    locale: existingAutomationSettings.speech.locale || locale,
-    stt: {
-      ...existingAutomationSettings.speech.stt,
-      provider: speechConfig.sttProvider,
-      model: sttModel.length > 0 ? sttModel : resolveDefaultModel("stt", speechConfig.sttProvider),
-    },
-    tts: {
-      ...existingAutomationSettings.speech.tts,
-      provider: speechConfig.ttsProvider,
-      model: ttsModel.length > 0 ? ttsModel : resolveDefaultModel("tts", speechConfig.ttsProvider),
-    },
-  };
+  return buildNextSpeechConfigFromProfile(
+    existingAutomationSettings.speech,
+    speechConfig,
+    locale,
+  );
 };
 
 const createEnsureSpeechConfigLoadedAction =

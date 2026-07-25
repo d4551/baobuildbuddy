@@ -15,8 +15,10 @@ import {
 interface SpeechModelProfileFieldsProps {
   readonly sttProvider: SpeechProviderOption;
   readonly sttModel: string;
+  readonly sttEndpoint: string;
   readonly ttsProvider: SpeechProviderOption;
   readonly ttsModel: string;
+  readonly ttsEndpoint: string;
   readonly providerOptions: readonly SpeechProviderOption[];
   /** When set, TTS select uses this list (browser + local Kokoro only). */
   readonly ttsProviderOptions?: readonly SpeechProviderOption[];
@@ -29,8 +31,10 @@ const props = defineProps<SpeechModelProfileFieldsProps>();
 const emit = defineEmits<{
   "update:sttProvider": [value: SpeechProviderOption];
   "update:sttModel": [value: string];
+  "update:sttEndpoint": [value: string];
   "update:ttsProvider": [value: SpeechProviderOption];
   "update:ttsModel": [value: string];
+  "update:ttsEndpoint": [value: string];
   save: [];
 }>();
 const { t } = useI18n();
@@ -77,7 +81,22 @@ function handleTtsModelChange(event: Event): void {
   }
   emit("update:ttsModel", target.value);
 }
-</script>
+
+function handleSttEndpointChange(event: Event): void {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+  emit("update:sttEndpoint", target.value);
+}
+
+function handleTtsEndpointChange(event: Event): void {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) {
+    return;
+  }
+  emit("update:ttsEndpoint", target.value);
+}</script>
 
 <template>
  <fieldset :class="[FIELDSET_PANEL_CLASS, PADDING_TOKEN_CLASS.p3]">
@@ -162,6 +181,34 @@ function handleTtsModelChange(event: Event): void {
           :value="model"
         />
       </datalist>
+
+      <label class="label" for="speech-profile-stt-endpoint" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+        {{ t("aiChatPage.voiceSettings.sttEndpointLabel") }}
+      </label>
+      <input
+        id="speech-profile-stt-endpoint"
+        type="url"
+        class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
+        :value="props.sttEndpoint"
+        :disabled="props.saving"
+        :placeholder="t('aiChatPage.voiceSettings.endpointHint')"
+        :aria-label="t('aiChatPage.voiceSettings.sttEndpointAria')"
+        @input="handleSttEndpointChange"
+      />
+
+      <label class="label" for="speech-profile-tts-endpoint" :class="[PADDING_TOKEN_CLASS.py0, TYPOGRAPHY_SCALE_CLASS.xs]">
+        {{ t("aiChatPage.voiceSettings.ttsEndpointLabel") }}
+      </label>
+      <input
+        id="speech-profile-tts-endpoint"
+        type="url"
+        class="input input-sm" :class="[FLUID_WIDTH_CLASS]"
+        :value="props.ttsEndpoint"
+        :disabled="props.saving"
+        :placeholder="t('aiChatPage.voiceSettings.endpointHint')"
+        :aria-label="t('aiChatPage.voiceSettings.ttsEndpointAria')"
+        @input="handleTtsEndpointChange"
+      />
     </SectionGrid>
     <p
       v-if="props.ttsProvider === 'local' || props.ttsProvider === 'browser' || props.sttProvider === 'browser'"

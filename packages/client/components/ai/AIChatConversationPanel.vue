@@ -76,8 +76,10 @@ const emit = defineEmits<{
   "update:autoSpeakReplies": [value: boolean];
   "update:sttProvider": [value: string];
   "update:sttModel": [value: string];
+  "update:sttEndpoint": [value: string];
   "update:ttsProvider": [value: string];
   "update:ttsModel": [value: string];
+  "update:ttsEndpoint": [value: string];
   saveSpeech: [];
   toggleListening: [];
   replayAssistant: [];
@@ -280,15 +282,19 @@ const updateInput = (event: Event): void => {
                 :tts-provider-options="ttsProviderOptions"
                 :stt-provider="speechConfig.sttProvider"
                 :stt-model="speechConfig.sttModel"
+                :stt-endpoint="speechConfig.sttEndpoint"
                 :tts-provider="speechConfig.ttsProvider"
                 :tts-model="speechConfig.ttsModel"
+                :tts-endpoint="speechConfig.ttsEndpoint"
                 :stt-model-options="sttModelOptions"
                 :tts-model-options="ttsModelOptions"
                 :saving="speechConfigSaving"
                 @update:stt-provider="emit('update:sttProvider', $event)"
                 @update:stt-model="emit('update:sttModel', $event)"
+                @update:stt-endpoint="emit('update:sttEndpoint', $event)"
                 @update:tts-provider="emit('update:ttsProvider', $event)"
                 @update:tts-model="emit('update:ttsModel', $event)"
+                @update:tts-endpoint="emit('update:ttsEndpoint', $event)"
                 @save="emit('saveSpeech')"
               />
             </div>
