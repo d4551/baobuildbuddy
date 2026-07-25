@@ -14,20 +14,23 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const CLIENT_ROOT = join(import.meta.dirname, "..");
+const LAYOUT_PUBLIC = join(CLIENT_ROOT, "constants/layout.ts");
+const LAYOUT_CHROME = join(CLIENT_ROOT, "constants/layout-chrome.ts");
 const PAGE_HERO_GLASS_SUBTLE_PATTERN = /PAGE_HERO_SECTION_CLASS\s*=\s*[\s\S]*?glass-subtle/u;
 
 // ── Glass surface consistency ────────────────────────────────────────
 
 describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(LAYOUT_CHROME, "utf8");
     expect(content).toContain(
       'SURFACE_GLASS_CARD_CLASS = "card card-border card-glass glass-interactive"',
     );
+    expect(readFileSync(LAYOUT_PUBLIC, "utf8")).toContain("SURFACE_GLASS_CARD_CLASS");
   });
 
   it("all SURFACE_GLASS_* variants are declared in layout.ts", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(LAYOUT_PUBLIC, "utf8");
     const variants = [
       "SURFACE_GLASS_CARD_CLASS",
       "SURFACE_GLASS_CARD_STRONG_CLASS",
@@ -89,7 +92,8 @@ describe("Layout SSOT — Glass surface tokens", () => {
 
 describe("Layout SSOT — Layout token declarations", () => {
   it("layout.ts declares shell and page tokens", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const publicSurface = readFileSync(LAYOUT_PUBLIC, "utf8");
+    const chrome = readFileSync(LAYOUT_CHROME, "utf8");
     const tokens = [
       "SHELL_MAIN_INNER_CLASS",
       "SHELL_DRAWER_CLASS",
@@ -102,8 +106,8 @@ describe("Layout SSOT — Layout token declarations", () => {
       "EMPTY_STATE_STACK_CLASS",
       "SIDEBAR_WIDTH_LG_CLASS",
     ];
-    for (const t of tokens) expect(content, `Missing: ${t}`).toContain(t);
-    expect(content, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
+    for (const t of tokens) expect(publicSurface, `Missing: ${t}`).toContain(t);
+    expect(chrome, "PAGE_HERO_SECTION_CLASS must use glass-subtle").toMatch(
       PAGE_HERO_GLASS_SUBTLE_PATTERN,
     );
   });
@@ -136,20 +140,22 @@ describe("Layout SSOT — Layout token declarations", () => {
 
 describe("Layout SSOT — Layout token declarations continued", () => {
   it("ICON_SIZE_CLASS has canonical icon sizes", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(LAYOUT_CHROME, "utf8");
     expect(content).toContain('xs: "h-3 w-3"');
     expect(content).toContain('sm: "h-5 w-5"');
     expect(content).toContain('md: "h-6 w-6"');
     expect(content).toContain('lg: "h-8 w-8"');
+    expect(readFileSync(LAYOUT_PUBLIC, "utf8")).toContain("ICON_SIZE_CLASS");
   });
 
   it("ICON_DECORATIVE_STROKE_WIDTH is defined", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(LAYOUT_CHROME, "utf8");
     expect(content).toContain("ICON_DECORATIVE_STROKE_WIDTH = 2");
+    expect(readFileSync(LAYOUT_PUBLIC, "utf8")).toContain("ICON_DECORATIVE_STROKE_WIDTH");
   });
 
   it("min-height/width dimension tokens exist", () => {
-    const content = readFileSync(join(CLIENT_ROOT, "constants/layout.ts"), "utf8");
+    const content = readFileSync(LAYOUT_PUBLIC, "utf8");
     const tokens = [
       "MIN_HEIGHT_ZERO_CLASS",
       "MIN_HEIGHT_SCROLL_CLASS",
