@@ -193,3 +193,13 @@ describe("raw-design-token gate source keeps oklab/color-mix/arbitrary coverage"
     expect(source.includes("cssColorFunctionPattern")).toBe(true);
   });
 });
+
+describe("collectRawDesignTokenViolationsForContent: skips test/spec fixtures", () => {
+  test("does not flag responsive bypass or color-mix quoted inside .spec.ts", () => {
+    const violations = collectRawDesignTokenViolationsForContent(
+      "packages/client/tests/bao-ssot-compliance.spec.ts",
+      'expect(SIDEBAR_WIDTH_LG_CLASS).toContain("lg:w-64"); const x = color-mix(in oklab, red 20%, transparent);',
+    );
+    expect(violations).toEqual([]);
+  });
+});

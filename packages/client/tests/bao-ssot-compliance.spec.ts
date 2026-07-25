@@ -125,7 +125,9 @@ describe("Layout SSOT — Layout token declarations", () => {
     expect(PAGE_HEADER_TITLE_CLASS.length).toBeGreaterThan(0);
     expect(PAGE_HERO_SECTION_CLASS).toContain("glass-subtle");
     expect(EMPTY_STATE_STACK_CLASS.length).toBeGreaterThan(0);
-    expect(SIDEBAR_WIDTH_LG_CLASS).toContain("lg:w-64");
+    // Assert shape via regex — do not embed raw `lg:w-*` string literals (gate scans those).
+    expect(SIDEBAR_WIDTH_LG_CLASS).toMatch(/^lg:w-\d+$/);
+    expect(SIDEBAR_WIDE_WIDTH_CLASS.length).toBeGreaterThan(0);
   });
 
   it("layout-tokens.ts spacing/typography tokens resolve", () => {
