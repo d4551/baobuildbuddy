@@ -10,6 +10,7 @@ export declare const automationScreenshotRoutes: import("elysia/types").AddRoute
 }, import("elysia/types").DefaultMetadata, {}, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/:runId/:index", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         runId: import("typebox").TString;

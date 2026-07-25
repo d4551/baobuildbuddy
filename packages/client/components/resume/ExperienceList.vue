@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -169,15 +170,11 @@ function removeExperience(index: number): void {
           </fieldset>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.experience.descriptionLegend") }}</legend>
-            <textarea 
+            <AppProseField
               v-model="experience.description"
-              required
-              minlength="20"
-              class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
-              rows="3"
               :aria-label="t('resumePage.experience.descriptionAria')"
-              @input="emitValue"
-            ></textarea>
+              @update:model-value="emitValue"
+            />
             <p class="validator-hint">{{ t("resumePage.experience.descriptionHint") }}</p>
           </fieldset>
         </div>

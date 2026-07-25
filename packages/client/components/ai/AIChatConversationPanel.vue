@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared/types/ai";
+import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
+import { useSettings } from "~/composables/useSettings";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   ICON_SIZE_CLASS,
-  LEADING_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   MAX_W_2XL_CLASS,
   MIN_HEIGHT_ZERO_CLASS,
@@ -51,8 +52,9 @@ defineProps<{
   availableVoices: SpeechSynthesisVoice[];
   speechProviderOptions: ReturnType<
     typeof useSpeechModelProfiles
-  >["speechProviderOptions"]["value"];
-  speechConfig: ReturnType<typeof useSpeechModelProfiles>["speechConfig"]["value"];
+  >["speechProviderOptions"];
+  ttsProviderOptions: ReturnType<typeof useSpeechModelProfiles>["ttsProviderOptions"];
+  speechConfig: ReturnType<typeof useSpeechModelProfiles>["speechConfig"];
   sttModelOptions: ReturnType<typeof useSpeechModelProfiles>["sttModelOptions"]["value"];
   ttsModelOptions: ReturnType<typeof useSpeechModelProfiles>["ttsModelOptions"]["value"];
   speechConfigSaving: boolean;
@@ -75,9 +77,30 @@ const emit = defineEmits<{
   saveSpeech: [];
   toggleListening: [];
   replayAssistant: [];
+  testOnDeviceTts: [];
 }>();
 
 const { t } = useI18n();
+const { isAiConfigurationIncomplete } = useSettings();
+const emptyCtaTo = computed(() =>
+  isAiConfigurationIncomplete.value
+    ? APP_ROUTE_BUILDERS.settingsSection("aiProviders")
+    : APP_ROUTES.aiDashboard,
+);
+const emptyTitleKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureTitle" : "aiChatPage.emptyTitle",
+);
+const emptyDescriptionKey = computed(() =>
+  isAiConfigurationIncomplete.value
+    ? "aiChatPage.emptyConfigureDescription"
+    : "aiChatPage.emptyDescription",
+);
+const emptyCtaLabelKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCta" : "aiChatPage.emptyCta",
+);
+const emptyCtaAriaKey = computed(() =>
+  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCtaAria" : "aiChatPage.emptyCtaAria",
+);
 
 const updateInput = (event: Event): void => {
   const target = event.target;
@@ -136,21 +159,27 @@ const updateInput = (event: Event): void => {
         :aria-label="t('aiChatPage.logAria')"
         @scroll="emit('scroll')"
       >
-        <div v-if="!hasConversation" class="flex items-center justify-center" :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]">
-          <div class="card border border-base-300 bg-base-100" :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
-            <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-              <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-                <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ t("aiChatPage.emptyTitle") }}</h2>
-                <p class="text-secondary" :class="[LEADING_TOKEN_CLASS.leading6, TYPOGRAPHY_SCALE_CLASS.sm]">
-                  {{ t("aiChatPage.emptyDescription") }}
-                </p>
-              </div>
-              <ChatPromptChips
-                :prompts="contextualPrompts"
-                :loading="loading"
-                @prompt="emit('prompt', $event)"
-              />
-            </div>
+        <div
+          v-if="!hasConversation"
+          class="flex items-center justify-center"
+          :class="[MIN_HEIGHT_ZERO_CLASS, PADDING_TOKEN_CLASS.py8, FLUID_HEIGHT_CLASS]"
+        >
+          <div :class="[MAX_W_2XL_CLASS, FLUID_WIDTH_CLASS]">
+            <EmptyState
+              :title-key="emptyTitleKey"
+              :description-key="emptyDescriptionKey"
+              :cta-label-key="emptyCtaLabelKey"
+              :cta-aria-key="emptyCtaAriaKey"
+              :cta-to="emptyCtaTo"
+            >
+              <template #actions>
+                <ChatPromptChips
+                  :prompts="contextualPrompts"
+                  :loading="loading"
+                  @prompt="emit('prompt', $event)"
+                />
+              </template>
+            </EmptyState>
           </div>
         </div>
 
@@ -247,6 +276,7 @@ const updateInput = (event: Event): void => {
               @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
               @toggle-listening="emit('toggleListening')"
               @replay-assistant="emit('replayAssistant')"
+              @test-on-device-tts="emit('testOnDeviceTts')"
             />
           </ClientOnly>
           <details class="collapse collapse-arrow border border-base-300 bg-base-100" :class="[MARGIN_TOKEN_CLASS.mt2]">
@@ -256,6 +286,7 @@ const updateInput = (event: Event): void => {
             <div class="collapse-content" :class="[PADDING_TOKEN_CLASS.pb4]">
               <SpeechModelProfileFields
                 :provider-options="speechProviderOptions"
+                :tts-provider-options="ttsProviderOptions"
                 :stt-provider="speechConfig.sttProvider"
                 :stt-model="speechConfig.sttModel"
                 :tts-provider="speechConfig.ttsProvider"

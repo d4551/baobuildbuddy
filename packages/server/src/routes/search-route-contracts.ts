@@ -1,15 +1,11 @@
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_ID, SCHEMA_MAX_LENGTH_SHORT } from "@bao/shared/constants/schema-limits";
+import { SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { t } from "elysia";
 import type { Static } from "typebox";
 
-export const searchTypes: readonly ["jobs", "studios", "skills", "resumes"] = [
-  "jobs",
-  "studios",
-  "skills",
-  "resumes",
-];
-export type SearchType = (typeof searchTypes)[number];
+export const searchTypes = SEARCH_RESULT_TYPES;
+export type SearchType = SearchResultType;
 
 export const searchQuerySchema = t.Object({
   q: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
@@ -33,6 +29,10 @@ export const searchResultSchema = t.Object({
     t.Literal("studios"),
     t.Literal("skills"),
     t.Literal("resumes"),
+    t.Literal("cover-letters"),
+    t.Literal("portfolio-projects"),
+    t.Literal("interview-sessions"),
+    t.Literal("automation-runs"),
   ]),
   id: t.String(),
   title: t.String(),
@@ -41,15 +41,21 @@ export const searchResultSchema = t.Object({
   relevance: t.Number(),
 });
 
+const searchCountsSchema = t.Object({
+  jobs: t.Number(),
+  studios: t.Number(),
+  skills: t.Number(),
+  resumes: t.Number(),
+  "cover-letters": t.Number(),
+  "portfolio-projects": t.Number(),
+  "interview-sessions": t.Number(),
+  "automation-runs": t.Number(),
+});
+
 export const searchAllResponseSchema = t.Object({
   query: t.String(),
   results: t.Array(searchResultSchema),
-  counts: t.Object({
-    jobs: t.Number(),
-    studios: t.Number(),
-    skills: t.Number(),
-    resumes: t.Number(),
-  }),
+  counts: searchCountsSchema,
   totalTime: t.Number(),
 });
 

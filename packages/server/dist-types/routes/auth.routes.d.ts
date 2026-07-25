@@ -96,19 +96,23 @@ export declare const authRoutes: Elysia<string, "local", {
                 headers: unknown;
                 response: {
                     200: {
-                        readonly configured: true;
-                        readonly apiKey: string;
-                        readonly message: "API key rotated. Save this new key — it will not be shown again.";
-                    } & {
-                        readonly configured: true;
-                        readonly apiKey: string;
-                        readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                        configured: boolean;
+                        apiKey?: string | undefined;
+                        message?: string | undefined;
                     };
                     401: {
-                        readonly error: string;
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     404: {
-                        readonly error: "No API key configured to rotate";
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;
@@ -123,17 +127,22 @@ export declare const authRoutes: Elysia<string, "local", {
                 headers: unknown;
                 response: {
                     200: {
-                        readonly revoked: true;
-                        readonly message: "API key has been revoked.";
-                    } & {
-                        readonly revoked: true;
-                        readonly message: "API key has been revoked.";
+                        revoked: boolean;
+                        message?: string | undefined;
                     };
                     401: {
-                        readonly error: string;
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                     404: {
-                        readonly error: "No API key configured to revoke";
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
                     };
                 };
                 error: never;

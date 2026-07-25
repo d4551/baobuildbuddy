@@ -66,6 +66,7 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "put", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         name: import("typebox").TOptional<import("typebox").TString>;
@@ -135,27 +136,6 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
         }>;
     };
 }, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
-    body: {
-        name?: string | undefined;
-        email?: string | undefined;
-        phone?: string | undefined;
-        location?: string | undefined;
-        website?: string | undefined;
-        linkedin?: string | undefined;
-        github?: string | undefined;
-        summary?: string | undefined;
-        currentRole?: string | undefined;
-        currentCompany?: string | undefined;
-        yearsExperience?: number | undefined;
-        technicalSkills?: string[] | undefined;
-        softSkills?: string[] | undefined;
-        gamingExperience?: Record<string, unknown> | undefined;
-        careerGoals?: Record<string, unknown> | undefined;
-    };
-    query: Record<string, string | undefined>;
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -163,11 +143,6 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         400: {
             error: string;
@@ -218,6 +193,32 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
             updatedAt: string;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: {
+        name?: string | undefined;
+        email?: string | undefined;
+        phone?: string | undefined;
+        location?: string | undefined;
+        website?: string | undefined;
+        linkedin?: string | undefined;
+        github?: string | undefined;
+        summary?: string | undefined;
+        currentRole?: string | undefined;
+        currentCompany?: string | undefined;
+        yearsExperience?: number | undefined;
+        technicalSkills?: string[] | undefined;
+        softSkills?: string[] | undefined;
+        gamingExperience?: Record<string, unknown> | undefined;
+        careerGoals?: Record<string, unknown> | undefined;
+    };
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     id: string;
     name: string;

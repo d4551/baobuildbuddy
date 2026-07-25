@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,

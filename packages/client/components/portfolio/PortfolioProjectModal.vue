@@ -4,6 +4,7 @@ import {
   PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
 } from "@bao/shared/constants/portfolio";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -67,6 +68,16 @@ function updateProjectTextField<K extends "title" | "description" | "image" | "l
   });
 }
 
+function updateProjectStringField<K extends "title" | "description" | "image" | "liveUrl">(
+  key: K,
+  value: string,
+): void {
+  emit("update:projectForm", {
+    ...props.projectForm,
+    [key]: value,
+  });
+}
+
 function updateFeaturedFlag(event: Event): void {
   const target = event.target;
   if (!(target instanceof HTMLInputElement)) {
@@ -112,15 +123,12 @@ function updateFeaturedFlag(event: Event): void {
 
       <fieldset class="fieldset">
         <legend class="fieldset-legend">{{ t("portfolioPage.modal.descriptionLegend") }}</legend>
-        <textarea 
-          :value="props.projectForm.description"
-          :minlength="PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH"
-          class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
-          rows="4"
+        <AppProseField
+          :model-value="props.projectForm.description"
           :placeholder="t('portfolioPage.modal.descriptionPlaceholder')"
           :aria-label="t('portfolioPage.modal.descriptionAria')"
-          @input="updateProjectTextField('description', $event)"
-        ></textarea>
+          @update:model-value="updateProjectStringField('description', $event)"
+        />
         <p class="validator-hint">
           {{ t("portfolioPage.modal.descriptionHint", { count: PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH }) }}
         </p>

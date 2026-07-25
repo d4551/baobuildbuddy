@@ -1,4 +1,8 @@
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {
+  SEARCH_RESULT_TYPES,
+  type SearchResultType,
+} from "@bao/shared/constants/search";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { settle } from "@bao/shared/utils/promise";
 import { useI18n } from "vue-i18n";
@@ -6,7 +10,7 @@ import { assertApiResponse, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
 
 export type WorkspaceSearchResult = {
-  type: string;
+  type: SearchResultType;
   id: string;
   title: string;
   subtitle: string;
@@ -19,26 +23,39 @@ export type WorkspaceSearchSuggestion = {
   type: string;
 };
 
-const SEARCH_TYPE_ROUTE: Record<string, (id: string) => string> = {
+/** SSOT route map — keys MUST equal SEARCH_RESULT_TYPES (validate:search-type-parity). */
+export const SEARCH_TYPE_ROUTE: Record<SearchResultType, (id: string) => string> = {
   jobs: (id) => APP_ROUTE_BUILDERS.jobDetail(id),
   studios: (id) => APP_ROUTE_BUILDERS.studioDetail(id),
   resumes: (id) => APP_ROUTE_BUILDERS.resumeEditor(id),
   skills: () => APP_ROUTES.skills,
+  "cover-letters": (id) => APP_ROUTE_BUILDERS.coverLetterDetail(id),
+  "portfolio-projects": () => APP_ROUTES.portfolio,
+  "interview-sessions": (id) => APP_ROUTE_BUILDERS.interviewSession(id),
+  "automation-runs": (id) => APP_ROUTE_BUILDERS.automationRunDetail(id),
 };
 
 const AUTOCOMPLETE_MIN_PREFIX = 2;
 const AUTOCOMPLETE_DEBOUNCE_MS = 180;
 
+export const WORKSPACE_OMNI_SEARCH_OPEN_EVENT = "bao:open-omni-search";
+
 export function resolveWorkspaceSearchResultRoute(result: WorkspaceSearchResult): string {
   const builder = SEARCH_TYPE_ROUTE[result.type];
-  if (!builder) {
-    return APP_ROUTES.dashboard;
-  }
   return builder(result.id);
 }
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
+}
+
+function asSearchResultType(value: unknown): SearchResultType | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  return (SEARCH_RESULT_TYPES as readonly string[]).includes(value)
+    ? (value as SearchResultType)
+    : null;
 }
 
 function mapSearchResults(data: unknown): WorkspaceSearchResult[] {
@@ -49,8 +66,12 @@ function mapSearchResults(data: unknown): WorkspaceSearchResult[] {
     if (!isRecord(entry)) {
       continue;
     }
+    const type = asSearchResultType(entry.type);
+    if (!type) {
+      continue;
+    }
     mapped.push({
-      type: asString(entry.type),
+      type,
       id: asString(entry.id),
       title: asString(entry.title),
       subtitle: asString(entry.subtitle),

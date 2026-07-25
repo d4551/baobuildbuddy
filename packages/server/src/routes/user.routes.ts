@@ -8,6 +8,7 @@ import { db } from "../db/client";
 import { userProfile } from "../db/schema/user";
 import { simpleRouteErrorResponses } from "./route-error-envelope";
 import { userProfileResponseSchema, userProfileUpdateBodySchema } from "./user-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 type UserProfileRow = typeof userProfile.$inferSelect;
 
@@ -43,7 +44,7 @@ export const userRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     {
-      detail: { tags: ["User"] },
+      detail: openapiDetail("User", "Retrieve user resource for BaoBuildBuddy career automation."),
       response: userProfileResponses,
     },
     async ({ status }) => {
@@ -60,7 +61,7 @@ export const userRoutes = new Elysia({
   .put(
     toApiChildPath(API_ENDPOINTS.userBase, API_ENDPOINTS.userProfile),
     {
-      detail: { tags: ["User"] },
+      detail: openapiDetail("User", "Retrieve user resource for BaoBuildBuddy career automation."),
       body: userProfileUpdateBodySchema,
       response: userProfileResponses,
     },

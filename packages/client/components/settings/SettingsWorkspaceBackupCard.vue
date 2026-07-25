@@ -10,6 +10,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { SettingsWorkspaceExportPayload } from "~/types/client-api-workspace";
 import { getErrorMessage } from "~/utils/errors";
@@ -95,8 +96,7 @@ async function handleImportFile(event: Event): Promise<void> {
         <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
           <button
             type="button"
-            class="btn btn-outline"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('settings.preferences.exportAria')"
             :disabled="pending"
             @click="handleExport"
@@ -106,8 +106,7 @@ async function handleImportFile(event: Event): Promise<void> {
           </button>
           <button
             type="button"
-            class="btn btn-outline"
-            :class="[TOUCH_TARGET_MIN_CLASS]"
+            :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('settings.preferences.importAria')"
             :disabled="pending"
             @click="requestImportPicker"

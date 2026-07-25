@@ -1029,17 +1029,21 @@ const catalog = {
       saveErrorFallback: "Échec de l'enregistrement du profil de voix",
       unsavedHint: "Vous avez des modifications de profil de voix non enregistrées.",
       providers: {
-        browser: "Navigateur",
+        browser: "Navigateur (sur appareil)",
         custom: "Personnalisé",
       },
     },
   },
+      onDeviceHint: "Navigateur (sur appareil) utilise l’API Web Speech de cet appareil — aucun audio ne quitte la machine.",
   aiChatCommon: {
     timeAt: "à {time}",
     voice: {
       listeningStatus: "Écoute en cours...",
       speakingStatus: "Lecture de la réponse...",
       idleStatus: "Voix prête",
+      testOnDeviceTitle: "Tester le haut-parleur sur appareil",
+      testOnDeviceAria: "Lire un court échantillon avec la synthèse vocale sur appareil",
+      testOnDeviceSample: "La synthèse vocale sur appareil fonctionne.",
     },
   },
 } as const;

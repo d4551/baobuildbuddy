@@ -207,6 +207,7 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", "/monthly", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     response: {
         200: import("typebox").TObject<{
@@ -219,11 +220,6 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
         }>;
     };
 }, {}, `${string}/monthly`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ status }: {
-    body: unknown;
-    query: Record<string, string | undefined>;
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -231,11 +227,6 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         200: {
             totalXP: number;
@@ -246,6 +237,16 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
             streakDays: number;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     totalXP: number;
     levelsGained: number;

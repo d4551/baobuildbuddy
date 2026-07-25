@@ -5,7 +5,7 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSeoMeta } from "#imports";
@@ -14,11 +14,15 @@ import {
   SETTINGS_DEFAULT_SECTION_ID,
   type SettingsSectionId,
 } from "~/components/settings/settings-sections";
+import { useSettings } from "~/composables/useSettings";
 import { useSettingsPage } from "~/composables/useSettingsPage";
+import { PRIMARY_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
 const { t } = useI18n();
 const route = useRoute();
+const { isAiConfigurationIncomplete } = useSettings();
+const aiProvidersSettingsRoute = APP_ROUTE_BUILDERS.settingsSection("aiProviders");
 
 useSeoMeta({
   title: t("settings.seoTitle"),
@@ -117,6 +121,21 @@ watch(
       :description="t('settings.subtitle')"
       description-class="text-secondary"
     />
+
+    <div
+      v-if="isAiConfigurationIncomplete"
+      class="alert alert-warning sm:alert-horizontal"
+      role="status"
+    >
+      <span>{{ t("a11y.aiConfigIncompleteAria") }}</span>
+      <NuxtLink
+        :to="aiProvidersSettingsRoute"
+        :class="[PRIMARY_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="t('settings.aiProviders.configureCtaAria')"
+      >
+        {{ t("settings.aiProviders.configureCta") }}
+      </NuxtLink>
+    </div>
 
     <BootstrapErrorAlert
       v-if="settingsBootstrapError"

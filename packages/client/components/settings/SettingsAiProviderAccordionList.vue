@@ -9,6 +9,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 type ProviderField =
@@ -89,7 +90,7 @@ const emit = defineEmits<{
             />
             <button 
               type="button"
-              class="btn btn-outline join-item"
+              :class="[OUTLINE_ACTION_CLASS, 'join-item']"
               :aria-label="t('settings.aiProviders.testAria')"
               @click="emit('testProvider', provider.id)"
             >

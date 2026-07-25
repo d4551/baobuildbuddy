@@ -9,6 +9,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
@@ -213,7 +214,7 @@ const { t } = useI18n();
 
       <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
         <button 
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :disabled="!hasStoredPassword"
           :aria-label="t('settings.emailDelivery.clearPasswordAria')"
           @click="emit('clearPassword')"

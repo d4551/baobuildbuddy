@@ -16,6 +16,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import {
   SKILLS_CONFIDENCE_MAX,
@@ -99,8 +100,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
         </NuxtLink>
         <button
           v-if="hasMappings"
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :disabled="analyzing"
           :aria-label="t('skillsPage.actions.aiAnalyzeAria')"
           @click="handleAIAnalyze"

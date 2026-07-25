@@ -32,6 +32,7 @@ import {
   automationScreenshotParams,
   automationScreenshotResponses,
 } from "./automation-screenshot-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -119,7 +120,7 @@ export const automationScreenshotRoutes = new Elysia({
 }).get(
   "/:runId/:index",
   {
-    detail: { tags: ["Automation"] },
+    detail: openapiDetail("Automation", "Retrieve automation :runId :index for BaoBuildBuddy career automation."),
     params: automationScreenshotParams,
     response: automationScreenshotResponses,
   },

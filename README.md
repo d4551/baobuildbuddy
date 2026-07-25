@@ -14,11 +14,29 @@
 
 # BaoBuildBuddy
 
-[![Bun](https://img.shields.io/badge/Bun-Manifest-1f2937?logo=bun&logoColor=white)](https://bun.sh/)
-[![Nuxt](https://img.shields.io/badge/Nuxt-4.x-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com/)
+[![Bun](https://img.shields.io/badge/Bun-1.3.14-1f2937?logo=bun&logoColor=white)](https://bun.sh/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-4.5-00dc82?logo=nuxtdotjs&logoColor=white)](https://nuxt.com/)
+[![Elysia](https://img.shields.io/badge/Elysia-2.x--exp-f43f5e)](https://elysiajs.com/)
+[![Drizzle](https://img.shields.io/badge/Drizzle-SQLite-c5f74f)](https://orm.drizzle.team/)
+[![daisyUI](https://img.shields.io/badge/daisyUI-5.7-5a0ef8)](https://daisyui.com/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Kokoro TTS](https://img.shields.io/badge/TTS-Kokoro%20local-orange)](scripts/kokoro-openai-server.py)
+[![Whisper STT](https://img.shields.io/badge/STT-Whisper%20local-blue)](scripts/whisper-openai-server.py)
 [![License](https://img.shields.io/github/license/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/blob/main/LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/d4551/baobuildbuddy)](https://github.com/d4551/baobuildbuddy/commits/main)
+
+## ELI5 — Explain Like I’m 5
+
+BaoBuildBuddy is a **career helper for game jobs**.
+
+1. You tell it about yourself (resume, skills).
+2. It finds game-studio jobs and helps you apply.
+3. A **local robot brain** (Ollama) can chat and write letters.
+4. A **local voice** (Kokoro) can speak; a **local ear** (Whisper) can listen.
+5. A **robot browser** (Playwright) can click job sites for you.
+6. Everything is saved in a little notebook file (SQLite) on your computer.
+
+No cloud TTS required. Cloud AI keys are optional — local-first is the default path.
 
 BaoBuildBuddy is a full-stack toolkit for game-industry job seekers. It aggregates job listings, helps you build resumes and cover letters, runs AI-powered mock interviews, automates job applications with browser RPA, and tracks your progress with a gamification system.
 
@@ -66,6 +84,7 @@ Not sure where to start? Choose the guide that matches your goal:
 
 ## Table of Contents
 
+- [ELI5 — Explain Like I’m 5](#eli5--explain-like-im-5)
 - [Pick Your Guide](#pick-your-guide)
 - [Quick Start](#quick-start)
 - [Local AI Quick Path](#local-ai-quick-path)
@@ -267,6 +286,48 @@ flowchart LR
   Svcs --> RPA
   RPA -->|Bun.spawn| Scraper["@bao/scraper"]
 ```
+
+### Local AI + speech (product SSOT)
+
+```mermaid
+flowchart TB
+  subgraph UI["Nuxt UI"]
+    Chat["AI Chat"]
+    Voice["Test speaker / Mic"]
+    Export["Export PDF"]
+  end
+
+  subgraph API["Elysia /api"]
+    AIChat["/api/ai/chat"]
+    Synth["/api/speech/synthesize"]
+    Transcribe["/api/speech/transcribe"]
+    PDF["resume/cover/portfolio export"]
+  end
+
+  subgraph Local["On-machine services"]
+    Ollama["Ollama :11434/v1"]
+    Kokoro["Kokoro ONNX :8880/v1"]
+    Whisper["Whisper :8090/v1"]
+    SQLite[("SQLite ~/.bao/bao.db")]
+  end
+
+  Chat --> AIChat --> Ollama
+  Voice -->|local TTS| Synth --> Kokoro
+  Voice -->|local STT| Transcribe --> Whisper
+  Export --> PDF --> SQLite
+  AIChat --> SQLite
+```
+
+**Fail-closed proofs (no speechSynthesis-only greens):**
+
+| Proof | What it proves |
+|-------|----------------|
+| `proof:kokoro-tts` | RIFF WAV from Kokoro via UI + API |
+| `proof:whisper-stt` | Local Whisper transcription via API |
+| `proof:ollama-live` | Live nonce chat (not stub) |
+| `proof:pdf-live` | Real `%PDF-` bytes from UI Export |
+| `validate:zero-capability-debt` | Ledger Remaining empty + wiring markers |
+| `validate:no-soft-test-skips` | No `test.skip` / hardcoded STT BLOCKED theater |
 
 ### Agent documentation alignment
 
@@ -1119,7 +1180,18 @@ bun run release:refresh:all-os
 | `bun run test`                  | All test suites pass                                 |
 | `bun run build`                 | All packages build successfully                      |
 | `bun run build:desktop`         | Current-host desktop packaging succeeds              |
+| `bun run prepare:desktop-runtime` | Build + stage `src-tauri/gen/runtime` (server/bin/scraper; gitignored) |
 | `bun run verify:desktop-runtime`| Packaged runtime executes deterministic automation proof |
+| `bun run proof:dom-reactivity`  | Headed CM6/theme/search/viewport reactivity; findings=0 |
+| `bun run proof:on-device-speech` | On-device Web Speech STT+TTS (browser); findings=0 |
+| `bun run speech:kokoro:serve` | Local Kokoro ONNX OpenAI-compatible TTS (`:8880/v1`) |
+| `bun run proof:kokoro-tts` | Local Kokoro TTS UI+API RIFF WAV; findings=0 |
+| `bun run validate:local-kokoro-tts` | Fail-closed Kokoro wiring (not speechSynthesis-only) |
+| `bun run speech:whisper:serve` | Local Whisper STT OpenAI-compatible (`:8090/v1`) |
+| `bun run proof:whisper-stt` | Local Whisper STT via `/api/speech/transcribe`; findings=0 |
+| `bun run proof:editor-ide` | Vim/minimap/TipTap/Cmd+P IDE surfaces; findings=0 |
+| `bun run validate:zero-capability-debt` | Forbids ledger Remaining theater + requires wiring |
+| `bun run validate:openapi-descriptions` | Every route `detail` has description (no API Docs empty stubs) |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
 | `bun run proof:browser-smoke`   | Multi-viewport screenshots; 0 capture failures       |
 | `bun run proof:browser-burndown`| Interactive matrix; 0 findings; 5Q ledger complete   |

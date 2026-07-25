@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PRIMARY_ACTION_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 interface ResumeEditorToolbarProps {
@@ -35,7 +35,7 @@ const { t } = useI18n();
 
     <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
       <button 
-        :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+        :class="[OUTLINE_ACTION_CLASS]"
         :disabled="enhancing"
         :aria-label="t('resumePage.aiEnhanceButtonAria')"
         @click="emit('enhance')"
@@ -45,7 +45,7 @@ const { t } = useI18n();
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
       <button 
-        :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+        :class="[OUTLINE_ACTION_CLASS]"
         :disabled="scoring"
         :aria-label="t('resumePage.aiScoreButtonAria')"
         @click="emit('score')"
@@ -56,7 +56,7 @@ const { t } = useI18n();
       <AppExportMenu 
         :button-label="t('resumePage.exportButton')"
         :button-aria-label="t('resumePage.exportButtonAria')"
-        summary-:class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+        :summary-class="OUTLINE_ACTION_CLASS"
         @export="emit('export', $event)"
       />
       <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">

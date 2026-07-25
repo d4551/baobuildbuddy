@@ -15,18 +15,27 @@ const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:300
 const OUT_DIR =
   process.env.BROWSER_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/browser-video-proof");
 
+/** Full primary surface tour — keep in sync with browser-visual-smoke STATIC_ROUTES. */
 const ROUTES: readonly { readonly slug: string; readonly path: string }[] = [
   { slug: "dashboard", path: APP_ROUTES.dashboard },
+  { slug: "setup", path: APP_ROUTES.setup },
   { slug: "jobs", path: APP_ROUTES.jobs },
   { slug: "resume", path: APP_ROUTES.resume },
+  { slug: "cover-letter", path: APP_ROUTES.coverLetter },
+  { slug: "portfolio", path: APP_ROUTES.portfolio },
   { slug: "interview", path: APP_ROUTES.interview },
   { slug: "skills", path: APP_ROUTES.skills },
   { slug: "studios", path: APP_ROUTES.studios },
   { slug: "ai-dashboard", path: APP_ROUTES.aiDashboard },
   { slug: "ai-chat", path: APP_ROUTES.aiChat },
   { slug: "automation", path: APP_ROUTES.automation },
+  { slug: "automation-job-apply", path: APP_ROUTES.automationJobApply },
+  { slug: "automation-scraper", path: APP_ROUTES.automationScraper },
+  { slug: "automation-email", path: APP_ROUTES.automationEmail },
+  { slug: "automation-runs", path: APP_ROUTES.automationRuns },
+  { slug: "gamification", path: APP_ROUTES.gamification },
+  { slug: "docs-api", path: APP_ROUTES.apiDocs },
   { slug: "settings", path: APP_ROUTES.settings },
-  { slug: "setup", path: APP_ROUTES.setup },
 ];
 
 const VIEWPORTS = [

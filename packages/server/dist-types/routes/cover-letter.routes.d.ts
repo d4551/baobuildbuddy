@@ -239,6 +239,7 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/:id/export", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         id: import("typebox").TString;

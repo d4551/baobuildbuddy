@@ -22,6 +22,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { HERO_TITLE_RESPONSIVE_CLASS, UI_SPACING_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
@@ -130,7 +131,7 @@ async function handleExport(format: "pdf" | "docx") {
             <a
               v-if="portfolio.metadata?.email"
               :href="`mailto:${portfolio.metadata?.email}`"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('portfolioPage.preview.contactAria')"
             >
               <svg :class="ICON_SIZE_CLASS.sm" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -143,7 +144,7 @@ async function handleExport(format: "pdf" | "docx") {
               :href="portfolio.metadata?.website"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn btn-outline"
+              :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('portfolioPage.preview.websiteAria')"
             >
               <IconGlobe :class="ICON_SIZE_CLASS.sm" />

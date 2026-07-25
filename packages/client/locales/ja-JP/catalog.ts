@@ -1014,18 +1014,22 @@ const catalog = {
       saveErrorFallback: "音声設定の保存に失敗しました",
       unsavedHint: "音声プロフィールに保存されていない変更があります。",
       providers: {
-        browser: "ブラウザ",
+        browser: "ブラウザ（オンデバイス）",
         local: "ローカル",
         custom: "カスタム",
       },
     },
   },
+      onDeviceHint: "ブラウザ（オンデバイス）は端末の Web Speech API を使います。音声は端末外に出ません。",
   aiChatCommon: {
     timeAt: "{time} の時刻",
     voice: {
       listeningStatus: "聴取中...",
       speakingStatus: "応答を読み上げ中...",
       idleStatus: "音声準備完了",
+      testOnDeviceTitle: "オンデバイススピーカーをテスト",
+      testOnDeviceAria: "オンデバイス音声合成で短いサンプルを再生",
+      testOnDeviceSample: "オンデバイスの音声合成は動作しています。",
     },
   },
 } as const;

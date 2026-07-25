@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -10,9 +10,9 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -58,7 +58,7 @@ useSeoMeta({
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automationRuns"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.email.openRunsAria')"
         >
           {{ t("automation.email.openRunsButton") }}
@@ -135,12 +135,9 @@ useSeoMeta({
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
-            <textarea
+            <AppProseField
               v-model="form.message"
-              class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_H_36_CLASS]"
-              required
-              minlength="10"
-              maxlength="12000"
+              :min-height-class="MIN_H_36_CLASS"
               :placeholder="t('automation.email.messagePlaceholder')"
               :aria-label="t('automation.email.messageAria')"
             />
@@ -170,7 +167,7 @@ useSeoMeta({
             <NuxtLink
               v-if="!emailDeliveryConfigured"
               :to="APP_ROUTE_BUILDERS.settingsSection('emailDelivery')"
-              class="btn btn-link btn-sm" :class="[TOUCH_TARGET_MIN_CLASS, PADDING_TOKEN_CLASS.px0]"
+              :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('automation.email.configureDeliveryAria')"
             >
               {{ t("automation.email.configureDeliveryButton") }}
@@ -200,7 +197,7 @@ useSeoMeta({
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
           <button
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :disabled="pending || !canSubmit || !form.runAt"
             :aria-label="t('automation.email.schedule.buttonAria')"
             @click="submitScheduledEmailResponse"

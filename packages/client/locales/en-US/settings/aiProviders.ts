@@ -1,6 +1,8 @@
 const settingsaiProviders = {
   settings: {
     aiProviders: {
+      configureCta: "Configure AI Providers",
+      configureCtaAria: "Open AI Providers settings to finish configuration",
       title: "AI Providers",
       subtitle: "Keep local providers as primary and cloud providers as controlled fallbacks.",
       openaiV1Title: "OpenAI Chat Completions API",

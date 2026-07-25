@@ -36,10 +36,13 @@ import { authenticateApiKey } from "../middleware/auth";
 import { hashApiKey } from "../utils/crypto";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
+import { openapiDetail } from "../utils/openapi-detail";
 import {
   authBootstrapBody,
   authConfiguredResponses,
   authInitResponses,
+  authRevokeResponses,
+  authRotateResponses,
   authStatusResponses,
 } from "./auth-route-contracts";
 
@@ -90,7 +93,10 @@ export const authRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authStatus),
     {
-      // no inline detail for rotate,revoke routes
+      detail: openapiDetail(
+        "Auth",
+        "Retrieve authentication status, bootstrap requirements, and setup-token configuration.",
+      ),
       response: authStatusResponses,
     },
     async ({ status }) => {
@@ -115,7 +121,10 @@ export const authRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authConfigured),
     {
-      // no inline detail for rotate,revoke routes
+      detail: openapiDetail(
+        "Auth",
+        "Retrieve whether an API key is already configured for this workspace.",
+      ),
       response: authConfiguredResponses,
     },
     async ({ status }) => {
@@ -140,7 +149,10 @@ export const authRoutes = new Elysia({
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authInit),
         {
-          // no inline detail for rotate,revoke routes
+          detail: openapiDetail(
+            "Auth",
+            "Bootstrap the first API key using the configured setup token (one-time).",
+          ),
           body: authBootstrapBody,
           response: authInitResponses,
         },
@@ -222,7 +234,11 @@ export const authRoutes = new Elysia({
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRotate),
         {
-          // no inline detail for rotate,revoke routes
+          detail: openapiDetail(
+            "Auth",
+            "Rotate the active API key and return the new secret once for safekeeping.",
+          ),
+          response: authRotateResponses,
         },
         async ({ request, status }) => {
           const authFailure = await authenticateApiKey(request);
@@ -264,7 +280,11 @@ export const authRoutes = new Elysia({
       .post(
         toApiChildPath(API_ENDPOINTS.authBase, API_ENDPOINTS.authRevoke),
         {
-          // no inline detail for rotate,revoke routes
+          detail: openapiDetail(
+            "Auth",
+            "Revoke the active API key so subsequent authenticated requests are rejected.",
+          ),
+          response: authRevokeResponses,
         },
         async ({ request, status }) => {
           const authFailure = await authenticateApiKey(request);

@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
-
-  FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -51,11 +50,9 @@ const emit = defineEmits<{
         <label :for="`answer-${aiQuestions[currentQuestionIndex]?.id}`" class="label">
           {{ aiQuestions[currentQuestionIndex]?.question }}
         </label>
-        <textarea 
+        <AppProseField
           :id="`answer-${aiQuestions[currentQuestionIndex]?.id}`"
           v-model="answers[aiQuestions[currentQuestionIndex]!.id]"
-          class="textarea" :class="[FLUID_WIDTH_CLASS]"
-          rows="4"
           :placeholder="
             t('resumeBuildPage.questions.answerPlaceholder', {
               question: aiQuestions[currentQuestionIndex]?.question,

@@ -16,7 +16,7 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
                     200: {
                         query: string;
                         results: {
-                            type: "jobs" | "resumes" | "skills" | "studios";
+                            type: "automation-runs" | "cover-letters" | "interview-sessions" | "jobs" | "portfolio-projects" | "resumes" | "skills" | "studios";
                             id: string;
                             title: string;
                             subtitle: string;
@@ -28,6 +28,10 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
                             studios: number;
                             skills: number;
                             resumes: number;
+                            "cover-letters": number;
+                            "portfolio-projects": number;
+                            "interview-sessions": number;
+                            "automation-runs": number;
                         };
                         totalTime: number;
                     };
@@ -49,6 +53,7 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     query: import("typebox").TObject<{
         prefix: import("typebox").TOptional<import("typebox").TString>;
@@ -60,13 +65,6 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
         }>>;
     };
 }, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ query, status }: {
-    body: unknown;
-    query: {
-        prefix?: string | undefined;
-    };
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -74,17 +72,24 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         200: {
             text: string;
             type: string;
         }[];
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: {
+        prefix?: string | undefined;
+    };
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     text: string;
     type: string;

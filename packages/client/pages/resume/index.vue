@@ -10,6 +10,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -97,8 +98,7 @@ const {
         </button>
         <NuxtLink
           :to="APP_ROUTES.resumeBuild"
-          class="btn btn-outline"
-          :class="[TOUCH_TARGET_MIN_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('resumePage.guidedButtonAria')"
         >
           {{ t("resumePage.guidedButton") }}

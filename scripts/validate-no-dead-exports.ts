@@ -220,13 +220,15 @@ export const isDeadExportViolation = (options: {
   }
 
   const exportedNames = collectExportedRuntimeNames(content);
+  const composableHooks = exportedNames.filter((exportName) => exportName.startsWith("use"));
   if (
     filePath.startsWith("packages/client/composables/") &&
-    exportedNames.some((exportName) => exportName.startsWith("use")) &&
-    exportedNames.every((exportName) =>
+    composableHooks.length > 0 &&
+    composableHooks.every((exportName) =>
       hasAutoImportConsumer(filePath, exportName, importSources, autoImportNames),
     )
   ) {
+    // Companion const/type exports (shortcuts tables, contracts) may ship with the hook.
     return [];
   }
 

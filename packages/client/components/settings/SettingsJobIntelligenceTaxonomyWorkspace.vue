@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
+import AppJsonField from "~/components/ui/AppJsonField.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  MIN_HEIGHT_EDITOR_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -81,10 +79,11 @@ const populatedTaxonomyCount = computed(
               </p>
             </div>
 
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyKeywordsLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.keywordsJson" :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobTaxonomyForm.keywordsJson"
+              :label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
+              :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
+            />
           </div>
         </article>
 
@@ -97,10 +96,11 @@ const populatedTaxonomyCount = computed(
               </p>
             </div>
 
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.taxonomyStudiosLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobTaxonomyForm.studioRulesJson" :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_EDITOR_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobTaxonomyForm.studioRulesJson"
+              :label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
+              :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
+            />
           </div>
         </article>
       </SectionGrid>

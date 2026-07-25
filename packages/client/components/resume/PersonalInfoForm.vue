@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
@@ -108,15 +109,11 @@ function emitValue(): void {
     </SectionGrid>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.personal.summaryLegend") }}</legend>
-      <textarea 
+      <AppProseField
         v-model="localValue.summary"
-        required
-        minlength="50"
-        class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
-        rows="4"
         :aria-label="t('resumePage.personal.summaryAria')"
-        @input="emitValue"
-      ></textarea>
+        @update:model-value="emitValue"
+      />
       <p class="validator-hint">{{ t("resumePage.personal.summaryHint") }}</p>
     </fieldset>
   </div>

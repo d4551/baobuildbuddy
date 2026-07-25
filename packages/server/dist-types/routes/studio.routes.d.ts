@@ -302,6 +302,7 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "delete", "/:id", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         id: import("typebox").TString;
@@ -320,13 +321,6 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
         }>;
     };
 }, {}, `${string}/:id`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, status }: {
-    body: unknown;
-    query: Record<string, string | undefined>;
-    params: {
-        id: string;
-    };
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -334,11 +328,6 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         readonly 200: {
             message: string;
@@ -352,6 +341,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
             id?: string | undefined;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {
+        id: string;
+    };
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     message: string;
     id: string;

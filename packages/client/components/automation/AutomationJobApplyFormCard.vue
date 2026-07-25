@@ -7,6 +7,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
@@ -116,8 +117,7 @@ const { t } = useI18n();
         </button>
         <button
           type="button"
-          class="btn btn-outline join-item"
-          :class="[TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
+          :class="[OUTLINE_ACTION_CLASS, 'join-item', TOUCH_TARGET_MIN_CLASS, FLUID_WIDTH_CLASS]"
           :disabled="isScheduleDisabled"
           :aria-label="t('automation.jobApply.schedule.buttonAria')"
           @click="$emit('schedule')"

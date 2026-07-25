@@ -218,6 +218,8 @@ export function readConfig() {
     dbPath: Bun.env.DB_PATH || DEFAULT_DB_PATH_TILDE,
     logLevel: Bun.env.LOG_LEVEL || DEFAULT_LOG_LEVEL,
     corsOrigins: resolveCorsOrigins(port, clientPort),
+    localModelEndpoint: parseOptionalNonEmptyString(Bun.env.LOCAL_MODEL_ENDPOINT),
+    localModelName: parseOptionalNonEmptyString(Bun.env.LOCAL_MODEL_NAME),
     ...resolveAuthConfig(),
     get enableAutomationVerification(): boolean {
       return resolveEnableAutomationVerification();

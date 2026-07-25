@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ResumeFormProject } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -118,15 +119,11 @@ function removeProject(index: number): void {
           </SectionGrid>
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("resumePage.projects.descriptionLegend") }}</legend>
-            <textarea 
+            <AppProseField
               v-model="project.description"
-              required
-              minlength="20"
-              class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
-              rows="3"
               :aria-label="t('resumePage.projects.descriptionAria')"
-              @input="emitValue"
-            ></textarea>
+              @update:model-value="emitValue"
+            />
             <p class="validator-hint">{{ t("resumePage.projects.descriptionHint") }}</p>
           </fieldset>
         </div>

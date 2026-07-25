@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ResumeFormData } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -79,14 +80,12 @@ function emitValue(): void {
     </fieldset>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("resumePage.gaming.achievementsLegend") }}</legend>
-      <textarea 
+      <AppProseField
         v-model="localValue.achievements"
-        class="textarea" :class="[FLUID_WIDTH_CLASS]"
-        rows="4"
-        :placeholder="t('resumePage.gaming.achievementsPlaceholder')"
         :aria-label="t('resumePage.gaming.achievementsAria')"
-        @input="emitValue"
-      ></textarea>
+        :placeholder="t('resumePage.gaming.achievementsPlaceholder')"
+        @update:model-value="emitValue"
+      />
     </fieldset>
   </div>
 </template>

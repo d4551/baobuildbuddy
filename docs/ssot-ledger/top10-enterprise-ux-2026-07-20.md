@@ -8,7 +8,7 @@ SSOT: `docs/STACK-CONTRACT.md` (TS constants + CSS + validators). Evidence: `/op
 2. **Jobs → Apply dead** — HARDENED (hero Configure when catalog empty; EmptyState primary-first CTAs).
 3. **Setup ≠ readiness** — FIXED (hide XP card until `profile.name`; Setup demoted to secondary).
 4. **Settings nested Profile + section friction** — FIXED (title → Settings; `omitActiveHeadingBelowLg`).
-5. **AI Chat / Automation dock orphans** — FIXED (dock = dashboard/jobs/ai-chat/automation/settings + `/ai` prefix match).
+5. **AI Chat / Automation dock orphans** — FIXED then superseded by IA cutover 2026-07-24 (dock = dashboard/jobs/resume/ai-chat/settings; Automation sidebar Work group; AI prefix still lights ai-chat).
 
 ## TOP 5 legacy blockers
 

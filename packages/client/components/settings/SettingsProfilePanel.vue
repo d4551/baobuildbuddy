@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { FLUID_WIDTH_CLASS, SURFACE_GLASS_CARD_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -152,12 +153,10 @@ const profileSaveStateLabel = computed(() => {
           <legend class="fieldset-legend">
             {{ t("settings.profile.summaryLegend") }}
           </legend>
-          <textarea 
+          <AppProseField
             v-model="profileForm.summary"
-            class="textarea" :class="[FLUID_WIDTH_CLASS]"
-            rows="4"
             :aria-label="t('settings.profile.summaryAria')"
-          ></textarea>
+          />
         </fieldset>
 
         <fieldset class="fieldset md:col-span-2">

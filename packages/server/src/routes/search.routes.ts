@@ -1,5 +1,6 @@
 import { API_ENDPOINTS, toApiChildPath, toApiScopedPath } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { DEFAULT_SEARCH_RESULT_TYPES } from "@bao/shared/constants/search";
 import { Elysia } from "elysia";
 import { searchService } from "../services/search-service";
 import {
@@ -10,8 +11,17 @@ import {
   searchQuery,
   searchTypes,
 } from "./search-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 const searchTypeSet = new Set<string>(searchTypes);
+
+const emptySearchCounts = (): Record<SearchType, number> => {
+  const counts = {} as Record<SearchType, number>;
+  for (const type of DEFAULT_SEARCH_RESULT_TYPES) {
+    counts[type] = 0;
+  }
+  return counts;
+};
 
 const parseSearchTypes = (value: string | undefined): SearchType[] | undefined => {
   if (!value) {
@@ -32,7 +42,7 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
     {
-      detail: { tags: ["Search"] },
+      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
       query: searchQuery,
       response: searchAllResponses,
     },
@@ -42,7 +52,7 @@ export const searchRoutes = new Elysia({
         return status(HTTP_STATUS_OK, {
           query: q,
           results: [],
-          counts: { jobs: 0, studios: 0, skills: 0, resumes: 0 },
+          counts: emptySearchCounts(),
           totalTime: 0,
         });
       }
@@ -53,7 +63,7 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.searchAutocomplete),
     {
-      detail: { tags: ["Search"] },
+      detail: openapiDetail("Search", "Retrieve search resource for BaoBuildBuddy career automation."),
       query: searchAutocompleteQuery,
       response: searchAutocompleteResponses,
     },

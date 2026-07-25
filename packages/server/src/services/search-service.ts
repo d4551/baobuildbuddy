@@ -1,28 +1,31 @@
 import { JOB_QUERY_DEFAULT_LIMIT } from "@bao/shared/constants/jobs";
 import {
+  DEFAULT_SEARCH_RESULT_TYPES,
+  type SearchResultType,
+} from "@bao/shared/constants/search";
+import {
   isResumeTemplate,
   RESUME_DEFAULT_NAME,
   RESUME_TEMPLATE_DEFAULT,
 } from "@bao/shared/constants/resume";
+import type { SearchResult } from "@bao/shared/types/search";
+import { settle } from "@bao/shared/utils/promise";
 import { like, or } from "drizzle-orm";
 import { db } from "../db/client";
+import { automationRuns } from "../db/schema/automation-runs";
+import { coverLetters } from "../db/schema/cover-letters";
+import { interviewSessions } from "../db/schema/interviews";
 import { jobs } from "../db/schema/jobs";
+import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { studios } from "../db/schema/studios";
+import { createServerLogger } from "../utils/logger";
 import { getJobTaxonomy } from "./jobs/job-taxonomy-service";
 
-type SearchType = "jobs" | "studios" | "skills" | "resumes";
+type SearchType = SearchResultType;
 
-const DEFAULT_SEARCH_TYPES: SearchType[] = ["jobs", "studios", "skills", "resumes"];
-interface SearchResult {
-  type: SearchType;
-  id: string;
-  title: string;
-  subtitle: string;
-  snippet: string;
-  relevance: number;
-}
+const searchLogger = createServerLogger("search-service");
 
 export interface UnifiedSearchResult {
   query: string;
@@ -31,16 +34,29 @@ export interface UnifiedSearchResult {
   totalTime: number;
 }
 
+const emptyCounts = (): Record<SearchType, number> => {
+  const counts = {} as Record<SearchType, number>;
+  for (const type of DEFAULT_SEARCH_RESULT_TYPES) {
+    counts[type] = 0;
+  }
+  return counts;
+};
+
 export class SearchService {
-  private async runTableQuery<T>(operation: () => Promise<T>): Promise<T | null> {
-    return operation().then(
-      (value) => value,
-      () => null,
-    );
+  private async runTableQuery<T>(label: string, operation: () => Promise<T>): Promise<T | null> {
+    const settled = await settle(operation());
+    if (settled.status === "rejected") {
+      searchLogger.warn("search table query failed", {
+        label,
+        err: settled.reason.message,
+      });
+      return null;
+    }
+    return settled.value;
   }
 
   private async searchJobs(query: string, pattern: string): Promise<SearchResult[]> {
-    const jobRows = await this.runTableQuery(() =>
+    const jobRows = await this.runTableQuery("jobs", () =>
       db
         .select()
         .from(jobs)
@@ -58,7 +74,7 @@ export class SearchService {
     }
     const queryLower = query.toLowerCase();
     return jobRows.map((job) => ({
-      type: "jobs",
+      type: "jobs" as const,
       id: job.id,
       title: job.title || "",
       subtitle: job.company || "",
@@ -68,7 +84,7 @@ export class SearchService {
   }
 
   private async searchStudios(pattern: string, query: string): Promise<SearchResult[]> {
-    const studioRows = await this.runTableQuery(() =>
+    const studioRows = await this.runTableQuery("studios", () =>
       db
         .select()
         .from(studios)
@@ -86,7 +102,7 @@ export class SearchService {
     }
     const queryLower = query.toLowerCase();
     return studioRows.map((studio) => ({
-      type: "studios",
+      type: "studios" as const,
       id: studio.id,
       title: studio.name || "",
       subtitle: `${studio.location || ""} · ${studio.type || ""}`,
@@ -96,7 +112,7 @@ export class SearchService {
   }
 
   private async searchSkills(pattern: string): Promise<SearchResult[]> {
-    const skillRows = await this.runTableQuery(() =>
+    const skillRows = await this.runTableQuery("skills", () =>
       db
         .select()
         .from(skillMappings)
@@ -112,7 +128,7 @@ export class SearchService {
       return [];
     }
     return skillRows.map((skill) => ({
-      type: "skills",
+      type: "skills" as const,
       id: skill.id,
       title: skill.gameExpression || "",
       subtitle: skill.transferableSkill || "",
@@ -122,7 +138,7 @@ export class SearchService {
   }
 
   private async searchResumes(pattern: string): Promise<SearchResult[]> {
-    const resumeRows = await this.runTableQuery(() =>
+    const resumeRows = await this.runTableQuery("resumes", () =>
       db
         .select()
         .from(resumes)
@@ -133,12 +149,107 @@ export class SearchService {
       return [];
     }
     return resumeRows.map((resume) => ({
-      type: "resumes",
+      type: "resumes" as const,
       id: resume.id,
       title: resume.name || RESUME_DEFAULT_NAME,
       subtitle: isResumeTemplate(resume.template) ? resume.template : RESUME_TEMPLATE_DEFAULT,
       snippet: resume.summary?.slice(0, 150) || "",
       relevance: 0.7,
+    }));
+  }
+
+  private async searchCoverLetters(pattern: string): Promise<SearchResult[]> {
+    const rows = await this.runTableQuery("cover-letters", () =>
+      db
+        .select()
+        .from(coverLetters)
+        .where(or(like(coverLetters.company, pattern), like(coverLetters.position, pattern)))
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
+    );
+    if (!rows) {
+      return [];
+    }
+    return rows.map((row) => ({
+      type: "cover-letters" as const,
+      id: row.id,
+      title: row.position || "",
+      subtitle: row.company || "",
+      snippet: `${row.position} @ ${row.company}`,
+      relevance: 0.75,
+    }));
+  }
+
+  private async searchPortfolioProjects(pattern: string): Promise<SearchResult[]> {
+    const rows = await this.runTableQuery("portfolio-projects", () =>
+      db
+        .select()
+        .from(portfolioProjects)
+        .where(
+          or(like(portfolioProjects.title, pattern), like(portfolioProjects.description, pattern)),
+        )
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
+    );
+    if (!rows) {
+      return [];
+    }
+    return rows.map((row) => ({
+      type: "portfolio-projects" as const,
+      id: row.id,
+      title: row.title || "",
+      subtitle: row.role || "",
+      snippet: row.description?.slice(0, 150) || "",
+      relevance: 0.7,
+    }));
+  }
+
+  private async searchInterviewSessions(pattern: string): Promise<SearchResult[]> {
+    const rows = await this.runTableQuery("interview-sessions", () =>
+      db
+        .select()
+        .from(interviewSessions)
+        .where(
+          or(like(interviewSessions.studioId, pattern), like(interviewSessions.status, pattern)),
+        )
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
+    );
+    if (!rows) {
+      return [];
+    }
+    return rows.map((row) => ({
+      type: "interview-sessions" as const,
+      id: row.id,
+      title: `Interview · ${row.status || "unknown"}`,
+      subtitle: row.studioId || "",
+      snippet: `Session ${row.id}`,
+      relevance: 0.55,
+    }));
+  }
+
+  private async searchAutomationRuns(pattern: string): Promise<SearchResult[]> {
+    const rows = await this.runTableQuery("automation-runs", () =>
+      db
+        .select()
+        .from(automationRuns)
+        .where(
+          or(
+            like(automationRuns.type, pattern),
+            like(automationRuns.status, pattern),
+            like(automationRuns.jobId, pattern),
+            like(automationRuns.error, pattern),
+          ),
+        )
+        .limit(JOB_QUERY_DEFAULT_LIMIT),
+    );
+    if (!rows) {
+      return [];
+    }
+    return rows.map((row) => ({
+      type: "automation-runs" as const,
+      id: row.id,
+      title: `${row.type} · ${row.status}`,
+      subtitle: row.jobId || row.type,
+      snippet: row.error?.slice(0, 150) || `Run ${row.id}`,
+      relevance: 0.6,
     }));
   }
 
@@ -152,19 +263,35 @@ export class SearchService {
       .map((option) => ({ text: option, type }));
   }
 
+  private async searchByType(
+    type: SearchType,
+    query: string,
+    pattern: string,
+  ): Promise<SearchResult[]> {
+    const handlers: Record<SearchType, () => Promise<SearchResult[]>> = {
+      jobs: () => this.searchJobs(query, pattern),
+      studios: () => this.searchStudios(pattern, query),
+      skills: () => this.searchSkills(pattern),
+      resumes: () => this.searchResumes(pattern),
+      "cover-letters": () => this.searchCoverLetters(pattern),
+      "portfolio-projects": () => this.searchPortfolioProjects(pattern),
+      "interview-sessions": () => this.searchInterviewSessions(pattern),
+      "automation-runs": () => this.searchAutomationRuns(pattern),
+    };
+    return handlers[type]();
+  }
+
   async searchAll(query: string, types?: SearchType[]): Promise<UnifiedSearchResult> {
     const startTime = Date.now();
-    const searchTypes = types || DEFAULT_SEARCH_TYPES;
+    const searchTypes = types && types.length > 0 ? types : [...DEFAULT_SEARCH_RESULT_TYPES];
     const pattern = `%${query}%`;
-    const counts: Record<SearchType, number> = { jobs: 0, studios: 0, skills: 0, resumes: 0 };
+    const counts = emptyCounts();
 
     const batches = await Promise.all(
-      searchTypes.map(async (type) => {
-        if (type === "jobs") return { type, results: await this.searchJobs(query, pattern) };
-        if (type === "studios") return { type, results: await this.searchStudios(pattern, query) };
-        if (type === "skills") return { type, results: await this.searchSkills(pattern) };
-        return { type, results: await this.searchResumes(pattern) };
-      }),
+      searchTypes.map(async (type) => ({
+        type,
+        results: await this.searchByType(type, query, pattern),
+      })),
     );
 
     const results: SearchResult[] = batches.flatMap((batch) => {

@@ -1,11 +1,16 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { hashApiKey } from "../utils/crypto";
-import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
+import {
+  API_ENDPOINTS,
+  OPENAI_V1_ENDPOINT_PREFIX,
+  toApiScopedPath,
+} from "@bao/shared/constants/endpoints";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { createTestDbPath, requestJson } from "../test-utils";
 
 type OpenApiOperation = {
   tags?: string[];
+  description?: string;
 };
 
 type OpenApiSpec = {
@@ -32,11 +37,16 @@ const routeTagMatchers = [
   { prefix: toApiScopedPath(API_ENDPOINTS.searchBase), tag: "Search" },
   { prefix: toApiScopedPath(API_ENDPOINTS.statsBase), tag: "Stats" },
   { prefix: toApiScopedPath(API_ENDPOINTS.automationBase), tag: "Automation" },
+  { prefix: toApiScopedPath(API_ENDPOINTS.speechBase), tag: "Speech" },
+  { prefix: OPENAI_V1_ENDPOINT_PREFIX, tag: "OpenAI V1" },
 ] as const;
+
+/** Paths allowed without OpenAPI tags (docs UI shell only). */
+const UNTAGGED_ALLOWLIST = new Set<string>([toApiScopedPath(API_ENDPOINTS.apiDocsUi)]);
 
 const resolveExpectedTag = (path: string): string | null => {
   const scopedPath = toApiScopedPath(path);
-  if (scopedPath === toApiScopedPath(API_ENDPOINTS.apiDocsUi)) {
+  if (UNTAGGED_ALLOWLIST.has(scopedPath)) {
     return null;
   }
 
@@ -105,17 +115,25 @@ describe("openapi tags", () => {
         }
 
         const expectedTag = resolveExpectedTag(path);
-        // Routes without an expected tag prefix are fine (e.g. auth lifecycle routes)
         if (!expectedTag) {
+          // Only allowlisted paths may omit tags; everything else is debt.
+          if (!UNTAGGED_ALLOWLIST.has(toApiScopedPath(path))) {
+            throw new Error(
+              `OpenAPI path has no tag matcher (add matcher or allowlist): ${method.toUpperCase()} ${path}`,
+            );
+          }
           continue;
         }
-        // Tags may not be present on routes registered before the openapi plugin
-        if (!operation.tags) {
-          continue;
+        if (!operation.tags || operation.tags.length === 0) {
+          throw new Error(`OpenAPI operation missing tags: ${method.toUpperCase()} ${path}`);
         }
-        expect(operation.tags).toBeArray();
-        expect(operation.tags?.length).toBeGreaterThan(0);
         expect(operation.tags).toContain(expectedTag);
+        const description = operation.description?.trim() ?? "";
+        if (description.length < 12) {
+          throw new Error(
+            `OpenAPI operation missing description (≥12 chars): ${method.toUpperCase()} ${path}`,
+          );
+        }
       }
     }
   });

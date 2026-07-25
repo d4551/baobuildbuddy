@@ -27,13 +27,13 @@ If parent AGENTS and this file conflict on SSOT shape: **this document wins for 
 | Layer | Technology | Notes |
 |-------|------------|--------|
 | Runtime / PM | **Bun** | `bun run *` for dev, test, lint, build |
-| API | **Elysia 2** (`>=2.0.0-exp.42`, pinned `2.0.0-exp.46` via root `overrides`) on Bun | Port **3000**; `/api/*` app routes + OpenAI Chat Completions **`/v1/models`** and **`/v1/chat/completions`**; OpenAPI via `@elysiajs/openapi`. **Installed pins enforced by** `validate:stack-versions` (not `npm view` latest). Absolute user-home symlinks banned by `validate:no-abs-path-symlinks`. |
+| API | **Elysia 2** (`>=2.0.0-exp.42`, pinned `2.0.0-exp.49` via root `overrides`) on Bun | Port **3000**; `/api/*` app routes + OpenAI Chat Completions **`/v1/models`** and **`/v1/chat/completions`**; OpenAPI via `@elysiajs/openapi`. **Installed pins enforced by** `validate:stack-versions` (not `npm view` latest). Absolute user-home symlinks banned by `validate:no-abs-path-symlinks`. Peer `typebox` ≥ `1.3.8`. |
 | TypeScript | **7** (`@typescript/native`) + **6.0.3** API peer | Typecheck uses TS7 native; ESLint/typescript-eslint stays on TS 6.0.3 until TS 7.1 programmatic API lands |
 | `skipLibCheck` | **false** | Enforced. Upstream Elysia/Drizzle/OpenAPI `.d.ts` are marked `// @ts-nocheck` by `scripts/patch-upstream-dts-nocheck.ts` (`postinstall`) until those packages ship TS7-clean declarations. First-party source remains fully checked (`scripts/typecheck-workspace.ts`). |
 | API client types | **Eden Treaty** (`@elysiajs/eden@1.4.9`) | Generated from server. **No Eden 2.x on npm** (latest/experimental still 1.x); keep Eden 1 until upstream publishes Elysia-2-compatible Eden. OpenAPI plugin is `@elysiajs/openapi@2.0.0-exp.0`. |
 | Persistence | **Drizzle ORM** + **SQLite** via **`bun:sqlite`** | Schema: `packages/server/src/db/schema/schema-modules.ts`; `drizzle-kit` uses `better-sqlite3` |
 | UI | **Nuxt 4** + **Vue 3** + **vue-i18n** | Port **3001** |
-| Styling | **Tailwind CSS 4** + **daisyUI 5** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark) |
+| Styling | **Tailwind CSS 4** + **daisyUI 5** | Themes in `packages/client/assets/css/main.css` (`corporate` default, `business` prefers-dark). CSS entry must `@import "tailwindcss/index.css"` (not bare `"tailwindcss"`) so Vite/postcss-import resolves the package export under bun workspaces. |
 
 ## Non-goals (do not “migrate” without an explicit product decision)
 
@@ -80,6 +80,8 @@ bun run test
 bun run build
 bun run validate:stack-versions
 ```
+
+**Biome exception (scripts only):** `scripts/browser-record-product-demo.ts` may disable `performance/noAwaitInLoops` because headed Playwright capture must poll UI sequentially (parallel `Promise.all` races the DOM). Product/runtime packages keep the rule as `error`.
 
 Optional interactive stack: `bun run dev` (server + client; Nuxt on `127.0.0.1:3001` by default).
 

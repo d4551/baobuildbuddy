@@ -118,11 +118,35 @@ const openRoute = async (
 ): Promise<void> => {
   consoleBucket.length = 0;
   pageErrorBucket.length = 0;
-  await page.goto(`${CLIENT_BASE}${route}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await page.waitForTimeout(600);
+  const target = `${CLIENT_BASE}${route}`;
+  await settle(page.waitForLoadState("domcontentloaded", { timeout: 5_000 }));
+  // If a prior click already landed here, skip competing goto.
+  if (page.url().startsWith(target)) {
+    await page.waitForTimeout(400);
+    return;
+  }
+  let attempt = 0;
+  while (attempt < 4) {
+    const navResult = await settle(
+      page.goto(target, {
+        waitUntil: "domcontentloaded",
+        timeout: 60_000,
+      }),
+    );
+    if (navResult.status === "fulfilled") {
+      await page.waitForTimeout(600);
+      return;
+    }
+    await settle(page.waitForLoadState("domcontentloaded", { timeout: 8_000 }));
+    if (page.url().startsWith(target)) {
+      await page.waitForTimeout(400);
+      return;
+    }
+    if (attempt === 3) {
+      throw navResult.reason;
+    }
+    attempt += 1;
+  }
 };
 
 const collectChromeSignals = async (page: Page) =>
@@ -182,6 +206,10 @@ const collectChromeSignals = async (page: Page) =>
       return !intentionalTruncate;
     });
     const duplicateChromeCopy = (() => {
+      // API Docs legitimately repeats OpenAPI operation descriptions in list + detail.
+      if (location.pathname.includes("/docs/api")) {
+        return [] as string[];
+      }
       const texts = [...document.querySelectorAll("p")]
         .filter((el) => !el.closest(".grid, .stats, [role='log']"))
         .map((el) => collapseWs(el.textContent ?? ""))
@@ -354,13 +382,33 @@ const clickOneLabel = async (
         if (control.hasAttribute("disabled") || control.getAttribute("aria-disabled") === "true") {
           continue;
         }
+        control.scrollIntoView({ block: "nearest", inline: "nearest" });
         control.click();
         return true;
       }
       return false;
     }, label),
   );
-  const clicked = clickResult.status === "fulfilled" && clickResult.value;
+  let clicked = clickResult.status === "fulfilled" && clickResult.value;
+  if (!clicked) {
+    // Fallback: Playwright role click (section tabs / rails often miss evaluate hit-testing).
+    const roleClick = await settle(
+      (async () => {
+        const locator = page
+          .getByRole("link", { name: label, exact: true })
+          .or(page.getByRole("button", { name: label, exact: true }))
+          .or(page.getByRole("tab", { name: label, exact: true }))
+          .first();
+        if ((await locator.count()) === 0) {
+          return false;
+        }
+        await locator.scrollIntoViewIfNeeded();
+        await locator.click({ timeout: 4_000 });
+        return true;
+      })(),
+    );
+    clicked = roleClick.status === "fulfilled" && roleClick.value;
+  }
   if (!clicked) {
     // Prior clicks (refresh/filter) often unmount empty-state CTAs; skip stale labels.
     const stillListedResult = await settle(listClickableControlLabels(page));

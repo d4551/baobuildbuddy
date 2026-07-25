@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import AppCodeEditor from "~/components/ui/AppCodeEditor.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
+import { EDITOR_MIN_HEIGHT_CLASS } from "~/constants/editor";
 import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
-  MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -60,11 +61,8 @@ function updateQueryParameter(name: string, event: Event): void {
   }
 }
 
-function updateRequestBodyValue(event: Event): void {
-  const target = event.target;
-  if (target instanceof HTMLTextAreaElement) {
-    emit("update:request-body-value", target.value);
-  }
+function updateRequestBodyValue(value: string): void {
+  emit("update:request-body-value", value);
 }
 </script>
 
@@ -180,7 +178,16 @@ function updateRequestBodyValue(event: Event): void {
         :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]"
       >
         <h3 class="font-medium">{{ t("apiDocs.tester.requestBodyIntro") }}</h3>
-        <textarea class="textarea font-mono" :value="requestBodyValue" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.sm, MIN_HEIGHT_SCROLL_CLASS]" :placeholder="t('apiDocs.tester.bodyPlaceholder')" :aria-label="t('apiDocs.tester.requestBodyAria')" @input="updateRequestBodyValue"/>
+        <ClientOnly>
+          <AppCodeEditor
+            :model-value="requestBodyValue"
+            mode="json"
+            :aria-label="t('apiDocs.tester.requestBodyAria')"
+            :placeholder="t('apiDocs.tester.bodyPlaceholder')"
+            :min-height-class="EDITOR_MIN_HEIGHT_CLASS"
+            @update:model-value="updateRequestBodyValue"
+          />
+        </ClientOnly>
         <p 
           v-if="!selectedEndpoint.requestBodyTemplate && !selectedEndpoint.requestBodyRequired"
           class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.xs]"

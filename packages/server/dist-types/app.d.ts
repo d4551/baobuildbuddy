@@ -142,19 +142,23 @@ export declare const app: Elysia<"/api", "local", {
                     headers: unknown;
                     response: {
                         200: {
-                            readonly configured: true;
-                            readonly apiKey: string;
-                            readonly message: "API key rotated. Save this new key — it will not be shown again.";
-                        } & {
-                            readonly configured: true;
-                            readonly apiKey: string;
-                            readonly message: "API key rotated. Save this new key — it will not be shown again.";
+                            configured: boolean;
+                            apiKey?: string | undefined;
+                            message?: string | undefined;
                         };
                         401: {
-                            readonly error: string;
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                         404: {
-                            readonly error: "No API key configured to rotate";
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                     };
                     error: never;
@@ -169,17 +173,22 @@ export declare const app: Elysia<"/api", "local", {
                     headers: unknown;
                     response: {
                         200: {
-                            readonly revoked: true;
-                            readonly message: "API key has been revoked.";
-                        } & {
-                            readonly revoked: true;
-                            readonly message: "API key has been revoked.";
+                            revoked: boolean;
+                            message?: string | undefined;
                         };
                         401: {
-                            readonly error: string;
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                         404: {
-                            readonly error: "No API key configured to revoke";
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
                         };
                     };
                     error: never;
@@ -3021,6 +3030,43 @@ export declare const app: Elysia<"/api", "local", {
     };
 } & {
     api: {
+        [x: string]: {};
+    } & {
+        [x: string]: {
+            [x: string]: {
+                post: {
+                    body: {
+                        audioBase64: string;
+                        mimeType: string;
+                        filename?: string | undefined;
+                    };
+                    params: {};
+                    query: unknown;
+                    headers: unknown;
+                    response: {
+                        200: {
+                            text: string;
+                            provider: string;
+                            model: string;
+                            message: string;
+                        };
+                        400: {
+                            error: string;
+                        };
+                        422: {
+                            error: string;
+                        };
+                        502: {
+                            error: string;
+                        };
+                    };
+                    error: never;
+                };
+            };
+        };
+    };
+} & {
+    api: {
         [x: string]: {
             progress: {
                 get: {
@@ -3622,7 +3668,7 @@ export declare const app: Elysia<"/api", "local", {
                         200: {
                             query: string;
                             results: {
-                                type: "jobs" | "resumes" | "skills" | "studios";
+                                type: "automation-runs" | "cover-letters" | "interview-sessions" | "jobs" | "portfolio-projects" | "resumes" | "skills" | "studios";
                                 id: string;
                                 title: string;
                                 subtitle: string;
@@ -3634,6 +3680,10 @@ export declare const app: Elysia<"/api", "local", {
                                 studios: number;
                                 skills: number;
                                 resumes: number;
+                                "cover-letters": number;
+                                "portfolio-projects": number;
+                                "interview-sessions": number;
+                                "automation-runs": number;
                             };
                             totalTime: number;
                         };
@@ -3805,6 +3855,7 @@ export declare const app: Elysia<"/api", "local", {
                         headers: unknown;
                         response: {
                             200: unknown;
+                            204: void;
                             404: {
                                 error: {
                                     code: string;

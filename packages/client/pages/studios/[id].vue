@@ -12,6 +12,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 definePageMeta({
@@ -148,7 +149,7 @@ function studioDetailLocation(location: string | undefined): string {
             :href="studio.website"
             target="_blank"
             rel="noopener noreferrer"
-            class="btn btn-outline"
+            :class="[OUTLINE_ACTION_CLASS]"
             :aria-label="t('studioDetail.visitWebsiteAria', { studio: studio.name })"
           >
             <IconGlobe :class="ICON_SIZE_CLASS.sm" />

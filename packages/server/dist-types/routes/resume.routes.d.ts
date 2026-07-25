@@ -337,6 +337,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/:id/ai-score", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         id: import("typebox").TString;

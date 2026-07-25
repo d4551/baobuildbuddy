@@ -33,3 +33,10 @@
 | I19 | Jobs empty CTAs | under dock | CTAs before copy; Configure primary | measure underDock=false |
 | I20 | AI chat settings-first | STT forms first paint | compact voice + collapse profiles | screenshot |
 | I21 | Page header density | text-2xl always | text-xl sm:text-2xl | PAGE_HEADER_* SSOT |
+
+| I22 | OmniSearch Cmd+K | button-only | Ctrl/Cmd+K opens + focuses input | Δ: enterprise palette | SSOT: useKeyboardShortcuts | gate: keyboard-nav-parity + browser probe |
+| I23 | Search fabric types | 4 types | 8 types incl cover/portfolio/interview/runs | Δ: +4 entities | SSOT: constants/search.ts | gate: search-type-parity |
+| I24 | Outline/soft tokens | raw literals | OUTLINE/SOFT_ACTION_CLASS + gate | Δ: 0 quoted btn-outline in .vue | SSOT: layout-tokens | gate: outline-action-density |
+| I25 | Elysia tip | exp.46 | exp.49 + websocket capability | Δ: tip non-downgrade | SSOT: STACK-CONTRACT | gate: stack-versions |
+
+| I26 | Tailwind CSS import | bare `tailwindcss` ENOENT in Vite SSR build | `tailwindcss/index.css` + gate | Δ: CI build green | SSOT: STACK-CONTRACT | gate: validate:tailwind-css-import |

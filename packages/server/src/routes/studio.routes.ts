@@ -21,6 +21,7 @@ import {
   studioMutationBodySchema,
   studioUpdateBodySchema,
 } from "./studio-route-contracts";
+import { openapiDetail } from "../utils/openapi-detail";
 
 export interface StudioAnalytics {
   totalStudios: number;
@@ -36,7 +37,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Retrieve studios resource for BaoBuildBuddy career automation."),
       query: studioListQuerySchema,
       response: studioListResponses,
     },
@@ -74,7 +75,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/analytics",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Retrieve studios analytics for BaoBuildBuddy career automation."),
       response: studioAnalyticsResponses,
     },
     async ({ status }) => {
@@ -120,7 +121,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Retrieve studios :id for BaoBuildBuddy career automation."),
       params: studioIdParamsSchema,
       response: studioEntityResponses,
     },
@@ -135,7 +136,7 @@ export const studioRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Create or execute studios resource for BaoBuildBuddy career automation."),
       body: studioMutationBodySchema,
       response: studioEntityResponses,
     },
@@ -163,7 +164,7 @@ export const studioRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Replace studios :id for BaoBuildBuddy career automation."),
       params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
       response: studioEntityResponses,
@@ -196,7 +197,7 @@ export const studioRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: { tags: ["Studios"] },
+      detail: openapiDetail("Studios", "Delete studios :id for BaoBuildBuddy career automation."),
       params: studioIdParamsSchema,
       response: studioDeleteResponses,
     },

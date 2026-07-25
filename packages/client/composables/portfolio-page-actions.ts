@@ -7,6 +7,7 @@ import type { ComputedRef, Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
 import type { NuxtApp } from "#app";
 import { settlePromise } from "~/composables/async-flow";
+import { runExportWithToast } from "~/composables/export-with-toast";
 import type {
   PortfolioProjectForm,
   PortfolioProjectView,
@@ -237,16 +238,13 @@ function createPortfolioCrudActions(
 
   return {
     async handleExport(format: "pdf" | "docx"): Promise<void> {
-      const exportResult = await settlePromise(
-        input.exportPortfolio(format),
-        t("portfolioPage.toasts.exportFailed"),
-      );
-      if (!exportResult.ok) {
-        $toast.error(getErrorMessage(exportResult.error, t("portfolioPage.toasts.exportFailed")));
-        return;
-      }
-
-      $toast.success(t("portfolioPage.toasts.exported"));
+      await runExportWithToast({
+        exportFn: () => input.exportPortfolio(format),
+        failMessage: t("portfolioPage.toasts.exportFailed"),
+        successMessage: t("portfolioPage.toasts.exported"),
+        toast: $toast,
+        t,
+      });
     },
 
     async handleSavePortfolio(): Promise<void> {

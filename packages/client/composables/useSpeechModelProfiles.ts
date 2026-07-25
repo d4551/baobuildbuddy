@@ -1,5 +1,6 @@
 import {
   DEFAULT_SPEECH_SETTINGS,
+  ON_DEVICE_TTS_PROVIDER_OPTIONS,
   SPEECH_MODEL_OPTIONS,
   SPEECH_PROVIDER_OPTIONS,
   type SpeechProviderOption,
@@ -236,6 +237,8 @@ export function useSpeechModelProfiles(options: UseSpeechModelProfilesOptions) {
 
   return {
     speechProviderOptions: SPEECH_PROVIDER_OPTIONS,
+    /** Cloud TTS ignored — UI only offers browser + local Kokoro. */
+    ttsProviderOptions: ON_DEVICE_TTS_PROVIDER_OPTIONS,
     speechConfig,
     sttModelOptions,
     ttsModelOptions,

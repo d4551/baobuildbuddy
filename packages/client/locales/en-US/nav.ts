@@ -15,6 +15,12 @@ const nav = {
     settings: "Settings",
     apiDocs: "API Docs",
     breadcrumbUnknown: "Page",
+    groups: {
+      work: "Work",
+      create: "Create",
+      intelligence: "Intelligence",
+      system: "System",
+    },
   },
 } as const;
 

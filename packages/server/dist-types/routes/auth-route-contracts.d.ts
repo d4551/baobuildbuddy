@@ -54,3 +54,48 @@ export declare const authInitResponses: {
         id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
+export declare const authRotateResponses: {
+    readonly 200: import("typebox").TObject<{
+        configured: import("typebox").TBoolean;
+        apiKey: import("typebox").TOptional<import("typebox").TString>;
+        message: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 401: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};
+export declare const authRevokeResponseSchema: import("typebox").TObject<{
+    revoked: import("typebox").TBoolean;
+    message: import("typebox").TOptional<import("typebox").TString>;
+}>;
+export declare const authRevokeResponses: {
+    readonly 200: import("typebox").TObject<{
+        revoked: import("typebox").TBoolean;
+        message: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 401: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    readonly 404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+};

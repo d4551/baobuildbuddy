@@ -9,6 +9,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_BUTTON_VARIANT_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
@@ -131,7 +132,11 @@ const brandPreviewThemes = computed<
             >
               {{ t("settings.brand.previewPrimaryAction") }}
             </span>
-            <span class="btn btn-secondary btn-outline" aria-hidden="true">
+            <span
+              class="btn btn-secondary"
+              :class="[OUTLINE_BUTTON_VARIANT_CLASS]"
+              aria-hidden="true"
+            >
               {{ t("settings.brand.previewSecondaryAction") }}
             </span>
           </div>

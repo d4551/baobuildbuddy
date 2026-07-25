@@ -24,6 +24,7 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                     headers: unknown;
                     response: {
                         200: unknown;
+                        204: void;
                         404: {
                             error: {
                                 code: string;
@@ -510,6 +511,7 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
 }, "get", "/runs/:id", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         id: import("typebox").TString;

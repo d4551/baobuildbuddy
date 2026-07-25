@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
 definePageMeta({
   middleware: ["auth"],
 });
@@ -256,7 +257,7 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       <template #actions>
         <NuxtLink
           :to="APP_ROUTES.automation"
-          class="btn btn-outline"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.runs.backToAutomation')"
         >
           {{ t("automation.runs.backButton") }}

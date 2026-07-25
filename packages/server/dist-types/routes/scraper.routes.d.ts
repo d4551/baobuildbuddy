@@ -38,6 +38,7 @@ export declare const scraperRoutes: import("elysia/types").AddRoute<string, "loc
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         portalId: import("typebox").TString;
@@ -65,13 +66,6 @@ export declare const scraperRoutes: import("elysia/types").AddRoute<string, "loc
         }>;
     };
 }, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, status }: {
-    body: unknown;
-    query: Record<string, string | undefined>;
-    params: {
-        portalId: string;
-    };
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -79,11 +73,6 @@ export declare const scraperRoutes: import("elysia/types").AddRoute<string, "loc
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         readonly 200: {
             scraped: number;
@@ -106,6 +95,18 @@ export declare const scraperRoutes: import("elysia/types").AddRoute<string, "loc
             details?: string | undefined;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {
+        portalId: string;
+    };
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, import("@bao/shared/types/jobs").ScraperOperationResult, 200> | import("elysia").ElysiaStatus<400, {
     error: string;
     details: string;

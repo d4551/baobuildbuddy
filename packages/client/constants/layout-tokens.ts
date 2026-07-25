@@ -143,6 +143,7 @@ export const PADDING_TOKEN_CLASS = {
   pr10: "pr-10",
   pr14: "pr-14",
   pt2: "pt-2",
+  pt3: "pt-3",
   pt4: "pt-4",
 } as const;
 export type PaddingToken = keyof typeof PADDING_TOKEN_CLASS;
@@ -281,6 +282,15 @@ export const PRIMARY_ACTION_CLASS = `btn ${PRIMARY_BUTTON_VARIANT_CLASS} h-11 mi
  * Use for quick-action grids and demoted hub cards when a page already owns PRIMARY_ACTION_CLASS.
  */
 export const OUTLINE_ACTION_CLASS = "btn btn-outline h-11 min-h-11";
+
+/** daisyUI soft variant + touch floor (prompt chips, demoted secondary). */
+export const SOFT_ACTION_CLASS = "btn btn-soft h-11 min-h-11";
+
+/** Outline variant token segment for composition (ban raw `btn-outline` in consumers). */
+export const OUTLINE_BUTTON_VARIANT_CLASS = "btn-outline";
+
+/** Soft variant token segment for composition (ban raw `btn-soft` in consumers). */
+export const SOFT_BUTTON_VARIANT_CLASS = "btn-soft";
 
 /** Per-item dock link: meets touch-target floor without forking dock chrome. */
 export const SHELL_DOCK_ITEM_CLASS = "min-h-11 min-w-11";

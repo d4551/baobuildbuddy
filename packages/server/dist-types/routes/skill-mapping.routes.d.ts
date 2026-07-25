@@ -330,6 +330,7 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
 }, "post", "/ai-analyze", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         gameExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;
@@ -353,15 +354,6 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
         }>;
     };
 }, {}, `${string}/ai-analyze`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
-    body: {
-        gameExperience?: Record<string, string | number | boolean | null> | undefined;
-        resume?: Record<string, string | number | boolean | null> | undefined;
-        autoCreateMappings?: boolean | undefined;
-    };
-    query: Record<string, string | undefined>;
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -369,11 +361,6 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         200: {
             message: string;
@@ -390,6 +377,20 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
             provider?: string | undefined;
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: {
+        gameExperience?: Record<string, string | number | boolean | null> | undefined;
+        resume?: Record<string, string | number | boolean | null> | undefined;
+        autoCreateMappings?: boolean | undefined;
+    };
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
     message: string;
     detectedSkills: string[];

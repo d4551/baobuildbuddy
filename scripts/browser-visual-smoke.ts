@@ -190,12 +190,10 @@ const smokeRoute = async (
     reason = `pageerror: ${pageErrors[0] ?? "unknown"}`;
   } else if (
     viewportName === "mobile" &&
-    (route === APP_ROUTES.ai ||
-      route.startsWith(`${APP_ROUTES.ai}/`) ||
-      route === APP_ROUTES.automation ||
-      route.startsWith(`${APP_ROUTES.automation}/`)) &&
+    (route === APP_ROUTES.ai || route.startsWith(`${APP_ROUTES.ai}/`)) &&
     signals.dockActive.length === 0
   ) {
+    // Automation lives in sidebar Work group only (IA cutover); AI still requires dock active.
     reason = `dock orphan on ${route} — expected aria-current/dock-active`;
   } else if (
     viewportName === "mobile" &&

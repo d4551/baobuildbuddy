@@ -2,7 +2,6 @@
 import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,

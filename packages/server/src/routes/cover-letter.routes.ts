@@ -38,6 +38,7 @@ import {
   listCoverLetters,
   updateCoverLetter,
 } from "./cover-letter-route-support";
+import { openapiDetail } from "../utils/openapi-detail";
 
 type RouteStatus = typeof status;
 
@@ -90,7 +91,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Retrieve cover letters resource for BaoBuildBuddy career automation."),
       response: coverLettersListResponses,
     },
     async ({ status }) =>
@@ -99,7 +100,7 @@ export const coverLetterRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Create or execute cover letters resource for BaoBuildBuddy career automation."),
       body: coverLetterMutationBodySchema,
       response: coverLetterEntityResponses,
     },
@@ -111,7 +112,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Retrieve cover letters :id for BaoBuildBuddy career automation."),
       params: coverLetterIdParamsSchema,
       response: coverLetterEntityResponses,
     },
@@ -127,7 +128,7 @@ export const coverLetterRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Replace cover letters :id for BaoBuildBuddy career automation."),
       params: coverLetterIdParamsSchema,
       body: coverLetterUpdateBodySchema,
       response: coverLetterEntityResponses,
@@ -144,7 +145,7 @@ export const coverLetterRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Delete cover letters :id for BaoBuildBuddy career automation."),
       params: coverLetterIdParamsSchema,
       response: coverLetterDeleteResponses,
     },
@@ -160,7 +161,7 @@ export const coverLetterRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.coverLettersBase, API_ENDPOINTS.coverLettersGenerate),
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Delete cover letters :id for BaoBuildBuddy career automation."),
       body: generateCoverLetterBodySchema,
       response: generateCoverLetterResponses,
     },
@@ -200,7 +201,7 @@ export const coverLetterRoutes = new Elysia({
   .post(
     "/:id/export",
     {
-      detail: { tags: ["Cover Letters"] },
+      detail: openapiDetail("Cover Letters", "Create or execute cover letters :id export for BaoBuildBuddy career automation."),
       params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,
       response: coverLetterExportResponses,

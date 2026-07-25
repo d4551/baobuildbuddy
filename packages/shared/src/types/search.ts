@@ -1,11 +1,19 @@
 /**
- * Search and statistics types for dashboard and unified search
+ * Search and statistics types for dashboard and unified search.
+ * Result type literals are owned by `@bao/shared/constants/search`.
  */
+
+import type { SearchResultType } from "../constants/search";
+
+export type { SearchResultType } from "../constants/search";
 
 export interface SearchResult {
   id: string;
-  type: "job" | "studio" | "skill" | "resume" | "cover-letter";
+  type: SearchResultType;
   title: string;
+  subtitle: string;
+  snippet: string;
+  relevance: number;
   description?: string;
   matchScore?: number;
   metadata?: Record<string, unknown>;

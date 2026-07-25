@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import {
+  DOCK_NAVIGATION_IDS,
   getDockNavigationItems,
   isDockRouteActive,
   NAVIGATION_ITEMS,
@@ -14,16 +15,16 @@ describe("dock section wayfinding", () => {
     expect(isDockRouteActive(APP_ROUTES.aiDashboard, aiChat!)).toBe(true);
   });
 
-  it("activates automation for nested run routes", () => {
+  it("still resolves automation routes for sidebar Work group (not dock)", () => {
     const automation = NAVIGATION_ITEMS.find((item) => item.id === "automation");
     expect(automation).toBeTruthy();
+    expect(automation?.includeInDock).toBe(false);
     expect(isDockRouteActive(APP_ROUTES.automation, automation!)).toBe(true);
     expect(isDockRouteActive(APP_ROUTES.automationRuns, automation!)).toBe(true);
-    expect(isDockRouteActive(APP_ROUTES.automationJobApply, automation!)).toBe(true);
   });
 
-  it("keeps dock composition under Apple HIG cap with AI + Automation", () => {
+  it("keeps dock composition as Home/Work/Create/AI/System", () => {
     const ids = getDockNavigationItems().map((item) => item.id);
-    expect(ids).toEqual(["dashboard", "jobs", "ai-chat", "automation", "settings"]);
+    expect(ids).toEqual([...DOCK_NAVIGATION_IDS]);
   });
 });

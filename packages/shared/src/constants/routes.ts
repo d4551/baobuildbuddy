@@ -145,4 +145,13 @@ export const APP_ROUTE_BUILDERS = {
   resumePreview(resumeId: string): string {
     return `${APP_ROUTES.resumePreview}?${APP_ROUTE_QUERY_KEYS.id}=${encodeRouteParam(resumeId)}`;
   },
+  /**
+   * Builds an interview session route with selected session query.
+   *
+   * @param sessionId Interview session identifier.
+   * @returns Canonical interview session route with query.
+   */
+  interviewSession(sessionId: string): string {
+    return `${APP_ROUTES.interviewSession}?${APP_ROUTE_QUERY_KEYS.sessionId}=${encodeRouteParam(sessionId)}`;
+  },
 } as const;

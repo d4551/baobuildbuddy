@@ -5,7 +5,6 @@ import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.sche
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -14,6 +13,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 
 const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
@@ -152,7 +152,7 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
       <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3, MARGIN_TOKEN_CLASS.mt4]">
         <NuxtLink 
           :to="runDetailRoute(activeRunId)"
-          :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-sm btn-outline']"
+          :class="[OUTLINE_ACTION_CLASS]"
           :aria-label="t('automation.jobApply.openRunDetailAria', { id: activeRunId })"
         >
           {{ t("automation.jobApply.openRunDetailLink") }}

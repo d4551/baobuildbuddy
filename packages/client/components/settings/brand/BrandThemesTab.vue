@@ -3,14 +3,13 @@ import {
   RESPONSIVE_PADDING_MD_P6_CLASS,
 } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
+import AppJsonField from "~/components/ui/AppJsonField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
@@ -43,13 +42,11 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.lightThemeLegend") }}
           </legend>
-          <textarea 
+          <AppJsonField
             v-model="brandForm.lightThemeJson"
-            class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
-            rows="12"
-            :aria-describedby="props.hintIds.lightTheme"
+            :label="t('settings.brand.lightThemeLegend')"
             :aria-label="t('settings.brand.lightThemeAria')"
-          ></textarea>
+          />
           <p :id="props.hintIds.lightTheme" class="label whitespace-normal">
             {{ t("settings.brand.themeJsonHint") }}
           </p>
@@ -59,13 +56,11 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.darkThemeLegend") }}
           </legend>
-          <textarea 
+          <AppJsonField
             v-model="brandForm.darkThemeJson"
-            class="textarea font-mono" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
-            rows="12"
-            :aria-describedby="props.hintIds.darkTheme"
+            :label="t('settings.brand.darkThemeLegend')"
             :aria-label="t('settings.brand.darkThemeAria')"
-          ></textarea>
+          />
           <p :id="props.hintIds.darkTheme" class="label whitespace-normal">
             {{ t("settings.brand.themeJsonHint") }}
           </p>

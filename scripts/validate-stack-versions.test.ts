@@ -9,13 +9,13 @@ import {
 describe("readPackageVersionFromJson", () => {
   test("reads matching package name/version", () => {
     expect(
-      readPackageVersionFromJson("elysia", JSON.stringify({ name: "elysia", version: "2.0.0-exp.46" })),
-    ).toBe("2.0.0-exp.46");
+      readPackageVersionFromJson("elysia", JSON.stringify({ name: "elysia", version: "2.0.0-exp.49" })),
+    ).toBe("2.0.0-exp.49");
   });
 
   test("rejects name mismatch", () => {
     expect(
-      readPackageVersionFromJson("elysia", JSON.stringify({ name: "other", version: "2.0.0-exp.46" })),
+      readPackageVersionFromJson("elysia", JSON.stringify({ name: "other", version: "2.0.0-exp.49" })),
     ).toBeNull();
   });
 });
@@ -24,7 +24,7 @@ describe("collectStackVersionViolations", () => {
   const pins: readonly StackVersionPin[] = [
     {
       packageName: "elysia",
-      requiredInstalled: "2.0.0-exp.46",
+      requiredInstalled: "2.0.0-exp.49",
       requiredPrefix: "2.0.0-exp.",
       resolveFromPackage: "packages/server",
     },
@@ -36,11 +36,11 @@ describe("collectStackVersionViolations", () => {
       [
         {
           packageName: "elysia",
-          installedVersion: "2.0.0-exp.46",
+          installedVersion: "2.0.0-exp.49",
           packageJsonPath: "node_modules/elysia/package.json",
         },
       ],
-      { elysia: "2.0.0-exp.46" },
+      { elysia: "2.0.0-exp.49" },
     );
     expect(violations).toHaveLength(0);
   });
@@ -55,7 +55,7 @@ describe("collectStackVersionViolations", () => {
           packageJsonPath: "node_modules/elysia/package.json",
         },
       ],
-      { elysia: "2.0.0-exp.46" },
+      { elysia: "2.0.0-exp.49" },
     );
     expect(violations.some((v) => v.message.includes("1.4.29"))).toBe(true);
   });
@@ -66,7 +66,7 @@ describe("collectStackVersionViolations", () => {
       [
         {
           packageName: "elysia",
-          installedVersion: "2.0.0-exp.46",
+          installedVersion: "2.0.0-exp.49",
           packageJsonPath: "node_modules/elysia/package.json",
         },
       ],

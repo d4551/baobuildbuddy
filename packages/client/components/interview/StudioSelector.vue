@@ -11,6 +11,7 @@ import {
   STACK_SPACE_Y_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import { studioTypeLabel as formatStudioTypeLabel } from "~/utils/labels";
 
@@ -207,7 +208,7 @@ function studioLocationLabel(location: string): string {
   <div class="dropdown" :class="[FLUID_WIDTH_CLASS, { 'dropdown-open': isOpen }]">
     <button 
       type="button"
-      class="btn btn-outline justify-between" :class="[FLUID_WIDTH_CLASS]"
+      :class="[OUTLINE_ACTION_CLASS, 'justify-between', FLUID_WIDTH_CLASS]"
       :aria-label="t('studioSelector.toggleAria')"
       :aria-expanded="isOpen"
       :aria-controls="listboxId"

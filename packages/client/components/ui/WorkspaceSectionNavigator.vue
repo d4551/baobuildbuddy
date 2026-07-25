@@ -138,7 +138,7 @@ const activeDescription = computed<string>(() => {
 
           <nav
             ref="sectionRailRef"
-            class="overflow-x-auto overscroll-x-contain"
+            class="overscroll-x-contain max-lg:overflow-x-auto lg:overflow-x-visible"
             :class="[
               FLUID_WIDTH_CLASS,
               TRUNCATE_FLEX_CHILD_CLASS,
@@ -147,14 +147,20 @@ const activeDescription = computed<string>(() => {
               SCROLL_SMOOTH_CLASS,
               SCROLL_PADDING_INLINE_3_CLASS,
             ]"
+            data-testid="workspace-section-rail"
             :aria-label="t(ariaLabelKey)"
           >
-            <div class="tabs tabs-box w-max max-w-none p-2" :class="[SURFACE_GLASS_SUBTLE_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+            <div
+              class="tabs tabs-box max-w-none p-2 max-lg:w-max lg:flex lg:w-full lg:flex-wrap"
+              :class="[SURFACE_GLASS_SUBTLE_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]"
+            >
               <NuxtLink
                 v-for="section in sections"
                 :key="section.id"
                 :to="buildRoute(section.id)"
                 class="tab h-auto shrink-0 justify-start whitespace-nowrap rounded-box px-3 py-2 text-left"
+                active-class=""
+                exact-active-class=""
                 :class="[
                   TOUCH_TARGET_MIN_CLASS,
                   FLEX_GAP_TOKEN_CLASS.gap3,

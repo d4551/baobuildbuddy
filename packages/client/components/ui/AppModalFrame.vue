@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
+import CloseIcon from "~/components/ui/CloseIcon.vue";
+import { ICON_SIZE_CLASS, TOUCH_TARGET_MIN_CLASS } from "~/constants/layout";
 import { UI_MODAL_SIZE_CLASS_BY_TOKEN, type UiModalSizeToken } from "~/constants/ui-layout";
 
 const props = withDefaults(
@@ -54,13 +56,24 @@ watch(
 
 function requestClose(): void {
   emit("update:open", false);
+  emit("close");
+  const dialog = dialogRef.value;
+  if (dialog?.open) {
+    dialog.close();
+  }
 }
 
-function handleClose(): void {
-  emit("close");
+function handleNativeClose(): void {
   if (props.open) {
     emit("update:open", false);
   }
+  emit("close");
+}
+
+function handleCancel(event: Event): void {
+  // Escape: own the dismiss path so Vue `open` cannot desync from dialog.open.
+  event.preventDefault();
+  requestClose();
 }
 </script>
 
@@ -72,13 +85,25 @@ function handleClose(): void {
     aria-modal="true"
     :aria-labelledby="titleId"
     :aria-describedby="resolvedDescribedById.length > 0 ? resolvedDescribedById : undefined"
-    @close="handleClose"
+    @cancel="handleCancel"
+    @close="handleNativeClose"
   >
-    <div class="modal-box glass-modal" :class="modalBoxClass">
-      <slot />
+    <div class="modal-box glass-modal relative" :class="modalBoxClass">
+      <button
+        type="button"
+        class="btn btn-ghost btn-circle btn-sm absolute right-2 top-2"
+        :class="[TOUCH_TARGET_MIN_CLASS]"
+        :aria-label="closeAriaLabel"
+        @click="requestClose"
+      >
+        <CloseIcon :class="ICON_SIZE_CLASS.sm" aria-hidden="true" />
+      </button>
+      <div class="pe-12">
+        <slot />
+      </div>
     </div>
     <form method="dialog" class="modal-backdrop">
-      <button type="button" :aria-label="closeAriaLabel" @click="requestClose">
+      <button type="submit" :aria-label="closeAriaLabel">
         {{ backdropButtonLabel }}
       </button>
     </form>

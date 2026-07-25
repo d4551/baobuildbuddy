@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import { FLUID_WIDTH_CLASS, PRIMARY_ACTION_CLASS, SURFACE_GLASS_CARD_CLASS } from "~/constants/layout";
 
@@ -24,6 +25,13 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
   emit("update:portfolioForm", {
     ...props.portfolioForm,
     [key]: target.value,
+  });
+}
+
+function updatePortfolioStringField<K extends keyof PortfolioMetadata>(key: K, value: string): void {
+  emit("update:portfolioForm", {
+    ...props.portfolioForm,
+    [key]: value,
   });
 }
 </script>
@@ -75,14 +83,12 @@ function updatePortfolioField<K extends keyof PortfolioMetadata>(key: K, event: 
 
         <fieldset class="fieldset md:col-span-2">
           <legend class="fieldset-legend">{{ t("portfolioPage.profile.bioLegend") }}</legend>
-          <textarea 
-            :value="props.portfolioForm.bio"
-            class="textarea" :class="[FLUID_WIDTH_CLASS]"
-            rows="4"
+          <AppProseField
+            :model-value="props.portfolioForm.bio"
             :placeholder="t('portfolioPage.profile.bioPlaceholder')"
             :aria-label="t('portfolioPage.profile.bioAria')"
-            @input="updatePortfolioField('bio', $event)"
-          ></textarea>
+            @update:model-value="updatePortfolioStringField('bio', $event)"
+          />
         </fieldset>
       </SectionGrid>
 

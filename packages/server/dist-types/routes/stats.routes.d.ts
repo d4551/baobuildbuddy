@@ -91,6 +91,7 @@ export declare const statsRoutes: import("elysia/types").AddRoute<string, "local
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     response: {
         200: import("typebox").TObject<{
@@ -100,11 +101,6 @@ export declare const statsRoutes: import("elysia/types").AddRoute<string, "local
         }>;
     };
 }, {}, `${string}/${string}`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ status }: {
-    body: unknown;
-    query: Record<string, string | undefined>;
-    params: {};
-    headers: Record<string, string | undefined>;
-    cookie: Record<string, import("elysia").Cookie<unknown>>;
     server: import("elysia").Server | null;
     redirect: import("elysia").redirect;
     set: {
@@ -112,11 +108,6 @@ export declare const statsRoutes: import("elysia/types").AddRoute<string, "local
         status?: number | keyof import("elysia").StatusMap;
         cookie?: Record<string, import("elysia").BaseCookie>;
     };
-    readonly path: string;
-    route?: string;
-    rid?: string;
-    request: Request;
-    store: {};
     status: import("elysia").SelectiveStatus<{
         200: {
             skillCoverage: number;
@@ -124,4 +115,14 @@ export declare const statsRoutes: import("elysia/types").AddRoute<string, "local
             interviewTrend: number[];
         };
     }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: unknown;
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, import("@bao/shared/types/search").CareerProgress, 200>>>;

@@ -2,6 +2,7 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { settle } from "@bao/shared/utils/promise";
 import { onMounted, onUnmounted, ref, useRoute, useRouter } from "#imports";
 import type { NavigationItem } from "~/constants/navigation";
+import { WORKSPACE_OMNI_SEARCH_OPEN_EVENT } from "~/composables/useWorkspaceSearch";
 import { createClientLogger } from "~/utils/client-logger";
 
 /**
@@ -19,13 +20,22 @@ export interface KeyboardRouteShortcut {
 }
 
 /**
- * Canonical keyboard shortcuts for route navigation.
+ * Canonical keyboard shortcuts for route navigation (g then key).
+ * Every sidebar item must be listed here or mark `keyboardOptional` on NavigationItem.
  */
 export const KEYBOARD_ROUTE_SHORTCUTS: readonly KeyboardRouteShortcut[] = [
   { id: "dashboard", prefix: "g", key: "d", to: APP_ROUTES.dashboard },
   { id: "jobs", prefix: "g", key: "j", to: APP_ROUTES.jobs },
   { id: "resume", prefix: "g", key: "r", to: APP_ROUTES.resume },
+  { id: "cover-letter", prefix: "g", key: "l", to: APP_ROUTES.coverLetter },
+  { id: "portfolio", prefix: "g", key: "p", to: APP_ROUTES.portfolio },
   { id: "interview", prefix: "g", key: "i", to: APP_ROUTES.interview },
+  { id: "skills", prefix: "g", key: "k", to: APP_ROUTES.skills },
+  { id: "studios", prefix: "g", key: "u", to: APP_ROUTES.studios },
+  { id: "ai-dashboard", prefix: "g", key: "b", to: APP_ROUTES.aiDashboard },
+  { id: "ai-chat", prefix: "g", key: "c", to: APP_ROUTES.aiChat },
+  { id: "automation", prefix: "g", key: "m", to: APP_ROUTES.automation },
+  { id: "gamification", prefix: "g", key: "g", to: APP_ROUTES.gamification },
   { id: "apiDocs", prefix: "g", key: "a", to: APP_ROUTES.apiDocs },
   { id: "settings", prefix: "g", key: "s", to: APP_ROUTES.settings },
 ] as const;
@@ -58,8 +68,23 @@ async function pushShortcutRoute(
   }
 }
 
+/** Enterprise command palette: Cmd/Ctrl+K or Cmd/Ctrl+P opens workspace OmniSearch. */
+function isOpenSearchShortcut(event: KeyboardEvent): boolean {
+  if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+    return false;
+  }
+  const key = event.key.toLowerCase();
+  return key === "k" || key === "p";
+}
+
+/** Chat composer focus: Cmd/Ctrl+Shift+K (distinct from search). */
 function isFocusChatShortcut(event: KeyboardEvent): boolean {
-  return (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+  return (
+    (event.metaKey || event.ctrlKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    event.key.toLowerCase() === "k"
+  );
 }
 
 function hasBlockedModifier(event: KeyboardEvent): boolean {
@@ -73,9 +98,16 @@ function createKeyDownHandler(input: {
   pendingPrefix: ReturnType<typeof ref<KeyboardRouteShortcut["prefix"] | null>>;
   resetPrefix: () => void;
   armPrefix: () => void;
+  openSearchShortcut: () => void;
   focusChatShortcut: () => void;
 }): (event: KeyboardEvent) => void {
   return (event: KeyboardEvent): void => {
+    if (isOpenSearchShortcut(event)) {
+      event.preventDefault();
+      input.openSearchShortcut();
+      return;
+    }
+
     if (isFocusChatShortcut(event)) {
       event.preventDefault();
       input.focusChatShortcut();
@@ -129,6 +161,9 @@ export function useKeyboardShortcuts() {
     }
     prefixTimer = setTimeout(resetPrefix, SHORTCUT_PREFIX_TIMEOUT_MS);
   };
+  const openSearchShortcut = (): void => {
+    window.dispatchEvent(new CustomEvent(WORKSPACE_OMNI_SEARCH_OPEN_EVENT));
+  };
   const focusChatShortcut = (): void => {
     window.dispatchEvent(new CustomEvent("bao:focus-chat"));
   };
@@ -140,6 +175,7 @@ export function useKeyboardShortcuts() {
     pendingPrefix,
     resetPrefix,
     armPrefix,
+    openSearchShortcut,
     focusChatShortcut,
   });
 

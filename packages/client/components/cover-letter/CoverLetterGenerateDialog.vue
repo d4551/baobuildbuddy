@@ -2,6 +2,7 @@
 import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { ResumeData } from "@bao/shared/types/resume";
 import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -105,14 +106,11 @@ defineEmits<{
         <legend class="fieldset-legend">
           {{ $t("coverLetterPage.generate.jobDescriptionLegend") }}
         </legend>
-        <textarea 
+        <AppProseField
           v-model="form.jobDescription"
-          :minlength="jobDescriptionMinLength"
-          class="textarea validator" :class="[FLUID_WIDTH_CLASS]"
-          rows="5"
           :placeholder="$t('coverLetterPage.generate.jobDescriptionPlaceholder')"
           :aria-label="$t('coverLetterPage.generate.jobDescriptionAria')"
-        ></textarea>
+        />
         <p class="validator-hint">
           {{ $t("coverLetterPage.generate.jobDescriptionHint", { count: jobDescriptionMinLength }) }}
         </p>

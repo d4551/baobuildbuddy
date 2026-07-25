@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import AppJsonField from "~/components/ui/AppJsonField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
-  MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
@@ -51,10 +50,11 @@ const sourceCollectionCount = computed(
             </span>
           </summary>
           <div class="collapse-content">
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.greenhouseBoardsLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobProviderForm.greenhouseBoardsJson" :aria-label="t('settings.jobIntelligence.greenhouseBoardsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_SCROLL_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobProviderForm.greenhouseBoardsJson"
+              :label="t('settings.jobIntelligence.greenhouseBoardsLabel')"
+              :aria-label="t('settings.jobIntelligence.greenhouseBoardsLabel')"
+            />
           </div>
         </details>
 
@@ -66,10 +66,11 @@ const sourceCollectionCount = computed(
             </span>
           </summary>
           <div class="collapse-content">
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.leverCompaniesLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobProviderForm.leverCompaniesJson" :aria-label="t('settings.jobIntelligence.leverCompaniesLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_SCROLL_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobProviderForm.leverCompaniesJson"
+              :label="t('settings.jobIntelligence.leverCompaniesLabel')"
+              :aria-label="t('settings.jobIntelligence.leverCompaniesLabel')"
+            />
           </div>
         </details>
 
@@ -81,10 +82,11 @@ const sourceCollectionCount = computed(
             </span>
           </summary>
           <div class="collapse-content">
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.companyBoardsLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobProviderForm.companyBoardsJson" :aria-label="t('settings.jobIntelligence.companyBoardsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_SCROLL_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobProviderForm.companyBoardsJson"
+              :label="t('settings.jobIntelligence.companyBoardsLabel')"
+              :aria-label="t('settings.jobIntelligence.companyBoardsLabel')"
+            />
           </div>
         </details>
 
@@ -96,10 +98,11 @@ const sourceCollectionCount = computed(
             </span>
           </summary>
           <div class="collapse-content">
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.companyTemplatesLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobProviderForm.companyBoardApiTemplatesJson" :aria-label="t('settings.jobIntelligence.companyTemplatesLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_SCROLL_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobProviderForm.companyBoardApiTemplatesJson"
+              :label="t('settings.jobIntelligence.companyTemplatesLabel')"
+              :aria-label="t('settings.jobIntelligence.companyTemplatesLabel')"
+            />
           </div>
         </details>
 
@@ -111,10 +114,11 @@ const sourceCollectionCount = computed(
             </span>
           </summary>
           <div class="collapse-content">
-            <fieldset class="fieldset">
-              <legend class="sr-only">{{ t("settings.jobIntelligence.gamingPortalsLabel") }}</legend>
-              <textarea class="textarea font-mono" v-model="jobProviderForm.gamingPortalsJson" :aria-label="t('settings.jobIntelligence.gamingPortalsLabel')" :class="[FLUID_WIDTH_CLASS, TYPOGRAPHY_SCALE_CLASS.xs, MIN_HEIGHT_SCROLL_CLASS]"/>
-            </fieldset>
+            <AppJsonField
+              v-model="jobProviderForm.gamingPortalsJson"
+              :label="t('settings.jobIntelligence.gamingPortalsLabel')"
+              :aria-label="t('settings.jobIntelligence.gamingPortalsLabel')"
+            />
           </div>
         </details>
       </div>

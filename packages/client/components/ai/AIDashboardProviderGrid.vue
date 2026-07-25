@@ -3,14 +3,13 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
-
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
   PRIMARY_ACTION_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
+  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type {
   ProviderConfig,
@@ -100,7 +99,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
 
         <div class="card-actions justify-end">
           <button 
-            :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-outline btn-sm']"
+            :class="[OUTLINE_ACTION_CLASS]"
             :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"
             @click="onTestProvider(provider.id)"

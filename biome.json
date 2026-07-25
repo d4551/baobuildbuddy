@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
   "root": true,
   "vcs": {
     "enabled": true,
@@ -103,6 +103,35 @@
         "rules": {
           "performance": {
             "noBarrelFile": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "scripts/browser-record-product-demo.ts",
+        "scripts/browser-record-desktop-capabilities.ts",
+        "scripts/browser-record-visual-proof.ts",
+        "scripts/browser-interaction-burndown.ts",
+        "scripts/browser-proof-ollama-live.ts",
+        "scripts/browser-proof-pdf-live.ts",
+        "scripts/browser-proof-rpa-live.ts",
+        "scripts/browser-record-ai-pdf-demo.ts",
+        "scripts/browser-record-full-desktop-tour.ts",
+        "scripts/browser-record-editor-ux-demo.ts",
+        "scripts/browser-record-debt-cleanup-demo.ts",
+        "scripts/browser-proof-dom-reactivity.ts",
+        "scripts/browser-proof-stt-live.ts",
+        "scripts/browser-proof-on-device-speech.ts",
+        "scripts/browser-proof-kokoro-tts.ts",
+        "scripts/browser-proof-editor-ide.ts",
+        "scripts/browser-proof-whisper-stt.ts",
+        "scripts/browser-proof-tts-live.ts"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAwaitInLoops": "off"
           }
         }
       }

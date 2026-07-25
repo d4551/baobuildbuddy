@@ -17,6 +17,8 @@ interface SpeechModelProfileFieldsProps {
   readonly ttsProvider: SpeechProviderOption;
   readonly ttsModel: string;
   readonly providerOptions: readonly SpeechProviderOption[];
+  /** When set, TTS select uses this list (browser + local Kokoro only). */
+  readonly ttsProviderOptions?: readonly SpeechProviderOption[];
   readonly sttModelOptions: readonly string[];
   readonly ttsModelOptions: readonly string[];
   readonly saving: boolean;
@@ -31,6 +33,8 @@ const emit = defineEmits<{
   save: [];
 }>();
 const { t } = useI18n();
+
+const ttsProviders = computed(() => props.ttsProviderOptions ?? props.providerOptions);
 
 const isSpeechProviderOption = (value: string): value is SpeechProviderOption =>
   SPEECH_PROVIDER_OPTIONS.some((option) => option === value);
@@ -110,7 +114,7 @@ function handleTtsModelChange(event: Event): void {
         @change="handleTtsProviderChange"
       >
         <option
-          v-for="provider in props.providerOptions"
+          v-for="provider in ttsProviders"
           :key="`profile-tts-${provider}`"
           :value="provider"
         >
@@ -158,6 +162,15 @@ function handleTtsModelChange(event: Event): void {
         />
       </datalist>
     </SectionGrid>
+    <p
+      v-if="props.ttsProvider === 'local' || props.ttsProvider === 'browser' || props.sttProvider === 'browser'"
+      class="alert alert-info alert-soft"
+      :class="[MARGIN_TOKEN_CLASS.mt2, TYPOGRAPHY_SCALE_CLASS.xs]"
+      role="status"
+      data-testid="on-device-speech-hint"
+    >
+      {{ t("aiChatPage.voiceSettings.onDeviceHint") }}
+    </p>
     <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">
         {{ t("aiChatPage.voiceSettings.hint") }}
