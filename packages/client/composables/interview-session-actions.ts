@@ -159,6 +159,55 @@ function createInterviewCompletionAction(
   };
 }
 
+function resolveInterviewResponseText(
+  actions: InterviewSessionActionsInput,
+  submittedResponse?: string,
+): string {
+  if (typeof submittedResponse === "string") {
+    return submittedResponse.trim();
+  }
+  return actions.response.value.trim();
+}
+
+async function submitInterviewResponseHttp(
+  actions: InterviewSessionActionsInput,
+  responseText: string,
+): Promise<"failed" | "completed" | "continued"> {
+  const submitResult = await settlePromise(
+    actions.submitResponse(actions.sessionId.value, {
+      questionIndex: actions.currentQuestionIndex.value,
+      response: responseText,
+    }),
+    actions.t("interviewSession.errors.submitFailed"),
+  );
+  if (!submitResult.ok) {
+    actions.toast.error(
+      getErrorMessage(submitResult.error, actions.t("interviewSession.errors.submitFailed")),
+    );
+    return "failed";
+  }
+  return submitResult.value?.status === "completed" ? "completed" : "continued";
+}
+
+async function finalizeInterviewSubmission(input: {
+  actions: InterviewSessionActionsInput;
+  goToHistory: () => Promise<void>;
+  handleCompleteInterview: () => Promise<void>;
+  completedViaHttp: boolean;
+}): Promise<void> {
+  input.actions.stt.stopListening();
+  input.actions.response.value = "";
+  input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));
+  if (input.completedViaHttp) {
+    input.actions.toast.success(input.actions.t("interviewSession.toasts.completed"));
+    await input.goToHistory();
+    return;
+  }
+  if (input.actions.isLastQuestion.value) {
+    await input.handleCompleteInterview();
+  }
+}
+
 function createInterviewSubmissionAction(input: {
   actions: InterviewSessionActionsInput;
   goToHistory: () => Promise<void>;
@@ -169,10 +218,7 @@ function createInterviewSubmissionAction(input: {
       return;
     }
 
-    const responseText =
-      typeof submittedResponse === "string"
-        ? submittedResponse.trim()
-        : input.actions.response.value.trim();
+    const responseText = resolveInterviewResponseText(input.actions, submittedResponse);
     if (responseText.length < INTERVIEW_MIN_RESPONSE_LENGTH) {
       input.actions.toast.error(
         input.actions.t("interviewSession.errors.minResponseLength", {
@@ -190,24 +236,12 @@ function createInterviewSubmissionAction(input: {
 
     let completedViaHttp = false;
     if (!wsHandled) {
-      const submitResult = await settlePromise(
-        input.actions.submitResponse(input.actions.sessionId.value, {
-          questionIndex: input.actions.currentQuestionIndex.value,
-          response: responseText,
-        }),
-        input.actions.t("interviewSession.errors.submitFailed"),
-      );
-      if (!submitResult.ok) {
+      const outcome = await submitInterviewResponseHttp(input.actions, responseText);
+      if (outcome === "failed") {
         input.actions.submitting.value = false;
-        input.actions.toast.error(
-          getErrorMessage(
-            submitResult.error,
-            input.actions.t("interviewSession.errors.submitFailed"),
-          ),
-        );
         return;
       }
-      completedViaHttp = submitResult.value?.status === "completed";
+      completedViaHttp = outcome === "completed";
     } else {
       // Refresh HTTP session so UI picks up AI analysis written by WS path.
       await settlePromise(
@@ -216,20 +250,7 @@ function createInterviewSubmissionAction(input: {
       );
     }
     input.actions.submitting.value = false;
-
-    input.actions.stt.stopListening();
-    input.actions.response.value = "";
-    input.actions.toast.success(input.actions.t("interviewSession.toasts.responseRecorded"));
-
-    if (completedViaHttp) {
-      input.actions.toast.success(input.actions.t("interviewSession.toasts.completed"));
-      await input.goToHistory();
-      return;
-    }
-
-    if (input.actions.isLastQuestion.value) {
-      await input.handleCompleteInterview();
-    }
+    await finalizeInterviewSubmission({ ...input, completedViaHttp });
   };
 }
 

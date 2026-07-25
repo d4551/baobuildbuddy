@@ -9,14 +9,14 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const applicationNotes = defineModel<string>("applicationNotes", { required: true });
+
 defineProps<{
   open: boolean;
   titleId: string;
   applying: boolean;
   jobTitle?: string;
 }>();
-
-const applicationNotes = defineModel<string>("applicationNotes", { required: true });
 
 const emit = defineEmits<{
   "update:open": [value: boolean];

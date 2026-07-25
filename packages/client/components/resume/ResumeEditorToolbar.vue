@@ -29,13 +29,13 @@ const { t } = useI18n();
 
 <template>
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-    <button :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
+    <button type="button" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('resumePage.backButtonAria')" @click="emit('back')">
       <IconArrowLeft :class="[ICON_SIZE_CLASS[4]]"/>
       {{ t("resumePage.backButton") }}
     </button>
 
     <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-      <button 
+      <button type="button" 
         :class="[OUTLINE_ACTION_CLASS]"
         :disabled="enhancing"
         :aria-label="t('resumePage.aiEnhanceButtonAria')"
@@ -45,7 +45,7 @@ const { t } = useI18n();
         <IconBolt :class="[ICON_SIZE_CLASS[4]]" v-else/>
         {{ t("resumePage.aiEnhanceButton") }}
       </button>
-      <button 
+      <button type="button" 
         :class="[OUTLINE_ACTION_CLASS]"
         :disabled="scoring"
         :aria-label="t('resumePage.aiScoreButtonAria')"
@@ -60,7 +60,7 @@ const { t } = useI18n();
         :summary-class="OUTLINE_ACTION_CLASS"
         @export="emit('export', $event)"
       />
-      <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
+      <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">
         {{ t("resumePage.saveButton") }}
       </button>
     </div>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -13,6 +15,16 @@ useSeoMeta({
   title: t("interviewSession.title"),
   description: t("interviewHub.seoDescription"),
 });
+
+function resolveCompletionState(
+  state: string,
+): "completed" | "completing" | "submitting" | "ready" {
+  if (state === "completed" || state === "completing" || state === "submitting") {
+    return state;
+  }
+  return "ready";
+}
+
 </script>
 
 <template>
@@ -23,7 +35,7 @@ useSeoMeta({
       :description="t('interviewSession.subtitle')"
     />
 
-    <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="8" />
+    <LoadingSkeleton v-if="page.completionState.value === 'loading'" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="page.completionState.value === 'error'"
@@ -38,7 +50,7 @@ useSeoMeta({
       v-else-if="page.activeSession.value"
       :active-session="page.activeSession.value"
       :session-id="page.sessionId.value"
-      :completion-state="page.completionState.value === 'completed' ? 'completed' : page.completionState.value === 'completing' ? 'completing' : page.completionState.value === 'submitting' ? 'submitting' : 'ready'"
+      :completion-state="resolveCompletionState(page.completionState.value)"
       :target-job="page.targetJob.value"
       :progress="page.progress.value"
       :elapsed-time-duration="page.elapsedTimeDuration.value"

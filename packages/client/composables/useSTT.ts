@@ -1,4 +1,7 @@
-import { AI_CHAT_VOICE_ERROR_CODES, AI_CHAT_VOICE_ERROR_MESSAGE_KEYS } from "@bao/shared/constants/ai-voice";
+import {
+  AI_CHAT_VOICE_ERROR_CODES,
+  AI_CHAT_VOICE_ERROR_MESSAGE_KEYS,
+} from "@bao/shared/constants/ai-voice";
 import type { VoiceSettings } from "@bao/shared/types/interview";
 import type { Ref } from "vue";
 import { computed, onMounted, onUnmounted, readonly, ref } from "#imports";
@@ -8,8 +11,8 @@ import {
   type ServerSttRequestOptions,
   transcribeAudioViaServer,
 } from "./speech-server-stt";
-import { createServerSttRequestOptions } from "./speech-stt-request-options";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
+import { createServerSttRequestOptions } from "./speech-stt-request-options";
 import { useSettings } from "./useSettings";
 
 interface RecognitionUpdate {
@@ -128,14 +131,18 @@ function startServerSttListening(state: SttMutableState): boolean {
         state.isListening.value = true;
       },
       () => {
-        state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.audioCapture];
+        state.error.value =
+          AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.audioCapture];
         state.isListening.value = false;
       },
     )
     .then(
       () => undefined,
       (error: Error) => {
-        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.startFailed];
+        state.error.value =
+          error instanceof Error
+            ? error.message
+            : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.startFailed];
       },
     );
   state.micPromise = micPromise;
@@ -148,7 +155,8 @@ function startBrowserSttListening(
   settings?: Ref<VoiceSettings | undefined>,
 ): boolean {
   if (!state.recognition) {
-    state.error.value = AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition];
+    state.error.value =
+      AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition];
     return false;
   }
   if (state.isListening.value) {
@@ -177,10 +185,7 @@ function startSttListening(
   return startBrowserSttListening(state, locale, settings);
 }
 
-function stopServerSttListening(
-  state: SttMutableState,
-  options: ServerSttRequestOptions,
-): void {
+function stopServerSttListening(state: SttMutableState, options: ServerSttRequestOptions): void {
   const activeRecorder = state.recorder;
   state.recorder = null;
   if (!activeRecorder) {
@@ -210,7 +215,10 @@ function stopServerSttListening(
     .then(
       () => undefined,
       (error: Error) => {
-        state.error.value = error instanceof Error ? error.message : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
+        state.error.value =
+          error instanceof Error
+            ? error.message
+            : AI_CHAT_VOICE_ERROR_MESSAGE_KEYS[AI_CHAT_VOICE_ERROR_CODES.network];
       },
     );
   state.micPromise = micPromise;

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -12,6 +11,14 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
+
+const brandForm = defineModel<{
+  fontStylesheetUrl: string;
+  displayFontFamily: string;
+  bodyFontFamily: string;
+  monoFontFamily: string;
+}>("brandForm", { required: true });
 
 const BRAND_HINT_IDS = {
   fontStylesheet: "settings-brand-font-stylesheet-hint",
@@ -20,13 +27,6 @@ const BRAND_HINT_IDS = {
 const brandFieldsetClass = `${FIELDSET_PANEL_CLASS} ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
-
-const brandForm = defineModel<{
-  fontStylesheetUrl: string;
-  displayFontFamily: string;
-  bodyFontFamily: string;
-  monoFontFamily: string;
-}>("brandForm", { required: true });
 </script>
 
 <template>

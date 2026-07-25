@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import AppJsonField from "~/components/ui/AppJsonField.vue";
 import AppProseField from "~/components/ui/AppProseField.vue";
@@ -14,6 +13,13 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
+
+const brandForm = defineModel<{
+  defaultTitle: string;
+  defaultDescription: string;
+  contentOverridesJson: string;
+}>("brandForm", { required: true });
 
 const props = defineProps<{
   hintIds: {
@@ -24,12 +30,6 @@ const props = defineProps<{
 const brandFieldsetClass = `${FIELDSET_PANEL_CLASS} ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
 
 const { t } = useI18n();
-
-const brandForm = defineModel<{
-  defaultTitle: string;
-  defaultDescription: string;
-  contentOverridesJson: string;
-}>("brandForm", { required: true });
 </script>
 
 <template>

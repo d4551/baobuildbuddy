@@ -9,9 +9,9 @@ interface ResumeTabListProps {
   readonly tabAriaLabel: (tab: string) => string;
 }
 
-const props = defineProps<ResumeTabListProps>();
-
 const activeTab = defineModel<string>("activeTab", { required: true });
+
+const props = defineProps<ResumeTabListProps>();
 
 const tabRefs = ref<(HTMLButtonElement | null)[]>([]);
 
@@ -31,47 +31,41 @@ function selectTab(tab: string): void {
   activeTab.value = tab;
 }
 
-function handleTabKeydown(event: KeyboardEvent, index: number): void {
+function activateTabAt(index: number): void {
+  const tab = props.tabs[index];
+  if (tab) {
+    selectTab(tab);
+  }
+  focusTab(index);
+}
+
+function resolveArrowTabIndex(index: number, direction: "left" | "right"): number {
   const lastTabIndex = props.tabs.length - 1;
+  if (direction === "right") {
+    return index === lastTabIndex ? 0 : index + 1;
+  }
+  return index === 0 ? lastTabIndex : index - 1;
+}
+
+function handleTabKeydown(event: KeyboardEvent, index: number): void {
   if (event.key === "ArrowRight") {
     event.preventDefault();
-    const nextIndex = index === lastTabIndex ? 0 : index + 1;
-    const nextTab = props.tabs[nextIndex];
-    if (nextTab) {
-      selectTab(nextTab);
-    }
-    focusTab(nextIndex);
+    activateTabAt(resolveArrowTabIndex(index, "right"));
     return;
   }
-
   if (event.key === "ArrowLeft") {
     event.preventDefault();
-    const nextIndex = index === 0 ? lastTabIndex : index - 1;
-    const nextTab = props.tabs[nextIndex];
-    if (nextTab) {
-      selectTab(nextTab);
-    }
-    focusTab(nextIndex);
+    activateTabAt(resolveArrowTabIndex(index, "left"));
     return;
   }
-
   if (event.key === "Home") {
     event.preventDefault();
-    const firstTab = props.tabs[0];
-    if (firstTab) {
-      selectTab(firstTab);
-    }
-    focusTab(0);
+    activateTabAt(0);
     return;
   }
-
   if (event.key === "End") {
     event.preventDefault();
-    const lastTab = props.tabs[lastTabIndex];
-    if (lastTab) {
-      selectTab(lastTab);
-    }
-    focusTab(lastTabIndex);
+    activateTabAt(props.tabs.length - 1);
   }
 }
 

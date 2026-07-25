@@ -13,6 +13,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -89,14 +90,14 @@ const {
       density="comfortable"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('interviewHub.hero.openJobAria')"
           @click="openConfig('job')"
         >
           {{ t("interviewHub.hero.openJobButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :aria-label="t('interviewHub.hero.openStudioAria')"
           @click="openConfig('studio')"
@@ -115,7 +116,7 @@ const {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="interviewHubPending" :lines="6" />
+    <LoadingSkeleton v-if="interviewHubPending" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="interviewHubStatus === 'error'"
@@ -165,7 +166,7 @@ const {
             <UiGlassCard
               v-for="(item, index) in prepChecklist"
               :key="item.id"
-              :stagger-index="Math.min(index + 1, 11)"
+              :stagger-index="Math.min(index + 1, UI_STAGGER_INDEX_MAX)"
               variant="subtle"
             >
               <div :class="[PADDING_TOKEN_CLASS.p4, STACK_SPACE_Y_TOKEN_CLASS.stack3]">

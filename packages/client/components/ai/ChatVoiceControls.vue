@@ -105,10 +105,20 @@ function handleAutoSpeakChange(event: Event): void {
 
   emit("update:autoSpeakReplies", target.checked);
 }
+
+const voiceStatusLabel = computed(() => {
+  if (props.isListening) {
+    return t("aiChatCommon.voice.listeningStatus");
+  }
+  if (props.isSpeaking) {
+    return t("aiChatCommon.voice.speakingStatus");
+  }
+  return t("aiChatCommon.voice.idleStatus");
+});
 </script>
 
 <template>
-  <button
+  <button type="button"
     v-if="props.supportsRecognition"
  
  :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
@@ -152,7 +162,7 @@ function handleAutoSpeakChange(event: Event): void {
       <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M19 10a7 7 0 11-14 0M12 21v-3" />
     </svg>
   </button>
-  <button
+  <button type="button"
     v-if="props.supportsSynthesis"
  
  :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
@@ -178,7 +188,7 @@ function handleAutoSpeakChange(event: Event): void {
       <circle cx="18" cy="16" r="3" />
     </svg>
   </button>
-  <button
+  <button type="button"
     v-if="props.supportsSynthesis"
  
  :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
@@ -232,13 +242,7 @@ function handleAutoSpeakChange(event: Event): void {
       />
     </label>
     <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.xs]" aria-live="polite">
-      {{
-        props.isListening
-          ? t("aiChatCommon.voice.listeningStatus")
-          : props.isSpeaking
-            ? t("aiChatCommon.voice.speakingStatus")
-            : t("aiChatCommon.voice.idleStatus")
-      }}
+{{ voiceStatusLabel }}
     </p>
   </div>
 

@@ -107,7 +107,7 @@ function handlePrint() {
       :description="t('resumePreview.description')"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="GHOST_ACTION_PRINT_HIDDEN_CLASS"
           :aria-label="t('resumePage.backButtonAria')"
           @click="router.back()"
@@ -116,7 +116,7 @@ function handlePrint() {
           {{ t("resumePage.backButton") }}
         </button>
 
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS, 'print:hidden']"
           :aria-label="t('resumePreview.printAria')"
           @click="handlePrint"

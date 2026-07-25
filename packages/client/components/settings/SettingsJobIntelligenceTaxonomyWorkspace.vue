@@ -17,11 +17,11 @@ import type { JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 import { getSaveStateBadgeClass, getSaveStateLabelKey } from "./save-state";
 
+const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+
 const props = defineProps<{
   taxonomySaveState: SaveState;
 }>();
-
-const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
 
 const emit = defineEmits<{
   save: [];
@@ -57,7 +57,7 @@ const populatedTaxonomyCount = computed(
  >
               {{ t(taxonomySaveStateLabelKey) }}
             </span>
-            <button 
+            <button type="button" 
               :class="[TOUCH_TARGET_MIN_CLASS, SECONDARY_ACTION_DENSE_CLASS]"
               :aria-label="t('settings.jobIntelligence.saveTaxonomyAria')"
               @click="emit('save')"

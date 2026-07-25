@@ -1,19 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { requireApiResponseData } from "~/utils/api-response";
 import {
   buildJobApplyBody,
   toCoverLetterSelectOptions,
   toResumeSelectOptions,
 } from "./automation-job-apply-select-options";
-import { requireApiResponseData } from "~/utils/api-response";
 
 describe("job-apply bootstrap helpers", () => {
   it("maps resume list payloads to select options", () => {
     expect(
-      toResumeSelectOptions([
-        { id: "r1", name: "Gameplay CV" },
-        { id: 2 },
-        { name: "missing id" },
-      ]),
+      toResumeSelectOptions([{ id: "r1", name: "Gameplay CV" }, { id: 2 }, { name: "missing id" }]),
     ).toEqual([{ id: "r1", name: "Gameplay CV" }]);
   });
 
@@ -23,17 +19,16 @@ describe("job-apply bootstrap helpers", () => {
         { id: "c1", company: "Studio", position: "Engineer" },
         { id: "c2" },
       ]),
-    ).toEqual([
-      { id: "c1", company: "Studio", position: "Engineer" },
-      { id: "c2" },
-    ]);
+    ).toEqual([{ id: "c1", company: "Studio", position: "Engineer" }, { id: "c2" }]);
   });
 
   it("fail-closes bootstrap envelopes via requireApiResponseData", () => {
     expect(() =>
       toResumeSelectOptions(
-        requireApiResponseData({ data: null, error: "boom" }, "bootstrap failed", (error, fallback) =>
-          typeof error === "string" ? error : fallback,
+        requireApiResponseData(
+          { data: null, error: "boom" },
+          "bootstrap failed",
+          (error, fallback) => (typeof error === "string" ? error : fallback),
         ),
       ),
     ).toThrow("boom");

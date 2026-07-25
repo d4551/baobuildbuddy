@@ -57,7 +57,7 @@ const { t } = useI18n();
           density="comfortable"
         >
           <template #actions>
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
               :aria-label="t('jobDetail.interviewAria')"
               @click="emit('interview')"
@@ -69,7 +69,7 @@ const { t } = useI18n();
               {{ t("jobDetail.interviewButton") }}
             </button>
 
-            <button
+            <button type="button"
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('jobDetail.applyAria')"
               @click="emit('apply')"
@@ -78,7 +78,7 @@ const { t } = useI18n();
               {{ t("jobDetail.applyButton") }}
             </button>
 
-            <button
+            <button type="button"
               :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"

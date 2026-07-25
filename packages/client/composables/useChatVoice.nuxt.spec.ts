@@ -72,6 +72,12 @@ vi.mock("./useSpeech", () => ({
   }),
 }));
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 const { useChatVoice } = await import("./useChatVoice");
 
 function resetSpeechState() {

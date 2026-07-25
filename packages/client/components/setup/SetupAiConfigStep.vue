@@ -141,7 +141,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
       />
     </label>
 
-    <button 
+    <button type="button" 
       :class="[OUTLINE_ACTION_CLASS]"
       :disabled="testing && testingProvider === 'local'"
       :aria-label="t('setup.testLocalAria')"
@@ -173,7 +173,7 @@ function updateProviderCredential(event: Event, provider: CloudProvider): void {
               :aria-label="t('setup.cloudProviderAria', { provider: providerLabels[provider] })"
               @input="updateProviderCredential($event, provider)"
             />
-            <button 
+            <button type="button" 
               :class="[OUTLINE_ACTION_CLASS, 'join-item']"
               :disabled="testing || !providerCredentials[provider].trim()"
               :aria-label="t('setup.testProviderAria', { provider: providerLabels[provider] })"

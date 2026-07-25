@@ -10,6 +10,9 @@ import {
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
+const remoteWork = defineModel<boolean>("remoteWork", { required: true });
+
+
 defineProps<{
   studioSizeOptions: string[];
   studioTypeOptions: string[];
@@ -22,7 +25,6 @@ defineEmits<{
 const searchQuery = defineModel<string>("searchQuery", { required: true });
 const selectedType = defineModel<string>("selectedType", { required: true });
 const selectedSize = defineModel<string>("selectedSize", { required: true });
-const remoteWork = defineModel<boolean>("remoteWork", { required: true });
 
 const { t } = useI18n();
 </script>
@@ -82,7 +84,7 @@ const { t } = useI18n();
           <span class="label">{{ t("studiosIndex.filters.remoteLabel") }}</span>
         </label>
 
-        <button :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
+        <button type="button" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('studiosIndex.filters.clearAria')" @click="$emit('clear')">
           {{ t("studiosIndex.filters.clearButton") }}
         </button>
       </div>

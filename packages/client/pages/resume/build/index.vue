@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RESUME_BUILD_PROGRESS } from "~/constants/numeric-ui";
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS } from "~/constants/layout";
 
 definePageMeta({
@@ -58,14 +59,14 @@ const canProceedTarget = computed(() => targetRole.value.trim().length > 0);
 
 const progressValue = computed(() => {
   if (phase.value === "target") return 0;
-  if (phase.value === "generating" || phase.value === "synthesizing") return 50;
+  if (phase.value === "generating" || phase.value === "synthesizing") return RESUME_BUILD_PROGRESS.generating;
   if (phase.value === "questions" && aiQuestions.value.length > 0) {
     const answered = aiQuestions.value.filter(
       (q) => (answers[q.id] ?? "").trim().length > 0,
     ).length;
-    return 25 + (answered / aiQuestions.value.length) * 50;
+    return RESUME_BUILD_PROGRESS.answeringBase + (answered / aiQuestions.value.length) * RESUME_BUILD_PROGRESS.answeringSpan;
   }
-  return 25;
+  return RESUME_BUILD_PROGRESS.answeringBase;
 });
 
 async function generateQuestions() {

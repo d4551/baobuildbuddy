@@ -5,8 +5,8 @@ import {
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
   MARGIN_TOKEN_CLASS,
-  MIN_HEIGHT_SCROLL_CLASS,
   MIN_H_36_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -15,6 +15,7 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -67,7 +68,7 @@ useSeoMeta({
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="emailSettingsPending" :lines="6" />
+    <LoadingSkeleton v-if="emailSettingsPending" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="emailSettingsError"
@@ -188,7 +189,7 @@ useSeoMeta({
         </div>
 
         <div class="flex flex-wrap" :class="[MARGIN_TOKEN_CLASS.mt6, FLEX_GAP_TOKEN_CLASS.gap3]">
-          <button
+          <button type="button"
             :class="[PRIMARY_ACTION_CLASS]"
             :disabled="pending || !canSubmit"
             :aria-label="t('automation.email.generateAria')"
@@ -197,7 +198,7 @@ useSeoMeta({
             <LoadingSpinner size="sm" :label="t('common.loading')" v-if="pendingAction === 'generate'" />
             <span v-else>{{ t("automation.email.generateButton") }}</span>
           </button>
-          <button
+          <button type="button"
             :class="[OUTLINE_ACTION_CLASS]"
             :disabled="pending || !canSubmit || !form.runAt"
             :aria-label="t('automation.email.schedule.buttonAria')"

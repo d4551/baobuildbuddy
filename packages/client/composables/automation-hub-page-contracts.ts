@@ -61,14 +61,14 @@ export const resolveOrderedCardIds = (
 ): AutomationHubCardId[] => {
   const orderedCardIds: AutomationHubCardId[] = [];
   for (const actionId of actionIds) {
-    const cardId =
-      actionId === "automationScraper"
-        ? "scraper"
-        : actionId === "automationApply"
-          ? "jobApply"
-          : actionId === "automationRuns"
-            ? "runHistory"
-            : null;
+    let cardId: AutomationHubCardId | null = null;
+    if (actionId === "automationScraper") {
+      cardId = "scraper";
+    } else if (actionId === "automationApply") {
+      cardId = "jobApply";
+    } else if (actionId === "automationRuns") {
+      cardId = "runHistory";
+    }
     if (!cardId || orderedCardIds.includes(cardId)) {
       continue;
     }

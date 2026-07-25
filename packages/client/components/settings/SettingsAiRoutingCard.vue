@@ -19,6 +19,8 @@ import {
 
 type AIRoutingDraft = Record<AIRoutingPurpose, { provider: AIProviderType; model: string }>;
 
+const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
+
 defineProps<{
   providerInputs: ReadonlyArray<{
     id: AIProviderType;
@@ -35,11 +37,10 @@ defineProps<{
   t: ComposerTranslation;
 }>();
 
-const aiRoutingDraft = defineModel<AIRoutingDraft>("aiRoutingDraft", { required: true });
-
 const emit = defineEmits<{
   save: [];
 }>();
+
 </script>
 
 <template>
@@ -50,7 +51,7 @@ const emit = defineEmits<{
           <h3 class="font-semibold">{{ t("settings.aiProviders.routingTitle") }}</h3>
           <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("settings.aiProviders.routingSubtitle") }}</p>
         </div>
-        <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
+        <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('settings.aiProviders.saveRoutingAria')" @click="emit('save')">
           {{ t("settings.aiProviders.saveRoutingButton") }}
         </button>
       </div>

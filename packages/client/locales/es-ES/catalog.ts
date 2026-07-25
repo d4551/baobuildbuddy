@@ -3090,7 +3090,6 @@ const catalog = {
     menuAria: "Atajos de acciones rápidas",
   },
   floatingChat: {
-
     contextBadge: "Contexto: {context}",
 
     focusedEntityBadge: "Enfoque: {entity}",
@@ -3146,7 +3145,6 @@ const catalog = {
         automationRun: "Explica qué pasó en {target} y qué corregir después.",
       },
     },
-
   },
   studioSelector: {
     toggleAria: "Abrir selector de estudios",
@@ -3211,7 +3209,8 @@ const catalog = {
         browser: "Navegador (en el dispositivo)",
         custom: "Personalizado",
       },
-      onDeviceHint: "Navegador (en el dispositivo) usa la API Web Speech del equipo: el audio no sale de la máquina.",
+      onDeviceHint:
+        "Navegador (en el dispositivo) usa la API Web Speech del equipo: el audio no sale de la máquina.",
     },
   },
   aiChatCommon: {

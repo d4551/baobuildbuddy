@@ -1,6 +1,7 @@
 import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import type {
   DashboardStats,
   ProviderConfig,
@@ -48,12 +49,12 @@ function normalizeDashboardStats(
   const userMessages = readNumberField(usagePayload, "userMessages") ?? 0;
   const assistantMessages = readNumberField(usagePayload, "assistantMessages") ?? 0;
   const sessions = readNumberField(usagePayload, "sessions") ?? 0;
-  const successRate =
-    userMessages > 0
-      ? Math.round((assistantMessages / userMessages) * 100)
-      : totalMessages > 0
-        ? 100
-        : 0;
+  let successRate = 0;
+  if (userMessages > 0) {
+    successRate = Math.round((assistantMessages / userMessages) * PERCENT_MAX);
+  } else if (totalMessages > 0) {
+    successRate = PERCENT_MAX;
+  }
 
   return {
     totalRequests: totalMessages,

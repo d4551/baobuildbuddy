@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -91,7 +92,7 @@ const lockedAchievements = computed(
 const levelProgress = computed(() => {
   const progress = hubData.value?.progress;
   if (!progress) return 0;
-  return Math.round(getXPProgress(progress.xp).progress * 100);
+  return Math.round(getXPProgress(progress.xp).progress * PERCENT_MAX);
 });
 
 const xpTarget = computed(() => {

@@ -1,7 +1,4 @@
-import {
-  DEFAULT_SPEECH_SETTINGS,
-  type SpeechProviderOption,
-} from "@bao/shared/constants/settings";
+import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 
 const STT_PROVIDERS = new Set<SpeechProviderOption>([
   "local",

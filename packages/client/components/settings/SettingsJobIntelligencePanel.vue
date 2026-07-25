@@ -15,13 +15,14 @@ import { countActiveJobProviderSources } from "~/utils/job-provider-source-count
 import type { JobProviderForm, JobTaxonomyForm } from "./job-intelligence";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
+const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
+
+const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
+
 defineProps<{
   providerSaveState: SaveState;
   taxonomySaveState: SaveState;
 }>();
-
-const jobProviderForm = defineModel<JobProviderForm>("jobProviderForm", { required: true });
-const jobTaxonomyForm = defineModel<JobTaxonomyForm>("jobTaxonomyForm", { required: true });
 
 const emit = defineEmits<{
   saveProviders: [];
@@ -32,16 +33,22 @@ const { t } = useI18n();
 
 const configuredSourceCount = computed(() => countActiveJobProviderSources(jobProviderForm.value));
 
-const sourceCollectionCount = computed(
-  () =>
-    [
-      jobProviderForm.value.greenhouseBoardsJson,
-      jobProviderForm.value.leverCompaniesJson,
-      jobProviderForm.value.companyBoardsJson,
-      jobProviderForm.value.companyBoardApiTemplatesJson,
-      jobProviderForm.value.gamingPortalsJson,
-    ].filter((value) => value.trim().length > 0).length,
-);
+const sourceCollectionCount = computed(() => {
+  const sources = [
+    jobProviderForm.value.greenhouseBoardsJson,
+    jobProviderForm.value.leverCompaniesJson,
+    jobProviderForm.value.companyBoardsJson,
+    jobProviderForm.value.companyBoardApiTemplatesJson,
+    jobProviderForm.value.gamingPortalsJson,
+  ];
+  let count = 0;
+  for (const source of sources) {
+    if (source.trim().length > 0) {
+      count += 1;
+    }
+  }
+  return count;
+});
 
 const taxonomyAssetCount = computed(
   () =>

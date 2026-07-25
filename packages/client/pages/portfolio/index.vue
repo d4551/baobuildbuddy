@@ -14,6 +14,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { VISIBILITY_HIDE_BELOW_SM_CLASS } from "~/constants/ui-layout";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -139,7 +140,7 @@ function updateProjectForm(value: typeof projectForm): void {
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending || (loading && !portfolio)" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="bootstrapErrorMessage"
@@ -196,7 +197,7 @@ function updateProjectForm(value: typeof projectForm): void {
           </SectionGrid>
 
           <div v-if="hasFiltersApplied" class="card-actions justify-end">
-            <button :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
+            <button type="button" :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]" :aria-label="t('portfolioPage.filters.clearAria')" @click="clearFilters">
               {{ t("portfolioPage.filters.clearButton") }}
             </button>
           </div>

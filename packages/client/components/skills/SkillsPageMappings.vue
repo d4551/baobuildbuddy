@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {
-  UI_CHIP_OVERFLOW_THRESHOLD,
-} from "~/constants/numeric-ui";
 import type { SkillMapping } from "@bao/shared/types/skill-mapping";
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
@@ -22,6 +19,9 @@ import {
   BADGE_PRIMARY_SM_CLASS,
   BADGE_SOFT_SM_CLASS,
 } from "~/constants/layout-badges";
+import {
+  UI_CHIP_OVERFLOW_THRESHOLD,
+} from "~/constants/numeric-ui";
 import {
   SKILLS_CATEGORY_LABEL_KEYS,
   SKILLS_CONFIDENCE_MAX,

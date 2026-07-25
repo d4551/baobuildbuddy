@@ -22,6 +22,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import {
   resolveAutomationCapabilityAction,
   resolveAutomationCapabilityDisplayName,
@@ -96,7 +97,7 @@ const readyEntries = computed(() =>
       <LoadingSkeleton
         v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
         variant="stats"
-        :lines="3"
+        :lines="LOADING_SKELETON_LINES.compact"
       />
 
       <BootstrapErrorAlert

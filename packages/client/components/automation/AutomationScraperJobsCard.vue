@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {
-  LOADING_SKELETON_LINES,
-} from "~/constants/numeric-ui";
 import type { Job } from "@bao/shared/types/jobs";
 import { useI18n } from "vue-i18n";
 import ResponsiveDataSurface from "~/components/ui/ResponsiveDataSurface.vue";
@@ -22,6 +19,9 @@ import {
   BADGE_SOFT_PRIMARY_CLASS,
   BADGE_SOFT_WARNING_SM_CLASS,
 } from "~/constants/layout-badges";
+import {
+  LOADING_SKELETON_LINES,
+} from "~/constants/numeric-ui";
 
 defineProps<{
   jobsLoading: boolean;

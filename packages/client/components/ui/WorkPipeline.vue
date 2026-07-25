@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DashboardPipelineStepViewModel, useI18n } from "vue-i18n";
+import { type DashboardPipelineStepViewModel, useI18n } from "vue-i18n";
 import type {   DashboardPipelineStatus,
   } from "~/constants/dashboard-contracts";
 import { DASHBOARD_PIPELINE_STATUS_KEYS } from "~/constants/dashboard-copy";

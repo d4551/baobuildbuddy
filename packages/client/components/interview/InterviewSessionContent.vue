@@ -10,13 +10,13 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
+  OUTLINE_ACTION_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
-  TYPOGRAPHY_SCALE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
 type InterviewCompletionState =

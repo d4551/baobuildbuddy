@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getSidebarNavigationGroups,
-  NAVIGATION_GROUP_IDS,
-  NAVIGATION_ITEMS,
-} from "./navigation";
+import { getSidebarNavigationGroups, NAVIGATION_GROUP_IDS, NAVIGATION_ITEMS } from "./navigation";
 
 describe("sidebar navigation groups SSOT", () => {
   it("assigns every sidebar item a known groupId", () => {

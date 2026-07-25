@@ -18,13 +18,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-
-const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
-  AUTOMATION_RUN_STATUSES;
-const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
-  RUN_STATUS_SUCCESS,
-  RUN_STATUS_ERROR,
-]);
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 const props = defineProps<{
   activeRunId: string;
@@ -36,10 +30,19 @@ const props = defineProps<{
   toLocalizedDateTime: (value: string) => string;
 }>();
 
+
 const emit = defineEmits<{
   cancel: [];
   retry: [];
 }>();
+
+
+const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
+  AUTOMATION_RUN_STATUSES;
+const TERMINAL_RUN_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>([
+  RUN_STATUS_SUCCESS,
+  RUN_STATUS_ERROR,
+]);
 
 const { t } = useI18n();
 
@@ -51,7 +54,7 @@ const streamStatusLabel = computed<string>(() => {
 const streamProgressValue = computed<number>(() => {
   const progress = props.run?.progress;
   if (typeof progress === "number" && Number.isFinite(progress)) {
-    return Math.max(0, Math.min(100, progress));
+    return Math.max(0, Math.min(PERCENT_MAX, progress));
   }
   return 0;
 });
@@ -67,12 +70,12 @@ const lifecycleStepClasses = computed<[string, string, string]>(() => {
     runStatus === RUN_STATUS_RUNNING || TERMINAL_RUN_STATUSES.has(runStatus)
       ? "step step-primary"
       : "step";
-  const completionStep =
-    runStatus === RUN_STATUS_SUCCESS
-      ? "step step-success"
-      : runStatus === RUN_STATUS_ERROR
-        ? "step step-error"
-        : "step";
+  let completionStep = "step";
+  if (runStatus === RUN_STATUS_SUCCESS) {
+    completionStep = "step step-success";
+  } else if (runStatus === RUN_STATUS_ERROR) {
+    completionStep = "step step-error";
+  }
   return [queueStep, runningStep, completionStep];
 });
 

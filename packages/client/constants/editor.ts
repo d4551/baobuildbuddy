@@ -16,8 +16,7 @@ export const EDITOR_MIN_HEIGHT_CLASS = "min-h-64";
 export const EDITOR_WRITING_MIN_HEIGHT_CLASS = "min-h-80";
 
 /** CM6 host shell — border/radius from daisyUI, no local CSS files. */
-export const EDITOR_HOST_CLASS =
-  `${INSET_PANEL_CLASS} w-full overflow-hidden text-base-content`;
+export const EDITOR_HOST_CLASS = `${INSET_PANEL_CLASS} w-full overflow-hidden text-base-content`;
 
 /** Prose editors must not use monospace (document metaphor). */
 export const EDITOR_PROSE_MODES: readonly EditorMode[] = ["markdown", "plain", "blocks"];

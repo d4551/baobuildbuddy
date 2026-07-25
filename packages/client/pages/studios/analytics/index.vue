@@ -11,6 +11,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, PERCENT_MAX } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -60,7 +61,7 @@ useSeoMeta({
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="loading && !analytics" :lines="8" />
+    <LoadingSkeleton v-if="loading && !analytics" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="pageError"
@@ -98,7 +99,7 @@ useSeoMeta({
           <div class="stat-title">{{ t("studioAnalytics.overview.indieStudiosTitle") }}</div>
           <div class="stat-value text-warning">{{ indieStudiosCount }}</div>
           <div class="stat-desc">
-            {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((indieStudiosCount / totalStudios) * 100) : 0 }) }}
+            {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((indieStudiosCount / totalStudios) * PERCENT_MAX) : 0 }) }}
           </div>
         </div>
       </div>
@@ -112,7 +113,7 @@ useSeoMeta({
               <div class="stat-title" :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ type }}</div>
               <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ count }}</div>
               <div class="stat-desc">
-                {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((count / totalStudios) * 100) : 0 }) }}
+                {{ t("studioAnalytics.overview.percentageOfTotal", { value: totalStudios > 0 ? Math.round((count / totalStudios) * PERCENT_MAX) : 0 }) }}
               </div>
             </div>
           </SectionGrid>

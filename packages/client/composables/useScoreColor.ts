@@ -6,7 +6,7 @@ import {
 export type ScoreLevel = "pass" | "warning" | "developing" | "unknown";
 
 function resolveScoreLevel(score: number | undefined): ScoreLevel {
-  if (!Number.isFinite(score ?? NaN)) return "unknown";
+  if (!Number.isFinite(score ?? Number.NaN)) return "unknown";
   const s = score ?? 0;
   if (s >= SCORE_PASS_THRESHOLD) return "pass";
   if (s >= SCORE_WARNING_THRESHOLD) return "warning";

@@ -3,9 +3,7 @@ import type { Ref } from "vue";
 import { computed } from "vue";
 
 /** Empty-state CTA/copy keys for the AI chat conversation panel. */
-export const createAiChatConversationEmptyState = (
-  isAiConfigurationIncomplete: Ref<boolean>,
-) => {
+export const createAiChatConversationEmptyState = (isAiConfigurationIncomplete: Ref<boolean>) => {
   const emptyCtaTo = computed(() =>
     isAiConfigurationIncomplete.value
       ? APP_ROUTE_BUILDERS.settingsSection("aiProviders")

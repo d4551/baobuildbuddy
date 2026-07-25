@@ -14,6 +14,14 @@ import {
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
+const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
+  required: true,
+});
+
+const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
+  required: true,
+});
+
 defineProps<{
   emailDeliveryConfigured: boolean;
   hasStoredPassword: boolean;
@@ -21,13 +29,6 @@ defineProps<{
   securityOptionLabels: ReadonlyArray<{ value: string; label: string }>;
   authModeOptionLabels: ReadonlyArray<{ value: string; label: string }>;
 }>();
-
-const emailTransportForm = defineModel<EmailTransportSettings>("emailTransportForm", {
-  required: true,
-});
-const emailTransportPasswordDraft = defineModel<string>("emailTransportPasswordDraft", {
-  required: true,
-});
 
 const emit = defineEmits<{
   saveSettings: [];
@@ -214,7 +215,7 @@ const { t } = useI18n();
       </div>
 
       <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap2, MARGIN_TOKEN_CLASS.mt2]">
-        <button 
+        <button type="button" 
           :class="[OUTLINE_ACTION_CLASS]"
           :disabled="!hasStoredPassword"
           :aria-label="t('settings.emailDelivery.clearPasswordAria')"
@@ -222,14 +223,14 @@ const { t } = useI18n();
         >
           {{ t("settings.emailDelivery.clearPasswordButton") }}
         </button>
-        <button 
+        <button type="button" 
           :class="SECONDARY_ACTION_CLASS"
           :aria-label="t('settings.emailDelivery.savePasswordAria')"
           @click="emit('savePassword')"
         >
           {{ t("settings.emailDelivery.savePasswordButton") }}
         </button>
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('settings.emailDelivery.saveAria')"
           @click="emit('saveSettings')"

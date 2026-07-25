@@ -21,6 +21,9 @@ import {
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
 
+const open = defineModel<boolean>("open", { required: true });
+
+
 defineProps<{
   studio: GameStudio | null;
   titleId: string;
@@ -31,8 +34,6 @@ defineEmits<{
   openDetail: [id: string];
   startInterview: [id: string];
 }>();
-
-const open = defineModel<boolean>("open", { required: true });
 const { t } = useI18n();
 
 function studioDescription(description: string | undefined): string {

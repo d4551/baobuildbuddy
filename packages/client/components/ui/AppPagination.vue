@@ -74,7 +74,7 @@ function getPageButtons(): HTMLButtonElement[] {
 }
 
 function getPageIndex(page: number): number {
-  const index = normalizedPageNumbers.value.findIndex((item) => item === page);
+  const index = normalizedPageNumbers.value.indexOf(page);
   return index >= 0 ? index : 0;
 }
 
@@ -94,7 +94,7 @@ function clampPageIndex(index: number): number {
 }
 
 function handleNavigationKeydown(event: KeyboardEvent): void {
-  if (!normalizedPageNumbers.value.length) return;
+  if (normalizedPageNumbers.value.length === 0) return;
 
   if (
     event.key !== "ArrowLeft" &&

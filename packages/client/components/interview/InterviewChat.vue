@@ -6,15 +6,16 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
-  MIN_HEIGHT_SCROLL_CLASS,
   MIN_H_80_CLASS,
+  MIN_HEIGHT_SCROLL_CLASS,
   PADDING_TOKEN_CLASS,
-  STACK_SPACE_Y_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  TYPOGRAPHY_SCALE_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { BASE36_ID_RADIX, BASE36_ID_SLICE_END, BASE36_ID_SLICE_START } from "~/constants/numeric-ui";
 import { buildChatMessageRenderRows, resolveLatestAssistantMessageIndex } from "~/utils/chat";
 
 interface Question {
@@ -26,6 +27,8 @@ interface Response {
   questionId: string;
   text: string;
 }
+const currentResponse = defineModel<string>("response", { default: "" });
+
 
 const props = withDefaults(
   defineProps<{
@@ -66,8 +69,7 @@ const emit = defineEmits<{
   "update:response": [response: string];
 }>();
 const { t, locale } = useI18n();
-const responseIdSeed = Math.random().toString(36).slice(2, 10);
-const currentResponse = defineModel<string>("response", { default: "" });
+const responseIdSeed = Math.random().toString(BASE36_ID_RADIX).slice(BASE36_ID_SLICE_START, BASE36_ID_SLICE_END);
 const responseTextareaId = `interview-chat-response-${responseIdSeed}`;
 const responseHintId = `interview-chat-submit-hint-${responseIdSeed}`;
 const completeMessage = computed(() => t(props.completeMessageKey));
@@ -89,22 +91,22 @@ const responseByQuestionId = computed(() => {
 const chatMessages = computed<ChatMessage[]>(() => {
   const messages: ChatMessage[] = [];
 
-  props.questions.forEach((question) => {
+  for (const question of props.questions) {
     messages.push({
       id: `interview-question-${question.id}`,
       role: "assistant",
       content: question.text,
     });
 
-    const response = responseByQuestionId.value.get(question.id);
-    if (response) {
+    const responseText = responseByQuestionId.value.get(question.id);
+    if (responseText) {
       messages.push({
         id: `interview-response-${question.id}`,
         role: "user",
-        content: response,
+        content: responseText,
       });
     }
-  });
+  }
 
   return messages;
 });

@@ -55,7 +55,7 @@ const { t } = useI18n();
                 }}
               </div>
             </div>
-            <button
+            <button type="button"
               :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS, POINTER_EVENTS_TOKEN_CLASS.auto]"
               :aria-label="t('interviewHub.cards.changeJobAria')"
               @click="emit('openJob')"
@@ -65,7 +65,7 @@ const { t } = useI18n();
           </div>
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
-          <button
+          <button type="button"
             :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureJobAria')"
             @click="emit('openJob')"
@@ -90,7 +90,7 @@ const { t } = useI18n();
           <span>{{ t("interviewHub.cards.currentStudio", { studio: selectedStudioName }) }}</span>
         </div>
         <div class="card-actions justify-end" :class="[POINTER_EVENTS_TOKEN_CLASS.auto]">
-          <button
+          <button type="button"
             :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
             :aria-label="t('interviewHub.cards.configureStudioAria')"
             @click="emit('openStudio')"

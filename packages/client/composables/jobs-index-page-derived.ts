@@ -68,9 +68,13 @@ const createJobsPaginationState = (input: {
   totalJobs: ComputedRef<number>;
 }) => {
   const totalPages = computed(() => Math.ceil(input.totalJobs.value / input.pageSize));
-  const pageNumbers = computed(() =>
-    Array.from({ length: totalPages.value }, (_, index) => index + 1),
-  );
+  const pageNumbers = computed(() => {
+    const pages: number[] = [];
+    for (let page = 1; page <= totalPages.value; page += 1) {
+      pages.push(page);
+    }
+    return pages;
+  });
 
   function paginatedItems<T>(items: ComputedRef<T[]>) {
     return computed(() => {

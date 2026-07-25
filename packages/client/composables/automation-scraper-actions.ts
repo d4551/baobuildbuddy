@@ -1,7 +1,7 @@
 import {
-  isAutomationJobScrapeTarget,
-  automationScrapeTargetToPortalId,
   type AutomationScrapeTarget,
+  automationScrapeTargetToPortalId,
+  isAutomationJobScrapeTarget,
 } from "@bao/shared/constants/automation";
 import type { Ref } from "vue";
 import type { ComposerTranslation } from "vue-i18n";

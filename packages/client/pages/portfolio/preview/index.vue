@@ -79,7 +79,7 @@ async function handleExport(format: "pdf" | "docx") {
       :description="t('portfolioPage.preview.description')"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="GHOST_ACTION_PRINT_HIDDEN_CLASS"
           :aria-label="t('portfolioPage.preview.backButtonAria')"
           @click="router.back()"
@@ -209,7 +209,7 @@ async function handleExport(format: "pdf" | "docx") {
       <div v-if="regularProjects.length" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
         <PageHeaderBlock
           title-id="portfolio-all-projects-title"
-          :title="featuredProjects.length ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
+          :title="featuredProjects.length > 0 ? t('portfolioPage.preview.moreProjectsTitle') : t('portfolioPage.projects.title')"
         />
         <SectionGrid grid-token="threeColumnMdGap6">
           <div
@@ -256,7 +256,7 @@ async function handleExport(format: "pdf" | "docx") {
       </div>
 
       <EmptyState
-        v-if="!projects.length"
+        v-if="projects.length === 0"
         title-key="portfolioPage.preview.emptyStateTitle"
         description-key="portfolioPage.preview.emptyStateDescription"
         cta-label-key="portfolioPage.preview.backButton"

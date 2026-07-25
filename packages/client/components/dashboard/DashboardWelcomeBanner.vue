@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import {
-  RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
-  RESPONSIVE_TEXT_MD_3XL_CLASS,
-  RESPONSIVE_WIDTH_SM_AUTO_CLASS,
-} from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -21,6 +16,11 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  RESPONSIVE_FLEX_COL_SM_ROW_CLASS,
+  RESPONSIVE_TEXT_MD_3XL_CLASS,
+  RESPONSIVE_WIDTH_SM_AUTO_CLASS,
+} from "~/constants/ui-layout";
 
 defineProps<{
   welcomeHeading: string;

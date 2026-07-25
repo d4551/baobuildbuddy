@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RESPONSIVE_PADDING_LG_P8_CLASS } from "~/constants/ui-layout";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { DASHBOARD_COPY_KEYS } from "~/constants/dashboard-copy";
@@ -17,6 +16,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_PADDING_LG_P8_CLASS } from "~/constants/ui-layout";
 
 defineProps<{
   primaryRoute: string;

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, PERCENT_MAX } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -49,18 +51,26 @@ useSeoMeta({
 
 const activeSubscriptions = new Map<string, () => void>();
 const liveRunById = ref<Record<string, RpaRunExecutionEnvelope>>({});
-const typeOptions = computed(() =>
-  AUTOMATION_RUN_TYPES.map((runType) => ({
-    value: runType,
-    label: t(`automation.runs.typeOptions.${runType}`),
-  })),
-);
-const statusOptions = computed(() =>
-  AUTOMATION_RUN_STATUSES.map((runStatus) => ({
-    value: runStatus,
-    label: t(`automation.runs.statusOptions.${runStatus}`),
-  })),
-);
+const typeOptions = computed(() => {
+  const options: { value: (typeof AUTOMATION_RUN_TYPES)[number]; label: string }[] = [];
+  for (const runType of AUTOMATION_RUN_TYPES) {
+    options.push({
+      value: runType,
+      label: t(`automation.runs.typeOptions.${runType}`),
+    });
+  }
+  return options;
+});
+const statusOptions = computed(() => {
+  const options: { value: (typeof AUTOMATION_RUN_STATUSES)[number]; label: string }[] = [];
+  for (const runStatus of AUTOMATION_RUN_STATUSES) {
+    options.push({
+      value: runStatus,
+      label: t(`automation.runs.statusOptions.${runStatus}`),
+    });
+  }
+  return options;
+});
 
 const query = computed(() => {
   const params: { type?: AutomationRunType; status?: AutomationRunStatus } = {};
@@ -74,7 +84,9 @@ const query = computed(() => {
 });
 
 const { data: runs, status: runFetchStatus, error, refresh } = fetchRuns(query);
-watch(query, () => void refresh());
+watch(query, () => {
+  refresh().then(() => undefined, () => undefined);
+});
 const isLoading = computed(() => runFetchStatus.value === "pending");
 const errorMessage = computed(() =>
   error.value ? getErrorMessage(error.value, t("automation.runs.loadErrorFallback")) : "",
@@ -96,7 +108,45 @@ const computeProgressFromSteps = (
   ) {
     return 0;
   }
-  return Math.max(0, Math.min(100, Math.round((currentStep / totalSteps) * 100)));
+  return Math.max(0, Math.min(PERCENT_MAX, Math.round((currentStep / totalSteps) * PERCENT_MAX)));
+};
+
+const mergeProgressEvent = (
+  run: RpaRunExecutionEnvelope,
+  event: Extract<RpaRunEvent, { eventType: "progress" }>,
+): RpaRunExecutionEnvelope => {
+  const currentStep = typeof event.step === "number" ? event.step : run.currentStep;
+  const totalSteps = typeof event.totalSteps === "number" ? event.totalSteps : run.totalSteps;
+  const progress =
+    typeof run.progress === "number" && Number.isFinite(run.progress)
+      ? run.progress
+      : computeProgressFromSteps(currentStep ?? null, totalSteps ?? null);
+  return {
+    ...run,
+    status: event.status,
+    currentStep: currentStep ?? null,
+    totalSteps: totalSteps ?? null,
+    progress,
+    updatedAt: event.timestamp,
+  };
+};
+
+const mergeResultEvent = (
+  run: RpaRunExecutionEnvelope,
+  event: Extract<RpaRunEvent, { eventType: "result" }>,
+): RpaRunExecutionEnvelope => {
+  const outputSteps = event.result.steps.length;
+  return {
+    ...run,
+    status: event.result.success ? RUN_STATUS_SUCCESS : RUN_STATUS_ERROR,
+    output: event.result,
+    error: event.result.success ? null : event.result.error,
+    progress: PERCENT_MAX,
+    currentStep: outputSteps,
+    totalSteps: outputSteps,
+    completedAt: event.timestamp,
+    updatedAt: event.timestamp,
+  };
 };
 
 const mergeRunWithEvent = (
@@ -104,37 +154,11 @@ const mergeRunWithEvent = (
   event: RpaRunEvent,
 ): RpaRunExecutionEnvelope => {
   if (event.eventType === "progress") {
-    const currentStep = typeof event.step === "number" ? event.step : run.currentStep;
-    const totalSteps = typeof event.totalSteps === "number" ? event.totalSteps : run.totalSteps;
-    const progress =
-      typeof run.progress === "number" && Number.isFinite(run.progress)
-        ? run.progress
-        : computeProgressFromSteps(currentStep ?? null, totalSteps ?? null);
-    return {
-      ...run,
-      status: event.status,
-      currentStep: currentStep ?? null,
-      totalSteps: totalSteps ?? null,
-      progress,
-      updatedAt: event.timestamp,
-    };
+    return mergeProgressEvent(run, event);
   }
-
   if (event.eventType === "result") {
-    const outputSteps = event.result.steps.length;
-    return {
-      ...run,
-      status: event.result.success ? RUN_STATUS_SUCCESS : RUN_STATUS_ERROR,
-      output: event.result,
-      error: event.result.success ? null : event.result.error,
-      progress: 100,
-      currentStep: outputSteps,
-      totalSteps: outputSteps,
-      completedAt: event.timestamp,
-      updatedAt: event.timestamp,
-    };
+    return mergeResultEvent(run, event);
   }
-
   return {
     ...run,
     status: RUN_STATUS_ERROR,
@@ -166,7 +190,8 @@ const subscribeRun = (run: RpaRunExecutionEnvelope): void => {
   }
   const unsubscribe = subscribeToRun(run.id, (event) => {
     const currentRun =
-      liveRunById.value[event.runId] || runs.value?.find((item) => item.id === event.runId);
+      liveRunById.value[event.runId] ||
+      runs.value?.find((candidate) => candidate.id === event.runId);
     if (!currentRun) {
       return;
     }
@@ -182,21 +207,30 @@ const subscribeRun = (run: RpaRunExecutionEnvelope): void => {
   activeSubscriptions.set(run.id, unsubscribe);
 };
 
-const mergedRuns = computed<RpaRunExecutionEnvelope[]>(() =>
-  (runs.value || []).map((run) => liveRunById.value[run.id] || run),
-);
+const mergedRuns = computed<RpaRunExecutionEnvelope[]>(() => {
+  const rows: RpaRunExecutionEnvelope[] = [];
+  for (const run of runs.value || []) {
+    rows.push(liveRunById.value[run.id] || run);
+  }
+  return rows;
+});
 
 watch(
   mergedRuns,
   (nextRuns) => {
-    const liveRunIds = new Set(nextRuns.filter((run) => isLiveRun(run)).map((run) => run.id));
+    const liveRunIds = new Set<string>();
+    for (const nextRun of nextRuns) {
+      if (isLiveRun(nextRun)) {
+        liveRunIds.add(nextRun.id);
+      }
+    }
     for (const runId of activeSubscriptions.keys()) {
       if (!liveRunIds.has(runId)) {
         unsubscribeRun(runId);
       }
     }
-    for (const run of nextRuns) {
-      subscribeRun(run);
+    for (const nextRun of nextRuns) {
+      subscribeRun(nextRun);
     }
   },
   { immediate: true },
@@ -206,18 +240,23 @@ onBeforeUnmount(() => {
   clearSubscriptions();
 });
 
+function compareRunsForSort(
+  left: RpaRunExecutionEnvelope,
+  right: RpaRunExecutionEnvelope,
+): number {
+  const statusDiff = RUN_STATUS_ORDER[left.status] - RUN_STATUS_ORDER[right.status];
+  if (statusDiff !== 0) {
+    return statusDiff;
+  }
+  const createdDiff = Date.parse(right.createdAt) - Date.parse(left.createdAt);
+  if (Number.isFinite(createdDiff) && createdDiff !== 0) {
+    return createdDiff;
+  }
+  return left.id.localeCompare(right.id);
+}
+
 const sortedRuns = computed<RpaRunExecutionEnvelope[]>(() =>
-  [...mergedRuns.value].sort((left, right) => {
-    const statusDiff = RUN_STATUS_ORDER[left.status] - RUN_STATUS_ORDER[right.status];
-    if (statusDiff !== 0) {
-      return statusDiff;
-    }
-    const createdDiff = Date.parse(right.createdAt) - Date.parse(left.createdAt);
-    if (Number.isFinite(createdDiff) && createdDiff !== 0) {
-      return createdDiff;
-    }
-    return left.id.localeCompare(right.id);
-  }),
+  [...mergedRuns.value].sort(compareRunsForSort),
 );
 
 const formatDate = (value: string): string => {
@@ -237,7 +276,7 @@ const formatRunStatus = (runStatus: AutomationRunStatus): string =>
 
 const formatRunProgress = (run: RpaRunExecutionEnvelope): string => {
   if (typeof run.progress === "number" && Number.isFinite(run.progress)) {
-    return `${Math.max(0, Math.min(100, Math.round(run.progress)))}%`;
+    return `${Math.max(0, Math.min(PERCENT_MAX, Math.round(run.progress)))}%`;
   }
   return notAvailableValue.value;
 };
@@ -273,7 +312,7 @@ const resolveRowClass = (run: RpaRunExecutionEnvelope): Record<string, boolean> 
       :t="t"
     />
 
-    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="6" />
+    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="error"

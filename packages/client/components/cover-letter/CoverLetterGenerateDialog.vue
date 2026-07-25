@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { CoverLetterTemplate } from "@bao/shared/constants/cover-letter";
 import type { ResumeData } from "@bao/shared/types/resume";
-import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
 import AppProseField from "~/components/ui/AppProseField.vue";
+import type { CoverLetterGenerateForm } from "~/composables/useCoverLetterListPage";
 import {
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -14,7 +14,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-const open = defineModel<boolean>("open", { default: false });
+const isDialogOpen = defineModel<boolean>("open", { default: false });
 const form = defineModel<CoverLetterGenerateForm>("form", { required: true });
 
 defineProps<{
@@ -35,7 +35,7 @@ defineEmits<{
 
 <template>
   <AppModalFrame
-    v-model:open="open"
+    v-model:open="isDialogOpen"
     :title-id="titleId"
     size-token="compact"
     :close-aria-label="$t('coverLetterPage.generate.closeBackdropAria')"
@@ -134,14 +134,14 @@ defineEmits<{
     </div>
 
     <div class="modal-action">
-      <button 
+      <button type="button" 
         :class="GHOST_ACTION_CLASS"
         :aria-label="$t('coverLetterPage.generate.cancelAria')"
-        @click="open = false"
+        @click="isDialogOpen = false"
       >
         {{ $t("coverLetterPage.generate.cancelButton") }}
       </button>
-      <button 
+      <button type="button" 
         :class="[PRIMARY_ACTION_CLASS]"
         :disabled="generating || !form.company || !form.position"
         :aria-label="$t('coverLetterPage.generate.submitAria')"

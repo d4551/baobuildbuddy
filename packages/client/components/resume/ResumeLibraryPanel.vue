@@ -29,9 +29,9 @@ interface ResumeLibraryPanelProps {
   readonly pageAria: (page: number) => string;
 }
 
-defineProps<ResumeLibraryPanelProps>();
-
 const searchQuery = defineModel<string>("searchQuery", { required: true });
+
+defineProps<ResumeLibraryPanelProps>();
 
 const emit = defineEmits<{
   clearFilters: [];
@@ -72,7 +72,7 @@ function requestDelete(resumeId?: string): void {
         </fieldset>
 
         <div v-if="hasFiltersApplied" class="card-actions justify-end">
-          <button 
+          <button type="button" 
             :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
             :aria-label="t('resumePage.filters.clearAria')"
             @click="emit('clearFilters')"
@@ -138,14 +138,14 @@ function requestDelete(resumeId?: string): void {
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
-              <button 
+              <button type="button" 
                 :class="[OUTLINE_ACTION_CLASS]"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
-              <button 
+              <button type="button" 
                 :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"

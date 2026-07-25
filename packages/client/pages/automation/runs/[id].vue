@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {
-  STACK_SPACE_Y_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -39,6 +40,21 @@ useSeoMeta({
   title: t("automation.runDetail.title"),
   description: t("automation.hub.cards.runHistory.description"),
 });
+
+function resolveRunErrorMessage(error: unknown): string {
+  if (!error) {
+    return "";
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    return typeof message === "string" ? message : "";
+  }
+  return "";
+}
+
 </script>
 
 <template>
@@ -73,9 +89,7 @@ useSeoMeta({
         :output-summary="outputSummary"
         :status-text="statusText"
         :progress-percent="progressPercent"
-        :error-message="
-          run.error ? (typeof run.error === 'string' ? run.error : run.error.message) : ''
-        "
+        :error-message="resolveRunErrorMessage(run.error)"
       />
 
       <AutomationRunDetailTimelineCard
@@ -97,6 +111,6 @@ useSeoMeta({
       />
     </div>
 
-    <LoadingSkeleton v-else :lines="8" />
+    <LoadingSkeleton v-else :lines="LOADING_SKELETON_LINES.form" />
   </PageScaffold>
 </template>

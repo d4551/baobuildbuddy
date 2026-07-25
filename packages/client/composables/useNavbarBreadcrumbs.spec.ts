@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { describe, expect, it } from "vitest";
 import { normalizeRoutePath, resolveLongestMatchingSidebarNavItem } from "~/constants/navigation";
 
 describe("navbar section crumbs (peer IA)", () => {

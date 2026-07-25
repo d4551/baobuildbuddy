@@ -99,7 +99,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
         </div>
 
         <div class="card-actions justify-end">
-          <button 
+          <button type="button" 
             :class="[OUTLINE_ACTION_CLASS]"
             :disabled="testingProvider === provider.id || !isProviderConfigured(provider.id)"
             :aria-label="t('aiDashboard.providerCard.testAria', { provider: providerLabel(provider.id) })"

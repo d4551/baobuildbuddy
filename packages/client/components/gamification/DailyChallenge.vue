@@ -57,7 +57,7 @@ const { t } = useI18n();
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ challenge.description }}</p>
 
       <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt4]">
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="challenge.completed"
           :aria-label="t('dailyChallengeCard.completeAria', { title: challenge.title })"

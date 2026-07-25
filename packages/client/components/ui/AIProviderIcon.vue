@@ -6,6 +6,17 @@ type IconPath = {
   readonly fill?: string;
 };
 
+const props = withDefaults(
+  defineProps<{
+    providerId: AIProviderType;
+    class?: string;
+  }>(),
+  {
+    class: "",
+  },
+);
+
+
 const AI_PROVIDER_ICON_PATHS: Record<AIProviderType, readonly IconPath[]> = {
   local: [
     {
@@ -44,16 +55,6 @@ const AI_PROVIDER_ICON_PATHS: Record<AIProviderType, readonly IconPath[]> = {
     { d: "M16.8 7.4 18 5.7" },
   ],
 };
-
-const props = withDefaults(
-  defineProps<{
-    providerId: AIProviderType;
-    class?: string;
-  }>(),
-  {
-    class: "",
-  },
-);
 
 const iconPaths = computed(() => AI_PROVIDER_ICON_PATHS[props.providerId]);
 const iconClass = computed(() => ["inline-block shrink-0 align-middle", props.class]);

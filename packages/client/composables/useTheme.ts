@@ -4,8 +4,10 @@ import {
   THEME_NAMES,
 } from "@bao/shared/constants/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
+import { SECONDS_PER_DAY } from "@bao/shared/constants/time";
 import { readonly } from "vue";
 import { useCookie, useState } from "#imports";
+import { THEME_COOKIE_MAX_AGE_DAYS } from "~/constants/numeric-ui";
 
 /**
  * Theme toggle: daisyUI `corporate` (light) / `business` (dark), driven by `data-theme`.
@@ -17,7 +19,7 @@ export function useTheme() {
     default: () => null,
     path: "/",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: SECONDS_PER_DAY * THEME_COOKIE_MAX_AGE_DAYS,
   });
 
   function setTheme(newTheme: AppDataTheme, options: { persist?: boolean } = {}) {

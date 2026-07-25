@@ -7,6 +7,7 @@ import {
   type InterviewSessionFlowState as SessionFlowState,
 } from "~/composables/interview-session-actions";
 import type { createInterviewSessionTimer } from "~/composables/interview-session-timer";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 export function createInterviewSessionState() {
   const route = useRoute();
@@ -233,7 +234,7 @@ function createInterviewSessionProgressState(input: {
       return 0;
     }
     const current = Math.min(input.currentQuestionIndex.value, input.totalQuestions.value - 1);
-    return ((current + 1) / input.totalQuestions.value) * 100;
+    return ((current + 1) / input.totalQuestions.value) * PERCENT_MAX;
   });
   const displayQuestionIndex = computed(() =>
     input.totalQuestions.value === 0

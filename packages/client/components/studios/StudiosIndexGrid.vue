@@ -85,14 +85,14 @@ function studioLocation(location: string): string {
           </div>
 
           <div class="card-actions justify-end" :class="[MARGIN_TOKEN_CLASS.mt1]">
-            <button 
+            <button type="button" 
               :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
               :aria-label="t('studiosIndex.card.previewAria', { studio: studio.name })"
               @click="$emit('preview', studio.id)"
             >
               {{ t("studiosIndex.card.previewButton") }}
             </button>
-            <button 
+            <button type="button" 
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('studiosIndex.card.viewAria', { studio: studio.name })"
               @click="$emit('view', studio.id)"

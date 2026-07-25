@@ -18,6 +18,7 @@ import {
   hasNonEmptyGamingValue,
 } from "~/composables/resume-page-bootstrap";
 import { createFlowEngineInput } from "~/constants/flow-engine";
+import { PERCENT_MAX, UI_CHIP_OVERFLOW_THRESHOLD } from "~/constants/numeric-ui";
 
 type ResumePageDerivedInput = {
   dashboardStats: Ref<DashboardStatsView | null>;
@@ -103,7 +104,7 @@ function useResumeCompletionState(formData: ResumeFormData) {
       if (total === 0) {
         return 0;
       }
-      return Math.round((completedSectionCount.value / total) * 100);
+      return Math.round((completedSectionCount.value / total) * PERCENT_MAX);
     }),
     nextRecommendedTab: computed<ResumeTabId | null>(() => {
       const incomplete = resumeSectionCompletion.value.find((section) => !section.completed);
@@ -177,7 +178,7 @@ function useResumeCompletionQuickActions(
   return computed<readonly ResumeCompletionQuickAction[]>(() => {
     const actionCandidates = [flowPrimaryAction.value, ...flowRecommendedActions.value]
       .filter((action) => action.id !== "resume")
-      .slice(0, 3);
+      .slice(0, UI_CHIP_OVERFLOW_THRESHOLD);
 
     return actionCandidates.map((action) => ({
       id: action.id,

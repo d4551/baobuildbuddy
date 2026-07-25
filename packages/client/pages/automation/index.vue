@@ -10,6 +10,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -80,11 +81,18 @@ const routeSection = computed<AutomationHubSectionId>(() =>
 
 const activeSection = ref<AutomationHubSectionId>(routeSection.value);
 
-const readinessIssueCount = computed(() =>
-  capabilityEntries.value
-    ? capabilityEntries.value.filter((entry) => entry.issues.length > 0).length
-    : 0,
-);
+const readinessIssueCount = computed(() => {
+  if (!capabilityEntries.value) {
+    return 0;
+  }
+  let count = 0;
+  for (const entry of capabilityEntries.value) {
+    if (entry.issues.length > 0) {
+      count += 1;
+    }
+  }
+  return count;
+});
 
 const hubSectionBadgeById = computed<Record<AutomationHubSectionId, number>>(() => ({
   overview: totalRuns.value,
@@ -125,7 +133,7 @@ useSeoMeta({
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="4" />
+    <LoadingSkeleton v-if="uiState === 'loading' || uiState === 'idle'" variant="stats" :lines="LOADING_SKELETON_LINES.short" />
 
     <BootstrapErrorAlert
       v-else-if="uiState === 'error'"

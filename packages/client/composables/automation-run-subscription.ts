@@ -1,8 +1,5 @@
 import { WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import {
-  type RpaRunEvent,
-  rpaRunEventSchema,
-} from "@bao/shared/schemas/rpa-events.schema";
+import { type RpaRunEvent, rpaRunEventSchema } from "@bao/shared/schemas/rpa-events.schema";
 import { safeParseJson } from "@bao/shared/utils/json";
 import type { ClientApiRequestRuntime } from "~/composables/api-request";
 import { resolveWebSocketEndpoint } from "~/utils/endpoints";
@@ -10,10 +7,7 @@ import { resolveWebSocketEndpoint } from "~/utils/endpoints";
 /**
  * Subscribes to automation run events over WS_ENDPOINTS.automation.
  */
-export function createAutomationRunSubscription(
-  runtime: ClientApiRequestRuntime,
-  wsBase: string,
-) {
+export function createAutomationRunSubscription(runtime: ClientApiRequestRuntime, wsBase: string) {
   return (runId: string, onEvent: (event: RpaRunEvent) => void): (() => void) => {
     const wsUrl = resolveWebSocketEndpoint(wsBase, runtime.requestUrl, WS_ENDPOINTS.automation);
     const ws = new WebSocket(wsUrl);

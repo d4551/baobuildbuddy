@@ -17,13 +17,13 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
+const contentText = defineModel<string>("contentText", { required: true });
+
 defineProps<{
   contentCharacterCount: number;
   t: (key: string, values?: Record<string, unknown>) => string;
   isDirty?: boolean;
 }>();
-
-const contentText = defineModel<string>("contentText", { required: true });
 
 const emit = defineEmits<{
   clear: [];
@@ -31,9 +31,11 @@ const emit = defineEmits<{
   edited: [];
 }>();
 
+const PREVIEW_PARAGRAPH_SPLIT = /\n{2,}/u;
+
 const previewParagraphs = computed(() =>
   contentText.value
-    .split(/\n{2,}/u)
+    .split(PREVIEW_PARAGRAPH_SPLIT)
     .map((block) => block.trim())
     .filter((block) => block.length > 0),
 );
@@ -122,14 +124,14 @@ function onTextareaInput(event: Event): void {
           {{ t("coverLetterDetailPage.editor.characterCount", { count: contentCharacterCount }) }}
         </span>
         <div class="flex" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
-          <button
+          <button type="button"
             :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
             :aria-label="t('coverLetterDetailPage.editor.clearAria')"
             @click="emit('clear')"
           >
             {{ t("coverLetterDetailPage.editor.clearButton") }}
           </button>
-          <button
+          <button type="button"
             :class="[PRIMARY_ACTION_CLASS]"
             :aria-label="t('coverLetterDetailPage.editor.saveAria')"
             @click="emit('save')"

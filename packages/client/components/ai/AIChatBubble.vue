@@ -54,13 +54,15 @@ const avatarClass = computed(() => {
   }
   return props.isLatestAssistantMessage && props.isStreaming ? "avatar-online" : "avatar-offline";
 });
-const avatarLabel = computed(() =>
-  isAssistant.value
-    ? props.isStreaming
-      ? t("aiChatCommon.voice.speakingStatus")
-      : props.assistantLabel
-    : props.userLabel,
-);
+const avatarLabel = computed(() => {
+  if (!isAssistant.value) {
+    return props.userLabel;
+  }
+  if (props.isStreaming) {
+    return t("aiChatCommon.voice.speakingStatus");
+  }
+  return props.assistantLabel;
+});
 const chatBubbleClass = computed(() =>
   isAssistant.value
     ? `border border-base-300 ${SURFACE_GLASS_SUBTLE_CLASS} text-base-content ${SHADOW_TOKEN_CLASS.sm}`
@@ -100,7 +102,6 @@ const ariaLabel = computed(() => {
 <template>
   <article 
     class="chat" :class="[FLUID_WIDTH_CLASS, chatClass]"
-    role="listitem"
     :aria-label="ariaLabel"
     :aria-busy="isStreaming"
     :aria-live="isStreaming ? 'polite' : 'off'"

@@ -15,8 +15,7 @@ export const INSET_PANEL_MUTED_CLASS = "rounded-box border border-base-300 bg-ba
 export const INSET_LIST_CLASS = "list rounded-box border border-base-300 bg-base-100";
 
 /** Fieldset panel chrome. */
-export const FIELDSET_PANEL_CLASS =
-  "fieldset rounded-box border border-base-300 bg-base-100 p-4";
+export const FIELDSET_PANEL_CLASS = "fieldset rounded-box border border-base-300 bg-base-100 p-4";
 
 /** Standard card body padding. */
 export const CARD_BODY_CLASS = "card-body";

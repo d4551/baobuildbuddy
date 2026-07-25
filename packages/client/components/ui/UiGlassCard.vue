@@ -20,14 +20,15 @@ import { computed } from "vue";
 import {
   POINTER_EVENTS_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
-  SURFACE_GLASS_CARD_STRONG_CLASS,
-  SURFACE_GLASS_CARD_MODAL_CLASS,
-  SURFACE_GLASS_CARD_SELECTED_CLASS,
   SURFACE_GLASS_CARD_DISABLED_CLASS,
   SURFACE_GLASS_CARD_ERROR_CLASS,
+  SURFACE_GLASS_CARD_MODAL_CLASS,
+  SURFACE_GLASS_CARD_SELECTED_CLASS,
+  SURFACE_GLASS_CARD_STRONG_CLASS,
   SURFACE_GLASS_CLEAR_CLASS,
   SURFACE_GLASS_SOLID_CLASS,
 } from "~/constants/layout";
+import { UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 
 type GlassCardVariant = "standard" | "strong" | "modal" | "subtle" | "clear" | "solid";
 
@@ -77,7 +78,7 @@ const surfaceClass = computed(() => {
 /** Clamp stagger index to 0–11 so it always maps to a defined CSS delay class. */
 const staggerClass = computed(() =>
   props.staggerIndex !== undefined
-    ? `glass-card-enter glass-card-enter-${Math.min(Math.max(props.staggerIndex, 0), 11)}`
+    ? `glass-card-enter glass-card-enter-${Math.min(Math.max(props.staggerIndex, 0), UI_STAGGER_INDEX_MAX)}`
     : "",
 );
 

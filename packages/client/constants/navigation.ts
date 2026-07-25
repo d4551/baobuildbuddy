@@ -29,13 +29,7 @@ export const NAVIGATION_GROUPS: readonly {
 ] as const;
 
 /** Canonical dock destination ids (Home / Work / Create / AI / System). */
-export const DOCK_NAVIGATION_IDS = [
-  "dashboard",
-  "jobs",
-  "resume",
-  "ai-chat",
-  "settings",
-] as const;
+export const DOCK_NAVIGATION_IDS = ["dashboard", "jobs", "resume", "ai-chat", "settings"] as const;
 
 /**
  * Shared navigation item contract for app chrome components.

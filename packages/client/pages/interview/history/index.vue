@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -51,7 +52,7 @@ useSeoMeta({
       :description="t('interviewHistory.subtitle')"
     />
 
-    <LoadingSkeleton v-if="bootstrapPending && !sessions.length" :lines="8" />
+    <LoadingSkeleton v-if="bootstrapPending && sessions.length === 0" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="sessionsError"
@@ -63,7 +64,7 @@ useSeoMeta({
     />
 
     <EmptyState
-      v-else-if="!sessions.length"
+      v-else-if="sessions.length === 0"
       title-key="interviewHistory.emptyStateTitle"
       description-key="interviewHistory.emptyStateDescription"
       cta-label-key="interviewHistory.emptyStateCta"

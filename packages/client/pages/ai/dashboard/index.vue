@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import {
+  OUTLINE_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   TOUCH_TARGET_MIN_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -34,7 +35,7 @@ const page = reactive(useAIDashboardPage());
       description-class="text-secondary"
     >
       <template #actions>
-        <button
+        <button type="button"
           :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :disabled="page.loading"
           :aria-label="t('aiDashboard.preference.refreshAria')"
@@ -46,7 +47,7 @@ const page = reactive(useAIDashboardPage());
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="page.loading" :lines="8" />
+    <LoadingSkeleton v-if="page.loading" :lines="LOADING_SKELETON_LINES.form" />
     <BootstrapErrorAlert
       v-else-if="page.dashboardBootstrapError"
       :message="getErrorMessage(page.dashboardBootstrapError, t('aiDashboard.toasts.loadFailed'))"
@@ -71,7 +72,7 @@ const page = reactive(useAIDashboardPage());
           :t="page.t"
         />
         <template #fallback>
-          <LoadingSkeleton :lines="5" />
+          <LoadingSkeleton :lines="LOADING_SKELETON_LINES.medium" />
         </template>
       </ClientOnly>
 

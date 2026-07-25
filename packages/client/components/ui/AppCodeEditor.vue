@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import { json } from "@codemirror/lang-json";
-import { css } from "@codemirror/lang-css";
-import { markdown } from "@codemirror/lang-markdown";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { defaultKeymap, history, historyKeymap, redo, undo } from "@codemirror/commands";
+import { css } from "@codemirror/lang-css";
+import { json } from "@codemirror/lang-json";
+import { markdown } from "@codemirror/lang-markdown";
 import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { linter, lintGutter } from "@codemirror/lint";
 import { highlightSelectionMatches, openSearchPanel, searchKeymap } from "@codemirror/search";
 import { EditorState, type Extension } from "@codemirror/state";
 import {
+  placeholder as cmPlaceholder,
+  drawSelection,
   EditorView,
   highlightActiveLine,
   keymap,
   lineNumbers,
-  placeholder as cmPlaceholder,
   rectangularSelection,
-  drawSelection,
 } from "@codemirror/view";
-import { vim } from "@replit/codemirror-vim";
 import { showMinimap } from "@replit/codemirror-minimap";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { vim } from "@replit/codemirror-vim";
 import { useI18n } from "vue-i18n";
+import { createEditorCollabExtension } from "~/composables/editor-collab-broadcast";
 import {
   EDITOR_HOST_CLASS,
   EDITOR_MIN_HEIGHT_CLASS,
@@ -27,7 +28,6 @@ import {
   EDITOR_PROSE_MODES,
   type EditorMode,
 } from "~/constants/editor";
-import { createEditorCollabExtension } from "~/composables/editor-collab-broadcast";
 
 const props = withDefaults(
   defineProps<{

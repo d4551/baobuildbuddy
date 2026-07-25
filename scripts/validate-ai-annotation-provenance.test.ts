@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { collectAiProvenanceViolationsForContent } from "./validate-ai-annotation-provenance";
 
-const AI_CHAT_PAGE = "packages/client/pages/ai/chat.vue";
-const INTERVIEW_PAGE = "packages/client/pages/interview/session.vue";
-const NON_AI_PAGE = "packages/client/pages/settings.vue";
+const AI_CHAT_PAGE = "packages/client/pages/ai/chat/index.vue";
+const INTERVIEW_PAGE = "packages/client/pages/interview/session/index.vue";
+const NON_AI_PAGE = "packages/client/pages/settings/index.vue";
 
 describe("collectAiProvenanceViolationsForContent", () => {
   test("flags AI surface rendering aiMessage without provider", () => {

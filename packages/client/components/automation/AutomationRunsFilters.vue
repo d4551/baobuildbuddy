@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const statusFilter = defineModel<string>("statusFilter", { required: true });
+
 defineProps<{
   typeOptions: ReadonlyArray<{ value: string; label: string }>;
   statusOptions: ReadonlyArray<{ value: string; label: string }>;
@@ -6,7 +8,6 @@ defineProps<{
 }>();
 
 const typeFilter = defineModel<string>("typeFilter", { required: true });
-const statusFilter = defineModel<string>("statusFilter", { required: true });
 </script>
 
 <template>

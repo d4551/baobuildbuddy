@@ -3,7 +3,7 @@ import {
   SPEECH_MODEL_OPTIONS,
   type SpeechProviderOption,
 } from "@bao/shared/constants/settings";
-import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import type { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 
 type SpeechModelProfileKind = "stt" | "tts";
 
@@ -93,7 +93,9 @@ const resolvePersistedEndpointOrDefault = (
   if (trimmed.length > 0) {
     return trimmed;
   }
-  return kind === "stt" ? DEFAULT_SPEECH_SETTINGS.stt.endpoint : DEFAULT_SPEECH_SETTINGS.tts.endpoint;
+  return kind === "stt"
+    ? DEFAULT_SPEECH_SETTINGS.stt.endpoint
+    : DEFAULT_SPEECH_SETTINGS.tts.endpoint;
 };
 
 /**
@@ -104,8 +106,16 @@ export const buildNextSpeechConfigFromProfile = (
   speechConfig: SpeechModelProfileState,
   localeFallback: string,
 ): PersistedSpeechSettings => {
-  const sttModel = resolvePersistedModelOrDefault("stt", speechConfig.sttProvider, speechConfig.sttModel);
-  const ttsModel = resolvePersistedModelOrDefault("tts", speechConfig.ttsProvider, speechConfig.ttsModel);
+  const sttModel = resolvePersistedModelOrDefault(
+    "stt",
+    speechConfig.sttProvider,
+    speechConfig.sttModel,
+  );
+  const ttsModel = resolvePersistedModelOrDefault(
+    "tts",
+    speechConfig.ttsProvider,
+    speechConfig.ttsModel,
+  );
   const sttEndpoint = resolvePersistedEndpointOrDefault("stt", speechConfig.sttEndpoint);
   const ttsEndpoint = resolvePersistedEndpointOrDefault("tts", speechConfig.ttsEndpoint);
   return {

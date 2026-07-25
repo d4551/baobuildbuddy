@@ -7,6 +7,11 @@ import type {
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import {
+  GAMIFICATION_STREAK_DAYS,
+  GAMIFICATION_STREAK_MULTIPLIER,
+  GAMIFICATION_XP_LEVEL_DIVISOR,
+} from "~/constants/numeric-ui";
 import { withLoadingState } from "./async-flow";
 import { parseAchievementList, parseDailyChallengeList } from "./gamification-entity-normalizers";
 
@@ -214,11 +219,11 @@ const createFetchMonthlyStatsAction = (context: GamificationContext) => async ()
 const createGamificationComputedState = (state: GamificationState) => {
   const level = computed(() => {
     const xp = state.progress.value?.xp || 0;
-    return Math.floor(Math.sqrt(xp / 100)) + 1;
+    return Math.floor(Math.sqrt(xp / GAMIFICATION_XP_LEVEL_DIVISOR)) + 1;
   });
 
   const xpToNextLevel = computed(() => {
-    const nextLevelXp = level.value ** 2 * 100;
+    const nextLevelXp = level.value ** 2 * GAMIFICATION_XP_LEVEL_DIVISOR;
     const currentXp = state.progress.value?.xp || 0;
     return nextLevelXp - currentXp;
   });
@@ -229,11 +234,11 @@ const createGamificationComputedState = (state: GamificationState) => {
 
   const streakMultiplier = computed(() => {
     const streak = currentStreak.value;
-    if (streak >= 30) return 3.0;
-    if (streak >= 14) return 2.0;
-    if (streak >= 7) return 1.5;
-    if (streak >= 3) return 1.25;
-    return 1.0;
+    if (streak >= GAMIFICATION_STREAK_DAYS.long) return GAMIFICATION_STREAK_MULTIPLIER.long;
+    if (streak >= GAMIFICATION_STREAK_DAYS.medium) return GAMIFICATION_STREAK_MULTIPLIER.medium;
+    if (streak >= GAMIFICATION_STREAK_DAYS.short) return GAMIFICATION_STREAK_MULTIPLIER.short;
+    if (streak >= GAMIFICATION_STREAK_DAYS.start) return GAMIFICATION_STREAK_MULTIPLIER.start;
+    return GAMIFICATION_STREAK_MULTIPLIER.none;
   });
 
   const actionHistory = computed<JsonValue[]>(() => {

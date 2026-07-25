@@ -3,6 +3,11 @@ import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { settle } from "@bao/shared/utils/promise";
 import { useI18n } from "vue-i18n";
 import {
+  resolveWorkspaceSearchResultRoute,
+  useWorkspaceSearch,
+  WORKSPACE_OMNI_SEARCH_OPEN_EVENT,
+} from "~/composables/useWorkspaceSearch";
+import {
   BADGE_SOFT_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -15,11 +20,6 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-import {
-  resolveWorkspaceSearchResultRoute,
-  useWorkspaceSearch,
-  WORKSPACE_OMNI_SEARCH_OPEN_EVENT,
-} from "~/composables/useWorkspaceSearch";
 
 const WORKSPACE_SEARCH_DIALOG_TITLE_ID = "workspace-omni-search-title";
 const WORKSPACE_SEARCH_INPUT_ID = "workspace-omni-search-input";
@@ -75,6 +75,10 @@ async function openResult(result: (typeof results.value)[number]): Promise<void>
   await router.push(resolveWorkspaceSearchResultRoute(result));
 }
 
+function openSearch(): void {
+  open.value = true;
+}
+
 function closeSearch(): void {
   open.value = false;
   clear();
@@ -100,7 +104,7 @@ function typeLabel(type: string): string {
  :aria-label="t('workspaceSearch.openButtonAria')"
  :aria-expanded="open"
  :aria-controls="WORKSPACE_SEARCH_DIALOG_TITLE_ID"
- @click="open = true"
+ @click="openSearch"
  >
       <IconSearch :class="ICON_SIZE_CLASS.sm" />
     </button>

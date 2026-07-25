@@ -75,6 +75,29 @@ function handleScheduleInput(event: Event): void {
     emit("update:scheduledRunAt", { target: props.capability.target, value: input.value });
   }
 }
+
+function readinessValueClass(): string {
+  if (props.capability.configured) {
+    return "text-success";
+  }
+  if (issueCount.value > 0) {
+    return "text-warning";
+  }
+  return "text-error";
+}
+
+function latestRunValueClass(): string {
+  if (props.runState === "success") {
+    return "text-success";
+  }
+  if (props.runState === "error") {
+    return "text-error";
+  }
+  if (props.runState === "running") {
+    return "text-info";
+  }
+  return "text-base-content";
+}
 </script>
 
 <template>
@@ -121,7 +144,7 @@ function handleScheduleInput(event: Event): void {
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
           <div 
-            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, capability.configured ? 'text-success' : issueCount > 0 ? 'text-warning' : 'text-error']"
+            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, readinessValueClass()]"
           >
             {{ capabilityAvailabilityLabel(capability) }}
           </div>
@@ -144,7 +167,7 @@ function handleScheduleInput(event: Event): void {
         </div>
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, runState === 'success' ? 'text-success' : runState === 'error' ? 'text-error' : runState === 'running' ? 'text-info' : 'text-base-content']">
+          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, latestRunValueClass()]">
             {{ runStateLabel(runState) }}
           </div>
           <div class="stat-desc">
@@ -158,7 +181,7 @@ function handleScheduleInput(event: Event): void {
       </div>
 
       <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <button 
+        <button type="button" 
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="cardRunAria(capability.target)"
           :disabled="pendingAction !== null || !capability.configured"
@@ -256,7 +279,7 @@ function handleScheduleInput(event: Event): void {
             <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
           </fieldset>
           <div class="card-actions justify-end">
-            <button 
+            <button type="button" 
               :class="[OUTLINE_ACTION_CLASS]"
               :aria-label="t('automation.scraper.schedule.buttonAria')"
               :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"

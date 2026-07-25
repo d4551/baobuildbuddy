@@ -5,6 +5,7 @@ import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
+  OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
   SCROLL_MARGIN_TOKEN_CLASS,
@@ -12,7 +13,6 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  OUTLINE_ACTION_CLASS,
 } from "~/constants/layout";
 import type { ApiEndpoint, ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 

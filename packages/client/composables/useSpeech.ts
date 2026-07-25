@@ -14,12 +14,9 @@ import {
 import type { ServerSttRequestOptions } from "./speech-server-stt";
 import { playBase64Audio, synthesizeSpeechViaServer } from "./speech-server-tts";
 import { createStartListeningAction } from "./speech-stt-listening";
-import { createServerSttRequestOptions } from "./speech-stt-request-options";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
-import {
-  resolveSpeechTtsProvider,
-  shouldUseLocalKokoroTts,
-} from "./speech-tts-provider";
+import { createServerSttRequestOptions } from "./speech-stt-request-options";
+import { resolveSpeechTtsProvider, shouldUseLocalKokoroTts } from "./speech-tts-provider";
 import { useSettings } from "./useSettings";
 
 type RecognitionErrorName = keyof typeof AI_CHAT_VOICE_RECOGNITION_ERROR_CODE_MAP;

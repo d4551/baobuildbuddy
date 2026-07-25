@@ -6,6 +6,7 @@ import {
   MARGIN_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES, SETUP_WIZARD_FINAL_STEP } from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -16,7 +17,7 @@ const {
   resolvedBrand,
   OLLAMA_WEBSITE_URL,
   step,
-  name,
+  name: profileName,
   currentRole,
   authSetupToken,
   existingApiKey,
@@ -61,7 +62,7 @@ useSeoMeta({
       {{ t("setup.title", { brand: resolvedBrand.name }) }}
     </h1>
 
-    <LoadingSkeleton v-if="setupBootstrapPending" :lines="8" />
+    <LoadingSkeleton v-if="setupBootstrapPending" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="setupBootstrapError"
@@ -76,9 +77,9 @@ useSeoMeta({
 
       <SetupProfileStep
         v-if="step === 1"
-        :name="name"
+        :name="profileName"
         :current-role="currentRole"
-        @update:name="name = $event"
+        @update:name="profileName = $event"
         @update:current-role="currentRole = $event"
         @next="step = 2"
       />
@@ -101,7 +102,7 @@ useSeoMeta({
         @test-provider="handleTestProvider"
         @copy="copyOllamaCommand"
         @back="step = 1"
-        @next="step = 3"
+        @next="step = SETUP_WIZARD_FINAL_STEP"
       />
 
       <SetupCompletionStep

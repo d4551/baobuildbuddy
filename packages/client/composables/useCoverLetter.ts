@@ -3,6 +3,7 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
+import type { ClientApi } from "~/types/client-api";
 import { toCoverLetterData } from "./api-normalizer-cover-letter";
 import {
   type ClientApiRequestRuntime,
@@ -10,7 +11,6 @@ import {
   useClientApiRequestRuntime,
 } from "./api-request";
 import { useApi } from "./useApi";
-import type { ClientApi } from "~/types/client-api";
 
 interface CreateCoverLetterInput {
   company: string;

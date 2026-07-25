@@ -1,3 +1,4 @@
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type { ComputedRef } from "vue";
 
 interface TimedInterviewSession {
@@ -27,7 +28,7 @@ function estimateElapsedTime(
 
   const start = Number.isFinite(startTime) ? startTime : fallbackSeconds;
   const end = typeof endTime === "number" && Number.isFinite(endTime) ? endTime : Date.now();
-  const rawSeconds = Math.floor((end - start) / 1000);
+  const rawSeconds = Math.floor((end - start) / MS_PER_SECOND);
   return Math.max(0, rawSeconds);
 }
 

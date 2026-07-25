@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { STACK_SPACE_Y_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],
@@ -50,7 +51,7 @@ useSeoMeta({
     <LoadingSkeleton
       v-if="uiState === 'loading' || uiState === 'idle'"
       variant="stats"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <BootstrapErrorAlert

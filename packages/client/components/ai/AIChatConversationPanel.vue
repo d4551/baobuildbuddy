@@ -2,8 +2,8 @@
 import type { ChatMessage } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import { createAiChatConversationEmptyState } from "~/composables/ai-chat-conversation-empty";
-import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import { useSettings } from "~/composables/useSettings";
+import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import {
   BADGE_GHOST_CLASS,
   BADGE_SOFT_INFO_CLASS,

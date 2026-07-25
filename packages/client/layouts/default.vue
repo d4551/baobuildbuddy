@@ -81,7 +81,7 @@ onUnmounted(() => {
 <template>
   <div class="drawer" :class="SHELL_DRAWER_CLASS" :data-theme="theme">
     <input
-      :id="APP_DRAWER_ID"
+      id="app-drawer"
       type="checkbox"
       class="drawer-toggle"
       v-model="isDrawerOpen"
@@ -99,12 +99,13 @@ onUnmounted(() => {
       <ToastContainer />
     </div>
     <div class="drawer-side" :class="SHELL_DRAWER_SIDE_CLASS">
-      <label
-        :for="APP_DRAWER_ID"
+      <button
+        type="button"
         class="drawer-overlay"
         :aria-label="t('a11y.closeSidebar')"
         :aria-controls="APP_DRAWER_ID"
-      ></label>
+        @click="isDrawerOpen = false"
+      ></button>
       <aside :class="SHELL_SIDEBAR_ASIDE_CLASS" :aria-label="t('a11y.sidebarNavigation')">
         <AppSidebar />
       </aside>

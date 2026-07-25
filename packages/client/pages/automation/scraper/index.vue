@@ -9,9 +9,10 @@ import {
   isAutomationScraperSectionId,
 } from "~/components/automation/scraper-sections";
 import {
-  STACK_SPACE_Y_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
+  STACK_SPACE_Y_TOKEN_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { UI_SPACING_CLASS_BY_TOKEN, UI_WIDTH_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 import { resolveRouteSectionId } from "~/utils/route-query";
 
@@ -116,7 +117,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
     <div :class="contentScaffoldClass">
       <LoadingSkeleton
         v-if="capabilityAuditStatus === 'pending' || capabilityAuditStatus === 'idle'"
-        :lines="6"
+        :lines="LOADING_SKELETON_LINES.long"
       />
 
       <BootstrapErrorAlert
@@ -136,7 +137,7 @@ function updateScheduledRunAt(target: keyof typeof scheduledRunAt, value: string
           @retry="() => refreshScraperJobs()"
         />
 
-        <LoadingSkeleton v-if="scraperJobsPending" :lines="6" />
+        <LoadingSkeleton v-if="scraperJobsPending" :lines="LOADING_SKELETON_LINES.long" />
 
         <template v-else>
           <WorkspaceSectionNavigator

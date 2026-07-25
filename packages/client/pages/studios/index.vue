@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -52,7 +54,7 @@ const catalogEmpty = computed(
 
     <LoadingSkeleton
       v-else-if="(bootstrapPending || page.loading.value) && page.totalStudios.value === 0"
-      :lines="6"
+      :lines="LOADING_SKELETON_LINES.long"
     />
 
     <EmptyState

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UI_RECOMMENDATION_PREVIEW_LIMIT, UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
+
 definePageMeta({
   middleware: ["auth"],
 });
@@ -56,7 +58,7 @@ const page = useJobsIndexPage();
           <LoadingSpinner v-if="page.matching.value" size="sm" :label="t('jobsPage.aiMatchButton')" />
           <span v-else>{{ t("jobsPage.aiMatchButton") }}</span>
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('jobsPage.refreshAria')"
           :disabled="page.refreshing.value"
@@ -79,11 +81,11 @@ const page = useJobsIndexPage();
       </h2>
       <SectionGrid grid-token="twoColumn">
         <UiGlassCard
-          v-for="(job, index) in page.recommendations.value.slice(0, 4)"
+          v-for="(job, index) in page.recommendations.value.slice(0, UI_RECOMMENDATION_PREVIEW_LIMIT)"
           :key="`rec-${job.id}`"
           :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
-          :stagger-index="Math.min(index, 11)"
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
           <div class="card-body relative z-10">
             <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
@@ -199,7 +201,7 @@ const page = useJobsIndexPage();
               :key="job.id"
               :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
-              :stagger-index="Math.min(index, 11)"
+              :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             >
               <div class="card-body relative z-10">
                 <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
@@ -243,14 +245,14 @@ const page = useJobsIndexPage();
                     {{ page.formatDate(job.postedDate) }}
                   </span>
                   <div :class="['flex', ROW_GAP_XS_CLASS]">
-                    <button
+                    <button type="button"
                       :class="[OUTLINE_ACTION_CLASS]"
                       :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
                       @click.stop="page.interviewJob(job.id)"
                     >
                       {{ t("jobsPage.interviewButton") }}
                     </button>
-                    <button
+                    <button type="button"
                       :class="[PRIMARY_ACTION_CLASS]"
                       :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
                       @click.stop="page.viewJob(job.id)"

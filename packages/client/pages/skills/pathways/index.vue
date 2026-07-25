@@ -9,6 +9,7 @@ import {
   GHOST_ACTION_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 
 definePageMeta({
@@ -72,7 +73,7 @@ useSeoMeta({
       @retry="() => page.refreshGamificationProgress()"
     />
 
-    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="8" />
+    <LoadingSkeleton v-if="page.uiState.value === 'loading'" variant="cards" :lines="LOADING_SKELETON_LINES.form" />
 
     <BootstrapErrorAlert
       v-else-if="page.uiState.value === 'error'"

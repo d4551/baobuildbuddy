@@ -1,5 +1,5 @@
-import { ViewPlugin, type ViewUpdate } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
+import { type EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view";
 
 /**
  * Same-origin multi-tab collab via BroadcastChannel.
@@ -12,7 +12,7 @@ export const createEditorCollabExtension = (channelName: string): Extension =>
       private applyingRemote = false;
       private lastSent = "";
 
-      constructor(readonly view: import("@codemirror/view").EditorView) {
+      constructor(readonly view: EditorView) {
         if (typeof BroadcastChannel === "undefined") {
           return;
         }

@@ -123,7 +123,7 @@ function triggerFileDownload(blob: Blob, filename: string): void {
 export async function downloadApiFile(
   runtime: ClientApiRequestRuntime,
   endpoint: string,
-  options: ClientApiRequestOptions = {},
+  options: ClientApiRequestOptions,
   fallbackFilename: string,
 ): Promise<void> {
   const body = createRequestBody(options.body);

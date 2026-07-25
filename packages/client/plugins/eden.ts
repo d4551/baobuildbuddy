@@ -1,5 +1,6 @@
 import type { App } from "@bao/server/app";
 import { AUTH_KEY_STORAGE_KEY } from "@bao/shared/constants/auth";
+import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 import { treaty } from "@elysiajs/eden";
 import { tryUseNuxtApp } from "nuxt/app";
 import type { Ref } from "vue";
@@ -75,7 +76,7 @@ export default defineNuxtPlugin({
         return key ? { Authorization: `Bearer ${key}` } : {};
       },
       onResponse: (response) => {
-        if (response.status === 401) {
+        if (response.status === HTTP_STATUS_UNAUTHORIZED) {
           writeApiKey(null);
         }
       },

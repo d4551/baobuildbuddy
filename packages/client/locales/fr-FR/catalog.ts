@@ -1032,7 +1032,8 @@ const catalog = {
         browser: "Navigateur (sur appareil)",
         custom: "Personnalisé",
       },
-      onDeviceHint: "Navigateur (sur appareil) utilise l’API Web Speech de cet appareil — aucun audio ne quitte la machine.",
+      onDeviceHint:
+        "Navigateur (sur appareil) utilise l’API Web Speech de cet appareil — aucun audio ne quitte la machine.",
     },
   },
   aiChatCommon: {

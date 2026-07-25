@@ -1,10 +1,7 @@
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
-import {
-  SEARCH_RESULT_TYPES,
-  type SearchResultType,
-} from "@bao/shared/constants/search";
-import { isRecord } from "@bao/shared/utils/type-guards";
+import { SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
@@ -132,9 +129,7 @@ function createWorkspaceSearchActions(input: {
       return;
     }
     input.suggesting.value = true;
-    const settled = await settle(
-      input.api.search.autocomplete.get({ query: { prefix: trimmed } }),
-    );
+    const settled = await settle(input.api.search.autocomplete.get({ query: { prefix: trimmed } }));
     input.suggesting.value = false;
     if (settled.status !== "fulfilled") {
       return;

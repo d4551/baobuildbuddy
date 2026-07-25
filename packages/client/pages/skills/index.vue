@@ -21,6 +21,7 @@ import {
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import {
   SKILLS_CONFIDENCE_MAX,
   SKILLS_CONFIDENCE_MIN,
@@ -101,7 +102,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           </span>
           <span :class="[TYPOGRAPHY_SCALE_CLASS.xs]">{{ t("skillsPage.gamification.xpLabel", { xp: gamificationXP }) }}</span>
         </NuxtLink>
-        <button
+        <button type="button"
           v-if="hasMappings"
           :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
           :disabled="analyzing"
@@ -112,7 +113,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
           <IconBolt v-else :class="ICON_SIZE_CLASS['4']" />
           {{ t("skillsPage.actions.aiAnalyzeButton") }}
         </button>
-        <button
+        <button type="button"
           v-if="hasMappings"
           :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('skillsPage.actions.addMappingAria')"
@@ -124,7 +125,7 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       </template>
     </PageHeroHeader>
 
-    <LoadingSkeleton v-if="bootstrapPending && !hasMappings" variant="cards" :lines="6" />
+    <LoadingSkeleton v-if="bootstrapPending && !hasMappings" variant="cards" :lines="LOADING_SKELETON_LINES.long" />
 
     <BootstrapErrorAlert
       v-else-if="pageError && !hasMappings"
@@ -265,14 +266,14 @@ const { pending: bootstrapPending, refresh: refreshSkillsPage } = await useAsync
       </div>
 
       <div class="modal-action">
-        <button
+        <button type="button"
           :class="GHOST_ACTION_CLASS"
           :aria-label="t('skillsPage.createModal.cancelAria')"
           @click="showAddModal = false"
         >
           {{ t("skillsPage.createModal.cancelButton") }}
         </button>
-        <button
+        <button type="button"
           :class="[PRIMARY_ACTION_CLASS]"
           :disabled="loading || !newMapping.gameExpression.trim() || !newMapping.transferableSkill.trim()"
           :aria-label="t('skillsPage.createModal.createAria')"

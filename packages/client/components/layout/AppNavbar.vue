@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {
-  NAVBAR_SCROLL_ELEVATION_PX,
-} from "~/constants/numeric-ui";
 import { THEME_NAMES } from "@bao/shared/constants/branding";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { computed, useTemplateRef } from "vue";
@@ -25,6 +22,9 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import {
+  NAVBAR_SCROLL_ELEVATION_PX,
+} from "~/constants/numeric-ui";
 import { setDrawerToggleState } from "~/utils/drawer-controls";
 
 const { theme, setTheme } = useTheme();

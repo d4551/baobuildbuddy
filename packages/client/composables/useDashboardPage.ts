@@ -24,6 +24,7 @@ import {
 import { resolveDashboardPipelineSteps } from "~/constants/dashboard-pipeline";
 import { createFlowEngineInput } from "~/constants/flow-engine";
 import { GAMIFICATION_XP_TARGET_FALLBACK } from "~/constants/gamification";
+import { PERCENT_MAX, UI_RECOMMENDATION_PREVIEW_LIMIT } from "~/constants/numeric-ui";
 import { getErrorMessage } from "~/utils/errors";
 import { settlePromise } from "./async-flow";
 import { fetchDashboardViewModel, isDashboardEmpty, toFlowStats } from "./dashboard-page-data";
@@ -89,7 +90,7 @@ const useDashboardProgress = (dashboard: DashboardRef) => ({
   // Within-level % — must match the XP numerator/denominator shown in the card.
   levelProgress: computed(() => {
     const gamification = dashboard.value?.gamification;
-    return gamification ? Math.round(getXPProgress(gamification.xp).progress * 100) : 0;
+    return gamification ? Math.round(getXPProgress(gamification.xp).progress * PERCENT_MAX) : 0;
   }),
   /** XP earned inside the current level band (not lifetime total). */
   xpIntoLevel: computed(() => {
@@ -142,7 +143,9 @@ const useDashboardFlowActions = (t: ReturnType<typeof useI18n>["t"], dashboard: 
 
   return {
     // Hero owns primaryAction — quick actions are secondary only (no dual primary).
-    dashboardQuickActions: computed(() => recommendedActions.value.slice(0, 4)),
+    dashboardQuickActions: computed(() =>
+      recommendedActions.value.slice(0, UI_RECOMMENDATION_PREVIEW_LIMIT),
+    ),
     primaryFlowLabel: computed(() => t(nextStepLabel.value)),
     primaryFlowRoute: computed(() => primaryAction.value.to),
   };
@@ -214,9 +217,7 @@ export function useDashboardPage() {
     );
     claimingChallengeId.value = null;
     if (!claimResult.ok) {
-      $toast.error(
-        getErrorMessage(claimResult.error, t("dashboard.claimChallengeErrorFallback")),
-      );
+      $toast.error(getErrorMessage(claimResult.error, t("dashboard.claimChallengeErrorFallback")));
       return;
     }
     $toast.success(t("dashboard.claimChallengeToast"));

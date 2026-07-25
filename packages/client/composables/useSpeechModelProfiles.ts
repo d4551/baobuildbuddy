@@ -112,11 +112,7 @@ const buildNextSpeechConfig = (
 ) => {
   const existingAutomationSettings =
     settings.value?.automationSettings ?? DEFAULT_AUTOMATION_SETTINGS;
-  return buildNextSpeechConfigFromProfile(
-    existingAutomationSettings.speech,
-    speechConfig,
-    locale,
-  );
+  return buildNextSpeechConfigFromProfile(existingAutomationSettings.speech, speechConfig, locale);
 };
 
 const createEnsureSpeechConfigLoadedAction =

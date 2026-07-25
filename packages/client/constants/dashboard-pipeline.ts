@@ -1,4 +1,5 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
+import { UI_RECOMMENDATION_PREVIEW_LIMIT } from "~/constants/numeric-ui";
 import type {
   DashboardPipelineSnapshot,
   DashboardPipelineStep,
@@ -132,7 +133,7 @@ export function resolveDashboardFlowActions(
       ]
     : ["interview", "aiChat", ...DASHBOARD_FLOW_ACTION_FALLBACK_ORDER];
   return [...new Set(actionPriorityQueue)]
-    .slice(0, 4)
+    .slice(0, UI_RECOMMENDATION_PREVIEW_LIMIT)
     .map((actionId) => DASHBOARD_FLOW_ACTIONS[actionId]);
 }
 

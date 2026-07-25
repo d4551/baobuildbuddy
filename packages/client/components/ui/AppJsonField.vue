@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 /**
  * Settings JSON field — AppCodeEditor + chrome (SSOT for power JSON).
  */
 import AppCodeEditor from "~/components/ui/AppCodeEditor.vue";
 import AppEditorChrome from "~/components/ui/AppEditorChrome.vue";
-import { useI18n } from "vue-i18n";
 import { EDITOR_HOST_CLASS, EDITOR_MIN_HEIGHT_CLASS } from "~/constants/editor";
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 

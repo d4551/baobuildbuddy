@@ -55,7 +55,11 @@ export function useAutomationJobApplyBootstrap(input: {
   } = useAsyncData<ResumeSelectOption[]>("automation-job-apply-resumes", async () => {
     const response = await input.api.resumes.get();
     return toResumeSelectOptions(
-      requireApiResponseData(response, input.t("automation.jobApply.bootstrapError"), getErrorMessage),
+      requireApiResponseData(
+        response,
+        input.t("automation.jobApply.bootstrapError"),
+        getErrorMessage,
+      ),
     );
   });
 
@@ -64,19 +68,16 @@ export function useAutomationJobApplyBootstrap(input: {
     status: coverLettersStatus,
     error: coverLettersError,
     refresh: refreshCoverLetters,
-  } = useAsyncData<CoverLetterSelectOption[]>(
-    "automation-job-apply-cover-letters",
-    async () => {
-      const response = await input.api["cover-letters"].get();
-      return toCoverLetterSelectOptions(
-        requireApiResponseData(
-          response,
-          input.t("automation.jobApply.bootstrapError"),
-          getErrorMessage,
-        ),
-      );
-    },
-  );
+  } = useAsyncData<CoverLetterSelectOption[]>("automation-job-apply-cover-letters", async () => {
+    const response = await input.api["cover-letters"].get();
+    return toCoverLetterSelectOptions(
+      requireApiResponseData(
+        response,
+        input.t("automation.jobApply.bootstrapError"),
+        getErrorMessage,
+      ),
+    );
+  });
 
   const bootstrapPending = computed(
     () =>

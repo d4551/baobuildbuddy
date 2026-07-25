@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -7,14 +6,15 @@ import {
   GHOST_ACTION_DENSE_CLASS,
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOUCH_TARGET_MIN_CLASS,
   TRACKING_TOKEN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_BUTTON_VARIANT_CLASS,
-  TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { RESPONSIVE_WIDTH_LG_W80_CLASS } from "~/constants/ui-layout";
 import type { ApiEndpointGroup, ApiHttpMethod } from "~/types/api-docs";
 
 defineProps<{

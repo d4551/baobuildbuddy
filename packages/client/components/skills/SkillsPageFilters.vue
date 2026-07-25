@@ -13,18 +13,19 @@ import {
 } from "~/constants/layout";
 import { SKILLS_FILTER_ALL_VALUE } from "~/constants/skills";
 
-defineProps<{
-  categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
-  hasActiveFilters: boolean;
-}>();
-
 const categoryFilter = defineModel<typeof SKILLS_FILTER_ALL_VALUE | SkillCategory>(
   "categoryFilter",
   {
     required: true,
   },
 );
+
 const searchFilter = defineModel<string>("searchFilter", { required: true });
+
+defineProps<{
+  categoryOptions: ReadonlyArray<{ value: SkillCategory; label: string }>;
+  hasActiveFilters: boolean;
+}>();
 
 const emit = defineEmits<{
   clear: [];
@@ -36,7 +37,7 @@ const { t } = useI18n();
 <template>
   <div :class="SURFACE_GLASS_CARD_CLASS">
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-      <label class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
+      <div class="input input-sm flex items-center" :class="[FLUID_WIDTH_CLASS, FLEX_GAP_TOKEN_CLASS.gap2]">
         <svg class="text-muted" :class="[ICON_SIZE_CLASS[4]]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -47,7 +48,7 @@ const { t } = useI18n();
           :placeholder="t('skillsPage.filters.searchPlaceholder')"
           :aria-label="t('skillsPage.filters.searchAria')"
         />
-      </label>
+      </div>
 
       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]" role="radiogroup" :aria-label="t('skillsPage.filters.categoryGroupAria')">
         <button 
@@ -73,7 +74,7 @@ const { t } = useI18n();
       </div>
 
       <div class="flex justify-end">
-        <button 
+        <button type="button" 
           :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
           :disabled="!hasActiveFilters"
           :aria-label="t('skillsPage.filters.clearAria')"

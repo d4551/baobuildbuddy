@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -12,15 +11,7 @@ import {
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
-
-const BRAND_HINT_IDS = {
-  logoPath: "settings-brand-logo-path-hint",
-  faviconPath: "settings-brand-favicon-path-hint",
-} as const;
-
-const brandFieldsetClass = `${FIELDSET_PANEL_CLASS} ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
-
-const { t } = useI18n();
+import { RESPONSIVE_PADDING_MD_P6_CLASS } from "~/constants/ui-layout";
 
 const brandForm = defineModel<{
   name: string;
@@ -30,6 +21,15 @@ const brandForm = defineModel<{
   logoPath: string;
   faviconPath: string;
 }>("brandForm", { required: true });
+
+const BRAND_HINT_IDS = {
+  logoPath: "settings-brand-logo-path-hint",
+  faviconPath: "settings-brand-favicon-path-hint",
+} as const;
+
+const brandFieldsetClass = `${FIELDSET_PANEL_CLASS} ${SHADOW_TOKEN_CLASS.sm} ${FLEX_GAP_TOKEN_CLASS.gap2} ${PADDING_TOKEN_CLASS.p4}`;
+
+const { t } = useI18n();
 </script>
 
 <template>

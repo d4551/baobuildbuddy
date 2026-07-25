@@ -13,6 +13,7 @@ import {
   toLocaleCode,
 } from "~/composables/automation-run-detail-projectors";
 import { useAutomationRunStream } from "~/composables/useAutomationRunStream";
+import { PERCENT_MAX } from "~/constants/numeric-ui";
 import { resolveApiEndpoint } from "~/utils/endpoints";
 import { formatDateWithLocale } from "~/utils/locale-format";
 
@@ -21,9 +22,7 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-const mapOutputStepStatusToTimeline = (
-  status: OutputStep["status"],
-): TimelineEntry["status"] => {
+const mapOutputStepStatusToTimeline = (status: OutputStep["status"]): TimelineEntry["status"] => {
   if (status === "ok") {
     return "success";
   }
@@ -77,7 +76,7 @@ const createAutomationRunDetailStreamState = (
     if (typeof value !== "number" || !Number.isFinite(value)) {
       return 0;
     }
-    return Math.max(0, Math.min(100, Math.round(value)));
+    return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
   });
   return {
     streamState,

@@ -6,11 +6,11 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   PADDING_TOKEN_CLASS,
+  PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
   TYPOGRAPHY_SCALE_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "~/constants/layout";
 import BrandContentTab from "./brand/BrandContentTab.vue";
 import BrandIdentityTab from "./brand/BrandIdentityTab.vue";
@@ -24,38 +24,10 @@ import { getSaveStateBadgeClass, getSaveStateLabelKey, type SaveState } from "./
 
 type BrandEditorPanel = "identity" | "typography" | "themes" | "content";
 
-const BRAND_EDITOR_PANELS = [
-  { id: "identity", labelKey: "settings.brand.tabs.identity" },
-  { id: "typography", labelKey: "settings.brand.tabs.typography" },
-  { id: "themes", labelKey: "settings.brand.tabs.themes" },
-  { id: "content", labelKey: "settings.brand.tabs.content" },
-] as const;
-
-const BRAND_HINT_IDS = {
-  logoPath: "settings-brand-logo-path-hint",
-  faviconPath: "settings-brand-favicon-path-hint",
-  fontStylesheet: "settings-brand-font-stylesheet-hint",
-  lightTheme: "settings-brand-light-theme-hint",
-  darkTheme: "settings-brand-dark-theme-hint",
-  contentOverrides: "settings-brand-content-overrides-hint",
-} as const;
-
-const props = defineProps<{
-  brandSaveState: SaveState;
-  brandDraft: BrandSettings;
-  brandOverrideCount: number;
-  languageOptionsCount: number;
-  themeNames: { light: string; dark: string };
-}>();
-
-const emit = defineEmits<{
-  save: [];
-}>();
-
-const { t } = useI18n();
 const brandEditorPanel = defineModel<BrandEditorPanel>("activePanel", {
   default: "identity",
 });
+
 const brandForm = defineModel<{
   name: string;
   assistantName: string;
@@ -73,6 +45,36 @@ const brandForm = defineModel<{
   darkThemeJson: string;
   contentOverridesJson: string;
 }>("brandForm", { required: true });
+
+const props = defineProps<{
+  brandSaveState: SaveState;
+  brandDraft: BrandSettings;
+  brandOverrideCount: number;
+  languageOptionsCount: number;
+  themeNames: { light: string; dark: string };
+}>();
+
+const emit = defineEmits<{
+  save: [];
+}>();
+
+const BRAND_EDITOR_PANELS = [
+  { id: "identity", labelKey: "settings.brand.tabs.identity" },
+  { id: "typography", labelKey: "settings.brand.tabs.typography" },
+  { id: "themes", labelKey: "settings.brand.tabs.themes" },
+  { id: "content", labelKey: "settings.brand.tabs.content" },
+] as const;
+
+const BRAND_HINT_IDS = {
+  logoPath: "settings-brand-logo-path-hint",
+  faviconPath: "settings-brand-favicon-path-hint",
+  fontStylesheet: "settings-brand-font-stylesheet-hint",
+  lightTheme: "settings-brand-light-theme-hint",
+  darkTheme: "settings-brand-dark-theme-hint",
+  contentOverrides: "settings-brand-content-overrides-hint",
+} as const;
+
+const { t } = useI18n();
 const brandSaveStateLabel = computed(() => {
   const key = getSaveStateLabelKey(props.brandSaveState);
   return key ? t(key) : "";
@@ -234,7 +236,7 @@ function handleBrandTabKeydown(event: KeyboardEvent, panel: BrandEditorPanel): v
           </div>
 
           <div class="card-actions justify-end" :class="[PADDING_TOKEN_CLASS.pt2]">
-            <button 
+            <button type="button" 
               :class="[PRIMARY_ACTION_CLASS]"
               :aria-label="t('settings.brand.saveAria')"
               :disabled="brandSaveState === 'saving'"

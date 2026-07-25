@@ -93,7 +93,7 @@ function updatePortfolioStringField<K extends keyof PortfolioMetadata>(key: K, v
       </SectionGrid>
 
       <div class="card-actions justify-end">
-        <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">
+        <button type="button" :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('portfolioPage.profile.saveAria')" @click="emit('save')">
           {{ t("portfolioPage.profile.saveButton") }}
         </button>
       </div>

@@ -30,8 +30,12 @@ function resolveActivityDescription(action: string, t: TranslateFn): string {
 
 function mapDailyChallenge(challenge: DailyChallenge): DashboardChallengeViewModel {
   const goal = typeof challenge.goal === "number" && challenge.goal > 0 ? challenge.goal : 1;
-  const progress =
-    typeof challenge.progress === "number" ? challenge.progress : challenge.completed ? goal : 0;
+  let progress = 0;
+  if (typeof challenge.progress === "number") {
+    progress = challenge.progress;
+  } else if (challenge.completed) {
+    progress = goal;
+  }
 
   return {
     id: challenge.id,
