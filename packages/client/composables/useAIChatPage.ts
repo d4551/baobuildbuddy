@@ -129,6 +129,7 @@ export function useAIChatPage() {
     testOnDeviceTts: pageState.voice.testOnDeviceTts,
     toggleListening: pageState.voice.toggleListening,
     speechProviderOptions: core.speech.speechProviderOptions,
+    ttsProviderOptions: core.speech.ttsProviderOptions,
     speechConfig: core.speech.speechConfig,
     sttModelOptions: core.speech.sttModelOptions,
     ttsModelOptions: core.speech.ttsModelOptions,

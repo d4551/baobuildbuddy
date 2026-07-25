@@ -99,18 +99,27 @@ export const SPEECH_MODEL_OPTIONS = {
   },
   tts: {
     browser: ["browser-default"],
-    openai: ["gpt-4o-mini-tts", "gpt-4o-audio-preview"],
-    huggingface: ["suno/bark", "hexgrad/Kokoro-82M"],
-    local: ["kokoro", "piper", "xtts-v2"],
-    custom: ["custom-tts-model"],
+    /** Cloud TTS ignored — local Kokoro is the product TTS path. */
+    openai: ["kokoro"],
+    huggingface: ["kokoro"],
+    local: ["kokoro"],
+    custom: ["kokoro"],
   },
 } as const satisfies {
   stt: Record<SpeechProviderOption, readonly string[]>;
   tts: Record<SpeechProviderOption, readonly string[]>;
 };
 
+/** TTS providers that ship in-product (cloud OpenAI/HF TTS ignored). */
+export const ON_DEVICE_TTS_PROVIDER_OPTIONS = ["browser", "local"] as const;
+
 const DEFAULT_STT_PROVIDER: SpeechProviderOption = "browser";
-const DEFAULT_TTS_PROVIDER: SpeechProviderOption = "browser";
+/** Local Kokoro ONNX via OpenAI-compatible endpoint — not browser speechSynthesis. */
+const DEFAULT_TTS_PROVIDER: SpeechProviderOption = "local";
+
+/** Default Kokoro OpenAI-compatible base (scripts/kokoro-openai-server.py). */
+export const DEFAULT_LOCAL_TTS_ENDPOINT = "http://127.0.0.1:8880/v1";
+export const DEFAULT_LOCAL_TTS_VOICE = "af_heart";
 
 /**
  * Default provider/model values for speech recognition and synthesis.
@@ -126,9 +135,9 @@ export const DEFAULT_SPEECH_SETTINGS = {
   tts: {
     provider: DEFAULT_TTS_PROVIDER,
     model: SPEECH_MODEL_OPTIONS.tts[DEFAULT_TTS_PROVIDER][0],
-    endpoint: "",
-    voice: "alloy",
-    format: "mp3",
+    endpoint: DEFAULT_LOCAL_TTS_ENDPOINT,
+    voice: DEFAULT_LOCAL_TTS_VOICE,
+    format: "wav",
   },
 } as const satisfies {
   locale: string;

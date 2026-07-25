@@ -30,6 +30,12 @@ export const API_ERROR_SPEECH_STT_NOT_CONFIGURED =
   "Speech-to-text provider is not configured for server transcription";
 export const API_ERROR_SPEECH_STT_ENDPOINT_INVALID =
   "Speech-to-text endpoint is missing or not allowed";
+export const API_ERROR_SPEECH_TTS_NOT_CONFIGURED =
+  "Text-to-speech is not configured for a local Kokoro endpoint";
+export const API_ERROR_SPEECH_TTS_ENDPOINT_INVALID =
+  "Text-to-speech endpoint is invalid for local Kokoro";
+export const API_ERROR_SPEECH_SYNTHESIZE = "Failed to synthesize speech audio";
+export const API_ERROR_SPEECH_TTS_EMPTY_TEXT = "Speech synthesize requires non-empty text";
 export const API_ERROR_START_INTERVIEW = "Failed to start interview session";
 export const API_ERROR_GENERATE_RESPONSE = "Failed to generate response";
 export const API_ERROR_GENERATE_EMAIL_RESPONSE = "Failed to generate email response";

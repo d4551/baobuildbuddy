@@ -26,6 +26,7 @@ interface ChatVoiceControlsProps {
   readonly supportHintKey: string;
   readonly errorLabel: string;
   readonly speechProviderOptions?: readonly SpeechProviderOption[];
+  readonly ttsProviderOptions?: readonly SpeechProviderOption[];
   readonly sttProvider?: SpeechProviderOption;
   readonly sttModel?: string;
   readonly sttModelOptions?: readonly string[];
@@ -40,6 +41,7 @@ interface ChatVoiceControlsProps {
 const props = withDefaults(defineProps<ChatVoiceControlsProps>(), {
   compact: false,
   speechProviderOptions: () => [],
+  ttsProviderOptions: () => [],
   sttProvider: DEFAULT_SPEECH_SETTINGS.stt.provider,
   sttModel: DEFAULT_SPEECH_SETTINGS.stt.model,
   sttModelOptions: () => [],
@@ -253,6 +255,7 @@ function handleAutoSpeakChange(event: Event): void {
     v-if="showAdvancedSpeechConfig"
     :class="[MARGIN_TOKEN_CLASS.mt3]"
     :provider-options="props.speechProviderOptions ?? []"
+    :tts-provider-options="props.ttsProviderOptions ?? []"
     :stt-provider="props.sttProvider"
     :stt-model="props.sttModel"
     :tts-provider="props.ttsProvider"

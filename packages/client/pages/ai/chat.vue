@@ -28,6 +28,7 @@ const {
   testOnDeviceTts,
   toggleListening,
   speechProviderOptions,
+  ttsProviderOptions,
   sttModelOptions,
   ttsModelOptions,
   speechConfigSaving,
@@ -86,6 +87,7 @@ useSeoMeta({
           :selected-voice-id="selectedVoiceId"
           :available-voices="availableVoices"
           :speech-provider-options="speechProviderOptions"
+          :tts-provider-options="ttsProviderOptions"
           :speech-config="speechConfig"
           :stt-model-options="sttModelOptions"
           :tts-model-options="ttsModelOptions"

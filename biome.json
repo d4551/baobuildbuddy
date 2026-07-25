@@ -123,6 +123,7 @@
         "scripts/browser-proof-dom-reactivity.ts",
         "scripts/browser-proof-stt-live.ts",
         "scripts/browser-proof-on-device-speech.ts",
+        "scripts/browser-proof-kokoro-tts.ts",
         "scripts/browser-proof-tts-live.ts"
       ],
       "linter": {

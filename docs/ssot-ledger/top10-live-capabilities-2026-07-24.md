@@ -61,10 +61,14 @@
 
 28. **On-device STT/TTS** — Browser (on-device) labels + hint; Test speaker control; `proof:on-device-speech` findings=0 (SpeechRecognition.start + speechSynthesis.speak). Cloud TTS has no server synth route yet (settings metadata only).
 
+## Closed (Kokoro local TTS)
+
+29. **Local Kokoro TTS** — `scripts/kokoro-openai-server.py` (ONNX on-device) + `POST /api/speech/synthesize` + client speak routes local→Kokoro WAV. Default TTS=`local`/`kokoro`. Cloud TTS ignored. Gate: `validate:local-kokoro-tts`. Proof: `proof:kokoro-tts` findings=0 (RIFF WAV ~132KB, synthesizeCalls=1).
+
 ## Remaining (honest)
 
 1. **STT** — no mic in cloud agent (env). Code + `/api/speech` wired; live mic unproven here.
-2. **TTS** — browser `speechSynthesis` wired; cloud TTS not e2e-proven.
+2. **Cloud TTS** — ignored by product (local Kokoro is SSOT).
 3. **IDE editor goals** (Vim/multi-cursor/TipTap/Cmd+P) — deferred.
 4. **UI gapless polish** — API Docs empty OpenAPI descriptions; settings rail horizontal scroll density.
 

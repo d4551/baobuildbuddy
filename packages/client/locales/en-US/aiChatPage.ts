@@ -49,14 +49,14 @@ const aiChatPage = {
       saveErrorFallback: "Failed to save speech profile",
       unsavedHint: "You have unsaved speech profile changes.",
       providers: {
-        browser: "Browser (on-device)",
-        openai: "OpenAI",
-        huggingface: "Hugging Face",
-        local: "Local",
-        custom: "Custom",
+        browser: "Browser (Web Speech)",
+        openai: "OpenAI (ignored)",
+        huggingface: "Hugging Face (ignored)",
+        local: "Local Kokoro (on-device)",
+        custom: "Custom local",
       },
       onDeviceHint:
-        "Browser (on-device) uses this device's Web Speech API — no audio leaves the machine for STT/TTS.",
+        "Local Kokoro runs neural TTS on this machine via OpenAI-compatible /v1/audio/speech. Browser uses Web Speech only as fallback.",
     },
   },
 } as const;

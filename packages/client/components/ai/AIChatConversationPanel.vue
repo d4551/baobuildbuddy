@@ -52,8 +52,9 @@ defineProps<{
   availableVoices: SpeechSynthesisVoice[];
   speechProviderOptions: ReturnType<
     typeof useSpeechModelProfiles
-  >["speechProviderOptions"]["value"];
-  speechConfig: ReturnType<typeof useSpeechModelProfiles>["speechConfig"]["value"];
+  >["speechProviderOptions"];
+  ttsProviderOptions: ReturnType<typeof useSpeechModelProfiles>["ttsProviderOptions"];
+  speechConfig: ReturnType<typeof useSpeechModelProfiles>["speechConfig"];
   sttModelOptions: ReturnType<typeof useSpeechModelProfiles>["sttModelOptions"]["value"];
   ttsModelOptions: ReturnType<typeof useSpeechModelProfiles>["ttsModelOptions"]["value"];
   speechConfigSaving: boolean;
@@ -285,6 +286,7 @@ const updateInput = (event: Event): void => {
             <div class="collapse-content" :class="[PADDING_TOKEN_CLASS.pb4]">
               <SpeechModelProfileFields
                 :provider-options="speechProviderOptions"
+                :tts-provider-options="ttsProviderOptions"
                 :stt-provider="speechConfig.sttProvider"
                 :stt-model="speechConfig.sttModel"
                 :tts-provider="speechConfig.ttsProvider"

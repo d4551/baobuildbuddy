@@ -20,3 +20,11 @@
 - Defaults: STT/TTS provider `browser`.
 - `proof:on-device-speech` fail-closed (mic + test speaker).
 - Cloud TTS provider options are profile-only until a server TTS route exists.
+
+## Why browser-only "on-device" proof was lazy (LDL)
+
+`proof:on-device-speech` only asserted `speechSynthesis.speak` — that is Web Speech, not neural local TTS.
+User asked for Kokoro-class on-device TTS. Fixed by:
+- Default TTS provider `local` + Kokoro OpenAI-compatible server
+- Client speak → `/api/speech/synthesize` → Kokoro WAV (RIFF fail-closed)
+- `validate:local-kokoro-tts` + `proof:kokoro-tts` (API bytes + UI synthesizeCalls≥1)
