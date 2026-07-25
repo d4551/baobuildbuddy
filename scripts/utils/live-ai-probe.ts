@@ -64,11 +64,15 @@ export const assertLiveInference = async (
     body: JSON.stringify({
       model: modelId,
       temperature: 0,
-      max_tokens: 32,
+      max_tokens: 48,
       messages: [
         {
+          role: "system",
+          content: "You are a literal echo bot. Output only the user message with no extra words.",
+        },
+        {
           role: "user",
-          content: `Reply with ONLY this exact token and nothing else: ${nonce}`,
+          content: nonce,
         },
       ],
     }),

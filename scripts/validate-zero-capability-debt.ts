@@ -37,6 +37,18 @@ const REQUIRED_WIRED = [
     path: "packages/server/src/utils/openapi-detail.ts",
     needles: ["openapiDetail"],
   },
+  {
+    path: "scripts/validate-no-soft-test-skips.ts",
+    needles: ["collectSoftTestSkipViolations", "HONEST_STT_HARDCODED_BLOCKED"],
+  },
+  {
+    path: "scripts/browser-proof-kokoro-tts.ts",
+    needles: ["RIFF", "synthesizeCalls"],
+  },
+  {
+    path: "scripts/browser-proof-whisper-stt.ts",
+    needles: ["speech/transcribe", "whisper"],
+  },
 ] as const;
 
 export const collectZeroCapabilityDebtViolations = async (): Promise<ValidationViolation[]> => {
