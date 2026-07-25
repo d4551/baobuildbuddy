@@ -61,7 +61,6 @@ export type PortfolioExportFormat = "pdf" | "docx" | "zip" | "html" | "json" | "
 
 export interface PortfolioExportOptions {
   template?: "modern" | "gaming" | "minimal" | "showcase";
-  theme?: "light" | "dark" | "gaming" | "neon";
   includeImages?: boolean;
   includeFeaturedOnly?: boolean;
 }

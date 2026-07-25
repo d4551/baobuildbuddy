@@ -1,6 +1,8 @@
 import {
   COVER_LETTER_EXPORT_THEME,
+  type CoverLetterDocxTheme,
   PORTFOLIO_EXPORT_THEME,
+  type PortfolioDocxTheme,
 } from "@bao/shared/constants/export-document-theme";
 import {
   DOCX_COVER_LETTER_FONT_BODY_PT,
@@ -29,6 +31,7 @@ export interface CoverLetterPayload {
   company: string;
   position: string;
   content: unknown;
+  template?: string;
 }
 
 export interface CoverLetterUserProfile {
@@ -52,6 +55,8 @@ export const PORTFOLIO_DOCX_MUTED_COLOR = PORTFOLIO_EXPORT_THEME.docx.mutedColor
 export const PORTFOLIO_DOCX_SUBTLE_COLOR = PORTFOLIO_EXPORT_THEME.docx.subtleColorHex;
 export const PORTFOLIO_DOCX_FOOTER_COLOR = PORTFOLIO_EXPORT_THEME.docx.footerColorHex;
 export const PORTFOLIO_DOCX_LINE_COLOR = PORTFOLIO_EXPORT_THEME.docx.lineColorHex;
+
+export type { CoverLetterDocxTheme, PortfolioDocxTheme };
 
 export const createDivider = (color: string): Paragraph =>
   new Paragraph({

@@ -15,6 +15,16 @@ type CoverLetterPdfPalette = {
   line: PdfRgb;
 };
 
+export type CoverLetterDocxTheme = {
+  fontFamily: string;
+  primaryColorHex: string;
+  accentColorHex: string;
+  textColorHex: string;
+  mutedColorHex: string;
+  subtleColorHex: string;
+  lineColorHex: string;
+};
+
 type PortfolioPdfPalette = {
   primary: PdfRgb;
   text: PdfRgb;
@@ -24,6 +34,16 @@ type PortfolioPdfPalette = {
   featured: PdfRgb;
   line: PdfRgb;
   footer: PdfRgb;
+};
+
+export type PortfolioDocxTheme = {
+  fontFamily: string;
+  primaryColorHex: string;
+  accentColorHex: string;
+  mutedColorHex: string;
+  subtleColorHex: string;
+  footerColorHex: string;
+  lineColorHex: string;
 };
 
 /**
@@ -78,6 +98,49 @@ export const COVER_LETTER_EXPORT_THEME = {
 } as const;
 
 /**
+ * Per-template cover-letter DOCX palettes — mirrors PDF palette intent.
+ */
+export const COVER_LETTER_DOCX_THEME_BY_TEMPLATE = {
+  professional: COVER_LETTER_EXPORT_THEME.docx,
+  creative: {
+    fontFamily: "Aptos",
+    primaryColorHex: "9E2E6B",
+    accentColorHex: "ED6B38",
+    textColorHex: "241F29",
+    mutedColorHex: "6B5C66",
+    subtleColorHex: "8C7A85",
+    lineColorHex: "EBD1DC",
+  },
+  gaming: {
+    fontFamily: "Aptos",
+    primaryColorHex: "8A2BE2",
+    accentColorHex: "00E68C",
+    textColorHex: "F0F0F5",
+    mutedColorHex: "A6A6B8",
+    subtleColorHex: "73738C",
+    lineColorHex: "593380",
+  },
+  executive: {
+    fontFamily: "Georgia",
+    primaryColorHex: "1A237E",
+    accentColorHex: "C9B038",
+    textColorHex: "1F1F1F",
+    mutedColorHex: "666666",
+    subtleColorHex: "8C8C8C",
+    lineColorHex: "CCC7B3",
+  },
+  technical: {
+    fontFamily: "Aptos",
+    primaryColorHex: "00695C",
+    accentColorHex: "0277BD",
+    textColorHex: "1A1F24",
+    mutedColorHex: "59666B",
+    subtleColorHex: "808C94",
+    lineColorHex: "BFD9E0",
+  },
+} as const satisfies Record<CoverLetterTemplate, CoverLetterDocxTheme>;
+
+/**
  * Per-template cover-letter PDF palettes — must produce visually distinct PDFs.
  */
 export const COVER_LETTER_EXPORT_THEME_BY_TEMPLATE = {
@@ -117,7 +180,6 @@ export const COVER_LETTER_EXPORT_THEME_BY_TEMPLATE = {
 } as const satisfies Record<CoverLetterTemplate, CoverLetterPdfPalette>;
 
 export type PortfolioExportTemplate = "modern" | "gaming" | "minimal" | "showcase";
-export type PortfolioExportTheme = "light" | "dark" | "gaming" | "neon";
 
 export const PORTFOLIO_EXPORT_TEMPLATE_OPTIONS = [
   "modern",
@@ -125,13 +187,6 @@ export const PORTFOLIO_EXPORT_TEMPLATE_OPTIONS = [
   "minimal",
   "showcase",
 ] as const satisfies readonly PortfolioExportTemplate[];
-
-export const PORTFOLIO_EXPORT_THEME_OPTIONS = [
-  "light",
-  "dark",
-  "gaming",
-  "neon",
-] as const satisfies readonly PortfolioExportTheme[];
 
 /**
  * Portfolios use a more showcase-oriented accent system and wider visual contrast.
@@ -161,7 +216,7 @@ export const PORTFOLIO_EXPORT_THEME = {
 } as const;
 
 /**
- * Portfolio PDF palettes keyed by template (theme overlays dark/neon backgrounds via text/bg).
+ * Portfolio PDF palettes keyed by template.
  */
 export const PORTFOLIO_EXPORT_THEME_BY_TEMPLATE = {
   modern: PORTFOLIO_EXPORT_THEME.pdf.colors,
@@ -197,6 +252,40 @@ export const PORTFOLIO_EXPORT_THEME_BY_TEMPLATE = {
   },
 } as const satisfies Record<PortfolioExportTemplate, PortfolioPdfPalette>;
 
+/**
+ * Portfolio DOCX palettes keyed by template — template palettes are the export SSOT.
+ */
+export const PORTFOLIO_DOCX_THEME_BY_TEMPLATE = {
+  modern: PORTFOLIO_EXPORT_THEME.docx,
+  gaming: {
+    fontFamily: "Aptos",
+    primaryColorHex: "8A2BE2",
+    accentColorHex: "00F28C",
+    mutedColorHex: "A6A6B8",
+    subtleColorHex: "73738C",
+    footerColorHex: "8C8CA6",
+    lineColorHex: "593380",
+  },
+  minimal: {
+    fontFamily: "Arial",
+    primaryColorHex: "1F1F1F",
+    accentColorHex: "595959",
+    mutedColorHex: "737373",
+    subtleColorHex: "999999",
+    footerColorHex: "8C8C8C",
+    lineColorHex: "E0E0E0",
+  },
+  showcase: {
+    fontFamily: "Aptos",
+    primaryColorHex: "E6591A",
+    accentColorHex: "1A73D9",
+    mutedColorHex: "666673",
+    subtleColorHex: "8C8C99",
+    footerColorHex: "807A73",
+    lineColorHex: "E6D9C7",
+  },
+} as const satisfies Record<PortfolioExportTemplate, PortfolioDocxTheme>;
+
 export const resolveCoverLetterPdfPalette = (
   template: CoverLetterTemplate | string | undefined | null,
 ): CoverLetterPdfPalette => {
@@ -206,6 +295,15 @@ export const resolveCoverLetterPdfPalette = (
   return COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.professional;
 };
 
+export const resolveCoverLetterDocxTheme = (
+  template: CoverLetterTemplate | string | undefined | null,
+): CoverLetterDocxTheme => {
+  if (template && template in COVER_LETTER_DOCX_THEME_BY_TEMPLATE) {
+    return COVER_LETTER_DOCX_THEME_BY_TEMPLATE[template as CoverLetterTemplate];
+  }
+  return COVER_LETTER_DOCX_THEME_BY_TEMPLATE.professional;
+};
+
 export const resolvePortfolioPdfPalette = (
   template: PortfolioExportTemplate | string | undefined | null,
 ): PortfolioPdfPalette => {
@@ -213,4 +311,13 @@ export const resolvePortfolioPdfPalette = (
     return PORTFOLIO_EXPORT_THEME_BY_TEMPLATE[template as PortfolioExportTemplate];
   }
   return PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.modern;
+};
+
+export const resolvePortfolioDocxTheme = (
+  template: PortfolioExportTemplate | string | undefined | null,
+): PortfolioDocxTheme => {
+  if (template && template in PORTFOLIO_DOCX_THEME_BY_TEMPLATE) {
+    return PORTFOLIO_DOCX_THEME_BY_TEMPLATE[template as PortfolioExportTemplate];
+  }
+  return PORTFOLIO_DOCX_THEME_BY_TEMPLATE.modern;
 };

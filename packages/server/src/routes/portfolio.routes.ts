@@ -236,7 +236,7 @@ export const portfolioRoutes = new Elysia({
 
       if (body.format === "docx") {
         const docxResult = await settle(
-          docxExportService.exportPortfolioDocx(metadata, portfolio.projects),
+          docxExportService.exportPortfolioDocx(metadata, portfolio.projects, body.template),
         );
         if (docxResult.status === "rejected") {
           return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {

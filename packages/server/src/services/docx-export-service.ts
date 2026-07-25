@@ -23,8 +23,9 @@ export class DocxExportService {
   async exportPortfolioDocx(
     metadata: PortfolioMetadata,
     projects: PortfolioProject[],
+    template?: string,
   ): Promise<Uint8Array> {
-    return exportPortfolioDocxDocument(metadata, projects);
+    return exportPortfolioDocxDocument(metadata, projects, template);
   }
 }
 

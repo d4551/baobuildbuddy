@@ -3,6 +3,10 @@ definePageMeta({
   middleware: ["auth"],
 });
 
+import {
+  PORTFOLIO_EXPORT_TEMPLATE_OPTIONS,
+  type PortfolioExportTemplate,
+} from "@bao/shared/constants/export-document-theme";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { settlePromise } from "~/composables/async-flow";
@@ -40,6 +44,7 @@ useSeoMeta({
 });
 
 const pageError = ref<string | null>(null);
+const exportTemplate = ref<PortfolioExportTemplate>(PORTFOLIO_EXPORT_TEMPLATE_OPTIONS[0]);
 const featuredProjects = computed(() => projects.value.filter((project) => project.featured));
 const regularProjects = computed(() => projects.value.filter((project) => !project.featured));
 
@@ -62,7 +67,7 @@ const { pending: bootstrapPending, refresh: refreshPortfolioPreview } = await us
 );
 
 async function handleExport(format: "pdf" | "docx") {
-  await exportPortfolio(format);
+  await exportPortfolio(format, exportTemplate.value);
 }
 </script>
 
@@ -87,6 +92,23 @@ async function handleExport(format: "pdf" | "docx") {
           <IconArrowLeft :class="ICON_SIZE_CLASS['4']" />
           {{ t("portfolioPage.preview.backButton") }}
         </button>
+
+        <fieldset class="fieldset print:hidden">
+          <legend class="sr-only">{{ t("portfolioPage.actions.templateAria") }}</legend>
+          <select
+            v-model="exportTemplate"
+            class="select select-sm"
+            :aria-label="t('portfolioPage.actions.templateAria')"
+          >
+            <option
+              v-for="templateOption in PORTFOLIO_EXPORT_TEMPLATE_OPTIONS"
+              :key="templateOption"
+              :value="templateOption"
+            >
+              {{ t(`portfolioPage.exportTemplates.${templateOption}`) }}
+            </option>
+          </select>
+        </fieldset>
 
         <AppExportMenu
           :button-label="t('portfolioPage.actions.exportButton')"
