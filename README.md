@@ -1119,7 +1119,9 @@ bun run release:refresh:all-os
 | `bun run test`                  | All test suites pass                                 |
 | `bun run build`                 | All packages build successfully                      |
 | `bun run build:desktop`         | Current-host desktop packaging succeeds              |
+| `bun run prepare:desktop-runtime` | Build + stage `src-tauri/gen/runtime` (server/bin/scraper; gitignored) |
 | `bun run verify:desktop-runtime`| Packaged runtime executes deterministic automation proof |
+| `bun run proof:dom-reactivity`  | Headed CM6/theme/search/viewport reactivity; findings=0 |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
 | `bun run proof:browser-smoke`   | Multi-viewport screenshots; 0 capture failures       |
 | `bun run proof:browser-burndown`| Interactive matrix; 0 findings; 5Q ledger complete   |

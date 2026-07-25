@@ -50,11 +50,19 @@
 22. Dual FAB eliminated (floating chat removed; quick FAB only). Fix Setup → PRIMARY.
 23. Playwright **1.62.0**, vue-i18n **11.4.7**. proof:debt-cleanup video findings=0.
 
+## Closed (prose + desktop runtime + reactivity)
+
+24. Remaining non-chat prose → AppProseField + `validate:prose-editor-ssot`.
+25. Tauri tip: `@tauri-apps/api@2.11.1`, `@tauri-apps/cli@2.11.4`.
+26. **Desktop `gen/runtime` full package** — `prepare:desktop-runtime` + `verify:desktop-runtime` EXIT 0 (server/bin/scraper ~96MB; gitignored under `src-tauri/gen/`).
+27. `proof:dom-reactivity` findings=0 (CM6 type→DOM, theme flip, omnisearch, mobile dock + desktop sidebar).
+
 ## Remaining (honest)
 
-1. **STT** — no mic in cloud agent (env).
-2. **Desktop packaging** — full offline `gen/runtime` Bun/server/scraper bundle.
-3. **IDE editor goals** (Vim/multi-cursor/TipTap/Cmd+P) — deferred by product owner ("don't worry about IDE").
+1. **STT** — no mic in cloud agent (env). Code + `/api/speech` wired; live mic unproven here.
+2. **TTS** — browser `speechSynthesis` wired; cloud TTS not e2e-proven.
+3. **IDE editor goals** (Vim/multi-cursor/TipTap/Cmd+P) — deferred.
+4. **UI gapless polish** — API Docs empty OpenAPI descriptions; settings rail horizontal scroll density.
 
 ## Proof commands
 

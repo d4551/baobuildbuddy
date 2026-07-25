@@ -1,21 +1,24 @@
-# Stack bleeding-edge audit — 2026-07-24
+# Stack bleed audit — 2026-07-24 (updated)
 
-Source: `bunx npm view` dist-tags + `validate:stack-versions`.
+## Tip alignment (npm dist-tag)
 
-| Package | Pin / installed | Tip dist-tag | Action |
-|---------|-----------------|-------------|--------|
-| bun | 1.3.14 | latest 1.3.14 | keep |
-| elysia | 2.0.0-exp.49 | experimental **2.0.0-exp.49** | already tip |
-| @elysiajs/openapi | 2.0.0-exp.0 | experimental 2.0.0-exp.0 | keep |
-| @elysiajs/eden | ^1.4.9 | latest 1.4.9 (no Eden 2) | keep |
-| nuxt | ^4.5.0 | latest 4.5.0 | keep |
-| vue | ^3.5.40 | latest 3.5.40 (3.6 still rc) | keep stable |
-| daisyui | 5.7.0 | latest 5.7.0 | keep |
-| tailwindcss | ^4.3.3 | latest 4.3.3 | keep |
-| vitest | 4.1.10 | latest 4.1.10 | keep |
-| playwright (root) | 1.61.1 | latest 1.61.1 | keep |
-| playwright (scraper) | **1.61.1** | was ^1.58.2 | **bumped** |
-| zod | 4.4.3 | latest 4.4.3 | keep |
-| @biomejs/biome | 2.5.5 | latest 2.5.5 | keep |
+| Package | Installed | Tip | Notes |
+|---------|-----------|-----|-------|
+| daisyui | 5.7.0 | 5.7.0 | ok |
+| playwright | 1.62.0 | 1.62.0 | ok |
+| vue-i18n | 11.4.7 | 11.4.7 | ok |
+| vitest | 4.1.10 | 4.1.10 | ok |
+| nuxt | ^4.5.0 | 4.5.0 | ok |
+| vue | ^3.5.40 | 3.5.40 | ok |
+| tailwindcss | ^4.3.3 | 4.3.3 | ok |
+| @tauri-apps/api | 2.11.1 | 2.11.1 | bumped |
+| @tauri-apps/cli | 2.11.4 | 2.11.4 | bumped |
+| elysia | 2.0.0-exp.49 | (latest track 1.4.29) | **STACK pin** — do not downgrade |
+| typescript (eslint) | 6.0.3 | — | peer for typescript-eslint |
+| @typescript/native | 7.0.2 | 7.0.2 | typecheck native |
 
-Vue 3.6 / Playwright beta / Vitest 5 beta intentionally **not** adopted (RC/beta).
+## Intentional overrides
+
+- Root `overrides` Elysia 2.0.0-exp.49 per `docs/STACK-CONTRACT.md`
+- Upstream `.d.ts` `@ts-nocheck` patch for TS7 native
+- biome `noAwaitInLoops` off only for headed Playwright proof scripts

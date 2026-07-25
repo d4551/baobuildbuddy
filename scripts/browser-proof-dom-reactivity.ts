@@ -90,15 +90,18 @@ const main = async (): Promise<void> => {
   // 3) OmniSearch reactivity
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.dashboard}`, { waitUntil: "networkidle" });
   await wait(page, 800);
-  await page.keyboard.press("Meta+k").catch(() => undefined);
-  await page.keyboard.press("Control+k").catch(() => undefined);
+  const metaK = await settle(page.keyboard.press("Meta+k"));
+  if (metaK.status === "rejected") {
+    const ctrlK = await settle(page.keyboard.press("Control+k"));
+    if (ctrlK.status === "rejected") {
+      findings.push("OmniSearch shortcut failed (Meta/Control+K)");
+    }
+  }
   await wait(page, 600);
   const searchInput = page.getByRole("searchbox").or(page.getByPlaceholder(RE_SEARCH)).first();
   if ((await searchInput.count()) > 0) {
     await searchInput.fill("resume");
     await wait(page, 700);
-    const results = page.locator("[role='option'], [data-testid='search-result'], li").first();
-    // soft: at least dialog open with input value
     const value = await searchInput.inputValue();
     if (value !== "resume") {
       findings.push("OmniSearch input not reactive");
@@ -114,13 +117,20 @@ const main = async (): Promise<void> => {
   await page.setViewportSize({ width: 390, height: 844 });
   await wait(page, 600);
   const dock = page.locator("[data-testid='app-dock'], nav.dock, .dock").first();
-  const dockVisible = (await dock.count()) > 0 && (await dock.isVisible().catch(() => false));
+  let dockVisible = false;
+  if ((await dock.count()) > 0) {
+    const dockVis = await settle(dock.isVisible());
+    dockVisible = dockVis.status === "fulfilled" && dockVis.value;
+  }
   await shot(page, "04-mobile-viewport");
   await page.setViewportSize({ width: 1440, height: 900 });
   await wait(page, 600);
   const sidebar = page.locator("aside").first();
-  const sidebarVisible =
-    (await sidebar.count()) > 0 && (await sidebar.isVisible().catch(() => false));
+  let sidebarVisible = false;
+  if ((await sidebar.count()) > 0) {
+    const sideVis = await settle(sidebar.isVisible());
+    sidebarVisible = sideVis.status === "fulfilled" && sideVis.value;
+  }
   if (!sidebarVisible) {
     findings.push("Desktop sidebar not visible at 1440");
   }

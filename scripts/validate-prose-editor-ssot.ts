@@ -21,6 +21,9 @@ const PROSE_SURFACE_HINT =
   /settings\/|portfolio\/|automation\/email|JobApplyDialog|CoverLetterGenerate|ResumeBuildQuestions|BrandContentTab/u;
 
 const RAW_TEXTAREA_PATTERN = /<textarea\b[^>]*class="[^"]*textarea[^"]*"/u;
+const TEXTAREA_OPEN_TAG_PATTERN = /<textarea\b[\s\S]*?>/gu;
+const READONLY_ATTR_PATTERN = /\breadonly\b/u;
+const READONLY_TEXTAREA_PATTERN = /<textarea\b[^>]*\breadonly\b/u;
 
 export const collectProseEditorSsotViolations = (
   files: Array<{ filePath: string; content: string }>,
@@ -34,10 +37,9 @@ export const collectProseEditorSsotViolations = (
       continue;
     }
     // Readonly reply/preview textareas are allowed when marked readonly.
-    if (RAW_TEXTAREA_PATTERN.test(file.content) && !/<textarea\b[^>]*\breadonly\b/u.test(file.content)) {
-      // If every textarea is readonly, skip; else flag when any non-readonly exists.
-      const textareas = file.content.match(/<textarea\b[\s\S]*?>/gu) ?? [];
-      const hasEditable = textareas.some((tag) => !/\breadonly\b/u.test(tag));
+    if (RAW_TEXTAREA_PATTERN.test(file.content) && !READONLY_TEXTAREA_PATTERN.test(file.content)) {
+      const textareas = file.content.match(TEXTAREA_OPEN_TAG_PATTERN) ?? [];
+      const hasEditable = textareas.some((tag) => !READONLY_ATTR_PATTERN.test(tag));
       if (hasEditable) {
         violations.push({
           filePath: file.filePath,
