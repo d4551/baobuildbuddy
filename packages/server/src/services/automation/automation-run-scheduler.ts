@@ -1,5 +1,6 @@
+import { AUTOMATION_RUN_STATUSES } from "@bao/shared/constants/automation";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
-import { and, eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { createServerLogger } from "../../utils/logger";
@@ -9,6 +10,8 @@ import type { AutomationRunRow } from "./automation-service-contracts";
 
 const automationSchedulerLogger = createServerLogger("automation-run-scheduler");
 export const ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE = "Orphaned running run reclaimed on startup";
+export const UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE =
+  "Unknown automation run status normalized to error on startup";
 export const PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE =
   "Pending automation run missing schedule metadata";
 
@@ -62,6 +65,11 @@ export class AutomationRunScheduler {
   }
 
   async reclaimRunningRuns(): Promise<void> {
+    await db
+      .update(automationRuns)
+      .set(createFailedRunUpdate(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE))
+      .where(notInArray(automationRuns.status, [...AUTOMATION_RUN_STATUSES]));
+
     await db
       .update(automationRuns)
       .set(createFailedRunUpdate(ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE))

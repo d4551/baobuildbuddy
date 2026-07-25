@@ -10,6 +10,7 @@ import { validateLocalAiEndpoint } from "@bao/shared/utils/local-ai-endpoint";
 import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../db/schema/settings";
 import { buildAIControlPlaneState } from "../services/ai/control-plane";
+import { normalizeAndPersistAutomationSettings } from "../services/automation/automation-settings-support";
 import { LocalProvider } from "../services/ai/local-provider";
 import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { decryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
@@ -32,9 +33,11 @@ export const buildSettingsResponse = async (row: SettingsRow) => {
     buildAIControlPlaneState(row),
     getJobTaxonomy(),
   ]);
-  const automationSettings = row.automationSettings
-    ? normalizeAutomationSettings(row.automationSettings)
-    : row.automationSettings;
+  const automationSettings =
+    (await normalizeAndPersistAutomationSettings(row)) ??
+    (row.automationSettings
+      ? normalizeAutomationSettings(row.automationSettings)
+      : row.automationSettings);
 
   return {
     ...publicRow,

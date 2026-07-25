@@ -18,7 +18,6 @@ import {
   AUTOMATION_RUN_STATUSES,
   AUTOMATION_RUN_TYPES,
   AUTOMATION_STATUS_ERROR,
-  AUTOMATION_STATUS_PENDING,
 } from "./automation-route-contracts";
 
 type AutomationDbRow = typeof automationRuns.$inferSelect;
@@ -86,7 +85,7 @@ const normalizeAutomationRun = (run: AutomationDbRow): RpaRunExecutionEnvelope =
   const normalizedCandidate = {
     id: run.id,
     type: isAutomationRunType(run.type) ? run.type : AUTOMATION_RUN_TYPES[0],
-    status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_PENDING,
+    status: isAutomationRunStatus(run.status) ? run.status : AUTOMATION_STATUS_ERROR,
     jobId: run.jobId,
     userId: run.userId,
     input: toJsonObject(run.input),

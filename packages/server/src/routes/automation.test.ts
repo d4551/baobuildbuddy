@@ -17,6 +17,7 @@ import {
   AutomationRunScheduler,
   ORPHANED_RUNNING_RUN_RECLAIMED_MESSAGE,
   PENDING_RUN_MISSING_SCHEDULE_METADATA_MESSAGE,
+  UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE,
 } from "../services/automation/automation-run-scheduler";
 import { scraperService } from "../services/scraper-service";
 import { requestJson } from "../test-utils";
@@ -477,6 +478,36 @@ function registerSchedulerRunningReclaimTest(): void {
   });
 }
 
+function registerUnknownStatusNormalizationTest(): void {
+  test("unknown automation run status normalizes to error and is reclaimed on startup", async () => {
+    const runId = generateId();
+    createdRunIds.push(runId);
+    await insertTestAutomationRun({
+      id: runId,
+      status: "failed",
+    });
+
+    const routeRes = await requestJson<{ id: string; status: "error" }>(
+      app,
+      "GET",
+      `${API_ENDPOINTS.automationRuns}/${runId}`,
+    );
+    expect(routeRes.status).toBe(HTTP_STATUS_OK);
+    expect(routeRes.body.status).toBe("error");
+
+    const scheduler = new AutomationRunScheduler(() => Promise.resolve());
+    await scheduler.reclaimRunningRuns();
+
+    const run = await readAutomationRun(runId);
+    expect(run.status).toBe("error");
+    expect(run.error).toBe(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE);
+    const output = run.output;
+    const outputError = output && typeof output === "object" ? output.error : null;
+    expect(outputError).toBe(UNKNOWN_RUN_STATUS_RECLAIMED_MESSAGE);
+    expect(run.completedAt).not.toBeNull();
+  });
+}
+
 function registerSchedulerPendingWithoutMetadataTest(): void {
   test("pending recovery fails runs without schedule metadata", async () => {
     const runId = generateId();
@@ -609,6 +640,7 @@ describe("automation routes", () => {
   registerImmediateScrapeRunTest();
   registerScheduledScrapeRunTest();
   registerSchedulerRunningReclaimTest();
+  registerUnknownStatusNormalizationTest();
   registerSchedulerPendingWithoutMetadataTest();
   registerSchedulerPendingWithMetadataTest();
   registerCapabilityAuditRouteTest();

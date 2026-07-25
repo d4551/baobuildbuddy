@@ -29,6 +29,43 @@ import { AutomationValidationError } from "./automation-errors";
 
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
+const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
+
+type SettingsAutomationRow = {
+  id: string;
+  automationSettings: AutomationSettings | null;
+};
+
+export const normalizeAndPersistAutomationSettings = async (
+  row: SettingsAutomationRow,
+): Promise<AutomationSettings | null> => {
+  if (!row.automationSettings) {
+    return null;
+  }
+
+  const parsedSettings = automationSettingsSchema.safeParse(row.automationSettings);
+  if (!parsedSettings.success) {
+    return null;
+  }
+
+  const normalized = normalizeAutomationSettings(parsedSettings.data);
+  if (
+    parsedSettings.data.defaultTimeout === LEGACY_AUTOMATION_TIMEOUT_SECONDS &&
+    normalized.defaultTimeout !== parsedSettings.data.defaultTimeout
+  ) {
+    await settle(
+      db
+        .update(settings)
+        .set({
+          automationSettings: normalized,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(settings.id, row.id)),
+    );
+  }
+
+  return normalized;
+};
 
 export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   const settingsQueryResult = await settle(
@@ -39,11 +76,8 @@ export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   }
 
   const rows = settingsQueryResult.value;
-  if (rows.length > 0 && rows[0].automationSettings) {
-    const parsedSettings = automationSettingsSchema.safeParse(rows[0].automationSettings);
-    if (parsedSettings.success) {
-      return normalizeAutomationSettings(parsedSettings.data);
-    }
+  if (rows.length > 0) {
+    return (await normalizeAndPersistAutomationSettings(rows[0])) ?? DEFAULT_AUTOMATION_SETTINGS;
   }
 
   return DEFAULT_AUTOMATION_SETTINGS;
@@ -54,13 +88,11 @@ export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
  */
 export const resolveAutomationTimeoutMs = (settingsValue: AutomationSettings): number => {
   const normalized = normalizeAutomationSettings(settingsValue);
-  const seconds = Number.isFinite(normalized.defaultTimeout) && normalized.defaultTimeout > 0
-    ? Math.trunc(normalized.defaultTimeout)
-    : SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS;
-  const clamped = Math.min(
-    Math.max(1, seconds),
-    SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS,
-  );
+  const seconds =
+    Number.isFinite(normalized.defaultTimeout) && normalized.defaultTimeout > 0
+      ? Math.trunc(normalized.defaultTimeout)
+      : SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS;
+  const clamped = Math.min(Math.max(1, seconds), SCHEMA_MAX_AUTOMATION_TIMEOUT_SECONDS);
   return clamped * MS_PER_SECOND;
 };
 
