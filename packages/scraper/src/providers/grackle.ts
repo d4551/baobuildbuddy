@@ -1,4 +1,10 @@
 import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
+import {
+  SCRAPED_JOB_COMPANY_MAX_LENGTH,
+  SCRAPED_JOB_LOCATION_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MIN_LENGTH_SHORT,
+} from "../constants/scrape-fields";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
@@ -12,6 +18,11 @@ type GrackleCandidate = {
   href: string;
 };
 
+type GrackleEvaluateArgs = {
+  resultLimit: number;
+  titleMinLength: number;
+};
+
 /**
  * Extracts normalized GrackleHQ jobs from the current Playwright page.
  *
@@ -23,46 +34,52 @@ export const extractGrackleJobs = async (
   page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
-  const rows = await page.evaluate((resultLimit) => {
-    const stripLeadingSeparator = (value: string): string =>
-      value.startsWith("-") ? value.slice(1).trimStart() : value;
-    const getListingCandidate = (listing: HTMLElement): GrackleCandidate | null => {
-      const link =
-        listing.querySelector<HTMLAnchorElement>("a[target='_blank']") ??
-        listing.querySelector<HTMLAnchorElement>("a");
-      if (!link) {
-        return null;
-      }
+  const rows = await page.evaluate(
+    ({ resultLimit, titleMinLength }: GrackleEvaluateArgs) => {
+      const stripLeadingSeparator = (value: string): string =>
+        value.startsWith("-") ? value.slice(1).trimStart() : value;
+      const getListingCandidate = (listing: HTMLElement): GrackleCandidate | null => {
+        const link =
+          listing.querySelector<HTMLAnchorElement>("a[target='_blank']") ??
+          listing.querySelector<HTMLAnchorElement>("a");
+        if (!link) {
+          return null;
+        }
 
-      const title = (link.innerText ?? "").trim();
-      if (title.length < 3) {
-        return null;
-      }
+        const title = (link.innerText ?? "").trim();
+        if (title.length < titleMinLength) {
+          return null;
+        }
 
-      const fullText = (listing.innerText ?? "").replaceAll("\n", " ").trim();
-      const afterTitle = fullText.replace(title, "").trim();
-      const [rawCompany, rawLocation] = afterTitle.split(" - ", 2);
+        const fullText = (listing.innerText ?? "").replaceAll("\n", " ").trim();
+        const afterTitle = fullText.replace(title, "").trim();
+        const [rawCompany, rawLocation] = afterTitle.split(" - ", 2);
 
-      return {
-        title,
-        company: rawCompany ? stripLeadingSeparator(rawCompany.trim()) : "Unknown",
-        location: rawLocation?.trim().split("  ")[0] || "Remote",
-        href: link.getAttribute("href") ?? "",
+        return {
+          title,
+          company: rawCompany ? stripLeadingSeparator(rawCompany.trim()) : "Unknown",
+          location: rawLocation?.trim().split("  ")[0] || "Remote",
+          href: link.getAttribute("href") ?? "",
+        };
       };
-    };
 
-    return Array.from(document.querySelectorAll<HTMLElement>("div.joblisting"))
-      .slice(0, resultLimit)
-      .flatMap((listing) => {
-        const candidate = getListingCandidate(listing);
-        return candidate ? [candidate] : [];
-      });
-  }, GRACKLE_RESULT_LIMIT);
+      return Array.from(document.querySelectorAll<HTMLElement>("div.joblisting"))
+        .slice(0, resultLimit)
+        .flatMap((listing) => {
+          const candidate = getListingCandidate(listing);
+          return candidate ? [candidate] : [];
+        });
+    },
+    {
+      resultLimit: GRACKLE_RESULT_LIMIT,
+      titleMinLength: SCRAPED_JOB_TITLE_MIN_LENGTH_SHORT,
+    },
+  );
 
   return rows.slice(0, GRACKLE_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100) || "Unknown";
-    const location = toBoundedText(row.location, 100) || "Remote";
+    const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPED_JOB_COMPANY_MAX_LENGTH) || "Unknown";
+    const location = toBoundedText(row.location, SCRAPED_JOB_LOCATION_MAX_LENGTH) || "Remote";
 
     return {
       title,

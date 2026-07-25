@@ -1,3 +1,5 @@
+import { SCRAPER_CONTENT_HASH_HEX_LENGTH } from "../constants/scrape-fields";
+
 /**
  * Builds a deterministic content hash for normalized scraper rows.
  *
@@ -9,5 +11,5 @@ export const buildScraperHash = (prefix: string, parts: readonly string[]): stri
   const canonical = parts.map((part) => part.trim().toLowerCase()).join("|");
   const hasher = new Bun.CryptoHasher("sha256");
   hasher.update(canonical);
-  return `${prefix}-${hasher.digest("hex").slice(0, 12)}`;
+  return `${prefix}-${hasher.digest("hex").slice(0, SCRAPER_CONTENT_HASH_HEX_LENGTH)}`;
 };

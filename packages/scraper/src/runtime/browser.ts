@@ -1,3 +1,4 @@
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type { AutomationBrowserLaunchFailureDetails } from "@bao/shared/schemas/error-envelope.schema";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
@@ -82,7 +83,7 @@ export const launchAutomationBrowser = async (
 
   const page = pageResult.value;
   page.setDefaultTimeout(
-    Math.max(settings.defaultTimeout * 1_000, automationRuntimeConfig.navigationTimeoutMs),
+    Math.max(settings.defaultTimeout * MS_PER_SECOND, automationRuntimeConfig.navigationTimeoutMs),
   );
 
   return {

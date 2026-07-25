@@ -1,13 +1,18 @@
 import { existsSync } from "node:fs";
 import { arch, homedir, platform, release } from "node:os";
+import {
+  AUTOMATION_PAGE_SETTLE_DELAY_MS_DEFAULT,
+  AUTOMATION_POST_SUBMIT_DELAY_MS_DEFAULT,
+  AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS_DEFAULT,
+} from "@bao/shared/constants/automation-timing";
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
-import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
+import { ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT } from "@bao/shared/constants/env-bounds";
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
+  type PlaywrightBrowsersPathDeps,
   resolvePlaywrightBrowsersPath,
   resolvePlaywrightHostPlatformOverride,
-  type PlaywrightBrowsersPathDeps,
 } from "@bao/shared/utils/playwright-browsers-path";
 
 const playwrightBrowsersPathDeps = (): PlaywrightBrowsersPathDeps => ({
@@ -84,14 +89,20 @@ export interface AutomationRuntimeConfig {
 export const automationRuntimeConfig: AutomationRuntimeConfig = {
   navigationTimeoutMs: parsePositiveInt(
     Bun.env.AUTOMATION_NAVIGATION_TIMEOUT_MS,
-    DEFAULT_AUTOMATION_SETTINGS.defaultTimeout * 1_000,
+    ENV_AUTOMATION_SCRIPT_TIMEOUT_MS_DEFAULT,
   ),
-  pageSettleDelayMs: parsePositiveInt(Bun.env.AUTOMATION_PAGE_SETTLE_DELAY_MS, 2_000),
+  pageSettleDelayMs: parsePositiveInt(
+    Bun.env.AUTOMATION_PAGE_SETTLE_DELAY_MS,
+    AUTOMATION_PAGE_SETTLE_DELAY_MS_DEFAULT,
+  ),
   secondaryNavigationDelayMs: parsePositiveInt(
     Bun.env.AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS,
-    2_000,
+    AUTOMATION_SECONDARY_NAVIGATION_DELAY_MS_DEFAULT,
   ),
-  postSubmitDelayMs: parsePositiveInt(Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS, 3_000),
+  postSubmitDelayMs: parsePositiveInt(
+    Bun.env.AUTOMATION_POST_SUBMIT_DELAY_MS,
+    AUTOMATION_POST_SUBMIT_DELAY_MS_DEFAULT,
+  ),
   get enableAutomationVerify(): boolean {
     return Bun.env.BAO_ENABLE_AUTOMATION_VERIFY === "true";
   },

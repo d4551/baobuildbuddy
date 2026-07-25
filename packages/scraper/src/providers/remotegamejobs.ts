@@ -1,4 +1,10 @@
 import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
+import {
+  SCRAPED_JOB_COMPANY_LINE_MAX_LENGTH,
+  SCRAPED_JOB_COMPANY_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MIN_LENGTH,
+} from "../constants/scrape-fields";
 import { buildScraperHash } from "../runtime/hash";
 import { toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
@@ -20,6 +26,9 @@ type RemoteGameJobsEvaluateArgs = {
   boxSelector: string;
   primaryLinkSelector: string;
   secondaryLinkSelector: string;
+  resultLimit: number;
+  titleMinLength: number;
+  companyLineMaxLength: number;
 };
 
 const extractRemoteGameJobsCandidates = ({
@@ -27,6 +36,9 @@ const extractRemoteGameJobsCandidates = ({
   boxSelector,
   primaryLinkSelector,
   secondaryLinkSelector,
+  resultLimit,
+  titleMinLength,
+  companyLineMaxLength,
 }: RemoteGameJobsEvaluateArgs): RemoteGameJobsCandidate[] => {
   const findCompanyLine = (lines: string[], title: string): string =>
     lines.find((line) => {
@@ -36,13 +48,13 @@ const extractRemoteGameJobsCandidates = ({
         !employmentTypeTokens.includes(lowered) &&
         !line.startsWith("Remote") &&
         line.length > 2 &&
-        line.length < 80
+        line.length < companyLineMaxLength
       );
     }) ?? "Unknown";
 
   const boxes = Array.from(document.querySelectorAll<HTMLElement>(boxSelector));
 
-  return boxes.slice(0, 50).flatMap((box) => {
+  return boxes.slice(0, resultLimit).flatMap((box) => {
     const link =
       box.querySelector<HTMLAnchorElement>(primaryLinkSelector) ??
       box.querySelector<HTMLAnchorElement>(secondaryLinkSelector);
@@ -51,7 +63,7 @@ const extractRemoteGameJobsCandidates = ({
     }
 
     const title = ((link.textContent ?? "").trim().split("\n")[0] ?? "").trim();
-    if (title.length < 5) {
+    if (title.length < titleMinLength) {
       return [];
     }
 
@@ -86,11 +98,14 @@ export const extractRemoteGameJobs = async (
     boxSelector: REMOTE_GAME_JOBS_BOX_SELECTOR,
     primaryLinkSelector: REMOTE_GAME_JOBS_PRIMARY_LINK_SELECTOR,
     secondaryLinkSelector: REMOTE_GAME_JOBS_SECONDARY_LINK_SELECTOR,
+    resultLimit: REMOTE_GAME_JOBS_RESULT_LIMIT,
+    titleMinLength: SCRAPED_JOB_TITLE_MIN_LENGTH,
+    companyLineMaxLength: SCRAPED_JOB_COMPANY_LINE_MAX_LENGTH,
   });
 
   return rows.slice(0, REMOTE_GAME_JOBS_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100) || "Unknown";
+    const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPED_JOB_COMPANY_MAX_LENGTH) || "Unknown";
 
     return {
       title,

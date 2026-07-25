@@ -1,4 +1,11 @@
 import type { ScrapedJob } from "@bao/shared/schemas/automation-scripts.schema";
+import {
+  SCRAPED_JOB_COMPANY_LINE_MAX_LENGTH,
+  SCRAPED_JOB_COMPANY_MAX_LENGTH,
+  SCRAPED_JOB_LOCATION_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MAX_LENGTH,
+  SCRAPED_JOB_TITLE_MIN_LENGTH_SHORT,
+} from "../constants/scrape-fields";
 import { buildScraperHash } from "../runtime/hash";
 import { normalizeWhitespace, toAbsoluteUrl, toBoundedText } from "./provider-helpers";
 import type { PageEvaluator } from "./provider-types";
@@ -25,16 +32,16 @@ export const extractWorkWithIndiesJobs = async (
   page: PageEvaluator,
   sourceUrl: string,
 ): Promise<ScrapedJob[]> => {
-  const rows = await page.evaluate(() => {
+  const rows = await page.evaluate((resultLimit) => {
     const cards = Array.from(
       document.querySelectorAll<HTMLAnchorElement>("a.job-card, a[href*='/careers/']"),
     );
 
-    return cards.slice(0, 60).map((card) => ({
+    return cards.slice(0, resultLimit).map((card) => ({
       text: (card.innerText ?? "").replaceAll("\n", " ").trim(),
       href: card.getAttribute("href") ?? "",
     }));
-  });
+  }, WORK_WITH_INDIES_RESULT_LIMIT);
 
   const candidates: WorkWithIndiesCandidate[] = [];
 
@@ -48,7 +55,10 @@ export const extractWorkWithIndiesJobs = async (
     const title = normalizeWhitespace(match[2] ?? "");
     const location = normalizeWhitespace(match[3] ?? "Remote");
 
-    if (title.length < 3 || company.length > 80) {
+    if (
+      title.length < SCRAPED_JOB_TITLE_MIN_LENGTH_SHORT ||
+      company.length > SCRAPED_JOB_COMPANY_LINE_MAX_LENGTH
+    ) {
       continue;
     }
 
@@ -66,9 +76,9 @@ export const extractWorkWithIndiesJobs = async (
   }
 
   return candidates.slice(0, WORK_WITH_INDIES_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, 200);
-    const company = toBoundedText(row.company, 100);
-    const location = toBoundedText(row.location, 100) || "Remote";
+    const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPED_JOB_COMPANY_MAX_LENGTH);
+    const location = toBoundedText(row.location, SCRAPED_JOB_LOCATION_MAX_LENGTH) || "Remote";
 
     return {
       title,

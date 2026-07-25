@@ -1,3 +1,4 @@
+import { MS_PER_SECOND } from "@bao/shared/constants/time";
 import type { JobApplyScriptEnvelope } from "@bao/shared/schemas/automation-scripts.schema";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
@@ -24,7 +25,6 @@ import {
 import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import type { JobApplyStrategy } from "./strategy-registry";
 import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
-import { MS_PER_SECOND } from "@bao/shared/constants/time";
 
 const buildResult = (
   success: boolean,
