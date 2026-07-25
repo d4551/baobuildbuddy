@@ -108,11 +108,11 @@ function updateProjectForm(value: typeof projectForm): void {
       :description-class="PAGE_HEADER_DESCRIPTION_MEASURE_CLASS"
     >
       <template v-if="!isPortfolioEmpty" #actions>
-        <label class="form-control">
-          <span class="sr-only">{{ t("portfolioPage.actions.templateAria") }}</span>
+        <fieldset class="fieldset">
+          <legend class="sr-only">{{ t("portfolioPage.actions.templateAria") }}</legend>
           <select
             v-model="exportTemplate"
-            class="select select-bordered select-sm"
+            class="select select-sm"
             :aria-label="t('portfolioPage.actions.templateAria')"
           >
             <option
@@ -123,7 +123,7 @@ function updateProjectForm(value: typeof projectForm): void {
               {{ t(`portfolioPage.exportTemplates.${templateOption}`) }}
             </option>
           </select>
-        </label>
+        </fieldset>
         <NuxtLink
           :to="APP_ROUTES.portfolioPreview"
           :class="[OUTLINE_ACTION_CLASS]"
