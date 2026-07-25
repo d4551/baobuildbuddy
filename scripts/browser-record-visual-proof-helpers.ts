@@ -1,10 +1,8 @@
 const NUM_10000 = 10_000;
 const NUM_1400 = 1_400;
 const NUM_200 = 200;
-const NUM_300 = 300;
 const NUM_40 = 40;
 const NUM_400 = 400;
-const NUM_500 = 500;
 
 /**
  * Helpers for browser-record-visual-proof.ts (complexity split).
@@ -12,22 +10,15 @@ const NUM_500 = 500;
 import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Page } from "playwright";
+import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
 
 const RE_BANNED_BUTTON_LABEL = /save|delete|submit|clear|remove|revoke|reset/i;
 
 export const waitForPageReady = async (page: Page, timeout: number): Promise<void> => {
-  await page
-    .locator("body")
-    .waitFor({ state: "visible", timeout })
-    .then(
-      () => undefined,
-      () => undefined,
-    );
-  await page.waitForLoadState("domcontentloaded", { timeout }).then(
-    () => undefined,
-    () => undefined,
-  );
+  // Fail-closed: blank/broken loads must not soft-continue.
+  await page.locator("body").waitFor({ state: "visible", timeout });
+  await page.waitForLoadState("domcontentloaded", { timeout });
 };
 
 export const mapSequential = async <TItem>(
@@ -46,22 +37,85 @@ export const mapSequential = async <TItem>(
 const readDataTheme = async (page: Page): Promise<string | null> =>
   page.evaluate(
     () =>
-      document.querySelector("[data-theme]")?.getAttribute("data-theme") ??
-      document.documentElement.getAttribute("data-theme"),
+      // Prefer documentElement (useTheme SSOT) over nested shells.
+      document.documentElement.getAttribute("data-theme") ||
+      document.querySelector("[data-theme]")?.getAttribute("data-theme") ||
+      null,
   );
 
+const THEME_TOGGLE_NAME = /toggle theme/i;
+const THEME_FLIP_ATTEMPTS = 5;
+const THEME_FLIP_OBSERVE_MS = 2_000;
+
+const themeToggleLocator = (page: Page) =>
+  page.getByRole("button", { name: THEME_TOGGLE_NAME }).first();
+
+const attemptThemeFlip = async (
+  page: Page,
+  beforeTheme: string,
+  attemptsLeft: number,
+): Promise<string | null> => {
+  if (attemptsLeft <= 0) {
+    return readDataTheme(page);
+  }
+  await themeToggleLocator(page).click({ timeout: 5_000 });
+  const changedResult = await settle(
+    page.waitForFunction(
+      (previous) => {
+        const current =
+          document.documentElement.getAttribute("data-theme") ||
+          document.querySelector("[data-theme]")?.getAttribute("data-theme");
+        return Boolean(current && current !== previous);
+      },
+      beforeTheme,
+      { timeout: THEME_FLIP_OBSERVE_MS },
+    ),
+  );
+  if (changedResult.status === "fulfilled") {
+    return readDataTheme(page);
+  }
+  return attemptThemeFlip(page, beforeTheme, attemptsLeft - 1);
+};
+
+const flipUntilThemeChanges = async (page: Page, beforeTheme: string): Promise<string | null> => {
+  await themeToggleLocator(page).waitFor({ state: "visible", timeout: 5_000 });
+  return attemptThemeFlip(page, beforeTheme, THEME_FLIP_ATTEMPTS);
+};
+
 export const proveDashboardTheme = async (page: Page, viewportName: string): Promise<void> => {
+  // Wait for hydrated data-theme + Vue app (SSR can paint theme before click handlers attach).
+  await page.waitForFunction(
+    () => {
+      const theme =
+        document.documentElement.getAttribute("data-theme") ||
+        document.querySelector("[data-theme]")?.getAttribute("data-theme");
+      const nuxtRoot = document.querySelector("#__nuxt") as { __vue_app__?: unknown } | null;
+      return Boolean(theme && nuxtRoot?.__vue_app__);
+    },
+    undefined,
+    { timeout: NUM_10000 },
+  );
   const beforeTheme = await readDataTheme(page);
-  await page.locator("label.swap").first().click({ timeout: 5_000 });
-  await waitForPageReady(page, NUM_500);
-  const afterTheme = await readDataTheme(page);
+  if (!beforeTheme) {
+    await writeError(`Theme missing before flip on ${viewportName}`);
+    process.exitCode = 1;
+    return;
+  }
+  const afterTheme = await flipUntilThemeChanges(page, beforeTheme);
   await writeOutput(`theme ${viewportName}: ${String(beforeTheme)} → ${String(afterTheme)}`);
-  if (!beforeTheme || !afterTheme || beforeTheme === afterTheme) {
+  if (!afterTheme || beforeTheme === afterTheme) {
     await writeError(`Theme failed to flip on ${viewportName}`);
     process.exitCode = 1;
+    return;
   }
-  await page.locator("label.swap").first().click({ timeout: 5_000 });
-  await waitForPageReady(page, NUM_300);
+  // Restore prior theme so subsequent stills stay consistent.
+  const restored = await flipUntilThemeChanges(page, afterTheme);
+  if (restored !== beforeTheme) {
+    await writeError(
+      `Theme failed to restore on ${viewportName}: ${String(afterTheme)} → ${String(restored)} (wanted ${beforeTheme})`,
+    );
+    process.exitCode = 1;
+  }
 };
 
 export const clickSafeMainButton = async (page: Page): Promise<boolean> =>

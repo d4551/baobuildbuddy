@@ -17,13 +17,12 @@ const TAURI_CONF_CANDIDATES = [
 ] as const;
 const MOD_DECL_PATTERN = /^\s*(?:pub\s+)?mod\s+([A-Za-z0-9_]+)\s*;/gmu;
 const CARGO_ERROR_DETAIL_MAX_CHARS = 6000;
+const CARGO_ERROR_LINE_PATTERN = /\berror\b|failed to|cannot find|not found|Package /i;
 
 export const trimCargoFailureDetail = (combined: string): string => {
   const trimmed = combined.trim();
   // Prefer rustc/pkg-config lines even when the blob is short — downloads must not bury the cause.
-  const errorLines = trimmed
-    .split("\n")
-    .filter((line) => /\berror\b|failed to|cannot find|not found|Package /i.test(line));
+  const errorLines = trimmed.split("\n").filter((line) => CARGO_ERROR_LINE_PATTERN.test(line));
   if (errorLines.length > 0) {
     const focused = errorLines.join("\n");
     if (focused.length <= CARGO_ERROR_DETAIL_MAX_CHARS) {

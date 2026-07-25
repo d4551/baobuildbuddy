@@ -66,11 +66,12 @@ function syncUserMenuState(): void {
   isUserMenuOpen.value = userMenuRef.value?.open ?? false;
 }
 
-async function onThemeControllerChange(event: Event): Promise<void> {
-  const { target } = event;
-  if (!(target instanceof HTMLInputElement)) return;
+async function applyThemePreference(nextTheme: typeof THEME_NAMES.light | typeof THEME_NAMES.dark): Promise<void> {
   const previousTheme = theme.value;
-  const nextTheme = target.checked ? THEME_NAMES.dark : THEME_NAMES.light;
+  if (previousTheme === nextTheme) {
+    return;
+  }
+  // Optimistic UI update (documentElement + shell) before settings persist.
   setTheme(nextTheme, { persist: false });
   const requestId = ++themePersistRequestId;
   const saveResult = await settlePromise(
@@ -82,10 +83,16 @@ async function onThemeControllerChange(event: Event): Promise<void> {
   }
   if (!saveResult.ok) {
     setTheme(previousTheme, { persist: false });
-    target.checked = previousTheme === THEME_NAMES.dark;
     return;
   }
   setTheme(nextTheme, { persist: true });
+}
+
+/** Single activation path — checkbox is daisyUI visual state only (no @change; avoids double-toggle). */
+async function onThemeSwapActivate(): Promise<void> {
+  await applyThemePreference(
+    theme.value === THEME_NAMES.dark ? THEME_NAMES.light : THEME_NAMES.dark,
+  );
 }
 
 onMounted(() => {
@@ -141,17 +148,21 @@ onUnmounted(() => {
     </div>
     <div class="navbar-end" :class="[FLEX_GAP_TOKEN_CLASS.gap1]">
       <WorkspaceOmniSearch />
-      <label :for="themeControllerId" :class="[GHOST_ACTION_SQUARE_CLASS, 'swap swap-rotate']">
-        <span class="sr-only">{{ t("a11y.toggleTheme") }}</span>
-        <input 
-          :id="themeControllerId"
+      <button
+        :id="themeControllerId"
+        type="button"
+        :class="[GHOST_ACTION_SQUARE_CLASS, 'swap swap-rotate']"
+        :aria-label="t('a11y.toggleTheme')"
+        :aria-pressed="isDarkTheme"
+        @click="onThemeSwapActivate"
+      >
+        <input
           type="checkbox"
           class="theme-controller"
           value="business"
+          tabindex="-1"
+          aria-hidden="true"
           :checked="isDarkTheme"
-          :aria-label="t('a11y.toggleTheme')"
-          :aria-pressed="isDarkTheme"
-          @change="onThemeControllerChange"
         />
         <span class="swap-off" aria-hidden="true">
           <svg class="fill-current" :class="[ICON_SIZE_CLASS[5]]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -165,7 +176,7 @@ onUnmounted(() => {
             <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
           </svg>
         </span>
-      </label>
+      </button>
       <details ref="userMenu" class="dropdown dropdown-end" @toggle="syncUserMenuState">
         <summary 
           :class="[GHOST_ACTION_SQUARE_CLASS, TOUCH_TARGET_MIN_CLASS]"

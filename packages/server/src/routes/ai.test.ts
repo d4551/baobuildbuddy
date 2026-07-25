@@ -9,6 +9,8 @@ import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
 import { requestJson } from "../test-utils";
 
+const MESSAGE_REQUIRED_DETAIL = /message/i;
+
 let app: { handle: (request: Request) => Response | Promise<Response> };
 
 beforeAll(async () => {
@@ -88,7 +90,7 @@ test("POST ai chat requires message (validation error)", async () => {
   // Elysia body validation is 422 — do not soft-OR with 400.
   expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
   expect(res.body.type).toBe("validation");
-  expect(res.body.detail ?? "").toMatch(/message/i);
+  expect(res.body.detail ?? "").toMatch(MESSAGE_REQUIRED_DETAIL);
   expect(Array.isArray(res.body.errors)).toBe(true);
   expect((res.body.errors ?? []).length).toBeGreaterThan(0);
 });

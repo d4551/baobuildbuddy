@@ -102,21 +102,26 @@ const exportResumePdf = async (page: Page): Promise<string | null> => {
   return path;
 };
 
-const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
+const countJobTitles = async (page: Page): Promise<number> =>
+  page.evaluate(
+    () =>
+      [...document.querySelectorAll("main h3, main .card-title")]
+        .map((el) => (el.textContent ?? "").trim())
+        .filter((text) => text.length > 0).length,
+  );
+
+const enableJobProviders = async (page: Page): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTE_BUILDERS.settingsSection("jobIntelligence")}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
   });
   await wait(page, NUM_2000);
-
-  // Enable Work With Indies portal — fail closed if control missing.
   const portalToggle = page.getByLabel(RE_WWI).or(page.getByText(RE_WWI)).first();
   if ((await portalToggle.count()) === 0) {
     await writeError("Work With Indies portal toggle missing — scrape not wired");
     return false;
   }
   await portalToggle.click({ timeout: 5_000 });
-  // Fill greenhouse board for a known public board as secondary source
   const boards = page.getByLabel(RE_GREENHOUSE_BOARDS).first();
   if ((await boards.count()) > 0) {
     await boards.fill(
@@ -126,18 +131,10 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   await page.getByRole("button", { name: RE_SAVE }).last().click();
   await wait(page, NUM_2000);
   await shot(page, "03-providers-saved");
+  return true;
+};
 
-  await page.goto(`${CLIENT_BASE}${APP_ROUTES.jobs}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000,
-  });
-  await wait(page, NUM_1500);
-  const titlesBefore = await page.evaluate(() =>
-    [...document.querySelectorAll("main h3, main .card-title")]
-      .map((el) => (el.textContent ?? "").trim())
-      .filter((text) => text.length > 0).length,
-  );
-
+const runScraperOnce = async (page: Page): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.automationScraper}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
@@ -154,7 +151,10 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   await enabledRun.click();
   await wait(page, NUM_35000);
   await shot(page, "04-scraper-ran");
+  return true;
+};
 
+const refreshJobsAndAssert = async (page: Page, titlesBefore: number): Promise<boolean> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.jobs}`, {
     waitUntil: "domcontentloaded",
     timeout: 60_000,
@@ -179,8 +179,23 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   await writeOutput(
     `jobs beforeTitles=${String(titlesBefore)} empty=${String(empty)} cards=${String(cards)} titles=${JSON.stringify(titles)}`,
   );
-  // Fail-closed: pre-existing jobs alone must not green — require titles after scrape path.
   return empty === 0 && titles.length > 0 && titles.length >= titlesBefore;
+};
+
+const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
+  if (!(await enableJobProviders(page))) {
+    return false;
+  }
+  await page.goto(`${CLIENT_BASE}${APP_ROUTES.jobs}`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await wait(page, NUM_1500);
+  const titlesBefore = await countJobTitles(page);
+  if (!(await runScraperOnce(page))) {
+    return false;
+  }
+  return refreshJobsAndAssert(page, titlesBefore);
 };
 
 const WHISPER_BASE = (process.env.WHISPER_OPENAI_BASE ?? "http://127.0.0.1:8090").replace(

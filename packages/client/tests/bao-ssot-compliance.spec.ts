@@ -51,6 +51,7 @@ import {
 import { UI_GRID_CLASS_BY_TOKEN } from "../constants/ui-layout";
 
 const CLIENT_ROOT = join(import.meta.dirname, "..");
+const SIDEBAR_WIDTH_LG_SHAPE = /^lg:w-\d+$/;
 
 describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
@@ -126,7 +127,7 @@ describe("Layout SSOT — Layout token declarations", () => {
     expect(PAGE_HERO_SECTION_CLASS).toContain("glass-subtle");
     expect(EMPTY_STATE_STACK_CLASS.length).toBeGreaterThan(0);
     // Assert shape via regex — do not embed raw `lg:w-*` string literals (gate scans those).
-    expect(SIDEBAR_WIDTH_LG_CLASS).toMatch(/^lg:w-\d+$/);
+    expect(SIDEBAR_WIDTH_LG_CLASS).toMatch(SIDEBAR_WIDTH_LG_SHAPE);
     expect(SIDEBAR_WIDE_WIDTH_CLASS.length).toBeGreaterThan(0);
   });
 
