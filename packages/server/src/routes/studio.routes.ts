@@ -102,7 +102,7 @@ export const studioRoutes = new Elysia({
       }
 
       for (const studio of allStudios) {
-        if (studio.size > 0) {
+        if (studio.size && studio.size.length > 0) {
           analytics.bySize[studio.size] = (analytics.bySize[studio.size] || 0) + 1;
         }
       }

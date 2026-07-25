@@ -17,7 +17,7 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
 } | {
     error?: undefined;
     resume: ResumeData;
-    suggestions: import("@bao/shared/utils/json").JsonArray;
+    suggestions: unknown[];
     section: string;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{

@@ -31,7 +31,7 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Prom
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;
@@ -82,7 +82,7 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;
@@ -152,7 +152,7 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;
@@ -203,7 +203,7 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody) => Promi
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;
@@ -254,7 +254,7 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;
@@ -314,7 +314,7 @@ export declare const handleAutomationRunByIdRoute: (runId: string) => Promise<{
             }[];
             steps: {
                 action: string;
-                status: "error" | "ok";
+                status: "error" | "ok" | "skipped";
                 message?: string | undefined;
             }[];
         } | null;

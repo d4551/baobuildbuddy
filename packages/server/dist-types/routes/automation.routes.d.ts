@@ -586,7 +586,7 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
         }[];
         steps: {
             action: string;
-            status: "error" | "ok";
+            status: "error" | "ok" | "skipped";
             message?: string | undefined;
         }[];
     } | null;

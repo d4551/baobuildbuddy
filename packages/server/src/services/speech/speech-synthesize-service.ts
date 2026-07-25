@@ -120,6 +120,9 @@ export const synthesizeSpeechAudio = async (
   if (!textResult.ok) {
     return textResult;
   }
+  if (!("text" in textResult)) {
+    return { ok: false, error: API_ERROR_SPEECH_SYNTHESIZE, status: 502 };
+  }
 
   const automation = await loadAutomationSettings();
   const provider = automation.speech.tts.provider;
@@ -146,6 +149,9 @@ export const synthesizeSpeechAudio = async (
   });
   if (!audioResult.ok) {
     return audioResult;
+  }
+  if (!("bytes" in audioResult) || !(audioResult.bytes instanceof Uint8Array)) {
+    return { ok: false, error: API_ERROR_SPEECH_SYNTHESIZE, status: 502 };
   }
 
   return {

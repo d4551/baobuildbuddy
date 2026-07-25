@@ -16,7 +16,7 @@ interface SettingsUpdateInput {
     emailTransportSettings?: Partial<EmailTransportSettings>;
 }
 export declare const buildSettingsUpdate: (existingRow: SettingsRow, body: SettingsUpdateInput) => Partial<SettingsInsert> | null;
-export declare const buildApiKeysUpdate: (body: {
+type ApiKeysUpdateBody = {
     geminiApiKey?: string;
     openaiApiKey?: string;
     claudeApiKey?: string;
@@ -24,5 +24,6 @@ export declare const buildApiKeysUpdate: (body: {
     localModelEndpoint?: string;
     localModelName?: string;
     emailTransportPassword?: string;
-}) => Partial<SettingsInsert>;
+};
+export declare const buildApiKeysUpdate: (body: ApiKeysUpdateBody) => Partial<SettingsInsert>;
 export {};
