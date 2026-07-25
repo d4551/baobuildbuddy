@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import {
   BADGE_PRIMARY_SM_CLASS,
   BADGE_SM_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
@@ -146,7 +147,7 @@ function requestDelete(resumeId?: string): void {
                 {{ t("resumePage.editButton") }}
               </button>
               <button type="button" 
-                :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+                :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
               >

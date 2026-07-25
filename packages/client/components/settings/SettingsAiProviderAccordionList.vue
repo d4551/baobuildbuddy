@@ -3,6 +3,7 @@ import { OLLAMA_WEBSITE_URL } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
   BADGE_SUCCESS_SM_CLASS,
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   ICON_SIZE_CLASS,
@@ -120,7 +121,7 @@ const emit = defineEmits<{
         <span 
           v-if="testResults[provider.id]"
           class="badge"
-          :class="testResults[provider.id]?.valid ? 'badge-success' : 'badge-error'"
+          :class="testResults[provider.id]?.valid ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.error"
         >
           {{
             testResults[provider.id]?.valid

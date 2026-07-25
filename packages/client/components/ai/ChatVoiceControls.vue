@@ -3,6 +3,7 @@ import { AI_CHAT_VOICE_DEFAULT_ID } from "@bao/shared/constants/ai-voice";
 import { DEFAULT_SPEECH_SETTINGS, type SpeechProviderOption } from "@bao/shared/constants/settings";
 import { useI18n } from "vue-i18n";
 import {
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
@@ -121,7 +122,7 @@ const voiceStatusLabel = computed(() => {
   <button type="button"
     v-if="props.supportsRecognition"
  
- :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
+ :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, [BTN_VARIANT_CLASS.warning]: props.isListening }]"
  data-testid="on-device-stt-mic"
  :title="
  props.isListening

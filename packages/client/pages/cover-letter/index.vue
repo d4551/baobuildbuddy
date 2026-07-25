@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { useCoverLetterListPage } from "~/composables/useCoverLetterListPage";
 import {
   BADGE_OUTLINE_SM_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
@@ -241,7 +242,7 @@ const hasCoverLetters = computed(() => coverLetters.length > 0);
               {{ t("coverLetterPage.cards.editButton") }}
             </button>
             <button type="button"
-              :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+              :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
               :aria-label="t('coverLetterPage.cards.deleteAria', { company: letter.company, position: letter.position })"
               @click.stop="requestDeleteCoverLetter(letter.id)"
             >

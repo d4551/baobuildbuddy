@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import {
   BADGE_PRIMARY_OUTLINE_CLASS,
   BADGE_SM_CLASS,
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   OUTLINE_ACTION_CLASS,
@@ -63,7 +64,7 @@ const { t } = useI18n();
           v-for="section in sections"
           :key="section.id"
  class="cursor-pointer"
- :class="[BADGE_SM_CLASS, section.completed ? 'badge-success' : 'badge-ghost']"
+ :class="[BADGE_SM_CLASS, section.completed ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.ghost]"
  :aria-label="t('resumePage.completion.jumpAria', { section: tabLabel(section.id) })"
  @click="emit('selectTab', section.id)"
  >

@@ -3,6 +3,7 @@ import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  ALERT_VARIANT_CLASS,
   BADGE_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
@@ -84,7 +85,7 @@ function resolveProviderStatus(provider: ProviderConfig): {
           v-if="testResults[provider.id]"
           role="status"
           class="alert alert-soft"
-          :class="testResults[provider.id]?.valid ? 'alert-success' : 'alert-error'"
+          :class="testResults[provider.id]?.valid ? ALERT_VARIANT_CLASS.success : ALERT_VARIANT_CLASS.error"
         >
           <div>
             <h4 class="font-semibold">

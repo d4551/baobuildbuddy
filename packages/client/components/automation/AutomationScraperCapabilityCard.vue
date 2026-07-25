@@ -17,6 +17,7 @@ import {
   PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -140,7 +141,7 @@ function latestRunValueClass(): string {
         </NuxtLink>
       </div>
 
-      <div class="stats stats-vertical border border-base-300 bg-base-200 xl:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.xl]">
         <div class="stat">
           <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
           <div 

@@ -5,7 +5,6 @@ import {
   BADGE_PRIMARY_LG_CLASS,
   BADGE_SUCCESS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
-  FLUID_WIDTH_CLASS,
   FORM_WIDTH_20_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CLASS,
@@ -14,6 +13,7 @@ import {
   PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -180,7 +180,7 @@ function studioDetailLocation(location: string | undefined): string {
                       {{ t("studioDetail.remoteFriendlyBadge") }}
                     </span>
                   </div>
-                  <div class="stats stats-vertical bg-base-200 sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+                  <div :class="[STATS_SHELL_VARIANT_CLASS.sm]">
                     <div class="stat">
                       <div class="stat-title">{{ t("studioDetail.info.locationLabel") }}</div>
                       <div class="stat-value text-base">

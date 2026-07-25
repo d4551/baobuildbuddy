@@ -3,6 +3,7 @@ import type { EmailTransportSettings } from "@bao/shared/types/settings-contract
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -46,7 +47,7 @@ const { t } = useI18n();
         <template #meta>
           <span 
             class="badge"
-            :class="emailDeliveryConfigured ? 'badge-success' : 'badge-warning'"
+            :class="emailDeliveryConfigured ? BADGE_VARIANT_CLASS.success : BADGE_VARIANT_CLASS.warning"
           >
             {{
               emailDeliveryConfigured

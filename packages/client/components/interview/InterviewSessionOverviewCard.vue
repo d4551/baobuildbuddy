@@ -8,6 +8,7 @@ import {
   FLUID_WIDTH_CLASS,
   PADDING_TOKEN_CLASS,
   SHADOW_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -76,7 +77,7 @@ const roundedProgress = computed(() => Math.round(props.progress));
         </template>
       </PageHeaderBlock>
 
-      <div class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[FLUID_WIDTH_CLASS, SHADOW_TOKEN_CLASS.sm]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.lg, SHADOW_TOKEN_CLASS.sm]">
         <div class="stat" :class="[PADDING_TOKEN_CLASS.px4, PADDING_TOKEN_CLASS.py3]">
           <div class="stat-title">{{ t("interviewSession.timeLabel") }}</div>
           <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">

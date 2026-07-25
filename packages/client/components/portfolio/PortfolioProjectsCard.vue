@@ -7,6 +7,7 @@ import type { ProjectDirection } from "~/composables/usePortfolioPage";
 import {
   BADGE_PRIMARY_XS_CLASS,
   BADGE_XS_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
   FLUID_WIDTH_CLASS,
@@ -167,7 +168,7 @@ const hasTechnologies = (project: PortfolioProject): boolean =>
                 {{ t("portfolioPage.projects.editButton") }}
               </button>
               <button type="button" 
-                :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+                :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
                 :aria-label="t('portfolioPage.projects.deleteAria', { title: project.title })"
                 @click="emit('delete', project.id)"
               >

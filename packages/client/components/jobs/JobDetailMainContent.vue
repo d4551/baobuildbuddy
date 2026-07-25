@@ -5,6 +5,7 @@ import {
   BADGE_PRIMARY_CLASS,
   BADGE_PRIMARY_LG_CLASS,
   BADGE_SUCCESS_CLASS,
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -79,7 +80,7 @@ const { t } = useI18n();
             </button>
 
             <button type="button"
-              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { 'btn-success': isSaved }]"
+              :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, { [BTN_VARIANT_CLASS.success]: isSaved }]"
               :aria-label="isSaved ? t('jobDetail.unsaveAria') : t('jobDetail.saveAria')"
               @click="emit('save')"
             >

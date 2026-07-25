@@ -14,6 +14,7 @@ import {
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -121,8 +122,8 @@ function resolveStreamEventMessage(event: RpaRunEvent): string {
         <li :class="lifecycleStepClasses[2]">{{ t("automation.jobApply.stream.steps.completed") }}</li>
       </ul>
 
-      <div 
-        class="stats stats-vertical bg-base-200 lg:stats-horizontal" :class="[MARGIN_TOKEN_CLASS.mt4]"
+      <div
+        :class="[STATS_SHELL_VARIANT_CLASS.lg, MARGIN_TOKEN_CLASS.mt4]"
         :aria-label="t('automation.jobApply.stream.aria')"
       >
         <div class="stat">

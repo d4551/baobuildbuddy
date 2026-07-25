@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   BADGE_SM_CLASS,
+  BADGE_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   OUTLINE_ACTION_CLASS,
   PADDING_TOKEN_CLASS,
@@ -40,7 +41,7 @@ const emit = defineEmits<{
   >
     <span
  
- :class="[BADGE_SM_CLASS, isDirty ? 'badge-warning' : 'badge-ghost']"
+ :class="[BADGE_SM_CLASS, isDirty ? BADGE_VARIANT_CLASS.warning : BADGE_VARIANT_CLASS.ghost]"
  role="status"
  >
       {{ isDirty ? dirtyLabel : savedLabel }}

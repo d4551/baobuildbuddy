@@ -8,6 +8,7 @@ import {
   OUTLINE_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -82,7 +83,7 @@ useSeoMeta({
     />
 
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
-      <div class="stats stats-vertical lg:stats-horizontal bg-base-200" :class="[FLUID_WIDTH_CLASS]">
+      <div :class="[STATS_SHELL_VARIANT_CLASS.lg]">
         <div class="stat">
           <div class="stat-title">{{ t("studioAnalytics.overview.totalStudiosTitle") }}</div>
           <div class="stat-value text-primary">{{ totalStudios }}</div>
@@ -176,7 +177,7 @@ useSeoMeta({
         <div class="card-body">
           <h2 class="card-title">{{ t("studioAnalytics.sections.remoteAvailabilityTitle") }}</h2>
 
-          <div class="stats stats-vertical bg-base-200 sm:stats-horizontal" :class="[FLUID_WIDTH_CLASS]">
+          <div :class="[STATS_SHELL_VARIANT_CLASS.sm]">
             <div class="stat">
               <div class="stat-title">
                 {{ t("studioAnalytics.sections.offerRemoteLabel") }}

@@ -8,6 +8,7 @@ import type {
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
+  BTN_VARIANT_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   ICON_SIZE_CLASS,
   OUTLINE_ACTION_CLASS,
@@ -129,7 +130,7 @@ const { t } = useI18n();
             </div>
             <button 
               type="button"
-              :class="[PRIMARY_ACTION_CLASS, { 'btn-error': stt.isListening.value }]"
+              :class="[PRIMARY_ACTION_CLASS, { [BTN_VARIANT_CLASS.error]: stt.isListening.value }]"
               :disabled="completionState !== 'ready' || !canUseVoice"
               :title="stt.isListening.value ? t('interviewSession.voice.stopTitle') : t('interviewSession.voice.startTitle')"
               :aria-label="stt.isListening.value ? t('interviewSession.voice.stopAria') : t('interviewSession.voice.startAria')"
@@ -163,7 +164,7 @@ const { t } = useI18n();
         <div class="flex justify-end">
           <button 
             type="button"
-            :class="[OUTLINE_ACTION_CLASS, 'btn-error']"
+            :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
             :disabled="!canComplete || completionState !== 'ready'"
             :aria-label="t('interviewSession.endAria')"
             @click="$emit('complete')"
