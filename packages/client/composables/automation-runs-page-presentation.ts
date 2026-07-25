@@ -27,10 +27,7 @@ const DATE_FORMAT_OPTIONS = {
   timeStyle: "short",
 } as const satisfies Intl.DateTimeFormatOptions;
 
-function compareRunsForSort(
-  left: RpaRunExecutionEnvelope,
-  right: RpaRunExecutionEnvelope,
-): number {
+function compareRunsForSort(left: RpaRunExecutionEnvelope, right: RpaRunExecutionEnvelope): number {
   const statusDiff = RUN_STATUS_ORDER[left.status] - RUN_STATUS_ORDER[right.status];
   if (statusDiff !== 0) {
     return statusDiff;

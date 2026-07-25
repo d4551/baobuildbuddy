@@ -75,10 +75,7 @@ export const jobsRoutes = new Elysia({
   .post(
     "/save",
     {
-      detail: openapiDetail(
-        "Jobs",
-        "Save a job posting to the user's shortlist.",
-      ),
+      detail: openapiDetail("Jobs", "Save a job posting to the user's shortlist."),
       body: saveJobBodySchema,
       response: saveJobResponses,
     },
@@ -113,10 +110,7 @@ export const jobsRoutes = new Elysia({
   .post(
     "/apply",
     {
-      detail: openapiDetail(
-        "Jobs",
-        "Record a manual job application for a posting.",
-      ),
+      detail: openapiDetail("Jobs", "Record a manual job application for a posting."),
       body: applyJobBodySchema,
       response: applyJobResponses,
     },
@@ -150,10 +144,7 @@ export const jobsRoutes = new Elysia({
   .get(
     "/applications",
     {
-      detail: openapiDetail(
-        "Jobs",
-        "List job applications with status and timestamps.",
-      ),
+      detail: openapiDetail("Jobs", "List job applications with status and timestamps."),
       response: applicationsListResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await listApplications()),
@@ -161,10 +152,7 @@ export const jobsRoutes = new Elysia({
   .get(
     "/recommendations",
     {
-      detail: openapiDetail(
-        "Jobs",
-        "Retrieve personalized job recommendations for the profile.",
-      ),
+      detail: openapiDetail("Jobs", "Retrieve personalized job recommendations for the profile."),
       response: recommendationsResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await getRecommendations()),
@@ -172,10 +160,7 @@ export const jobsRoutes = new Elysia({
   .post(
     "/refresh",
     {
-      detail: openapiDetail(
-        "Jobs",
-        "Refresh the job feed from configured providers.",
-      ),
+      detail: openapiDetail("Jobs", "Refresh the job feed from configured providers."),
       response: jobsRefreshResponses,
     },
     async ({ status }) => {

@@ -40,19 +40,25 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
 
-import { brandSettingsSchema } from "./settings-brand.schema";
-
-export {
-  brandContentSettingsPatchSchema,
-  brandContentSettingsSchema,
-  brandSettingsPatchSchema,
-  brandSettingsSchema,
-  brandThemePalettePatchSchema,
-  brandThemePaletteSchema,
-  brandTypographySettingsPatchSchema,
-  brandTypographySettingsSchema,
+import {
+  brandContentSettingsPatchSchema as brandContentSettingsPatchSchemaDef,
+  brandContentSettingsSchema as brandContentSettingsSchemaDef,
+  brandSettingsPatchSchema as brandSettingsPatchSchemaDef,
+  brandSettingsSchema as brandSettingsSchemaDef,
+  brandThemePalettePatchSchema as brandThemePalettePatchSchemaDef,
+  brandThemePaletteSchema as brandThemePaletteSchemaDef,
+  brandTypographySettingsPatchSchema as brandTypographySettingsPatchSchemaDef,
+  brandTypographySettingsSchema as brandTypographySettingsSchemaDef,
 } from "./settings-brand.schema";
 
+export const brandContentSettingsPatchSchema = brandContentSettingsPatchSchemaDef;
+export const brandContentSettingsSchema = brandContentSettingsSchemaDef;
+export const brandSettingsPatchSchema = brandSettingsPatchSchemaDef;
+export const brandSettingsSchema = brandSettingsSchemaDef;
+export const brandThemePalettePatchSchema = brandThemePalettePatchSchemaDef;
+export const brandThemePaletteSchema = brandThemePaletteSchemaDef;
+export const brandTypographySettingsPatchSchema = brandTypographySettingsPatchSchemaDef;
+export const brandTypographySettingsSchema = brandTypographySettingsSchemaDef;
 
 export const apiKeyConfigSchema = z.object({
   provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),

@@ -81,10 +81,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail(
-        "Studios",
-        "List game studios with filters and search metadata.",
-      ),
+      detail: openapiDetail("Studios", "List game studios with filters and search metadata."),
       query: studioListQuerySchema,
       response: studioListResponses,
     },
@@ -122,10 +119,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/analytics",
     {
-      detail: openapiDetail(
-        "Studios",
-        "Retrieve studio analytics such as hiring activity trends.",
-      ),
+      detail: openapiDetail("Studios", "Retrieve studio analytics such as hiring activity trends."),
       response: studioAnalyticsResponses,
     },
     async ({ status }) => {
@@ -151,10 +145,7 @@ export const studioRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail(
-        "Studios",
-        "Create or ingest a studio profile record.",
-      ),
+      detail: openapiDetail("Studios", "Create or ingest a studio profile record."),
       body: studioMutationBodySchema,
       response: studioEntityResponses,
     },

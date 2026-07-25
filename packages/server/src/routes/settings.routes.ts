@@ -141,19 +141,21 @@ export const settingsRoutes = new Elysia({
       .put(
         "/api-keys",
         {
-          detail: openapiDetail(
-            "Settings",
-            "Replace encrypted API keys for cloud AI providers.",
-          ),
+          detail: openapiDetail("Settings", "Replace encrypted API keys for cloud AI providers."),
           body: apiKeysUpdateBodySchema,
           response: apiKeysUpdateResponses,
         },
         async ({ body, status }: { body: ApiKeysUpdateBody; status: RouteStatus }) => {
-          await readOrCreateSettingsRow();
+          const ensuredRow = await readOrCreateSettingsRow();
+          if (!ensuredRow) {
+            return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+              error: API_ERROR_INIT_SETTINGS_ROW,
+            });
+          }
           await db
             .update(settings)
             .set(buildApiKeysUpdate(body))
-            .where(eq(settings.id, DEFAULT_SETTINGS_ID));
+            .where(eq(settings.id, ensuredRow.id));
 
           return status(HTTP_STATUS_OK, { success: true });
         },
@@ -174,10 +176,7 @@ export const settingsRoutes = new Elysia({
       .get(
         "/export",
         {
-          detail: openapiDetail(
-            "Settings",
-            "Export settings as a portable configuration payload.",
-          ),
+          detail: openapiDetail("Settings", "Export settings as a portable configuration payload."),
           response: settingsExportResponses,
         },
         async ({ status }: { status: RouteStatus }) => {

@@ -23,12 +23,7 @@ export function useAutomationRunsPage() {
     clearSubscriptions();
   });
 
-  const presentation = createAutomationRunsPagePresentation(
-    mergedRuns,
-    t,
-    locale,
-    fallbackLocale,
-  );
+  const presentation = createAutomationRunsPagePresentation(mergedRuns, t, locale, fallbackLocale);
 
   return {
     t,

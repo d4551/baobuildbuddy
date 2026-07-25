@@ -8,7 +8,7 @@ import {
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 
-defineProps<{
+const props = defineProps<{
   screenshotPaths: readonly string[];
   screenshotEndpoint: (index: number) => string;
   screenshotLinkLabel: (index: number) => string;
@@ -22,7 +22,7 @@ function bindScreenshotImage(element: Element | null, index: number): void {
     return;
   }
   element.onerror = () => {
-    markScreenshotError(index);
+    props.markScreenshotError(index);
   };
 }
 </script>

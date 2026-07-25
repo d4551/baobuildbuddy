@@ -80,10 +80,7 @@ export const portfolioRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Retrieve the portfolio profile and project summary.",
-      ),
+      detail: openapiDetail("Portfolio", "Retrieve the portfolio profile and project summary."),
       response: portfolioResponses,
     },
     async ({ status }: { status: RouteStatus }) => {
@@ -113,10 +110,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/projects",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Add a new project entry to the portfolio.",
-      ),
+      detail: openapiDetail("Portfolio", "Add a new project entry to the portfolio."),
       body: portfolioProjectCreateBodySchema,
       response: portfolioProjectMutationResponses,
     },
@@ -152,10 +146,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/projects/reorder",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Reorder portfolio projects for display priority.",
-      ),
+      detail: openapiDetail("Portfolio", "Reorder portfolio projects for display priority."),
       body: portfolioProjectReorderBodySchema,
       response: portfolioProjectReorderResponses,
     },
@@ -176,10 +167,7 @@ export const portfolioRoutes = new Elysia({
   .put(
     "/projects/:id",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Replace fields on an existing portfolio project.",
-      ),
+      detail: openapiDetail("Portfolio", "Replace fields on an existing portfolio project."),
       params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
       response: portfolioProjectMutationResponses,
@@ -218,10 +206,7 @@ export const portfolioRoutes = new Elysia({
   .delete(
     "/projects/:id",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Delete a portfolio project by id.",
-      ),
+      detail: openapiDetail("Portfolio", "Delete a portfolio project by id."),
       params: portfolioProjectIdParamsSchema,
       response: portfolioProjectDeleteResponses,
     },
@@ -237,10 +222,7 @@ export const portfolioRoutes = new Elysia({
   .post(
     "/export",
     {
-      detail: openapiDetail(
-        "Portfolio",
-        "Export the portfolio as a downloadable package.",
-      ),
+      detail: openapiDetail("Portfolio", "Export the portfolio as a downloadable package."),
       body: portfolioExportBodySchema,
       response: portfolioExportResponses,
     },

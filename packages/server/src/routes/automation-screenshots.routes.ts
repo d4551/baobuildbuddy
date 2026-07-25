@@ -120,10 +120,7 @@ export const automationScreenshotRoutes = new Elysia({
 }).get(
   "/:runId/:index",
   {
-    detail: openapiDetail(
-      "Automation",
-      "Serve a screenshot image for an automation run by index.",
-    ),
+    detail: openapiDetail("Automation", "Serve a screenshot image for an automation run by index."),
     params: automationScreenshotParams,
     response: automationScreenshotResponses,
   },

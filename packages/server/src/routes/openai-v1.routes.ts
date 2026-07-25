@@ -13,6 +13,7 @@ import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
   openaiV1ChatCompletionsBodySchema,
+  openaiV1ModelParamsSchema,
   openaiV1ModelsListResponses,
 } from "./openai-v1-route-contracts";
 import {
@@ -86,16 +87,16 @@ export const openaiV1Routes = new Elysia({
     },
   )
   .get(
-    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`,
+    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/:model`,
     {
       detail: openapiDetail(
         "OpenAI V1",
         "Retrieve a single model by id through the OpenAI-compatible API.",
       ),
+      params: openaiV1ModelParamsSchema,
     },
     async ({ params, status }) => {
-      const modelId = decodeURIComponent(params["*"] ?? "");
-      const result = await getOpenAIV1Model(modelId);
+      const result = await getOpenAIV1Model(decodeURIComponent(params.model));
       return status(result.status, result.body);
     },
   )

@@ -111,10 +111,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/job-apply",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Start an RPA job-apply run for a selected posting.",
-      ),
+      detail: openapiDetail("Automation", "Start an RPA job-apply run for a selected posting."),
       body: jobApplyBodySchema,
       response: automationRunResponses,
     },
@@ -139,10 +136,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/job-apply/schedule",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Schedule a future RPA job-apply run.",
-      ),
+      detail: openapiDetail("Automation", "Schedule a future RPA job-apply run."),
       body: scheduledJobApplyBodySchema,
       response: automationRunResponses,
     },
@@ -168,10 +162,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Start an RPA email-response automation run.",
-      ),
+      detail: openapiDetail("Automation", "Start an RPA email-response automation run."),
       body: emailResponseBodySchema,
       response: automationEmailResponseResponses,
     },
@@ -199,10 +190,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/email-response/schedule",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Schedule a future RPA email-response run.",
-      ),
+      detail: openapiDetail("Automation", "Schedule a future RPA email-response run."),
       body: scheduledEmailResponseBodySchema,
       response: automationRunResponses,
     },
@@ -234,10 +222,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Start an RPA scrape run against a configured portal.",
-      ),
+      detail: openapiDetail("Automation", "Start an RPA scrape run against a configured portal."),
       body: scrapeBodySchema,
       response: automationRunResponses,
     },
@@ -256,10 +241,7 @@ export const automationRoutes = new Elysia({
   .post(
     "/scrape/schedule",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Schedule a future RPA scrape run against a portal.",
-      ),
+      detail: openapiDetail("Automation", "Schedule a future RPA scrape run against a portal."),
       body: scheduledScrapeBodySchema,
       response: automationRunResponses,
     },
@@ -295,10 +277,7 @@ export const automationRoutes = new Elysia({
   .get(
     "/runs",
     {
-      detail: openapiDetail(
-        "Automation",
-        "List automation run history with status summaries.",
-      ),
+      detail: openapiDetail("Automation", "List automation run history with status summaries."),
       query: automationRunQuerySchema,
       response: automationRunsListResponses,
     },
@@ -308,10 +287,7 @@ export const automationRoutes = new Elysia({
   .get(
     "/runs/:id",
     {
-      detail: openapiDetail(
-        "Automation",
-        "Retrieve a single automation run by id with logs.",
-      ),
+      detail: openapiDetail("Automation", "Retrieve a single automation run by id with logs."),
       params: automationRunIdParamsSchema,
       response: automationRunResponses,
     },

@@ -74,10 +74,7 @@ export const skillMappingRoutes = new Elysia({
   .put(
     "/mappings/:id",
     {
-      detail: openapiDetail(
-        "Skill Mapping",
-        "Replace an existing skill mapping entry by id.",
-      ),
+      detail: openapiDetail("Skill Mapping", "Replace an existing skill mapping entry by id."),
       params: skillMappingIdParamsSchema,
       body: skillMappingUpdateBodySchema,
       response: skillMappingUpdateResponses,
@@ -94,10 +91,7 @@ export const skillMappingRoutes = new Elysia({
   .delete(
     "/mappings/:id",
     {
-      detail: openapiDetail(
-        "Skill Mapping",
-        "Delete a skill mapping entry by id.",
-      ),
+      detail: openapiDetail("Skill Mapping", "Delete a skill mapping entry by id."),
       params: skillMappingIdParamsSchema,
       response: skillMappingDeleteResponses,
     },
@@ -130,10 +124,7 @@ export const skillMappingRoutes = new Elysia({
   .get(
     "/readiness",
     {
-      detail: openapiDetail(
-        "Skill Mapping",
-        "Retrieve skill readiness scores for target roles.",
-      ),
+      detail: openapiDetail("Skill Mapping", "Retrieve skill readiness scores for target roles."),
       query: skillReadinessQuerySchema,
       response: skillReadinessResponses,
     },
@@ -142,10 +133,7 @@ export const skillMappingRoutes = new Elysia({
   .post(
     "/ai-analyze",
     {
-      detail: openapiDetail(
-        "Skill Mapping",
-        "Analyze skills with AI and propose mapping updates.",
-      ),
+      detail: openapiDetail("Skill Mapping", "Analyze skills with AI and propose mapping updates."),
       body: skillAnalysisBodySchema,
       response: skillAnalysisResponses,
     },

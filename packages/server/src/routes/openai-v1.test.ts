@@ -133,7 +133,7 @@ describe("openai v1 models", () => {
     expect(body.data[0]?.id.includes("/")).toBe(true);
   });
 
-  test("GET /v1/models/* returns 404 for unknown model", async () => {
+  test("GET /v1/models/:model returns 404 for unknown model", async () => {
     const app = createCompatApp();
     const response = await app.handle(
       new Request(`http://localhost${OPENAI_V1_ENDPOINTS.models}/local%2Fmissing-model`),

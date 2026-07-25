@@ -126,10 +126,7 @@ export const resumeRoutes = new Elysia({
   .post(
     toApiChildPath(API_ENDPOINTS.resumes, API_ENDPOINTS.resumeFromQuestionsSynthesize),
     {
-      detail: openapiDetail(
-        "Resumes",
-        "Synthesize questionnaire answers into a new saved resume.",
-      ),
+      detail: openapiDetail("Resumes", "Synthesize questionnaire answers into a new saved resume."),
       body: resumeQuestionSynthesizeBodySchema,
       response: resumeQuestionSynthesizeResponses,
     },
@@ -179,10 +176,7 @@ export const resumeRoutes = new Elysia({
   .post(
     "/",
     {
-      detail: openapiDetail(
-        "Resumes",
-        "Create a new resume from structured profile sections.",
-      ),
+      detail: openapiDetail("Resumes", "Create a new resume from structured profile sections."),
       body: resumeMutationBodySchema,
       response: resumeCreateResponses,
     },
@@ -214,7 +208,10 @@ export const resumeRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: openapiDetail("Resumes", "Replace resume sections and metadata for an existing resume."),
+      detail: openapiDetail(
+        "Resumes",
+        "Replace resume sections and metadata for an existing resume.",
+      ),
       params: resumeIdParamsSchema,
       body: resumeMutationBodySchema,
       response: resumeUpdateResponses,
@@ -254,10 +251,7 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/export",
     {
-      detail: openapiDetail(
-        "Resumes",
-        "Export a resume as a downloadable document.",
-      ),
+      detail: openapiDetail("Resumes", "Export a resume as a downloadable document."),
       params: resumeIdParamsSchema,
       body: resumeExportBodySchema,
       response: resumeExportResponses,
@@ -291,10 +285,7 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/ai-enhance",
     {
-      detail: openapiDetail(
-        "Resumes",
-        "Enhance resume wording with AI suggestions.",
-      ),
+      detail: openapiDetail("Resumes", "Enhance resume wording with AI suggestions."),
       params: resumeIdParamsSchema,
       body: resumeEnhanceBodySchema,
       response: resumeEnhanceResponses,
@@ -338,10 +329,7 @@ export const resumeRoutes = new Elysia({
   .post(
     "/:id/ai-score",
     {
-      detail: openapiDetail(
-        "Resumes",
-        "Score a resume against a target role with AI.",
-      ),
+      detail: openapiDetail("Resumes", "Score a resume against a target role with AI."),
       params: resumeIdParamsSchema,
       body: resumeScoreBodySchema,
       response: resumeScoreResponses,

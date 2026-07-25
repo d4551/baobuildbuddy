@@ -144,10 +144,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
       response: {
         [HTTP_STATUS_OK]: "HealthResponse",
       },
-      detail: openapiDetail(
-        "Health",
-        "Return API and database health status for uptime probes.",
-      ),
+      detail: openapiDetail("Health", "Return API and database health status for uptime probes."),
     },
     async () => {
       const healthResult = await settle(

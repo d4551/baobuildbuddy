@@ -4,10 +4,7 @@ import {
   BRAND_THEME_LENGTH_PATTERN,
   BRAND_THEME_UNITLESS_FLAG_PATTERN,
 } from "../constants/brand-theme-css";
-import {
-  SCHEMA_MAX_LENGTH_LONG,
-  SCHEMA_MAX_LENGTH_SHORT,
-} from "../constants/schema-limits";
+import { SCHEMA_MAX_LENGTH_LONG, SCHEMA_MAX_LENGTH_SHORT } from "../constants/schema-limits";
 
 const brandThemeColorValueSchema = z
   .string()
@@ -106,4 +103,3 @@ export const brandSettingsPatchSchema = z.object({
   darkTheme: brandThemePalettePatchSchema.optional(),
   content: brandContentSettingsPatchSchema.optional(),
 });
-

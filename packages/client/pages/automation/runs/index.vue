@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
-import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useAutomationRunsPage } from "~/composables/useAutomationRunsPage";
+import { OUTLINE_ACTION_CLASS } from "~/constants/layout";
+import { LOADING_SKELETON_LINES } from "~/constants/numeric-ui";
 
 definePageMeta({
   middleware: ["auth"],

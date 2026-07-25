@@ -48,84 +48,87 @@ const shot = async (page: Page, name: string): Promise<void> => {
   await page.screenshot({ path: join(OUT, "stills", `${name}.png`), fullPage: false });
 };
 
-const installOnDeviceSpeechHooks = async (page: Page): Promise<void> => {
-  await page.addInitScript(() => {
-    const g = globalThis as typeof globalThis & {
-      __baoOnDeviceSpeech?: {
-        recognitionStarts: number;
-        synthesisSpeaks: number;
-        usedRecognitionPolyfill: boolean;
-      };
-      SpeechRecognition?: new () => SpeechRecognition;
-      webkitSpeechRecognition?: new () => SpeechRecognition;
-    };
-    g.__baoOnDeviceSpeech = {
-      recognitionStarts: 0,
-      synthesisSpeaks: 0,
-      usedRecognitionPolyfill: false,
-    };
-    const hooksState = g.__baoOnDeviceSpeech;
-    const hasNativeRecognition = Boolean(g.SpeechRecognition || g.webkitSpeechRecognition);
-    if (!hasNativeRecognition) {
-      hooksState.usedRecognitionPolyfill = true;
-      class PolyfillRecognition {
-        continuous = false;
-        interimResults = false;
-        lang = "en-US";
-        onresult: ((ev: SpeechRecognitionEvent) => void) | null = null;
-        onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null = null;
-        onend: (() => void) | null = null;
-        start(): void {
-          const state = g.__baoOnDeviceSpeech;
-          if (state) {
-            state.recognitionStarts += 1;
-          }
-          const resultEvent = Object.assign(new Event("result"), {
-            results: {
-              0: { 0: { transcript: "on device stt proof" }, isFinal: true, length: 1 },
-              length: 1,
-            },
-            resultIndex: 0,
-          }) as SpeechRecognitionEvent;
-          queueMicrotask(() => {
-            this.onresult?.(resultEvent);
-            this.onend?.();
-          });
-        }
-        stop(): void {
-          this.onend?.();
-        }
-        abort(): void {
-          this.onend?.();
-        }
-      }
-      g.SpeechRecognition = PolyfillRecognition as new () => SpeechRecognition;
-      g.webkitSpeechRecognition = g.SpeechRecognition;
-    } else {
-      const NativeCtor = g.SpeechRecognition ?? g.webkitSpeechRecognition;
-      if (NativeCtor) {
-        const proto = NativeCtor.prototype;
-        const originalStart = proto.start.bind(proto) as (this: SpeechRecognition) => void;
-        proto.start = function patchedStart(this: SpeechRecognition): void {
-          const state = g.__baoOnDeviceSpeech;
-          if (state) {
-            state.recognitionStarts += 1;
-          }
-          originalStart.call(this);
-        };
-      }
-    }
-    if (typeof speechSynthesis !== "undefined") {
-      const originalSpeak = speechSynthesis.speak.bind(speechSynthesis);
-      speechSynthesis.speak = (utterance: SpeechSynthesisUtterance) => {
+/** Runs in the page; must stay self-contained for Playwright addInitScript. */
+const onDeviceSpeechInitScript = (): void => {
+  const g = globalThis as typeof globalThis & {
+    __baoOnDeviceSpeech?: SpeechHooks;
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  };
+  g.__baoOnDeviceSpeech = {
+    recognitionStarts: 0,
+    synthesisSpeaks: 0,
+    usedRecognitionPolyfill: false,
+  };
+  const hooksState = g.__baoOnDeviceSpeech;
+  const hasNativeRecognition = Boolean(g.SpeechRecognition || g.webkitSpeechRecognition);
+  if (!hasNativeRecognition) {
+    hooksState.usedRecognitionPolyfill = true;
+    class PolyfillRecognition {
+      continuous = false;
+      interimResults = false;
+      lang = "en-US";
+      onresult: ((ev: SpeechRecognitionEvent) => void) | null = null;
+      onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null = null;
+      onend: (() => void) | null = null;
+      start(): void {
         const state = g.__baoOnDeviceSpeech;
         if (state) {
-          state.synthesisSpeaks += 1;
+          state.recognitionStarts += 1;
         }
-        originalSpeak(utterance);
-      };
+        const resultEvent = Object.assign(new Event("result"), {
+          results: {
+            0: { 0: { transcript: "on device stt proof" }, isFinal: true, length: 1 },
+            length: 1,
+          },
+          resultIndex: 0,
+        }) as SpeechRecognitionEvent;
+        queueMicrotask(() => {
+          this.onresult?.(resultEvent);
+          this.onend?.();
+        });
+      }
+      stop(): void {
+        this.onend?.();
+      }
+      abort(): void {
+        this.onend?.();
+      }
     }
-  });
+    g.SpeechRecognition = PolyfillRecognition;
+    g.webkitSpeechRecognition = PolyfillRecognition;
+  } else {
+    const NativeCtor = g.SpeechRecognition ?? g.webkitSpeechRecognition;
+    if (NativeCtor) {
+      type StartFn = (this: SpeechRecognition) => void;
+      const originalStart = Reflect.get(NativeCtor.prototype, "start") as StartFn;
+      Reflect.set(
+        NativeCtor.prototype,
+        "start",
+        function patchedStart(this: SpeechRecognition): void {
+          const state = g.__baoOnDeviceSpeech;
+          if (state) {
+            state.recognitionStarts += 1;
+          }
+          Reflect.apply(originalStart, this, []);
+        },
+      );
+    }
+  }
+  if (typeof speechSynthesis !== "undefined") {
+    const originalSpeak = speechSynthesis.speak.bind(speechSynthesis);
+    speechSynthesis.speak = (utterance: SpeechSynthesisUtterance) => {
+      const state = g.__baoOnDeviceSpeech;
+      if (state) {
+        state.synthesisSpeaks += 1;
+      }
+      originalSpeak(utterance);
+    };
+  }
+};
+
+const installOnDeviceSpeechHooks = async (page: Page): Promise<void> => {
+  await page.addInitScript(onDeviceSpeechInitScript);
 };
 
 const readHooks = async (page: Page): Promise<SpeechHooks> =>

@@ -91,10 +91,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail(
-        "Cover Letters",
-        "List saved cover letters for the current profile.",
-      ),
+      detail: openapiDetail("Cover Letters", "List saved cover letters for the current profile."),
       response: coverLettersListResponses,
     },
     async ({ status }) =>
@@ -118,10 +115,7 @@ export const coverLetterRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: openapiDetail(
-        "Cover Letters",
-        "Retrieve a cover letter by id with full content.",
-      ),
+      detail: openapiDetail("Cover Letters", "Retrieve a cover letter by id with full content."),
       params: coverLetterIdParamsSchema,
       response: coverLetterEntityResponses,
     },
@@ -157,10 +151,7 @@ export const coverLetterRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: openapiDetail(
-        "Cover Letters",
-        "Delete a cover letter by id from saved documents.",
-      ),
+      detail: openapiDetail("Cover Letters", "Delete a cover letter by id from saved documents."),
       params: coverLetterIdParamsSchema,
       response: coverLetterDeleteResponses,
     },
@@ -219,10 +210,7 @@ export const coverLetterRoutes = new Elysia({
   .post(
     "/:id/export",
     {
-      detail: openapiDetail(
-        "Cover Letters",
-        "Export a cover letter as a downloadable attachment.",
-      ),
+      detail: openapiDetail("Cover Letters", "Export a cover letter as a downloadable attachment."),
       params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,
       response: coverLetterExportResponses,

@@ -62,10 +62,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/analyze-resume",
     {
-      detail: openapiDetail(
-        "AI",
-        "Analyze a resume against a target role with AI feedback.",
-      ),
+      detail: openapiDetail("AI", "Analyze a resume against a target role with AI feedback."),
       body: analyzeResumeRouteBodySchema,
       response: analyzeResumeResponses,
     },
@@ -77,10 +74,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/generate-cover-letter",
     {
-      detail: openapiDetail(
-        "AI",
-        "Generate cover letter draft text with the AI provider.",
-      ),
+      detail: openapiDetail("AI", "Generate cover letter draft text with the AI provider."),
       body: generateCoverLetterRouteBodySchema,
       response: generateCoverLetterResponses,
     },
@@ -92,10 +86,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/match-jobs",
     {
-      detail: openapiDetail(
-        "AI",
-        "Match the user profile against open jobs with AI ranking.",
-      ),
+      detail: openapiDetail("AI", "Match the user profile against open jobs with AI ranking."),
       body: matchJobsRouteBodySchema,
       response: matchJobsResponses,
     },
@@ -138,10 +129,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
   .post(
     "/automation-action",
     {
-      detail: openapiDetail(
-        "AI",
-        "Propose or execute an AI-assisted automation operator action.",
-      ),
+      detail: openapiDetail("AI", "Propose or execute an AI-assisted automation operator action."),
       body: automationActionRouteBodySchema,
       response: automationActionResponses,
     },

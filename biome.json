@@ -23,7 +23,8 @@
       "!**/docs",
       "!**/docs/browser-smoke",
       "!**/docs/ssot-ledger/**/*.json",
-      "!**/docs/ssot-ledger/**/*.png"
+      "!**/docs/ssot-ledger/**/*.png",
+      "!**/artifacts"
     ]
   },
   "formatter": {

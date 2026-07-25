@@ -42,10 +42,7 @@ export const searchRoutes = new Elysia({
   .get(
     toApiChildPath(API_ENDPOINTS.searchBase, API_ENDPOINTS.search),
     {
-      detail: openapiDetail(
-        "Search",
-        "Search jobs, studios, and related career content by query.",
-      ),
+      detail: openapiDetail("Search", "Search jobs, studios, and related career content by query."),
       query: searchQuery,
       response: searchAllResponses,
     },

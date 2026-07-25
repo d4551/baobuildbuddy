@@ -41,10 +41,7 @@ export const gamificationRoutes = new Elysia({
   .post(
     "/award-xp",
     {
-      detail: openapiDetail(
-        "Gamification",
-        "Award XP for a completed career action event.",
-      ),
+      detail: openapiDetail("Gamification", "Award XP for a completed career action event."),
       body: awardXpBody,
       response: awardXpResponses,
     },
@@ -71,10 +68,7 @@ export const gamificationRoutes = new Elysia({
   .get(
     "/achievements",
     {
-      detail: openapiDetail(
-        "Gamification",
-        "List unlocked and locked gamification achievements.",
-      ),
+      detail: openapiDetail("Gamification", "List unlocked and locked gamification achievements."),
       response: achievementsResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await gamificationService.getAchievements()),
@@ -136,10 +130,7 @@ export const gamificationRoutes = new Elysia({
   .get(
     "/weekly",
     {
-      detail: openapiDetail(
-        "Gamification",
-        "Retrieve weekly gamification activity and XP totals.",
-      ),
+      detail: openapiDetail("Gamification", "Retrieve weekly gamification activity and XP totals."),
       response: weeklyProgressResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await gamificationService.getWeeklyProgress()),

@@ -4,7 +4,7 @@ import { collectLogicalCssViolationsForContent } from "./validate-logical-css";
 const CONSUMER_PATH = "packages/client/components/example/ExampleWidget.vue";
 const SSOT_PATH = "packages/client/constants/layout.ts";
 
-describe("collectLogicalCssViolationsForContent", () => {
+describe("collectLogicalCssViolationsForContent — flags", () => {
   test("flags physical text alignment utilities", () => {
     const violations = collectLogicalCssViolationsForContent(
       CONSUMER_PATH,
@@ -27,6 +27,17 @@ describe("collectLogicalCssViolationsForContent", () => {
     expect(violations.some((v) => v.message.includes("right-1.5"))).toBe(true);
   });
 
+  test("still flags CSS left/right property declarations with values", () => {
+    const violations = collectLogicalCssViolationsForContent(
+      CONSUMER_PATH,
+      "<style>.panel { left: 0; right: auto; }</style>",
+    );
+    expect(violations.some((v) => v.message.includes("left:"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("right:"))).toBe(true);
+  });
+});
+
+describe("collectLogicalCssViolationsForContent — allows", () => {
   test("does not flag JS identifiers or French words with accent boundaries", () => {
     const violations = collectLogicalCssViolationsForContent(
       "packages/client/locales/fr-FR/catalog.ts",
@@ -51,15 +62,6 @@ describe("collectLogicalCssViolationsForContent", () => {
       ].join("\n"),
     );
     expect(violations).toHaveLength(0);
-  });
-
-  test("still flags CSS left/right property declarations with values", () => {
-    const violations = collectLogicalCssViolationsForContent(
-      CONSUMER_PATH,
-      "<style>.panel { left: 0; right: auto; }</style>",
-    );
-    expect(violations.some((v) => v.message.includes("left:"))).toBe(true);
-    expect(violations.some((v) => v.message.includes("right:"))).toBe(true);
   });
 
   test("allows logical utilities", () => {

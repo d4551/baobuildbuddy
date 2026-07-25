@@ -92,6 +92,39 @@ const shouldScanRouteFile = (filePath: string): boolean => {
   return !filePath.includes(".test.ts");
 };
 
+const pushDetailDescriptionViolations = (
+  violations: ValidationViolation[],
+  seen: Map<string, { filePath: string; line: number }>,
+  filePath: string,
+  description: string,
+  line: number,
+): void => {
+  if (CODEMOD_JUNK_PATTERN.test(description)) {
+    violations.push({
+      filePath,
+      line,
+      message: `OpenAPI description contains codemod junk path literal: ${description}`,
+    });
+  }
+  if (CAREER_AUTOMATION_SUFFIX_PATTERN.test(description)) {
+    violations.push({
+      filePath,
+      line,
+      message: `OpenAPI description still uses codemod stub suffix: ${description}`,
+    });
+  }
+  const prior = seen.get(description);
+  if (prior) {
+    violations.push({
+      filePath,
+      line,
+      message: `Duplicate OpenAPI description (also ${prior.filePath}:${String(prior.line)}): ${description}`,
+    });
+    return;
+  }
+  seen.set(description, { filePath, line });
+};
+
 const collectOpenApiDetailCallViolations = (
   files: Array<{ filePath: string; content: string }>,
 ): ValidationViolation[] => {
@@ -106,30 +139,7 @@ const collectOpenApiDetailCallViolations = (
     while (match) {
       const description = (match[2] ?? "").trim();
       const line = lineAtIndex(file.content, match.index);
-      if (CODEMOD_JUNK_PATTERN.test(description)) {
-        violations.push({
-          filePath: file.filePath,
-          line,
-          message: `OpenAPI description contains codemod junk path literal: ${description}`,
-        });
-      }
-      if (CAREER_AUTOMATION_SUFFIX_PATTERN.test(description)) {
-        violations.push({
-          filePath: file.filePath,
-          line,
-          message: `OpenAPI description still uses codemod stub suffix: ${description}`,
-        });
-      }
-      const prior = seen.get(description);
-      if (prior) {
-        violations.push({
-          filePath: file.filePath,
-          line,
-          message: `Duplicate OpenAPI description (also ${prior.filePath}:${String(prior.line)}): ${description}`,
-        });
-      } else {
-        seen.set(description, { filePath: file.filePath, line });
-      }
+      pushDetailDescriptionViolations(violations, seen, file.filePath, description, line);
       match = OPENAPI_DETAIL_CALL_PATTERN.exec(file.content);
     }
   }
