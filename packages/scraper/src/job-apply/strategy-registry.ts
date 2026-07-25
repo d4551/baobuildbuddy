@@ -91,6 +91,8 @@ const GREENHOUSE_STRATEGY: JobApplyStrategy = {
     email: ["#email", inputSelectorByName(greenhouseFieldName("email"))],
     phone: ["#phone", inputSelectorByName(greenhouseFieldName("phone"))],
     resume: [
+      "#resume",
+      inputSelectorByType("file"),
       inputSelectorByDataSource("paste"),
       inputSelectorByName(greenhouseFieldName("resume")),
     ],
@@ -100,7 +102,11 @@ const GREENHOUSE_STRATEGY: JobApplyStrategy = {
       "#cover_letter",
       textareaSelectorByName("coverLetter"),
     ],
-    submit: ["#submit_app", buttonSelectorByText("Submit application")],
+    submit: [
+      "#submit_app",
+      buttonSelectorByText("Submit application"),
+      buttonSelectorByType("submit"),
+    ],
   },
 };
 

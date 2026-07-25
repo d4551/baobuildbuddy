@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { Page } from "playwright";
-import { detectAndFollowHostedApplyPage } from "./runtime-page-setup";
+import {
+  detectAndFollowHostedApplyPage,
+  isHostedApplyErrorUrl,
+  resolveJobApplyRunOutcome,
+} from "./runtime-page-setup";
 
 const buildPage = (input: {
   url: string;
@@ -69,5 +73,34 @@ describe("detectAndFollowHostedApplyPage", () => {
     if (outcome.kind === "nav_failed") {
       expect(outcome.href).toContain("greenhouse");
     }
+  });
+});
+
+describe("job-apply honesty gates", () => {
+  test("isHostedApplyErrorUrl detects Greenhouse error landings", () => {
+    expect(isHostedApplyErrorUrl("https://job-boards.greenhouse.io/discord?error=true")).toBe(
+      true,
+    );
+    expect(isHostedApplyErrorUrl("https://job-boards.greenhouse.io/discord/jobs/1")).toBe(false);
+  });
+
+  test("resolveJobApplyRunOutcome fails closed on critical step errors", () => {
+    expect(
+      resolveJobApplyRunOutcome([
+        { action: "fill_name", status: "ok" },
+        { action: "fill_email", status: "error", message: "Email field not found" },
+        { action: "verify", status: "ok", message: "Submission confirmation detected" },
+      ]),
+    ).toEqual({ success: false, error: "Email field not found" });
+
+    expect(
+      resolveJobApplyRunOutcome([
+        { action: "fill_name", status: "ok" },
+        { action: "fill_email", status: "ok" },
+        { action: "upload_resume", status: "ok" },
+        { action: "submit", status: "ok" },
+        { action: "verify", status: "ok", message: "Submission confirmation detected" },
+      ]),
+    ).toEqual({ success: true, error: null });
   });
 });
