@@ -93,7 +93,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Retrieve cover letters resource for BaoBuildBuddy career automation.",
+        "List saved cover letters for the current profile.",
       ),
       response: coverLettersListResponses,
     },
@@ -105,7 +105,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Create or execute cover letters resource for BaoBuildBuddy career automation.",
+        "Create a cover letter from company, role, and body content.",
       ),
       body: coverLetterMutationBodySchema,
       response: coverLetterEntityResponses,
@@ -120,7 +120,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Retrieve cover letters :id for BaoBuildBuddy career automation.",
+        "Retrieve a cover letter by id with full content.",
       ),
       params: coverLetterIdParamsSchema,
       response: coverLetterEntityResponses,
@@ -139,7 +139,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Replace cover letters :id for BaoBuildBuddy career automation.",
+        "Replace cover letter fields for an existing document.",
       ),
       params: coverLetterIdParamsSchema,
       body: coverLetterUpdateBodySchema,
@@ -159,7 +159,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Delete cover letters :id for BaoBuildBuddy career automation.",
+        "Delete a cover letter by id from saved documents.",
       ),
       params: coverLetterIdParamsSchema,
       response: coverLetterDeleteResponses,
@@ -178,7 +178,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Delete cover letters :id for BaoBuildBuddy career automation.",
+        "Generate a cover letter with AI from job and profile context.",
       ),
       body: generateCoverLetterBodySchema,
       response: generateCoverLetterResponses,
@@ -221,7 +221,7 @@ export const coverLetterRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Cover Letters",
-        "Create or execute cover letters :id export for BaoBuildBuddy career automation.",
+        "Export a cover letter as a downloadable attachment.",
       ),
       params: coverLetterIdParamsSchema,
       body: coverLetterExportBodySchema,

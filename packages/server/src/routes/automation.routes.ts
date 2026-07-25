@@ -99,7 +99,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Retrieve automation verify context for BaoBuildBuddy career automation.",
+        "Return verification context for a pending automation run.",
       ),
       response: automationVerifyContextResponses,
     },
@@ -113,7 +113,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation job apply for BaoBuildBuddy career automation.",
+        "Start an RPA job-apply run for a selected posting.",
       ),
       body: jobApplyBodySchema,
       response: automationRunResponses,
@@ -141,7 +141,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation job apply schedule for BaoBuildBuddy career automation.",
+        "Schedule a future RPA job-apply run.",
       ),
       body: scheduledJobApplyBodySchema,
       response: automationRunResponses,
@@ -170,7 +170,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation email response for BaoBuildBuddy career automation.",
+        "Start an RPA email-response automation run.",
       ),
       body: emailResponseBodySchema,
       response: automationEmailResponseResponses,
@@ -201,7 +201,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation email response schedule for BaoBuildBuddy career automation.",
+        "Schedule a future RPA email-response run.",
       ),
       body: scheduledEmailResponseBodySchema,
       response: automationRunResponses,
@@ -236,7 +236,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation scrape for BaoBuildBuddy career automation.",
+        "Start an RPA scrape run against a configured portal.",
       ),
       body: scrapeBodySchema,
       response: automationRunResponses,
@@ -258,7 +258,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Create or execute automation scrape schedule for BaoBuildBuddy career automation.",
+        "Schedule a future RPA scrape run against a portal.",
       ),
       body: scheduledScrapeBodySchema,
       response: automationRunResponses,
@@ -283,7 +283,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Retrieve automation capabilities for BaoBuildBuddy career automation.",
+        "List automation capabilities and current runtime readiness.",
       ),
       response: automationCapabilitiesResponses,
     },
@@ -297,7 +297,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Retrieve automation runs for BaoBuildBuddy career automation.",
+        "List automation run history with status summaries.",
       ),
       query: automationRunQuerySchema,
       response: automationRunsListResponses,
@@ -310,7 +310,7 @@ export const automationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Automation",
-        "Retrieve automation runs :id for BaoBuildBuddy career automation.",
+        "Retrieve a single automation run by id with logs.",
       ),
       params: automationRunIdParamsSchema,
       response: automationRunResponses,

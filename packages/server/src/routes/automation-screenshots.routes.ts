@@ -122,7 +122,7 @@ export const automationScreenshotRoutes = new Elysia({
   {
     detail: openapiDetail(
       "Automation",
-      "Retrieve automation :runId :index for BaoBuildBuddy career automation.",
+      "Serve a screenshot image for an automation run by index.",
     ),
     params: automationScreenshotParams,
     response: automationScreenshotResponses,

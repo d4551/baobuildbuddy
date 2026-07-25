@@ -66,7 +66,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Retrieve settings resource for BaoBuildBuddy career automation.",
+            "Retrieve application settings including AI and automation prefs.",
           ),
           response: settingsReadResponses,
         },
@@ -95,7 +95,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Replace settings resource for BaoBuildBuddy career automation.",
+            "Replace application settings for AI, speech, and automation.",
           ),
           body: settingsUpdateBodySchema,
           response: settingsUpdateResponses,
@@ -128,7 +128,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Replace settings job taxonomy for BaoBuildBuddy career automation.",
+            "Replace the job taxonomy used for filtering and matching.",
           ),
           body: jobTaxonomyUpdateBodySchema,
           response: jobTaxonomyUpdateResponses,
@@ -143,7 +143,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Replace settings api keys for BaoBuildBuddy career automation.",
+            "Replace encrypted API keys for cloud AI providers.",
           ),
           body: apiKeysUpdateBodySchema,
           response: apiKeysUpdateResponses,
@@ -163,7 +163,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Create or execute settings test api key for BaoBuildBuddy career automation.",
+            "Test a provider API key without persisting credentials.",
           ),
           body: providerTestBodySchema,
           response: providerTestResponses,
@@ -176,7 +176,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Retrieve settings export for BaoBuildBuddy career automation.",
+            "Export settings as a portable configuration payload.",
           ),
           response: settingsExportResponses,
         },
@@ -190,7 +190,7 @@ export const settingsRoutes = new Elysia({
         {
           detail: openapiDetail(
             "Settings",
-            "Create or execute settings import for BaoBuildBuddy career automation.",
+            "Import settings from a portable configuration payload.",
           ),
           body: importSettingsBodySchema,
           response: settingsImportResponses,

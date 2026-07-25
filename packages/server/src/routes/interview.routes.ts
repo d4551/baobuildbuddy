@@ -41,7 +41,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Retrieve interview resource for BaoBuildBuddy career automation.",
+        "Create a new interview practice session for a studio and config.",
       ),
       body: createSessionBodySchema,
       response: createInterviewSessionResponses,
@@ -56,7 +56,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Retrieve interview resource for BaoBuildBuddy career automation.",
+        "List interview practice sessions with derived progress fields.",
       ),
       response: interviewSessionsListResponses,
     },
@@ -70,7 +70,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Retrieve interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id for BaoBuildBuddy career automation.",
+        "Retrieve an interview session by id, including derived progress fields.",
       ),
       params: interviewSessionParamsSchema,
       response: interviewSessionResponses,
@@ -88,7 +88,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id response for BaoBuildBuddy career automation.",
+        "Submit an answer for the current interview session question.",
       ),
       params: interviewSessionParamsSchema,
       body: submitResponseBodySchema,
@@ -118,7 +118,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id complete for BaoBuildBuddy career automation.",
+        "Complete an interview session and finalize scoring feedback.",
       ),
       params: interviewSessionParamsSchema,
       response: completeInterviewSessionResponses,
@@ -136,7 +136,7 @@ export const interviewRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Interview",
-        "Create or execute interview $toApiChildPath(API ENDPOINTS.interviewBase, API ENDPOINTS.interviewSessions) :id complete for BaoBuildBuddy career automation.",
+        "Retrieve aggregate interview practice statistics for the user.",
       ),
       response: interviewStatsResponses,
     },

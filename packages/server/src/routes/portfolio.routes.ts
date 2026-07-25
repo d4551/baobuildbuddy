@@ -82,7 +82,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Retrieve portfolio resource for BaoBuildBuddy career automation.",
+        "Retrieve the portfolio profile and project summary.",
       ),
       response: portfolioResponses,
     },
@@ -98,7 +98,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Replace portfolio resource for BaoBuildBuddy career automation.",
+        "Replace portfolio profile fields such as headline and bio.",
       ),
       body: portfolioUpdateBodySchema,
       response: portfolioMutationResponses,
@@ -115,7 +115,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Create or execute portfolio projects for BaoBuildBuddy career automation.",
+        "Add a new project entry to the portfolio.",
       ),
       body: portfolioProjectCreateBodySchema,
       response: portfolioProjectMutationResponses,
@@ -154,7 +154,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Create or execute portfolio projects reorder for BaoBuildBuddy career automation.",
+        "Reorder portfolio projects for display priority.",
       ),
       body: portfolioProjectReorderBodySchema,
       response: portfolioProjectReorderResponses,
@@ -178,7 +178,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Replace portfolio projects :id for BaoBuildBuddy career automation.",
+        "Replace fields on an existing portfolio project.",
       ),
       params: portfolioProjectIdParamsSchema,
       body: portfolioProjectUpdateBodySchema,
@@ -220,7 +220,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Delete portfolio projects :id for BaoBuildBuddy career automation.",
+        "Delete a portfolio project by id.",
       ),
       params: portfolioProjectIdParamsSchema,
       response: portfolioProjectDeleteResponses,
@@ -239,7 +239,7 @@ export const portfolioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Portfolio",
-        "Create or execute portfolio export for BaoBuildBuddy career automation.",
+        "Export the portfolio as a downloadable package.",
       ),
       body: portfolioExportBodySchema,
       response: portfolioExportResponses,

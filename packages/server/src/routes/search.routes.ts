@@ -44,7 +44,7 @@ export const searchRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Search",
-        "Retrieve search resource for BaoBuildBuddy career automation.",
+        "Search jobs, studios, and related career content by query.",
       ),
       query: searchQuery,
       response: searchAllResponses,
@@ -68,7 +68,7 @@ export const searchRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Search",
-        "Retrieve search resource for BaoBuildBuddy career automation.",
+        "Return autocomplete suggestions for a search prefix string.",
       ),
       query: searchAutocompleteQuery,
       response: searchAutocompleteResponses,

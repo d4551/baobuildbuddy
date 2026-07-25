@@ -83,7 +83,7 @@ export const studioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Studios",
-        "Retrieve studios resource for BaoBuildBuddy career automation.",
+        "List game studios with filters and search metadata.",
       ),
       query: studioListQuerySchema,
       response: studioListResponses,
@@ -124,7 +124,7 @@ export const studioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Studios",
-        "Retrieve studios analytics for BaoBuildBuddy career automation.",
+        "Retrieve studio analytics such as hiring activity trends.",
       ),
       response: studioAnalyticsResponses,
     },
@@ -136,7 +136,7 @@ export const studioRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Retrieve studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Retrieve a studio by id with profile and roles."),
       params: studioIdParamsSchema,
       response: studioEntityResponses,
     },
@@ -153,7 +153,7 @@ export const studioRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Studios",
-        "Create or execute studios resource for BaoBuildBuddy career automation.",
+        "Create or ingest a studio profile record.",
       ),
       body: studioMutationBodySchema,
       response: studioEntityResponses,
@@ -182,7 +182,7 @@ export const studioRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Replace studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Replace studio profile fields for an existing studio."),
       params: studioIdParamsSchema,
       body: studioUpdateBodySchema,
       response: studioEntityResponses,
@@ -215,7 +215,7 @@ export const studioRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: openapiDetail("Studios", "Delete studios :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Studios", "Delete a studio profile by id."),
       params: studioIdParamsSchema,
       response: studioDeleteResponses,
     },

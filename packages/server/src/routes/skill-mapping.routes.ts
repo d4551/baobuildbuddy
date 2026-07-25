@@ -49,7 +49,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Retrieve skill mapping mappings for BaoBuildBuddy career automation.",
+        "List skill mappings between game and transferable skills.",
       ),
       query: skillMappingsQuerySchema,
       response: skillMappingsListResponses,
@@ -61,7 +61,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Create or execute skill mapping mappings for BaoBuildBuddy career automation.",
+        "Create a skill mapping entry for career translation.",
       ),
       body: skillMappingCreateBodySchema,
       response: skillMappingCreateResponses,
@@ -76,7 +76,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Replace skill mapping mappings :id for BaoBuildBuddy career automation.",
+        "Replace an existing skill mapping entry by id.",
       ),
       params: skillMappingIdParamsSchema,
       body: skillMappingUpdateBodySchema,
@@ -96,7 +96,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Delete skill mapping mappings :id for BaoBuildBuddy career automation.",
+        "Delete a skill mapping entry by id.",
       ),
       params: skillMappingIdParamsSchema,
       response: skillMappingDeleteResponses,
@@ -121,7 +121,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Retrieve skill mapping pathways for BaoBuildBuddy career automation.",
+        "Retrieve recommended skill pathways for target roles.",
       ),
       response: skillPathwaysResponses,
     },
@@ -132,7 +132,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Retrieve skill mapping readiness for BaoBuildBuddy career automation.",
+        "Retrieve skill readiness scores for target roles.",
       ),
       query: skillReadinessQuerySchema,
       response: skillReadinessResponses,
@@ -144,7 +144,7 @@ export const skillMappingRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Skill Mapping",
-        "Create or execute skill mapping ai analyze for BaoBuildBuddy career automation.",
+        "Analyze skills with AI and propose mapping updates.",
       ),
       body: skillAnalysisBodySchema,
       response: skillAnalysisResponses,

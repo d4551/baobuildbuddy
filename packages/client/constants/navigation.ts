@@ -89,6 +89,8 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     to: APP_ROUTES.jobs,
     includeInSidebar: true,
     includeInDock: true,
+    /** Automation hub stays out of dock (HIG cap); Jobs owns Work-section wayfinding. */
+    dockMatchPrefixes: [APP_ROUTES.automation],
   },
   {
     id: "studios",

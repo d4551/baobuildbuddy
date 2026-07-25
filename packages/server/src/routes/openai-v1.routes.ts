@@ -76,7 +76,7 @@ export const openaiV1Routes = new Elysia({
     {
       detail: openapiDetail(
         "OpenAI V1",
-        "Retrieve openai v1 resource for BaoBuildBuddy career automation.",
+        "List available models through the OpenAI-compatible API.",
       ),
       response: openaiV1ModelsListResponses,
     },
@@ -85,17 +85,26 @@ export const openaiV1Routes = new Elysia({
       return status(HTTP_STATUS_OK, { object: "list" as const, data });
     },
   )
-  .get(`${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`, async ({ params, status }) => {
-    const modelId = decodeURIComponent(params["*"] ?? "");
-    const result = await getOpenAIV1Model(modelId);
-    return status(result.status, result.body);
-  })
+  .get(
+    `${toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.models)}/*`,
+    {
+      detail: openapiDetail(
+        "OpenAI V1",
+        "Retrieve a single model by id through the OpenAI-compatible API.",
+      ),
+    },
+    async ({ params, status }) => {
+      const modelId = decodeURIComponent(params["*"] ?? "");
+      const result = await getOpenAIV1Model(modelId);
+      return status(result.status, result.body);
+    },
+  )
   .post(
     toOpenAIV1ChildPath(OPENAI_V1_ENDPOINTS.chatCompletions),
     {
       detail: openapiDetail(
         "OpenAI V1",
-        "Retrieve openai v1 $toOpenAIV1ChildPath(OPENAI V1 ENDPOINTS.models) * for BaoBuildBuddy career automation.",
+        "Create a chat completion through the OpenAI-compatible API.",
       ),
       body: openaiV1ChatCompletionsBodySchema,
     },

@@ -17,7 +17,7 @@ export const statsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Stats",
-        "Retrieve stats resource for BaoBuildBuddy career automation.",
+        "Retrieve dashboard career stats summary for the home hub.",
       ),
       response: statsDashboardResponses,
     },
@@ -28,7 +28,7 @@ export const statsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Stats",
-        "Retrieve stats resource for BaoBuildBuddy career automation.",
+        "Retrieve weekly activity stats for streak and XP charts.",
       ),
       response: statsWeeklyResponses,
     },
@@ -39,7 +39,7 @@ export const statsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Stats",
-        "Retrieve stats resource for BaoBuildBuddy career automation.",
+        "Retrieve career progress stats across roles and milestones.",
       ),
       response: statsCareerResponses,
     },

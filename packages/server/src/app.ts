@@ -146,7 +146,7 @@ export const app = new Elysia({ prefix: API_ENDPOINT_PREFIX })
       },
       detail: openapiDetail(
         "Health",
-        "Retrieve health resource for BaoBuildBuddy career automation.",
+        "Return API and database health status for uptime probes.",
       ),
     },
     async () => {

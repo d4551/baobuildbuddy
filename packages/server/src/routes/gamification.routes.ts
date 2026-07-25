@@ -32,7 +32,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Retrieve gamification progress for BaoBuildBuddy career automation.",
+        "Retrieve XP, level, and streak progress for the user.",
       ),
       response: gamificationProgressResponses,
     },
@@ -43,7 +43,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Create or execute gamification award xp for BaoBuildBuddy career automation.",
+        "Award XP for a completed career action event.",
       ),
       body: awardXpBody,
       response: awardXpResponses,
@@ -73,7 +73,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Retrieve gamification achievements for BaoBuildBuddy career automation.",
+        "List unlocked and locked gamification achievements.",
       ),
       response: achievementsResponses,
     },
@@ -84,7 +84,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Retrieve gamification challenges for BaoBuildBuddy career automation.",
+        "List active gamification challenges and completion state.",
       ),
       response: challengesListResponses,
     },
@@ -106,7 +106,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Create or execute gamification challenges :id complete for BaoBuildBuddy career automation.",
+        "Mark a gamification challenge complete and grant rewards.",
       ),
       params: challengeIdParams,
       response: challengeCompleteResponses,
@@ -138,7 +138,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Retrieve gamification weekly for BaoBuildBuddy career automation.",
+        "Retrieve weekly gamification activity and XP totals.",
       ),
       response: weeklyProgressResponses,
     },
@@ -149,7 +149,7 @@ export const gamificationRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Gamification",
-        "Retrieve gamification monthly for BaoBuildBuddy career automation.",
+        "Retrieve monthly gamification activity and XP totals.",
       ),
       response: monthlyStatsResponses,
     },

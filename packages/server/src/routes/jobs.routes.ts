@@ -51,7 +51,7 @@ export const jobsRoutes = new Elysia({
   .get(
     "/",
     {
-      detail: openapiDetail("Jobs", "Retrieve jobs resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Jobs", "List jobs in the feed with filters and pagination."),
       query: jobsListQuerySchema,
       response: jobsListResponses,
     },
@@ -60,7 +60,7 @@ export const jobsRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: openapiDetail("Jobs", "Retrieve jobs :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Jobs", "Retrieve a single job posting by id with details."),
       params: jobIdParamsSchema,
       response: jobEntityResponses,
     },
@@ -77,7 +77,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Jobs",
-        "Create or execute jobs save for BaoBuildBuddy career automation.",
+        "Save a job posting to the user's shortlist.",
       ),
       body: saveJobBodySchema,
       response: saveJobResponses,
@@ -96,7 +96,7 @@ export const jobsRoutes = new Elysia({
   .delete(
     "/save/:jobId",
     {
-      detail: openapiDetail("Jobs", "Delete jobs save :jobId for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Jobs", "Remove a job posting from the user's shortlist."),
       params: savedJobParamsSchema,
       response: deleteSavedJobResponses,
     },
@@ -105,7 +105,7 @@ export const jobsRoutes = new Elysia({
   .get(
     "/saved",
     {
-      detail: openapiDetail("Jobs", "Retrieve jobs saved for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Jobs", "List jobs the user has saved to their shortlist."),
       response: savedJobsListResponses,
     },
     async ({ status }) => status(HTTP_STATUS_OK, await listSavedJobs()),
@@ -115,7 +115,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Jobs",
-        "Create or execute jobs apply for BaoBuildBuddy career automation.",
+        "Record a manual job application for a posting.",
       ),
       body: applyJobBodySchema,
       response: applyJobResponses,
@@ -134,7 +134,7 @@ export const jobsRoutes = new Elysia({
   .put(
     "/apply/:id",
     {
-      detail: openapiDetail("Jobs", "Replace jobs apply :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Jobs", "Update application status and notes for a job."),
       params: updateApplicationParamsSchema,
       body: updateApplicationBodySchema,
       response: updateApplicationResponses,
@@ -152,7 +152,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Jobs",
-        "Retrieve jobs applications for BaoBuildBuddy career automation.",
+        "List job applications with status and timestamps.",
       ),
       response: applicationsListResponses,
     },
@@ -163,7 +163,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Jobs",
-        "Retrieve jobs recommendations for BaoBuildBuddy career automation.",
+        "Retrieve personalized job recommendations for the profile.",
       ),
       response: recommendationsResponses,
     },
@@ -174,7 +174,7 @@ export const jobsRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Jobs",
-        "Create or execute jobs refresh for BaoBuildBuddy career automation.",
+        "Refresh the job feed from configured providers.",
       ),
       response: jobsRefreshResponses,
     },

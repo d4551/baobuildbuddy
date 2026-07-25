@@ -26,7 +26,7 @@ export const scraperRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Scraper",
-        "Retrieve scraper resource for BaoBuildBuddy career automation.",
+        "Scrape and ingest studio listings from configured sources.",
       ),
       response: scraperOperationResponses,
     },
@@ -49,7 +49,7 @@ export const scraperRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Scraper",
-        "Retrieve scraper resource for BaoBuildBuddy career automation.",
+        "Scrape jobs from the specified portal id into the job feed.",
       ),
       params: scraperPortalParamsSchema,
       response: scraperOperationResponses,

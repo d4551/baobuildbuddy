@@ -101,7 +101,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+        "Generate resume questionnaire questions for a target role.",
       ),
       body: resumeQuestionGenerateBodySchema,
       response: resumeQuestionGenerateResponses,
@@ -128,7 +128,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+        "Synthesize questionnaire answers into a new saved resume.",
       ),
       body: resumeQuestionSynthesizeBodySchema,
       response: resumeQuestionSynthesizeResponses,
@@ -169,7 +169,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Retrieve resumes resource for BaoBuildBuddy career automation.",
+        "List saved resumes available for customization and export.",
       ),
       response: resumeListResponses,
     },
@@ -181,7 +181,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Create or execute resumes resource for BaoBuildBuddy career automation.",
+        "Create a new resume from structured profile sections.",
       ),
       body: resumeMutationBodySchema,
       response: resumeCreateResponses,
@@ -199,7 +199,7 @@ export const resumeRoutes = new Elysia({
   .get(
     "/:id",
     {
-      detail: openapiDetail("Resumes", "Retrieve resumes :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Resumes", "Retrieve a resume by id with full section content."),
       params: resumeIdParamsSchema,
       response: resumeEntityResponses,
     },
@@ -214,7 +214,7 @@ export const resumeRoutes = new Elysia({
   .put(
     "/:id",
     {
-      detail: openapiDetail("Resumes", "Replace resumes :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Resumes", "Replace resume sections and metadata for an existing resume."),
       params: resumeIdParamsSchema,
       body: resumeMutationBodySchema,
       response: resumeUpdateResponses,
@@ -238,7 +238,7 @@ export const resumeRoutes = new Elysia({
   .delete(
     "/:id",
     {
-      detail: openapiDetail("Resumes", "Delete resumes :id for BaoBuildBuddy career automation."),
+      detail: openapiDetail("Resumes", "Delete a resume by id from saved documents."),
       params: resumeIdParamsSchema,
       response: resumeDeleteResponses,
     },
@@ -256,7 +256,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Create or execute resumes :id export for BaoBuildBuddy career automation.",
+        "Export a resume as a downloadable document.",
       ),
       params: resumeIdParamsSchema,
       body: resumeExportBodySchema,
@@ -293,7 +293,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Create or execute resumes :id ai enhance for BaoBuildBuddy career automation.",
+        "Enhance resume wording with AI suggestions.",
       ),
       params: resumeIdParamsSchema,
       body: resumeEnhanceBodySchema,
@@ -340,7 +340,7 @@ export const resumeRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Resumes",
-        "Create or execute resumes :id ai score for BaoBuildBuddy career automation.",
+        "Score a resume against a target role with AI.",
       ),
       params: resumeIdParamsSchema,
       body: resumeScoreBodySchema,
