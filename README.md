@@ -1123,6 +1123,9 @@ bun run release:refresh:all-os
 | `bun run verify:desktop-runtime`| Packaged runtime executes deterministic automation proof |
 | `bun run proof:dom-reactivity`  | Headed CM6/theme/search/viewport reactivity; findings=0 |
 | `bun run proof:on-device-speech` | On-device Web Speech STT+TTS (browser); findings=0 |
+| `bun run speech:kokoro:serve` | Local Kokoro ONNX OpenAI-compatible TTS (`:8880/v1`) |
+| `bun run proof:kokoro-tts` | Local Kokoro TTS UI+API RIFF WAV; findings=0 |
+| `bun run validate:local-kokoro-tts` | Fail-closed Kokoro wiring (not speechSynthesis-only) |
 | `bun run validate:openapi-descriptions` | Every route `detail` has description (no API Docs empty stubs) |
 | `bun run verify:pages`          | All SSR routes and content checks pass               |
 | `bun run proof:browser-smoke`   | Multi-viewport screenshots; 0 capture failures       |
