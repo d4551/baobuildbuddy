@@ -184,13 +184,13 @@ Raw Tauri build outputs are created under `packages/desktop/src-tauri/target/rel
 - Run `bun run verify:desktop-releases -- --release` to validate version alignment, required Tauri icons, staged artifact names, bundle signatures, DMG integrity, matching-host provenance, **stapler / notarization** on macOS DMGs, and checksum matches for **every target listed in `provenance.json`** when you omit `--targets`. Omitted platforms are skipped until their artifacts are staged again.
 - Omit `--release` when the staged macOS DMG is **not** stapled (e.g. local unsigned or ad-hoc builds): you still get DMG mount/payload and checksum verification without requiring a notarization ticket.
 - For the full four-target matrix after assembling all host builds, pass explicit targets, for example: `bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64 --release`.
-- For the current repository snapshot, the staged artifact buckets are `macos`, `windows`, and `linux-arm64`, so the direct verifier command is:
+- For the current repository snapshot, the staged artifact buckets are `macos`, `windows`, `linux-x64`, and `linux-arm64`, so the direct verifier command is (run `git lfs pull` first so the binaries are materialized, not pointer files):
 
 ```bash
-bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
+bun run verify:desktop-releases -- --targets macos,windows,linux-x64,linux-arm64
 ```
 
-This validates the exact checked-in DMG, NSIS setup, Windows portable zip, Linux ARM64 deb, Linux ARM64 rpm, signatures, manifests, provenance, and checksums without pretending the current host rebuilt every platform.
+This validates the exact checked-in DMG, NSIS setup, Windows portable zip, Linux x64 deb, Linux x64 rpm, Linux x64 AppImage, Linux ARM64 deb, Linux ARM64 rpm, signatures, manifests, provenance, and checksums without pretending the current host rebuilt every platform.
 - **Local `bun run build:desktop` (or `release:desktop:*`) updates only the current host’s bucket under `packages/desktop/releases/`** and merges into `provenance.json` / `sha256.txt` while **leaving other canonical targets on disk** (default). To delete every platform not present in this refresh, pass `--replace-release-tree` to `scripts/refresh-desktop-releases.ts`. Commit refreshed binaries only when you intend to ship that platform’s new build.
 
 ## Signing prerequisites
