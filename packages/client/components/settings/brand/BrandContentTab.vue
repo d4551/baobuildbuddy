@@ -4,6 +4,7 @@ import {
 } from "~/constants/ui-layout";
 import { useI18n } from "vue-i18n";
 import AppJsonField from "~/components/ui/AppJsonField.vue";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -55,12 +56,10 @@ const brandForm = defineModel<{
           <legend class="fieldset-legend font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             {{ t("settings.brand.defaultDescriptionLegend") }}
           </legend>
-          <textarea 
+          <AppProseField
             v-model="brandForm.defaultDescription"
-            class="textarea" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]"
-            rows="4"
             :aria-label="t('settings.brand.defaultDescriptionAria')"
-          ></textarea>
+          />
         </fieldset>
 
         <fieldset :class="[brandFieldsetClass, 'md:col-span-2']">

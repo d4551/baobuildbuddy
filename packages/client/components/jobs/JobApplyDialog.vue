@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
-  FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -40,13 +40,11 @@ const { t } = useI18n();
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend">{{ t("jobDetail.applicationNotesLegend") }}</legend>
-      <textarea 
+      <AppProseField
         v-model="applicationNotes"
-        class="textarea" :class="[FLUID_WIDTH_CLASS]"
-        rows="5"
         :placeholder="t('jobDetail.applicationNotesPlaceholder')"
         :aria-label="t('jobDetail.applicationNotesAria')"
-      ></textarea>
+      />
     </fieldset>
 
     <div class="modal-action">

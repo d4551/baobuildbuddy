@@ -119,7 +119,8 @@
         "scripts/browser-record-ai-pdf-demo.ts",
         "scripts/browser-record-full-desktop-tour.ts",
         "scripts/browser-record-editor-ux-demo.ts",
-        "scripts/browser-record-debt-cleanup-demo.ts"
+        "scripts/browser-record-debt-cleanup-demo.ts",
+        "scripts/browser-proof-dom-reactivity.ts"
       ],
       "linter": {
         "rules": {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppProseField from "~/components/ui/AppProseField.vue";
 import {
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
@@ -134,12 +135,9 @@ useSeoMeta({
 
           <fieldset class="fieldset">
             <legend class="fieldset-legend">{{ t("automation.email.messageLegend") }}</legend>
-            <textarea
+            <AppProseField
               v-model="form.message"
-              class="textarea" :class="[FLUID_WIDTH_CLASS, MIN_H_36_CLASS]"
-              required
-              minlength="10"
-              maxlength="12000"
+              :min-height-class="MIN_H_36_CLASS"
               :placeholder="t('automation.email.messagePlaceholder')"
               :aria-label="t('automation.email.messageAria')"
             />
