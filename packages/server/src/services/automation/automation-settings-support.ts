@@ -16,6 +16,7 @@ import {
   DEFAULT_AUTOMATION_SETTINGS,
   DEFAULT_EMAIL_TRANSPORT_SETTINGS,
 } from "@bao/shared/types/settings-defaults";
+import { normalizeAutomationSettings } from "@bao/shared/types/settings-normalization";
 import { isEmailTransportConfigured } from "@bao/shared/utils/email-transport";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
@@ -28,18 +29,6 @@ import { AutomationValidationError } from "./automation-errors";
 
 const MIN_CONCURRENT_RUNS = 1;
 const MIN_SCHEDULE_LEAD_TIME_MS = 1_000;
-/** Pre-90s installs persisted 30s; Greenhouse job-apply routinely exceeds that. */
-const LEGACY_AUTOMATION_TIMEOUT_SECONDS = 30;
-
-const normalizeAutomationSettings = (value: AutomationSettings): AutomationSettings => {
-  if (value.defaultTimeout !== LEGACY_AUTOMATION_TIMEOUT_SECONDS) {
-    return value;
-  }
-  return {
-    ...value,
-    defaultTimeout: SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS,
-  };
-};
 
 export const loadAutomationSettings = async (): Promise<AutomationSettings> => {
   const settingsQueryResult = await settle(

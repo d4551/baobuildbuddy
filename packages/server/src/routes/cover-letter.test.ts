@@ -149,6 +149,35 @@ function registerCoverLetterExportTests(): void {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
+  test("POST cover letter PDF uses stored template palette (gaming)", async () => {
+    const { COVER_LETTER_EXPORT_THEME_BY_TEMPLATE } = await import(
+      "@bao/shared/constants/export-document-theme"
+    );
+    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const update = await requestJson<{ id: string; template?: string }>(
+      app,
+      "PUT",
+      `${API_ENDPOINTS.coverLetters}/${generatedId}`,
+      { template: "gaming" },
+    );
+    expect(update.status).toBe(HTTP_STATUS_OK);
+    const response = await app.handle(
+      new Request(`http://localhost${buildCoverLetterExportEndpoint(generatedId)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ format: "pdf" }),
+      }),
+    );
+    expect(response.status).toBe(HTTP_STATUS_OK);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(
+      pdfStreamsContainRgbFill(bytes, COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.gaming.primary),
+    ).toBe(true);
+    expect(
+      pdfStreamsContainRgbFill(bytes, COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.professional.primary),
+    ).toBe(false);
+  });
+
   test("POST cover letter export returns a DOCX attachment", async () => {
     const response = await app.handle(
       new Request(`http://localhost${buildCoverLetterExportEndpoint(generatedId)}`, {

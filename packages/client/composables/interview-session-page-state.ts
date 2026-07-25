@@ -195,7 +195,10 @@ export function createInterviewSessionDerivedState(
 
 function createInterviewSessionIdentity(input: ReturnType<typeof createInterviewSessionState>) {
   const sessionId = computed(() =>
-    normalizeSessionIdFromQuery(input.route.query[APP_ROUTE_QUERY_KEYS.id]),
+    normalizeSessionIdFromQuery(
+      input.route.query[APP_ROUTE_QUERY_KEYS.sessionId] ??
+        input.route.query[APP_ROUTE_QUERY_KEYS.id],
+    ),
   );
   const activeSession = computed(() => {
     const id = sessionId.value;

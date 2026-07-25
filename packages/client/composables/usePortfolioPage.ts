@@ -2,6 +2,7 @@ import {
   PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH,
   PORTFOLIO_PROJECT_TITLE_MIN_LENGTH,
 } from "@bao/shared/constants/portfolio";
+import { APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { usePortfolioPageActions } from "~/composables/portfolio-page-actions";
 import { usePortfolioPageDerived } from "~/composables/portfolio-page-derived";
@@ -15,11 +16,12 @@ function usePortfolioPageDependencies() {
     i18n: useI18n(),
     nuxtApp: useNuxtApp(),
     portfolioApi: usePortfolio(),
+    route: useRoute(),
   };
 }
 
 export function usePortfolioPage() {
-  const { i18n, nuxtApp, portfolioApi } = usePortfolioPageDependencies();
+  const { i18n, nuxtApp, portfolioApi, route } = usePortfolioPageDependencies();
   const state = usePortfolioPageState();
   const derived = usePortfolioPageDerived(
     {
@@ -33,6 +35,13 @@ export function usePortfolioPage() {
   async function loadPortfolio(): Promise<void> {
     await portfolioApi.fetchPortfolio();
     state.syncPortfolioMetadata(portfolioApi.portfolio.value?.metadata);
+    const projectId = route.query[APP_ROUTE_QUERY_KEYS.id];
+    if (typeof projectId === "string" && projectId.length > 0) {
+      const match = portfolioApi.projects.value.find((project) => project.id === projectId);
+      if (match) {
+        state.openEditModal(match);
+      }
+    }
   }
 
   const actions = usePortfolioPageActions(

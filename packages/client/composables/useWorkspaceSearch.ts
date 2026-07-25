@@ -1,4 +1,8 @@
-import { APP_ROUTE_BUILDERS, APP_ROUTES } from "@bao/shared/constants/routes";
+import {
+  APP_ROUTE_BUILDERS,
+  APP_ROUTE_QUERY_KEYS,
+  APP_ROUTES,
+} from "@bao/shared/constants/routes";
 import { SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { settle } from "@bao/shared/utils/promise";
 import { isRecord } from "@bao/shared/utils/type-guards";
@@ -27,7 +31,8 @@ export const SEARCH_TYPE_ROUTE: Record<SearchResultType, (id: string) => string>
   resumes: (id) => APP_ROUTE_BUILDERS.resumeEditor(id),
   skills: () => APP_ROUTES.skills,
   "cover-letters": (id) => APP_ROUTE_BUILDERS.coverLetterDetail(id),
-  "portfolio-projects": () => APP_ROUTES.portfolio,
+  "portfolio-projects": (id) =>
+    `${APP_ROUTES.portfolio}?${APP_ROUTE_QUERY_KEYS.id}=${encodeURIComponent(id)}`,
   "interview-sessions": (id) => APP_ROUTE_BUILDERS.interviewSession(id),
   "automation-runs": (id) => APP_ROUTE_BUILDERS.automationRunDetail(id),
 };

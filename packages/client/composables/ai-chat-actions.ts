@@ -101,6 +101,11 @@ async function requestAIChatResponseHttp(
   assertApiResponse(error, input.t("apiErrors.ai.sendMessageFailed"));
 
   const response = parseAIChatResponse(data);
+  const message = typeof response.message === "string" ? response.message.trim() : "";
+  if (message.length === 0) {
+    throw new Error(input.t("aiChatCommon.requestErrorToast"));
+  }
+  response.message = message;
   if (typeof response.sessionId === "string" && response.sessionId.length > 0) {
     input.sessionId.value = response.sessionId;
   }

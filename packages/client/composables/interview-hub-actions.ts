@@ -146,7 +146,7 @@ function createSessionStartAction(
       $toast.success(t("interviewHub.toasts.started"));
       await router.push({
         path: APP_ROUTES.interviewSession,
-        query: { [APP_ROUTE_QUERY_KEYS.id]: startResult.value.id },
+        query: { [APP_ROUTE_QUERY_KEYS.sessionId]: startResult.value.id },
       });
     }
   };

@@ -212,6 +212,13 @@ async function handleExport(format: "pdf" | "docx") {
   if (!id) {
     return;
   }
+  // Export reads DB row — persist dirty template/content first or PDF/DOCX lies.
+  if (buildFormFingerprint() !== lastSavedFingerprint.value) {
+    await handleSave();
+    if (buildFormFingerprint() !== lastSavedFingerprint.value) {
+      return;
+    }
+  }
   await runExportWithToast({
     exportFn: () => exportDocument(id, format),
     failMessage: t("coverLetterDetailPage.toasts.exportFailed"),
