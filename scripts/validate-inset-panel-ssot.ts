@@ -19,6 +19,7 @@ const sourceExtensions = new Set([".vue", ".ts"]);
 const ALLOW_PATH_MARKERS = [
   "packages/client/constants/layout-shell.ts",
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-chrome.ts",
   "packages/client/constants/layout-tokens.ts",
   "packages/client/constants/ui-layout.ts",
   "packages/client/constants/chat.ts",

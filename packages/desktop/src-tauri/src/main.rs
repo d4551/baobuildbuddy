@@ -9,12 +9,13 @@ use service_ready::{are_services_ready, is_service_ready_with_address, wait_for_
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, ExitStatus, Stdio};
-use std::sync::{Arc, Mutex};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::process::{Child, Command, Stdio};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
+#[cfg(target_os = "windows")]
+use std::process::ExitStatus;
 
 use rfd::{MessageButtons, MessageDialog, MessageDialogResult, MessageLevel};
 use serde::Deserialize;
@@ -641,6 +642,7 @@ fn launch_packaged_server(runtime: &PackagedRuntime) -> io::Result<Child> {
     command.spawn()
 }
 
+#[cfg(target_os = "windows")]
 fn format_exit_status(status: &ExitStatus) -> String {
     match status.code() {
         Some(code) => format!("status code {code}"),

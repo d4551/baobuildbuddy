@@ -16,6 +16,7 @@ const ALLOW_PATH_MARKERS = [
   "packages/client/constants/layout-tokens.ts",
   "packages/client/constants/layout-tokens-actions.ts",
   "packages/client/constants/layout.ts",
+  "packages/client/constants/layout-chrome.ts",
   "packages/client/constants/layout-shell.ts",
   "packages/client/constants/layout-badges.ts",
   "packages/client/constants/layout-action-soft.ts",

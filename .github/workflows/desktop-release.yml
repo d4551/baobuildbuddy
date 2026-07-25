@@ -6,6 +6,10 @@ on:
       - main
       - "codex/**"
       - "copilot/**"
+  # PRs targeting main must build all desktop OS targets (macOS/Windows/linux-x64/arm64).
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       include_linux_appimage:
@@ -112,7 +116,9 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -253,7 +259,9 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -387,7 +395,9 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -484,7 +494,9 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2

@@ -50,6 +50,7 @@ const NUM_127 = 127;
 const NUM_13 = 13;
 const NUM_137 = 137;
 const NUM_16 = 16;
+const NUM_17 = 17;
 const NUM_171 = 171;
 const NUM_20 = 20;
 const NUM_219 = 219;
@@ -79,6 +80,13 @@ const NUM_80 = 80;
 const NUM_90 = 90;
 const NUM_97 = 97;
 const NUM_99 = 99;
+/** OLE Compound File Binary magic (CFB) — Windows MSI containers. */
+const NUM_161 = 161;
+const NUM_177 = 177;
+const NUM_207 = 207;
+const NUM_208 = 208;
+const NUM_224 = 224;
+const NUM_225 = 225;
 
 type DesktopReleaseTarget = (typeof DESKTOP_RELEASE_TARGETS)[number];
 
@@ -247,6 +255,17 @@ const DEB_SIGNATURE = Uint8Array.from([NUM_33, 60, NUM_97, NUM_114, NUM_99, NUM_
 const RPM_SIGNATURE = Uint8Array.from([NUM_237, NUM_171, NUM_238, NUM_219]);
 const ZIP_SIGNATURE = Uint8Array.from([NUM_80, NUM_75, NUM_3, NUM_4]);
 const WINDOWS_EXE_SIGNATURE = Uint8Array.from([NUM_77, NUM_90]);
+/** MSI / OLE CFB: D0 CF 11 E0 A1 B1 1A E1 (not PE `MZ`). */
+const WINDOWS_MSI_SIGNATURE = Uint8Array.from([
+  NUM_208,
+  NUM_207,
+  NUM_17,
+  NUM_224,
+  NUM_161,
+  NUM_177,
+  NUM_26,
+  NUM_225,
+]);
 const ZIP_LIST_TIMEOUT_MS = 30_000;
 const REQUIRED_ICO_LAYER_SIZES = [NUM_16, 24, NUM_32, NUM_48, NUM_64, NUM_256] as const;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/u;
@@ -1114,6 +1133,14 @@ const verifyArtifactType = async (artifact: ReleaseArtifact): Promise<Verificati
 
   if (artifact.kind === "portable") {
     return verifyMagicArtifact(artifact, ZIP_SIGNATURE);
+  }
+
+  if (artifact.kind === "msi") {
+    return verifyMagicArtifact(artifact, WINDOWS_MSI_SIGNATURE);
+  }
+
+  if (artifact.kind === "setup") {
+    return verifyMagicArtifact(artifact, WINDOWS_EXE_SIGNATURE);
   }
 
   if (artifact.kind === "sig") {
