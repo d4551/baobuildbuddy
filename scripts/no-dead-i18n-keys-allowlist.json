@@ -110,11 +110,6 @@
     "expires": "2026-08-25"
   },
   {
-    "key": "aiChatCommon.voice.testOnDeviceSample",
-    "reason": "Main-audit calibration after Cycle 14; dynamic or deferred consumers.",
-    "expires": "2026-08-25"
-  },
-  {
     "key": "aiChatCommon.youLabel",
     "reason": "Main-audit calibration after Cycle 14; dynamic or deferred consumers.",
     "expires": "2026-08-25"

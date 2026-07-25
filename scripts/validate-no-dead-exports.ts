@@ -58,6 +58,8 @@ const isFrameworkEntrypointFile = (filePath: string): boolean =>
   filePath.startsWith("packages/client/plugins/") ||
   filePath.startsWith("packages/client/layouts/") ||
   filePath.startsWith("packages/client/middleware/") ||
+  // Lint CLI entrypoints (`bun run scripts/validate-*.ts`) are consumers of their own exports.
+  /^scripts\/validate-[^/]+\.ts$/u.test(filePath) ||
   isLocaleCatalogEntrypoint(filePath);
 
 const normalizeImportTargets = (sourceFilePath: string, importPath: string): string[] => {

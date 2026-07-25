@@ -150,7 +150,7 @@ const openRoute = async (
 };
 
 const collectChromeSignals = async (page: Page) =>
-  page.evaluate(() => {
+  page.evaluate((apiDocsPath: string) => {
     const collapseWs = (value: string): string => {
       let out = "";
       let prevSpace = false;
@@ -207,7 +207,7 @@ const collectChromeSignals = async (page: Page) =>
     });
     const duplicateChromeCopy = (() => {
       // API Docs legitimately repeats OpenAPI operation descriptions in list + detail.
-      if (location.pathname.includes("/docs/api")) {
+      if (location.pathname.includes(apiDocsPath)) {
         return [] as string[];
       }
       const texts = [...document.querySelectorAll("p")]
@@ -242,7 +242,7 @@ const collectChromeSignals = async (page: Page) =>
       rawGlass,
       bodyLen: collapseWs(document.body?.innerText ?? "").length,
     };
-  });
+  }, APP_ROUTES.apiDocs);
 
 const probeRouteShell = async (
   page: Page,

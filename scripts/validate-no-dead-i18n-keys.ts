@@ -53,7 +53,7 @@ const ALLOWLIST_PATH = "scripts/no-dead-i18n-keys-allowlist.json";
  * Allowlist size ratchet: the entry count may never exceed this ceiling.
  * Lower the constant whenever entries are pruned; never raise it.
  */
-const MAX_ALLOWLIST_ENTRIES = 294;
+const MAX_ALLOWLIST_ENTRIES = 293;
 
 const EXPIRES_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 

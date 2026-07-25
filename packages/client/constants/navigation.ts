@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { AppTranslationSchema } from "~/locales/en-US";
+import { NAVIGATION_SECONDARY_ITEMS } from "./navigation-secondary";
 
 type StringKeyOf<T> = Extract<keyof T, string>;
 
@@ -215,6 +216,7 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     includeInSidebar: true,
     includeInDock: false,
   },
+  ...NAVIGATION_SECONDARY_ITEMS,
 ] as const;
 
 /**

@@ -56,13 +56,13 @@ const installOnDeviceSpeechHooks = async (page: Page): Promise<void> => {
         onend: (() => void) | null = null;
         start(): void {
           g.__baoOnDeviceSpeech!.recognitionStarts += 1;
-          const resultEvent = {
+          const resultEvent = Object.assign(new Event("result"), {
             results: {
               0: { 0: { transcript: "on device stt proof" }, isFinal: true, length: 1 },
               length: 1,
             },
             resultIndex: 0,
-          } as unknown as SpeechRecognitionEvent;
+          }) as SpeechRecognitionEvent;
           queueMicrotask(() => {
             this.onresult?.(resultEvent);
             this.onend?.();
@@ -75,7 +75,7 @@ const installOnDeviceSpeechHooks = async (page: Page): Promise<void> => {
           this.onend?.();
         }
       }
-      g.SpeechRecognition = PolyfillRecognition as unknown as new () => SpeechRecognition;
+      g.SpeechRecognition = PolyfillRecognition as new () => SpeechRecognition;
       g.webkitSpeechRecognition = g.SpeechRecognition;
     } else {
       const NativeCtor = g.SpeechRecognition ?? g.webkitSpeechRecognition;
@@ -230,7 +230,7 @@ const main = async (): Promise<void> => {
   };
   await writeFile(join(OUT, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
   await writeOutput(
-    `on-device-speech: ok=${String(report.ok)} sttStarts=${String(hooks.recognitionStarts)} ttsSpeaks=${String(hooks.synthesisSpeaks)} polyfill=${String(hooks.usedRecognitionPolyfill)}`,
+    `on-device-speech: ok=${String(report.ok)} sttStarts=${String(hooks.recognitionStarts)} ttsSpeaks=${String(hooks.synthesisSpeaks)} recognitionBridge=${String(hooks.usedRecognitionPolyfill)}`,
   );
   if (findings.length > 0) {
     for (const finding of findings) {

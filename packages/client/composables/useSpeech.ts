@@ -11,20 +11,16 @@ import {
   resolveSpeechRecognitionConstructor,
   resolveSpeechSynthesis,
 } from "../utils/speech";
-import {
-  createMicrophoneRecorder,
-  type ServerSttRequestOptions,
-  transcribeAudioViaServer,
-} from "./speech-server-stt";
+import type { ServerSttRequestOptions } from "./speech-server-stt";
 import { playBase64Audio, synthesizeSpeechViaServer } from "./speech-server-tts";
+import { createStartListeningAction } from "./speech-stt-listening";
+import { createServerSttRequestOptions } from "./speech-stt-request-options";
 import { resolveSpeechSttProvider, shouldUseServerStt } from "./speech-stt-provider";
 import {
   resolveSpeechTtsProvider,
   shouldUseLocalKokoroTts,
 } from "./speech-tts-provider";
 import { useSettings } from "./useSettings";
-
-type MicrophoneRecorder = Awaited<ReturnType<typeof createMicrophoneRecorder>>;
 
 type RecognitionErrorName = keyof typeof AI_CHAT_VOICE_RECOGNITION_ERROR_CODE_MAP;
 type SynthesisErrorName = keyof typeof AI_CHAT_VOICE_SYNTHESIS_ERROR_CODE_MAP;
@@ -258,105 +254,6 @@ const createStopSpeakingAction = (state: SpeechState) => (): void => {
   state.isSpeaking.value = false;
 };
 
-const createStartListeningAction =
-  (
-    state: SpeechState,
-    getProvider: () => ReturnType<typeof resolveSpeechSttProvider>,
-    getServerSttOptions: () => ServerSttRequestOptions,
-  ) => {
-    let recorder: MicrophoneRecorder | null = null;
-    const startListening = (locale?: string): boolean => {
-      state.error.value = null;
-      state.transcript.value = "";
-      state.interimTranscript.value = "";
-      if (shouldUseServerStt(getProvider())) {
-        if (state.isListening.value) {
-          return true;
-        }
-        settle(createMicrophoneRecorder()).then(
-          (settled) => {
-            if (settled.status === "rejected") {
-              state.error.value = AI_CHAT_VOICE_ERROR_CODES.audioCapture;
-              state.isListening.value = false;
-              return;
-            }
-            recorder = settled.value;
-            settled.value.start();
-            state.isListening.value = true;
-          },
-          () => {
-            state.error.value = AI_CHAT_VOICE_ERROR_CODES.audioCapture;
-            state.isListening.value = false;
-          },
-        );
-        return true;
-      }
-      if (!state.recognition.value) {
-        state.error.value = AI_CHAT_VOICE_ERROR_CODES.unsupportedRecognition;
-        return false;
-      }
-      if (state.isListening.value) {
-        return true;
-      }
-      state.recognition.value.lang = resolveSpeechLocale(locale);
-      state.recognition.value.start();
-      state.isListening.value = true;
-      return true;
-    };
-
-    const stopListening = (): void => {
-      if (shouldUseServerStt(getProvider())) {
-        const active = recorder;
-        recorder = null;
-        if (!active) {
-          state.isListening.value = false;
-          return;
-        }
-        settle(active.stop())
-          .then(
-            async (stopSettled) => {
-              if (stopSettled.status === "rejected") {
-                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-                return;
-              }
-              const transcriptSettled = await settle(
-                transcribeAudioViaServer(stopSettled.value, getServerSttOptions()),
-              );
-              if (transcriptSettled.status === "rejected") {
-                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-                return;
-              }
-              const result = transcriptSettled.value;
-              if (result.ok) {
-                state.transcript.value = result.text;
-                state.interimTranscript.value = "";
-              } else {
-                state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-              }
-            },
-            () => {
-              state.error.value = AI_CHAT_VOICE_ERROR_CODES.network;
-            },
-          )
-          .then(
-            () => {
-              state.isListening.value = false;
-            },
-            () => {
-              state.isListening.value = false;
-            },
-          );
-        return;
-      }
-      if (state.recognition.value) {
-        state.recognition.value.stop();
-      }
-      state.isListening.value = false;
-    };
-
-    return { startListening, stopListening };
-  };
-
 const createSpeechSupportState = (
   state: SpeechState,
   getSttProvider: () => ReturnType<typeof resolveSpeechSttProvider>,
@@ -396,14 +293,8 @@ export function useSpeech() {
     resolveSpeechTtsProvider(appSettings.value?.automationSettings?.speech?.tts?.provider);
   const getTtsVoice = () =>
     appSettings.value?.automationSettings?.speech?.tts?.voice?.trim() || "af_heart";
-  const getServerSttOptions = (): ServerSttRequestOptions => {
-    const stt = appSettings.value?.automationSettings?.speech?.stt;
-    return {
-      provider: resolveSpeechSttProvider(stt?.provider),
-      model: stt?.model?.trim() || "",
-      endpoint: stt?.endpoint?.trim() || "",
-    };
-  };
+  const getServerSttOptions = (): ServerSttRequestOptions =>
+    createServerSttRequestOptions(appSettings);
   const state = createSpeechState();
   const loadVoices = createLoadVoicesAction(state);
   setupSpeechApis(state, loadVoices);

@@ -8,6 +8,7 @@ import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { ChatMessage } from "@bao/shared/types/ai";
 import type { Ref } from "vue";
 import { computed, getCurrentScope, onScopeDispose, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { resolveSpeechLocale } from "../utils/speech";
 import { useNuxtState } from "./nuxtRuntime";
 import { useSpeech } from "./useSpeech";
@@ -237,6 +238,7 @@ function registerVoiceWatchers(input: VoiceWatchInput): void {
 }
 
 function createVoiceActions(input: VoiceActionInput) {
+  const { t } = useI18n();
   const startListening = (): boolean => {
     if (!input.speech.supportsRecognition.value) {
       return false;
@@ -277,7 +279,7 @@ function createVoiceActions(input: VoiceActionInput) {
     }
     speakWithSelectedVoice({
       speech: input.speech,
-      text: "On-device text to speech is working.",
+      text: t("aiChatCommon.voice.testOnDeviceSample"),
       locale: input.locale.value,
       selectedVoiceId: input.selectedVoiceId.value,
       voices: input.voices.value,

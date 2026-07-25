@@ -5,6 +5,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Page } from "playwright";
+import { API_ENDPOINTS } from "../packages/shared/src/constants/endpoints";
 import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -85,7 +86,7 @@ const main = async (): Promise<void> => {
 
   let synthesizeCalls = 0;
   page.on("request", (req) => {
-    if (req.url().includes("/api/speech/synthesize") && req.method() === "POST") {
+    if (req.url().includes(API_ENDPOINTS.speechSynthesize) && req.method() === "POST") {
       synthesizeCalls += 1;
     }
   });

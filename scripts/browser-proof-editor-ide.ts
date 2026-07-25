@@ -92,7 +92,10 @@ const main = async (): Promise<void> => {
   }
   await wait(page, 800);
   await page.keyboard.press("Escape");
-  const href = await page.locator("a[href*='/cover-letter/']").first().getAttribute("href");
+  const href = await page
+    .locator(`a[href*='${APP_ROUTES.coverLetter}/']`)
+    .first()
+    .getAttribute("href");
   if (!href) {
     findings.push("No cover letter detail link to open TipTap editor");
   } else {

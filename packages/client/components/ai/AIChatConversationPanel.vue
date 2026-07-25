@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { ChatMessage } from "@bao/shared/types/ai";
-import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
+import { createAiChatConversationEmptyState } from "~/composables/ai-chat-conversation-empty";
 import { CHAT_COMPOSER_STICKY_CLASS } from "~/constants/chat";
 import { useSettings } from "~/composables/useSettings";
 import {
-  APP_ROUTE_BUILDERS,
   BADGE_GHOST_CLASS,
   BADGE_SOFT_INFO_CLASS,
   BADGE_SOFT_PRIMARY_CLASS,
@@ -87,32 +86,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { isAiConfigurationIncomplete } = useSettings();
-const emptyCtaTo = computed(() =>
-  isAiConfigurationIncomplete.value
-    ? APP_ROUTE_BUILDERS.settingsSection("aiProviders")
-    : APP_ROUTES.aiDashboard,
-);
-const emptyTitleKey = computed(() =>
-  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureTitle" : "aiChatPage.emptyTitle",
-);
-const emptyDescriptionKey = computed(() =>
-  isAiConfigurationIncomplete.value
-    ? "aiChatPage.emptyConfigureDescription"
-    : "aiChatPage.emptyDescription",
-);
-const emptyCtaLabelKey = computed(() =>
-  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCta" : "aiChatPage.emptyCta",
-);
-const emptyCtaAriaKey = computed(() =>
-  isAiConfigurationIncomplete.value ? "aiChatPage.emptyConfigureCtaAria" : "aiChatPage.emptyCtaAria",
-);
+const {
+  emptyCtaTo,
+  emptyTitleKey,
+  emptyDescriptionKey,
+  emptyCtaLabelKey,
+  emptyCtaAriaKey,
+} = createAiChatConversationEmptyState(isAiConfigurationIncomplete);
 
 const updateInput = (event: Event): void => {
   const target = event.target;
   if (!(target instanceof HTMLTextAreaElement)) {
     return;
   }
-
   emit("update:input", target.value);
 };
 </script>
@@ -144,11 +130,11 @@ const updateInput = (event: Event): void => {
           </div>
           <button
             type="button"
- class="self-start"
- :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
- :aria-label="t('aiChatPage.clearAria')"
- @click="emit('clear')"
- >
+            class="self-start"
+            :class="[GHOST_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS]"
+            :aria-label="t('aiChatPage.clearAria')"
+            @click="emit('clear')"
+          >
             {{ t("aiChatPage.clearButton") }}
           </button>
         </div>
