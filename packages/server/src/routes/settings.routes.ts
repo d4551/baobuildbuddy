@@ -149,7 +149,7 @@ export const settingsRoutes = new Elysia({
           response: apiKeysUpdateResponses,
         },
         async ({ body, status }: { body: ApiKeysUpdateBody; status: RouteStatus }) => {
-          await await readOrCreateSettingsRow();
+          await readOrCreateSettingsRow();
           await db
             .update(settings)
             .set(buildApiKeysUpdate(body))

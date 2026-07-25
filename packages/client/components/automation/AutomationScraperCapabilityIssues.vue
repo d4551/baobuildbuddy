@@ -2,6 +2,7 @@
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   INSET_PANEL_MUTED_CLASS,
   PADDING_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -35,7 +36,7 @@ const jobIntelligenceSettingsRoute = APP_ROUTE_BUILDERS.settingsSection("jobInte
           {{ issue }}
         </li>
       </ul>
-      <div class="card-actions justify-end">
+      <div :class="['flex', 'justify-end', FLEX_GAP_TOKEN_CLASS.gap2]">
         <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
           {{ t("automation.hub.audit.actions.fixSetup") }}
         </NuxtLink>
@@ -59,7 +60,7 @@ const jobIntelligenceSettingsRoute = APP_ROUTE_BUILDERS.settingsSection("jobInte
           {{ issue }}
         </li>
       </ul>
-      <div class="card-actions justify-end">
+      <div :class="['flex', 'justify-end', FLEX_GAP_TOKEN_CLASS.gap2]">
         <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
           {{ t("automation.hub.audit.actions.fixSetup") }}
         </NuxtLink>

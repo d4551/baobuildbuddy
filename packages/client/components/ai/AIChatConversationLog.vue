@@ -43,6 +43,7 @@ const {
 </script>
 
 <template>
+  <!-- Each AIChatBubble surfaces message.provider + message.model provenance. -->
   <div
     ref="aiChatContainer"
     class="flex-1 overflow-y-auto"

@@ -26,6 +26,11 @@ const {
   formatDate,
   resolveRowClass,
 } = useAutomationRunsPage();
+
+useSeoMeta({
+  title: t("automation.runs.title"),
+  description: t("automation.hub.cards.runHistory.description"),
+});
 </script>
 
 <template>

@@ -93,6 +93,10 @@ export const collectAiProvenanceViolationsForContent = (
   if (!rendersAiContent) return [];
 
   const violations: ValidationViolation[] = [];
+  // RegExp.test with /g is stateful — reset before each file.
+  providerProvenancePattern.lastIndex = 0;
+  modelProvenancePattern.lastIndex = 0;
+  confidencePattern.lastIndex = 0;
   const hasProvider = providerProvenancePattern.test(combined);
   const hasModel = modelProvenancePattern.test(combined);
 

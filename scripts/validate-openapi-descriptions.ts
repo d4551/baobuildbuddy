@@ -136,7 +136,7 @@ const collectOpenApiDetailCallViolations = (
   return violations;
 };
 
-export const collectOpenApiDescriptionViolations = (
+const collectOpenApiDescriptionViolations = (
   files: Array<{ filePath: string; content: string }>,
 ): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];

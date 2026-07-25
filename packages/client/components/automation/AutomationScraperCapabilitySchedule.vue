@@ -2,6 +2,7 @@
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
 import { useI18n } from "vue-i18n";
 import {
+  FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   INSET_PANEL_MUTED_CLASS,
@@ -60,7 +61,7 @@ function handleScheduleInput(event: Event): void {
         />
         <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
       </fieldset>
-      <div class="card-actions justify-end">
+      <div :class="['flex', 'justify-end', FLEX_GAP_TOKEN_CLASS.gap2]">
         <button
           type="button"
           :class="[OUTLINE_ACTION_CLASS]"
@@ -90,7 +91,7 @@ function handleScheduleInput(event: Event): void {
       <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
         {{ latestRunStatusText(capability.target) }}
       </p>
-      <div class="card-actions justify-end">
+      <div :class="['flex', 'justify-end', FLEX_GAP_TOKEN_CLASS.gap2]">
         <NuxtLink
           :to="buildRunDetailRoute(latestRun.id)"
           :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"

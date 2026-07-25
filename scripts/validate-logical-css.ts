@@ -18,8 +18,9 @@ const sourceExtensions = new Set([".vue", ".ts", ".css"]);
 // Complete utilities text-left|text-right|float-left|float-right match as wholes.
 const physicalUtilityPattern =
   /(?:^|[\s"'`:])((?:(?:ml|mr|pl|pr|left|right)(?:-\[[^\]]+\]|-(?:auto|px|full|\d+(?:\.\d+)?))|(?:text|float)-(?:left|right)))\b/gu;
+// Require a CSS-ish value after left/right so TS params (`left: Foo`) are not flagged.
 const physicalCssPropertyPattern =
-  /(?:^|[;{\s])((?:margin|padding)-(?:left|right)|(?:left|right)\s*:|text-align\s*:\s*(?:left|right))/giu;
+  /(?:^|[;{\s])((?:margin|padding)-(?:left|right)\s*:|(?:left|right)\s*:\s*(?:auto|inherit|initial|unset|0|-?\d|var\(|calc\(|['"])|text-align\s*:\s*(?:left|right))/giu;
 
 export const collectLogicalCssViolationsForContent = (
   filePath: string,

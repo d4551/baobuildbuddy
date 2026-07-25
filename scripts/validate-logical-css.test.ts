@@ -38,6 +38,30 @@ describe("collectLogicalCssViolationsForContent", () => {
     expect(violations).toHaveLength(0);
   });
 
+  test("does not flag TypeScript parameter type annotations named left/right", () => {
+    const violations = collectLogicalCssViolationsForContent(
+      "packages/client/pages/automation/runs/index.vue",
+      [
+        "function compareRunsForSort(",
+        "  left: RpaRunExecutionEnvelope,",
+        "  right: RpaRunExecutionEnvelope,",
+        "): number {",
+        "  return left.id.localeCompare(right.id);",
+        "}",
+      ].join("\n"),
+    );
+    expect(violations).toHaveLength(0);
+  });
+
+  test("still flags CSS left/right property declarations with values", () => {
+    const violations = collectLogicalCssViolationsForContent(
+      CONSUMER_PATH,
+      "<style>.panel { left: 0; right: auto; }</style>",
+    );
+    expect(violations.some((v) => v.message.includes("left:"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("right:"))).toBe(true);
+  });
+
   test("allows logical utilities", () => {
     const violations = collectLogicalCssViolationsForContent(
       CONSUMER_PATH,

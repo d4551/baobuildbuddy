@@ -11,19 +11,19 @@ const buildPage = (input: {
   const count = input.count ?? (input.href ? 1 : 0);
   const locator = {
     first: () => locator,
-    count: async () => count,
-    getAttribute: async () => input.href ?? null,
+    count: () => Promise.resolve(count),
+    getAttribute: () => Promise.resolve(input.href ?? null),
   };
   return {
     url: () => input.url,
     locator: () => locator,
-    goto: async () => {
+    goto: () => {
       if (input.gotoRejects) {
-        throw new Error("nav failed");
+        return Promise.reject(new Error("nav failed"));
       }
-      return null;
+      return Promise.resolve(null);
     },
-    waitForLoadState: async () => undefined,
+    waitForLoadState: () => Promise.resolve(undefined),
   } as unknown as Page;
 };
 

@@ -31,7 +31,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+  <div :class="['flex', 'justify-end', FLEX_GAP_TOKEN_CLASS.gap3]">
     <button
       type="button"
       :class="[PRIMARY_ACTION_CLASS]"

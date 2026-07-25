@@ -107,7 +107,7 @@ const collectWiringViolations = async (): Promise<ValidationViolation[]> => {
   return violations;
 };
 
-export const collectZeroCapabilityDebtViolations = async (): Promise<ValidationViolation[]> => {
+const collectZeroCapabilityDebtViolations = async (): Promise<ValidationViolation[]> => {
   const ledger = await readFile(LEDGER, "utf8");
   return [...collectRemainingLedgerViolations(ledger), ...(await collectWiringViolations())];
 };

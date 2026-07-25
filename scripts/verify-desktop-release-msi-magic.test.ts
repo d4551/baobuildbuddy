@@ -14,7 +14,8 @@ describe("windows MSI magic verification", () => {
     await mkdir(windowsDir, { recursive: true });
 
     const msiPath = join(windowsDir, "BaoBuildBuddy_0.1.0_x64_en-US.msi");
-    const cfb = Uint8Array.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, ...Array(64).fill(0)]);
+    const cfb = new Uint8Array(72);
+    cfb.set([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1], 0);
     await writeFile(msiPath, cfb);
 
     // Source-level contract: the verifier must treat msi as CFB, not MZ.

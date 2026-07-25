@@ -106,7 +106,10 @@ const fetchFirstModelId = async (app: ReturnType<typeof createCompatApp>): Promi
   const modelsBody = (await modelsResponse.json()) as { data: Array<{ id: string }> };
   const modelId = modelsBody.data[0]?.id;
   expect(modelId).toBeDefined();
-  return modelId as string;
+  if (!modelId) {
+    throw new Error("expected at least one OpenAI-compatible model id");
+  }
+  return modelId;
 };
 
 describe("openai v1 models", () => {

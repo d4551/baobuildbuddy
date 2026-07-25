@@ -40,16 +40,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
 } from "../types/settings";
 
-import {
-  brandContentSettingsPatchSchema,
-  brandContentSettingsSchema,
-  brandSettingsPatchSchema,
-  brandSettingsSchema,
-  brandThemePalettePatchSchema,
-  brandThemePaletteSchema,
-  brandTypographySettingsPatchSchema,
-  brandTypographySettingsSchema,
-} from "./settings-brand.schema";
+import { brandSettingsSchema } from "./settings-brand.schema";
 
 export {
   brandContentSettingsPatchSchema,

@@ -104,14 +104,14 @@ const installOnDeviceSpeechHooks = async (page: Page): Promise<void> => {
     } else {
       const NativeCtor = g.SpeechRecognition ?? g.webkitSpeechRecognition;
       if (NativeCtor) {
-        const proto = NativeCtor.prototype as SpeechRecognition & { start: () => void };
-        const originalStart = proto.start;
+        const proto = NativeCtor.prototype;
+        const originalStart = proto.start.bind(proto) as (this: SpeechRecognition) => void;
         proto.start = function patchedStart(this: SpeechRecognition): void {
           const state = g.__baoOnDeviceSpeech;
           if (state) {
             state.recognitionStarts += 1;
           }
-          originalStart.apply(this);
+          originalStart.call(this);
         };
       }
     }
