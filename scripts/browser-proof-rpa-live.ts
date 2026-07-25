@@ -96,10 +96,11 @@ const assertRunsViaUi = async (page: Page, beforeCount: number): Promise<number>
   await shot(page, "04-runs-history");
   const afterCount = await countRunRows(page);
   const body = await page.locator("main").innerText();
-  const hasRunSignal =
-    afterCount > beforeCount || afterCount > 0 || RUN_STATUS_SIGNAL_PATTERN.test(body);
-  if (!hasRunSignal) {
-    throw new Error("Runs history empty after scraper click — RPA not integrated");
+  // Fail-closed: require a new run row (stale history / body copy must not green).
+  if (!(afterCount > beforeCount)) {
+    throw new Error(
+      `Runs history did not grow after scraper click (before=${String(beforeCount)} after=${String(afterCount)} bodyHasScrapeSignal=${String(RUN_STATUS_SIGNAL_PATTERN.test(body))}) — RPA not integrated`,
+    );
   }
   return afterCount;
 };
@@ -169,13 +170,15 @@ const main = async (): Promise<void> => {
     await Bun.write(videoPath, Bun.file(raw));
   }
 
+  const scraperDeltaOk = afterCount > beforeCount;
+  const ok = scraperDeltaOk && jobApplyOk;
   await writeFile(
     join(OUT, "report.json"),
     `${JSON.stringify(
       {
-        ok: true,
+        ok,
         mode: "ui-click-type+video",
-        scraper: { ran: true, runsBefore: beforeCount, runsAfter: afterCount },
+        scraper: { ran: scraperDeltaOk, runsBefore: beforeCount, runsAfter: afterCount },
         jobApply: { ok: jobApplyOk, error: jobApplyError },
         videoPath,
       },
@@ -183,6 +186,11 @@ const main = async (): Promise<void> => {
       2,
     )}\n`,
   );
+  if (!ok) {
+    throw new Error(
+      `browser-proof-rpa-live FAIL scraperDelta=${String(scraperDeltaOk)} jobApply=${String(jobApplyOk)} error=${jobApplyError ?? "none"}`,
+    );
+  }
   await writeOutput(`browser-proof-rpa-live OK (UI) video=${videoPath ?? "none"} → ${OUT}`);
 };
 

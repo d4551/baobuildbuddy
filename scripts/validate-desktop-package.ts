@@ -16,7 +16,26 @@ const TAURI_CONF_CANDIDATES = [
   "packages/desktop/src-tauri/tauri.conf.json5",
 ] as const;
 const MOD_DECL_PATTERN = /^\s*(?:pub\s+)?mod\s+([A-Za-z0-9_]+)\s*;/gmu;
-const CARGO_ERROR_DETAIL_MAX_CHARS = 2000;
+const CARGO_ERROR_DETAIL_MAX_CHARS = 6000;
+
+export const trimCargoFailureDetail = (combined: string): string => {
+  const trimmed = combined.trim();
+  if (trimmed.length <= CARGO_ERROR_DETAIL_MAX_CHARS) {
+    return trimmed;
+  }
+  // Prefer the tail — downloads/compile spam is at the head; rustc errors at the end.
+  const errorLines = trimmed
+    .split("\n")
+    .filter((line) => /\berror\b|failed to|cannot find|not found|Package /i.test(line));
+  if (errorLines.length > 0) {
+    const focused = errorLines.join("\n");
+    if (focused.length <= CARGO_ERROR_DETAIL_MAX_CHARS) {
+      return focused;
+    }
+    return focused.slice(-CARGO_ERROR_DETAIL_MAX_CHARS);
+  }
+  return trimmed.slice(-CARGO_ERROR_DETAIL_MAX_CHARS);
+};
 
 const fileExists = async (relativePath: string): Promise<boolean> => {
   const settled = await access(join(process.cwd(), relativePath)).then(
@@ -90,10 +109,9 @@ const runCargoCheck = async (): Promise<ValidationViolation[]> => {
   if (exitCode === 0) {
     return [];
   }
-  const detail = [stderr, stdout]
-    .filter((chunk) => chunk.trim().length > 0)
-    .join("\n")
-    .slice(0, CARGO_ERROR_DETAIL_MAX_CHARS);
+  const detail = trimCargoFailureDetail(
+    [stderr, stdout].filter((chunk) => chunk.trim().length > 0).join("\n"),
+  );
   return [
     {
       filePath: CARGO_TOML,

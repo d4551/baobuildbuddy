@@ -39,11 +39,10 @@ test("generate fails over to the first healthy provider with a concrete provider
   const localProvider = service.getProvider("local");
   const huggingfaceProvider = service.getProvider("huggingface");
 
-  expect(localProvider).toBeTruthy();
-  expect(huggingfaceProvider).toBeTruthy();
-
+  expect(localProvider).toBeDefined();
+  expect(huggingfaceProvider).toBeDefined();
   if (!(localProvider && huggingfaceProvider)) {
-    return;
+    throw new Error("Expected local + huggingface providers to be registered");
   }
 
   spyOn(LocalProvider, "inspectEndpoint").mockResolvedValue({
@@ -87,11 +86,10 @@ test("generate throws when every provider in the failover order fails", async ()
   const localProvider = service.getProvider("local");
   const huggingfaceProvider = service.getProvider("huggingface");
 
-  expect(localProvider).toBeTruthy();
-  expect(huggingfaceProvider).toBeTruthy();
-
+  expect(localProvider).toBeDefined();
+  expect(huggingfaceProvider).toBeDefined();
   if (!(localProvider && huggingfaceProvider)) {
-    return;
+    throw new Error("Expected local + huggingface providers to be registered");
   }
 
   spyOn(LocalProvider, "inspectEndpoint").mockResolvedValue({

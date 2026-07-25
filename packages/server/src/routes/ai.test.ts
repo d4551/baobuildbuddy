@@ -1,11 +1,7 @@
 import { afterAll, afterEach, beforeAll, expect, mock, spyOn, test } from "bun:test";
 import { AI_CHAT_API_ENDPOINT } from "@bao/shared/constants/ai-chat";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_OK,
-  HTTP_STATUS_UNPROCESSABLE_ENTITY,
-} from "@bao/shared/constants/http";
+import { HTTP_STATUS_OK, HTTP_STATUS_UNPROCESSABLE_ENTITY } from "@bao/shared/constants/http";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -83,8 +79,18 @@ test("POST ai chat accepts message", async () => {
 });
 
 test("POST ai chat requires message (validation error)", async () => {
-  const res = await requestJson<{ error?: string }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
-  expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNPROCESSABLE_ENTITY]).toContain(res.status);
+  const res = await requestJson<{
+    type?: string;
+    status?: number;
+    detail?: string;
+    errors?: Array<{ message?: string }>;
+  }>(app, "POST", AI_CHAT_API_ENDPOINT, {});
+  // Elysia body validation is 422 — do not soft-OR with 400.
+  expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
+  expect(res.body.type).toBe("validation");
+  expect(res.body.detail ?? "").toMatch(/message/i);
+  expect(Array.isArray(res.body.errors)).toBe(true);
+  expect((res.body.errors ?? []).length).toBeGreaterThan(0);
 });
 
 test("POST ai chat accepts contextual payload without validation drift", async () => {
