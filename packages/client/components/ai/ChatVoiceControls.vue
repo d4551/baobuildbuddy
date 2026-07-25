@@ -60,6 +60,7 @@ const emit = defineEmits<{
   "save-speech-settings": [];
   "toggle-listening": [];
   "replay-assistant": [];
+  "test-on-device-tts": [];
 }>();
 
 const { t } = useI18n();
@@ -100,6 +101,7 @@ function handleAutoSpeakChange(event: Event): void {
     v-if="props.supportsRecognition"
     class="btn btn-ghost"
     :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem, 'btn-warning': props.isListening }]"
+    data-testid="on-device-stt-mic"
     :title="
       props.isListening
         ? t('aiChatCommon.voice.stopTitle')
@@ -143,6 +145,33 @@ function handleAutoSpeakChange(event: Event): void {
     v-if="props.supportsSynthesis"
     class="btn btn-ghost"
     :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+    data-testid="on-device-tts-test"
+    :aria-label="t('aiChatCommon.voice.testOnDeviceAria')"
+    :title="t('aiChatCommon.voice.testOnDeviceTitle')"
+    @click="emit('test-on-device-tts')"
+  >
+    <svg
+      :class="iconClass"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        :stroke-width="SVG_STROKE_WIDTH_DEFAULT"
+        d="M9 18V5l12-2v13"
+      />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  </button>
+  <button
+    v-if="props.supportsSynthesis"
+    class="btn btn-ghost"
+    :class="[TOUCH_TARGET_MIN_CLASS, { 'join-item': props.joinItem }]"
+    data-testid="on-device-tts-replay"
     :aria-label="t('aiChatCommon.voice.replayAria')"
     :title="t('aiChatCommon.voice.replayTitle')"
     :disabled="!props.canReplayAssistant || props.loading"

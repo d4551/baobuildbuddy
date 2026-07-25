@@ -41,6 +41,8 @@ import {
   authBootstrapBody,
   authConfiguredResponses,
   authInitResponses,
+  authRevokeResponses,
+  authRotateResponses,
   authStatusResponses,
 } from "./auth-route-contracts";
 
@@ -236,6 +238,7 @@ export const authRoutes = new Elysia({
             "Auth",
             "Rotate the active API key and return the new secret once for safekeeping.",
           ),
+          response: authRotateResponses,
         },
         async ({ request, status }) => {
           const authFailure = await authenticateApiKey(request);
@@ -281,6 +284,7 @@ export const authRoutes = new Elysia({
             "Auth",
             "Revoke the active API key so subsequent authenticated requests are rejected.",
           ),
+          response: authRevokeResponses,
         },
         async ({ request, status }) => {
           const authFailure = await authenticateApiKey(request);

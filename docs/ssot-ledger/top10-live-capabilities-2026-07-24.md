@@ -57,6 +57,10 @@
 26. **Desktop `gen/runtime` full package** — `prepare:desktop-runtime` + `verify:desktop-runtime` EXIT 0 (server/bin/scraper ~96MB; gitignored under `src-tauri/gen/`).
 27. `proof:dom-reactivity` findings=0 (CM6 type→DOM, theme flip, omnisearch, mobile dock + desktop sidebar).
 
+## Closed (on-device speech)
+
+28. **On-device STT/TTS** — Browser (on-device) labels + hint; Test speaker control; `proof:on-device-speech` findings=0 (SpeechRecognition.start + speechSynthesis.speak). Cloud TTS has no server synth route yet (settings metadata only).
+
 ## Remaining (honest)
 
 1. **STT** — no mic in cloud agent (env). Code + `/api/speech` wired; live mic unproven here.

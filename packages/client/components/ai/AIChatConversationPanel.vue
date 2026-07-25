@@ -76,6 +76,7 @@ const emit = defineEmits<{
   saveSpeech: [];
   toggleListening: [];
   replayAssistant: [];
+  testOnDeviceTts: [];
 }>();
 
 const { t } = useI18n();
@@ -274,6 +275,7 @@ const updateInput = (event: Event): void => {
               @update:auto-speak-replies="emit('update:autoSpeakReplies', $event)"
               @toggle-listening="emit('toggleListening')"
               @replay-assistant="emit('replayAssistant')"
+              @test-on-device-tts="emit('testOnDeviceTts')"
             />
           </ClientOnly>
           <details class="collapse collapse-arrow border border-base-300 bg-base-100" :class="[MARGIN_TOKEN_CLASS.mt2]">

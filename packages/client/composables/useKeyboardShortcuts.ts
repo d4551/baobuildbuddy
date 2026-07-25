@@ -68,14 +68,13 @@ async function pushShortcutRoute(
   }
 }
 
-/** Enterprise command palette: Cmd/Ctrl+K opens workspace OmniSearch. */
+/** Enterprise command palette: Cmd/Ctrl+K or Cmd/Ctrl+P opens workspace OmniSearch. */
 function isOpenSearchShortcut(event: KeyboardEvent): boolean {
-  return (
-    (event.metaKey || event.ctrlKey) &&
-    !event.shiftKey &&
-    !event.altKey &&
-    event.key.toLowerCase() === "k"
-  );
+  if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+    return false;
+  }
+  const key = event.key.toLowerCase();
+  return key === "k" || key === "p";
 }
 
 /** Chat composer focus: Cmd/Ctrl+Shift+K (distinct from search). */

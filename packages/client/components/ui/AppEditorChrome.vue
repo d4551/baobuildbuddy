@@ -14,12 +14,21 @@ defineProps<{
   readonly redoLabel: string;
   readonly dirtyLabel: string;
   readonly savedLabel: string;
+  readonly vimLabel?: string;
+  readonly minimapLabel?: string;
+  readonly commandsLabel?: string;
+  readonly vimActive?: boolean;
+  readonly minimapActive?: boolean;
+  readonly showPowerToggles?: boolean;
 }>();
 
 const emit = defineEmits<{
   find: [];
   undo: [];
   redo: [];
+  toggleVim: [];
+  toggleMinimap: [];
+  commands: [];
 }>();
 </script>
 
@@ -59,6 +68,38 @@ const emit = defineEmits<{
         @click="emit('find')"
       >
         <span :class="TYPOGRAPHY_SCALE_CLASS.sm">{{ findLabel }}</span>
+      </button>
+      <button
+        v-if="commandsLabel"
+        type="button"
+        :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, 'btn-sm']"
+        :aria-label="commandsLabel"
+        data-testid="editor-commands"
+        @click="emit('commands')"
+      >
+        <span :class="TYPOGRAPHY_SCALE_CLASS.sm">{{ commandsLabel }}</span>
+      </button>
+      <button
+        v-if="showPowerToggles && vimLabel"
+        type="button"
+        :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, 'btn-sm', vimActive ? 'btn-active' : '']"
+        :aria-label="vimLabel"
+        :aria-pressed="vimActive ? 'true' : 'false'"
+        data-testid="editor-vim-toggle"
+        @click="emit('toggleVim')"
+      >
+        <span :class="TYPOGRAPHY_SCALE_CLASS.sm">{{ vimLabel }}</span>
+      </button>
+      <button
+        v-if="showPowerToggles && minimapLabel"
+        type="button"
+        :class="[OUTLINE_ACTION_CLASS, TOUCH_TARGET_MIN_CLASS, 'btn-sm', minimapActive ? 'btn-active' : '']"
+        :aria-label="minimapLabel"
+        :aria-pressed="minimapActive ? 'true' : 'false'"
+        data-testid="editor-minimap-toggle"
+        @click="emit('toggleMinimap')"
+      >
+        <span :class="TYPOGRAPHY_SCALE_CLASS.sm">{{ minimapLabel }}</span>
       </button>
     </div>
   </div>

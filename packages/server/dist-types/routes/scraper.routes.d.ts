@@ -38,6 +38,7 @@ export declare const scraperRoutes: import("elysia/types").AddRoute<string, "loc
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         portalId: import("typebox").TString;

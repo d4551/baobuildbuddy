@@ -49,12 +49,14 @@ const aiChatPage = {
       saveErrorFallback: "Failed to save speech profile",
       unsavedHint: "You have unsaved speech profile changes.",
       providers: {
-        browser: "Browser",
+        browser: "Browser (on-device)",
         openai: "OpenAI",
         huggingface: "Hugging Face",
         local: "Local",
         custom: "Custom",
       },
+      onDeviceHint:
+        "Browser (on-device) uses this device's Web Speech API — no audio leaves the machine for STT/TTS.",
     },
   },
 } as const;

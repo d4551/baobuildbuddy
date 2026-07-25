@@ -126,6 +126,7 @@ export function useAIChatPage() {
     selectedVoiceId: pageState.voice.selectedVoiceId,
     availableVoices: pageState.voice.voices,
     speakLatestAssistantMessage: pageState.voice.speakLatestAssistantMessage,
+    testOnDeviceTts: pageState.voice.testOnDeviceTts,
     toggleListening: pageState.voice.toggleListening,
     speechProviderOptions: core.speech.speechProviderOptions,
     speechConfig: core.speech.speechConfig,

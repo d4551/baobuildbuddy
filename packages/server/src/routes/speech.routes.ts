@@ -29,7 +29,10 @@ export const speechRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.s
   .post(
     toApiChildPath(API_ENDPOINTS.speechBase, API_ENDPOINTS.speechTranscribe),
     {
-      detail: openapiDetail("Speech", "Retrieve speech resource for BaoBuildBuddy career automation."),
+      detail: openapiDetail(
+        "Speech",
+        "Transcribe uploaded audio via the configured speech-to-text provider (Whisper-compatible).",
+      ),
       body: speechTranscribeBodySchema,
       response: speechTranscribeResponses,
     },

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppCodeEditor from "~/components/ui/AppCodeEditor.vue";
+import AppBlockEditor from "~/components/ui/AppBlockEditor.vue";
 import AppEditorChrome from "~/components/ui/AppEditorChrome.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
@@ -32,12 +32,6 @@ const emit = defineEmits<{
   save: [];
   edited: [];
 }>();
-
-const codeEditorRef = ref<{
-  openFind: () => void;
-  runUndo: () => void;
-  runRedo: () => void;
-} | null>(null);
 
 const previewParagraphs = computed(() =>
   contentText.value
@@ -79,18 +73,11 @@ function onTextareaInput(event: Event): void {
             :find-label="t('editor.find')"
             :undo-label="t('editor.undo')"
             :redo-label="t('editor.redo')"
-            @find="codeEditorRef?.openFind()"
-            @undo="codeEditorRef?.runUndo()"
-            @redo="codeEditorRef?.runRedo()"
           />
           <ClientOnly>
-            <AppCodeEditor
-              ref="codeEditorRef"
+            <AppBlockEditor
               :model-value="contentText"
-              mode="plain"
               :aria-label="t('coverLetterDetailPage.editor.aria')"
-              :placeholder="t('coverLetterDetailPage.editor.placeholder')"
-              :min-height-class="EDITOR_WRITING_MIN_HEIGHT_CLASS"
               @update:model-value="onUpdate"
             />
             <template #fallback>

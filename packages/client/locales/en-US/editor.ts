@@ -10,6 +10,12 @@ const editor = {
     redoAria: "Redo last edit",
     autosaved: "Draft autosaved",
     jsonInvalid: "Invalid JSON",
+    vim: "Vim",
+    vimAria: "Toggle Vim keybindings",
+    minimap: "Minimap",
+    minimapAria: "Toggle editor minimap",
+    commands: "Commands",
+    commandsAria: "Open editor command palette (Find)",
   },
 } as const;
 

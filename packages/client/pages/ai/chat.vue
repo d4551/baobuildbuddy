@@ -25,6 +25,7 @@ const {
   selectedVoiceId,
   availableVoices,
   speakLatestAssistantMessage,
+  testOnDeviceTts,
   toggleListening,
   speechProviderOptions,
   sttModelOptions,
@@ -105,6 +106,7 @@ useSeoMeta({
           @save-speech="handleSaveSpeechConfig"
           @toggle-listening="toggleListening"
           @replay-assistant="speakLatestAssistantMessage"
+          @test-on-device-tts="testOnDeviceTts"
         />
 
         <AIChatSidebar

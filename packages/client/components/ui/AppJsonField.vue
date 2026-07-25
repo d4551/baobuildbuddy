@@ -26,6 +26,9 @@ const codeEditorRef = ref<{
 } | null>(null);
 
 const localDirty = ref(false);
+const vimOn = ref(true);
+const minimapOn = ref(true);
+
 watch(
   () => props.modelValue,
   () => {
@@ -58,9 +61,18 @@ function onTextareaInput(event: Event): void {
         :find-label="t('editor.find')"
         :undo-label="t('editor.undo')"
         :redo-label="t('editor.redo')"
+        :vim-label="t('editor.vim')"
+        :minimap-label="t('editor.minimap')"
+        :commands-label="t('editor.commands')"
+        :vim-active="vimOn"
+        :minimap-active="minimapOn"
+        :show-power-toggles="true"
         @find="codeEditorRef?.openFind()"
         @undo="codeEditorRef?.runUndo()"
         @redo="codeEditorRef?.runRedo()"
+        @commands="codeEditorRef?.openFind()"
+        @toggle-vim="vimOn = !vimOn"
+        @toggle-minimap="minimapOn = !minimapOn"
       />
       <ClientOnly>
         <AppCodeEditor
@@ -69,6 +81,8 @@ function onTextareaInput(event: Event): void {
           mode="json"
           :aria-label="ariaLabel"
           :min-height-class="EDITOR_MIN_HEIGHT_CLASS"
+          :enable-vim="vimOn"
+          :enable-minimap="minimapOn"
           @update:model-value="onUpdate"
         />
         <template #fallback>

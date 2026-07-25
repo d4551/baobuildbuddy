@@ -428,6 +428,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/refresh", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     response: {
         readonly 200: import("typebox").TObject<{

@@ -53,6 +53,7 @@ export declare const searchRoutes: import("elysia/types").AddRoute<string, "loca
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     query: import("typebox").TObject<{
         prefix: import("typebox").TOptional<import("typebox").TString>;

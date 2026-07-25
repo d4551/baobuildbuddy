@@ -270,11 +270,27 @@ function createVoiceActions(input: VoiceActionInput) {
     return true;
   };
 
+  /** On-device TTS sample — does not require an assistant message (Web Speech API). */
+  const testOnDeviceTts = (): boolean => {
+    if (!input.speech.supportsSynthesis.value) {
+      return false;
+    }
+    speakWithSelectedVoice({
+      speech: input.speech,
+      text: "On-device text to speech is working.",
+      locale: input.locale.value,
+      selectedVoiceId: input.selectedVoiceId.value,
+      voices: input.voices.value,
+    });
+    return true;
+  };
+
   return {
     startListening,
     stopListening,
     toggleListening,
     speakLatestAssistantMessage,
+    testOnDeviceTts,
   };
 }
 

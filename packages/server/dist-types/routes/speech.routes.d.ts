@@ -16,6 +16,7 @@ export declare const speechRoutes: import("elysia/types").AddRoute<string, "loca
 }, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         audioBase64: import("typebox").TString;

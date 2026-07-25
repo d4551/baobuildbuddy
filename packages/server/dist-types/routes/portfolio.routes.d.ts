@@ -181,6 +181,7 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "post", "/export", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         format: import("typebox").TOptional<import("typebox").TString>;

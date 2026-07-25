@@ -66,6 +66,7 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "put", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         name: import("typebox").TOptional<import("typebox").TString>;

@@ -3218,11 +3218,12 @@ const catalog = {
       saveErrorFallback: "No se pudo guardar el perfil de voz",
       unsavedHint: "Tienes cambios sin guardar en el perfil de voz.",
       providers: {
-        browser: "Navegador",
+        browser: "Navegador (en el dispositivo)",
         custom: "Personalizado",
       },
     },
   },
+      onDeviceHint: "Navegador (en el dispositivo) usa la API Web Speech del equipo: el audio no sale de la máquina.",
   aiChatCommon: {
     youLabel: "Tú",
     defaultGreeting:
@@ -3238,6 +3239,9 @@ const catalog = {
       stopAria: "Detener entrada de voz",
       replayTitle: "Leer última respuesta del asistente",
       replayAria: "Leer última respuesta del asistente",
+      testOnDeviceTitle: "Probar altavoz en el dispositivo",
+      testOnDeviceAria: "Reproducir una muestra corta con TTS en el dispositivo",
+      testOnDeviceSample: "La síntesis de voz en el dispositivo funciona.",
       voiceLegend: "Salida de voz",
       voiceAria: "Selección de salida de voz",
       systemVoiceOption: "Voz del sistema por defecto",

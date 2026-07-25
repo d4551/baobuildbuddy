@@ -190,6 +190,7 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     response: {
         200: import("typebox").TObject<{

@@ -302,6 +302,7 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "delete", "/:id", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     params: import("typebox").TObject<{
         id: import("typebox").TString;

@@ -1,7 +1,9 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
+  HTTP_STATUS_UNAUTHORIZED,
 } from "@bao/shared/constants/http";
 import { t } from "elysia";
 import type { Static } from "typebox";
@@ -44,4 +46,21 @@ export const authInitResponses = {
   [HTTP_STATUS_OK]: authInitSuccessResponseSchema,
   [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
   [HTTP_STATUS_FORBIDDEN]: simpleErrorResponseSchema,
+} as const;
+
+export const authRotateResponses = {
+  [HTTP_STATUS_OK]: authInitSuccessResponseSchema,
+  [HTTP_STATUS_UNAUTHORIZED]: simpleErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
+
+export const authRevokeResponseSchema = t.Object({
+  revoked: t.Boolean(),
+  message: t.Optional(t.String()),
+});
+
+export const authRevokeResponses = {
+  [HTTP_STATUS_OK]: authRevokeResponseSchema,
+  [HTTP_STATUS_UNAUTHORIZED]: simpleErrorResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 } as const;

@@ -330,6 +330,7 @@ export declare const skillMappingRoutes: import("elysia/types").AddRoute<string,
 }, "post", "/ai-analyze", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         gameExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnion<[import("typebox").TString, import("typebox").TNumber, import("typebox").TBoolean, import("typebox").TNull]>>>;

@@ -107,6 +107,7 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
 }, "post", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         model: import("typebox").TString;

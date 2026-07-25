@@ -275,6 +275,7 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
 }, "post", "/automation-action", import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     body: import("typebox").TObject<{
         action: import("typebox").TString;

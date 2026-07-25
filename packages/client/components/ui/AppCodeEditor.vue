@@ -14,11 +14,14 @@ import {
   lineNumbers,
   placeholder as cmPlaceholder,
 } from "@codemirror/view";
+import { vim } from "@replit/codemirror-vim";
+import { showMinimap } from "@replit/codemirror-minimap";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { useI18n } from "vue-i18n";
 import {
   EDITOR_HOST_CLASS,
   EDITOR_MIN_HEIGHT_CLASS,
+  EDITOR_POWER_MODES,
   EDITOR_PROSE_MODES,
   type EditorMode,
 } from "~/constants/editor";
@@ -31,22 +34,34 @@ const props = withDefaults(
     readonly placeholder?: string;
     readonly readonly?: boolean;
     readonly minHeightClass?: string;
+    readonly enableVim?: boolean;
+    readonly enableMinimap?: boolean;
   }>(),
   {
     placeholder: "",
     readonly: false,
     minHeightClass: EDITOR_MIN_HEIGHT_CLASS,
+    enableVim: undefined,
+    enableMinimap: undefined,
   },
 );
-
-const { t } = useI18n();
 
 const emit = defineEmits<{
   "update:modelValue": [value: string];
 }>();
 
+const { t } = useI18n();
+
 const hostRef = ref<HTMLDivElement | null>(null);
 let view: EditorView | null = null;
+
+const powerMode = computed(() => EDITOR_POWER_MODES.includes(props.mode));
+const vimEnabled = computed(() =>
+  props.enableVim === undefined ? powerMode.value && props.mode !== "markdown" : props.enableVim,
+);
+const minimapEnabled = computed(() =>
+  props.enableMinimap === undefined ? powerMode.value && !EDITOR_PROSE_MODES.includes(props.mode) : props.enableMinimap,
+);
 
 const jsonParseLinter = linter((viewState) => {
   const text = viewState.state.doc.toString();
@@ -133,8 +148,20 @@ function buildExtensions(): Extension[] {
     EditorView.editorAttributes.of({
       "aria-label": props.ariaLabel,
       role: "textbox",
+      "data-vim": vimEnabled.value ? "on" : "off",
+      "data-minimap": minimapEnabled.value ? "on" : "off",
     }),
   ];
+  if (vimEnabled.value) {
+    extensions.push(vim());
+  }
+  if (minimapEnabled.value) {
+    extensions.push(
+      showMinimap.of({
+        create: () => ({ dom: document.createElement("div") }),
+      }),
+    );
+  }
   if (!isProse) {
     extensions.push(lineNumbers(), monoTheme);
   }
@@ -148,10 +175,16 @@ function buildExtensions(): Extension[] {
   return extensions;
 }
 
+function destroyEditor(): void {
+  view?.destroy();
+  view = null;
+}
+
 function mountEditor(): void {
-  if (!hostRef.value || view) {
+  if (!hostRef.value) {
     return;
   }
+  destroyEditor();
   view = new EditorView({
     parent: hostRef.value,
     state: EditorState.create({
@@ -195,13 +228,18 @@ watch(
   },
 );
 
+watch([vimEnabled, minimapEnabled], () => {
+  if (hostRef.value) {
+    mountEditor();
+  }
+});
+
 onMounted(() => {
   mountEditor();
 });
 
 onBeforeUnmount(() => {
-  view?.destroy();
-  view = null;
+  destroyEditor();
 });
 
 defineExpose({
@@ -209,6 +247,7 @@ defineExpose({
   runUndo,
   runRedo,
   focus: () => view?.focus(),
+  remount: mountEditor,
 });
 </script>
 

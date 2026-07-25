@@ -91,6 +91,7 @@ export declare const statsRoutes: import("elysia/types").AddRoute<string, "local
 }, import("elysia/types").DefaultEphemeral, import("elysia/types").DefaultEphemeral, "get", string, import("elysia/types").IntersectIfObjectSchema<import("elysia").UnwrapRoute<{
     detail: {
         tags: string[];
+        description: string;
     };
     response: {
         200: import("typebox").TObject<{
