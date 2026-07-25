@@ -81,6 +81,11 @@ const contentSectionCount = computed(() => {
 
 const hasUnsavedChanges = computed(() => buildFormFingerprint() !== lastSavedFingerprint.value);
 
+const { notifyEdited: scheduleCoverLetterAutosave } = useEditorChrome({
+  getFingerprint: () => buildFormFingerprint(),
+  onAutosave: () => handleSave(),
+});
+
 function templateLabel(template: CoverLetterTemplate): string {
   return t(`coverLetterDetailPage.templates.${template}`);
 }
@@ -272,12 +277,12 @@ async function handleExport(format: "pdf" | "docx") {
       <CoverLetterEditorCard
         v-model:content-text="formData.contentText"
         :content-character-count="contentCharacterCount"
+        :is-dirty="hasUnsavedChanges"
         :t="t"
         @clear="clearContent"
         @save="handleSave"
+        @edited="scheduleCoverLetterAutosave"
       />
-
-      <CoverLetterPreviewCard :content-text="formData.contentText" :t="t" />
     </div>
 
     <ConfirmDialog

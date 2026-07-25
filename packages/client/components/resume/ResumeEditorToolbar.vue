@@ -56,7 +56,7 @@ const { t } = useI18n();
       <AppExportMenu 
         :button-label="t('resumePage.exportButton')"
         :button-aria-label="t('resumePage.exportButtonAria')"
-        summary-:class="[OUTLINE_ACTION_CLASS]"
+        :summary-class="OUTLINE_ACTION_CLASS"
         @export="emit('export', $event)"
       />
       <button :class="[PRIMARY_ACTION_CLASS]" :aria-label="t('resumePage.saveButtonAria')" @click="emit('save')">

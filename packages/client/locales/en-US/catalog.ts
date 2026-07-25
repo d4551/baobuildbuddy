@@ -15,6 +15,7 @@ import automationruns from "./automation/runs";
 import automationscraper from "./automation/scraper";
 import common from "./common";
 import confirmDialog from "./confirmDialog";
+import editor from "./editor";
 import coverLetterDetailPage from "./coverLetterDetailPage";
 import coverLetterPage from "./coverLetterPage";
 import dailyChallengeCard from "./dailyChallengeCard";
@@ -73,6 +74,7 @@ import xpBar from "./xpBar";
 type EnglishLocaleCatalog = typeof meta &
   typeof app &
   typeof common &
+  typeof editor &
   typeof a11y &
   typeof layout &
   typeof apiErrors &
@@ -145,6 +147,7 @@ const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   meta,
   app,
   common,
+  editor,
   a11y,
   layout,
   apiErrors,

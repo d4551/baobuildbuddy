@@ -117,7 +117,8 @@
         "scripts/browser-proof-pdf-live.ts",
         "scripts/browser-proof-rpa-live.ts",
         "scripts/browser-record-ai-pdf-demo.ts",
-        "scripts/browser-record-full-desktop-tour.ts"
+        "scripts/browser-record-full-desktop-tour.ts",
+        "scripts/browser-record-editor-ux-demo.ts"
       ],
       "linter": {
         "rules": {
