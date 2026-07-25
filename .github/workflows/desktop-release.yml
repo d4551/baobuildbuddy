@@ -116,9 +116,7 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.97.1
+        uses: dtolnay/rust-toolchain@1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -259,9 +257,7 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.97.1
+        uses: dtolnay/rust-toolchain@1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -395,9 +391,7 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.97.1
+        uses: dtolnay/rust-toolchain@1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
@@ -494,9 +488,7 @@ jobs:
           bun-version: ${{ steps.bun-version.outputs.version }}
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.97.1
+        uses: dtolnay/rust-toolchain@1.97.1
 
       - name: Cache Rust artifacts
         uses: Swatinem/rust-cache@v2
