@@ -76,6 +76,22 @@ export function resolveApiEndpoint(
 }
 
 /**
+ * Prefer same-origin `/api/...` paths in the browser so Nuxt's API proxy owns the
+ * request. Absolute cross-origin API hosts break blob downloads and CDP capture.
+ */
+export function resolveBrowserApiFetchUrl(absoluteEndpointUrl: string, pageUrl: URL): string {
+  try {
+    const endpoint = new URL(absoluteEndpointUrl, pageUrl);
+    if (endpoint.pathname === API_ENDPOINT_PREFIX || endpoint.pathname.startsWith(`${API_ENDPOINT_PREFIX}/`)) {
+      return `${endpoint.pathname}${endpoint.search}`;
+    }
+  } catch {
+    /* keep absolute */
+  }
+  return absoluteEndpointUrl;
+}
+
+/**
  * Resolves a WebSocket endpoint URL from runtime config and request context.
  *
  * @param configuredBase Runtime-configured WebSocket or API base.
