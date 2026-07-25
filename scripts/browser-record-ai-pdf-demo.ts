@@ -76,7 +76,7 @@ const exportPdf = async (
   return saveDownload(result.value, filename);
 };
 
-const GREETING_SNIPPET = "Hi, I’m Bao";
+const GREETING_SNIPPET = "Hi, I'm Bao";
 
 const waitLiveAssistantReply = async (page: Page, nonce: string): Promise<string> => {
   const deadline = Date.now() + MS_TWO_MINUTES;
