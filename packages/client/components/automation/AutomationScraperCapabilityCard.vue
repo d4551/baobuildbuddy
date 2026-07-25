@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { AutomationScrapeTarget } from "@bao/shared/constants/automation";
-import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
@@ -8,16 +7,10 @@ import {
   BADGE_SOFT_SM_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_HEIGHT_CLASS,
-  FLUID_WIDTH_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
-  INSET_PANEL_MUTED_CLASS,
-  OUTLINE_ACTION_CLASS,
-  PADDING_TOKEN_CLASS,
-  PRIMARY_ACTION_CLASS,
   RADIUS_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
-  STATS_SHELL_VARIANT_CLASS,
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
@@ -60,7 +53,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const jobIntelligenceSettingsRoute = APP_ROUTE_BUILDERS.settingsSection("jobIntelligence");
 
 const issues = computed(() => resolveAutomationCapabilityIssues(props.capability, t));
 const issueCount = computed(() => issues.value.length);
@@ -69,13 +61,6 @@ const latestRunRoute = computed(() =>
   props.latestRun ? props.buildRunDetailRoute(props.latestRun.id) : props.automationRunsRoute,
 );
 const showOperations = computed(() => !props.compactMode);
-
-function handleScheduleInput(event: Event): void {
-  const input = event.target;
-  if (input instanceof HTMLInputElement) {
-    emit("update:scheduledRunAt", { target: props.capability.target, value: input.value });
-  }
-}
 
 function readinessValueClass(): string {
   if (props.capability.configured) {
@@ -108,16 +93,23 @@ function latestRunValueClass(): string {
         <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
           <div class="flex flex-wrap items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
             <span class="tooltip tooltip-bottom" :data-tip="capability.name">
-              <span class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary" :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]">
-                <component :class="[ICON_SIZE_CLASS[4]]" :is="resolveAppIconComponent(capabilityIconName)" aria-hidden="true"/>
+              <span
+                class="inline-flex items-center justify-center border border-primary/30 bg-primary/10 text-primary"
+                :class="[RADIUS_TOKEN_CLASS.full, ICON_SIZE_CLASS[8]]"
+              >
+                <component
+                  :class="[ICON_SIZE_CLASS[4]]"
+                  :is="resolveAppIconComponent(capabilityIconName)"
+                  aria-hidden="true"
+                />
                 <span class="sr-only">{{ capability.name }}</span>
               </span>
             </span>
             <h2 class="card-title">{{ capability.name }}</h2>
- <span :class="[BADGE_SOFT_SM_CLASS, capabilityAvailabilityBadgeClass(capability)]">
+            <span :class="[BADGE_SOFT_SM_CLASS, capabilityAvailabilityBadgeClass(capability)]">
               {{ capabilityAvailabilityLabel(capability) }}
             </span>
- <span :class="[BADGE_SM_CLASS, runStateBadgeClass(runState)]">
+            <span :class="[BADGE_SM_CLASS, runStateBadgeClass(runState)]">
               {{ runStateLabel(runState) }}
             </span>
           </div>
@@ -141,180 +133,51 @@ function latestRunValueClass(): string {
         </NuxtLink>
       </div>
 
-      <div :class="[STATS_SHELL_VARIANT_CLASS.xl]">
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.readinessTitle") }}</div>
-          <div 
-            class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, readinessValueClass()]"
-          >
-            {{ capabilityAvailabilityLabel(capability) }}
-          </div>
-          <div class="stat-desc">
-            {{ t("automation.scraper.providerCard.readinessDescription") }}
-          </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.issuesTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, issueCount === 0 ? 'text-success' : 'text-warning']">
-            {{ issueCount }}
-          </div>
-          <div class="stat-desc">
-            {{
-              issueCount === 0
-                ? t("automation.scraper.providerCard.issuesReady")
-                : t("automation.scraper.providerCard.issuesNeedsAttention")
-            }}
-          </div>
-        </div>
-        <div class="stat">
-          <div class="stat-title">{{ t("automation.scraper.providerCard.latestRunTitle") }}</div>
-          <div class="stat-value" :class="[TYPOGRAPHY_SCALE_CLASS.xl2, latestRunValueClass()]">
-            {{ runStateLabel(runState) }}
-          </div>
-          <div class="stat-desc">
-            {{
-              latestRun
-                ? latestRunStatusText(capability.target)
-                : t("automation.scraper.providerCard.latestRunDescription")
-            }}
-          </div>
-        </div>
-      </div>
+      <AutomationScraperCapabilityStats
+        :capability="capability"
+        :run-state="runState"
+        :issue-count="issueCount"
+        :readiness-value-class="readinessValueClass()"
+        :latest-run-value-class="latestRunValueClass()"
+        :capability-availability-label="capabilityAvailabilityLabel"
+        :run-state-label="runStateLabel"
+        :latest-run-status-text="latestRunStatusText"
+        :has-latest-run="Boolean(latestRun)"
+      />
 
-      <div v-if="showOperations" class="card-actions justify-end" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-        <button type="button" 
-          :class="[PRIMARY_ACTION_CLASS]"
-          :aria-label="cardRunAria(capability.target)"
-          :disabled="pendingAction !== null || !capability.configured"
-          @click="emit('run', capability.target)"
-        >
-          <LoadingSpinner v-if="isPendingAction(capability.target, 'run')" size="xs" :label="t('common.loading')" />
-          <span>{{ cardRunButtonLabel(capability.target) }}</span>
-        </button>
-      </div>
-
-      <div v-if="showOperations && runState !== 'idle'" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
-        <div 
-          v-if="runState === 'running'"
-          aria-live="polite"
-          class="alert alert-info alert-vertical sm:alert-horizontal"
-        >
-          <LoadingSpinner size="xs" :label="t('common.loading')" />
-          <span>{{ runStateLabel(runState) }}</span>
-        </div>
-        <div 
-          v-else-if="runState === 'success'"
-          role="alert"
-          class="alert alert-success alert-vertical sm:alert-horizontal"
-        >
-          <span>{{ runMessage }}</span>
-        </div>
-        <div 
-          v-else-if="runState === 'error'"
-          role="alert"
-          class="alert alert-error alert-vertical sm:alert-horizontal"
-        >
-          <span>{{ runMessage }}</span>
-        </div>
-      </div>
-
-      <div
-        v-if="issueCount > 0 && compactMode"
- class="text-secondary" :class="[INSET_PANEL_MUTED_CLASS, PADDING_TOKEN_CLASS.p4, TYPOGRAPHY_SCALE_CLASS.sm]"
- >
-        <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <p class="font-semibold text-base-content">
-            {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
-          </p>
-          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-            <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
-              {{ issue }}
-            </li>
-          </ul>
-          <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
-              {{ t("automation.hub.audit.actions.fixSetup") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-
-      <details
-        v-else-if="issueCount > 0"
-        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
-      >
-        <summary class="collapse-title text-base font-semibold">
-          {{ t("automation.scraper.providerCard.setupTitle", { count: issueCount }) }}
-        </summary>
-        <div class="collapse-content text-secondary" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4, TYPOGRAPHY_SCALE_CLASS.sm]">
-          <ul :class="[STACK_SPACE_Y_TOKEN_CLASS.stack2]">
-            <li v-for="(issue, issueIndex) in issues" :key="`${capability.id}-issue-${issueIndex}`">
-              {{ issue }}
-            </li>
-          </ul>
-          <div class="card-actions justify-end">
-            <NuxtLink :to="jobIntelligenceSettingsRoute" :class="[PRIMARY_ACTION_CLASS]">
-              {{ t("automation.hub.audit.actions.fixSetup") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </details>
-
-      <details 
+      <AutomationScraperCapabilityRunActions
         v-if="showOperations"
-        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
-      >
-        <summary class="collapse-title text-base font-semibold">
-          {{ t("automation.scraper.schedule.disclosureTitle") }}
-        </summary>
-        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">{{ t("automation.scraper.schedule.legend") }}</legend>
-            <input 
-              :value="scheduledRunAt"
-              class="input" :class="[FLUID_WIDTH_CLASS]"
-              type="datetime-local"
-              :aria-label="t('automation.scraper.schedule.aria')"
-              @input="handleScheduleInput"
-            />
-            <p class="label">{{ t("automation.scraper.schedule.hint") }}</p>
-          </fieldset>
-          <div class="card-actions justify-end">
-            <button type="button" 
-              :class="[OUTLINE_ACTION_CLASS]"
-              :aria-label="t('automation.scraper.schedule.buttonAria')"
-              :disabled="pendingAction !== null || !capability.configured || !scheduledRunAt"
-              @click="emit('schedule', capability.target)"
-            >
-              <LoadingSpinner v-if="isPendingAction(capability.target, 'schedule')" size="xs" :label="t('common.loading')" />
-              <span>{{ t("automation.scraper.schedule.button") }}</span>
-            </button>
-          </div>
-        </div>
-      </details>
+        :capability="capability"
+        :run-state="runState"
+        :run-message="runMessage"
+        :pending-action="pendingAction"
+        :card-run-aria="cardRunAria"
+        :card-run-button-label="cardRunButtonLabel"
+        :run-state-label="runStateLabel"
+        :is-pending-action="isPendingAction"
+        @run="emit('run', $event)"
+      />
 
-      <details 
-        v-if="showOperations && latestRun"
-        :class="[INSET_PANEL_MUTED_CLASS, 'collapse collapse-arrow']"
-      >
-        <summary class="collapse-title text-base font-semibold">
-          {{ latestRunNoticeText(capability.target) }}
-        </summary>
-        <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
-          <p class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-            {{ latestRunStatusText(capability.target) }}
-          </p>
-          <div class="card-actions justify-end">
-            <NuxtLink 
-              :to="buildRunDetailRoute(latestRun.id)"
-              :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
-              :aria-label="t('automation.scraper.openRunDetailAria', { id: latestRun.id })"
-            >
-              {{ t("automation.scraper.openRunDetailButton") }}
-            </NuxtLink>
-          </div>
-        </div>
-      </details>
+      <AutomationScraperCapabilityIssues
+        :capability-id="capability.id"
+        :issue-count="issueCount"
+        :issues="issues"
+        :compact-mode="Boolean(compactMode)"
+      />
+
+      <AutomationScraperCapabilitySchedule
+        v-if="showOperations"
+        :capability="capability"
+        :scheduled-run-at="scheduledRunAt"
+        :latest-run="latestRun"
+        :pending-action="pendingAction"
+        :latest-run-notice-text="latestRunNoticeText"
+        :latest-run-status-text="latestRunStatusText"
+        :is-pending-action="isPendingAction"
+        :build-run-detail-route="buildRunDetailRoute"
+        @schedule="emit('schedule', $event)"
+        @update:scheduled-run-at="emit('update:scheduledRunAt', $event)"
+      />
     </div>
   </div>
 </template>
