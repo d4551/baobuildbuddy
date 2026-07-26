@@ -600,9 +600,10 @@ export declare const automationRoutes: import("elysia/types").AddRoute<string, "
                             runHistoryAvailable: boolean;
                             liveUpdatesAvailable: boolean;
                             issues: {
-                                code: "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable";
+                                code: "chromium_executable_missing" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable";
                                 portalId?: string | undefined;
                                 portalName?: string | undefined;
+                                remediation?: string | undefined;
                             }[];
                         }[];
                     };

@@ -64,7 +64,9 @@ describe("resolvePlaywrightChromiumExecutable", () => {
       ),
     ).toBe(newest);
   });
+});
 
+describe("resolvePlaywrightChromiumExecutable installed layouts", () => {
   test("returns null when a build directory exists without the executable", () => {
     expect(
       resolvePlaywrightChromiumExecutable(
@@ -73,5 +75,34 @@ describe("resolvePlaywrightChromiumExecutable", () => {
         depsFor(["/cache"], ["chromium-1200"]),
       ),
     ).toBeNull();
+  });
+
+  /**
+   * Pinned to the layout current Playwright actually installs. An earlier path
+   * table only knew the legacy `Chromium.app` name, so a real installed browser
+   * probed as missing and the RPA capability audit reported job-apply as
+   * unconfigured on a machine that could run it.
+   */
+  test("finds the macOS 'Google Chrome for Testing' bundle Playwright ships today", () => {
+    const executable =
+      "/cache/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing";
+    expect(
+      resolvePlaywrightChromiumExecutable(
+        "/cache",
+        "darwin",
+        depsFor(["/cache", executable], ["chromium-1228"]),
+      ),
+    ).toBe(executable);
+  });
+
+  test("finds the headless shell build directory", () => {
+    const executable = "/cache/chromium_headless_shell-1228/chrome-mac-arm64/headless_shell";
+    expect(
+      resolvePlaywrightChromiumExecutable(
+        "/cache",
+        "darwin",
+        depsFor(["/cache", executable], ["chromium_headless_shell-1228"]),
+      ),
+    ).toBe(executable);
   });
 });

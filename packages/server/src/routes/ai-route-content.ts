@@ -3,12 +3,19 @@ import { asNumber, asString, asStringArray, isRecord } from "@bao/shared/utils/t
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
+import type { EntityPromptContext } from "../services/ai/prompt-context-loader";
 import {
   coverLetterPrompt,
   resumeEnhancePrompt,
   resumeScorePrompt,
 } from "../services/ai/prompts-resume";
 import type { CoverLetterSections, ResumeAnalysisResult } from "./ai-route-contracts";
+
+/**
+ * Resume analysis reviews the whole document, so the focus section is fixed rather
+ * than caller-supplied.
+ */
+const RESUME_ANALYSIS_SECTION = "all";
 
 interface ExperienceEntry {
   title?: string;
@@ -215,7 +222,7 @@ export const buildAnalyzeResumePrompt = (resumeText: string, jobDescription: str
   if (jobDescription.length > 0) {
     return `${resumeScorePrompt(resumeText, jobDescription)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
   }
-  return `${resumeEnhancePrompt(resumeText)}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
+  return `${resumeEnhancePrompt({ resume: resumeText, section: RESUME_ANALYSIS_SECTION })}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), improvements (string[]), keywords (string[]).`;
 };
 
 export const buildCoverLetterPrompt = (
@@ -223,7 +230,15 @@ export const buildCoverLetterPrompt = (
   position: string,
   jobDescription: string,
   resumeText: string,
-): string => coverLetterPrompt(company, position, jobDescription, resumeText);
+  entityContext: EntityPromptContext = {},
+): string =>
+  coverLetterPrompt({
+    company,
+    position,
+    jobInfo: jobDescription,
+    resumeContext: resumeText,
+    ...entityContext,
+  });
 
 export const resolveAnalyzeResumeJobDescription = async (jobId?: string): Promise<string> => {
   if (!jobId) {

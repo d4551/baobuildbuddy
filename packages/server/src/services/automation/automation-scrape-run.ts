@@ -8,6 +8,7 @@ import {
   type RpaCapabilityAuditReport,
 } from "@bao/shared/constants/automation";
 import { AUTOMATION_FINISHED_PROGRESS } from "@bao/shared/constants/automation-limits";
+import type { AutomationRunStatus } from "@bao/shared/constants/automation";
 import { jsonObjectSchema } from "@bao/shared/schemas/json.schema";
 import type { ScraperOperationResult } from "@bao/shared/types/jobs";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
@@ -45,6 +46,52 @@ const executeScrapeTarget = (target: AutomationScrapeTarget): Promise<ScraperOpe
   return scraperService.scrapeJobsForTarget(target);
 };
 
+/** Non-zero process exit used for every failed automation run. */
+const AUTOMATION_FAILURE_EXIT_CODE = 1;
+
+const resolveRunStartMessage = (target: AutomationScrapeTarget): string =>
+  isAutomationJobScrapeTarget(target)
+    ? `Running ${target} scrape`
+    : "Importing the curated studio directory";
+
+const resolveRunCompleteMessage = (
+  target: AutomationScrapeTarget,
+  result: ScraperOperationResult,
+): string => {
+  const upsertSummary = `${result.upserted} upserted, ${result.enrichment.enrichedRecords} enriched)`;
+  return isAutomationJobScrapeTarget(target)
+    ? `${target} scrape completed (${result.scraped} scraped, ${upsertSummary}`
+    : `curated studio directory import completed (${result.scraped} imported, ${upsertSummary}`;
+};
+
+/**
+ * A run that collected nothing because the target was misconfigured is a failure,
+ * not a success.
+ *
+ * This used to be hardcoded to `success` with `exitCode: 0`, so a scrape that
+ * returned `scraped: 0` alongside `errors: ["Missing enabled hitmarker portal
+ * fallbackUrl."]` was indistinguishable in the run history from a scrape that
+ * genuinely worked. Partial runs — some records collected despite errors — stay
+ * successful so a single flaky portal page does not discard the rest of the harvest;
+ * the errors remain in `output.errors` either way.
+ */
+export const resolveScrapeRunOutcome = (
+  result: ScraperOperationResult,
+): {
+  status: Extract<AutomationRunStatus, "success" | "error">;
+  error: string | null;
+  exitCode: number;
+} => {
+  if (result.errors.length > 0 && result.scraped === 0) {
+    return {
+      status: "error",
+      error: result.errors.join("; "),
+      exitCode: AUTOMATION_FAILURE_EXIT_CODE,
+    };
+  }
+  return { status: "success", error: null, exitCode: 0 };
+};
+
 const markScrapeRunStarted = async (
   runId: string,
   target: AutomationScrapeTarget,
@@ -74,7 +121,7 @@ const markScrapeRunStarted = async (
       runId,
       action: resolveScrapeAction(target),
       status: "running",
-      message: `Running ${target} scrape`,
+      message: resolveRunStartMessage(target),
       step: 0,
       totalSteps: 1,
     }),
@@ -94,7 +141,7 @@ const failScrapeRun = async (params: {
     params.target === "studios" ? API_ERROR_SCRAPE_STUDIOS_FAILED : API_ERROR_SCRAPE_JOBS_FAILED,
   );
   await markRunFailed(params.runId, errorMessage, automationSettings, {
-    exitCode: 1,
+    exitCode: AUTOMATION_FAILURE_EXIT_CODE,
     timedOut: false,
     aborted: false,
     executionMs: params.executionMs,
@@ -128,16 +175,18 @@ const completeScrapeRun = async (params: {
     enrichment: params.result.enrichment,
   });
 
+  const outcome = resolveScrapeRunOutcome(params.result);
+
   await db
     .update(automationRuns)
     .set({
-      status: "success",
+      status: outcome.status,
       output,
-      error: null,
+      error: outcome.error,
       progress: AUTOMATION_FINISHED_PROGRESS,
       currentStep: 1,
       totalSteps: 1,
-      exitCode: 0,
+      exitCode: outcome.exitCode,
       timedOut: false,
       aborted: false,
       executionMs: params.executionMs,
@@ -150,12 +199,8 @@ const completeScrapeRun = async (params: {
     params.createProgressEvent({
       runId: params.runId,
       action: resolveScrapeAction(params.target),
-      status: "success",
-      message:
-        `${params.target} scrape completed (` +
-        `${params.result.scraped} scraped, ` +
-        `${params.result.upserted} upserted, ` +
-        `${params.result.enrichment.enrichedRecords} enriched)`,
+      status: outcome.status,
+      message: outcome.error ?? resolveRunCompleteMessage(params.target, params.result),
       step: 1,
       totalSteps: 1,
     }),

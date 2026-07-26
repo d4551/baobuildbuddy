@@ -31,6 +31,32 @@ describe("collectDeadDaisyUiV4ViolationsForContent", () => {
     expect(violations.some((v) => v.message.includes("tabs-boxed"))).toBe(true);
   });
 
+  test("flags the bare avatar modifiers renamed in v5", () => {
+    const violations = collectDeadDaisyUiV4ViolationsForContent(
+      CONSUMER_PATH,
+      '<template><div class="avatar placeholder"></div><div class="avatar online"></div><div class="avatar offline"></div></template>',
+    );
+    expect(violations.some((v) => v.message.includes("avatar-placeholder"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("avatar-online"))).toBe(true);
+    expect(violations.some((v) => v.message.includes("avatar-offline"))).toBe(true);
+  });
+
+  test("flags bare menu state modifiers renamed in v5", () => {
+    const violations = collectDeadDaisyUiV4ViolationsForContent(
+      CONSUMER_PATH,
+      '<template><ul class="menu active"></ul></template>',
+    );
+    expect(violations.some((v) => v.message.includes("menu-active"))).toBe(true);
+  });
+
+  test("does not flag bare modifier words outside an owning component class list", () => {
+    const violations = collectDeadDaisyUiV4ViolationsForContent(
+      CONSUMER_PATH,
+      '<template><input class="input" placeholder="Search" /><div class="badge active"></div></template>',
+    );
+    expect(violations).toHaveLength(0);
+  });
+
   test("allows daisyUI v5 join / fieldset / tabs contracts", () => {
     const violations = collectDeadDaisyUiV4ViolationsForContent(
       CONSUMER_PATH,

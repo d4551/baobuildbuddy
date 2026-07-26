@@ -1,8 +1,10 @@
 import { afterEach, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { API_ERROR_COVER_LETTER_GENERATION_FAILED } from "@bao/shared/constants/api-errors";
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
+import type { AIResponse } from "@bao/shared/types/ai";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
+import { jobs } from "../db/schema/jobs";
 import { seedDatabase } from "../db/seed";
 import { AIService } from "../services/ai/ai-service";
 import type { RouteSetState } from "../types/route-state";
@@ -11,6 +13,14 @@ import {
   toGeneratedCoverLetterContent,
   validateGeneratedCoverLetterContent,
 } from "./cover-letter-route-generation-support";
+
+/** Minimal well-formed provider response; only `content` matters to these tests. */
+const buildStubAiResponse = (): AIResponse => ({
+  id: "stub-response",
+  provider: "openai",
+  model: "stub-model",
+  content: '{"introduction":"a","body":"b","conclusion":"c"}',
+});
 
 const activeSpies: Array<{ mockRestore: () => void }> = [];
 const trackSpy = <T extends { mockRestore: () => void }>(spy: T): T => {
@@ -201,7 +211,68 @@ describe("handleGenerateCoverLetter secret hygiene", () => {
     expect(JSON.stringify(result)).not.toContain(leakedSecret);
     expect(JSON.stringify(result)).not.toContain("Invalid API key");
   });
+
+  registerPromptContextTests();
 });
+
+/**
+ * The defect these cover: generation only ever saw `company`, `position` and a
+ * caller-supplied `jobInfo` blob, so the scraped posting and the studio record in
+ * the database never reached the prompt. Nothing asserted the prompt's contents, so
+ * the suite stayed green while the model was context-blind.
+ */
+function registerPromptContextTests(): void {
+  test("prompt carries the scraped job and its studio when jobId is supplied", async () => {
+    const jobId = "cover-letter-context-job";
+    await db.insert(jobs).values({
+      id: jobId,
+      title: "Senior Gameplay Engineer",
+      company: "Riot Games",
+      location: "Los Angeles, CA",
+      description: "Own gameplay systems for a live-service title.",
+      requirements: ["5+ years C++", "Multiplayer netcode"],
+      technologies: ["C++", "Perforce"],
+      source: "greenhouse",
+    });
+
+    const service = AIService.fromSettings(undefined);
+    const generateSpy = trackSpy(spyOn(service, "generate")).mockResolvedValue(
+      buildStubAiResponse(),
+    );
+    trackSpy(spyOn(AIService, "fromSettings")).mockReturnValue(service);
+
+    const set: RouteSetState = { status: 200 };
+    await handleGenerateCoverLetter(
+      { company: "Riot Games", position: "Senior Gameplay Engineer", jobId },
+      set,
+    );
+
+    const prompt = generateSpy.mock.calls[0]?.[0] ?? "";
+    // Scraped posting facts.
+    expect(prompt).toContain("Own gameplay systems for a live-service title.");
+    expect(prompt).toContain("Multiplayer netcode");
+    expect(prompt).toContain("greenhouse");
+    // Studio resolved from the posting's company, carrying its real stack.
+    expect(prompt).toContain("Studio context:");
+    expect(prompt).toContain("Proprietary Engine");
+  });
+
+  test("prompt states job context is absent when no jobId is supplied", async () => {
+    const service = AIService.fromSettings(undefined);
+    const generateSpy = trackSpy(spyOn(service, "generate")).mockResolvedValue(
+      buildStubAiResponse(),
+    );
+    trackSpy(spyOn(AIService, "fromSettings")).mockReturnValue(service);
+
+    const set: RouteSetState = { status: 200 };
+    await handleGenerateCoverLetter({ company: "Nowhere Co", position: "Designer" }, set);
+
+    const prompt = generateSpy.mock.calls[0]?.[0] ?? "";
+    expect(prompt).toContain("Nowhere Co");
+    expect(prompt).not.toContain("Job context:");
+    expect(prompt).not.toContain("Studio context:");
+  });
+}
 
 describe("validateGeneratedCoverLetterContent", () => {
   test("fails loud when conclusion contains planning artifacts", () => {

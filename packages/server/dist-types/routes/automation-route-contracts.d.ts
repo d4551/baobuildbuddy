@@ -64,7 +64,7 @@ export declare const automationRunEnvelopeBodySchema: import("typebox").TObject<
  * `automation-route-capability-parity.test.ts` fails if this drifts from
  * RPA_CAPABILITY_ISSUE_CODES, which stays the single source of truth.
  */
-export declare const rpaCapabilityIssueCodeSchema: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
+export declare const rpaCapabilityIssueCodeSchema: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">, import("typebox").TLiteral<"chromium_executable_missing">]>;
 export declare const capabilityAuditEntryBodySchema: import("typebox").TObject<{
     id: import("typebox").TString;
     category: import("typebox").TUnion<[import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"scrape">]>;
@@ -78,9 +78,10 @@ export declare const capabilityAuditEntryBodySchema: import("typebox").TObject<{
     runHistoryAvailable: import("typebox").TBoolean;
     liveUpdatesAvailable: import("typebox").TBoolean;
     issues: import("typebox").TArray<import("typebox").TObject<{
-        code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
+        code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">, import("typebox").TLiteral<"chromium_executable_missing">]>;
         portalId: import("typebox").TOptional<import("typebox").TString>;
         portalName: import("typebox").TOptional<import("typebox").TString>;
+        remediation: import("typebox").TOptional<import("typebox").TString>;
     }>>;
 }>;
 export declare const capabilityAuditReportBodySchema: import("typebox").TObject<{
@@ -106,9 +107,10 @@ export declare const capabilityAuditReportBodySchema: import("typebox").TObject<
         runHistoryAvailable: import("typebox").TBoolean;
         liveUpdatesAvailable: import("typebox").TBoolean;
         issues: import("typebox").TArray<import("typebox").TObject<{
-            code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
+            code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">, import("typebox").TLiteral<"chromium_executable_missing">]>;
             portalId: import("typebox").TOptional<import("typebox").TString>;
             portalName: import("typebox").TOptional<import("typebox").TString>;
+            remediation: import("typebox").TOptional<import("typebox").TString>;
         }>>;
     }>>;
 }>;
@@ -340,9 +342,10 @@ export declare const automationCapabilitiesResponses: {
             runHistoryAvailable: import("typebox").TBoolean;
             liveUpdatesAvailable: import("typebox").TBoolean;
             issues: import("typebox").TArray<import("typebox").TObject<{
-                code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
+                code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">, import("typebox").TLiteral<"chromium_executable_missing">]>;
                 portalId: import("typebox").TOptional<import("typebox").TString>;
                 portalName: import("typebox").TOptional<import("typebox").TString>;
+                remediation: import("typebox").TOptional<import("typebox").TString>;
             }>>;
         }>>;
     }>;

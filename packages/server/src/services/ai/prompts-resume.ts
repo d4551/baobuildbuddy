@@ -1,13 +1,34 @@
 /**
- * Resume enhancement prompt
+ * Resume enhancement prompt.
+ *
+ * Takes a named context object rather than positional strings. The previous
+ * signature was `(resume, jobDescription?)`, and the route called it with the
+ * requested *section* in the second slot — so the prompt told the model the target
+ * job description was literally "all". Named fields make that class of mix-up
+ * impossible and let the caller supply real studio / job / skill context.
  */
-export function resumeEnhancePrompt(resume: string, jobDescription?: string): string {
+export interface ResumeEnhancePromptContext {
+  readonly resume: string;
+  /** Which resume section to focus on, e.g. "summary" or "all". */
+  readonly section: string;
+  readonly jobContext?: string;
+  readonly studioContext?: string;
+  readonly skillContext?: string;
+}
+
+export function resumeEnhancePrompt(context: ResumeEnhancePromptContext): string {
+  const supportingContext = [context.jobContext, context.studioContext, context.skillContext]
+    .filter((entry): entry is string => typeof entry === "string" && entry.length > 0)
+    .join("\n\n");
+
   return `Analyze this resume and suggest improvements to make it more effective for game industry positions.
 
 Resume:
-${resume}
+${context.resume}
 
-${jobDescription ? `Target Job Description:\n${jobDescription}\n\n` : ""}
+Focus section: ${context.section}
+
+${supportingContext}
 
 Provide specific suggestions for:
 1. Strengthening bullet points with quantifiable achievements
@@ -15,6 +36,9 @@ Provide specific suggestions for:
 3. Optimizing keywords for ATS (Applicant Tracking Systems)
 4. Improving action verbs and impact statements
 5. Better showcasing game projects, shipped titles, or relevant experience
+
+Ground every suggestion in the supplied job, studio and skill context when present;
+do not invent employer details that were not provided.
 
 Format your response with clear sections and actionable recommendations.`;
 }
@@ -44,28 +68,48 @@ Be honest but constructive in your assessment.`;
 }
 
 /**
- * Cover letter generation prompt
+ * Cover letter generation prompt.
+ *
+ * Instruction 3 asks the model to demonstrate knowledge of the company and its
+ * games. That was previously unbacked: the caller passed a company *name* and a
+ * free-form `jobInfo` blob, never the scraped studio record or the scraped posting,
+ * so the model had to invent the specifics it was told to demonstrate. The context
+ * fields below are the studio / job / skill blocks built by
+ * `prompt-context-entities.ts`.
  */
-export function coverLetterPrompt(
-  company: string,
-  position: string,
-  jobInfo: string,
-  resumeContext: string,
-): string {
+export interface CoverLetterPromptContext {
+  readonly company: string;
+  readonly position: string;
+  readonly jobInfo: string;
+  readonly resumeContext: string;
+  readonly jobContext?: string;
+  readonly studioContext?: string;
+  readonly skillContext?: string;
+}
+
+export function coverLetterPrompt(context: CoverLetterPromptContext): string {
+  const supportingContext = [context.studioContext, context.jobContext, context.skillContext]
+    .filter((entry): entry is string => typeof entry === "string" && entry.length > 0)
+    .join("\n\n");
+
   return `Write a compelling cover letter for this game industry position.
 
-Position: ${position}
-Company: ${company}
+Position: ${context.position}
+Company: ${context.company}
 
 Job Information:
-${jobInfo}
+${context.jobInfo}
 
-${resumeContext ? `Candidate Background:\n${resumeContext}` : ""}
+${supportingContext}
+
+${context.resumeContext ? `Candidate Background:\n${context.resumeContext}` : ""}
 
 Create a cover letter that:
 1. Shows genuine enthusiasm for the role and company
 2. Highlights 2-3 most relevant experiences or achievements
-3. Demonstrates knowledge of the company and their games/products
+3. Demonstrates knowledge of the company and their games/products, using only the
+   studio and job context supplied above — never invent titles, technologies or
+   values that were not provided
 4. Explains why this role is a great fit for the candidate's career goals
 5. Maintains a professional but passionate tone appropriate for gaming
 

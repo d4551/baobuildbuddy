@@ -12,4 +12,11 @@ concurrent = 1
 pathIgnorePatterns = [
   "**/packages/desktop/src-tauri/target/**",
   "**/packages/server/dist/**",
+  # Client `*.spec.ts` files are vitest-owned: they need the happy-dom
+  # environment declared in packages/client/vitest.config.ts, which `bun test`
+  # cannot provide. They run in full via `bun run --cwd packages/client test`
+  # (part of `bun run test`). Collecting them here would fail on a missing DOM
+  # rather than on anything real. `validate-dom-test-runner-ownership.ts` keeps
+  # the naming split honest so no DOM test can hide from either runner.
+  "**/packages/client/**/*.spec.ts",
 ]

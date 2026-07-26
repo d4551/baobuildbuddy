@@ -10,7 +10,7 @@ const isHttpSuccessStatus = (status: number): boolean =>
   status >= HTTP_STATUS_OK && status < HTTP_STATUS_MULTIPLE_CHOICES;
 
 const CLAUDE_TEST_MAX_TOKENS = 1;
-const CLAUDE_TEST_MODEL = "claude-sonnet-4-5-20250929";
+const CLAUDE_TEST_MODEL = "claude-sonnet-5";
 const ANTHROPIC_API_VERSION = "2023-06-01";
 
 export { AI_ROUTING_PURPOSE_IDS };
@@ -81,7 +81,7 @@ export const AI_PROVIDER_CATALOG: readonly AIProviderMetadata[] = [
     nameKey: "aiProviderCatalog.claude.name",
     descriptionKey: "aiProviderCatalog.claude.description",
     iconId: "claude",
-    modelHints: ["claude-sonnet-4-5-20250929", "claude-3-5-sonnet-20241022", "claude-3-opus"],
+    modelHints: ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"],
     requiresCredential: true,
   },
   {

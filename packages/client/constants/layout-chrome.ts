@@ -103,8 +103,16 @@ export const SURFACE_GLASS_CARD_ERROR_CLASS = "glass-error";
 export const SHELL_SIDEBAR_ASIDE_CLASS =
   "glass-subtle flex min-h-full flex-col items-start transition-[width,box-shadow,border-color] duration-[var(--motion-standard)] ease-[var(--ease-response)] is-drawer-close:w-14 is-drawer-open:w-64 border-r border-base-300";
 
-/** Shared sidebar menu layout (no menu-sm — touch floor via TOUCH_TARGET_MIN_CLASS). */
-export const SHELL_SIDEBAR_MENU_CLASS = "menu flex min-h-0 w-full flex-1 flex-col gap-1 p-4";
+/**
+ * Shared sidebar menu layout (no menu-sm — touch floor via TOUCH_TARGET_MIN_CLASS).
+ *
+ * Padding must collapse with the rail: the closed rail is `w-14` (56px), so the
+ * open-state `p-4` (32px horizontal) leaves only 24px for a 44px minimum touch
+ * target and every row overflows the rail. `p-1` keeps 48px of usable width and
+ * also removes the stacked vertical padding that made the icon column ragged.
+ */
+export const SHELL_SIDEBAR_MENU_CLASS =
+  "menu flex min-h-0 w-full flex-1 flex-col gap-1 p-4 is-drawer-close:p-1";
 
 /** Skip link contract for keyboard navigation. */
 export const SHELL_SKIP_LINK_CLASS =
@@ -232,7 +240,7 @@ export const SIDEBAR_WIDTH_LG_CLASS = "lg:w-64";
 
 /** Sidebar item surface inside the floating drawer (WCAG 2.5.5 / AAA 44px target). */
 export const SHELL_SIDEBAR_ITEM_CLASS =
-  "box-border flex h-11 min-h-11 min-w-11 items-center gap-2 rounded-box px-2 py-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right";
+  "box-border flex h-11 min-h-11 min-w-11 items-center gap-2 rounded-box px-2 py-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:justify-center is-drawer-close:px-0";
 
 /** Navbar dropdown (no menu-sm — keeps locale rows ≥44px). */
 export const SHELL_NAVBAR_DROPDOWN_CLASS =

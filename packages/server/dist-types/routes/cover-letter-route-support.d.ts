@@ -22,9 +22,11 @@ export declare const createCoverLetter: (body: {
         id: string;
         company: string;
         position: string;
-        jobInfo: Record<string, unknown>;
-        content: Record<string, unknown>;
-        template: "creative" | "executive" | "gaming" | "professional" | "technical";
+        jobInfo: Record<string, unknown> | null;
+        content: Record<string, unknown> | null;
+        template: string | null;
+        createdAt: string;
+        updatedAt: string;
     };
     statusCode: number;
 }>;

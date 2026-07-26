@@ -1,7 +1,9 @@
 import type { CompanyBoardConfig, JobProviderSettings } from "@bao/shared/types/settings-contracts";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
+import { createServerLogger } from "../../../utils/logger";
 import {
   type ATSResponse,
   isAtsResponse,
@@ -15,6 +17,17 @@ import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
 const REMOTE_PATTERN = /remote/i;
+
+const companyBoardLogger = createServerLogger("company-board");
+
+const logBoardFailure = (boardName: string, reason: string, details?: unknown): RawJob[] => {
+  companyBoardLogger.error("Company board fetch failed", {
+    boardName,
+    reason,
+    details,
+  });
+  return [];
+};
 
 /**
  * Provider that normalizes a single ATS board payload into `RawJob[]`.
@@ -49,20 +62,30 @@ export class CompanyBoardProvider implements JobProvider {
       }),
     );
     if (responseResult.status === "rejected") {
-      return [];
+      return logBoardFailure(this.name, "request_failed", {
+        error: toErrorMessage(responseResult.reason),
+        requestUrl: url,
+      });
     }
     const response = responseResult.value;
     if (!response.ok) {
-      return [];
+      return logBoardFailure(this.name, "response_not_ok", {
+        requestUrl: url,
+        status: response.status,
+      });
     }
 
     const rawText = await response.text();
     const parsed = safeParseJson(rawText);
     if (parsed === null) {
-      return [];
+      return logBoardFailure(this.name, "invalid_json", {
+        requestUrl: url,
+      });
     }
     if (!isAtsResponse(parsed)) {
-      return [];
+      return logBoardFailure(this.name, "invalid_payload", {
+        requestUrl: url,
+      });
     }
     return this.parseJobs(parsed, providerSettings);
   }

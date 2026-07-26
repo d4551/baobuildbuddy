@@ -3,6 +3,7 @@ import { PORTFOLIO_PROJECT_DESCRIPTION_MIN_LENGTH, PORTFOLIO_PROJECT_TITLE_MIN_L
 import { useI18n } from "vue-i18n";
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
+  CHECKBOX_CONTROL_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   FONT_WEIGHT_TOKEN_CLASS,
@@ -202,7 +203,7 @@ function updateFeaturedFlag(event: Event): void {
         <input 
           :checked="props.projectForm.featured"
           type="checkbox"
-          class="checkbox checkbox-primary"
+          :class="[CHECKBOX_CONTROL_CLASS]"
           :aria-label="t('portfolioPage.modal.featuredAria')"
           @change="updateFeaturedFlag"
         />

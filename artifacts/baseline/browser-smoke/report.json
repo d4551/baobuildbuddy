@@ -1094,33 +1094,7 @@
       "reason": null
     },
     {
-      "slug": "nav-3-_resume",
-      "route": "/resume",
-      "viewport": "desktop-nav",
-      "title": "Resume Builder | BaoBuildBuddy",
-      "h1": "Resume Builder",
-      "mainCount": 1,
-      "consoleErrors": [],
-      "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-3-_resume.png",
-      "ok": true,
-      "reason": null
-    },
-    {
-      "slug": "nav-4-_interview",
-      "route": "/interview",
-      "viewport": "desktop-nav",
-      "title": "Interview Prep Hub | BaoBuildBuddy",
-      "h1": "Interview Prep Hub",
-      "mainCount": 1,
-      "consoleErrors": [],
-      "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-4-_interview.png",
-      "ok": true,
-      "reason": null
-    },
-    {
-      "slug": "nav-5-_cover-letter",
+      "slug": "nav-3-_cover-letter",
       "route": "/cover-letter",
       "viewport": "desktop-nav",
       "title": "Cover Letters | BaoBuildBuddy",
@@ -1128,7 +1102,33 @@
       "mainCount": 1,
       "consoleErrors": [],
       "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-5-_cover-letter.png",
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-3-_cover-letter.png",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "slug": "nav-4-_resume",
+      "route": "/resume",
+      "viewport": "desktop-nav",
+      "title": "Resume Builder | BaoBuildBuddy",
+      "h1": "Resume Builder",
+      "mainCount": 1,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-4-_resume.png",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "slug": "nav-5-_interview",
+      "route": "/interview",
+      "viewport": "desktop-nav",
+      "title": "Interview Prep Hub | BaoBuildBuddy",
+      "h1": "Interview Prep Hub",
+      "mainCount": 1,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-5-_interview.png",
       "ok": true,
       "reason": null
     },
@@ -1146,20 +1146,7 @@
       "reason": null
     },
     {
-      "slug": "nav-7-_automation_scraper",
-      "route": "/automation/scraper",
-      "viewport": "desktop-nav",
-      "title": "Scraper Operations Hub | BaoBuildBuddy",
-      "h1": "Scraper Operations Hub",
-      "mainCount": 1,
-      "consoleErrors": [],
-      "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-7-_automation_scraper.png",
-      "ok": true,
-      "reason": null
-    },
-    {
-      "slug": "nav-8-_automation_job-apply",
+      "slug": "nav-7-_automation_job-apply",
       "route": "/automation/job-apply",
       "viewport": "desktop-nav",
       "title": "Job Application Automation | BaoBuildBuddy",
@@ -1167,7 +1154,20 @@
       "mainCount": 1,
       "consoleErrors": [],
       "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-8-_automation_job-apply.png",
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-7-_automation_job-apply.png",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "slug": "nav-8-_automation_scraper",
+      "route": "/automation/scraper",
+      "viewport": "desktop-nav",
+      "title": "Scraper Operations Hub | BaoBuildBuddy",
+      "h1": "Scraper Operations Hub",
+      "mainCount": 1,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-8-_automation_scraper.png",
       "ok": true,
       "reason": null
     },

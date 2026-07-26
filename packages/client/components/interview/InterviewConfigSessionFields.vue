@@ -6,6 +6,7 @@ import {
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import type { InterviewHubSessionConfig } from "~/types/interview";
@@ -162,7 +163,7 @@ function updateEnableVoiceMode(event: Event): void {
       <input 
         :checked="sessionConfig.enableVoiceMode"
         type="checkbox"
-        class="toggle toggle-primary"
+        :class="[TOGGLE_CONTROL_CLASS]"
         :aria-label="t('interviewHub.config.enableVoiceAria')"
         @change="updateEnableVoiceMode"
       />

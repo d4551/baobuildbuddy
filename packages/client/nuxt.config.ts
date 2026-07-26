@@ -198,6 +198,19 @@ export default defineNuxtConfig({
   },
   experimental: {
     componentIslands: false,
+    /**
+     * The app manifest resolves `#app-manifest` to `.nuxt/manifest/meta/<uuid>.json`,
+     * and that UUID is regenerated on every Nuxt restart. Vite's dep optimizer caches
+     * `nuxt/dist/app/composables/manifest.js` with the old resolution, so once the
+     * optimizer re-runs the dev server throws
+     * `[plugin:vite:import-analysis] Failed to resolve import "#app-manifest"` and the
+     * whole app is replaced by an error overlay.
+     *
+     * Nothing here consumes it: no `useAppManifest` / `getRouteRules` caller exists,
+     * the only `routeRules` are Nitro API-proxy rules, and prerendering is cleared by
+     * the `prerender:routes` hook. Disabling removes the failing path entirely.
+     */
+    appManifest: false,
   },
   hooks: {
     "prerender:routes": (context: { routes: Set<string> }) => {
@@ -244,10 +257,17 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: ["zod"],
+      // `nuxt` ships framework internals (`#app-manifest`, `#build/*`) that only
+      // resolve through Nuxt's own alias + `import.meta.server` define. Pre-bundling
+      // it strips both, so the server-only manifest import survives into the client
+      // graph and vite:import-analysis fails on "#app-manifest".
+      exclude: ["nuxt"],
     },
     resolve: {
+      // No `conditions` override: Vite always applies import/require/default, so
+      // listing them only *replaces* the defaults and drops `browser` +
+      // `development|production`, which mis-resolves framework entrypoints.
       dedupe: ["zod"],
-      conditions: ["import", "module", "default"],
     },
     ssr: {
       noExternal: ["@bao/shared"],

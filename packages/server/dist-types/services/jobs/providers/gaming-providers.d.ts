@@ -1,14 +1,5 @@
 import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
-import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
-/**
- * Provider for Hitmarker gaming jobs.
- */
-export declare class HitmarkerProvider implements JobProvider {
-    name: string;
-    type: string;
-    enabled: boolean;
-    fetchJobs(filters?: JobFilters): Promise<RawJob[]>;
-}
+import type { JobProvider, RawJob } from "./provider-interface";
 /**
  * Provider for RPA-backed gaming job portals.
  */

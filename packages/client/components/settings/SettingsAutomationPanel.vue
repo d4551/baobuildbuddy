@@ -7,6 +7,7 @@ import {
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -43,7 +44,7 @@ const { t } = useI18n();
           <input 
             v-model="automationForm.headless"
             type="checkbox"
-            class="toggle toggle-primary"
+            :class="[TOGGLE_CONTROL_CLASS]"
             :aria-label="t('settings.automation.headlessAria')"
           />
         </div>
@@ -60,7 +61,7 @@ const { t } = useI18n();
           <input 
             v-model="automationForm.enableSmartSelectors"
             type="checkbox"
-            class="toggle toggle-primary"
+            :class="[TOGGLE_CONTROL_CLASS]"
             :aria-label="t('settings.automation.smartSelectorsAria')"
           />
         </div>
@@ -77,7 +78,7 @@ const { t } = useI18n();
           <input 
             v-model="automationForm.autoSaveScreenshots"
             type="checkbox"
-            class="toggle toggle-primary"
+            :class="[TOGGLE_CONTROL_CLASS]"
             :aria-label="t('settings.automation.autoScreenshotsAria')"
           />
         </div>

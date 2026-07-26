@@ -32,7 +32,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 2",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
@@ -99,9 +99,9 @@
       "ssotUx": "layout ok",
       "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
-      "logs": "FAIL: console=2 page=0 findings=0"
+      "logs": "0 console/page errors"
     },
-    "ok": false
+    "ok": true
   },
   {
     "viewport": "mobile",
@@ -253,11 +253,11 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 1",
+      "interactions": "FAIL: no clickable controls",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
-    "ok": true
+    "ok": false
   },
   {
     "viewport": "mobile",
@@ -292,7 +292,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 2",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
@@ -383,7 +383,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 2",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
@@ -604,11 +604,11 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 1",
+      "interactions": "FAIL: no clickable controls",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
-    "ok": true
+    "ok": false
   },
   {
     "viewport": "tablet",
@@ -643,7 +643,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 3",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
@@ -734,7 +734,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 2",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
@@ -801,9 +801,9 @@
       "ssotUx": "layout ok",
       "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
-      "logs": "FAIL: console=2 page=0 findings=0"
+      "logs": "0 console/page errors"
     },
-    "ok": false
+    "ok": true
   },
   {
     "viewport": "desktop",
@@ -955,11 +955,11 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 1",
+      "interactions": "FAIL: no clickable controls",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },
-    "ok": true
+    "ok": false
   },
   {
     "viewport": "desktop",
@@ -994,7 +994,7 @@
     "fiveQ": {
       "shouldBeHere": "landmarks ok",
       "ssotUx": "layout ok",
-      "interactions": "clicked 3",
+      "interactions": "clicked 4",
       "glassDry": "no raw glass; chrome copy unique",
       "logs": "0 console/page errors"
     },

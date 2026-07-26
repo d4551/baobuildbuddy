@@ -19,6 +19,15 @@ const BTN_SHRINK_PATTERN = /\bbtn-(?:xs|sm)\b/u;
 const TOUCH_FLOOR_PATTERN = /\bTOUCH_TARGET_MIN_CLASS\b/u;
 const PRIMARY_ACTION_PATTERN = /\bPRIMARY_ACTION_CLASS\b/u;
 
+/**
+ * daisyUI form controls ship below the touch floor at every size: a bare `toggle`
+ * measures 40×24 in all of xs…xl, and the input is not wrapped in a larger label hit
+ * area. This rule only covered `btn-xs`/`btn-sm`, so six 24px-tall portal toggles
+ * shipped in Settings while the gate stayed green. Consume the SSOT token instead.
+ */
+const BARE_FORM_CONTROL_PATTERN = /\b(toggle|checkbox|radio)(?:-(?:xs|sm|md|lg|xl))?\b/u;
+const FORM_CONTROL_TOKEN_PATTERN = /\b(?:TOGGLE_CONTROL_CLASS|CHECKBOX_CONTROL_CLASS)\b/u;
+
 const isIconPrimitive = (filePath: string): boolean =>
   filePath.startsWith("packages/client/components/icons/");
 
@@ -32,6 +41,18 @@ export const collectTouchTargetDensityViolations = (
   const violations: ValidationViolation[] = [];
   for (const match of content.matchAll(CLASS_ATTR_PATTERN)) {
     const classValue = match[1] ?? "";
+    if (
+      BARE_FORM_CONTROL_PATTERN.test(classValue) &&
+      !TOUCH_FLOOR_PATTERN.test(classValue) &&
+      !FORM_CONTROL_TOKEN_PATTERN.test(classValue)
+    ) {
+      violations.push({
+        filePath,
+        line: getLineFromOffset(content, match.index ?? 0),
+        message: `daisyUI form control below the 44px touch floor ("${classValue}"); bind TOGGLE_CONTROL_CLASS / CHECKBOX_CONTROL_CLASS or add TOUCH_TARGET_MIN_CLASS`,
+      });
+      continue;
+    }
     if (!BTN_SHRINK_PATTERN.test(classValue)) {
       continue;
     }

@@ -1,6 +1,7 @@
 import { buildCoverLetterExportEndpoint } from "@bao/shared/constants/endpoints";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type { CoverLetterData } from "@bao/shared/types/cover-letter";
+import type { JsonObject } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import type { ClientApi } from "~/types/client-api";
@@ -28,7 +29,14 @@ export interface GenerateCoverLetterInput {
   resumeId?: string;
   template?: CoverLetterData["template"];
   save?: boolean;
-  jobInfo?: Record<string, unknown>;
+  jobInfo?: JsonObject;
+  /**
+   * Ids let the server load the scraped posting and the studio record itself, so the
+   * prompt carries their real attributes instead of only the free-text description
+   * the user happened to paste into `jobInfo`.
+   */
+  jobId?: string;
+  studioId?: string;
 }
 
 export type GenerateCoverLetterResult =

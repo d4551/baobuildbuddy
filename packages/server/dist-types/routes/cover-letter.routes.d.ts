@@ -19,8 +19,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                     jobInfo?: Record<string, unknown> | null | undefined;
                     content?: Record<string, unknown> | null | undefined;
                     template?: string | null | undefined;
-                    createdAt?: string | undefined;
-                    updatedAt?: string | undefined;
+                    createdAt: string;
+                    updatedAt: string;
                 }[];
             };
             error: never;
@@ -47,8 +47,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                     jobInfo?: Record<string, unknown> | null | undefined;
                     content?: Record<string, unknown> | null | undefined;
                     template?: string | null | undefined;
-                    createdAt?: string | undefined;
-                    updatedAt?: string | undefined;
+                    createdAt: string;
+                    updatedAt: string;
                 };
                 201: {
                     id: string;
@@ -57,8 +57,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                     jobInfo?: Record<string, unknown> | null | undefined;
                     content?: Record<string, unknown> | null | undefined;
                     template?: string | null | undefined;
-                    createdAt?: string | undefined;
-                    updatedAt?: string | undefined;
+                    createdAt: string;
+                    updatedAt: string;
                 };
                 404: {
                     error: string;
@@ -99,8 +99,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     201: {
                         id: string;
@@ -109,8 +109,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     404: {
                         error: string;
@@ -148,8 +148,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     201: {
                         id: string;
@@ -158,8 +158,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     404: {
                         error: string;
@@ -219,6 +219,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                     position: string;
                     jobInfo?: Record<string, unknown> | undefined;
                     resumeId?: string | undefined;
+                    jobId?: string | undefined;
+                    studioId?: string | undefined;
                     template?: undefined;
                     save?: boolean | undefined;
                 };
@@ -243,8 +245,8 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                             jobInfo?: Record<string, unknown> | null | undefined;
                             content?: Record<string, unknown> | null | undefined;
                             template?: string | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                            createdAt: string;
+                            updatedAt: string;
                         };
                     };
                     422: {

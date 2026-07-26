@@ -1,31 +1,13 @@
 import type { GamingPortalConfig, GamingPortalId } from "@bao/shared/types/settings-contracts";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
-import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { createServerLogger } from "../../../utils/logger";
 import { type ScrapedJob, scraperService } from "../../scraper-service";
-import type { JobFilters, JobProvider, RawJob } from "./provider-interface";
+import type { JobProvider, RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
-interface HitmarkerJob extends Record<string, unknown> {
-  id?: string;
-  title?: string;
-  company?: string | { name?: string };
-  location?: string;
-  description?: string;
-  url?: string;
-  slug?: string;
-  created_at?: string;
-}
-
-type HitmarkerResponse = HitmarkerJob[] | { jobs?: HitmarkerJob[]; data?: HitmarkerJob[] };
-
 type PortalScrapeMethod = (sourceUrl?: string) => Promise<ScrapedJob[]>;
-
-const WHITESPACE_PATTERN = /\s+/g;
-const NON_HASH_SAFE_PATTERN = /[^a-z0-9-_]/g;
-const REMOTE_LOCATION_PATTERN = /remote/i;
 
 const PORTAL_SCRAPE_METHOD_BY_ID: Record<GamingPortalId, PortalScrapeMethod> = {
   hitmarker: () => scraperService.scrapeHitmarkerJobsRaw(),
@@ -55,185 +37,10 @@ const logProviderSkip = (providerName: string, reason: string, details?: unknown
   return [];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isHitmarkerJob = (value: unknown): value is HitmarkerJob => isRecord(value);
-
-const isHitmarkerResponse = (value: unknown): value is HitmarkerResponse =>
-  (Array.isArray(value) && value.every(isHitmarkerJob)) ||
-  (isRecord(value) &&
-    ((Array.isArray(value.jobs) && value.jobs.every(isHitmarkerJob)) ||
-      (Array.isArray(value.data) && value.data.every(isHitmarkerJob))));
-
-const resolveHitmarkerJobs = (payload: HitmarkerResponse): HitmarkerJob[] =>
-  Array.isArray(payload) ? payload : (payload.jobs ?? payload.data ?? []);
-
-const resolveCompanyName = (company: HitmarkerJob["company"], fallback: string): string => {
-  if (typeof company === "string" && company.length > 0) {
-    return company;
-  }
-
-  if (typeof company === "object" && company !== null && typeof company.name === "string") {
-    return company.name;
-  }
-
-  return fallback;
-};
-
-const resolveHitmarkerContentHash = (job: HitmarkerJob): string => {
-  const source = job.id ?? job.slug ?? job.url ?? job.title ?? generateId();
-  const value = String(source)
-    .trim()
-    .toLowerCase()
-    .replace(WHITESPACE_PATTERN, "-")
-    .replace(NON_HASH_SAFE_PATTERN, "");
-
-  return `hm-${value || generateId()}`;
-};
-
 const resolvePortalConfig = (
   portals: GamingPortalConfig[],
   portalId: GamingPortalId,
 ): GamingPortalConfig | null => portals.find((portal) => portal.id === portalId) ?? null;
-
-const loadHitmarkerProviderSettings = async (providerName: string) => {
-  const providerSettingsResult = await settle(loadJobProviderSettings());
-  if (providerSettingsResult.status === "rejected") {
-    return {
-      ok: false as const,
-      jobs: logProviderFailure(providerName, "settings_unavailable", {
-        error: toErrorMessage(providerSettingsResult.reason),
-      }),
-    };
-  }
-
-  const providerSettings = providerSettingsResult.value;
-  if (!providerSettings.hitmarkerEnabled) {
-    return {
-      ok: false as const,
-      jobs: logProviderSkip(providerName, "provider_disabled"),
-    };
-  }
-
-  return {
-    ok: true as const,
-    providerSettings,
-  };
-};
-
-const fetchHitmarkerPayload = async (
-  providerName: string,
-  providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
-  filters?: JobFilters,
-) => {
-  const query = filters?.query || providerSettings.hitmarkerDefaultQuery;
-  const requestUrl = new URL(providerSettings.hitmarkerApiBaseUrl);
-  requestUrl.searchParams.set("search", query);
-  requestUrl.searchParams.set("limit", String(providerSettings.gamingBoardResultLimit));
-  const responseResult = await settle(
-    fetch(requestUrl.toString(), {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(providerSettings.providerTimeoutMs),
-    }),
-  );
-  if (responseResult.status === "rejected") {
-    return {
-      ok: false as const,
-      jobs: logProviderFailure(providerName, "request_failed", {
-        error: toErrorMessage(responseResult.reason),
-        requestUrl: requestUrl.toString(),
-      }),
-    };
-  }
-  const response = responseResult.value;
-  if (!response.ok) {
-    return {
-      ok: false as const,
-      jobs: logProviderFailure(providerName, "response_not_ok", {
-        requestUrl: requestUrl.toString(),
-        status: response.status,
-      }),
-    };
-  }
-
-  const rawText = await response.text();
-  const parsed = safeParseJson(rawText);
-  if (parsed === null) {
-    return {
-      ok: false as const,
-      jobs: logProviderFailure(providerName, "invalid_json", {
-        requestUrl: requestUrl.toString(),
-      }),
-    };
-  }
-  if (!isHitmarkerResponse(parsed)) {
-    return {
-      ok: false as const,
-      jobs: logProviderFailure(providerName, "invalid_payload", {
-        requestUrl: requestUrl.toString(),
-      }),
-    };
-  }
-
-  return {
-    ok: true as const,
-    jobs: resolveHitmarkerJobs(parsed),
-    hitmarkerOrigin: new URL(providerSettings.hitmarkerApiBaseUrl).origin,
-  };
-};
-
-const mapHitmarkerJobs = (
-  jobs: HitmarkerJob[],
-  providerSettings: Awaited<ReturnType<typeof loadJobProviderSettings>>,
-  hitmarkerOrigin: string,
-): RawJob[] =>
-  jobs.slice(0, providerSettings.gamingBoardResultLimit).map((job) => {
-    const location = job.location || providerSettings.hitmarkerDefaultLocation;
-
-    return {
-      id: generateId(),
-      title: job.title || "",
-      company: resolveCompanyName(job.company, providerSettings.unknownCompanyLabel),
-      location,
-      remote: REMOTE_LOCATION_PATTERN.test(location),
-      description: job.description || "",
-      url: job.url || `${hitmarkerOrigin}/jobs/${job.slug || job.id || generateId()}`,
-      source: "hitmarker",
-      postedDate: job.created_at || new Date().toISOString(),
-      contentHash: resolveHitmarkerContentHash(job),
-    };
-  });
-
-/**
- * Provider for Hitmarker gaming jobs.
- */
-export class HitmarkerProvider implements JobProvider {
-  name = "Hitmarker";
-  type = "gaming-board";
-  enabled = true;
-
-  async fetchJobs(filters?: JobFilters): Promise<RawJob[]> {
-    const providerSettingsResult = await loadHitmarkerProviderSettings(this.name);
-    if (!providerSettingsResult.ok) {
-      return providerSettingsResult.jobs;
-    }
-    const payloadResult = await fetchHitmarkerPayload(
-      this.name,
-      providerSettingsResult.providerSettings,
-      filters,
-    );
-    if (!payloadResult.ok) {
-      return payloadResult.jobs;
-    }
-
-    return mapHitmarkerJobs(
-      payloadResult.jobs,
-      providerSettingsResult.providerSettings,
-      payloadResult.hitmarkerOrigin,
-    );
-  }
-}
 
 /**
  * Provider for RPA-backed gaming job portals.

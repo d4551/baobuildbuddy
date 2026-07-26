@@ -7,11 +7,11 @@ import type {
 } from "@bao/shared/types/interview";
 import { interviewPersonaPrompt, interviewQuestionPrompt } from "./ai/prompts-interview";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
+import { buildStudioPromptContext } from "./ai/prompt-context-entities";
 import {
   buildCandidatePromptContext,
   buildInterviewerPersona,
-  buildJobPromptContext,
-  buildStudioPromptContext,
+  buildInterviewJobPromptContext,
 } from "./interview-service-prompt-context";
 
 export function buildQuestionGenerationPrompt(
@@ -41,7 +41,7 @@ Conversation style: ${candidateContext.conversationStyle}
 
 ${buildStudioPromptContext(studio)}
 
-${buildJobPromptContext(config)}
+${buildInterviewJobPromptContext(config)}
 
 ${buildCandidatePromptContext(candidateContext)}
 
@@ -84,7 +84,7 @@ export function buildNaturalNextQuestionPrompt(input: {
 Interview mode: ${config.interviewMode || "studio"}
 Conversation style: ${candidateContext.conversationStyle}
 ${buildStudioPromptContext(studio)}
-${buildJobPromptContext(config)}
+${buildInterviewJobPromptContext(config)}
 ${buildCandidatePromptContext(candidateContext)}
 
 Previous question:

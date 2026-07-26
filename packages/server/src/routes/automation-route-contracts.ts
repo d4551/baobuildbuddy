@@ -145,6 +145,7 @@ export const rpaCapabilityIssueCodeSchema = t.Union([
   t.Literal("portal_configuration_missing"),
   t.Literal("portal_disabled"),
   t.Literal("portal_fallback_url_missing"),
+  t.Literal("chromium_executable_missing"),
 ]);
 
 export const capabilityAuditEntryBodySchema = t.Object({
@@ -167,6 +168,7 @@ export const capabilityAuditEntryBodySchema = t.Object({
       code: rpaCapabilityIssueCodeSchema,
       portalId: t.Optional(t.String({ minLength: 1 })),
       portalName: t.Optional(t.String({ minLength: 1 })),
+      remediation: t.Optional(t.String({ minLength: 1 })),
     }),
   ),
 });

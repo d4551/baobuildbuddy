@@ -56,7 +56,6 @@ describe("initializeDatabase", () => {
     }
 
     expect(parsedAutomationSettings.data.jobProviders).toBeDefined();
-    expect(parsedAutomationSettings.data.jobProviders?.hitmarkerEnabled).toBe(true);
     const hitmarkerPortal = parsedAutomationSettings.data.jobProviders?.gamingPortals?.find(
       (portal) => portal.id === "hitmarker",
     );

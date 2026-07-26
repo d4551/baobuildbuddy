@@ -3,8 +3,8 @@ import type { ResumeEnhanceBody, ResumeExportBody, ResumeMutationBody, ResumeRou
 export declare const buildResumeCreatePayload: (body: ResumeMutationBody) => Omit<ResumeData, "id">;
 export declare const buildResumeUpdatePayload: (body: ResumeMutationBody) => Partial<ResumeData>;
 export declare const exportResumeAsset: (resumeId: string, body: ResumeExportBody, set: ResumeRouteSetState) => Promise<Response | {
-    error: string;
     details?: undefined;
+    error: string;
 } | {
     error: string;
     details: string;

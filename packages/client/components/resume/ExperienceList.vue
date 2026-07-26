@@ -3,6 +3,7 @@ import type { ResumeFormExperience } from "@bao/shared/utils/resume-transform";
 import { useI18n } from "vue-i18n";
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
+  CHECKBOX_CONTROL_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
@@ -161,7 +162,7 @@ function removeExperience(index: number): void {
               <input 
                 v-model="experience.current"
                 type="checkbox"
-                class="checkbox checkbox-sm"
+                :class="[CHECKBOX_CONTROL_CLASS]"
                 :aria-label="t('resumePage.experience.currentAria')"
                 @change="emitValue"
               />

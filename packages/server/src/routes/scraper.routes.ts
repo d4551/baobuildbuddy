@@ -26,7 +26,7 @@ export const scraperRoutes = new Elysia({
     {
       detail: openapiDetail(
         "Scraper",
-        "Scrape and ingest studio listings from configured sources.",
+        "Import the curated bundled studio directory into studio listings.",
       ),
       response: scraperOperationResponses,
     },

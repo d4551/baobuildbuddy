@@ -3,11 +3,15 @@ import { useI18n } from "vue-i18n";
 import { createAIChatPageActions } from "~/composables/ai-chat-page-actions";
 import { createAIChatPageDerivedState } from "~/composables/ai-chat-page-derived";
 import { useAIChatPageScroll } from "~/composables/ai-chat-page-scroll";
+import { useRouteStudioContext } from "~/composables/route-studio-context";
 import { CHAT_PAGE_CONTAINER_CLASS } from "~/constants/chat";
 
 const createAIChatPageCoreState = () => {
   const { t, locale } = useI18n();
   const { resolvedBrand } = useBrand();
+  // Resolves `?studio=<id>` handed over from a studio profile into the shared
+  // studio state so the context panel and prompts name the studio.
+  useRouteStudioContext();
   const {
     messages,
     loading,

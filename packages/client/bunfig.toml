@@ -1,0 +1,11 @@
+# Client `*.spec.ts` files are vitest-owned: they need the happy-dom environment
+# declared in vitest.config.ts, which `bun test` cannot provide. The canonical
+# command for this package is `bun run test` (vitest).
+#
+# The repo-root bunfig.toml already excludes them via `**/packages/client/**`,
+# but that pattern cannot match when the working directory *is* this package —
+# running bare `bun test` here would otherwise collect them and fail on a missing
+# DOM rather than on real behaviour. This keeps the exclusion cwd-independent.
+# `scripts/validate-dom-test-runner-ownership.ts` enforces the naming split.
+[test]
+pathIgnorePatterns = ["**/*.spec.ts"]

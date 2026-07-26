@@ -32,6 +32,7 @@ import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
+import { loadEntityPromptContext } from "../services/ai/prompt-context-loader";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
@@ -202,12 +203,26 @@ export const enhanceResumeWithAi = async (
   const settingsRows = await db.select().from(settings);
   const aiService = AIService.fromSettings(settingsRows[0]);
   const section = body.section || "all";
+  // `section` used to be passed positionally into the prompt's `jobDescription`
+  // slot, so the model was told the target job description was literally "all".
+  const entityContext = await loadEntityPromptContext({
+    jobId: body.jobId,
+    studioId: body.studioId,
+    includeSkills: true,
+  });
   const aiResult = await settle(
-    aiService.generate(resumeEnhancePrompt(serializeResumeForAi(resume), section), {
-      purpose: "resume",
-      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
-      maxTokens: AI_MAX_TOKENS_SCORE,
-    }),
+    aiService.generate(
+      resumeEnhancePrompt({
+        resume: serializeResumeForAi(resume),
+        section,
+        ...entityContext,
+      }),
+      {
+        purpose: "resume",
+        temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+        maxTokens: AI_MAX_TOKENS_SCORE,
+      },
+    ),
   );
   if (aiResult.status === "rejected") {
     resumeRouteLogger.error("Resume AI enhancement rejected", {

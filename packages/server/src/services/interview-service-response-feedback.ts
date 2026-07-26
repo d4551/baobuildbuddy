@@ -26,11 +26,11 @@ import { withAiOperationTimeout } from "./interview-service-ai";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 import { normalizeScore } from "./interview-service-normalizers";
+import { buildStudioPromptContext } from "./ai/prompt-context-entities";
 import {
   buildCandidatePromptContext,
   buildInterviewerPersona,
-  buildJobPromptContext,
-  buildStudioPromptContext,
+  buildInterviewJobPromptContext,
 } from "./interview-service-prompt-context";
 import { parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
 
@@ -92,7 +92,7 @@ function buildResponseFeedbackPrompt(input: {
 Interview mode: ${config.interviewMode || "studio"}
 Conversation style: ${candidateContext.conversationStyle}
 ${buildStudioPromptContext(studio)}
-${buildJobPromptContext(config)}
+${buildInterviewJobPromptContext(config)}
 ${buildCandidatePromptContext(candidateContext)}
 
 Prior answers:

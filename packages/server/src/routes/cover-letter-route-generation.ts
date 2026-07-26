@@ -7,6 +7,7 @@ import {
   API_ERROR_COVER_LETTER_GENERATION_FAILED,
   API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT,
   API_ERROR_COVER_LETTER_NOT_FOUND,
+  API_ERROR_CREATE_COVER_LETTER,
   API_ERROR_EXPORT_COVER_LETTER,
   API_ERROR_UNKNOWN,
 } from "@bao/shared/constants/api-errors";
@@ -28,6 +29,7 @@ import { coverLetters } from "../db/schema/cover-letters";
 import { settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
 import { AIService } from "../services/ai/ai-service";
+import { loadEntityPromptContext } from "../services/ai/prompt-context-loader";
 import { coverLetterPrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
@@ -65,7 +67,15 @@ const saveGeneratedCoverLetter = async (
     template: normalizeTemplate(body.template),
   };
   await db.insert(coverLetters).values(coverLetter);
-  return coverLetter;
+
+  // Same contract as the manual create path: return the persisted row so the
+  // database-defaulted timestamps are present and the insert is proven to have
+  // landed, instead of echoing the in-memory payload.
+  const [created] = await db.select().from(coverLetters).where(eq(coverLetters.id, coverLetter.id));
+  if (!created) {
+    throw new Error(API_ERROR_CREATE_COVER_LETTER);
+  }
+  return created;
 };
 
 const buildCoverLetterSender = async (): Promise<CoverLetterSender> => {
@@ -103,6 +113,33 @@ const createCoverLetterExportError = (reason: unknown) => {
   };
 };
 
+/**
+ * Assembles the generation prompt from the candidate's resume plus the scraped
+ * posting and studio records, so the prompt's "demonstrate knowledge of the company
+ * and their games" instruction is backed by real data rather than whatever the
+ * client happened to send.
+ */
+const buildCoverLetterGenerationPrompt = async (body: GenerateCoverLetterBody): Promise<string> => {
+  const [resumeContext, entityContext] = await Promise.all([
+    resolveResumeContext(body.resumeId),
+    loadEntityPromptContext({
+      jobId: body.jobId,
+      studioId: body.studioId,
+      includeSkills: true,
+    }),
+  ]);
+
+  return coverLetterPrompt({
+    company: body.company,
+    position: body.position,
+    jobInfo: body.jobInfo
+      ? JSON.stringify(body.jobInfo, null, 2)
+      : "No additional job information provided",
+    resumeContext: resumeContext.promptContext,
+    ...entityContext,
+  });
+};
+
 export const handleGenerateCoverLetter = async (
   body: GenerateCoverLetterBody,
   set: RouteSetState,
@@ -114,19 +151,12 @@ export const handleGenerateCoverLetter = async (
   }
 
   const aiService = AIService.fromSettings(settingsRows[0]);
-  const resumeContext = await resolveResumeContext(body.resumeId);
-  const jobInfoText = body.jobInfo
-    ? JSON.stringify(body.jobInfo, null, 2)
-    : "No additional job information provided";
   const aiResult = await settle(
-    aiService.generate(
-      coverLetterPrompt(body.company, body.position, jobInfoText, resumeContext.promptContext),
-      {
-        purpose: "coverLetter",
-        temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
-        maxTokens: AI_MAX_TOKENS_COVER_LETTER,
-      },
-    ),
+    aiService.generate(await buildCoverLetterGenerationPrompt(body), {
+      purpose: "coverLetter",
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: AI_MAX_TOKENS_COVER_LETTER,
+    }),
   );
   if (aiResult.status === "rejected") {
     coverLetterGenerationLogger.error("Cover letter AI generation rejected", {

@@ -178,10 +178,6 @@ export declare const settingsRoutes: Elysia<string, "local", {
                             gamingBoardResultLimit: number;
                             unknownLocationLabel: string;
                             unknownCompanyLabel: string;
-                            hitmarkerEnabled: boolean;
-                            hitmarkerApiBaseUrl: string;
-                            hitmarkerDefaultQuery: string;
-                            hitmarkerDefaultLocation: string;
                             greenhouseApiBaseUrl: string;
                             greenhouseMaxPages: number;
                             greenhouseBoards: {
@@ -445,10 +441,6 @@ export declare const settingsRoutes: Elysia<string, "local", {
                         gamingBoardResultLimit: number;
                         unknownLocationLabel: string;
                         unknownCompanyLabel: string;
-                        hitmarkerEnabled: boolean;
-                        hitmarkerApiBaseUrl: string;
-                        hitmarkerDefaultQuery: string;
-                        hitmarkerDefaultLocation: string;
                         greenhouseApiBaseUrl: string;
                         greenhouseMaxPages: number;
                         greenhouseBoards: {

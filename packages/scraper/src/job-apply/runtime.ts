@@ -9,7 +9,6 @@ import {
   initializeApplicationPage,
 } from "./runtime-page-setup";
 import { submitApplicationStep, verifySubmissionStep } from "./runtime-submission";
-import type { JobApplyStrategy } from "./strategy-registry";
 
 /**
  * Executes the Bun-based job-apply runtime using shared contracts.
@@ -25,15 +24,6 @@ export const runJobApplyAutomation = async (): Promise<number> => {
     emitter.emitError("OUTPUT_VALIDATION_ERROR", inputResult.message);
     return 1;
   }
-
-  const strategyPreview: JobApplyStrategy["id"] = "generic";
-  emitter.emitProgress({
-    action: "preflight_strategy",
-    status: "running",
-    step: 0,
-    totalSteps: 1,
-    message: `Detected ${strategyPreview}`,
-  });
 
   const state = await createExecutionState(inputResult.value, emitter);
   if (!state) {

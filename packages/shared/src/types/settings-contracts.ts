@@ -81,10 +81,6 @@ export interface JobProviderSettings {
   gamingBoardResultLimit: number;
   unknownLocationLabel: string;
   unknownCompanyLabel: string;
-  hitmarkerEnabled: boolean;
-  hitmarkerApiBaseUrl: string;
-  hitmarkerDefaultQuery: string;
-  hitmarkerDefaultLocation: string;
   greenhouseApiBaseUrl: string;
   greenhouseMaxPages: number;
   greenhouseBoards: GreenhouseBoardConfig[];

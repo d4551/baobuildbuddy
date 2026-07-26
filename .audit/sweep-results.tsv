@@ -22,7 +22,6 @@ bun run validate:badge-action-ssot	PASS
 bun run validate:route-nav-coverage	PASS
 bun run validate:route-query-ssot	PASS
 bun run validate:capability-surface-binding	PASS
-bun run validate:no-dead-i18n-keys	PASS
 bun run validate:biome-softener-ratchet	PASS
 bun run validate:biome-no-softenings	PASS
 bun run validate:eslint-softener-ratchet	PASS
@@ -71,7 +70,6 @@ bun run validate:no-unsafe-storage	PASS
 bun run validate:page-state-contracts	PASS
 bun run validate:seo-contracts	PASS
 bun run validate:accessibility-landmarks	PASS
-bun run validate:no-dead-exports	PASS
 bun run validate:no-duplicate-exports	PASS
 bun run validate:no-dead-vue-components	PASS
 bun run validate:no-fallback-shims	PASS
@@ -87,6 +85,6 @@ bun run validate:ui-ssot	PASS
 bun run validate:ui-canonical-primitives	PASS
 bun run validate:ascii	PASS
 bun run lint:typed	PASS
-bun --bun run biome lint .	PASS
-bun run --cwd packages/client lint	PASS
-bun run typecheck	PASS
+bun run validate:no-dead-i18n-keys	PASS
+bun run validate:no-dead-exports	PASS
+bun --bun run biome lint .	FAIL

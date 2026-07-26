@@ -11,6 +11,7 @@ import {
   HTTP_STATUS_SERVICE_UNAVAILABLE,
 } from "@bao/shared/constants/http";
 import { Elysia, type status } from "elysia";
+import type { coverLetters } from "../db/schema/cover-letters";
 import type { RouteSetState } from "../types/route-state";
 import { openapiDetail } from "../utils/openapi-detail";
 import {
@@ -41,16 +42,12 @@ import {
 
 type RouteStatus = typeof status;
 
-type CoverLetterEntitySource = {
-  id: string;
-  company: string;
-  position: string;
-  jobInfo?: unknown;
-  content?: unknown;
-  template?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-};
+/**
+ * Derived from the table so the response mapper cannot drift from the schema.
+ * The previous hand-written shape marked the `notNull()` timestamps optional,
+ * which is what let the create path return a cover letter without them.
+ */
+type CoverLetterEntitySource = typeof coverLetters.$inferSelect;
 
 const toRecordOrNull = (value: unknown) => {
   if (typeof value === "object" && value !== null && !Array.isArray(value)) {

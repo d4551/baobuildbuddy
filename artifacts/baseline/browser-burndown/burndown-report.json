@@ -7,16 +7,16 @@
   ],
   "findings": [
     {
-      "viewport": "mobile",
-      "route": "/portfolio/preview",
-      "action": "click-Export_DOCX",
+      "viewport": "tablet",
+      "route": "/ai/dashboard",
+      "action": "click-Open_settings_to_configure_Google_Gemini",
       "severity": "warn",
       "detail": "control not found",
       "screenshot": null
     }
   ],
   "errorCount": 0,
-  "ledgerOk": 79,
+  "ledgerOk": 78,
   "ledgerTotal": 81,
-  "ledgerFailures": 2
+  "ledgerFailures": 3
 }

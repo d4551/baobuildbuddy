@@ -8,10 +8,6 @@ const baseForm = (): JobProviderForm => ({
   gamingBoardResultLimit: 50,
   unknownLocationLabel: "Unknown",
   unknownCompanyLabel: "Unknown",
-  hitmarkerEnabled: false,
-  hitmarkerApiBaseUrl: "https://api.hitmarker.net/v1/jobs",
-  hitmarkerDefaultQuery: "game",
-  hitmarkerDefaultLocation: "",
   greenhouseApiBaseUrl: "https://boards.greenhouse.io",
   greenhouseMaxPages: 1,
   leverApiBaseUrl: "https://api.lever.co",
@@ -28,9 +24,10 @@ describe("countActiveJobProviderSources", () => {
     expect(countActiveJobProviderSources(baseForm())).toBe(0);
   });
 
-  it("counts hitmarker + enabled portal with fallback URL", () => {
+  // Hitmarker counts once, through its portal entry — there is no separate
+  // API-provider flag to double-count any more.
+  it("counts an enabled gaming portal with a fallback URL exactly once", () => {
     const form = baseForm();
-    form.hitmarkerEnabled = true;
     form.gamingPortalsJson = JSON.stringify([
       {
         id: "hitmarker",
@@ -40,12 +37,28 @@ describe("countActiveJobProviderSources", () => {
         enabled: true,
       },
     ]);
-    expect(countActiveJobProviderSources(form)).toBe(2);
+    expect(countActiveJobProviderSources(form)).toBe(1);
   });
 
   it("counts greenhouse only when an enabled board token exists", () => {
     const form = baseForm();
     form.greenhouseBoardsJson = JSON.stringify([{ token: "acme", enabled: true }]);
     expect(countActiveJobProviderSources(form)).toBe(1);
+  });
+
+  it("counts a board written in the persisted greenhouseBoardConfig shape", () => {
+    // `greenhouseBoardConfigSchema` identifies a board by `board`, not `token`, so a
+    // saved board used to count as zero active sources.
+    const form = baseForm();
+    form.greenhouseBoardsJson = JSON.stringify([
+      { board: "acme", company: "Acme Games", enabled: true },
+    ]);
+    expect(countActiveJobProviderSources(form)).toBe(1);
+  });
+
+  it("ignores a board that is enabled but has no identity", () => {
+    const form = baseForm();
+    form.greenhouseBoardsJson = JSON.stringify([{ company: "Acme Games", enabled: true }]);
+    expect(countActiveJobProviderSources(form)).toBe(0);
   });
 });

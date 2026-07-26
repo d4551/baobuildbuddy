@@ -2,12 +2,14 @@
 import type { NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import { useI18n } from "vue-i18n";
 import {
+  CHECKBOX_CONTROL_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
@@ -48,7 +50,7 @@ const { t } = useI18n();
             }}</span>
             <input 
               type="checkbox"
-              class="toggle toggle-primary theme-controller"
+              :class="[TOGGLE_CONTROL_CLASS, 'theme-controller']"
               :value="themeNames.dark"
               :checked="theme === themeNames.dark"
               :aria-label="t('settings.preferences.toggleThemeAria')"
@@ -87,7 +89,7 @@ const { t } = useI18n();
             <input 
               v-model="notificationForm.achievements"
               type="checkbox"
-              class="checkbox checkbox-sm"
+              :class="[CHECKBOX_CONTROL_CLASS]"
               :aria-label="
                 t('settings.preferences.notifications.achievementsAria')
               "
@@ -100,7 +102,7 @@ const { t } = useI18n();
             <input 
               v-model="notificationForm.dailyChallenges"
               type="checkbox"
-              class="checkbox checkbox-sm"
+              :class="[CHECKBOX_CONTROL_CLASS]"
               :aria-label="
                 t(
                   'settings.preferences.notifications.dailyChallengesAria',
@@ -115,7 +117,7 @@ const { t } = useI18n();
             <input 
               v-model="notificationForm.levelUp"
               type="checkbox"
-              class="checkbox checkbox-sm"
+              :class="[CHECKBOX_CONTROL_CLASS]"
               :aria-label="
                 t('settings.preferences.notifications.levelUpAria')
               "
@@ -128,7 +130,7 @@ const { t } = useI18n();
             <input 
               v-model="notificationForm.jobAlerts"
               type="checkbox"
-              class="checkbox checkbox-sm"
+              :class="[CHECKBOX_CONTROL_CLASS]"
               :aria-label="
                 t('settings.preferences.notifications.jobAlertsAria')
               "

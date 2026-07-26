@@ -58,6 +58,12 @@ agentiflow/*
 # Generated desktop packaging scratch space
 .tmp/
 .tmp-*/
+
+# Audit / hardening scratch output (gate logs, one-off probe scripts).
+# Excluded from biome + eslint too; see biome.json files.includes and
+# eslint.config.mjs ignoredPaths.
+.audit/
+.hardening/
 docs/assets/docs.generated.css
 
 # Desktop release staging (CI produces artifacts; do not commit local builds)

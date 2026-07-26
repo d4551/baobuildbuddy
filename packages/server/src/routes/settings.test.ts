@@ -59,8 +59,8 @@ const persistLegacyAutomationTimeout = () =>
 
 describe("settings read routes", () => {
   // Regression: the settings response schema is enforced at runtime, so a
-  // shipped default that violates it (e.g. an empty hitmarkerDefaultLocation
-  // against a minLength constraint) fails the route with 422 instead of 200.
+  // shipped default that violates a minLength constraint fails the route with
+  // 422 instead of 200.
   test("GET settings satisfies its declared response contract", async () => {
     const res = await getSettings();
     expect(res.status).not.toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);

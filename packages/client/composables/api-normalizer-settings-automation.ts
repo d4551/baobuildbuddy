@@ -1,4 +1,8 @@
-import { DEFAULT_SPEECH_SETTINGS, SPEECH_PROVIDER_OPTIONS } from "@bao/shared/constants/settings";
+import {
+  AUTOMATION_BROWSER_OPTIONS,
+  DEFAULT_SPEECH_SETTINGS,
+  SPEECH_PROVIDER_OPTIONS,
+} from "@bao/shared/constants/settings";
 import type { AutomationSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import { normalizeJobProviderSettings as normalizeSharedJobProviderSettings } from "@bao/shared/types/settings-normalization";
@@ -141,18 +145,6 @@ const normalizeJobProviderSettings = (value: unknown): AutomationSettings["jobPr
     unknownCompanyLabel:
       asString(value.unknownCompanyLabel) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.unknownCompanyLabel,
-    hitmarkerEnabled:
-      asBoolean(value.hitmarkerEnabled) ??
-      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerEnabled,
-    hitmarkerApiBaseUrl:
-      asString(value.hitmarkerApiBaseUrl) ??
-      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerApiBaseUrl,
-    hitmarkerDefaultQuery:
-      asString(value.hitmarkerDefaultQuery) ??
-      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultQuery,
-    hitmarkerDefaultLocation:
-      asString(value.hitmarkerDefaultLocation) ??
-      DEFAULT_AUTOMATION_SETTINGS.jobProviders.hitmarkerDefaultLocation,
     greenhouseApiBaseUrl:
       asString(value.greenhouseApiBaseUrl) ??
       DEFAULT_AUTOMATION_SETTINGS.jobProviders.greenhouseApiBaseUrl,
@@ -232,9 +224,8 @@ export const parseAutomationSettings = (value: unknown): AutomationSettings | un
     maxConcurrentRuns:
       asNumber(value.maxConcurrentRuns) ?? DEFAULT_AUTOMATION_SETTINGS.maxConcurrentRuns,
     defaultBrowser:
-      value.defaultBrowser === "chromium" || value.defaultBrowser === "edge"
-        ? value.defaultBrowser
-        : DEFAULT_AUTOMATION_SETTINGS.defaultBrowser,
+      asEnum(value.defaultBrowser, AUTOMATION_BROWSER_OPTIONS) ??
+      DEFAULT_AUTOMATION_SETTINGS.defaultBrowser,
     enableSmartSelectors:
       asBoolean(value.enableSmartSelectors) ?? DEFAULT_AUTOMATION_SETTINGS.enableSmartSelectors,
     autoSaveScreenshots:

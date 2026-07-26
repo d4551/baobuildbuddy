@@ -9,7 +9,12 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
+import type { Static } from "typebox";
 import { requestJson } from "../test-utils";
+import type { coverLetterEntityResponseSchema } from "./cover-letter-route-contracts";
+
+/** Derived from the route contract so the test cannot drift from the response shape. */
+type CoverLetterEntityResponse = Static<typeof coverLetterEntityResponseSchema>;
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 let createdId: string;
@@ -32,7 +37,7 @@ afterAll(() => undefined);
 
 function registerCreateAndReadTests(): void {
   test("POST cover letters creates cover letter", async () => {
-    const res = await requestJson<{ id: string; company: string; position: string }>(
+    const res = await requestJson<CoverLetterEntityResponse>(
       app,
       "POST",
       API_ENDPOINTS.coverLetters,
@@ -41,8 +46,31 @@ function registerCreateAndReadTests(): void {
     expect(res.status).toBe(HTTP_STATUS_CREATED);
     expect(res.body.company).toBe("Test Co");
     expect(res.body.position).toBe("Game Designer");
-    expect(res.body.id).toBeDefined();
+    expect(res.body.id.length > 0).toBe(true);
+    // The create path used to echo its insert payload, so the database-defaulted
+    // timestamps were silently absent from POST while present on every read.
+    expect(res.body.createdAt.startsWith(new Date().getUTCFullYear().toString())).toBe(true);
+    expect(res.body.updatedAt).toBe(res.body.createdAt);
     createdId = res.body.id;
+  });
+
+  test("POST and GET return the same cover letter representation", async () => {
+    const created = await requestJson<CoverLetterEntityResponse>(
+      app,
+      "POST",
+      API_ENDPOINTS.coverLetters,
+      { company: "Parity Co", position: "Tools Engineer" },
+    );
+    expect(created.status).toBe(HTTP_STATUS_CREATED);
+
+    const fetched = await requestJson<CoverLetterEntityResponse>(
+      app,
+      "GET",
+      `${API_ENDPOINTS.coverLetters}/${created.body.id}`,
+    );
+    expect(fetched.status).toBe(HTTP_STATUS_OK);
+    expect(Object.keys(created.body).toSorted()).toEqual(Object.keys(fetched.body).toSorted());
+    expect(created.body).toEqual(fetched.body);
   });
 
   test("GET cover letters returns list", async () => {

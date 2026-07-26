@@ -66,18 +66,13 @@ function sidebarLinkClass(item: NavigationItem): string[] {
     </div>
     <nav :aria-label="t('a11y.primaryNavigation')" class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS, TRUNCATE_FLEX_CHILD_CLASS]">
       <template v-for="group in sidebarGroups" :key="group.id">
-        <p
-          class="is-drawer-close:hidden menu-title text-muted"
-          :class="[
-            PADDING_TOKEN_CLASS.px4,
-            PADDING_TOKEN_CLASS.pt3,
-            TYPOGRAPHY_SCALE_CLASS.xs,
-            FONT_WEIGHT_TOKEN_CLASS.semibold,
-          ]"
-        >
-          {{ t(group.labelKey) }}
-        </p>
         <ul :class="SHELL_SIDEBAR_MENU_CLASS">
+          <li
+            class="is-drawer-close:hidden menu-title text-muted"
+            :class="[TYPOGRAPHY_SCALE_CLASS.xs, FONT_WEIGHT_TOKEN_CLASS.semibold]"
+          >
+            {{ t(group.labelKey) }}
+          </li>
           <li v-for="item in group.items" :key="item.id">
             <NuxtLink 
               :to="item.to"
@@ -107,7 +102,7 @@ function sidebarLinkClass(item: NavigationItem): string[] {
         <li :class="[PADDING_TOKEN_CLASS.pt4]">
           <button 
             type="button"
- class="justify-start is-drawer-close:btn-square"
+ class="is-drawer-open:justify-start is-drawer-close:justify-center"
  :class="[GHOST_ACTION_CLASS, FLUID_WIDTH_CLASS, TOUCH_TARGET_MIN_CLASS]"
  :aria-label="t('a11y.toggleSidebarNavigation')"
  :aria-controls="APP_DRAWER_ID"

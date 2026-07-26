@@ -16,7 +16,10 @@ const countEnabledNamedEntries = (rawJson: string): number => {
       continue;
     }
     const enabled = entry.enabled === true;
+    // `board` is the identity key in `greenhouseBoardConfigSchema`; omitting it made a
+    // schema-valid, enabled Greenhouse board count as zero active sources.
     const hasIdentity =
+      (typeof entry.board === "string" && entry.board.trim().length > 0) ||
       (typeof entry.token === "string" && entry.token.trim().length > 0) ||
       (typeof entry.slug === "string" && entry.slug.trim().length > 0) ||
       (typeof entry.id === "string" && entry.id.trim().length > 0) ||
@@ -33,8 +36,9 @@ const countEnabledNamedEntries = (rawJson: string): number => {
  * Shared by Job Intelligence summary + providers workspace (SSOT).
  */
 export function countActiveJobProviderSources(form: JobProviderForm): number {
+  // Hitmarker is counted through its gaming-portal entry like every other
+  // RPA-backed board; it no longer carries a separate API-provider flag.
   return (
-    Number(form.hitmarkerEnabled) +
     Number(countEnabledNamedEntries(form.greenhouseBoardsJson) > 0) +
     Number(countEnabledNamedEntries(form.leverCompaniesJson) > 0) +
     countConfiguredGamingPortals(parseGamingPortalsJson(form.gamingPortalsJson))

@@ -17,7 +17,7 @@ export class ClaudeProvider extends BaseAIProvider {
   model: string;
   private client: Anthropic;
 
-  constructor(apiKey: string, model = "claude-sonnet-4-5-20250929") {
+  constructor(apiKey: string, model = "claude-sonnet-5") {
     super(apiKey);
     this.model = model;
     this.client = new Anthropic({ apiKey });

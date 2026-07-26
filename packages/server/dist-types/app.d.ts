@@ -511,10 +511,6 @@ export declare const app: Elysia<"/api", "local", {
                                 gamingBoardResultLimit: number;
                                 unknownLocationLabel: string;
                                 unknownCompanyLabel: string;
-                                hitmarkerEnabled: boolean;
-                                hitmarkerApiBaseUrl: string;
-                                hitmarkerDefaultQuery: string;
-                                hitmarkerDefaultLocation: string;
                                 greenhouseApiBaseUrl: string;
                                 greenhouseMaxPages: number;
                                 greenhouseBoards: {
@@ -778,10 +774,6 @@ export declare const app: Elysia<"/api", "local", {
                             gamingBoardResultLimit: number;
                             unknownLocationLabel: string;
                             unknownCompanyLabel: string;
-                            hitmarkerEnabled: boolean;
-                            hitmarkerApiBaseUrl: string;
-                            hitmarkerDefaultQuery: string;
-                            hitmarkerDefaultLocation: string;
                             greenhouseApiBaseUrl: string;
                             greenhouseMaxPages: number;
                             greenhouseBoards: {
@@ -2169,6 +2161,8 @@ export declare const app: Elysia<"/api", "local", {
                     post: {
                         body: {
                             section?: string | undefined;
+                            jobId?: string | undefined;
+                            studioId?: string | undefined;
                         };
                         params: {
                             id: string;
@@ -2332,8 +2326,8 @@ export declare const app: Elysia<"/api", "local", {
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     }[];
                 };
                 error: never;
@@ -2360,8 +2354,8 @@ export declare const app: Elysia<"/api", "local", {
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     201: {
                         id: string;
@@ -2370,8 +2364,8 @@ export declare const app: Elysia<"/api", "local", {
                         jobInfo?: Record<string, unknown> | null | undefined;
                         content?: Record<string, unknown> | null | undefined;
                         template?: string | null | undefined;
-                        createdAt?: string | undefined;
-                        updatedAt?: string | undefined;
+                        createdAt: string;
+                        updatedAt: string;
                     };
                     404: {
                         error: string;
@@ -2412,8 +2406,8 @@ export declare const app: Elysia<"/api", "local", {
                             jobInfo?: Record<string, unknown> | null | undefined;
                             content?: Record<string, unknown> | null | undefined;
                             template?: string | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                            createdAt: string;
+                            updatedAt: string;
                         };
                         201: {
                             id: string;
@@ -2422,8 +2416,8 @@ export declare const app: Elysia<"/api", "local", {
                             jobInfo?: Record<string, unknown> | null | undefined;
                             content?: Record<string, unknown> | null | undefined;
                             template?: string | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                            createdAt: string;
+                            updatedAt: string;
                         };
                         404: {
                             error: string;
@@ -2461,8 +2455,8 @@ export declare const app: Elysia<"/api", "local", {
                             jobInfo?: Record<string, unknown> | null | undefined;
                             content?: Record<string, unknown> | null | undefined;
                             template?: string | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                            createdAt: string;
+                            updatedAt: string;
                         };
                         201: {
                             id: string;
@@ -2471,8 +2465,8 @@ export declare const app: Elysia<"/api", "local", {
                             jobInfo?: Record<string, unknown> | null | undefined;
                             content?: Record<string, unknown> | null | undefined;
                             template?: string | null | undefined;
-                            createdAt?: string | undefined;
-                            updatedAt?: string | undefined;
+                            createdAt: string;
+                            updatedAt: string;
                         };
                         404: {
                             error: string;
@@ -2532,6 +2526,8 @@ export declare const app: Elysia<"/api", "local", {
                         position: string;
                         jobInfo?: Record<string, unknown> | undefined;
                         resumeId?: string | undefined;
+                        jobId?: string | undefined;
+                        studioId?: string | undefined;
                         template?: undefined;
                         save?: boolean | undefined;
                     };
@@ -2556,8 +2552,8 @@ export declare const app: Elysia<"/api", "local", {
                                 jobInfo?: Record<string, unknown> | null | undefined;
                                 content?: Record<string, unknown> | null | undefined;
                                 template?: string | null | undefined;
-                                createdAt?: string | undefined;
-                                updatedAt?: string | undefined;
+                                createdAt: string;
+                                updatedAt: string;
                             };
                         };
                         422: {
@@ -5791,9 +5787,10 @@ export declare const app: Elysia<"/api", "local", {
                                 runHistoryAvailable: boolean;
                                 liveUpdatesAvailable: boolean;
                                 issues: {
-                                    code: "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable";
+                                    code: "chromium_executable_missing" | "portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable";
                                     portalId?: string | undefined;
                                     portalName?: string | undefined;
+                                    remediation?: string | undefined;
                                 }[];
                             }[];
                         };

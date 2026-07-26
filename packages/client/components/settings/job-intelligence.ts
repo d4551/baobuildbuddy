@@ -4,10 +4,6 @@ export type JobProviderForm = {
   gamingBoardResultLimit: number;
   unknownLocationLabel: string;
   unknownCompanyLabel: string;
-  hitmarkerEnabled: boolean;
-  hitmarkerApiBaseUrl: string;
-  hitmarkerDefaultQuery: string;
-  hitmarkerDefaultLocation: string;
   greenhouseApiBaseUrl: string;
   greenhouseMaxPages: number;
   leverApiBaseUrl: string;

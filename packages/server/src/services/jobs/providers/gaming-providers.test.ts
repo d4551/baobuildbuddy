@@ -8,10 +8,6 @@ import type { JobProvider, RawJob } from "./provider-interface";
 type LoggerEntry = readonly unknown[];
 type ProviderSettings = ReturnType<typeof createJobProviderSettings>;
 type ProviderModule = typeof GamingProvidersModule;
-type FetchImpl = (
-  input: URL | RequestInfo,
-  init?: RequestInit | BunFetchRequestInit,
-) => Promise<Response>;
 type ScrapeImpl = () => Promise<ScrapedJob[]>;
 
 const loggerEntries: {
@@ -26,9 +22,7 @@ const noopLogger = (): void => undefined;
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const isProviderModule = (value: unknown): value is ProviderModule =>
-  isRecord(value) &&
-  typeof value.HitmarkerProvider === "function" &&
-  typeof value.GamingPortalProvider === "function";
+  isRecord(value) && typeof value.GamingPortalProvider === "function";
 
 const logger = {
   debug: noopLogger,
@@ -56,10 +50,6 @@ const createJobProviderSettings = (overrides?: {
     gamingBoardResultLimit: 20,
     unknownLocationLabel: "Unknown location",
     unknownCompanyLabel: "Unknown company",
-    hitmarkerEnabled: true,
-    hitmarkerApiBaseUrl: "https://example.com/hitmarker",
-    hitmarkerDefaultQuery: "designer",
-    hitmarkerDefaultLocation: "Remote",
     greenhouseApiBaseUrl: "https://example.com/greenhouse",
     greenhouseMaxPages: 1,
     greenhouseBoards: [],
@@ -96,7 +86,6 @@ let scrapeWorkWithIndiesImpl: ScrapeImpl = () => Promise.resolve([]);
 let scrapeRemoteGameJobsImpl: ScrapeImpl = () => Promise.resolve([]);
 let scrapeGamesJobsDirectImpl: ScrapeImpl = () => Promise.resolve([]);
 let scrapePocketGamerImpl: ScrapeImpl = () => Promise.resolve([]);
-let fetchImpl: FetchImpl = () => Promise.resolve(new Response("[]", { status: 200 }));
 
 await mock.module("./provider-settings", () => ({
   loadJobProviderSettings: () => loadJobProviderSettingsImpl(),
@@ -117,13 +106,6 @@ await mock.module("../../../utils/logger", () => ({
   createServerLogger: () => logger,
 }));
 
-function mockedFetch(input: URL | RequestInfo, init?: RequestInit | BunFetchRequestInit) {
-  return fetchImpl(input, init);
-}
-
-mockedFetch.preconnect = globalThis.fetch.preconnect;
-globalThis.fetch = mockedFetch;
-
 const loadProviders = (): Promise<ProviderModule> =>
   import(`./gaming-providers.ts?test=${crypto.randomUUID()}`).then((moduleValue: unknown) => {
     if (!isProviderModule(moduleValue)) {
@@ -131,12 +113,6 @@ const loadProviders = (): Promise<ProviderModule> =>
     }
     return moduleValue;
   });
-
-const fetchHitmarkerJobs = async (): Promise<RawJob[]> => {
-  const { HitmarkerProvider } = await loadProviders();
-  const provider: JobProvider = new HitmarkerProvider();
-  return provider.fetchJobs();
-};
 
 const fetchPortalJobs = async (portalId: GamingPortalId): Promise<RawJob[]> => {
   const { GamingPortalProvider } = await loadProviders();
@@ -154,40 +130,6 @@ beforeEach(() => {
   scrapeRemoteGameJobsImpl = () => Promise.resolve([]);
   scrapeGamesJobsDirectImpl = () => Promise.resolve([]);
   scrapePocketGamerImpl = () => Promise.resolve([]);
-  fetchImpl = () => Promise.resolve(new Response("[]", { status: 200 }));
-});
-
-describe("Hitmarker gaming provider", () => {
-  test("logs settings failures for Hitmarker requests", async () => {
-    loadJobProviderSettingsImpl = () => Promise.reject(new Error("settings failed"));
-
-    const jobs = await fetchHitmarkerJobs();
-
-    expect(jobs).toEqual([]);
-    expect(
-      loggerEntries.error.some((entry) => JSON.stringify(entry).includes("settings_unavailable")),
-    ).toBe(true);
-  });
-
-  test("logs invalid JSON responses for Hitmarker requests", async () => {
-    fetchImpl = () => Promise.resolve(new Response("not-json", { status: 200 }));
-
-    const jobs = await fetchHitmarkerJobs();
-
-    expect(jobs).toEqual([]);
-    expect(
-      loggerEntries.error.some((entry) => JSON.stringify(entry).includes("invalid_json")),
-    ).toBe(true);
-  });
-
-  test("treats empty successful responses as empty results without failure logging", async () => {
-    fetchImpl = () => Promise.resolve(new Response("[]", { status: 200 }));
-
-    const jobs = await fetchHitmarkerJobs();
-
-    expect(jobs).toEqual([]);
-    expect(loggerEntries.error).toEqual([]);
-  });
 });
 
 describe("portal-backed gaming providers", () => {
@@ -223,6 +165,17 @@ describe("portal-backed gaming providers", () => {
     expect(jobs).toEqual([]);
     expect(
       loggerEntries.error.some((entry) => JSON.stringify(entry).includes("scrape_failed")),
+    ).toBe(true);
+  });
+
+  test("logs settings failures for portal-backed providers", async () => {
+    loadJobProviderSettingsImpl = () => Promise.reject(new Error("settings failed"));
+
+    const jobs = await fetchPortalJobs("grackle");
+
+    expect(jobs).toEqual([]);
+    expect(
+      loggerEntries.error.some((entry) => JSON.stringify(entry).includes("settings_unavailable")),
     ).toBe(true);
   });
 });

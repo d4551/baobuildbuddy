@@ -34,60 +34,6 @@ function providerBadgeLabel(isConfigured: boolean): string {
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
-            <h3 class="card-title text-base">{{ t("settings.jobIntelligence.hitmarkerTitle") }}</h3>
-            <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-              {{ t("settings.jobIntelligence.hitmarkerDescription") }}
-            </p>
-          </div>
-          <span
-            class="shrink-0"
-            :class="[providerBadgeClass(jobProviderForm.hitmarkerEnabled && jobProviderForm.hitmarkerApiBaseUrl.trim().length > 0)]"
-          >
-            {{
-              providerBadgeLabel(
-                jobProviderForm.hitmarkerEnabled &&
-                  jobProviderForm.hitmarkerApiBaseUrl.trim().length > 0,
-              )
-            }}
-          </span>
-        </div>
-
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerApiLabel") }}</legend>
-          <input 
-            v-model="jobProviderForm.hitmarkerApiBaseUrl"
-            :aria-label="t('settings.jobIntelligence.hitmarkerApiLabel')"
-            type="url"
-            class="input" :class="[FLUID_WIDTH_CLASS]"
-          />
-        </fieldset>
-
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerQueryLabel") }}</legend>
-          <input 
-            v-model="jobProviderForm.hitmarkerDefaultQuery"
-            :aria-label="t('settings.jobIntelligence.hitmarkerQueryLabel')"
-            type="text"
-            class="input" :class="[FLUID_WIDTH_CLASS]"
-          />
-        </fieldset>
-
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend">{{ t("settings.jobIntelligence.hitmarkerLocationLabel") }}</legend>
-          <input 
-            v-model="jobProviderForm.hitmarkerDefaultLocation"
-            :aria-label="t('settings.jobIntelligence.hitmarkerLocationLabel')"
-            type="text"
-            class="input" :class="[FLUID_WIDTH_CLASS]"
-          />
-        </fieldset>
-      </div>
-    </UiGlassCard>
-
-    <UiGlassCard>
-      <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
-        <div class="flex items-start justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-          <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <h3 class="card-title text-base">{{ t("settings.jobIntelligence.greenhouseTitle") }}</h3>
             <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
               {{ t("settings.jobIntelligence.greenhouseDescription") }}

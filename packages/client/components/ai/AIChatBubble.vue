@@ -9,6 +9,7 @@ import {
   type ChatDensity,
 } from "~/constants/chat";
 import {
+  AVATAR_PLACEHOLDER_CLASS,
   BADGE_GHOST_XS_CLASS,
   BADGE_OUTLINE_XS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
@@ -122,7 +123,7 @@ const ariaLabel = computed(() => {
     </div>
     <div 
       v-else
-      class="chat-image avatar placeholder"
+      :class="['chat-image', AVATAR_PLACEHOLDER_CLASS]"
       :aria-label="userLabel"
     >
       <div 

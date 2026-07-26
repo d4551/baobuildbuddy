@@ -611,6 +611,8 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 post: {
                     body: {
                         section?: string | undefined;
+                        jobId?: string | undefined;
+                        studioId?: string | undefined;
                     };
                     params: {
                         id: string;

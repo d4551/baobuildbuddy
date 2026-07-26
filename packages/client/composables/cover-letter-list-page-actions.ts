@@ -9,6 +9,7 @@ import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS } from "@bao/shared/constants/
 import type { Ref } from "vue";
 import { settlePromise } from "~/composables/async-flow";
 import { getErrorMessage } from "~/utils/errors";
+import { queryValueToString, type RouteQueryValue } from "~/utils/route-query";
 import type { GenerateCoverLetterInput, GenerateCoverLetterResult } from "./useCoverLetter";
 
 export type CoverLetterGenerateForm = {
@@ -31,7 +32,7 @@ type CoverLetterPageActionServices = {
   fetchCoverLetters(): Promise<void>;
   fetchResumes(): Promise<void>;
   router: { push(path: string): Promise<unknown> };
-  route: { query: Record<string, unknown> };
+  route: { query: Readonly<Record<string, RouteQueryValue>> };
   $toast: ToastApi;
   t: TranslateFn;
 };
@@ -99,8 +100,18 @@ function validateGenerateForm(state: CoverLetterPageActionState, toast: ToastApi
   return true;
 }
 
-function buildGeneratePayload(state: CoverLetterPageActionState) {
+/**
+ * Forwards the posting and studio the user arrived from (`?job=` / `?studio=`) so the
+ * server can load those records and tailor the letter against the scraped data,
+ * rather than only the description pasted into the form.
+ */
+function buildGeneratePayload(
+  state: CoverLetterPageActionState,
+  query: Readonly<Record<string, RouteQueryValue>>,
+): GenerateCoverLetterInput {
   const description = state.generateForm.jobDescription.trim();
+  const jobId = queryValueToString(query[APP_ROUTE_QUERY_KEYS.jobId]).trim();
+  const studioId = queryValueToString(query[APP_ROUTE_QUERY_KEYS.studioId]).trim();
   return {
     company: state.generateForm.company.trim(),
     position: state.generateForm.position.trim(),
@@ -111,6 +122,8 @@ function buildGeneratePayload(state: CoverLetterPageActionState) {
     template: state.generateForm.template,
     save: true,
     ...(description.length > 0 ? { jobInfo: { description } } : {}),
+    ...(jobId.length > 0 ? { jobId } : {}),
+    ...(studioId.length > 0 ? { studioId } : {}),
   };
 }
 
@@ -166,7 +179,7 @@ function createGenerateCoverLetterHandler(
 
     state.generating.value = true;
     const generateResult = await settlePromise(
-      services.generateCoverLetter(buildGeneratePayload(state)),
+      services.generateCoverLetter(buildGeneratePayload(state, services.route.query)),
       services.t("coverLetterPage.toasts.generateFailed"),
     );
     state.generating.value = false;

@@ -1,4 +1,7 @@
-import { API_ERROR_COVER_LETTER_NOT_FOUND } from "@bao/shared/constants/api-errors";
+import {
+  API_ERROR_COVER_LETTER_NOT_FOUND,
+  API_ERROR_CREATE_COVER_LETTER,
+} from "@bao/shared/constants/api-errors";
 import {
   COVER_LETTER_DEFAULT_TEMPLATE,
   type CoverLetterTemplate,
@@ -36,13 +39,23 @@ export const createCoverLetter = async (body: {
   };
 
   await db.insert(coverLetters).values(coverLetter);
+
+  // Read the row back rather than echoing the insert payload: `createdAt` /
+  // `updatedAt` are database defaults, so echoing would return a cover letter
+  // without the timestamps that every read path includes. Reading back also
+  // proves the insert actually landed, matching the resume/portfolio services.
+  const [created] = await db.select().from(coverLetters).where(eq(coverLetters.id, coverLetter.id));
+  if (!created) {
+    throw new Error(API_ERROR_CREATE_COVER_LETTER);
+  }
+
   gamificationService.trackActionFireAndForget(
     "coverLettersGenerated",
     ROUTE_GAMIFICATION_XP.coverLettersGenerated,
     "cover_letter_created",
   );
 
-  return { coverLetter, statusCode: HTTP_STATUS_CREATED };
+  return { coverLetter: created, statusCode: HTTP_STATUS_CREATED };
 };
 
 export const getCoverLetterById = async (id: string, set: RouteSetState) => {

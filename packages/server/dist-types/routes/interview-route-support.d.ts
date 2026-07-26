@@ -49,7 +49,6 @@ export declare const submitInterviewResponse: (id: string, body: SubmitResponseB
 } | {
     status: typeof HTTP_STATUS_OK;
     body: {
-        error?: undefined;
         id: string;
         studioId: string;
         config: import("@bao/shared/types/interview").InterviewConfig;
@@ -70,6 +69,7 @@ export declare const submitInterviewResponse: (id: string, body: SubmitResponseB
         totalResponses?: number;
         createdAt?: string;
         updatedAt?: string;
+        error?: undefined;
         message: string;
     };
 }>;
@@ -81,7 +81,6 @@ export declare const completeInterviewSession: (id: string) => Promise<{
 } | {
     status: typeof HTTP_STATUS_OK;
     body: {
-        error?: undefined;
         id: string;
         studioId: string;
         config: import("@bao/shared/types/interview").InterviewConfig;
@@ -102,6 +101,7 @@ export declare const completeInterviewSession: (id: string) => Promise<{
         totalResponses?: number;
         createdAt?: string;
         updatedAt?: string;
+        error?: undefined;
         message: string;
     };
 }>;

@@ -3,6 +3,7 @@ import { jobApplyScriptEnvelopeSchema } from "@bao/shared/schemas/automation-scr
 import { resumeDataSchema } from "@bao/shared/schemas/resume.schema";
 import type { RpaRunResult } from "@bao/shared/schemas/rpa-events.schema";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { isLoopbackOrPrivateHost } from "@bao/shared/utils/private-host";
 import {
   VERIFY_PROGRESS_YIELD_MS,
   VERIFY_STEP_INDEX,
@@ -39,6 +40,23 @@ const flattenJsonStrings = (value: JsonValue, parts: string[] = []): string => {
 const resolveSubmitUrl = (jobUrl: string): string => {
   const parsed = new URL(jobUrl);
   return new URL("/submit", parsed.origin).toString();
+};
+
+/**
+ * Verification submissions carry candidate PII multipart payloads; fail closed
+ * unless the target host is loopback or private address space.
+ */
+export const assertVerifySubmitHostAllowed = (jobUrl: string): void => {
+  const rawHostname = new URL(jobUrl).hostname;
+  const hostname =
+    rawHostname.startsWith("[") && rawHostname.endsWith("]")
+      ? rawHostname.slice(1, -1)
+      : rawHostname;
+  if (!isLoopbackOrPrivateHost(hostname)) {
+    throw new Error(
+      `Verification submission refused: host "${hostname}" is not a loopback or private host.`,
+    );
+  }
 };
 
 const appendResumeArtifact = async (
@@ -116,6 +134,8 @@ const submitVerificationForm = async (
     VERIFY_STEP_INDEX.submission,
     "Completing deterministic verification submission.",
   );
+
+  assertVerifySubmitHostAllowed(jobUrl);
 
   const submitResponse = await fetch(resolveSubmitUrl(jobUrl), {
     method: "POST",

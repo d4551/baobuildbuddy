@@ -71,12 +71,19 @@ export const RPA_CAPABILITY_ISSUE_CODES = [
   "portal_configuration_missing",
   "portal_disabled",
   "portal_fallback_url_missing",
+  "chromium_executable_missing",
 ] as const;
 
 /**
  * Union type for structured RPA capability audit issues.
  */
 export type RpaCapabilityIssueCode = (typeof RPA_CAPABILITY_ISSUE_CODES)[number];
+
+/**
+ * Remediation command surfaced when no Playwright Chromium build is installed.
+ */
+export const RPA_CAPABILITY_INSTALL_CHROMIUM_REMEDIATION =
+  "bun run automation:browsers:install" as const;
 
 /**
  * Structured audit issue payload localized by client surfaces.
@@ -94,6 +101,10 @@ export interface RpaCapabilityIssue {
    * Resolved portal label from current settings when available.
    */
   portalName?: string;
+  /**
+   * Operator-facing remediation command when the issue has a direct fix.
+   */
+  remediation?: string;
 }
 
 /**

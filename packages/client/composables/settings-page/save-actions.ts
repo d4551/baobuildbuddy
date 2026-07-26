@@ -11,6 +11,7 @@ import {
   leverCompanyConfigSchema,
 } from "@bao/shared/schemas/settings.schema";
 import { parseJson } from "@bao/shared/utils/json";
+import { parseJsonExplained } from "@bao/shared/utils/json-explained";
 import { isValidEmail } from "@bao/shared/utils/validation";
 import z from "zod";
 import { buildBrandPayload } from "./save-brand-payload";
@@ -156,87 +157,109 @@ function createHandleSaveAutomation(state: SettingsPageState) {
   };
 }
 
-function parseJobProviderCollections(state: SettingsPageState) {
-  const greenhouseBoards = parseJson(
+interface JobProviderCollections {
+  readonly greenhouseBoards: z.infer<z.ZodArray<typeof greenhouseBoardConfigSchema>>;
+  readonly leverCompanies: z.infer<z.ZodArray<typeof leverCompanyConfigSchema>>;
+  readonly companyBoards: z.infer<z.ZodArray<typeof companyBoardConfigSchema>>;
+  readonly companyBoardApiTemplates: z.infer<typeof companyBoardApiTemplatesSchema>;
+  readonly gamingPortals: z.infer<z.ZodArray<typeof gamingPortalConfigSchema>>;
+}
+
+/**
+ * Parses every provider collection, naming the first one that fails.
+ *
+ * These used to collapse to a bare `null`, so the save aborted with
+ * "Provider configuration JSON is invalid" and no way to tell which of the five
+ * datasets — or which field inside it — was at fault.
+ */
+function parseJobProviderCollections(
+  state: SettingsPageState,
+): { collections: JobProviderCollections } | { failure: string } {
+  const greenhouseBoards = parseJsonExplained(
     state.jobProviderForm.greenhouseBoardsJson,
     z.array(greenhouseBoardConfigSchema),
   );
-  const leverCompanies = parseJson(
+  if (!greenhouseBoards.ok) return { failure: `greenhouseBoards — ${greenhouseBoards.reason}` };
+
+  const leverCompanies = parseJsonExplained(
     state.jobProviderForm.leverCompaniesJson,
     z.array(leverCompanyConfigSchema),
   );
-  const companyBoards = parseJson(
+  if (!leverCompanies.ok) return { failure: `leverCompanies — ${leverCompanies.reason}` };
+
+  const companyBoards = parseJsonExplained(
     state.jobProviderForm.companyBoardsJson,
     z.array(companyBoardConfigSchema),
   );
-  const companyBoardApiTemplates = parseJson(
+  if (!companyBoards.ok) return { failure: `companyBoards — ${companyBoards.reason}` };
+
+  const companyBoardApiTemplates = parseJsonExplained(
     state.jobProviderForm.companyBoardApiTemplatesJson,
     companyBoardApiTemplatesSchema,
   );
-  const gamingPortals = parseJson(
+  if (!companyBoardApiTemplates.ok) {
+    return { failure: `companyBoardApiTemplates — ${companyBoardApiTemplates.reason}` };
+  }
+
+  const gamingPortals = parseJsonExplained(
     state.jobProviderForm.gamingPortalsJson,
     z.array(gamingPortalConfigSchema),
   );
-  if (
-    !(
-      greenhouseBoards &&
-      leverCompanies &&
-      companyBoards &&
-      companyBoardApiTemplates &&
-      gamingPortals
-    )
-  )
-    return null;
+  if (!gamingPortals.ok) return { failure: `gamingPortals — ${gamingPortals.reason}` };
 
   return {
-    greenhouseBoards,
-    leverCompanies,
-    companyBoards,
-    companyBoardApiTemplates,
-    gamingPortals,
+    collections: {
+      greenhouseBoards: greenhouseBoards.value,
+      leverCompanies: leverCompanies.value,
+      companyBoards: companyBoards.value,
+      companyBoardApiTemplates: companyBoardApiTemplates.value,
+      gamingPortals: gamingPortals.value,
+    },
   };
 }
 
 function buildJobProvidersPayload(state: SettingsPageState) {
-  const collections = parseJobProviderCollections(state);
-  if (!collections) {
-    return null;
+  const parsed = parseJobProviderCollections(state);
+  if ("failure" in parsed) {
+    return { failure: parsed.failure };
   }
+  const collections = parsed.collections;
 
   return {
-    providerTimeoutMs: state.jobProviderForm.providerTimeoutMs,
-    companyBoardResultLimit: state.jobProviderForm.companyBoardResultLimit,
-    gamingBoardResultLimit: state.jobProviderForm.gamingBoardResultLimit,
-    unknownLocationLabel: state.jobProviderForm.unknownLocationLabel.trim(),
-    unknownCompanyLabel: state.jobProviderForm.unknownCompanyLabel.trim(),
-    hitmarkerEnabled: state.jobProviderForm.hitmarkerEnabled,
-    hitmarkerApiBaseUrl: state.jobProviderForm.hitmarkerApiBaseUrl.trim(),
-    hitmarkerDefaultQuery: state.jobProviderForm.hitmarkerDefaultQuery.trim(),
-    hitmarkerDefaultLocation: state.jobProviderForm.hitmarkerDefaultLocation.trim(),
-    greenhouseApiBaseUrl: state.jobProviderForm.greenhouseApiBaseUrl.trim(),
-    greenhouseMaxPages: state.jobProviderForm.greenhouseMaxPages,
-    greenhouseBoards: collections.greenhouseBoards,
-    leverApiBaseUrl: state.jobProviderForm.leverApiBaseUrl.trim(),
-    leverMaxPages: state.jobProviderForm.leverMaxPages,
-    leverCompanies: collections.leverCompanies,
-    companyBoardApiTemplates: collections.companyBoardApiTemplates,
-    companyBoards: collections.companyBoards,
-    gamingPortals: collections.gamingPortals,
+    payload: {
+      providerTimeoutMs: state.jobProviderForm.providerTimeoutMs,
+      companyBoardResultLimit: state.jobProviderForm.companyBoardResultLimit,
+      gamingBoardResultLimit: state.jobProviderForm.gamingBoardResultLimit,
+      unknownLocationLabel: state.jobProviderForm.unknownLocationLabel.trim(),
+      unknownCompanyLabel: state.jobProviderForm.unknownCompanyLabel.trim(),
+      greenhouseApiBaseUrl: state.jobProviderForm.greenhouseApiBaseUrl.trim(),
+      greenhouseMaxPages: state.jobProviderForm.greenhouseMaxPages,
+      greenhouseBoards: collections.greenhouseBoards,
+      leverApiBaseUrl: state.jobProviderForm.leverApiBaseUrl.trim(),
+      leverMaxPages: state.jobProviderForm.leverMaxPages,
+      leverCompanies: collections.leverCompanies,
+      companyBoardApiTemplates: collections.companyBoardApiTemplates,
+      companyBoards: collections.companyBoards,
+      gamingPortals: collections.gamingPortals,
+    },
   };
 }
 
 function createHandleSaveJobProviders(state: SettingsPageState) {
   return async () => {
-    const payload = buildJobProvidersPayload(state);
-    if (!payload) {
+    const built = buildJobProvidersPayload(state);
+    if ("failure" in built) {
       state.jobProvidersSaveState.value = "error";
-      state.$toast.error(state.t("settings.jobIntelligence.errors.invalidProviderConfig"));
+      // Name the offending dataset and field instead of a blanket "invalid".
+      state.$toast.error(
+        `${state.t("settings.jobIntelligence.errors.invalidProviderConfig")} ${built.failure}`,
+      );
       return;
     }
     await runStatefulSave({
       state: state.jobProvidersSaveState,
       task: state.updateSettings({
-        automationSettings: { ...state.automationForm, jobProviders: payload },
+        automationSettings: { ...state.automationForm, jobProviders: built.payload },
       }),
       failureMessage: state.t("settings.jobIntelligence.errors.failedToSaveProviders"),
       successMessage: state.t("settings.jobIntelligence.toasts.providersSaved"),

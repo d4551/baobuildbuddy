@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppProseField from "~/components/ui/AppProseField.vue";
 import {
+  CHECKBOX_CONTROL_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   FLUID_WIDTH_CLASS,
   GHOST_ACTION_CLASS,
@@ -151,7 +152,7 @@ useSeoMeta({
               <input
                 v-model="form.deliverAfterGeneration"
                 type="checkbox"
-                class="checkbox checkbox-primary"
+                :class="[CHECKBOX_CONTROL_CLASS]"
                 :disabled="!emailDeliveryConfigured"
                 :aria-label="t('automation.email.deliverAria')"
               />

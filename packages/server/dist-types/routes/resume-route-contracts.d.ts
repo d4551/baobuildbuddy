@@ -25,6 +25,10 @@ export type ResumeExportBody = {
 };
 export type ResumeEnhanceBody = {
     section?: string;
+    /** Optional scraped posting to tailor the suggestions against. */
+    jobId?: string;
+    /** Optional studio whose stack, titles and culture should steer the suggestions. */
+    studioId?: string;
 };
 export declare const resumeTemplateBodySchema: import("typebox").TUnion<import("typebox").TLiteral<"classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical">[]>;
 export declare const resumeThemeBodySchema: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
@@ -149,6 +153,8 @@ export declare const resumeExportBodySchema: import("typebox").TObject<{
 export type ResumeExportRouteBody = Static<typeof resumeExportBodySchema>;
 export declare const resumeEnhanceBodySchema: import("typebox").TObject<{
     section: import("typebox").TOptional<import("typebox").TString>;
+    jobId: import("typebox").TOptional<import("typebox").TString>;
+    studioId: import("typebox").TOptional<import("typebox").TString>;
 }>;
 export type ResumeEnhanceRouteBody = Static<typeof resumeEnhanceBodySchema>;
 export declare const resumeScoreBodySchema: import("typebox").TObject<{

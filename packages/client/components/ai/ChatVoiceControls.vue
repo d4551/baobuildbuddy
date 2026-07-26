@@ -11,6 +11,7 @@ import {
   MARGIN_TOKEN_CLASS,
   PADDING_TOKEN_CLASS,
   SVG_STROKE_WIDTH_DEFAULT,
+  TOGGLE_CONTROL_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -237,7 +238,7 @@ const voiceStatusLabel = computed(() => {
       <input
         :checked="props.autoSpeakReplies"
         type="checkbox"
-        class="toggle toggle-xs"
+        :class="[TOGGLE_CONTROL_CLASS]"
         :aria-label="t('aiChatCommon.voice.autoSpeakAria')"
         @change="handleAutoSpeakChange"
       />

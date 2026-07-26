@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  AVATAR_PLACEHOLDER_CLASS,
   BADGE_OUTLINE_SM_CLASS,
   BADGE_PRIMARY_CLASS,
   BADGE_PRIMARY_LG_CLASS,
@@ -164,7 +165,7 @@ function studioDetailLocation(location: string | undefined): string {
           <div :class="SURFACE_GLASS_CARD_CLASS">
             <div class="card-body">
               <div class="flex items-start" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
-                <div class="avatar placeholder">
+                <div :class="[AVATAR_PLACEHOLDER_CLASS]">
                   <div class="bg-base-300 text-base-content" :class="[FORM_WIDTH_20_CLASS, RADIUS_TOKEN_CLASS.full]">
                     <span :class="[TYPOGRAPHY_SCALE_CLASS.xl3]">{{ studioInitial }}</span>
                   </div>

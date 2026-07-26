@@ -2,6 +2,7 @@
 import type { GameStudio } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
 import {
+  AVATAR_PLACEHOLDER_CLASS,
   BADGE_OUTLINE_SM_CLASS,
   BADGE_PRIMARY_SM_CLASS,
   BADGE_SUCCESS_SM_CLASS,
@@ -61,7 +62,7 @@ function studioLocation(location: string): string {
       >
         <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
           <div class="flex items-center" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
-            <div class="avatar placeholder">
+            <div :class="[AVATAR_PLACEHOLDER_CLASS]">
               <div class="bg-primary text-primary-content" :class="[RADIUS_TOKEN_CLASS.full, WIDTH_TOKEN_CLASS.w12]">
                 <span :class="[TYPOGRAPHY_SCALE_CLASS.xl]">{{ studioInitial(studio.name) }}</span>
               </div>

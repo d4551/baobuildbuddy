@@ -28,9 +28,11 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
         id: string;
         company: string;
         position: string;
-        jobInfo: Record<string, unknown>;
-        content: GeneratedCoverLetterContent;
-        template: "creative" | "executive" | "gaming" | "professional" | "technical";
+        jobInfo: Record<string, unknown> | null;
+        content: Record<string, unknown> | null;
+        template: string | null;
+        createdAt: string;
+        updatedAt: string;
     };
 }>;
 export declare const exportCoverLetterAttachment: (id: string, format: string | undefined, set: RouteSetState, templateOverride?: string | null) => Promise<Response | {

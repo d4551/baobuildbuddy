@@ -12,15 +12,27 @@ export type ChromiumExecutableProbeDeps = {
 const CHROMIUM_BUILD_DIR_PATTERN = /^chromium(?:_headless_shell)?-\d+$/;
 const REVISION_NUMBER_PATTERN = /\d+$/;
 
+/**
+ * Current Playwright builds ship "Google Chrome for Testing.app" on macOS and
+ * `headless_shell` in a separate `chromium_headless_shell-<rev>` directory.
+ * The older `Chromium.app` names are kept so pinned older caches still resolve.
+ */
 const EXECUTABLE_RELATIVE_PATHS: Readonly<Record<string, readonly string[]>> = {
   darwin: [
-    "chrome-mac/Chromium.app/Contents/MacOS/Chromium",
-    "chrome-mac/headless_shell",
+    "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+    "chrome-mac/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
     "chrome-mac-arm64/Chromium.app/Contents/MacOS/Chromium",
+    "chrome-mac/Chromium.app/Contents/MacOS/Chromium",
     "chrome-mac-arm64/headless_shell",
+    "chrome-mac/headless_shell",
   ],
-  linux: ["chrome-linux/chrome", "chrome-linux/headless_shell"],
-  win32: ["chrome-win/chrome.exe"],
+  linux: [
+    "chrome-linux/chrome",
+    "chrome-linux/headless_shell",
+    "chrome-linux-arm64/chrome",
+    "chrome-linux-arm64/headless_shell",
+  ],
+  win32: ["chrome-win/chrome.exe", "chrome-win/headless_shell.exe"],
 };
 
 const FALLBACK_EXECUTABLE_RELATIVE_PATHS: readonly string[] = [

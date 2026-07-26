@@ -12,6 +12,7 @@ import {
   PRIMARY_ACTION_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -105,7 +106,7 @@ const activeFilterCount = computed(() => {
             <input 
               v-model="remote"
               type="checkbox"
-              class="toggle toggle-primary toggle-sm"
+              :class="[TOGGLE_CONTROL_CLASS]"
               :aria-label="t('jobsPage.remoteOnlyAria')"
             />
           </label>

@@ -20,6 +20,7 @@ import { portfolioProjects } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { userProfile } from "../db/schema/user";
+import { createServerLogger } from "../utils/logger";
 
 import {
   buildCareerProgress,
@@ -27,11 +28,18 @@ import {
   parseActionHistory,
 } from "./statistics-service-activity";
 
+const statisticsLogger = createServerLogger("statistics-service");
+
 export class StatisticsService {
-  private async runBestEffort(operation: () => Promise<void>): Promise<void> {
+  private async runBestEffort(statName: string, operation: () => Promise<void>): Promise<void> {
     await operation().then(
       () => undefined,
-      () => undefined,
+      (error) => {
+        statisticsLogger.warn("Dashboard stat degraded to default", {
+          statName,
+          err: error instanceof Error ? error.message : String(error),
+        });
+      },
     );
   }
 
@@ -63,7 +71,7 @@ export class StatisticsService {
 
   private async getProfileCompleteness(): Promise<number> {
     let profileCompleteness = 0;
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("profile.completeness", async () => {
       const profileRows = await db
         .select()
         .from(userProfile)
@@ -92,7 +100,7 @@ export class StatisticsService {
       interviewing: 0,
       offered: 0,
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("jobs", async () => {
       const savedCount = await db.select({ count: count() }).from(savedJobs);
       jobStats.saved = savedCount[0]?.count || 0;
       const applicationRows = await db.select().from(applications);
@@ -111,7 +119,7 @@ export class StatisticsService {
       count: 0,
       lastUpdated: null,
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("resumes", async () => {
       const resumeCount = await db.select({ count: count() }).from(resumes);
       resumeStats.count = resumeCount[0]?.count || 0;
     });
@@ -120,7 +128,7 @@ export class StatisticsService {
 
   private async getCoverLetterCount(): Promise<number> {
     let countValue = 0;
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("coverLetters", async () => {
       const result = await db.select({ count: count() }).from(coverLetters);
       countValue = result[0]?.count || 0;
     });
@@ -129,7 +137,7 @@ export class StatisticsService {
 
   private async getPortfolioProjectCount(): Promise<number> {
     let projectCount = 0;
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("portfolio", async () => {
       const result = await db.select({ count: count() }).from(portfolioProjects);
       projectCount = result[0]?.count || 0;
     });
@@ -141,7 +149,7 @@ export class StatisticsService {
       totalSessions: 0,
       averageScore: null,
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("interviews", async () => {
       const result = await db.select({ count: count() }).from(interviewSessions);
       interviewStats.totalSessions = result[0]?.count || 0;
     });
@@ -150,7 +158,7 @@ export class StatisticsService {
 
   private async getMappedSkillCount(): Promise<number> {
     let mappedCount = 0;
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("skills", async () => {
       const result = await db.select({ count: count() }).from(skillMappings);
       mappedCount = result[0]?.count || 0;
     });
@@ -162,7 +170,7 @@ export class StatisticsService {
       chatMessages: 0,
       chatSessions: 0,
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("ai", async () => {
       const messageCount = await db.select({ count: count() }).from(chatHistory);
       aiStats.chatMessages = messageCount[0]?.count || 0;
     });
@@ -176,7 +184,7 @@ export class StatisticsService {
       achievements: 0,
       streak: 0,
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("gamification", async () => {
       const gamRows = await db
         .select()
         .from(gamification)
@@ -203,7 +211,7 @@ export class StatisticsService {
       todayRuns: 0,
       recentRuns: [],
     };
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("automation", async () => {
       const allRuns = await db
         .select()
         .from(automationRuns)
@@ -239,13 +247,13 @@ export class StatisticsService {
 
   async getCareerProgress(): Promise<CareerProgress> {
     let mappedSkills = 0;
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("careerProgress.mappedSkills", async () => {
       const skillResult = await db.select({ count: count() }).from(skillMappings);
       mappedSkills = skillResult[0]?.count || 0;
     });
 
     let applicationStatuses: string[] = [];
-    await this.runBestEffort(async () => {
+    await this.runBestEffort("careerProgress.applicationStatuses", async () => {
       const allApps = await db.select().from(applications);
       applicationStatuses = allApps.map((application) => application.status || "");
     });

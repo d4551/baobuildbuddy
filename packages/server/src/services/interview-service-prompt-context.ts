@@ -1,6 +1,5 @@
-import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import { COUNT_EIGHT, COUNT_FOUR } from "@bao/shared/constants/numeric";
 import type { InterviewConfig, InterviewerPersona } from "@bao/shared/types/interview";
+import { buildJobPromptContext, JOB_CONTEXT_NOT_PROVIDED } from "./ai/prompt-context-entities";
 import type { CandidateInterviewContext, StudioContext } from "./interview-service-contracts";
 
 export function buildCandidatePromptContext(candidateContext: CandidateInterviewContext): string {
@@ -15,38 +14,16 @@ ${candidateContext.portfolioSummary}
 Conversation style: ${candidateContext.conversationStyle}`;
 }
 
-export function buildStudioPromptContext(studio: StudioContext): string {
-  return `Studio context:
-- Name: ${studio.name}
-- Type: ${studio.type || DEFAULT_UNSPECIFIED_LABEL}
-- Interview style: ${studio.interviewStyle || DEFAULT_UNSPECIFIED_LABEL}
-- Technologies: ${studio.technologies.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
-- Key titles: ${studio.games.slice(0, COUNT_FOUR).join(", ") || DEFAULT_UNSPECIFIED_LABEL}
-- Remote: ${studio.remoteWork ? "supported" : "primarily on-site"}
-- Persona summary: ${studio.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}
-- Hiring signals: ${studio.enrichment?.hiringSignals.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
-- Interview focus areas: ${studio.enrichment?.interviewFocusAreas.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
-- Candidate pitch angles: ${studio.enrichment?.candidatePitchAngles.join("; ") || DEFAULT_UNSPECIFIED_LABEL}`;
-}
-
-export function buildJobPromptContext(config: InterviewConfig): string {
-  const targetJob = config.targetJob;
-  if (!targetJob || config.interviewMode !== "job") {
-    return "Job context: not provided.";
+/**
+ * Interviews only describe the posting in job mode — a studio-mode interview must
+ * not be steered by a job the user did not target. The studio block itself has no
+ * interview-specific rule, so callers use the canonical builder directly.
+ */
+export function buildInterviewJobPromptContext(config: InterviewConfig): string {
+  if (config.interviewMode !== "job") {
+    return JOB_CONTEXT_NOT_PROVIDED;
   }
-
-  return `Job context:
-- Job title: ${targetJob.title}
-- Company: ${targetJob.company}
-- Location: ${targetJob.location}
-- Technologies: ${targetJob.technologies?.join(", ") || DEFAULT_UNSPECIFIED_LABEL}
-- Requirements: ${targetJob.requirements?.slice(0, COUNT_EIGHT).join("; ") || DEFAULT_UNSPECIFIED_LABEL}
-- Description: ${targetJob.description || "Not provided"}
-- Source: ${targetJob.source || "Unknown"}
-- Persona summary: ${targetJob.enrichment?.summary || DEFAULT_UNSPECIFIED_LABEL}
-- Hiring signals: ${targetJob.enrichment?.hiringSignals.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
-- Interview focus areas: ${targetJob.enrichment?.interviewFocusAreas.join("; ") || DEFAULT_UNSPECIFIED_LABEL}
-- Candidate pitch angles: ${targetJob.enrichment?.candidatePitchAngles.join("; ") || DEFAULT_UNSPECIFIED_LABEL}`;
+  return buildJobPromptContext(config.targetJob);
 }
 
 export function buildInterviewerPersona(

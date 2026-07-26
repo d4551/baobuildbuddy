@@ -15,14 +15,12 @@ import { t } from "elysia";
 import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
-export type GenerateCoverLetterBody = {
-  company: string;
-  position: string;
-  jobInfo?: Record<string, unknown>;
-  resumeId?: string;
-  template?: string;
-  save?: boolean;
-};
+/**
+ * Derived from `generateCoverLetterBodySchema` below rather than hand-written, so a
+ * field added to the schema cannot go missing from the handler's view of the body —
+ * which is exactly how `jobId` / `studioId` would have been silently unavailable.
+ */
+export type GenerateCoverLetterBody = Static<typeof generateCoverLetterBodySchema>;
 
 export const coverLetterTemplateBodySchema = t.Union(
   COVER_LETTER_TEMPLATE_OPTIONS.map((template) => t.Literal(template)),
@@ -63,6 +61,10 @@ export const generateCoverLetterBodySchema = t.Object(
     position: t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT }),
     jobInfo: t.Optional(t.Record(t.String(), t.Unknown())),
     resumeId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    // Ids, not hand-marshalled blobs: the server loads the scraped posting and the
+    // studio record so the prompt carries their real attributes.
+    jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+    studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
     template: t.Optional(coverLetterTemplateBodySchema),
     save: t.Optional(t.Boolean()),
   },
@@ -83,8 +85,10 @@ export const coverLetterEntityResponseSchema = t.Object({
   jobInfo: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
   content: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
   template: t.Optional(t.Union([t.String(), t.Null()])),
-  createdAt: t.Optional(t.String()),
-  updatedAt: t.Optional(t.String()),
+  // `notNull()` with a SQL default in the schema, and every route now returns a
+  // persisted row rather than an echoed insert payload, so these are guaranteed.
+  createdAt: t.String(),
+  updatedAt: t.String(),
 });
 
 export const coverLetterDeleteResponseSchema = t.Object({

@@ -6,6 +6,7 @@ import {
   GHOST_ACTION_DENSE_CLASS,
   PADDING_TOKEN_CLASS,
   SURFACE_GLASS_CARD_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
 import { studioSizeLabel, studioTypeLabel } from "~/utils/labels";
@@ -78,7 +79,7 @@ const { t } = useI18n();
           <input 
             v-model="remoteWork"
             type="checkbox"
-            class="toggle toggle-primary toggle-sm"
+            :class="[TOGGLE_CONTROL_CLASS]"
             :aria-label="t('studiosIndex.filters.remoteAria')"
           />
           <span class="label">{{ t("studiosIndex.filters.remoteLabel") }}</span>

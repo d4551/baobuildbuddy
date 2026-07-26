@@ -48,6 +48,10 @@ export type ResumeExportBody = {
 
 export type ResumeEnhanceBody = {
   section?: string;
+  /** Optional scraped posting to tailor the suggestions against. */
+  jobId?: string;
+  /** Optional studio whose stack, titles and culture should steer the suggestions. */
+  studioId?: string;
 };
 
 export const resumeTemplateBodySchema = t.Union(
@@ -197,6 +201,8 @@ export type ResumeExportRouteBody = Static<typeof resumeExportBodySchema>;
 
 export const resumeEnhanceBodySchema = t.Object({
   section: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_LABEL })),
+  jobId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
+  studioId: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_ID })),
 });
 export type ResumeEnhanceRouteBody = Static<typeof resumeEnhanceBodySchema>;
 

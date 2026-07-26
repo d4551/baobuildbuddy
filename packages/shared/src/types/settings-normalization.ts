@@ -40,10 +40,6 @@ export const normalizeJobProviderSettings = (
 
   return {
     ...settings,
-    hitmarkerApiBaseUrl: normalizeUrl(
-      settings.hitmarkerApiBaseUrl,
-      DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerApiBaseUrl,
-    ),
     gamingPortals: DEFAULT_JOB_PROVIDER_SETTINGS.gamingPortals.map((fallbackPortal) =>
       normalizePortalConfig(portalById.get(fallbackPortal.id), fallbackPortal),
     ),

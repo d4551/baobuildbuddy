@@ -159,10 +159,6 @@ export declare const settingsUpdateBodySchema: import("typebox").TObject<{
             gamingBoardResultLimit: import("typebox").TNumber;
             unknownLocationLabel: import("typebox").TString;
             unknownCompanyLabel: import("typebox").TString;
-            hitmarkerEnabled: import("typebox").TBoolean;
-            hitmarkerApiBaseUrl: import("typebox").TString;
-            hitmarkerDefaultQuery: import("typebox").TString;
-            hitmarkerDefaultLocation: import("typebox").TString;
             greenhouseApiBaseUrl: import("typebox").TString;
             greenhouseMaxPages: import("typebox").TNumber;
             greenhouseBoards: import("typebox").TArray<import("typebox").TObject<{
@@ -430,10 +426,6 @@ export declare const settingsResponseSchema: import("typebox").TObject<{
             gamingBoardResultLimit: import("typebox").TNumber;
             unknownLocationLabel: import("typebox").TString;
             unknownCompanyLabel: import("typebox").TString;
-            hitmarkerEnabled: import("typebox").TBoolean;
-            hitmarkerApiBaseUrl: import("typebox").TString;
-            hitmarkerDefaultQuery: import("typebox").TString;
-            hitmarkerDefaultLocation: import("typebox").TString;
             greenhouseApiBaseUrl: import("typebox").TString;
             greenhouseMaxPages: import("typebox").TNumber;
             greenhouseBoards: import("typebox").TArray<import("typebox").TObject<{
@@ -738,10 +730,6 @@ export declare const settingsReadResponses: {
                 gamingBoardResultLimit: import("typebox").TNumber;
                 unknownLocationLabel: import("typebox").TString;
                 unknownCompanyLabel: import("typebox").TString;
-                hitmarkerEnabled: import("typebox").TBoolean;
-                hitmarkerApiBaseUrl: import("typebox").TString;
-                hitmarkerDefaultQuery: import("typebox").TString;
-                hitmarkerDefaultLocation: import("typebox").TString;
                 greenhouseApiBaseUrl: import("typebox").TString;
                 greenhouseMaxPages: import("typebox").TNumber;
                 greenhouseBoards: import("typebox").TArray<import("typebox").TObject<{

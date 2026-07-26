@@ -7,6 +7,7 @@ import {
   INSET_PANEL_CLASS,
   PADDING_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  TOGGLE_CONTROL_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
 import {
@@ -98,7 +99,7 @@ function onToggle(portal: GamingPortalConfig, enabled: boolean): void {
           </div>
           <input
             :key="`${portal.id}-${portal.enabled ? 'on' : 'off'}`"
-            class="toggle toggle-primary"
+            :class="[TOGGLE_CONTROL_CLASS]"
             type="checkbox"
             :checked="portal.enabled"
             :aria-label="

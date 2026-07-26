@@ -12,6 +12,8 @@ import {
   PRIMARY_ACTION_CLASS,
   QUICK_ACTION_MENU_ID,
 } from "~/constants/layout";
+import { resolveQuickActionTarget } from "~/utils/quick-action-context";
+import { queryValueToString } from "~/utils/route-query";
 
 const { t } = useI18n();
 const { resolvedBrand } = useBrand();
@@ -22,6 +24,28 @@ const quickActionMenuId = QUICK_ACTION_MENU_ID;
 const actionButtonRef = useTemplateRef<HTMLButtonElement>("quickActionToggle");
 const actionMenuRef = useTemplateRef<HTMLDivElement>("quickActionMenu");
 const actionItemRefs = ref<(HTMLAnchorElement | null)[]>([]);
+
+/**
+ * Quick actions carry the current page's entity into their destination so the AI
+ * surfaces open with the studio/job/resume the user was looking at instead of a
+ * blank context.
+ */
+const normalizedRouteQuery = computed<Record<string, string>>(() => {
+  const normalized: Record<string, string> = {};
+  for (const [key, value] of Object.entries(route.query)) {
+    const stringValue = queryValueToString(value);
+    if (stringValue.length > 0) {
+      normalized[key] = stringValue;
+    }
+  }
+  return normalized;
+});
+
+const quickActionTargets = computed(() =>
+  FAB_QUICK_ACTIONS.map((action) =>
+    resolveQuickActionTarget(action.to, route.path, normalizedRouteQuery.value),
+  ),
+);
 
 const closeQuickActions = (): void => {
   isOpen.value = false;
@@ -226,7 +250,7 @@ onUnmounted(() => {
         <NuxtLink 
           v-for="(action, index) in FAB_QUICK_ACTIONS"
           :key="action.id"
-          :to="action.to"
+          :to="quickActionTargets[index]"
           :id="`quick-action-${index}`"
           :class="[PRIMARY_ACTION_CLASS, 'btn-lg', 'justify-between transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)]', FAB_ACTION_MIN_WIDTH_CLASS]"
           role="menuitem"

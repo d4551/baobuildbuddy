@@ -3,6 +3,7 @@ import {
   type AutomationScrapePortalId,
   automationScrapeTargetToPortalId,
   buildRpaCapabilityIdFromScrapeTarget,
+  RPA_CAPABILITY_INSTALL_CHROMIUM_REMEDIATION,
   type RpaCapabilityAuditEntry,
   type RpaCapabilityAuditReport,
   type RpaCapabilityAuditSummary,
@@ -43,7 +44,14 @@ const createJobApplyCapabilityAuditEntry = (): RpaCapabilityAuditEntry => {
     scheduledRunAvailable: chromiumInstalled,
     runHistoryAvailable: true,
     liveUpdatesAvailable: true,
-    issues: [],
+    issues: chromiumInstalled
+      ? []
+      : [
+          {
+            code: "chromium_executable_missing",
+            remediation: RPA_CAPABILITY_INSTALL_CHROMIUM_REMEDIATION,
+          },
+        ],
   };
 };
 
