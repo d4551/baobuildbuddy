@@ -178,10 +178,19 @@ export const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody) => {
   }
 
   const resumeText = serializeResume(resume);
-  const jobDescription = await resolveAnalyzeResumeJobDescription(body.jobId);
+  const [jobDescription, entityContext] = await Promise.all([
+    resolveAnalyzeResumeJobDescription(body.jobId),
+    loadEntityPromptContext({
+      jobId: body.jobId,
+      includeSkills: true,
+    }),
+  ]);
+  const enrichedJobDescription = [jobDescription, serializeEntityPromptContext(entityContext)]
+    .filter((section) => typeof section === "string" && section.length > 0)
+    .join("\n\n");
   const aiService = await getAIService();
   const responseResult = await settle(
-    aiService.generate(buildAnalyzeResumePrompt(resumeText, jobDescription), {
+    aiService.generate(buildAnalyzeResumePrompt(resumeText, enrichedJobDescription), {
       purpose: "resume",
       temperature: AI_DEFAULT_TEMPERATURE,
       maxTokens: SCHEMA_MAX_LENGTH_LONG,
@@ -216,11 +225,23 @@ export const handleGenerateCoverLetterRoute = async (body: GenerateCoverLetterBo
   }
 
   const resumeText = serializeResume(resume);
-  const jobDescription = await resolveCoverLetterJobDescription(body.jobId);
+  const [jobDescription, entityContext] = await Promise.all([
+    resolveCoverLetterJobDescription(body.jobId),
+    loadEntityPromptContext({
+      jobId: body.jobId,
+      includeSkills: true,
+    }),
+  ]);
   const aiService = await getAIService();
   const responseResult = await settle(
     aiService.generate(
-      buildCoverLetterPrompt(body.company, body.position, jobDescription, resumeText),
+      buildCoverLetterPrompt(
+        body.company,
+        body.position,
+        jobDescription,
+        resumeText,
+        entityContext,
+      ),
       {
         purpose: "coverLetter",
         temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,

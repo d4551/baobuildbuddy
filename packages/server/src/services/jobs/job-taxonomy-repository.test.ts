@@ -1,4 +1,5 @@
-import { beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
 import { db, sqlite } from "../../db/client";
 import { initializeDatabase } from "../../db/init";
 import { jobTaxonomyKeywords, studioClassificationRules } from "../../db/schema/job-taxonomy";
@@ -8,6 +9,14 @@ import { readJobTaxonomy, replaceJobTaxonomy } from "./job-taxonomy-repository";
 beforeAll(() => {
   initializeDatabase(sqlite);
   seedDatabase(db);
+});
+
+// The "replaces" test mutates the module-level taxonomy cache via replaceJobTaxonomy.
+// Without restoring defaults, every later test that reads taxonomy (scraper ingestion,
+// job recommendations, skill readiness) would see a one-keyword taxonomy and fail.
+// Restore the canonical defaults so the cache is not polluted across the suite.
+afterAll(async () => {
+  await replaceJobTaxonomy(DEFAULT_JOB_TAXONOMY_SETTINGS);
 });
 
 describe("job taxonomy repository", () => {

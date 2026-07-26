@@ -119,6 +119,11 @@ export const getCandidateContextSummary = (context: SmartFieldAnalysisContext): 
     },
     coverLetterHighlights: coverLetterSections,
     existingAnswers: context.existingAnswers,
+    jobContext: context.jobContext,
+    studioContext: context.studioContext,
+    skillContext: context.skillContext,
+    profileContext: context.profileContext,
+    portfolioContext: context.portfolioContext,
   };
 
   return JSON.stringify(candidateProfile, null, 2);

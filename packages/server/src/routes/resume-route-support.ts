@@ -25,15 +25,18 @@ import {
   RESUME_TEMPLATE_DEFAULT,
 } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { safeParseJson } from "@bao/shared/utils/json";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
 import { AIService } from "../services/ai/ai-service";
-import { loadEntityPromptContext } from "../services/ai/prompt-context-loader";
+import {
+  loadEntityPromptContext,
+  serializeEntityPromptContext,
+} from "../services/ai/prompt-context-loader";
 import { resumeEnhancePrompt, resumeScorePrompt } from "../services/ai/prompts-resume";
 import { docxExportService } from "../services/docx-export-service";
 import { exportService } from "../services/export-service";
@@ -90,13 +93,42 @@ Projects: ${JSON.stringify(resume.projects, null, 2)}
 ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingExperience, null, 2)}` : ""}
 `.trim();
 
+const formatStringList = (values: unknown): string => {
+  if (!Array.isArray(values) || values.length === 0) {
+    return DEFAULT_UNSPECIFIED_LABEL;
+  }
+  const normalized = values.filter((entry): entry is string => typeof entry === "string");
+  return normalized.length > 0 ? normalized.join(", ") : DEFAULT_UNSPECIFIED_LABEL;
+};
+
+const formatEnrichment = (enrichment: unknown): string => {
+  if (!enrichment || typeof enrichment !== "object") {
+    return "";
+  }
+  const record = enrichment as Record<string, unknown>;
+  const sections: string[] = [];
+  if (typeof record.summary === "string" && record.summary.trim().length > 0) {
+    sections.push(`Summary: ${record.summary.trim()}`);
+  }
+  const hiringSignals = Array.isArray(record.hiringSignals) ? record.hiringSignals : [];
+  if (hiringSignals.length > 0) {
+    sections.push(`Hiring signals: ${hiringSignals.join(", ")}`);
+  }
+  const focusAreas = Array.isArray(record.interviewFocusAreas) ? record.interviewFocusAreas : [];
+  if (focusAreas.length > 0) {
+    sections.push(`Interview focus areas: ${focusAreas.join(", ")}`);
+  }
+  return sections.length > 0 ? `\nEnrichment:\n${sections.join("\n")}` : "";
+};
+
 const serializeJobForAi = (job: typeof jobs.$inferSelect): string =>
   `
 Job: ${job.title} at ${job.company}
 Description: ${job.description}
 Requirements: ${formatJobRequirements(job.requirements)}
+Technologies: ${formatStringList(job.technologies)}
 Location: ${job.location || DEFAULT_UNSPECIFIED_LABEL}
-Type: ${job.type || DEFAULT_UNSPECIFIED_LABEL}
+Type: ${job.type || DEFAULT_UNSPECIFIED_LABEL}${formatEnrichment(job.enrichment)}
 `.trim();
 
 const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
@@ -190,6 +222,49 @@ export const exportResumeAsset = async (
   return createPdfAttachmentResponse(Buffer.from(exportResult.value), `resume-${resumeId}.pdf`);
 };
 
+type ResumeEnhanceSuggestion = { text: string; section: string };
+
+const parseResumeEnhanceSuggestions = (
+  content: string,
+  section: string,
+): ResumeEnhanceSuggestion[] => {
+  const parsed = safeParseJson(content);
+  const parsedRecord =
+    parsed !== null && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  const rawSuggestions: JsonValue[] = [];
+  if (parsedRecord !== null && Array.isArray(parsedRecord.suggestions)) {
+    rawSuggestions.push(...parsedRecord.suggestions);
+  } else if (parsedRecord !== null) {
+    rawSuggestions.push(parsedRecord);
+  } else {
+    rawSuggestions.push({ text: content, section });
+  }
+  return rawSuggestions.map((item) => {
+    if (item !== null && typeof item === "object" && !Array.isArray(item)) {
+      const textValue = item.text;
+      const sectionValue = item.section;
+      return {
+        text: typeof textValue === "string" ? textValue : JSON.stringify(item),
+        section: typeof sectionValue === "string" ? sectionValue : section,
+      };
+    }
+    return { text: typeof item === "string" ? item : JSON.stringify(item), section };
+  });
+};
+
+const buildResumeScoreJobDescription = async (
+  jobRow: typeof jobs.$inferSelect,
+  body: ResumeScoreBody,
+): Promise<string> => {
+  const entityContext = await loadEntityPromptContext({
+    jobId: body.jobId,
+    includeSkills: true,
+  });
+  return [serializeJobForAi(jobRow), serializeEntityPromptContext(entityContext)]
+    .filter((section) => typeof section === "string" && section.length > 0)
+    .join("\n\n");
+};
+
 export const enhanceResumeWithAi = async (
   resumeId: string,
   body: ResumeEnhanceBody,
@@ -244,26 +319,7 @@ export const enhanceResumeWithAi = async (
     return { error: API_ERROR_AI_ENHANCEMENT_FAILED };
   }
 
-  const parsed = safeParseJson(response.content);
-  const parsedRecord =
-    parsed !== null && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-  const rawSuggestions: JsonValue[] =
-    parsedRecord !== null && Array.isArray(parsedRecord.suggestions)
-      ? parsedRecord.suggestions
-      : parsedRecord !== null
-        ? [parsedRecord]
-        : [{ text: response.content, section }];
-  const suggestions = rawSuggestions.map((item) => {
-    if (item !== null && typeof item === "object" && !Array.isArray(item)) {
-      const textValue = item.text;
-      const sectionValue = item.section;
-      return {
-        text: typeof textValue === "string" ? textValue : JSON.stringify(item),
-        section: typeof sectionValue === "string" ? sectionValue : section,
-      };
-    }
-    return { text: typeof item === "string" ? item : JSON.stringify(item), section };
-  });
+  const suggestions = parseResumeEnhanceSuggestions(response.content, section);
 
   return {
     resume,
@@ -289,17 +345,16 @@ export const handleResumeAiScore = async (
     return { error: API_ERROR_JOB_NOT_FOUND };
   }
 
+  const jobDescription = await buildResumeScoreJobDescription(jobRows[0], body);
+
   const settingsRows = await db.select().from(settings);
   const aiService = AIService.fromSettings(settingsRows[0]);
   const aiResult = await settle(
-    aiService.generate(
-      resumeScorePrompt(serializeResumeForAi(resume), serializeJobForAi(jobRows[0])),
-      {
-        purpose: "resume",
-        temperature: AI_DEFAULT_TEMPERATURE,
-        maxTokens: AI_MAX_TOKENS_RESUME,
-      },
-    ),
+    aiService.generate(resumeScorePrompt(serializeResumeForAi(resume), jobDescription), {
+      purpose: "resume",
+      temperature: AI_DEFAULT_TEMPERATURE,
+      maxTokens: AI_MAX_TOKENS_RESUME,
+    }),
   );
   if (aiResult.status === "rejected") {
     resumeRouteLogger.error("Resume AI scoring rejected", {

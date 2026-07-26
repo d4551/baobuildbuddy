@@ -69,6 +69,25 @@ const toFallbackRecommendations = (
   aiPowered: false,
 });
 
+const RECOMMENDATION_DESCRIPTION_LIMIT = 600;
+
+const truncateDescription = (description: string | null | undefined): string => {
+  const trimmed = (description ?? "").trim();
+  if (trimmed.length === 0) {
+    return DEFAULT_UNSPECIFIED_LABEL;
+  }
+  return trimmed.length > RECOMMENDATION_DESCRIPTION_LIMIT
+    ? `${trimmed.slice(0, RECOMMENDATION_DESCRIPTION_LIMIT)}...`
+    : trimmed;
+};
+
+const formatSkillList = (skills: string[] | null | undefined): string => {
+  if (!Array.isArray(skills) || skills.length === 0) {
+    return DEFAULT_UNSPECIFIED_LABEL;
+  }
+  return skills.join(", ");
+};
+
 const buildRecommendationPrompt = (profile: UserProfileRow, recentJobs: JobRow[]): string => {
   const userSkills = [...(profile.technicalSkills || []), ...(profile.softSkills || [])].join(", ");
   const userExperience =
@@ -80,11 +99,14 @@ const buildRecommendationPrompt = (profile: UserProfileRow, recentJobs: JobRow[]
       ? JSON.stringify(profile.careerGoals)
       : "Career growth in gaming industry";
   const jobsSummary = recentJobs
-    .map(
-      (job, idx) =>
-        `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || DEFAULT_UNSPECIFIED_LABEL}`,
-    )
-    .join("\n");
+    .map((job, idx) => {
+      const header = `Job ${idx + 1}: ${job.title} at ${job.company} - ${job.location} - ${job.experienceLevel || DEFAULT_UNSPECIFIED_LABEL}`;
+      const description = `Description: ${truncateDescription(job.description)}`;
+      const requirements = `Requirements: ${formatSkillList(job.requirements)}`;
+      const technologies = `Technologies: ${formatSkillList(job.technologies)}`;
+      return [header, description, requirements, technologies].join("\n");
+    })
+    .join("\n\n");
 
   return `You are a career matching AI assistant. Analyze these jobs against the user profile and score each job from 0-100 based on match quality.
 
@@ -106,7 +128,7 @@ Return a JSON array with match analysis for each job. Format:
   }
 ]
 
-Provide realistic scores based on skills match, experience level alignment, and career goals fit.`;
+Provide realistic scores based on skills match, experience level alignment, and career goals fit. Use the job description, requirements, and technologies to judge real alignment, not just the job title.`;
 };
 
 const parseRecommendationMatches = (responseContent: string): JobRecommendationMatch[] => {

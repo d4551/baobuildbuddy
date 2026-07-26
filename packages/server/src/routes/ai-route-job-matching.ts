@@ -108,6 +108,8 @@ const buildJobMatchPromptText = (profile: MatchProfile, job: JobRow): string =>
       company: job.company,
       description: job.description || "",
       requirements: job.requirements || [],
+      ...(Array.isArray(job.technologies) ? { technologies: job.technologies } : {}),
+      ...(job.enrichment ? { enrichment: job.enrichment } : {}),
     },
   )}\n\nRespond with a JSON object containing: score (number 0-100), strengths (string[]), concerns (string[]), highlightSkills (string[]).`;
 

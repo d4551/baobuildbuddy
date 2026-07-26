@@ -47,11 +47,26 @@ const createEmptyAutofillAnalysis = (): SmartFieldAnalysisResult => ({
 });
 
 const buildSmartFieldAnalysisContext = (
-  options: Pick<AutofillAnalysisOptions, "resume" | "coverLetter" | "existingAnswers">,
+  options: Pick<
+    AutofillAnalysisOptions,
+    | "resume"
+    | "coverLetter"
+    | "existingAnswers"
+    | "jobContext"
+    | "studioContext"
+    | "skillContext"
+    | "profileContext"
+    | "portfolioContext"
+  >,
 ): SmartFieldAnalysisContext => ({
   resume: Object.fromEntries(Object.entries(options.resume)),
   coverLetter: options.coverLetter ? { content: options.coverLetter.content || {} } : null,
   existingAnswers: options.existingAnswers,
+  ...(options.jobContext ? { jobContext: options.jobContext } : {}),
+  ...(options.studioContext ? { studioContext: options.studioContext } : {}),
+  ...(options.skillContext ? { skillContext: options.skillContext } : {}),
+  ...(options.profileContext ? { profileContext: options.profileContext } : {}),
+  ...(options.portfolioContext ? { portfolioContext: options.portfolioContext } : {}),
 });
 
 export const resolveAutofillAnalysis = async (

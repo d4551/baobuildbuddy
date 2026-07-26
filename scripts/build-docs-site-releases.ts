@@ -89,12 +89,8 @@ function readJson<T>(path: string): T {
 }
 
 function isLfsPointer(path: string): boolean {
-  try {
-    const fd = readFileSync(path, "utf8");
-    return fd.startsWith("version https://git-lfs");
-  } catch {
-    return false;
-  }
+  if (!existsSync(path)) return false;
+  return readFileSync(path, "utf8").startsWith("version https://git-lfs");
 }
 
 function loadSizeOverrides(root: string): Record<string, number> {

@@ -4,9 +4,16 @@ import type {
   ReadinessAssessment,
   SkillMapping,
 } from "@bao/shared/types/skill-mapping";
+import { eq } from "drizzle-orm";
+import { db } from "../db/client";
+import { jobs } from "../db/schema/jobs";
 import { skillMappingFromRow } from "./skill-mapping-normalizers";
 import { buildCareerPathways } from "./skill-mapping-pathways";
-import { buildSkillReadinessAssessment } from "./skill-mapping-readiness";
+import {
+  buildSkillReadinessAssessment,
+  buildSkillReadinessAssessmentForJob,
+  type ReadinessJobTarget,
+} from "./skill-mapping-readiness";
 import {
   createSkillMappingRow,
   deleteSkillMappingRow,
@@ -14,6 +21,13 @@ import {
   readSkillMappingRow,
   updateSkillMappingRow,
 } from "./skill-mapping-storage";
+
+const toReadinessJobTarget = (job: typeof jobs.$inferSelect): ReadinessJobTarget => ({
+  id: job.id,
+  title: job.title,
+  requirements: Array.isArray(job.requirements) ? job.requirements : [],
+  technologies: Array.isArray(job.technologies) ? job.technologies : [],
+});
 
 export class SkillMappingService {
   async getMappings(): Promise<SkillMapping[]> {
@@ -64,6 +78,16 @@ export class SkillMappingService {
   async getReadiness(): Promise<ReadinessAssessment> {
     const mappings = await this.getMappings();
     return buildSkillReadinessAssessment(mappings);
+  }
+
+  async getReadinessForJob(jobId: string): Promise<ReadinessAssessment | null> {
+    const jobRows = await db.select().from(jobs).where(eq(jobs.id, jobId));
+    const jobRow = jobRows[0];
+    if (!jobRow) {
+      return null;
+    }
+    const mappings = await this.getMappings();
+    return buildSkillReadinessAssessmentForJob(mappings, toReadinessJobTarget(jobRow));
   }
 }
 

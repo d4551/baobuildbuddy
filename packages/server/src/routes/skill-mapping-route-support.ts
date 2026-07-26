@@ -126,6 +126,11 @@ export const deleteSkillMappingById = async (id: string, set: SkillMappingRouteS
 };
 
 export const getSkillReadiness = async (jobId?: string) => {
-  const readiness = await skillMappingService.getReadiness();
-  return jobId ? { ...readiness, jobId } : readiness;
+  if (jobId) {
+    const readiness = await skillMappingService.getReadinessForJob(jobId);
+    if (readiness) {
+      return { ...readiness, jobId };
+    }
+  }
+  return skillMappingService.getReadiness();
 };

@@ -13,7 +13,8 @@ const scanRoots = [
   "packages/shared/src",
   "packages/scraper/src",
 ] as const;
-const maxVueLines = 350;
+// Keep aligned with validate-ui-single-source-of-truth.ts `vueFileLimit` — one SSOT ceiling for Vue files.
+const maxVueLines = 310;
 const maxTypeScriptLines = 400;
 const maxFunctionBodyLines = 80;
 const maxParameterCount = 5;
