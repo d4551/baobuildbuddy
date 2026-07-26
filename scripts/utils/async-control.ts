@@ -62,3 +62,35 @@ export const toErrorMessage = (error: unknown, fallback: string = "Unexpected er
 
 const valueIsNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
+
+export type PollUntilOptions<T> = {
+  /** Probe returning the resolved value, or null/undefined to keep polling. */
+  readonly probe: () => Promise<T | null | undefined>;
+  /** Delay between probes. */
+  readonly intervalMs: number;
+  /** Maximum total wait budget. */
+  readonly timeoutMs: number;
+  /** Sleep implementation (page-bound settle for browser proofs, Bun.sleep elsewhere). */
+  readonly sleep: (milliseconds: number) => Promise<unknown>;
+};
+
+/**
+ * Polls a probe until it resolves a value or the timeout elapses.
+ * Recursive by construction: live browser capture requires strictly sequential
+ * probing, so recursion is the honest no-await-in-loop shape.
+ */
+export const pollUntil = async <T>(options: PollUntilOptions<T>): Promise<T | null> => {
+  const deadline = Date.now() + options.timeoutMs;
+  const attempt = async (): Promise<T | null> => {
+    const hit = await options.probe();
+    if (hit !== null && hit !== undefined) {
+      return hit;
+    }
+    if (Date.now() >= deadline) {
+      return null;
+    }
+    await options.sleep(options.intervalMs);
+    return attempt();
+  };
+  return attempt();
+};

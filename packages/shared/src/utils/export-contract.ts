@@ -50,6 +50,14 @@ export const resolveResumeExportTemplate = (
 };
 
 /**
+ * CSS theme class applied to the resume preview shell for a template.
+ * Class definitions are generated from RESUME_EXPORT_THEME_CONFIGS into
+ * assets/css/resume-preview.generated.css (see scripts/generate-resume-preview-css.ts).
+ */
+export const resumePreviewThemeClass = (template: ResumeTemplate): string =>
+  `resume-preview-theme-${template}`;
+
+/**
  * Formats export dates with the shared locale contract.
  */
 export const formatExportDate = (date: Date): string => EXPORT_DATE_FORMATTER.format(date);

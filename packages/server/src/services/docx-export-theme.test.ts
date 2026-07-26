@@ -13,10 +13,28 @@ const ZIP_CENTRAL_DIRECTORY_FILE_HEADER_SIGNATURE = 0x02014b50;
 const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const ZIP_COMPRESSION_STORED = 0;
 const ZIP_COMPRESSION_DEFLATE = 8;
+/** Minimum EOCD record size; scan starts this far from the end of file. */
+const ZIP_EOCD_MIN_SIZE = 22;
+/** Field offsets inside the EOCD record. */
+const ZIP_EOCD_CENTRAL_DIRECTORY_OFFSET_FIELD = 16;
+/** Field offsets inside a central directory file header. */
+const ZIP_CENTRAL_COMPRESSION_METHOD_FIELD = 10;
+const ZIP_CENTRAL_COMPRESSED_SIZE_FIELD = 20;
+const ZIP_CENTRAL_FILE_NAME_LENGTH_FIELD = 28;
+const ZIP_CENTRAL_EXTRA_FIELD_LENGTH_FIELD = 30;
+const ZIP_CENTRAL_FILE_COMMENT_LENGTH_FIELD = 32;
+const ZIP_CENTRAL_LOCAL_HEADER_OFFSET_FIELD = 42;
+/** Fixed byte size of a central directory header before variable fields. */
+const ZIP_CENTRAL_HEADER_FIXED_SIZE = 46;
+/** Field offsets inside a local file header. */
+const ZIP_LOCAL_FILE_NAME_LENGTH_FIELD = 26;
+const ZIP_LOCAL_EXTRA_FIELD_LENGTH_FIELD = 28;
+/** Fixed byte size of a local file header before variable fields. */
+const ZIP_LOCAL_HEADER_FIXED_SIZE = 30;
 
 function findEndOfCentralDirectory(bytes: Uint8Array): number {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  for (let offset = bytes.byteLength - 22; offset >= 0; offset -= 1) {
+  for (let offset = bytes.byteLength - ZIP_EOCD_MIN_SIZE; offset >= 0; offset -= 1) {
     if (view.getUint32(offset, true) === ZIP_END_OF_CENTRAL_DIRECTORY_SIGNATURE) {
       return offset;
     }
@@ -28,27 +46,36 @@ function extractZipEntry(bytes: Uint8Array, entryName: string): Uint8Array {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const decoder = new TextDecoder();
   const endOfCentralDirectoryOffset = findEndOfCentralDirectory(bytes);
-  const centralDirectoryOffset = view.getUint32(endOfCentralDirectoryOffset + 16, true);
+  const centralDirectoryOffset = view.getUint32(
+    endOfCentralDirectoryOffset + ZIP_EOCD_CENTRAL_DIRECTORY_OFFSET_FIELD,
+    true,
+  );
   let offset = centralDirectoryOffset;
 
   while (view.getUint32(offset, true) === ZIP_CENTRAL_DIRECTORY_FILE_HEADER_SIGNATURE) {
-    const compressionMethod = view.getUint16(offset + 10, true);
-    const compressedSize = view.getUint32(offset + 20, true);
-    const fileNameLength = view.getUint16(offset + 28, true);
-    const extraFieldLength = view.getUint16(offset + 30, true);
-    const fileCommentLength = view.getUint16(offset + 32, true);
-    const localHeaderOffset = view.getUint32(offset + 42, true);
-    const fileNameStart = offset + 46;
+    const compressionMethod = view.getUint16(offset + ZIP_CENTRAL_COMPRESSION_METHOD_FIELD, true);
+    const compressedSize = view.getUint32(offset + ZIP_CENTRAL_COMPRESSED_SIZE_FIELD, true);
+    const fileNameLength = view.getUint16(offset + ZIP_CENTRAL_FILE_NAME_LENGTH_FIELD, true);
+    const extraFieldLength = view.getUint16(offset + ZIP_CENTRAL_EXTRA_FIELD_LENGTH_FIELD, true);
+    const fileCommentLength = view.getUint16(offset + ZIP_CENTRAL_FILE_COMMENT_LENGTH_FIELD, true);
+    const localHeaderOffset = view.getUint32(offset + ZIP_CENTRAL_LOCAL_HEADER_OFFSET_FIELD, true);
+    const fileNameStart = offset + ZIP_CENTRAL_HEADER_FIXED_SIZE;
     const fileName = decoder.decode(bytes.subarray(fileNameStart, fileNameStart + fileNameLength));
 
     if (fileName === entryName) {
       if (view.getUint32(localHeaderOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
         throw new Error(`Generated DOCX has an invalid ZIP local header for ${entryName}`);
       }
-      const localFileNameLength = view.getUint16(localHeaderOffset + 26, true);
-      const localExtraFieldLength = view.getUint16(localHeaderOffset + 28, true);
+      const localFileNameLength = view.getUint16(
+        localHeaderOffset + ZIP_LOCAL_FILE_NAME_LENGTH_FIELD,
+        true,
+      );
+      const localExtraFieldLength = view.getUint16(
+        localHeaderOffset + ZIP_LOCAL_EXTRA_FIELD_LENGTH_FIELD,
+        true,
+      );
       const compressedDataStart =
-        localHeaderOffset + 30 + localFileNameLength + localExtraFieldLength;
+        localHeaderOffset + ZIP_LOCAL_HEADER_FIXED_SIZE + localFileNameLength + localExtraFieldLength;
       const compressedData = bytes.subarray(
         compressedDataStart,
         compressedDataStart + compressedSize,
@@ -63,13 +90,13 @@ function extractZipEntry(bytes: Uint8Array, entryName: string): Uint8Array {
       throw new Error(`Generated DOCX uses unsupported ZIP compression ${compressionMethod}`);
     }
 
-    offset += 46 + fileNameLength + extraFieldLength + fileCommentLength;
+    offset += ZIP_CENTRAL_HEADER_FIXED_SIZE + fileNameLength + extraFieldLength + fileCommentLength;
   }
 
   throw new Error(`Generated DOCX is missing ${entryName}`);
 }
 
-async function readDocumentXml(docxBytes: Uint8Array): Promise<string> {
+function readDocumentXml(docxBytes: Uint8Array): string {
   const documentXml = extractZipEntry(docxBytes, "word/document.xml");
   return new TextDecoder().decode(documentXml);
 }
@@ -90,13 +117,13 @@ describe("DOCX export themes", () => {
       email: "alex@example.com",
     };
 
-    const creativeXml = await readDocumentXml(
+    const creativeXml = readDocumentXml(
       await exportCoverLetterDocxDocument(
         { ...baseCoverLetter, template: "creative" },
         userProfile,
       ),
     );
-    const technicalXml = await readDocumentXml(
+    const technicalXml = readDocumentXml(
       await exportCoverLetterDocxDocument(
         { ...baseCoverLetter, template: "technical" },
         userProfile,
@@ -128,10 +155,10 @@ describe("DOCX export themes", () => {
       },
     ];
 
-    const modernXml = await readDocumentXml(
+    const modernXml = readDocumentXml(
       await exportPortfolioDocxDocument(metadata, projects, "modern"),
     );
-    const showcaseXml = await readDocumentXml(
+    const showcaseXml = readDocumentXml(
       await exportPortfolioDocxDocument(metadata, projects, "showcase"),
     );
 

@@ -2,7 +2,7 @@
  * Shared document export themes — cover letter + portfolio variants.
  * Resume themes live in export-layout.ts (RESUME_EXPORT_THEME_CONFIGS).
  */
-import type { CoverLetterTemplate } from "./cover-letter";
+import { type CoverLetterTemplate, isCoverLetterTemplate } from "./cover-letter";
 
 type PdfRgb = { r: number; g: number; b: number };
 
@@ -189,6 +189,16 @@ export const PORTFOLIO_EXPORT_TEMPLATE_OPTIONS = [
 ] as const satisfies readonly PortfolioExportTemplate[];
 
 /**
+ * Type-guard for validating portfolio export template values from untyped boundaries.
+ */
+export function isPortfolioExportTemplate(
+  value: string | null | undefined,
+): value is PortfolioExportTemplate {
+  if (!value) return false;
+  return PORTFOLIO_EXPORT_TEMPLATE_OPTIONS.some((template) => template === value);
+}
+
+/**
  * Portfolios use a more showcase-oriented accent system and wider visual contrast.
  */
 export const PORTFOLIO_EXPORT_THEME = {
@@ -314,55 +324,43 @@ export const PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE = {
 } as const satisfies Record<PortfolioExportTemplate, PortfolioExportLayout>;
 
 export const resolveCoverLetterExportLayout = (
-  template: CoverLetterTemplate | string | undefined | null,
-): CoverLetterExportLayout => {
-  if (template && template in COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE) {
-    return COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE[template as CoverLetterTemplate];
-  }
-  return COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE.professional;
-};
+  template: string | undefined | null,
+): CoverLetterExportLayout =>
+  isCoverLetterTemplate(template)
+    ? COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE[template]
+    : COVER_LETTER_EXPORT_LAYOUT_BY_TEMPLATE.professional;
 
 export const resolvePortfolioExportLayout = (
-  template: PortfolioExportTemplate | string | undefined | null,
-): PortfolioExportLayout => {
-  if (template && template in PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE) {
-    return PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE[template as PortfolioExportTemplate];
-  }
-  return PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE.modern;
-};
+  template: string | undefined | null,
+): PortfolioExportLayout =>
+  isPortfolioExportTemplate(template)
+    ? PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE[template]
+    : PORTFOLIO_EXPORT_LAYOUT_BY_TEMPLATE.modern;
 
 export const resolveCoverLetterPdfPalette = (
-  template: CoverLetterTemplate | string | undefined | null,
-): CoverLetterPdfPalette => {
-  if (template && template in COVER_LETTER_EXPORT_THEME_BY_TEMPLATE) {
-    return COVER_LETTER_EXPORT_THEME_BY_TEMPLATE[template as CoverLetterTemplate];
-  }
-  return COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.professional;
-};
+  template: string | undefined | null,
+): CoverLetterPdfPalette =>
+  isCoverLetterTemplate(template)
+    ? COVER_LETTER_EXPORT_THEME_BY_TEMPLATE[template]
+    : COVER_LETTER_EXPORT_THEME_BY_TEMPLATE.professional;
 
 export const resolveCoverLetterDocxTheme = (
-  template: CoverLetterTemplate | string | undefined | null,
-): CoverLetterDocxTheme => {
-  if (template && template in COVER_LETTER_DOCX_THEME_BY_TEMPLATE) {
-    return COVER_LETTER_DOCX_THEME_BY_TEMPLATE[template as CoverLetterTemplate];
-  }
-  return COVER_LETTER_DOCX_THEME_BY_TEMPLATE.professional;
-};
+  template: string | undefined | null,
+): CoverLetterDocxTheme =>
+  isCoverLetterTemplate(template)
+    ? COVER_LETTER_DOCX_THEME_BY_TEMPLATE[template]
+    : COVER_LETTER_DOCX_THEME_BY_TEMPLATE.professional;
 
 export const resolvePortfolioPdfPalette = (
-  template: PortfolioExportTemplate | string | undefined | null,
-): PortfolioPdfPalette => {
-  if (template && template in PORTFOLIO_EXPORT_THEME_BY_TEMPLATE) {
-    return PORTFOLIO_EXPORT_THEME_BY_TEMPLATE[template as PortfolioExportTemplate];
-  }
-  return PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.modern;
-};
+  template: string | undefined | null,
+): PortfolioPdfPalette =>
+  isPortfolioExportTemplate(template)
+    ? PORTFOLIO_EXPORT_THEME_BY_TEMPLATE[template]
+    : PORTFOLIO_EXPORT_THEME_BY_TEMPLATE.modern;
 
 export const resolvePortfolioDocxTheme = (
-  template: PortfolioExportTemplate | string | undefined | null,
-): PortfolioDocxTheme => {
-  if (template && template in PORTFOLIO_DOCX_THEME_BY_TEMPLATE) {
-    return PORTFOLIO_DOCX_THEME_BY_TEMPLATE[template as PortfolioExportTemplate];
-  }
-  return PORTFOLIO_DOCX_THEME_BY_TEMPLATE.modern;
-};
+  template: string | undefined | null,
+): PortfolioDocxTheme =>
+  isPortfolioExportTemplate(template)
+    ? PORTFOLIO_DOCX_THEME_BY_TEMPLATE[template]
+    : PORTFOLIO_DOCX_THEME_BY_TEMPLATE.modern;

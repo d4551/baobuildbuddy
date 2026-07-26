@@ -8,9 +8,6 @@
   background-color: rgb(255 255 255);
   color: rgb(33 33 33);
 }
-.resume-preview-theme-modern .resume-preview-header {
-  border-color: var(--resume-preview-secondary);
-}
 
 .resume-preview-theme-classic {
   --resume-preview-primary: rgb(51 51 51);
@@ -18,9 +15,6 @@
   --resume-preview-secondary: rgb(89 89 89);
   background-color: rgb(255 255 255);
   color: rgb(31 31 31);
-}
-.resume-preview-theme-classic .resume-preview-header {
-  border-color: var(--resume-preview-secondary);
 }
 
 .resume-preview-theme-creative {
@@ -30,10 +24,6 @@
   background-color: rgb(255 255 255);
   color: rgb(33 33 33);
 }
-.resume-preview-theme-creative .resume-preview-header {
-  border-color: var(--resume-preview-accent);
-  border-bottom-width: 6px;
-}
 
 .resume-preview-theme-minimal {
   --resume-preview-primary: rgb(66 66 66);
@@ -41,9 +31,6 @@
   --resume-preview-secondary: rgb(117 117 117);
   background-color: rgb(255 255 255);
   color: rgb(31 31 31);
-}
-.resume-preview-theme-minimal .resume-preview-header {
-  border-color: var(--resume-preview-secondary);
 }
 
 .resume-preview-theme-google-xyz {
@@ -53,9 +40,6 @@
   background-color: rgb(255 255 255);
   color: rgb(33 33 36);
 }
-.resume-preview-theme-google-xyz .resume-preview-header {
-  border-color: var(--resume-preview-secondary);
-}
 
 .resume-preview-theme-gaming {
   --resume-preview-primary: rgb(138 43 227);
@@ -63,11 +47,6 @@
   --resume-preview-secondary: rgb(0 255 135);
   background-color: rgb(26 26 36);
   color: rgb(240 240 240);
-}
-.resume-preview-theme-gaming .resume-preview-header {
-  background-color: var(--resume-preview-primary);
-  color: rgb(240 240 240);
-  border-color: var(--resume-preview-accent);
 }
 
 .resume-preview-theme-executive {
@@ -77,10 +56,6 @@
   background-color: rgb(255 255 255);
   color: rgb(31 31 31);
 }
-.resume-preview-theme-executive .resume-preview-header {
-  border-color: var(--resume-preview-accent);
-  border-bottom-width: 6px;
-}
 
 .resume-preview-theme-technical {
   --resume-preview-primary: rgb(0 105 92);
@@ -89,6 +64,39 @@
   background-color: rgb(255 255 255);
   color: rgb(31 31 31);
 }
+
+.resume-preview-theme-modern .resume-preview-header {
+  border-color: var(--resume-preview-secondary);
+}
+
+.resume-preview-theme-classic .resume-preview-header {
+  border-color: var(--resume-preview-secondary);
+}
+
+.resume-preview-theme-creative .resume-preview-header {
+  border-color: var(--resume-preview-accent);
+  border-bottom-width: 6px;
+}
+
+.resume-preview-theme-minimal .resume-preview-header {
+  border-color: var(--resume-preview-secondary);
+}
+
+.resume-preview-theme-google-xyz .resume-preview-header {
+  border-color: var(--resume-preview-secondary);
+}
+
+.resume-preview-theme-gaming .resume-preview-header {
+  background-color: var(--resume-preview-primary);
+  color: rgb(240 240 240);
+  border-color: var(--resume-preview-accent);
+}
+
+.resume-preview-theme-executive .resume-preview-header {
+  border-color: var(--resume-preview-accent);
+  border-bottom-width: 6px;
+}
+
 .resume-preview-theme-technical .resume-preview-header {
   border-color: var(--resume-preview-secondary);
 }

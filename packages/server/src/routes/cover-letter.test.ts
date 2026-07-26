@@ -153,7 +153,7 @@ function registerCoverLetterExportTests(): void {
     const { COVER_LETTER_EXPORT_THEME_BY_TEMPLATE } = await import(
       "@bao/shared/constants/export-document-theme"
     );
-    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const { pdfStreamsContainRgbFill } = await import("@bao/shared/utils/pdf-streams");
     const update = await requestJson<{ id: string; template?: string }>(
       app,
       "PUT",

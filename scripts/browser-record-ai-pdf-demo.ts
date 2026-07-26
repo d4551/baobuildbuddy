@@ -20,6 +20,7 @@ import {
   MS_SIXTY_SECONDS,
   MS_TWO_MINUTES,
 } from "./constants/numeric-literals";
+import { pollUntil } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
 import { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } from "../packages/shared/src/constants/export-document-theme";
@@ -78,33 +79,40 @@ const exportPdf = async (
 };
 
 const GREETING_SNIPPET = "Hi, I'm Bao";
+const ASSISTANT_WORD_PATTERN = /[A-Za-z]{4,}/u;
+const USER_BUBBLE_LOCATOR = "article.chat-end .chat-bubble";
+
+const probeLiveAssistantReply = async (page: Page, nonce: string): Promise<string | null> => {
+  const userBubbles = page.locator(USER_BUBBLE_LOCATOR);
+  const userText = (await userBubbles.count()) > 0 ? await userBubbles.last().innerText() : "";
+  if (!userText.includes(nonce)) {
+    return null;
+  }
+  const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
+  const count = await bubbles.count();
+  if (count < 2) {
+    return null;
+  }
+  const latest = (await bubbles.nth(count - 1).innerText()).trim();
+  const looksLikeLiveReply =
+    latest.length > COUNT_TWELVE &&
+    !latest.startsWith(GREETING_SNIPPET) &&
+    (latest.includes(nonce) || ASSISTANT_WORD_PATTERN.test(latest));
+  return looksLikeLiveReply ? latest : null;
+};
 
 const waitLiveAssistantReply = async (page: Page, nonce: string): Promise<string> => {
-  const deadline = Date.now() + MS_TWO_MINUTES;
-  while (Date.now() < deadline) {
-    const userText = await page.locator("article.chat-end .chat-bubble").last().innerText().catch(() => "");
-    if (!userText.includes(nonce)) {
-      await wait(page, MS_ONE_TWO_HUNDRED);
-      continue;
-    }
-    const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
-    const count = await bubbles.count();
-    if (count < 2) {
-      await wait(page, MS_ONE_TWO_HUNDRED);
-      continue;
-    }
-    const latest = (await bubbles.nth(count - 1).innerText()).trim();
-    const looksLikeLiveReply =
-      latest.length > COUNT_TWELVE &&
-      !latest.startsWith(GREETING_SNIPPET) &&
-      (latest.includes(nonce) || /[A-Za-z]{4,}/u.test(latest));
-    if (looksLikeLiveReply) {
-      return latest;
-    }
-    await wait(page, MS_ONE_TWO_HUNDRED);
+  const reply = await pollUntil({
+    probe: () => probeLiveAssistantReply(page, nonce),
+    intervalMs: MS_ONE_TWO_HUNDRED,
+    timeoutMs: MS_TWO_MINUTES,
+    sleep: (milliseconds) => wait(page, milliseconds),
+  });
+  if (reply === null) {
+    await shot(page, "02-ai-chat-reply-missing");
+    throw new Error(`AI Chat video proof missing live assistant reply for ${nonce}`);
   }
-  await shot(page, "02-ai-chat-reply-missing");
-  throw new Error(`AI Chat video proof missing live assistant reply for ${nonce}`);
+  return reply;
 };
 
 const tourAiChat = async (page: Page): Promise<string> => {
@@ -144,7 +152,7 @@ const openResumeExportSurface = async (page: Page): Promise<void> => {
   await edit.first().click({ force: true });
   await wait(page, MS_ONE_AND_HALF_SECONDS);
   const exportBtn = page.getByRole("button", { name: RE_EXPORT_RESUME }).first();
-  if ((await exportBtn.count()) === 0 || !(await exportBtn.isVisible().catch(() => false))) {
+  if ((await exportBtn.count()) === 0 || !(await exportBtn.isVisible())) {
     await page.getByRole("link", { name: RE_PREVIEW_RESUME }).first().click();
     await wait(page, MS_ONE_AND_HALF_SECONDS);
   }

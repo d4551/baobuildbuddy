@@ -8,7 +8,7 @@ import {
 import { describe, expect, test } from "bun:test";
 import { exportCoverLetterPdf } from "./export-service-cover-letter";
 import { exportPortfolioPdf } from "./export-service-portfolio";
-import { pdfStreamsContainRgbFill } from "./export-pdf-stream-utils";
+import { pdfStreamsContainRgbFill } from "@bao/shared/utils/pdf-streams";
 
 const COVER_PROFILE = {
   name: "Bao Theme Proof",

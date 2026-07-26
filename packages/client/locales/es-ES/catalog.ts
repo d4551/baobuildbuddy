@@ -1311,9 +1311,7 @@ const catalog = {
     },
     exportTemplates: {
       modern: "Moderno",
-      gaming: "Gaming",
       minimal: "Minimalista",
-      showcase: "Showcase",
     },
     preview: {
       pageTitle: "Vista Previa del Portafolio",

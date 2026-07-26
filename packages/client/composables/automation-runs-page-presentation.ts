@@ -4,6 +4,7 @@ import {
   type AutomationRunType,
 } from "@bao/shared/constants/automation";
 import type { RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { computed, type Ref } from "vue";
 import type { useI18n } from "vue-i18n";
 import { isLiveAutomationRun } from "~/composables/automation-runs-page-merge";
@@ -66,6 +67,35 @@ export function createAutomationRunsPagePresentation(
   const formatRunStatus = (runStatus: AutomationRunStatus): string =>
     t(`automation.runs.statusOptions.${runStatus}`);
 
+  const resolveJobIdLabel = (run: RpaRunExecutionEnvelope): string | undefined =>
+    typeof run.jobId === "string" && run.jobId.trim().length > 0 ? run.jobId : undefined;
+
+  const resolveInputLabel = (input: unknown): string | undefined => {
+    if (!isRecord(input)) {
+      return undefined;
+    }
+    if (typeof input.jobUrl === "string" && input.jobUrl.trim().length > 0) {
+      return URL.canParse(input.jobUrl) ? new URL(input.jobUrl).hostname : input.jobUrl;
+    }
+    if (typeof input.target === "string" && input.target.trim().length > 0) {
+      return input.target;
+    }
+    return undefined;
+  };
+
+  const resolveOutputLabel = (output: unknown): string | undefined => {
+    if (!isRecord(output) || typeof output.scraped !== "number") {
+      return undefined;
+    }
+    return String(output.scraped);
+  };
+
+  const formatRunJobLabel = (run: RpaRunExecutionEnvelope): string =>
+    resolveJobIdLabel(run) ??
+    resolveInputLabel(run.input) ??
+    resolveOutputLabel(run.output) ??
+    t("automation.runs.emptyJobId");
+
   const formatRunProgress = (run: RpaRunExecutionEnvelope): string => {
     if (typeof run.progress === "number" && Number.isFinite(run.progress)) {
       return `${Math.max(0, Math.min(PERCENT_MAX, Math.round(run.progress)))}%`;
@@ -82,6 +112,7 @@ export function createAutomationRunsPagePresentation(
     formatDate,
     formatRunType,
     formatRunStatus,
+    formatRunJobLabel,
     formatRunProgress,
     resolveRowClass,
   };

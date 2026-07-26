@@ -11,13 +11,15 @@ import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants
 import { settle } from "../packages/shared/src/utils/promise";
 import {
   COUNT_FIVE_HUNDRED,
+  MS_MINUTE,
   MS_ONE_AND_HALF_SECONDS,
   MS_SECOND,
   MS_TEN_SECONDS,
-  MS_TWELVE_SECONDS,
   MS_TWO_AND_HALF_SECONDS,
+  MS_TWO_MINUTES,
   MS_TWO_SECONDS,
 } from "./constants/numeric-literals";
+import { pollUntil } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 
@@ -30,8 +32,11 @@ const OUT = process.env.RPA_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilitie
 const RE_ENABLE_WWI = /Enable Work With Indies job portal scraper/i;
 const RE_SAVE_PROVIDERS = /Save job provider configuration/i;
 const RE_JOB_URL = /Job posting URL/i;
+const RE_JOB_URL_PLACEHOLDER = /Paste the job posting URL/i;
 const RE_SELECT_RESUME = /Select resume/i;
 const RE_RUN_APPLICATION = /Run job application automation/i;
+const RE_RUN_JOB_SCRAPER = /Run job scraper/i;
+const RE_RUN_STUDIO_SCRAPER = /Run studio scraper/i;
 const RUNS_URL_PATTERN = /\/automation\/runs/u;
 const RUN_STATUS_SIGNAL_PATTERN = /queued|running|completed|success|failed|scrape/iu;
 
@@ -65,26 +70,29 @@ const countRunsViaApi = async (): Promise<number> => {
   if (!response.ok) {
     throw new Error(`GET ${API_ENDPOINTS.automationRuns} → ${String(response.status)}`);
   }
-  const body = (await response.json()) as unknown;
+  const body: unknown = await response.json();
   return Array.isArray(body) ? body.length : 0;
 };
 
 const pickEnabledRunner = async (page: Page) => {
   // Prefer job scraper (portal feeds) over long studio crawls when both are armed.
   const preferred = [
-    page.getByRole("button", { name: /Run job scraper/i }),
-    page.getByRole("button", { name: /Run studio scraper/i }),
+    page.getByRole("button", { name: RE_RUN_JOB_SCRAPER }),
+    page.getByRole("button", { name: RE_RUN_STUDIO_SCRAPER }),
   ];
-  for (const locator of preferred) {
-    const total = await locator.count();
-    for (let index = 0; index < total; index += 1) {
-      const candidate = locator.nth(index);
-      if ((await candidate.isVisible()) && !(await candidate.isDisabled())) {
-        return candidate;
-      }
-    }
-  }
-  return null;
+  const candidateGroups = await Promise.all(
+    preferred.map(async (locator) => {
+      const total = await locator.count();
+      return Array.from({ length: total }, (_, index) => locator.nth(index));
+    }),
+  );
+  const probes = await Promise.all(
+    candidateGroups.flat().map(async (candidate) => ({
+      candidate,
+      enabled: (await candidate.isVisible()) && !(await candidate.isDisabled()),
+    })),
+  );
+  return probes.find((probe) => probe.enabled)?.candidate ?? null;
 };
 
 const runScraperViaUi = async (page: Page): Promise<void> => {
@@ -95,14 +103,20 @@ const runScraperViaUi = async (page: Page): Promise<void> => {
   await shot(page, "02-scraper-hub");
 
   // Wait out in-flight scrapes that disable Run buttons (pendingAction global).
-  const armedDeadline = Date.now() + MS_TWELVE_SECONDS * 10;
-  let runner = await pickEnabledRunner(page);
-  while (!runner && Date.now() < armedDeadline) {
-    await wait(page, MS_TWO_SECONDS);
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await wait(page, MS_ONE_AND_HALF_SECONDS);
-    runner = await pickEnabledRunner(page);
-  }
+  const runner = await pollUntil({
+    probe: async () => {
+      const candidate = await pickEnabledRunner(page);
+      if (candidate) {
+        return candidate;
+      }
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await wait(page, MS_ONE_AND_HALF_SECONDS);
+      return null;
+    },
+    intervalMs: MS_TWO_SECONDS,
+    timeoutMs: MS_TWO_MINUTES,
+    sleep: (milliseconds) => wait(page, milliseconds),
+  });
   if (!runner) {
     throw new Error("No enabled Run Scraper button in UI after waiting for idle");
   }
@@ -116,17 +130,21 @@ const countRunRows = async (page: Page): Promise<number> =>
   page.locator("main table tbody tr").count();
 
 const waitForApiRunGrowth = async (beforeCount: number): Promise<number> => {
-  const deadline = Date.now() + MS_TWELVE_SECONDS * 5;
-  while (Date.now() < deadline) {
-    const after = await countRunsViaApi();
-    if (after > beforeCount) {
-      return after;
-    }
-    await Bun.sleep(MS_SECOND);
+  const after = await pollUntil({
+    probe: async () => {
+      const count = await countRunsViaApi();
+      return count > beforeCount ? count : null;
+    },
+    intervalMs: MS_SECOND,
+    timeoutMs: MS_MINUTE,
+    sleep: (milliseconds) => Bun.sleep(milliseconds),
+  });
+  if (after === null) {
+    throw new Error(
+      `Automation runs API did not grow after scraper click (before=${String(beforeCount)}) — RPA not integrated`,
+    );
   }
-  throw new Error(
-    `Automation runs API did not grow after scraper click (before=${String(beforeCount)}) — RPA not integrated`,
-  );
+  return after;
 };
 
 const assertRunsViaUi = async (page: Page, beforeCount: number): Promise<number> => {
@@ -153,7 +171,7 @@ const jobApplyViaUi = async (page: Page): Promise<void> => {
     waitUntil: "domcontentloaded",
   });
   await wait(page, MS_ONE_AND_HALF_SECONDS);
-  const urlInput = page.getByPlaceholder(/Paste the job posting URL/i).or(page.getByLabel(RE_JOB_URL));
+  const urlInput = page.getByPlaceholder(RE_JOB_URL_PLACEHOLDER).or(page.getByLabel(RE_JOB_URL));
   await urlInput.first().waitFor({ state: "visible", timeout: MS_TEN_SECONDS });
   await urlInput.first().click();
   await urlInput.first().fill("");
@@ -163,20 +181,20 @@ const jobApplyViaUi = async (page: Page): Promise<void> => {
   const resumeSelect = page.getByLabel(RE_SELECT_RESUME);
   await resumeSelect.waitFor({ state: "visible", timeout: MS_TEN_SECONDS });
   // Wait until bootstrap finishes populating resume options.
-  const optionDeadline = Date.now() + MS_TEN_SECONDS;
-  while (Date.now() < optionDeadline) {
-    const options = await resumeSelect.locator("option").count();
-    if (options > 1) {
-      break;
-    }
-    await wait(page, MS_SECOND);
-  }
+  await pollUntil({
+    probe: async () => ((await resumeSelect.locator("option").count()) > 1 ? true : null),
+    intervalMs: MS_SECOND,
+    timeoutMs: MS_TEN_SECONDS,
+    sleep: (milliseconds) => wait(page, milliseconds),
+  });
   await resumeSelect.selectOption({ index: 1 });
   const runApply = page.getByRole("button", { name: RE_RUN_APPLICATION });
-  const enableDeadline = Date.now() + MS_TEN_SECONDS;
-  while (Date.now() < enableDeadline && (await runApply.isDisabled())) {
-    await wait(page, COUNT_FIVE_HUNDRED);
-  }
+  await pollUntil({
+    probe: async () => ((await runApply.isDisabled()) ? null : true),
+    intervalMs: COUNT_FIVE_HUNDRED,
+    timeoutMs: MS_TEN_SECONDS,
+    sleep: (milliseconds) => wait(page, milliseconds),
+  });
   if (await runApply.isDisabled()) {
     await shot(page, "05-job-apply-form-filled");
     throw new Error("Run Application stayed disabled after typing URL + selecting resume");

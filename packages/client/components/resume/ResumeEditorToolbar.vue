@@ -18,9 +18,9 @@ interface ResumeEditorToolbarProps {
   readonly scoring: boolean;
 }
 
-defineProps<ResumeEditorToolbarProps>();
-
 const template = defineModel<ResumeTemplate>("template", { required: true });
+
+defineProps<ResumeEditorToolbarProps>();
 
 const emit = defineEmits<{
   back: [];

@@ -136,7 +136,7 @@ function registerPortfolioExportTests(): void {
     const { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } = await import(
       "@bao/shared/constants/export-document-theme"
     );
-    const { pdfStreamsContainRgbFill } = await import("../services/export-pdf-stream-utils");
+    const { pdfStreamsContainRgbFill } = await import("@bao/shared/utils/pdf-streams");
     const response = await app.handle(
       new Request(`http://localhost${API_ENDPOINTS.portfolio}/export`, {
         method: "POST",

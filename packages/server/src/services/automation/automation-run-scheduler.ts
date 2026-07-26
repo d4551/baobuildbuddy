@@ -82,32 +82,34 @@ export class AutomationRunScheduler {
     }
 
     this.recoveryInFlight = true;
-    try {
-      const pendingRows = await db
-        .select()
-        .from(automationRuns)
-        .where(eq(automationRuns.status, "pending"))
-        .limit(limit);
-      const pendingRunsWithoutSchedule: string[] = [];
+    await this.restorePendingRunsUnlocked(limit).finally(() => {
+      this.recoveryInFlight = false;
+    });
+  }
 
-      for (const row of pendingRows satisfies AutomationRunRow[]) {
-        const metadata = parseScheduledRunMetadata(asJsonRecord(row.input));
-        if (!metadata) {
-          pendingRunsWithoutSchedule.push(row.id);
-          continue;
-        }
+  private async restorePendingRunsUnlocked(limit: number): Promise<void> {
+    const pendingRows = await db
+      .select()
+      .from(automationRuns)
+      .where(eq(automationRuns.status, "pending"))
+      .limit(limit);
+    const pendingRunsWithoutSchedule: string[] = [];
 
-        this.queue(row.id, metadata.runAt);
+    for (const row of pendingRows satisfies AutomationRunRow[]) {
+      const metadata = parseScheduledRunMetadata(asJsonRecord(row.input));
+      if (!metadata) {
+        pendingRunsWithoutSchedule.push(row.id);
+        continue;
       }
 
-      await Promise.all(
-        pendingRunsWithoutSchedule.map((runId) =>
-          this.markPendingRunWithoutScheduleMetadata(runId),
-        ),
-      );
-    } finally {
-      this.recoveryInFlight = false;
+      this.queue(row.id, metadata.runAt);
     }
+
+    await Promise.all(
+      pendingRunsWithoutSchedule.map((runId) =>
+        this.markPendingRunWithoutScheduleMetadata(runId),
+      ),
+    );
   }
 
   private async markPendingRunWithoutScheduleMetadata(runId: string): Promise<void> {

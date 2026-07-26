@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";
+import {
+  resolveResumeExportTemplate,
+  resumePreviewThemeClass,
+} from "@bao/shared/utils/export-contract";
 import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
@@ -26,21 +29,11 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const theme = computed(() => {
-  const template = resolveResumeExportTemplate(props.resume.template, "modern");
-  return RESUME_EXPORT_THEME_CONFIGS[template].pdf;
-});
+const template = computed(() => resolveResumeExportTemplate(props.resume.template, "modern"));
 
-const toCssRgb = (color: { r: number; g: number; b: number }): string =>
-  `rgb(${Math.round(color.r * 255)} ${Math.round(color.g * 255)} ${Math.round(color.b * 255)})`;
+const theme = computed(() => RESUME_EXPORT_THEME_CONFIGS[template.value].pdf);
 
-const shellStyle = computed(() => ({
-  backgroundColor: toCssRgb(theme.value.colors.background),
-  color: toCssRgb(theme.value.colors.text),
-  "--resume-preview-primary": toCssRgb(theme.value.colors.primary),
-  "--resume-preview-accent": toCssRgb(theme.value.colors.accent),
-  "--resume-preview-secondary": toCssRgb(theme.value.colors.secondary),
-}));
+const themeClass = computed(() => resumePreviewThemeClass(template.value));
 
 const headerClass = computed(() => {
   const align =
@@ -49,29 +42,8 @@ const headerClass = computed(() => {
     theme.value.layout.headerStyle === "banner"
       ? "rounded-box px-4 py-4"
       : "border-b-2";
-  return [align, banner, MARGIN_TOKEN_CLASS.mb8, PADDING_TOKEN_CLASS.pb4];
+  return ["resume-preview-header", align, banner, MARGIN_TOKEN_CLASS.mb8, PADDING_TOKEN_CLASS.pb4];
 });
-
-const headerStyle = computed(() => {
-  if (theme.value.layout.headerStyle === "banner") {
-    return {
-      backgroundColor: toCssRgb(theme.value.colors.primary),
-      color: toCssRgb(theme.value.colors.text),
-      borderColor: toCssRgb(theme.value.colors.accent),
-    };
-  }
-  if (theme.value.layout.dividerStyle === "accent-bar") {
-    return {
-      borderColor: toCssRgb(theme.value.colors.accent),
-      borderBottomWidth: "6px",
-    };
-  }
-  return { borderColor: toCssRgb(theme.value.colors.secondary) };
-});
-
-const sectionTitleStyle = computed(() => ({
-  color: toCssRgb(theme.value.colors.primary),
-}));
 
 const skillsClass = computed(() =>
   theme.value.layout.skillsLayout === "2-column"
@@ -83,11 +55,10 @@ const skillsClass = computed(() =>
 <template>
   <div
     class="mx-auto max-w-4xl print:rounded-none print:border-0"
-    :class="[INSET_PANEL_CLASS, PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone]"
-    :style="shellStyle"
+    :class="[INSET_PANEL_CLASS, PRINT_PADDING_RESET_CLASS, PADDING_TOKEN_CLASS.p8, SHADOW_TOKEN_CLASS.lg, SHADOW_TOKEN_CLASS.printNone, themeClass]"
     :data-resume-export-template="resume.template || 'modern'"
   >
-    <div :class="headerClass" :style="headerStyle">
+    <div :class="headerClass">
       <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb2, TYPOGRAPHY_SCALE_CLASS.xl4]">{{ resume.personalInfo?.name || t("resumePreview.defaultName") }}</h2>
       <div class="flex flex-wrap" :class="[theme.layout.headerStyle === 'left-aligned' ? 'justify-start' : 'justify-center', FLEX_GAP_TOKEN_CLASS.gap4, TYPOGRAPHY_SCALE_CLASS.sm]">
         <span v-if="resume.personalInfo?.email">{{ resume.personalInfo.email }}</span>
@@ -124,8 +95,7 @@ const skillsClass = computed(() =>
     <div v-if="resume.summary" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-summary-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.personal.summaryLegend") }}</h2>
       <p :class="[LEADING_TOKEN_CLASS.relaxed, TYPOGRAPHY_SCALE_CLASS.sm]">{{ resume.summary }}</p>
     </div>
@@ -133,8 +103,7 @@ const skillsClass = computed(() =>
     <div v-if="resume.experience?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-experience-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.experience.title") }}</h2>
       <div
         v-for="(experience, index) in resume.experience"
@@ -144,9 +113,9 @@ const skillsClass = computed(() =>
         <div class="flex items-start justify-between" :class="[MARGIN_TOKEN_CLASS.mb1]">
           <div>
             <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ experience.title }}</h3>
-            <p class="text-base font-semibold" :style="{ color: 'var(--resume-preview-accent)' }">{{ experience.company }}</p>
+            <p class="text-base font-semibold resume-preview-company">{{ experience.company }}</p>
           </div>
-          <div class="text-end" :class="[TYPOGRAPHY_SCALE_CLASS.sm]" :style="{ color: 'var(--resume-preview-secondary)' }">
+          <div class="text-end resume-preview-meta" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
             <p>{{ experience.startDate }} - {{ experience.endDate || t("resumePreview.present") }}</p>
             <p v-if="experience.location">{{ experience.location }}</p>
           </div>
@@ -160,8 +129,7 @@ const skillsClass = computed(() =>
     <div v-if="resume.education?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-education-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.education.title") }}</h2>
       <div
         v-for="(education, index) in resume.education"
@@ -184,11 +152,10 @@ const skillsClass = computed(() =>
     <div v-if="displaySkills.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-skills-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.skills.title") }}</h2>
       <div :class="[skillsClass, FLEX_GAP_TOKEN_CLASS.gap2]">
-        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" :class="[BADGE_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]" :style="{ borderColor: 'var(--resume-preview-primary)', color: 'var(--resume-preview-primary)' }">
+        <span v-for="(skill, index) in displaySkills" :key="`${skill}-${index}`" :class="['resume-preview-skill-badge', BADGE_OUTLINE_CLASS, PADDING_TOKEN_CLASS.px3, PADDING_TOKEN_CLASS.py3, TYPOGRAPHY_SCALE_CLASS.sm]">
           {{ skill }}
         </span>
       </div>
@@ -197,8 +164,7 @@ const skillsClass = computed(() =>
     <div v-if="resume.projects?.length" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-projects-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.projects.title") }}</h2>
       <div v-for="(project, index) in resume.projects" :key="`${project.title}-${index}`" :class="[MARGIN_TOKEN_CLASS.mb3]">
         <h3 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.lg]">{{ project.title }}</h3>
@@ -210,8 +176,7 @@ const skillsClass = computed(() =>
     <div v-if="hasGamingExperience" :class="[MARGIN_TOKEN_CLASS.mb6]">
       <h2
         id="resume-preview-gaming-title"
-        :class="[FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
-        :style="sectionTitleStyle"
+        :class="['resume-preview-section-title', FONT_WEIGHT_TOKEN_CLASS.bold, MARGIN_TOKEN_CLASS.mb3, TYPOGRAPHY_SCALE_CLASS.xl]"
       >{{ t("resumePage.gaming.title") }}</h2>
       <div v-if="resume.gamingExperience?.gameEngines" :class="[MARGIN_TOKEN_CLASS.mb2]">
         <p class="font-semibold" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ t("resumePage.gaming.rolesLegend") }}:</p>

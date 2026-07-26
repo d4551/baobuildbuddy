@@ -15,6 +15,8 @@ export const UI_SSOT_AUTHORITY_PATHS = new Set<string>([
   "packages/client/constants/ui-layout.ts",
   "packages/client/constants/chat.ts",
   "packages/client/assets/css/main.css",
+  // Generated from RESUME_EXPORT_THEME_CONFIGS; drift locked by validate:resume-preview-css.
+  "packages/client/assets/css/resume-preview.generated.css",
 ]);
 
 export const isUiSsotAuthority = (filePath: string): boolean =>

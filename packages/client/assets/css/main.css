@@ -1,4 +1,5 @@
 @import "tailwindcss/index.css";
+@import "./resume-preview.generated.css";
 
 @plugin "daisyui" {
   themes:
@@ -514,6 +515,18 @@ textarea {
   border-radius: var(--radius-input);
 }
 
+/* Reduced motion — universal kill of nonessential spatial motion (§7.6).
+ * Kept ahead of higher-specificity glass selectors so cascade order stays honest. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+  }
+}
+
 /* Prevent nested backdrop roots inside glass (§10). Children must not
  * establish their own backdrop-filter sampling context. */
 .glass > *,
@@ -659,13 +672,6 @@ textarea {
     --motion-fast: 1ms;
     --motion-standard: 1ms;
     --motion-slow: 1ms;
-  }
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto;
-    animation-duration: 1ms;
-    animation-iteration-count: 1;
   }
   .glass-interactive:hover,
   .glass-interactive:active {

@@ -26,16 +26,18 @@ import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
 import type { JobApplyStrategy } from "./strategy-registry";
 import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
 
+/** Fallback marker probe for unparseable URLs (canonical path check needs a URL). */
+const HOSTED_APPLY_ERROR_QUERY_PATTERN = /[?&]error=true\b/i;
+
 /** Hosted ATS pages that signal a dead/invalid posting or apply failure. */
 export const isHostedApplyErrorUrl = (url: string): boolean => {
-  try {
-    const parsed = new URL(url);
-    if (parsed.searchParams.get("error") === "true") return true;
-    const path = parsed.pathname.toLowerCase();
-    return path.includes("/error") || path.endsWith("/404");
-  } catch {
-    return /[?&]error=true\b/i.test(url);
+  if (!URL.canParse(url)) {
+    return HOSTED_APPLY_ERROR_QUERY_PATTERN.test(url);
   }
+  const parsed = new URL(url);
+  if (parsed.searchParams.get("error") === "true") return true;
+  const path = parsed.pathname.toLowerCase();
+  return path.includes("/error") || path.endsWith("/404");
 };
 
 const CRITICAL_SUCCESS_ACTIONS = new Set([
@@ -214,17 +216,7 @@ export const createExecutionState = async (
   };
 };
 
-export const initializeApplicationPage = async (
-  state: JobApplyExecutionState,
-): Promise<number | null> => {
-  emitProgress(
-    state.emitter,
-    "init_browser",
-    JOB_APPLY_STEP_INDEX.initBrowser,
-    "Launching Chromium session",
-  );
-  addStep(state.steps, "init", "ok", `headless=${String(state.payload.settings.headless)}`);
-
+const navigateToJobPosting = async (state: JobApplyExecutionState): Promise<number | null> => {
   const timeoutMs = Math.max(
     state.payload.settings.defaultTimeout * MS_PER_SECOND,
     automationRuntimeConfig.navigationTimeoutMs,
@@ -265,7 +257,10 @@ export const initializeApplicationPage = async (
     steps: state.steps,
     label: "Loaded job page",
   });
+  return null;
+};
 
+const followHostedApplyLink = async (state: JobApplyExecutionState): Promise<number | null> => {
   emitProgress(state.emitter, "follow_apply_link", JOB_APPLY_STEP_INDEX.followApplyLink);
   const followOutcome = await detectAndFollowHostedApplyPage(state.session.page);
   if (followOutcome.kind === "nav_failed") {
@@ -298,6 +293,29 @@ export const initializeApplicationPage = async (
       "skipped",
       `No hosted apply link found; continuing on listing page: ${followOutcome.url}`,
     );
+  }
+  return null;
+};
+
+export const initializeApplicationPage = async (
+  state: JobApplyExecutionState,
+): Promise<number | null> => {
+  emitProgress(
+    state.emitter,
+    "init_browser",
+    JOB_APPLY_STEP_INDEX.initBrowser,
+    "Launching Chromium session",
+  );
+  addStep(state.steps, "init", "ok", `headless=${String(state.payload.settings.headless)}`);
+
+  const navigateFailure = await navigateToJobPosting(state);
+  if (navigateFailure !== null) {
+    return navigateFailure;
+  }
+
+  const followFailure = await followHostedApplyLink(state);
+  if (followFailure !== null) {
+    return followFailure;
   }
 
   const formReady = await ensureApplicationFormVisible(state.session.page);

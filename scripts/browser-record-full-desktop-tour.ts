@@ -32,7 +32,9 @@ import {
   MS_TWO_MINUTES,
   VIEWPORT_HEIGHT_DESKTOP,
 } from "./constants/numeric-literals";
+import { pollUntil } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
+import { createChatNonceProbe } from "./utils/playwright-chat-probe";
 import { assertLiveInference } from "./utils/live-ai-probe";
 import { assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
@@ -172,23 +174,13 @@ const proveAiChat = async (page: Page, findings: string[]): Promise<string> => {
     delay: 10,
   });
   await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  const deadline = Date.now() + MS_TWO_MINUTES;
-  let assistantHit = false;
-  while (Date.now() < deadline) {
-    const bubbles = page.locator(ASSISTANT_CHAT_LOCATOR);
-    const count = await bubbles.count();
-    for (let index = 0; index < count; index += 1) {
-      const text = (await bubbles.nth(index).innerText()).trim();
-      if (text.includes(nonce)) {
-        assistantHit = true;
-        break;
-      }
-    }
-    if (assistantHit) {
-      break;
-    }
-    await wait(page, MS_ONE_TWO_HUNDRED);
-  }
+  const assistantHit =
+    (await pollUntil({
+      probe: createChatNonceProbe(page, ASSISTANT_CHAT_LOCATOR, nonce),
+      intervalMs: MS_ONE_TWO_HUNDRED,
+      timeoutMs: MS_TWO_MINUTES,
+      sleep: (milliseconds) => wait(page, milliseconds),
+    })) === true;
   if (!assistantHit) {
     findings.push(`AI chat missing assistant nonce ${nonce}`);
   }

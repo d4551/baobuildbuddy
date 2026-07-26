@@ -6,6 +6,19 @@ import {
   COUNT_TWENTY_SIX,
   COUNT_TWENTY_TWO,
 } from "@bao/shared/constants/numeric";
+import {
+  PORTFOLIO_BANNER_AUTHOR_Y_OFFSET,
+  PORTFOLIO_BANNER_MUTED_COLOR,
+  PORTFOLIO_BANNER_TITLE_COLOR,
+  PORTFOLIO_COVER_AUTHOR_SIZE_BY_LAYOUT,
+  PORTFOLIO_COVER_TITLE_SIZE_BY_LAYOUT,
+  PORTFOLIO_DARK_BANNER_HEIGHT,
+  PORTFOLIO_DARK_TITLE_Y_OFFSET,
+  PORTFOLIO_PROJECTS_HEADING_BY_LAYOUT,
+  PORTFOLIO_PROJECTS_HEADING_SIZE_BY_LAYOUT,
+  PORTFOLIO_SHOWCASE_BANNER_HEIGHT,
+  PORTFOLIO_SHOWCASE_TITLE_Y_OFFSET,
+} from "@bao/shared/constants/export-layout";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { rgb } from "pdf-lib";
 import type { PortfolioRenderContext } from "./export-service-contracts";
@@ -40,27 +53,33 @@ function renderPortfolioTitleBlock(
   if (context.layout === "showcase") {
     context.page.drawRectangle({
       x: 0,
-      y: context.height - 110,
+      y: context.height - PORTFOLIO_SHOWCASE_BANNER_HEIGHT,
       width: context.width,
-      height: 110,
+      height: PORTFOLIO_SHOWCASE_BANNER_HEIGHT,
       color: context.colors.primary,
     });
-    context.yPosition = context.height - 48;
+    context.yPosition = context.height - PORTFOLIO_SHOWCASE_TITLE_Y_OFFSET;
   } else if (context.layout === "banner-dark") {
     context.page.drawRectangle({
       x: 0,
-      y: context.height - 84,
+      y: context.height - PORTFOLIO_DARK_BANNER_HEIGHT,
       width: context.width,
-      height: 84,
+      height: PORTFOLIO_DARK_BANNER_HEIGHT,
       color: context.colors.primary,
     });
-    context.yPosition = context.height - 42;
+    context.yPosition = context.height - PORTFOLIO_DARK_TITLE_Y_OFFSET;
   }
 
   const title = metadata.title ?? "Portfolio";
-  const titleSize = context.layout === "compact" ? 22 : context.layout === "showcase" ? 32 : 28;
+  const titleSize = PORTFOLIO_COVER_TITLE_SIZE_BY_LAYOUT[context.layout];
   const onBanner = context.layout === "showcase" || context.layout === "banner-dark";
-  const titleColor = onBanner ? rgb(1, 1, 1) : context.colors.primary;
+  const titleColor = onBanner
+    ? rgb(
+        PORTFOLIO_BANNER_TITLE_COLOR.r,
+        PORTFOLIO_BANNER_TITLE_COLOR.g,
+        PORTFOLIO_BANNER_TITLE_COLOR.b,
+      )
+    : context.colors.primary;
   context.page.drawText(title, {
     x: context.margin,
     y: context.yPosition,
@@ -72,7 +91,7 @@ function renderPortfolioTitleBlock(
 
   if (!metadata.author) {
     if (onBanner) {
-      context.yPosition = context.height - 130;
+      context.yPosition = context.height - PORTFOLIO_BANNER_AUTHOR_Y_OFFSET;
     }
     return;
   }
@@ -80,13 +99,22 @@ function renderPortfolioTitleBlock(
   context.page.drawText(metadata.author, {
     x: context.margin,
     y: context.yPosition,
-    size: context.layout === "compact" ? 10 : 12,
+    size: PORTFOLIO_COVER_AUTHOR_SIZE_BY_LAYOUT[context.layout],
     font: context.font,
-    color: onBanner ? rgb(0.95, 0.95, 0.97) : context.colors.muted,
+    color: onBanner
+      ? rgb(
+          PORTFOLIO_BANNER_MUTED_COLOR.r,
+          PORTFOLIO_BANNER_MUTED_COLOR.g,
+          PORTFOLIO_BANNER_MUTED_COLOR.b,
+        )
+      : context.colors.muted,
   });
   context.yPosition -= COUNT_EIGHTEEN;
   if (onBanner) {
-    context.yPosition = Math.min(context.yPosition, context.height - 130);
+    context.yPosition = Math.min(
+      context.yPosition,
+      context.height - PORTFOLIO_BANNER_AUTHOR_Y_OFFSET,
+    );
   }
 }
 
@@ -176,16 +204,11 @@ export function renderPortfolioCoverPage(
 
 export function startPortfolioProjectsSection(context: PortfolioRenderContext): void {
   ensurePortfolioSpace(context, COUNT_THIRTY_TWO);
-  const heading =
-    context.layout === "compact"
-      ? "Projects"
-      : context.layout === "showcase"
-        ? "SHOWCASE"
-        : "SELECTED CASE STUDIES";
+  const heading = PORTFOLIO_PROJECTS_HEADING_BY_LAYOUT[context.layout];
   context.page.drawText(heading, {
     x: context.margin,
     y: context.yPosition,
-    size: context.layout === "compact" ? 13 : 16,
+    size: PORTFOLIO_PROJECTS_HEADING_SIZE_BY_LAYOUT[context.layout],
     font: context.boldFont,
     color: context.colors.primary,
   });

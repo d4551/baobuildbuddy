@@ -39,6 +39,7 @@ export function useAutomationRunsPage() {
     isLiveRun: isLiveAutomationRun,
     formatRunType: presentation.formatRunType,
     formatRunStatus: presentation.formatRunStatus,
+    formatRunJobLabel: presentation.formatRunJobLabel,
     formatRunProgress: presentation.formatRunProgress,
     formatDate: presentation.formatDate,
     resolveRowClass: presentation.resolveRowClass,

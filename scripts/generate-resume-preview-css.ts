@@ -12,6 +12,8 @@ import { writeFile } from "node:fs/promises";
 import { RESUME_EXPORT_THEME_CONFIGS } from "../packages/shared/src/constants/export-layout";
 import type { ResumeTemplate } from "../packages/shared/src/constants/resume";
 import { RESUME_TEMPLATE_OPTIONS } from "../packages/shared/src/constants/resume";
+import { resumePreviewThemeClass } from "../packages/shared/src/utils/export-contract";
+import { writeOutput } from "./utils/cli-output";
 
 export const RESUME_PREVIEW_CSS_PATH =
   "packages/client/assets/css/resume-preview.generated.css";
@@ -22,17 +24,16 @@ const GENERATED_HEADER =
 
 type ExportRgbColor = { r: number; g: number; b: number };
 
-const toCssRgb = (color: ExportRgbColor): string =>
-  `rgb(${Math.round(color.r * 255)} ${Math.round(color.g * 255)} ${Math.round(color.b * 255)})`;
+/** 0..1 float channels in RESUME_EXPORT_THEME_CONFIGS map to 8-bit CSS channels. */
+const RGB_CHANNEL_MAX = 255;
 
-export const resumePreviewThemeClass = (template: ResumeTemplate): string =>
-  `resume-preview-theme-${template}`;
+const toCssRgb = (color: ExportRgbColor): string =>
+  `rgb(${Math.round(color.r * RGB_CHANNEL_MAX)} ${Math.round(color.g * RGB_CHANNEL_MAX)} ${Math.round(color.b * RGB_CHANNEL_MAX)})`;
 
 const renderThemeBlock = (template: ResumeTemplate): string => {
-  const { pdf } = RESUME_EXPORT_THEME_CONFIGS[template];
-  const { colors, layout } = pdf;
+  const { colors } = RESUME_EXPORT_THEME_CONFIGS[template].pdf;
   const themeClass = `.${resumePreviewThemeClass(template)}`;
-  const lines: string[] = [
+  return [
     `${themeClass} {`,
     `  --resume-preview-primary: ${toCssRgb(colors.primary)};`,
     `  --resume-preview-accent: ${toCssRgb(colors.accent)};`,
@@ -40,32 +41,34 @@ const renderThemeBlock = (template: ResumeTemplate): string => {
     `  background-color: ${toCssRgb(colors.background)};`,
     `  color: ${toCssRgb(colors.text)};`,
     `}`,
-  ];
+  ].join("\n");
+};
 
+const renderHeaderVariantBlock = (template: ResumeTemplate): string => {
+  const { colors, layout } = RESUME_EXPORT_THEME_CONFIGS[template].pdf;
+  const themeClass = `.${resumePreviewThemeClass(template)}`;
   if (layout.headerStyle === "banner") {
-    lines.push(
+    return [
       `${themeClass} .resume-preview-header {`,
       `  background-color: var(--resume-preview-primary);`,
       `  color: ${toCssRgb(colors.text)};`,
       `  border-color: var(--resume-preview-accent);`,
       `}`,
-    );
-  } else if (layout.dividerStyle === "accent-bar") {
-    lines.push(
+    ].join("\n");
+  }
+  if (layout.dividerStyle === "accent-bar") {
+    return [
       `${themeClass} .resume-preview-header {`,
       `  border-color: var(--resume-preview-accent);`,
       `  border-bottom-width: 6px;`,
       `}`,
-    );
-  } else {
-    lines.push(
-      `${themeClass} .resume-preview-header {`,
-      `  border-color: var(--resume-preview-secondary);`,
-      `}`,
-    );
+    ].join("\n");
   }
-
-  return lines.join("\n");
+  return [
+    `${themeClass} .resume-preview-header {`,
+    `  border-color: var(--resume-preview-secondary);`,
+    `}`,
+  ].join("\n");
 };
 
 const SHARED_CONSUMER_BLOCK = `.resume-preview-section-title {
@@ -89,11 +92,12 @@ export const renderResumePreviewCss = (): string =>
   [
     GENERATED_HEADER,
     ...RESUME_TEMPLATE_OPTIONS.map((template) => renderThemeBlock(template)),
+    ...RESUME_TEMPLATE_OPTIONS.map((template) => renderHeaderVariantBlock(template)),
     SHARED_CONSUMER_BLOCK,
     "",
   ].join("\n\n");
 
 if (import.meta.main) {
   await writeFile(RESUME_PREVIEW_CSS_PATH, renderResumePreviewCss(), "utf8");
-  console.log(`Wrote ${RESUME_PREVIEW_CSS_PATH}`);
+  await writeOutput(`Wrote ${RESUME_PREVIEW_CSS_PATH}`);
 }

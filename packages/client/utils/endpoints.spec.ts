@@ -33,17 +33,19 @@ describe("endpoint base resolution", () => {
   });
 
   it("rewrites absolute API export URLs to same-origin proxy paths in the browser", () => {
+    const resumesExportPath = `${API_ENDPOINT_PREFIX}/resumes/abc/export`;
+    const portfolioExportPath = `${API_ENDPOINT_PREFIX}/portfolio/export`;
     expect(
       resolveBrowserApiFetchUrl(
-        "http://127.0.0.1:3000/api/resumes/abc/export",
+        `http://127.0.0.1:3000${resumesExportPath}`,
         new URL("http://127.0.0.1:3001/resume"),
       ),
-    ).toBe("/api/resumes/abc/export");
+    ).toBe(resumesExportPath);
     expect(
       resolveBrowserApiFetchUrl(
-        "http://127.0.0.1:3001/api/portfolio/export",
+        `http://127.0.0.1:3001${portfolioExportPath}`,
         new URL("http://127.0.0.1:3001/portfolio"),
       ),
-    ).toBe("/api/portfolio/export");
+    ).toBe(portfolioExportPath);
   });
 });

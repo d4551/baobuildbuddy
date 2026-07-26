@@ -1,4 +1,8 @@
-import { PORTFOLIO_PROJECT_SPACE } from "@bao/shared/constants/export-layout";
+import {
+  PORTFOLIO_FEATURED_BADGE_INSET_X,
+  PORTFOLIO_PROJECT_SPACE,
+  PORTFOLIO_PROJECT_TITLE_SIZE_BY_LAYOUT,
+} from "@bao/shared/constants/export-layout";
 import {
   COUNT_FIFTEEN,
   COUNT_THIRTEEN,

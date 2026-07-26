@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { PERCENT_MAX } from "./constants/numeric-literals";
+import { UI_SSOT_AUTHORITY_PATHS } from "./ui-ssot-authority";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
@@ -64,7 +65,7 @@ const neverMatchPattern = /$^/u;
 const daisyColorTokenPattern =
   /--color-([a-z0-9-]+):\s*oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)/gu;
 
-const allowedColorLiteralFiles = new Set([themeFilePath]);
+const allowedColorLiteralFiles = UI_SSOT_AUTHORITY_PATHS;
 const scannedExtensions = new Set([".vue", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".css"]);
 
 const contrastPairs: Array<readonly [string, string]> = [

@@ -26,41 +26,13 @@ defineProps<{
   isLiveRun: (run: RpaRunExecutionEnvelope) => boolean;
   formatRunType: (runType: RpaRunExecutionEnvelope["type"]) => string;
   formatRunStatus: (runStatus: RpaRunExecutionEnvelope["status"]) => string;
+  formatRunJobLabel: (run: RpaRunExecutionEnvelope) => string;
   formatRunProgress: (run: RpaRunExecutionEnvelope) => string;
   formatDate: (value: string) => string;
   resolveRowClass: (run: RpaRunExecutionEnvelope) => Record<string, boolean>;
 }>();
 
 const { t } = useI18n();
-
-const formatRunJobLabel = (run: RpaRunExecutionEnvelope): string => {
-  if (typeof run.jobId === "string" && run.jobId.trim().length > 0) {
-    return run.jobId;
-  }
-  const input = run.input;
-  if (input && typeof input === "object" && !Array.isArray(input)) {
-    const jobUrl = "jobUrl" in input ? input.jobUrl : undefined;
-    if (typeof jobUrl === "string" && jobUrl.trim().length > 0) {
-      try {
-        return new URL(jobUrl).hostname;
-      } catch {
-        return jobUrl;
-      }
-    }
-    const target = "target" in input ? input.target : undefined;
-    if (typeof target === "string" && target.trim().length > 0) {
-      return target;
-    }
-  }
-  const scraped =
-    run.output && typeof run.output === "object" && !Array.isArray(run.output) && "scraped" in run.output
-      ? run.output.scraped
-      : undefined;
-  if (typeof scraped === "number") {
-    return String(scraped);
-  }
-  return t("automation.runs.emptyJobId");
-};
 </script>
 
 <template>

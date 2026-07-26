@@ -22,6 +22,7 @@ const {
   isLiveRun,
   formatRunType,
   formatRunStatus,
+  formatRunJobLabel,
   formatRunProgress,
   formatDate,
   resolveRowClass,
@@ -77,6 +78,7 @@ useSeoMeta({
       :is-live-run="isLiveRun"
       :format-run-type="formatRunType"
       :format-run-status="formatRunStatus"
+      :format-run-job-label="formatRunJobLabel"
       :format-run-progress="formatRunProgress"
       :format-date="formatDate"
       :resolve-row-class="resolveRowClass"

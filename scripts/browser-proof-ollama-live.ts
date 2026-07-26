@@ -18,6 +18,8 @@ import {
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertLiveInference } from "./utils/live-ai-probe";
+import { pollUntil } from "./utils/async-control";
+import { createChatNonceProbe } from "./utils/playwright-chat-probe";
 import { settlePage } from "./utils/playwright-settle";
 
 const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
@@ -91,23 +93,13 @@ const chatViaUi = async (page: Page): Promise<string> => {
     { delay: 10 },
   );
   await page.getByRole("button", { name: SEND_BUTTON_PATTERN }).first().click();
-  const deadline = Date.now() + MS_SIXTY_SECONDS;
-  let assistantHit = false;
-  while (Date.now() < deadline) {
-    const bubbles = page.locator("article.chat-start .chat-bubble");
-    const count = await bubbles.count();
-    for (let index = 0; index < count; index += 1) {
-      const text = (await bubbles.nth(index).innerText()).trim();
-      if (text.includes(uiNonce)) {
-        assistantHit = true;
-        break;
-      }
-    }
-    if (assistantHit) {
-      break;
-    }
-    await wait(page, MS_ONE_TWO_HUNDRED);
-  }
+  const assistantHit =
+    (await pollUntil({
+      probe: createChatNonceProbe(page, "article.chat-start .chat-bubble", uiNonce),
+      intervalMs: MS_ONE_TWO_HUNDRED,
+      timeoutMs: MS_SIXTY_SECONDS,
+      sleep: (milliseconds) => wait(page, milliseconds),
+    })) === true;
   await page.screenshot({ path: join(OUT, "stills", "03-ai-chat-live.png") });
   if (!assistantHit) {
     throw new Error(`AI Chat UI missing assistant nonce ${uiNonce}`);
