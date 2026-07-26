@@ -84,6 +84,7 @@ const populatedTaxonomyCount = computed(
 
             <AppJsonField
               v-model="jobTaxonomyForm.keywordsJson"
+              collab-key="taxonomy-keywords"
               :label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
               :aria-label="t('settings.jobIntelligence.taxonomyKeywordsLabel')"
             />
@@ -101,6 +102,7 @@ const populatedTaxonomyCount = computed(
 
             <AppJsonField
               v-model="jobTaxonomyForm.studioRulesJson"
+              collab-key="taxonomy-studio-rules"
               :label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
               :aria-label="t('settings.jobIntelligence.taxonomyStudiosLabel')"
             />

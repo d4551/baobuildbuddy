@@ -43,6 +43,7 @@ const { t } = useI18n();
           </legend>
           <AppJsonField
             v-model="brandForm.lightThemeJson"
+            collab-key="brand-light-theme"
             :label="t('settings.brand.lightThemeLegend')"
             :aria-label="t('settings.brand.lightThemeAria')"
           />
@@ -57,6 +58,7 @@ const { t } = useI18n();
           </legend>
           <AppJsonField
             v-model="brandForm.darkThemeJson"
+            collab-key="brand-dark-theme"
             :label="t('settings.brand.darkThemeLegend')"
             :aria-label="t('settings.brand.darkThemeAria')"
           />

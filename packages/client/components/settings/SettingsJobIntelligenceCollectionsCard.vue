@@ -54,6 +54,7 @@ const sourceCollectionCount = computed(
           <div class="collapse-content">
             <AppJsonField
               v-model="jobProviderForm.greenhouseBoardsJson"
+              collab-key="provider-greenhouse-boards"
               :label="t('settings.jobIntelligence.greenhouseBoardsLabel')"
               :aria-label="t('settings.jobIntelligence.greenhouseBoardsLabel')"
             />
@@ -70,6 +71,7 @@ const sourceCollectionCount = computed(
           <div class="collapse-content">
             <AppJsonField
               v-model="jobProviderForm.leverCompaniesJson"
+              collab-key="provider-lever-companies"
               :label="t('settings.jobIntelligence.leverCompaniesLabel')"
               :aria-label="t('settings.jobIntelligence.leverCompaniesLabel')"
             />
@@ -86,6 +88,7 @@ const sourceCollectionCount = computed(
           <div class="collapse-content">
             <AppJsonField
               v-model="jobProviderForm.companyBoardsJson"
+              collab-key="provider-company-boards"
               :label="t('settings.jobIntelligence.companyBoardsLabel')"
               :aria-label="t('settings.jobIntelligence.companyBoardsLabel')"
             />
@@ -102,6 +105,7 @@ const sourceCollectionCount = computed(
           <div class="collapse-content">
             <AppJsonField
               v-model="jobProviderForm.companyBoardApiTemplatesJson"
+              collab-key="provider-company-board-templates"
               :label="t('settings.jobIntelligence.companyTemplatesLabel')"
               :aria-label="t('settings.jobIntelligence.companyTemplatesLabel')"
             />
@@ -118,6 +122,7 @@ const sourceCollectionCount = computed(
           <div class="collapse-content">
             <AppJsonField
               v-model="jobProviderForm.gamingPortalsJson"
+              collab-key="provider-gaming-portals"
               :label="t('settings.jobIntelligence.gamingPortalsLabel')"
               :aria-label="t('settings.jobIntelligence.gamingPortalsLabel')"
             />

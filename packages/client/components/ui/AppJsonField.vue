@@ -5,13 +5,28 @@ import { useI18n } from "vue-i18n";
  */
 import AppCodeEditor from "~/components/ui/AppCodeEditor.vue";
 import AppEditorChrome from "~/components/ui/AppEditorChrome.vue";
-import { EDITOR_HOST_CLASS, EDITOR_MIN_HEIGHT_CLASS } from "~/constants/editor";
+import {
+  EDITOR_HOST_CLASS,
+  EDITOR_MIN_HEIGHT_CLASS,
+  JSON_EDITOR_COLLAB_CHANNEL_PREFIX,
+} from "~/constants/editor";
 import { FLUID_WIDTH_CLASS, MARGIN_TOKEN_CLASS, TYPOGRAPHY_SCALE_CLASS } from "~/constants/layout";
 
 const props = defineProps<{
   readonly label: string;
   readonly ariaLabel: string;
   readonly modelValue: string;
+  /**
+   * Stable identity for this field's cross-tab collab channel.
+   *
+   * Every JSON field previously shared one channel name, and the collab plugin
+   * overwrites the local document with whatever it receives — so mounting several
+   * fields on one page (five on the Job Intelligence panel) made each editor
+   * clobber the others. The greenhouse-boards field ended up holding a gaming-portal
+   * object, which failed `greenhouseBoardConfigSchema` and made every provider save
+   * abort, so no scraper portal could ever be enabled.
+   */
+  readonly collabKey: string;
 }>();
 
 const emit = defineEmits<{
@@ -24,6 +39,9 @@ const codeEditorRef = ref<{
   runUndo: () => void;
   runRedo: () => void;
 } | null>(null);
+
+/** Per-field channel so collab syncs the same field across tabs, never sibling fields. */
+const resolvedCollabChannel = computed(() => `${JSON_EDITOR_COLLAB_CHANNEL_PREFIX}${props.collabKey}`);
 
 const localDirty = ref(false);
 const vimOn = ref(true);
@@ -84,7 +102,7 @@ function onTextareaInput(event: Event): void {
           :enable-vim="vimOn"
           :enable-minimap="minimapOn"
           :enable-collab="true"
-          collab-channel="bao-json-editor-collab"
+          :collab-channel="resolvedCollabChannel"
           @update:model-value="onUpdate"
         />
         <template #fallback>

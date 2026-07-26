@@ -6,22 +6,86 @@
  * module-level resolution stay in the validator.
  */
 
-const BLOCK_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//gu;
-/** `(?<!:)` keeps `https://…` inside template literals from reading as a comment. */
-const LINE_COMMENT_PATTERN = /(?<![:\\])\/\/.*$/gmu;
-
 /**
- * Comments routinely spell out `export { … } from` in prose, and scanning them
- * would mine documentation for export names.
+ * Removes comments while leaving string and template-literal bodies intact.
  *
- * String bodies are deliberately left intact. Vue templates bind constants from
- * inside quoted attributes (`:class="SHELL_CLASS"`), and template literals hold
- * live references in `${…}`, so blanking quoted spans erases real usage and
- * reports live symbols as dead. Counting an occurrence inside a string is the
- * safe direction to err: it can only keep a symbol alive, never delete one.
+ * Comments routinely spell out `export { … } from` in prose, and scanning them would
+ * mine documentation for export names. String bodies must survive, though: Vue
+ * templates bind constants from inside quoted attributes (`:class="SHELL_CLASS"`) and
+ * template literals hold live references in `${…}`, so blanking quoted spans erases
+ * real usage and reports live symbols as dead.
+ *
+ * That combination rules out regex replacement. A pattern cannot tell a comment
+ * opener from the same characters inside a string, and this repo has one:
+ * `` `${API_ENDPOINT_PREFIX}/**` `` in `packages/client/nuxt.config.ts`. A
+ * non-greedy block-comment regex treated it as an opener and ran to the next real
+ * close delimiter far below, deleting ~7KB of code — every use site in between — and
+ * reporting nine live constants as dead exports.
+ *
+ * So walk the source once, tracking whether we are inside a quote, a template
+ * literal, a line comment or a block comment, and drop only real comment spans.
+ * (A `/*` inside a regex literal is still treated as a comment opener; regex
+ * literals cannot be told from division without a full parser, and no such literal
+ * exists here.)
  */
-export const stripComments = (content: string): string =>
-  content.replace(BLOCK_COMMENT_PATTERN, " ").replace(LINE_COMMENT_PATTERN, " ");
+const QUOTE_CHARACTERS = new Set(['"', "'", "`"]);
+
+/** Copies a quoted span verbatim; returns the index just past its closing quote. */
+const copyQuotedSpan = (content: string, start: number, output: string[]): number => {
+  const quote = content[start] ?? "";
+  output.push(quote);
+  let index = start + 1;
+
+  while (index < content.length) {
+    const character = content[index] ?? "";
+    output.push(character);
+    if (character === "\\") {
+      output.push(content[index + 1] ?? "");
+      index += 2;
+      continue;
+    }
+    index += 1;
+    if (character === quote) {
+      return index;
+    }
+  }
+  return index;
+};
+
+/** Returns the index just past the comment that starts at `start`, or the content end. */
+const skipComment = (content: string, start: number): number => {
+  if (content[start + 1] === "/") {
+    const lineEnd = content.indexOf("\n", start);
+    return lineEnd === -1 ? content.length : lineEnd;
+  }
+  const blockEnd = content.indexOf("*/", start + 2);
+  return blockEnd === -1 ? content.length : blockEnd + 2;
+};
+
+const startsComment = (content: string, index: number): boolean =>
+  content[index] === "/" && (content[index + 1] === "/" || content[index + 1] === "*");
+
+export const stripComments = (content: string): string => {
+  const output: string[] = [];
+  let index = 0;
+
+  while (index < content.length) {
+    const character = content[index] ?? "";
+    if (QUOTE_CHARACTERS.has(character)) {
+      index = copyQuotedSpan(content, index, output);
+      continue;
+    }
+    if (startsComment(content, index)) {
+      output.push(" ");
+      index = skipComment(content, index);
+      continue;
+    }
+    output.push(character);
+    index += 1;
+  }
+
+  return output.join("");
+};
 
 const IMPORT_STATEMENT_PATTERN = /\bimport\b[^;'"]*?\bfrom\b\s*['"`][^'"`]*['"`]/gu;
 const EXPORT_FROM_STATEMENT_PATTERN = /\bexport\b[^;'"]*?\bfrom\b\s*['"`][^'"`]*['"`]/gu;

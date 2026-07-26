@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { collectIdentifierOccurrences } from "./utils/dead-export-references";
+import { collectIdentifierOccurrences, stripComments } from "./utils/dead-export-references";
 import {
   collectImportedTargets,
   isDeadExportViolation,
@@ -242,5 +242,48 @@ describe("isOrphanExportViolation usage contexts", () => {
         "packages/shared/src/constants/a.ts",
       ),
     ).toHaveLength(0);
+  });
+});
+
+describe("stripComments", () => {
+  test("keeps code that follows a template literal containing a comment opener", () => {
+    // `packages/client/nuxt.config.ts` really does hold `${PREFIX}/**`. A regex-based
+    // stripper treated it as a block-comment opener and deleted everything up to the
+    // next close delimiter, hiding every use site in between.
+    const source = [
+      `const WILDCARD = \`$\{PREFIX}/**\`;`,
+      "/** Doc comment that closes here. */",
+      "const used = LIVE_SYMBOL;",
+    ].join("\n");
+
+    const stripped = stripComments(source);
+
+    expect(stripped).toContain("LIVE_SYMBOL");
+    expect(stripped).toContain("WILDCARD");
+    expect(stripped).not.toContain("Doc comment");
+  });
+
+  test("keeps code after a line comment that mentions a glob", () => {
+    const source = ["// mentions #build/* in prose", "const used = LIVE_SYMBOL;"].join("\n");
+    const stripped = stripComments(source);
+    expect(stripped).toContain("LIVE_SYMBOL");
+    expect(stripped).not.toContain("prose");
+  });
+
+  test("removes real comments but preserves quoted attribute bindings", () => {
+    const source = [
+      "/* block */",
+      "// line",
+      'const markup = "<div :class=\\"SHELL_CLASS\\"></div>";',
+    ].join("\n");
+    const stripped = stripComments(source);
+    expect(stripped).toContain("SHELL_CLASS");
+    expect(stripped).not.toContain("block");
+    expect(stripped).not.toContain("line");
+  });
+
+  test("does not treat an escaped quote as closing the string", () => {
+    const source = ['const value = "a\\"b";', "const used = LIVE_SYMBOL;"].join("\n");
+    expect(stripComments(source)).toContain("LIVE_SYMBOL");
   });
 });

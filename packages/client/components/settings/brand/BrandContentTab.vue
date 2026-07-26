@@ -67,6 +67,7 @@ const { t } = useI18n();
           </legend>
           <AppJsonField
             v-model="brandForm.contentOverridesJson"
+            collab-key="brand-content-overrides"
             :label="t('settings.brand.contentOverridesLegend')"
             :aria-label="t('settings.brand.contentOverridesAria')"
           />

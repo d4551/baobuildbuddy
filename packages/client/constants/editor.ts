@@ -12,6 +12,13 @@ export const EDITOR_AUTOSAVE_DEBOUNCE_MS = 1_200;
 /** Default min-height for JSON power editors. */
 export const EDITOR_MIN_HEIGHT_CLASS = "min-h-64";
 
+/**
+ * Prefix for a JSON field's cross-tab collab channel. The suffix must identify the
+ * individual field: the collab plugin overwrites the local document with whatever
+ * arrives on the channel, so two fields sharing a channel overwrite each other.
+ */
+export const JSON_EDITOR_COLLAB_CHANNEL_PREFIX = "bao-json-editor-collab:";
+
 /** Taller writing surface for cover letters. */
 export const EDITOR_WRITING_MIN_HEIGHT_CLASS = "min-h-80";
 
