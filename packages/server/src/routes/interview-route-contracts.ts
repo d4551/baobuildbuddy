@@ -271,19 +271,14 @@ export const interviewSessionResponses = {
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
-export const interviewSessionWithMessageResponseSchema = t.Intersect([
-  interviewSessionResponseSchema,
-  t.Object({ message: t.String() }),
-]);
-
 export const submitInterviewResponseResponses = {
-  [HTTP_STATUS_OK]: interviewSessionWithMessageResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const completeInterviewSessionResponses = {
-  [HTTP_STATUS_OK]: interviewSessionWithMessageResponseSchema,
+  [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
