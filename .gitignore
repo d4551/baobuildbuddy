@@ -27,6 +27,7 @@ packages/desktop/src-tauri/gen/
 Thumbs.db
 *.log
 .claude/
+.omo/
 
 # Editor directories and files
 .vscode/
