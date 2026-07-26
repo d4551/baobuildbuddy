@@ -66,6 +66,14 @@ agentiflow/*
 .hardening/
 docs/assets/docs.generated.css
 
+# Docs site release manifest (generated from packages/desktop/releases)
+docs/releases.manifest.json
+# Local docs-site preview staging (mirrors deployed /releases for local testing)
+docs/releases/
+
+# Local release size overrides used when artifacts are Git LFS pointers
+packages/desktop/releases/sizes.json
+
 # Desktop release staging (CI produces artifacts; do not commit local builds)
 .desktop-release-artifacts/
 

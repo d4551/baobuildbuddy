@@ -34,7 +34,7 @@
     "build:linux": "bun run build",
     "build:windows": "bun run build",
     "build:desktop": "bun run --cwd packages/desktop build",
-    "build:docs-site": "bun run scripts/build-docs-site-css.ts",
+    "build:docs-site": "bun run scripts/build-docs-site-css.ts && bun run scripts/build-docs-site-releases.ts",
     "build:desktop:debug": "bun run --cwd packages/desktop build:debug",
     "prepare:desktop-runtime": "bun run scripts/prepare-desktop-runtime.ts",
     "release:desktop:macos": "bun run scripts/build-desktop-release.ts --target macos",
