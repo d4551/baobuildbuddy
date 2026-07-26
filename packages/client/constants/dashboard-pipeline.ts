@@ -138,16 +138,6 @@ export function resolveDashboardFlowActions(
 }
 
 /**
- * Quick actions rendered in the dashboard footer section.
- */
-export const DASHBOARD_QUICK_ACTIONS: readonly DashboardQuickAction[] = [
-  DASHBOARD_FLOW_ACTIONS.search,
-  DASHBOARD_FLOW_ACTIONS.customize,
-  DASHBOARD_FLOW_ACTIONS.apply,
-  DASHBOARD_FLOW_ACTIONS.aiChat,
-] as const;
-
-/**
  * Quick actions rendered in the floating action button speed dial.
  */
 export const FAB_QUICK_ACTIONS: readonly DashboardQuickAction[] = [

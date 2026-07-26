@@ -74,12 +74,12 @@ const collectMotionTokenViolations = (filePath: string, content: string): Valida
     {
       pattern: rawDurationPattern,
       message: (token) =>
-        `Raw motion duration "${token}" bypasses the --motion-* token system. Use duration-[var(--motion-fast|standard|slow)] from main.css.`,
+        `Raw motion duration "${token}" bypasses the --motion-* token system. Use duration-[var(--motion-standard)] (or --motion-fast / --motion-slow) from main.css.`,
     },
     {
       pattern: rawEasePattern,
       message: (token) =>
-        `Raw easing utility "${token}" bypasses the --ease-* token system. Use ease-[var(--ease-response|enter|exit)] from main.css.`,
+        `Raw easing utility "${token}" bypasses the --ease-* token system. Use ease-[var(--ease-response)] (or --ease-enter / --ease-exit) from main.css.`,
     },
     {
       pattern: overlyBroadTransitionPattern,

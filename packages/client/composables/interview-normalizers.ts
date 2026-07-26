@@ -1,3 +1,4 @@
+import { INTERVIEW_DEFAULT_DURATION_MINUTES } from "@bao/shared/constants/interview";
 import type {
   InterviewCandidateContext,
   InterviewConfig,
@@ -6,6 +7,7 @@ import type {
   InterviewSession,
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
+import { resolveInterviewAnalysisSource } from "@bao/shared/utils/interview-analysis-provenance";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import {
   asBoolean,
@@ -14,7 +16,6 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
-import { INTERVIEW_DEFAULT_DURATION_MINUTES } from "~/constants/numeric-ui";
 
 const INTERVIEW_STATUS_VALUES = [
   "preparing",
@@ -154,6 +155,9 @@ const toResponseAnalysis = (
     feedback: asString(value.feedback) ?? "",
     strengths: asStringArray(value.strengths),
     improvements: asStringArray(value.improvements),
+    // Sessions stored before provenance tracking carry no marker, so the
+    // analysis is reported as "unknown" rather than claimed as AI-generated.
+    source: resolveInterviewAnalysisSource(value.source),
   };
 };
 

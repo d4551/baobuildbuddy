@@ -9,19 +9,16 @@ export const APP_LANGUAGE_CODES = ["en-US", "es-ES", "fr-FR", "ja-JP"] as const;
 export type AppLanguageCode = (typeof APP_LANGUAGE_CODES)[number];
 
 /**
- * Human-readable locale labels used for deterministic UI rendering.
- */
-export const APP_LANGUAGE_LABELS = {
-  "en-US": "English",
-  "es-ES": "Español",
-  "fr-FR": "Français",
-  "ja-JP": "日本語",
-} as const satisfies Record<AppLanguageCode, string>;
-
-/**
  * Default language code used for app settings and preference fallbacks.
  */
 export const DEFAULT_APP_LANGUAGE: AppLanguageCode = "en-US";
+
+/**
+ * Narrows a persisted language column to a supported code, preserving an
+ * explicit "unset" null rather than silently defaulting it.
+ */
+export const resolveAppLanguageCode = (value: string | null): AppLanguageCode | null =>
+  APP_LANGUAGE_CODES.find((code) => code === value) ?? null;
 
 /**
  * Select-option model for language preference inputs.

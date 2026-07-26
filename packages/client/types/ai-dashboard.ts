@@ -10,7 +10,7 @@ export type ProviderConfig = {
   health: ProviderHealth;
 };
 
-export type DashboardStats = {
+export type AiDashboardStats = {
   totalRequests: number;
   successRate: number;
   averageResponseTimeSeconds: number;

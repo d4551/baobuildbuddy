@@ -6,7 +6,7 @@ import { db } from "../db/client";
 import { gamification } from "../db/schema/gamification";
 import { DEFAULT_SETTINGS_ID, settings } from "../db/schema/settings";
 import { userProfile } from "../db/schema/user";
-import type { BaoExportData } from "./data-service-contracts";
+import type { BaoImportData } from "./data-service-contracts";
 import { runWithErrorHandler } from "./data-service-helpers";
 import {
   omitImportMetadata,
@@ -15,7 +15,7 @@ import {
 } from "./data-service-parsers";
 
 export const importProfileSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -48,7 +48,7 @@ export const importProfileSection = async (
 };
 
 export const importSettingsSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -77,7 +77,7 @@ export const importSettingsSection = async (
 };
 
 export const importGamificationSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {

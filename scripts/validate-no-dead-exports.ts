@@ -1,3 +1,4 @@
+import { collectIdentifierOccurrences, stripComments } from "./utils/dead-export-references";
 import {
   collectProjectFileEntries,
   reportViolations,
@@ -19,6 +20,38 @@ const NUXT_IMPORTS_MANIFEST_PATH = "packages/client/.nuxt/imports.d.ts";
 const autoImportExportPattern = /\bexport\s*\{\s*([^}]+)\s*\}\s*from\s*['"`][^'"`]+['"`]/gu;
 const AS_CLAUSE_PATTERN = /\s+as\s+/u;
 const SOURCE_FILE_EXTENSIONS = [".ts", ".tsx", ".vue", ".js", ".mjs", ".cjs"] as const;
+
+/** Occurrence count contributed by the export declaration itself. */
+const DECLARATION_OCCURRENCE_COUNT = 1;
+
+/**
+ * Flags exported symbols that nothing references anywhere. Unlike the
+ * module-level check above, this is symbol-granular, so a module kept alive by
+ * one live import cannot hide dead siblings inside it.
+ */
+export const isOrphanExportViolation = (options: {
+  filePath: string;
+  content: string;
+  identifierOccurrences: Map<string, number>;
+}): ValidationViolation[] => {
+  const { filePath, content, identifierOccurrences } = options;
+  if (isFrameworkEntrypointFile(filePath)) {
+    return [];
+  }
+
+  return collectExportedRuntimeNames(content).flatMap((exportName) => {
+    const total = identifierOccurrences.get(exportName) ?? 0;
+    return total > DECLARATION_OCCURRENCE_COUNT
+      ? []
+      : [
+          {
+            filePath,
+            line: 1,
+            message: `Exported symbol "${exportName}" is referenced nowhere in the workspace. Wire it into a real caller or delete it.`,
+          },
+        ];
+  });
+};
 
 const stripSourceExtension = (pathValue: string): string => {
   for (const extension of SOURCE_FILE_EXTENSIONS) {
@@ -83,7 +116,8 @@ const normalizeImportTargets = (sourceFilePath: string, importPath: string): str
   return [];
 };
 
-const collectExportedRuntimeNames = (content: string): string[] => {
+const collectExportedRuntimeNames = (rawContent: string): string[] => {
+  const content = stripComments(rawContent);
   const exportedNames = new Set<string>();
   const runtimeExportPattern =
     /\bexport\s+(?:async\s+)?(?:class|function|const|let|var)\s+([A-Za-z0-9_]+)/gu;
@@ -271,16 +305,18 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
   });
   const autoImportNames = await collectNuxtAutoImportNames();
   const importedTargets = collectImportedTargets(importSources);
+  const identifierOccurrences = collectIdentifierOccurrences(importSources);
 
-  return files.flatMap(({ filePath, content }) =>
-    isDeadExportViolation({
+  return files.flatMap(({ filePath, content }) => [
+    ...isDeadExportViolation({
       filePath,
       content,
       importSources,
       autoImportNames,
       importedTargets,
     }),
-  );
+    ...isOrphanExportViolation({ filePath, content, identifierOccurrences }),
+  ]);
 };
 
 if (import.meta.main) {

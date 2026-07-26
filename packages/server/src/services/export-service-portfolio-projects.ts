@@ -1,6 +1,15 @@
 import {
+  PORTFOLIO_BANNER_TITLE_COLOR,
+  PORTFOLIO_FEATURED_BADGE_BASELINE_OFFSET_Y,
+  PORTFOLIO_FEATURED_BADGE_HEIGHT,
   PORTFOLIO_FEATURED_BADGE_INSET_X,
+  PORTFOLIO_FEATURED_BADGE_WIDTH,
+  PORTFOLIO_PROJECT_BODY_SIZE,
+  PORTFOLIO_PROJECT_DESCRIPTION_GAP,
+  PORTFOLIO_PROJECT_LABEL_SIZE,
+  PORTFOLIO_PROJECT_SEPARATOR_THICKNESS,
   PORTFOLIO_PROJECT_SPACE,
+  PORTFOLIO_PROJECT_TAGS_SIZE,
   PORTFOLIO_PROJECT_TITLE_SIZE_BY_LAYOUT,
 } from "@bao/shared/constants/export-layout";
 import {
@@ -12,8 +21,7 @@ import {
 } from "@bao/shared/constants/numeric";
 import type { PortfolioProject } from "@bao/shared/types/portfolio";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
-import { rgb } from "pdf-lib";
-import type { PortfolioRenderContext } from "./export-service-contracts";
+import { type PortfolioRenderContext, toPdfColor } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
 function renderPortfolioProjectHeading(
@@ -27,7 +35,7 @@ function renderPortfolioProjectHeading(
       {
         x: context.margin,
         y: context.yPosition,
-        size: 9,
+        size: PORTFOLIO_PROJECT_LABEL_SIZE,
         font: context.boldFont,
         color: context.colors.accent,
       },
@@ -35,7 +43,7 @@ function renderPortfolioProjectHeading(
     context.yPosition -= COUNT_THIRTEEN;
   }
 
-  const titleSize = context.layout === "compact" ? 14 : 18;
+  const titleSize = PORTFOLIO_PROJECT_TITLE_SIZE_BY_LAYOUT[context.layout];
   context.page.drawText(
     context.layout === "compact" ? project.title : `${index + 1}. ${project.title}`,
     {
@@ -55,17 +63,17 @@ function renderPortfolioProjectHeading(
   if (context.layout === "showcase") {
     context.page.drawRectangle({
       x: context.margin,
-      y: context.yPosition - 2,
-      width: 88,
-      height: 14,
+      y: context.yPosition - PORTFOLIO_FEATURED_BADGE_BASELINE_OFFSET_Y,
+      width: PORTFOLIO_FEATURED_BADGE_WIDTH,
+      height: PORTFOLIO_FEATURED_BADGE_HEIGHT,
       color: context.colors.featured,
     });
     context.page.drawText("FEATURED", {
-      x: context.margin + 8,
+      x: context.margin + PORTFOLIO_FEATURED_BADGE_INSET_X,
       y: context.yPosition,
-      size: 9,
+      size: PORTFOLIO_PROJECT_LABEL_SIZE,
       font: context.boldFont,
-      color: rgb(1, 1, 1),
+      color: toPdfColor(PORTFOLIO_BANNER_TITLE_COLOR),
     });
     context.yPosition -= COUNT_FIFTEEN;
     return;
@@ -89,7 +97,7 @@ function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: stri
   context.page.drawText(`Role: ${role}`, {
     x: context.margin,
     y: context.yPosition,
-    size: 10,
+    size: PORTFOLIO_PROJECT_BODY_SIZE,
     font: context.boldFont,
     color: context.colors.muted,
   });
@@ -108,7 +116,7 @@ function renderPortfolioProjectTechnologies(
   context.page.drawText(`Technologies: ${technologies.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
-    size: 9,
+    size: PORTFOLIO_PROJECT_LABEL_SIZE,
     font: context.font,
     color: context.colors.accent,
   });
@@ -135,7 +143,7 @@ function renderPortfolioTechnicalDetails(
   context.page.drawText(details.join(" | "), {
     x: context.margin,
     y: context.yPosition,
-    size: 9,
+    size: PORTFOLIO_PROJECT_LABEL_SIZE,
     font: context.font,
     color: context.colors.muted,
   });
@@ -158,7 +166,7 @@ function renderPortfolioProjectLinks(
   context.page.drawText(links.join(" | "), {
     x: context.margin,
     y: context.yPosition,
-    size: 9,
+    size: PORTFOLIO_PROJECT_LABEL_SIZE,
     font: context.font,
     color: context.colors.accent,
   });
@@ -174,7 +182,7 @@ function renderPortfolioProjectTags(context: PortfolioRenderContext, tags?: stri
   context.page.drawText(`Tags: ${tags.join(", ")}`, {
     x: context.margin,
     y: context.yPosition,
-    size: 8,
+    size: PORTFOLIO_PROJECT_TAGS_SIZE,
     font: context.font,
     color: context.colors.footer,
   });
@@ -193,7 +201,7 @@ function renderPortfolioProjectSeparator(
   context.page.drawLine({
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
-    thickness: 0.5,
+    thickness: PORTFOLIO_PROJECT_SEPARATOR_THICKNESS,
     color: context.colors.line,
   });
   context.yPosition -= COUNT_TWENTY;
@@ -212,12 +220,12 @@ export function renderPortfolioProject(
   drawPortfolioWrappedText(context, {
     text: project.description,
     x: context.margin,
-    size: 10,
+    size: PORTFOLIO_PROJECT_BODY_SIZE,
     color: context.colors.text,
     font: context.font,
     maxWidth: context.width - context.margin * 2,
   });
-  context.yPosition -= 10;
+  context.yPosition -= PORTFOLIO_PROJECT_DESCRIPTION_GAP;
 
   renderPortfolioProjectTechnologies(context, project.technologies);
   renderPortfolioTechnicalDetails(context, project);

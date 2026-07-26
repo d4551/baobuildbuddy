@@ -21,7 +21,7 @@ import {
   openRoute,
   probeFirstTextInput,
   probeRouteShell,
-  slugify,
+  toFilenameSlug,
 } from "./browser-interaction-burndown-actions";
 import type { ChromeSignals } from "./browser-interaction-burndown-chrome";
 import { writeError, writeOutput } from "./utils/cli-output";
@@ -127,7 +127,7 @@ const burnRoute = async (
   pageErrorBucket: string[],
 ): Promise<RouteLedger> => {
   await openRoute(page, CLIENT_BASE, route, consoleBucket, pageErrorBucket);
-  const screenshot = join(OUT_DIR, viewport, `${slugify(route)}.png`);
+  const screenshot = join(OUT_DIR, viewport, `${toFilenameSlug(route)}.png`);
   await mkdir(join(OUT_DIR, viewport), { recursive: true });
   await page.screenshot({ path: screenshot, fullPage: false });
 

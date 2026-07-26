@@ -25,5 +25,4 @@ export declare const parseGamificationInsert: <T>(value: T) => GamificationInser
 export declare const parseSkillMappingInsert: <T>(value: T) => SkillMappingInsert | null;
 export declare const parseChatHistoryInsert: <T>(value: T) => ChatHistoryInsert | null;
 export declare const resolveProfileId: () => string;
-export declare const resolveSettingsId: () => string;
 export {};

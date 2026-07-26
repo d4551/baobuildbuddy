@@ -1,4 +1,4 @@
-import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
+import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-resume-theme";
 import { RESUME_TEMPLATE_DEFAULT } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";

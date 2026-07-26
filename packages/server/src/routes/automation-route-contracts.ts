@@ -3,7 +3,6 @@ import {
   AUTOMATION_RUN_TYPES,
   AUTOMATION_SCRAPE_TARGETS,
   type AutomationScrapeTarget,
-  RPA_CAPABILITY_ISSUE_CODES,
 } from "@bao/shared/constants/automation";
 import {
   HTTP_STATUS_BAD_REQUEST,
@@ -37,6 +36,7 @@ const [
   AUTOMATION_STATUS_RUNNING,
   AUTOMATION_STATUS_SUCCESS,
   AUTOMATION_STATUS_ERROR,
+  AUTOMATION_STATUS_CANCELLED,
 ] = AUTOMATION_RUN_STATUSES;
 const [
   SCRAPE_TARGET_STUDIOS,
@@ -82,6 +82,7 @@ export const AUTOMATION_STATUS_SCHEMA = t.Union([
   t.Literal(AUTOMATION_STATUS_RUNNING),
   t.Literal(AUTOMATION_STATUS_SUCCESS),
   t.Literal(AUTOMATION_STATUS_ERROR),
+  t.Literal(AUTOMATION_STATUS_CANCELLED),
 ]);
 export const EMAIL_RESPONSE_TONE_SCHEMA = t.Union([
   t.Literal("professional"),
@@ -133,6 +134,19 @@ export const automationRunEnvelopeBodySchema = t.Object({
   executionMs: t.Union([t.Number(), t.Null()]),
 });
 
+/**
+ * Spelled out as a literal tuple: `t.Union` over a mapped array loses the
+ * member literals and its Static collapses to `never`.
+ * `automation-route-capability-parity.test.ts` fails if this drifts from
+ * RPA_CAPABILITY_ISSUE_CODES, which stays the single source of truth.
+ */
+export const rpaCapabilityIssueCodeSchema = t.Union([
+  t.Literal("provider_settings_unavailable"),
+  t.Literal("portal_configuration_missing"),
+  t.Literal("portal_disabled"),
+  t.Literal("portal_fallback_url_missing"),
+]);
+
 export const capabilityAuditEntryBodySchema = t.Object({
   id: t.String({ minLength: 1 }),
   category: t.Union([t.Literal("job_apply"), t.Literal("scrape")]),
@@ -147,7 +161,10 @@ export const capabilityAuditEntryBodySchema = t.Object({
   liveUpdatesAvailable: t.Boolean(),
   issues: t.Array(
     t.Object({
-      code: t.Union(RPA_CAPABILITY_ISSUE_CODES.map((code) => t.Literal(code))),
+      // Spelled out as a literal tuple: `t.Union` over a mapped array loses the
+      // member literals and its Static collapses to `never`. Parity with
+      // RPA_CAPABILITY_ISSUE_CODES is asserted in the route contracts test.
+      code: rpaCapabilityIssueCodeSchema,
       portalId: t.Optional(t.String({ minLength: 1 })),
       portalName: t.Optional(t.String({ minLength: 1 })),
     }),
@@ -193,30 +210,30 @@ export const automationRouteErrorResponses = {
 } as const;
 
 export const automationVerifyContextResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: automationVerifyContextResponseSchema,
   [HTTP_STATUS_NO_CONTENT]: t.Void(),
   [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const automationRunResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: automationRunEnvelopeBodySchema,
   ...automationRouteErrorResponses,
 } as const;
 
 export const automationEmailResponseResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: automationEmailResponseBodySchema,
   ...automationRouteErrorResponses,
 } as const;
 
 export const automationCapabilitiesResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: capabilityAuditReportBodySchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const automationRunsListResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: t.Array(automationRunEnvelopeBodySchema),
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 

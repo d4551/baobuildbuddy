@@ -45,6 +45,7 @@ const resolvePackageManifestPath = async (
   throw new Error(
     `Unable to resolve packaged scraper dependency "${packageName}" from ${fromPackageRoot}: ${toErrorMessage(
       manifestPathResult.error,
+      "Unexpected error.",
     )}`,
     { cause: manifestPathResult.error },
   );

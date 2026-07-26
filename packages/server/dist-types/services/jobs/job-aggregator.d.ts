@@ -35,4 +35,3 @@ export declare class JobAggregator {
         lastUpdated: string | null;
     }>;
 }
-export declare const jobAggregator: JobAggregator;

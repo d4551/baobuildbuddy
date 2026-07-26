@@ -194,8 +194,17 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    404: unknown;
+                    200: {
+                        success: boolean;
+                        id: string;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -217,8 +226,27 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    201: unknown;
+                    200: {
+                        message: string;
+                        content: {
+                            introduction: string;
+                            body: string;
+                            conclusion: string;
+                        };
+                    };
+                    201: {
+                        message: string;
+                        coverLetter: {
+                            id: string;
+                            company: string;
+                            position: string;
+                            jobInfo?: Record<string, unknown> | null | undefined;
+                            content?: Record<string, unknown> | null | undefined;
+                            template?: string | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
+                        };
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -229,8 +257,20 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
                         property?: string;
                         expected?: string;
                     };
-                    500: unknown;
-                    503: unknown;
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
+                    503: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -250,8 +290,20 @@ export declare const coverLetterRoutes: import("elysia/types").AddRoute<string, 
     }>;
     response: {
         200: import("typebox").TUnknown;
-        404: import("typebox").TUnknown;
-        500: import("typebox").TUnknown;
+        404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        500: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
     };
 }, {}, `${string}/:id/export`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, status, }: {
     params: CoverLetterIdParams;

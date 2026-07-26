@@ -11,7 +11,7 @@ import {
 } from "@bao/shared/constants/http";
 import { DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import {
   RATE_LIMIT_SETTINGS_DURATION_MS,
   RATE_LIMIT_SETTINGS_READ_MAX_REQUESTS,
@@ -24,18 +24,13 @@ import { openapiDetail } from "../utils/openapi-detail";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
-  type ApiKeysUpdateBody,
   apiKeysUpdateBodySchema,
   apiKeysUpdateResponses,
-  type ImportSettingsBody,
   importSettingsBodySchema,
-  type JobTaxonomyUpdateBody,
   jobTaxonomyUpdateBodySchema,
   jobTaxonomyUpdateResponses,
-  type ProviderTestBody,
   providerTestBodySchema,
   providerTestResponses,
-  type SettingsUpdateBody,
   settingsExportResponses,
   settingsImportResponses,
   settingsReadResponses,
@@ -45,8 +40,6 @@ import {
 import { buildSettingsResponse, testProviderConnection } from "./settings-route-provider-support";
 import { readOrCreateSettingsRow } from "./settings-route-support";
 import { buildApiKeysUpdate, buildSettingsUpdate } from "./settings-route-update-support";
-
-type RouteStatus = typeof status;
 
 export const settingsRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.settings),
@@ -70,7 +63,7 @@ export const settingsRoutes = new Elysia({
           ),
           response: settingsReadResponses,
         },
-        async ({ status }: { status: RouteStatus }) => {
+        async ({ status }) => {
           const row = await readOrCreateSettingsRow();
           if (!row) {
             return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: API_ERROR_LOAD_SETTINGS });
@@ -100,7 +93,7 @@ export const settingsRoutes = new Elysia({
           body: settingsUpdateBodySchema,
           response: settingsUpdateResponses,
         },
-        async ({ body, status }: { body: SettingsUpdateBody; status: RouteStatus }) => {
+        async ({ body, status }) => {
           const existingRow = await readOrCreateSettingsRow();
           if (!existingRow) {
             return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
@@ -133,7 +126,7 @@ export const settingsRoutes = new Elysia({
           body: jobTaxonomyUpdateBodySchema,
           response: jobTaxonomyUpdateResponses,
         },
-        async ({ body, status }: { body: JobTaxonomyUpdateBody; status: RouteStatus }) => {
+        async ({ body, status }) => {
           const jobTaxonomy = await updateJobTaxonomy(body);
           return status(HTTP_STATUS_OK, { success: true, jobTaxonomy });
         },
@@ -145,7 +138,7 @@ export const settingsRoutes = new Elysia({
           body: apiKeysUpdateBodySchema,
           response: apiKeysUpdateResponses,
         },
-        async ({ body, status }: { body: ApiKeysUpdateBody; status: RouteStatus }) => {
+        async ({ body, status }) => {
           const ensuredRow = await readOrCreateSettingsRow();
           if (!ensuredRow) {
             return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
@@ -170,8 +163,7 @@ export const settingsRoutes = new Elysia({
           body: providerTestBodySchema,
           response: providerTestResponses,
         },
-        async ({ body, status }: { body: ProviderTestBody; status: RouteStatus }) =>
-          status(HTTP_STATUS_OK, await testProviderConnection(body)),
+        async ({ body, status }) => status(HTTP_STATUS_OK, await testProviderConnection(body)),
       )
       .get(
         "/export",
@@ -179,7 +171,7 @@ export const settingsRoutes = new Elysia({
           detail: openapiDetail("Settings", "Export settings as a portable configuration payload."),
           response: settingsExportResponses,
         },
-        async ({ status }: { status: RouteStatus }) => {
+        async ({ status }) => {
           const { dataService } = await import("../services/data-service");
           return status(HTTP_STATUS_OK, await dataService.exportAll());
         },
@@ -194,7 +186,7 @@ export const settingsRoutes = new Elysia({
           body: importSettingsBodySchema,
           response: settingsImportResponses,
         },
-        async ({ body, status }: { body: ImportSettingsBody; status: RouteStatus }) => {
+        async ({ body, status }) => {
           const { dataService } = await import("../services/data-service");
           return status(
             HTTP_STATUS_OK,

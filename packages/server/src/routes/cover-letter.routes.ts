@@ -24,7 +24,6 @@ import {
   coverLetterMutationBodySchema,
   coverLettersListResponses,
   coverLetterUpdateBodySchema,
-  type GenerateCoverLetterRouteBody,
   generateCoverLetterBodySchema,
   generateCoverLetterResponses,
 } from "./cover-letter-route-contracts";
@@ -155,7 +154,7 @@ export const coverLetterRoutes = new Elysia({
       params: coverLetterIdParamsSchema,
       response: coverLetterDeleteResponses,
     },
-    async ({ params, status }: { params: CoverLetterIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const state: RouteSetState = {};
       await deleteCoverLetter(params.id, state);
       if (state.status === HTTP_STATUS_NOT_FOUND) {
@@ -174,7 +173,7 @@ export const coverLetterRoutes = new Elysia({
       body: generateCoverLetterBodySchema,
       response: generateCoverLetterResponses,
     },
-    async ({ body, status }: { body: GenerateCoverLetterRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const state: RouteSetState = {};
       const result = await handleGenerateCoverLetter(body, state);
       if (state.status === HTTP_STATUS_SERVICE_UNAVAILABLE) {

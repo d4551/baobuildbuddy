@@ -6,7 +6,19 @@
  *
  * Split from layout.ts to keep each source file under the 400-line monolith limit
  * while maintaining a single public import path for all token consumers.
+ *
+ * Action button tokens are defined in layout-tokens-actions / layout-action-soft
+ * and aliased here so the facade surface stays complete.
  */
+
+import {
+  SOFT_ACTION_CLASS as _SOFT_ACTION_CLASS,
+} from "./layout-action-soft";
+import {
+  OUTLINE_ACTION_CLASS as _OUTLINE_ACTION_CLASS,
+  PRIMARY_ACTION_CLASS as _PRIMARY_ACTION_CLASS,
+  PRIMARY_BUTTON_VARIANT_CLASS as _PRIMARY_BUTTON_VARIANT_CLASS,
+} from "./layout-tokens-actions";
 
 /** Common vertical stack spacing. */
 export const STACK_SPACE_Y_TOKEN_CLASS = {
@@ -269,22 +281,22 @@ export const MIN_H_80_CLASS = "min-h-80";
 export const TOUCH_TARGET_MIN_CLASS = "box-border h-11 min-h-11 min-w-11 py-0";
 
 /** daisyUI primary color variant (segmented controls, selected ghost/outline buttons). */
-export const PRIMARY_BUTTON_VARIANT_CLASS = "btn-primary";
+export const PRIMARY_BUTTON_VARIANT_CLASS = _PRIMARY_BUTTON_VARIANT_CLASS;
 
 /**
  * Primary actionable CTA — daisyUI primary + touch floor.
  * Ban pairing `btn-primary` with `btn-sm`/`btn-xs` (validate:primary-action-density).
  */
-export const PRIMARY_ACTION_CLASS = `btn ${PRIMARY_BUTTON_VARIANT_CLASS} h-11 min-h-11`;
+export const PRIMARY_ACTION_CLASS = _PRIMARY_ACTION_CLASS;
 
 /**
  * Secondary / outline CTA — same touch floor as primary without competing for hero primary.
  * Use for quick-action grids and demoted hub cards when a page already owns PRIMARY_ACTION_CLASS.
  */
-export const OUTLINE_ACTION_CLASS = "btn btn-outline h-11 min-h-11";
+export const OUTLINE_ACTION_CLASS = _OUTLINE_ACTION_CLASS;
 
 /** daisyUI soft variant + touch floor (prompt chips, demoted secondary). */
-export const SOFT_ACTION_CLASS = "btn btn-soft h-11 min-h-11";
+export const SOFT_ACTION_CLASS = _SOFT_ACTION_CLASS;
 
 /** Outline variant token segment for composition (ban raw `btn-outline` in consumers). */
 export const OUTLINE_BUTTON_VARIANT_CLASS = "btn-outline";

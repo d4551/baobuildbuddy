@@ -11,7 +11,3 @@ export declare function interviewFeedbackPrompt(question: string, response: stri
  * Interview persona prompt for AI roleplaying as interviewer
  */
 export declare function interviewPersonaPrompt({ role, company, personality, interviewStyle, focusAreas, }: InterviewPersonaPromptInput): string;
-/**
- * Interview follow-up question prompt
- */
-export declare function interviewFollowUpPrompt(question: string, response: string, previousQuestions: string[]): string;

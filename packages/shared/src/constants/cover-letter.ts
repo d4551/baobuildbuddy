@@ -58,16 +58,6 @@ export const COVER_LETTER_EXPORT_FORMATS = ["pdf", "docx"] as const;
 export type CoverLetterExportFormat = (typeof COVER_LETTER_EXPORT_FORMATS)[number];
 
 /**
- * Type guard for supported cover-letter export formats.
- */
-export function isCoverLetterExportFormat(
-  value: string | undefined | null,
-): value is CoverLetterExportFormat {
-  if (!value) return false;
-  return COVER_LETTER_EXPORT_FORMATS.some((format) => format === value);
-}
-
-/**
  * Type-guard for validating cover-letter template values from untyped boundaries.
  *
  * @param value Candidate template value.

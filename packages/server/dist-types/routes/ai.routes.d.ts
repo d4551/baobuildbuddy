@@ -1,6 +1,3 @@
-import { type status } from "elysia";
-import { type AutomationActionRouteBody } from "./ai-route-contracts";
-type RouteStatus = typeof status;
 export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", {
     decorator: {};
     store: {};
@@ -91,7 +88,19 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        message: string;
+                        resumeId: string;
+                        jobId: string | null;
+                        analysis: {
+                            score: number;
+                            strengths: string[];
+                            improvements: string[];
+                            keywords: string[];
+                        };
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                        model: string;
+                    };
                     404: {
                         error: string;
                         code?: string | undefined;
@@ -231,7 +240,72 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        aiRouting?: {
+                            chat: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            interviewQuestions: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            interviewFeedback: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            resume: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            coverLetter: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            emailResponse: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            jobMatch: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            scrapeEnrichment: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                            automationFieldMapping: {
+                                provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                                model?: string | undefined;
+                            };
+                        } | undefined;
+                        configuredProviders?: ("claude" | "gemini" | "huggingface" | "local" | "openai")[] | undefined;
+                        error?: string | undefined;
+                        preferredModel?: string | null | undefined;
+                        preferredProvider?: "claude" | "gemini" | "huggingface" | "local" | "openai" | undefined;
+                        providerDiagnostics?: Record<string, {
+                            provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                            code: string;
+                            checkedAt: string;
+                            endpoint?: string | undefined;
+                            selectedModel?: string | undefined;
+                            availableModels?: string[] | undefined;
+                            message?: string | undefined;
+                        }> | undefined;
+                        providers: {
+                            id: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                            nameKey: string;
+                            descriptionKey: string;
+                            iconId: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                            models: string[];
+                            available: boolean;
+                            health: "degraded" | "down" | "healthy" | "unconfigured";
+                            selectedModel?: string | undefined;
+                            diagnosticCode?: string | undefined;
+                            availableModels?: string[] | undefined;
+                            error?: string | undefined;
+                        }[];
+                    };
                     429: {
                         error: string;
                         code?: string | undefined;
@@ -253,7 +327,17 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        totalMessages: number;
+                        userMessages: number;
+                        assistantMessages: number;
+                        sessions: number;
+                        recentActivity: {
+                            timestamp: string;
+                            role: string;
+                            sessionId: string | null;
+                        }[];
+                    };
                     429: {
                         error: string;
                         code?: string | undefined;
@@ -285,7 +369,11 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
         jobId: import("typebox").TOptional<import("typebox").TString>;
     }>;
     response: {
-        readonly 200: import("typebox").TUnknown;
+        readonly 200: import("typebox").TObject<{
+            runId: import("typebox").TString;
+            status: import("typebox").TString;
+            message: import("typebox").TString;
+        }>;
         readonly 400: import("typebox").TObject<{
             error: import("typebox").TString;
             code: import("typebox").TOptional<import("typebox").TString>;
@@ -330,15 +418,84 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
         }>;
     };
 }, {}, `${string}/automation-action`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
-    body: AutomationActionRouteBody;
-    status: RouteStatus;
-}) => Promise<import("elysia").ElysiaStatus<200 | 400 | 404 | 409 | 422 | 500, {
-    error: string;
-} | {
-    error: string;
-} | {
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    status: import("elysia").SelectiveStatus<{
+        readonly 200: {
+            runId: string;
+            status: string;
+            message: string;
+        };
+        readonly 400: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 404: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 409: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 422: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 500: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 429: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+    }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: {
+        action: string;
+        jobUrl: string;
+        resumeId: string;
+        coverLetterId?: string | undefined;
+        jobId?: string | undefined;
+    };
+    query: Record<string, string | undefined>;
+    params: {};
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
+}) => Promise<import("elysia").ElysiaStatus<200, {
     runId: string;
     status: string;
     message: string;
-}, 200 | 400 | 404 | 409 | 422 | 500>>>;
-export {};
+}, 200> | import("elysia").ElysiaStatus<400 | 404 | 409 | 422 | 500, {
+    error: string;
+} | {
+    error: string;
+}, 400 | 404 | 409 | 422 | 500>>>;

@@ -24,10 +24,10 @@ import type {
   VoiceSettings,
 } from "@bao/shared/types/interview";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { InterviewConfigInput } from "./interview-service-contracts";
 
 import {
-  isRecord,
   parseBoolean,
   parseNumber,
   parseString,
@@ -149,7 +149,7 @@ export function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined 
   return voiceSettings;
 }
 
-export function normalizeExperienceLevel(value: string): string {
+export function normalizeInterviewExperienceLevel(value: string): string {
   const normalized = value.toLowerCase().trim();
   if (normalized.includes("lead")) {
     return "lead";
@@ -179,7 +179,7 @@ export function normalizeConfig(raw: InterviewConfigInput): InterviewConfig {
     COUNT_FIVE,
     COUNT_ONE_TWENTY,
   );
-  const experienceLevel = normalizeExperienceLevel(
+  const experienceLevel = normalizeInterviewExperienceLevel(
     parseString(raw.experienceLevel, INTERVIEW_DEFAULT_EXPERIENCE_LEVEL),
   );
   const interviewMode = normalizeInterviewMode(raw.interviewMode);

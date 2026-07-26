@@ -45,7 +45,7 @@ const TEAMTAILOR_API_QUERY = ["?filter", "[company]=", "{token}"].join("");
 
 /**
  * Default runtime job-provider settings.
- * Hitmarker API + portal are on by default (primary working feed); other boards stay opt-in.
+ * The Hitmarker RPA portal is on by default (primary working feed); other boards stay opt-in.
  */
 export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
   providerTimeoutMs: 5_000,
@@ -56,7 +56,7 @@ export const DEFAULT_JOB_PROVIDER_SETTINGS: JobProviderSettings = {
   hitmarkerEnabled: true,
   hitmarkerApiBaseUrl: "https://api.hitmarker.net/v1/jobs",
   hitmarkerDefaultQuery: "game",
-  hitmarkerDefaultLocation: "Remote",
+  hitmarkerDefaultLocation: "",
   greenhouseApiBaseUrl: "https://boards.greenhouse.io",
   greenhouseMaxPages: 5,
   greenhouseBoards: [],

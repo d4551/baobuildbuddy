@@ -4,12 +4,12 @@ import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automa
 import { requireApiResponseData } from "~/utils/api-response";
 import { getErrorMessage } from "~/utils/errors";
 import {
-  type JobApplyRequestBody,
+  type JobApplyFormBody,
   toCoverLetterSelectOptions,
   toResumeSelectOptions,
 } from "./automation-job-apply-select-options";
 
-export interface ScheduledJobApplyRequestBody extends JobApplyRequestBody {
+export interface ScheduledJobApplyRequestBody extends JobApplyFormBody {
   runAt: string;
 }
 

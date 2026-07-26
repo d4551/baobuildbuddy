@@ -4,6 +4,7 @@ import { COUNT_FOUR, COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { InterviewCandidateContext, InterviewConfig } from "@bao/shared/types/interview";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { coverLetters } from "../db/schema/cover-letters";
@@ -16,10 +17,9 @@ import { decryptProviderKeys } from "../utils/settings-decrypt";
 import { AIService } from "./ai/ai-service";
 import type {
   CandidateInterviewContext,
-  JsonRecord,
   StudioContext,
 } from "./interview-service-contracts";
-import { isRecord, parseString, parseStringArray } from "./interview-service-value-parsers";
+import { parseString, parseStringArray } from "./interview-service-value-parsers";
 
 type StudioRow = typeof studios.$inferSelect;
 
@@ -76,7 +76,7 @@ function summarizeUserProfileContext(row: typeof userProfile.$inferSelect | unde
   const specializations = parseStringArray(gamingExperience?.specializations);
   const shippedTitles = Array.isArray(gamingExperience?.shippedTitles)
     ? gamingExperience.shippedTitles
-        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .filter((entry) => isRecord(entry))
         .map((entry) => parseString(entry.name, ""))
         .filter((value) => value.length > 0)
     : [];
@@ -100,7 +100,7 @@ function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): s
 
   const experience = Array.isArray(row.experience)
     ? row.experience
-        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .filter((entry) => isRecord(entry))
         .map((entry) =>
           [parseString(entry.title, ""), parseString(entry.company, "")]
             .filter((value) => value.length > 0)
@@ -110,7 +110,7 @@ function summarizeResumeContext(row: typeof resumes.$inferSelect | undefined): s
     : [];
   const projects = Array.isArray(row.projects)
     ? row.projects
-        .filter((entry): entry is JsonRecord => isRecord(entry))
+        .filter((entry) => isRecord(entry))
         .map((entry) => parseString(entry.title, ""))
         .filter((value) => value.length > 0)
     : [];

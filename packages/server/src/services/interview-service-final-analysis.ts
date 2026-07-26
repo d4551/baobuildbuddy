@@ -13,7 +13,9 @@ import type {
   InterviewConfig,
   InterviewResponse,
 } from "@bao/shared/types/interview";
+import { resolveInterviewAnalysisProvenance } from "@bao/shared/utils/interview-analysis-provenance";
 import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { interviewPersonaPrompt } from "./ai/prompts-interview";
 import { withAiOperationTimeout } from "./interview-service-ai";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
@@ -25,7 +27,7 @@ import {
   buildJobPromptContext,
   buildStudioPromptContext,
 } from "./interview-service-prompt-context";
-import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
+import { parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
 
 function calculateDefaultAnalysis(responses: InterviewResponse[]): InterviewAnalysis {
   if (responses.length === 0) {
@@ -144,6 +146,23 @@ function normalizeFinalFromAI(raw: unknown): InterviewAnalysis | null {
   };
 }
 
+/**
+ * Stamp session-level provenance onto an analysis so the UI can state whether
+ * the feedback came from a real AI provider, a heuristic fallback, or a mix.
+ */
+function withAnalysisProvenance(
+  analysis: InterviewAnalysis,
+  responses: readonly InterviewResponse[],
+): InterviewAnalysis {
+  const provenance = resolveInterviewAnalysisProvenance(responses);
+  return {
+    ...analysis,
+    analysisSource: provenance.analysisSource,
+    aiAverageScore: provenance.aiAverageScore,
+    provenanceCounts: provenance.provenanceCounts,
+  };
+}
+
 export async function generateFinalAnalysis(
   session: { config: InterviewConfig; responses: InterviewResponse[] },
   studio: StudioContext,
@@ -159,7 +178,7 @@ export async function generateFinalAnalysis(
   });
   const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
-    return calculateDefaultAnalysis(session.responses);
+    return withAnalysisProvenance(calculateDefaultAnalysis(session.responses), session.responses);
   }
 
   const response = (await withAiOperationTimeout(() =>
@@ -177,12 +196,12 @@ export async function generateFinalAnalysis(
   };
 
   if (response.error) {
-    return calculateDefaultAnalysis(session.responses);
+    return withAnalysisProvenance(calculateDefaultAnalysis(session.responses), session.responses);
   }
 
   const parsed = normalizeFinalFromAI(response.content);
   if (parsed) {
-    return parsed;
+    return withAnalysisProvenance(parsed, session.responses);
   }
-  return calculateDefaultAnalysis(session.responses);
+  return withAnalysisProvenance(calculateDefaultAnalysis(session.responses), session.responses);
 }

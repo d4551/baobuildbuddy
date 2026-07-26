@@ -14,7 +14,7 @@ import type { InterviewConfigInput } from "./interview-service-contracts";
 import { generateFinalAnalysis } from "./interview-service-final-analysis";
 import { generateNextNaturalQuestion, generateQuestions } from "./interview-service-questions";
 import { generateResponseFeedback } from "./interview-service-response-feedback";
-import { toInterviewSession } from "./interview-service-session-mapper";
+import { toInterviewSessionFromRow } from "./interview-service-session-mapper";
 import { calculateInterviewStats } from "./interview-service-stats";
 import { toPersistedRecord } from "./interview-service-value-parsers";
 
@@ -46,7 +46,7 @@ export class InterviewService {
       updatedAt: nowIso,
     });
 
-    return toInterviewSession({
+    return toInterviewSessionFromRow({
       id,
       studioId: studio.id,
       config: persistedConfig,
@@ -66,13 +66,13 @@ export class InterviewService {
       .select()
       .from(interviewSessions)
       .orderBy(desc(interviewSessions.createdAt));
-    return Promise.all(sessions.map((session) => toInterviewSession(session)));
+    return Promise.all(sessions.map((session) => toInterviewSessionFromRow(session)));
   }
 
   async getSession(id: string): Promise<InterviewSession | null> {
     const rows = await db.select().from(interviewSessions).where(eq(interviewSessions.id, id));
     const row = rows[0];
-    return row ? toInterviewSession(row) : null;
+    return row ? toInterviewSessionFromRow(row) : null;
   }
 
   private selectQuestionForResponse(

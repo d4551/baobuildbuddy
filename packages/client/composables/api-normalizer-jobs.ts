@@ -4,6 +4,7 @@ import {
   JOB_SUPPORTED_PLATFORMS,
 } from "@bao/shared/constants/jobs";
 import type { Job } from "@bao/shared/types/jobs";
+import { normalizeJobType } from "@bao/shared/utils/job-normalizers";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import {
   asBoolean,
@@ -16,7 +17,6 @@ import {
   asEnum,
   asEnumArray,
   normalizeJobExperienceLevel,
-  normalizeJobType,
 } from "~/composables/api-normalizer-shared";
 
 const normalizeSalary = (value: unknown): Job["salary"] | undefined => {

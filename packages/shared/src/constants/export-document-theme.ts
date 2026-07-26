@@ -1,6 +1,6 @@
 /**
  * Shared document export themes — cover letter + portfolio variants.
- * Resume themes live in export-layout.ts (RESUME_EXPORT_THEME_CONFIGS).
+ * Resume themes live in export-resume-theme.ts (RESUME_EXPORT_THEME_CONFIGS).
  */
 import { type CoverLetterTemplate, isCoverLetterTemplate } from "./cover-letter";
 

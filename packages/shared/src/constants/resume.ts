@@ -57,13 +57,3 @@ export function isResumeTemplate(value: string | undefined | null): value is Res
   if (!value) return false;
   return RESUME_TEMPLATE_OPTIONS.some((template) => template === value);
 }
-
-/**
- * Type guard for supported resume export formats.
- */
-export function isResumeExportFormat(
-  value: string | undefined | null,
-): value is ResumeExportFormat {
-  if (!value) return false;
-  return RESUME_EXPORT_FORMATS.some((format) => format === value);
-}

@@ -1,6 +1,6 @@
 import { type CoverLetterExportLayout, type PortfolioExportLayout } from "@bao/shared/constants/export-document-theme";
-import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
 import { A4_PAGE_HEIGHT, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
+import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-resume-theme";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { type Color, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
 export interface RGB {
@@ -105,24 +105,6 @@ export interface PortfolioRenderContext {
     darkBackground: boolean;
     layout: PortfolioExportLayout;
 }
-export declare const COVER_LETTER_PDF_COLORS: {
-    primary: Color;
-    accent: Color;
-    text: Color;
-    muted: Color;
-    subtle: Color;
-    line: Color;
-};
-export declare const PORTFOLIO_PDF_COLORS: {
-    primary: Color;
-    text: Color;
-    accent: Color;
-    muted: Color;
-    subtle: Color;
-    featured: Color;
-    line: Color;
-    footer: Color;
-};
 export declare const toCoverLetterPdfColors: (template?: string | null) => CoverLetterPdfColors;
 export declare const toPortfolioPdfColors: (template?: string | null) => PortfolioPdfColors;
 export declare const addA4Page: (pdfDoc: PDFDocument) => PDFPage;

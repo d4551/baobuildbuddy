@@ -9,7 +9,6 @@ import { Elysia, type status } from "elysia";
 import { interviewService } from "../services/interview-service";
 import { openapiDetail } from "../utils/openapi-detail";
 import {
-  type CreateSessionBody,
   completeInterviewSessionResponses,
   createInterviewSessionResponses,
   createSessionBodySchema,
@@ -46,7 +45,7 @@ export const interviewRoutes = new Elysia({
       body: createSessionBodySchema,
       response: createInterviewSessionResponses,
     },
-    async ({ body, status }: { body: CreateSessionBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await createInterviewSession(body.studioId, body.config);
       return status(HTTP_STATUS_CREATED, result.body);
     },
@@ -60,7 +59,7 @@ export const interviewRoutes = new Elysia({
       ),
       response: interviewSessionsListResponses,
     },
-    async ({ status }: { status: RouteStatus }) => {
+    async ({ status }) => {
       const sessions = await interviewService.getSessions();
       return status(HTTP_STATUS_OK, await Promise.all(sessions.map(sessionWithDerivedFields)));
     },
@@ -75,7 +74,7 @@ export const interviewRoutes = new Elysia({
       params: interviewSessionParamsSchema,
       response: interviewSessionResponses,
     },
-    async ({ params, status }: { params: InterviewSessionParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const result = await getInterviewSession(params.id);
       if (result.status === HTTP_STATUS_NOT_FOUND) {
         return status(HTTP_STATUS_NOT_FOUND, result.body);

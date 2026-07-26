@@ -73,18 +73,6 @@ export function formatDate(date: string | Date, locale?: string): string {
   });
 }
 
-export function isToday(date: string | Date): boolean {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const today = new Date();
-  return d.toDateString() === today.toDateString();
-}
-
-export function daysBetween(a: string | Date, b: string | Date): number {
-  const da = typeof a === "string" ? new Date(a) : a;
-  const db = typeof b === "string" ? new Date(b) : b;
-  return Math.floor(Math.abs(da.getTime() - db.getTime()) / MS_PER_DAY);
-}
-
 /** Options for formatRelativeTimeForDate. */
 export type FormatRelativeTimeForDateOptions = {
   /** i18n key prefix (e.g. "jobsPage.date", "jobCard.relativeTime"). */

@@ -4,6 +4,7 @@ import {
   COUNT_THREE_HUNDRED,
   PERCENT_MAX,
 } from "@bao/shared/constants/numeric";
+import { resolveInterviewAnalysisSource } from "@bao/shared/utils/interview-analysis-provenance";
 import type {
   InterviewAnalysis,
   InterviewConfig,
@@ -11,9 +12,10 @@ import type {
   InterviewResponse,
   InterviewSession,
 } from "@bao/shared/types/interview";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import { normalizeConfig } from "./interview-service-config-normalizers";
 import type { DBInterviewSession } from "./interview-service-contracts";
-import { isRecord, parseNumber, parseStringArray } from "./interview-service-value-parsers";
+import { parseNumber, parseStringArray } from "./interview-service-value-parsers";
 
 const questionTypePattern = new Set<string>([
   "behavioral",
@@ -57,11 +59,14 @@ export function normalizeDifficulty(value: unknown): InterviewQuestion["difficul
 }
 
 export function normalizeQuestions(raw: unknown): InterviewQuestion[] {
-  if (!Array.isArray(raw)) {
+  // `Array.isArray` on a wide input narrows to `any[]`, which then spreads
+  // `any` through every member access below; asJsonArray keeps elements typed.
+  const entries = asJsonArray(raw);
+  if (!entries) {
     return [];
   }
 
-  return raw
+  return entries
     .map((value, index): InterviewQuestion | null => {
       if (!isRecord(value)) {
         return null;
@@ -110,13 +115,16 @@ export function normalizeAiAnalysisScore(scoreCandidate: unknown): number {
 }
 
 export function normalizeResponses(raw: unknown): InterviewResponse[] {
-  if (!Array.isArray(raw)) {
+  // `Array.isArray` on a wide input narrows to `any[]`, which then spreads
+  // `any` through every member access below; asJsonArray keeps elements typed.
+  const entries = asJsonArray(raw);
+  if (!entries) {
     return [];
   }
 
   const parsed: InterviewResponse[] = [];
 
-  for (const value of raw) {
+  for (const value of entries) {
     if (!isRecord(value)) {
       continue;
     }
@@ -146,6 +154,9 @@ export function normalizeResponses(raw: unknown): InterviewResponse[] {
               feedback: typeof aiAnalysis.feedback === "string" ? aiAnalysis.feedback : "",
               strengths: parseStringArray(aiAnalysis.strengths),
               improvements: parseStringArray(aiAnalysis.improvements),
+              // Persisted rows predate provenance tracking, so an absent or
+              // unrecognised marker resolves to "unknown" rather than claiming AI.
+              source: resolveInterviewAnalysisSource(aiAnalysis.source),
             },
           }
         : {}),

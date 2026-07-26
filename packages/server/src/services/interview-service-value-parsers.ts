@@ -1,6 +1,5 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
 import { safeParseJson } from "@bao/shared/utils/json";
-import type { JsonRecord } from "./interview-service-contracts";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
@@ -13,9 +12,6 @@ export const toPersistedRecord = (value: object): Record<string, unknown> => {
   }
   return record;
 };
-
-export const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === "object" && value !== null;
 
 export function parseNumber(value: unknown, fallback: number, min: number, max: number): number {
   if (typeof value === "number" && Number.isFinite(value)) {

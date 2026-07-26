@@ -1,6 +1,5 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_CONFLICT,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
@@ -34,17 +33,6 @@ export const simpleErrorBodySchema = t.Object(
 );
 
 export const simpleErrorResponseSchema = simpleErrorBodySchema;
-
-/**
- * Standard error status map for routes that return the nested automation-style envelope.
- */
-export const nestedRouteErrorResponses = {
-  [HTTP_STATUS_BAD_REQUEST]: routeErrorBodySchema,
-  [HTTP_STATUS_NOT_FOUND]: routeErrorBodySchema,
-  [HTTP_STATUS_CONFLICT]: routeErrorBodySchema,
-  [HTTP_STATUS_UNPROCESSABLE_ENTITY]: routeErrorBodySchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: routeErrorBodySchema,
-} as const;
 
 /**
  * Standard error status map for routes that return the simple `{ error }` envelope.

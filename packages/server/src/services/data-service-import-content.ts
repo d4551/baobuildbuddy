@@ -14,7 +14,7 @@ import { interviewSessions } from "../db/schema/interviews";
 import { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import { resumes } from "../db/schema/resumes";
 import { skillMappings } from "../db/schema/skill-mappings";
-import type { BaoExportData } from "./data-service-contracts";
+import type { BaoImportData } from "./data-service-contracts";
 import {
   runIgnoringErrors,
   runTasksSequentially,
@@ -31,7 +31,7 @@ import {
 } from "./data-service-parsers";
 
 export const importResumesSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -66,7 +66,7 @@ export const importResumesSection = async (
 };
 
 export const importCoverLettersSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -100,7 +100,7 @@ export const importCoverLettersSection = async (
 };
 
 export const importPortfolioProjectsSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -145,7 +145,7 @@ export const importPortfolioProjectsSection = async (
 };
 
 export const importInterviewSessionsSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -179,7 +179,7 @@ export const importInterviewSessionsSection = async (
 };
 
 export const importSkillMappingsSection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -213,7 +213,7 @@ export const importSkillMappingsSection = async (
 };
 
 export const importChatHistorySection = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
 ): Promise<void> => {
   if (data.chatHistory?.length === 0) {

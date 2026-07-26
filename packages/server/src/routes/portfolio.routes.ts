@@ -28,11 +28,6 @@ import { createDocxAttachmentResponse, createPdfAttachmentResponse } from "../ut
 import { openapiDetail } from "../utils/openapi-detail";
 import {
   type PortfolioExportRouteBody,
-  type PortfolioProjectCreateRouteBody,
-  type PortfolioProjectIdParams,
-  type PortfolioProjectReorderRouteBody,
-  type PortfolioProjectUpdateRouteBody,
-  type PortfolioUpdateRouteBody,
   portfolioExportBodySchema,
   portfolioExportResponses,
   portfolioMutationResponses,
@@ -83,7 +78,7 @@ export const portfolioRoutes = new Elysia({
       detail: openapiDetail("Portfolio", "Retrieve the portfolio profile and project summary."),
       response: portfolioResponses,
     },
-    async ({ status }: { status: RouteStatus }) => {
+    async ({ status }) => {
       return status(
         HTTP_STATUS_OK,
         toPortfolioResponse(await portfolioService.getPortfolioPayload()),
@@ -100,7 +95,7 @@ export const portfolioRoutes = new Elysia({
       body: portfolioUpdateBodySchema,
       response: portfolioMutationResponses,
     },
-    async ({ body, status }: { body: PortfolioUpdateRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       return status(
         HTTP_STATUS_OK,
         toPortfolioResponse(await portfolioService.updatePortfolio({ metadata: body.metadata })),
@@ -114,7 +109,7 @@ export const portfolioRoutes = new Elysia({
       body: portfolioProjectCreateBodySchema,
       response: portfolioProjectMutationResponses,
     },
-    async ({ body, status }: { body: PortfolioProjectCreateRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
@@ -150,7 +145,7 @@ export const portfolioRoutes = new Elysia({
       body: portfolioProjectReorderBodySchema,
       response: portfolioProjectReorderResponses,
     },
-    async ({ body, status }: { body: PortfolioProjectReorderRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const portfolio = await portfolioService.getPortfolioPayload();
       if (!portfolio.id) {
         return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
@@ -172,15 +167,7 @@ export const portfolioRoutes = new Elysia({
       body: portfolioProjectUpdateBodySchema,
       response: portfolioProjectMutationResponses,
     },
-    async ({
-      params,
-      body,
-      status,
-    }: {
-      params: PortfolioProjectIdParams;
-      body: PortfolioProjectUpdateRouteBody;
-      status: RouteStatus;
-    }) => {
+    async ({ params, body, status }) => {
       const updated = await portfolioService.updateProject(params.id, {
         title: body.title,
         description: body.description,
@@ -210,7 +197,7 @@ export const portfolioRoutes = new Elysia({
       params: portfolioProjectIdParamsSchema,
       response: portfolioProjectDeleteResponses,
     },
-    async ({ params, status }: { params: PortfolioProjectIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const deleted = await portfolioService.deleteProject(params.id);
       if (!deleted) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_PROJECT_NOT_FOUND });

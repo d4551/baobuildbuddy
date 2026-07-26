@@ -27,6 +27,14 @@ export declare const SCRAPER_DIR: string;
 /**
  * Child-process env for RPA scripts. Rewrites incomplete agent-sandbox
  * Playwright browser caches and injects PLAYWRIGHT_HOST_PLATFORM_OVERRIDE.
+ * Binds the shared pure helper to this process's env, filesystem, and platform.
  */
-export declare const buildAutomationProcessEnv: (baseEnv?: NodeJS.ProcessEnv) => NodeJS.ProcessEnv;
+export declare const buildAutomationProcessEnvFromEnv: (baseEnv?: NodeJS.ProcessEnv) => NodeJS.ProcessEnv;
+/**
+ * Absolute path to the installed Playwright Chromium build, or null when no
+ * browser is present. Reads the browser cache location from the automation
+ * child-process env this module already resolves, so the RPA capability audit
+ * never reports job-apply as configured without a browser to drive.
+ */
+export declare const resolveInstalledChromiumExecutable: () => string | null;
 export {};

@@ -14,7 +14,7 @@ export declare const handleJobApplyRoute: (payload: JobApplyRequestBody) => Prom
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;
@@ -65,7 +65,7 @@ export declare const handleScheduledJobApplyRoute: (payload: ScheduleJobApplyReq
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;
@@ -135,7 +135,7 @@ export declare const handleScheduledEmailResponseRoute: (payload: ScheduleEmailR
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;
@@ -186,7 +186,7 @@ export declare const handleScrapeRoute: (payload: RunScrapeRequestBody) => Promi
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;
@@ -237,7 +237,7 @@ export declare const handleScheduledScrapeRoute: (payload: ScheduleScrapeRequest
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;
@@ -297,7 +297,7 @@ export declare const handleAutomationRunByIdRoute: (runId: string) => Promise<{
     body: {
         id: string;
         type: "email" | "job_apply" | "scrape";
-        status: "error" | "pending" | "running" | "success";
+        status: "cancelled" | "error" | "pending" | "running" | "success";
         jobId: string | null;
         userId: string | null;
         input: import("@bao/shared/utils/json").JsonObject | null;

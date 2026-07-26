@@ -1,3 +1,5 @@
+import { toErrorMessage as sharedToErrorMessage } from "../../packages/shared/src/utils/error-helpers";
+
 /**
  * Tagged result for operations that may fail.
  */
@@ -49,19 +51,11 @@ export const withCleanup = <T>(
 
 /**
  * Converts a rejection value into a human-readable message.
+ * Canonical implementation lives in shared error-helpers; this alias keeps
+ * the script-side import surface stable. Callers that relied on the former
+ * local default pass "Unexpected error." explicitly.
  */
-export const toErrorMessage = (error: unknown, fallback: string = "Unexpected error."): string => {
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return error.message;
-  }
-  if (valueIsNonEmptyString(error)) {
-    return error;
-  }
-  return fallback;
-};
-
-const valueIsNonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
+export const toErrorMessage = sharedToErrorMessage;
 
 export type PollUntilOptions<T> = {
   /** Probe returning the resolved value, or null/undefined to keep polling. */

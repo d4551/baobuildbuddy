@@ -3,7 +3,6 @@ import {
   JOB_GAME_GENRES,
   JOB_STUDIO_TYPES,
   JOB_SUPPORTED_PLATFORMS,
-  JOB_TYPES,
 } from "@bao/shared/constants/jobs";
 import type {
   GameGenre,
@@ -91,13 +90,6 @@ export const normalizePlatforms = (value: string[] | null): Platform[] | undefin
 export const normalizeExperienceLevel = (value: string | null): JobExperienceLevel | undefined => {
   if (!isOneOf(JOB_EXPERIENCE_LEVELS, value)) {
     return;
-  }
-  return value;
-};
-
-export const normalizeJobType = (value: string | null): JobType => {
-  if (!isOneOf(JOB_TYPES, value)) {
-    return "full-time";
   }
   return value;
 };

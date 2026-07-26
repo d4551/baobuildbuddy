@@ -20,6 +20,14 @@ export interface JobApplyFixtureServerHandle {
     baseUrl: string;
     port: number;
     submissions: SubmittedJobApplyFixturePayload[];
+    /**
+     * Resolve once a submission has been recorded, or null if none arrives.
+     *
+     * The RPA script can resolve before this server's async request handler has
+     * finished parsing the form body, so sampling `submissions[0]` immediately
+     * after the run is a race. Callers await this instead.
+     */
+    waitForSubmission(timeoutMs: number): Promise<SubmittedJobApplyFixturePayload | null>;
     stop(): Promise<void>;
 }
 /**

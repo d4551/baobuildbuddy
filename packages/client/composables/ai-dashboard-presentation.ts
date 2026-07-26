@@ -1,7 +1,7 @@
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { ComputedRef, Ref } from "vue";
 import type {
-  DashboardStats,
+  AiDashboardStats,
   ProviderConfig,
   ProviderConnectivityResult,
   ProviderHealth,
@@ -85,7 +85,7 @@ export function createDashboardProviderPresentation(
 }
 
 export function createDashboardStatsPresentation(
-  providerStats: ComputedRef<DashboardStats | null>,
+  providerStats: ComputedRef<AiDashboardStats | null>,
   t: Translate,
   providerLabel: (providerId: AIProviderType) => string,
 ) {
@@ -136,7 +136,7 @@ export function buildAIDashboardViewModel(input: {
   dashboardBootstrapError: Ref<unknown>;
   loading: ComputedRef<boolean>;
   providerPresentation: ReturnType<typeof createDashboardProviderPresentation>;
-  providerStats: ComputedRef<DashboardStats | null>;
+  providerStats: ComputedRef<AiDashboardStats | null>;
   providers: ComputedRef<ProviderConfig[]>;
   selection: {
     selectedModel: Ref<string>;

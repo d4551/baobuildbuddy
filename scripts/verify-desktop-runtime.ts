@@ -1255,7 +1255,7 @@ const main = async (): Promise<void> => {
 };
 
 await main().then(undefined, async (error: unknown) => {
-  const message = toErrorMessage(error);
+  const message = toErrorMessage(error, "Unexpected error.");
   await writeError(`desktop-runtime: verification failed: ${message}`);
   process.exit(1);
 });

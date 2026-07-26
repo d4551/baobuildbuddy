@@ -9,6 +9,7 @@ import {
   type RpaCapabilityIssue,
 } from "@bao/shared/constants/automation";
 import { settle } from "@bao/shared/utils/promise";
+import { resolveInstalledChromiumExecutable } from "../../config/paths";
 import { loadJobProviderSettings } from "../jobs/providers/provider-settings";
 
 interface ScrapePortalAuditConfig {
@@ -22,20 +23,29 @@ interface ScrapePortalAuditSnapshot {
   sharedSettingsIssue: RpaCapabilityIssue | null;
 }
 
-const createJobApplyCapabilityAuditEntry = (): RpaCapabilityAuditEntry => ({
-  id: "job_apply",
-  category: "job_apply",
-  name: "Job Apply",
-  target: null,
-  implemented: true,
-  configured: true,
-  enabled: true,
-  manualRunAvailable: true,
-  scheduledRunAvailable: true,
-  runHistoryAvailable: true,
-  liveUpdatesAvailable: true,
-  issues: [],
-});
+/**
+ * Job apply drives a real browser, so the capability is only honestly
+ * "configured" when a Playwright Chromium build is actually installed.
+ */
+const createJobApplyCapabilityAuditEntry = (): RpaCapabilityAuditEntry => {
+  const chromiumExecutable = resolveInstalledChromiumExecutable();
+  const chromiumInstalled = chromiumExecutable !== null;
+
+  return {
+    id: "job_apply",
+    category: "job_apply",
+    name: "Job Apply",
+    target: null,
+    implemented: true,
+    configured: chromiumInstalled,
+    enabled: chromiumInstalled,
+    manualRunAvailable: chromiumInstalled,
+    scheduledRunAvailable: chromiumInstalled,
+    runHistoryAvailable: true,
+    liveUpdatesAvailable: true,
+    issues: [],
+  };
+};
 
 const createStudioScrapeCapabilityAuditEntry = (): RpaCapabilityAuditEntry => ({
   id: buildRpaCapabilityIdFromScrapeTarget("studios"),

@@ -128,14 +128,6 @@ export function countLines(text: string): number {
   return text.split(LINE_BREAK_PATTERN).length;
 }
 
-export function isPageVueFile(pathValue: string): boolean {
-  return pathValue.startsWith("packages/client/pages/") && pathValue.endsWith(".vue");
-}
-
-export function isVueFile(pathValue: string): boolean {
-  return pathValue.endsWith(".vue");
-}
-
 export async function reportViolations(
   heading: string,
   violations: ValidationViolation[],

@@ -107,7 +107,30 @@ export interface InterviewResponse {
     feedback: string;
     strengths: string[];
     improvements: string[];
+    source: InterviewAnalysisSource;
+    provider?: string;
+    model?: string;
   };
+}
+
+/**
+ * Provenance of a single response analysis. Legacy rows without a stored
+ * source are normalized to "unknown" at read time.
+ */
+export type InterviewAnalysisSource = "ai" | "heuristic" | "unknown";
+
+/**
+ * Aggregated provenance for a session-level final analysis.
+ */
+export type InterviewAnalysisAggregateSource = "ai" | "heuristic" | "mixed" | "unknown";
+
+/**
+ * Per-source response analysis counts within a session or stats aggregate.
+ */
+export interface InterviewAnalysisProvenanceCounts {
+  ai: number;
+  heuristic: number;
+  unknown: number;
 }
 
 export interface InterviewAnalysis {
@@ -116,6 +139,9 @@ export interface InterviewAnalysis {
   improvements: string[];
   recommendations: string[];
   feedback?: string;
+  analysisSource?: InterviewAnalysisAggregateSource;
+  aiAverageScore?: number | null;
+  provenanceCounts?: InterviewAnalysisProvenanceCounts;
 }
 
 export interface InterviewStats {
@@ -126,6 +152,9 @@ export interface InterviewStats {
   improvementAreas: string[];
   totalTimeSpent: number;
   favoriteStudios: string[];
+  analysisSource?: InterviewAnalysisAggregateSource;
+  aiAverageScore?: number | null;
+  provenanceCounts?: InterviewAnalysisProvenanceCounts;
 }
 
 export interface VoiceSettings {

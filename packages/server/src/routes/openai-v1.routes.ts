@@ -3,7 +3,7 @@ import {
   API_ERROR_MISSING_AUTH_HEADER,
 } from "@bao/shared/constants/api-errors";
 import { OPENAI_V1_ENDPOINT_PREFIX, OPENAI_V1_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { Elysia } from "elysia";
 import { authenticateApiKey } from "../middleware/auth";
@@ -14,6 +14,7 @@ import { resolveRateLimitClientKey } from "../utils/request";
 import {
   openaiV1ChatCompletionsBodySchema,
   openaiV1ModelParamsSchema,
+  openaiV1ModelGetResponses,
   openaiV1ModelsListResponses,
 } from "./openai-v1-route-contracts";
 import {
@@ -94,10 +95,15 @@ export const openaiV1Routes = new Elysia({
         "Retrieve a single model by id through the OpenAI-compatible API.",
       ),
       params: openaiV1ModelParamsSchema,
+      response: openaiV1ModelGetResponses,
     },
     async ({ params, status }) => {
       const result = await getOpenAIV1Model(decodeURIComponent(params.model));
-      return status(result.status, result.body);
+      // Branch per status so each arm narrows to its declared response schema.
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -108,6 +114,8 @@ export const openaiV1Routes = new Elysia({
         "Create a chat completion through the OpenAI-compatible API.",
       ),
       body: openaiV1ChatCompletionsBodySchema,
+      // No response map: `stream: true` returns a raw SSE Response, which a
+      // per-status body schema cannot describe alongside the JSON completion.
     },
     async ({ body, status }) => {
       if (body.stream) {

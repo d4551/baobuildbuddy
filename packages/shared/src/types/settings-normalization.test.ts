@@ -9,8 +9,6 @@ import {
 
 const buildLegacyJobProviderSettings = (): JobProviderSettings => ({
   ...DEFAULT_JOB_PROVIDER_SETTINGS,
-  hitmarkerEnabled: true,
-  hitmarkerApiBaseUrl: "https://api.hitmarker.test/jobs",
   gamingPortals: DEFAULT_JOB_PROVIDER_SETTINGS.gamingPortals.map((portal) =>
     portal.id === "hitmarker"
       ? {
@@ -23,10 +21,9 @@ const buildLegacyJobProviderSettings = (): JobProviderSettings => ({
 });
 
 describe("job provider normalization", () => {
-  test("replaces legacy placeholder hitmarker endpoints with current defaults", () => {
+  test("replaces legacy placeholder portal endpoints with current defaults", () => {
     const normalized = normalizeJobProviderSettings(buildLegacyJobProviderSettings());
 
-    expect(normalized.hitmarkerApiBaseUrl).toBe(DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerApiBaseUrl);
     expect(normalized.gamingPortals.find((portal) => portal.id === "hitmarker")?.fallbackUrl).toBe(
       DEFAULT_JOB_PROVIDER_SETTINGS.gamingPortals.find((portal) => portal.id === "hitmarker")
         ?.fallbackUrl,
@@ -36,7 +33,6 @@ describe("job provider normalization", () => {
   test("preserves non-placeholder custom provider values", () => {
     const customSettings: JobProviderSettings = {
       ...buildLegacyJobProviderSettings(),
-      hitmarkerApiBaseUrl: "https://jobs.internal.example.org/hitmarker-feed",
       gamingPortals: DEFAULT_JOB_PROVIDER_SETTINGS.gamingPortals.map((portal) =>
         portal.id === "hitmarker"
           ? {
@@ -50,7 +46,6 @@ describe("job provider normalization", () => {
 
     const normalized = normalizeJobProviderSettings(customSettings);
 
-    expect(normalized.hitmarkerApiBaseUrl).toBe(customSettings.hitmarkerApiBaseUrl);
     expect(normalized.gamingPortals.find((portal) => portal.id === "hitmarker")?.fallbackUrl).toBe(
       "https://jobs.internal.example.org/hitmarker",
     );
@@ -66,8 +61,8 @@ describe("normalizeAutomationSettings", () => {
 
     const normalized = normalizeAutomationSettings(automationSettings);
 
-    expect(normalized.jobProviders.hitmarkerApiBaseUrl).toBe(
-      DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerApiBaseUrl,
+    expect(normalized.jobProviders.gamingPortals).toEqual(
+      DEFAULT_JOB_PROVIDER_SETTINGS.gamingPortals,
     );
   });
 });

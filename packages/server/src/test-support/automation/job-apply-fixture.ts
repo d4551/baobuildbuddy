@@ -29,6 +29,14 @@ export interface JobApplyFixtureServerHandle {
   baseUrl: string;
   port: number;
   submissions: SubmittedJobApplyFixturePayload[];
+  /**
+   * Resolve once a submission has been recorded, or null if none arrives.
+   *
+   * The RPA script can resolve before this server's async request handler has
+   * finished parsing the form body, so sampling `submissions[0]` immediately
+   * after the run is a race. Callers await this instead.
+   */
+  waitForSubmission(timeoutMs: number): Promise<SubmittedJobApplyFixturePayload | null>;
   stop(): Promise<void>;
 }
 
@@ -168,6 +176,12 @@ export function startJobApplyFixtureServer(
 ): JobApplyFixtureServerHandle {
   const submissions: SubmittedJobApplyFixturePayload[] = [];
   let serverPort = 0;
+  // Resolved by the request handler the moment a submission is recorded, so
+  // callers can await the real event instead of polling for it.
+  let signalFirstSubmission: (() => void) | null = null;
+  const firstSubmission = new Promise<void>((resolve) => {
+    signalFirstSubmission = resolve;
+  });
 
   const server = Bun.serve({
     hostname: FIXTURE_HOST,
@@ -177,6 +191,7 @@ export function startJobApplyFixtureServer(
       if (request.method === "POST" && requestUrl.pathname === "/submit") {
         const formData = await request.formData();
         submissions.push(collectSubmittedFields(formData));
+        signalFirstSubmission?.();
         return createSubmissionResponse(options.submissionDelayMs ?? 0);
       }
 
@@ -197,6 +212,10 @@ export function startJobApplyFixtureServer(
     baseUrl: `http://${FIXTURE_HOST}:${serverPort}`,
     port: serverPort,
     submissions,
+    async waitForSubmission(timeoutMs: number): Promise<SubmittedJobApplyFixturePayload | null> {
+      await Promise.race([firstSubmission, Bun.sleep(timeoutMs)]);
+      return submissions[0] ?? null;
+    },
     async stop(): Promise<void> {
       await server.stop(true);
     },

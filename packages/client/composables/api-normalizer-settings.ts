@@ -17,7 +17,7 @@ import {
   asStringArray,
   isRecord,
 } from "@bao/shared/utils/type-guards";
-import { normalizeAutomationSettings } from "~/composables/api-normalizer-settings-automation";
+import { parseAutomationSettings } from "~/composables/api-normalizer-settings-automation";
 import {
   JOB_TAXONOMY_CATEGORIES,
   JOB_TAXONOMY_STUDIO_TYPES,
@@ -151,7 +151,7 @@ export const toAppSettings = (value: unknown): AppSettings | null => {
       levelUp: asBoolean(notificationsRecord.levelUp) ?? true,
       jobAlerts: asBoolean(notificationsRecord.jobAlerts) ?? true,
     },
-    automationSettings: normalizeAutomationSettings(value.automationSettings),
+    automationSettings: parseAutomationSettings(value.automationSettings),
     jobTaxonomy: normalizeJobTaxonomySettings(value.jobTaxonomy),
     emailTransportSettings: normalizeEmailTransportSettings(value.emailTransportSettings),
     hasGeminiKey: asBoolean(value.hasGeminiKey),

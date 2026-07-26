@@ -7,20 +7,12 @@ import type { BrandPromptIdentity } from "./prompt-contracts";
  */
 export declare function buildSystemPrompt(brand: BrandPromptIdentity): string;
 /**
- * Core system prompt defining the default assistant personality and expertise.
- */
-export declare const SYSTEM_PROMPT: string;
-/**
  * Builds domain-specific system prompts for contextual AI conversations.
  *
  * @param brand Brand identity presented to the end user.
  * @returns Domain prompt map keyed by chat domain.
  */
 export declare function buildDomainSystemPrompts(brand: BrandPromptIdentity): Record<string, string>;
-/**
- * Domain-specific system prompts for contextual AI conversations.
- */
-export declare const DOMAIN_SYSTEM_PROMPTS: Record<string, string>;
 /**
  * Gaming industry context constant for prompt injection
  */

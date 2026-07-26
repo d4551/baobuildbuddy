@@ -15,8 +15,4 @@ export type ServerLogger = {
  * @returns A logger with shared lifecycle as Bun-native pino integration.
  */
 export declare const createServerLogger: (component: string) => ServerLogger;
-/**
- * Default server logger for shared startup and infra messages.
- */
-export declare const serverLogger: ServerLogger;
 export {};

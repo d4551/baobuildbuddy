@@ -1,7 +1,7 @@
 import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import type { CoverLetterSelectOption, ResumeSelectOption } from "~/types/automation-job-apply";
 
-export interface JobApplyRequestBody {
+export interface JobApplyFormBody {
   jobUrl: string;
   resumeId: string;
   coverLetterId?: string;
@@ -50,7 +50,7 @@ export function buildJobApplyBody(input: {
   resumeId: { value: string };
   coverLetterId: { value: string };
   jobId: { value: string };
-}): JobApplyRequestBody {
+}): JobApplyFormBody {
   const coverLetterId = input.coverLetterId.value.trim();
   const jobId = input.jobId.value.trim();
 

@@ -1,6 +1,6 @@
 import type { GameGenre, JobExperienceLevel, JobType, Platform, StudioType } from "../types/jobs";
-import { COUNT_FIFTEEN, COUNT_SIX } from "./numeric";
-import { MS_PER_HOUR, MS_PER_MINUTE, MS_PER_SECOND } from "./time";
+import { COUNT_SIX } from "./numeric";
+import { MS_PER_HOUR, MS_PER_SECOND } from "./time";
 
 /**
  * Sentinel value used by UI filters to represent "no active filter".
@@ -114,12 +114,6 @@ export const JOB_AGGREGATOR_CACHE_EXPIRY_MS = COUNT_SIX * MS_PER_HOUR;
 /** Salary string parse multiplier (e.g. "50" → 50_000). */
 export const JOB_SALARY_PARSE_MULTIPLIER = MS_PER_SECOND;
 
-/** Rate limit window for job provider fetches (1 minute). */
-export const JOB_PROVIDER_RATE_LIMIT_WINDOW_MS = MS_PER_MINUTE;
-
-/** Maximum requests per provider per rate limit window. */
-export const JOB_PROVIDER_RATE_LIMIT_MAX_REQUESTS = COUNT_FIFTEEN;
-
 /** Default match score for job recommendations when AI matching is not used. */
 export const JOB_DEFAULT_RECOMMENDATION_SCORE = 50;
 
@@ -128,19 +122,3 @@ export const JOB_DEFAULT_RECOMMENDATION_REASON = "Recent posting";
 
 /** Neutral score used when no data available (resume fallback, matching). */
 export const DEFAULT_SCORE_NEUTRAL = 50;
-
-/** Matching weights for weighted average (skills, experience, location, etc.). */
-export const MATCHING_WEIGHTS = {
-  skills: 0.25,
-  experience: 0.2,
-  location: 0.15,
-  salary: 0.15,
-  culture: 0.1,
-  technology: 0.15,
-} as const;
-
-/** Score threshold above which a factor is considered a strength. */
-export const MATCHING_STRENGTH_THRESHOLD = 70;
-
-/** Score threshold below which a factor needs improvement. */
-export const MATCHING_IMPROVEMENT_THRESHOLD = 50;

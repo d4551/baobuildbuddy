@@ -221,7 +221,19 @@ export declare const chatRouteResponses: {
     }>;
 };
 export declare const analyzeResumeResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        resumeId: import("typebox").TString;
+        jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        analysis: import("typebox").TObject<{
+            score: import("typebox").TNumber;
+            strengths: import("typebox").TArray<import("typebox").TString>;
+            improvements: import("typebox").TArray<import("typebox").TString>;
+            keywords: import("typebox").TArray<import("typebox").TString>;
+        }>;
+        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+        model: import("typebox").TString;
+    }>;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -244,7 +256,7 @@ export declare const analyzeResumeResponses: {
         id: import("typebox").TOptional<import("typebox").TString>;
     }>;
 };
-export declare const generateCoverLetterResponses: {
+export declare const aiGenerateCoverLetterResponses: {
     readonly 200: import("typebox").TUnknown;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
@@ -286,7 +298,72 @@ export declare const matchJobsResponses: {
     }>;
 };
 export declare const aiModelsResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        aiRouting: import("typebox").TOptional<import("typebox").TObject<{
+            chat: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            interviewQuestions: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            interviewFeedback: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            resume: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            coverLetter: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            emailResponse: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            jobMatch: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            scrapeEnrichment: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+            automationFieldMapping: import("typebox").TObject<{
+                provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>;
+        }>>;
+        configuredProviders: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>>>;
+        error: import("typebox").TOptional<import("typebox").TString>;
+        preferredModel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+        preferredProvider: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>>;
+        providerDiagnostics: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TObject<{
+            provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+            code: import("typebox").TString;
+            checkedAt: import("typebox").TString;
+            endpoint: import("typebox").TOptional<import("typebox").TString>;
+            selectedModel: import("typebox").TOptional<import("typebox").TString>;
+            availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            message: import("typebox").TOptional<import("typebox").TString>;
+        }>>>;
+        providers: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+            nameKey: import("typebox").TString;
+            descriptionKey: import("typebox").TString;
+            iconId: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+            models: import("typebox").TArray<import("typebox").TString>;
+            available: import("typebox").TBoolean;
+            health: import("typebox").TUnion<[import("typebox").TLiteral<"healthy">, import("typebox").TLiteral<"degraded">, import("typebox").TLiteral<"down">, import("typebox").TLiteral<"unconfigured">]>;
+            selectedModel: import("typebox").TOptional<import("typebox").TString>;
+            diagnosticCode: import("typebox").TOptional<import("typebox").TString>;
+            availableModels: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            error: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+    }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -296,7 +373,17 @@ export declare const aiModelsResponses: {
     }>;
 };
 export declare const aiUsageResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        totalMessages: import("typebox").TNumber;
+        userMessages: import("typebox").TNumber;
+        assistantMessages: import("typebox").TNumber;
+        sessions: import("typebox").TNumber;
+        recentActivity: import("typebox").TArray<import("typebox").TObject<{
+            timestamp: import("typebox").TString;
+            role: import("typebox").TString;
+            sessionId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        }>>;
+    }>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -306,7 +393,11 @@ export declare const aiUsageResponses: {
     }>;
 };
 export declare const automationActionResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        runId: import("typebox").TString;
+        status: import("typebox").TString;
+        message: import("typebox").TString;
+    }>;
     readonly 400: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;

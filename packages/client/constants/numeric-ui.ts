@@ -3,7 +3,10 @@
  * Prefer `@bao/shared/constants/http`, `numeric`, and `time` for cross-package values.
  */
 
-export const PERCENT_MAX = 100;
+import { PERCENT_MAX as SHARED_PERCENT_MAX } from "@bao/shared/constants/numeric";
+
+/** Alias of the shared definition — the literal lives in `@bao/shared/constants/numeric`. */
+export const PERCENT_MAX = SHARED_PERCENT_MAX;
 
 /** Max stagger index for entrance motion lists (0–11). */
 export const UI_STAGGER_INDEX_MAX = 11;
@@ -51,9 +54,6 @@ export const RESUME_AUTOSAVE_DEBOUNCE_MS = 900;
 
 /** Default skill-mapping confidence when API omits a value. */
 export const SKILL_MAPPING_DEFAULT_CONFIDENCE = 50;
-
-/** Default interview duration (minutes) when config omits a value. */
-export const INTERVIEW_DEFAULT_DURATION_MINUTES = 30;
 
 /** WAV header minimum byte length for TTS audio payloads. */
 export const WAV_HEADER_MIN_BYTES = 44;

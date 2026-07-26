@@ -1,6 +1,4 @@
 import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
   HTTP_STATUS_UNAUTHORIZED,
@@ -56,28 +54,6 @@ export const openaiV1ModelsListSchema = t.Object({
   data: t.Array(openaiV1ModelObjectSchema),
 });
 
-export const openaiV1ChatChoiceSchema = t.Object({
-  index: t.Number(),
-  message: t.Object({
-    role: t.Literal("assistant"),
-    content: t.String(),
-  }),
-  finish_reason: t.Union([t.Literal("stop"), t.Literal("length"), t.Null()]),
-});
-
-export const openaiV1ChatCompletionSchema = t.Object({
-  id: t.String(),
-  object: t.Literal("chat.completion"),
-  created: t.Number(),
-  model: t.String(),
-  choices: t.Array(openaiV1ChatChoiceSchema),
-  usage: t.Object({
-    prompt_tokens: t.Number(),
-    completion_tokens: t.Number(),
-    total_tokens: t.Number(),
-  }),
-});
-
 export const openaiV1ModelsListResponses = {
   [HTTP_STATUS_OK]: openaiV1ModelsListSchema,
   [HTTP_STATUS_UNAUTHORIZED]: openaiV1ErrorBodySchema,
@@ -86,13 +62,5 @@ export const openaiV1ModelsListResponses = {
 export const openaiV1ModelGetResponses = {
   [HTTP_STATUS_OK]: openaiV1ModelObjectSchema,
   [HTTP_STATUS_NOT_FOUND]: openaiV1ErrorBodySchema,
-  [HTTP_STATUS_UNAUTHORIZED]: openaiV1ErrorBodySchema,
-} as const;
-
-export const openaiV1ChatCompletionsResponses = {
-  [HTTP_STATUS_OK]: openaiV1ChatCompletionSchema,
-  [HTTP_STATUS_BAD_REQUEST]: openaiV1ErrorBodySchema,
-  [HTTP_STATUS_NOT_FOUND]: openaiV1ErrorBodySchema,
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: openaiV1ErrorBodySchema,
   [HTTP_STATUS_UNAUTHORIZED]: openaiV1ErrorBodySchema,
 } as const;

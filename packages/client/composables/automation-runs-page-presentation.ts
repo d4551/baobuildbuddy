@@ -13,14 +13,20 @@ import { formatDateWithLocale } from "~/utils/locale-format";
 
 type Translate = ReturnType<typeof useI18n>["t"];
 
-const [RUN_STATUS_PENDING, RUN_STATUS_RUNNING, RUN_STATUS_SUCCESS, RUN_STATUS_ERROR] =
-  AUTOMATION_RUN_STATUSES;
+const [
+  RUN_STATUS_PENDING,
+  RUN_STATUS_RUNNING,
+  RUN_STATUS_SUCCESS,
+  RUN_STATUS_ERROR,
+  RUN_STATUS_CANCELLED,
+] = AUTOMATION_RUN_STATUSES;
 
 const RUN_STATUS_ORDER: Record<AutomationRunStatus, number> = {
   [RUN_STATUS_RUNNING]: 0,
   [RUN_STATUS_PENDING]: 1,
   [RUN_STATUS_ERROR]: 2,
-  [RUN_STATUS_SUCCESS]: 3,
+  [RUN_STATUS_CANCELLED]: 3,
+  [RUN_STATUS_SUCCESS]: 4,
 };
 
 const DATE_FORMAT_OPTIONS = {

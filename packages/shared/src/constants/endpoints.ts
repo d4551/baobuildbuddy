@@ -1,9 +1,4 @@
-import {
-  type AutomationScrapePortalId,
-  type AutomationScrapeTarget,
-  automationScrapeTargetToPortalId,
-  isAutomationJobScrapeTarget,
-} from "./automation-types";
+import type { AutomationScrapePortalId } from "./automation-types";
 
 /**
  * OpenAPI/Swagger documentation version.
@@ -157,9 +152,6 @@ export function buildJobSaveEndpoint(jobId: string): string {
  * @param applicationId Application identifier.
  * @returns Canonical job-application detail endpoint path.
  */
-export function buildJobApplicationEndpoint(applicationId: string): string {
-  return `${API_ENDPOINTS.jobsApply}/${encodeURIComponent(applicationId.trim())}`;
-}
 
 /**
  * Builds the studio detail endpoint for a studio identifier.
@@ -197,13 +189,6 @@ export function buildScraperJobsEndpoint(portalId: AutomationScrapePortalId): st
  * @param target Supported scrape target.
  * @returns Manual scraper API endpoint path.
  */
-export function buildScraperEndpoint(target: AutomationScrapeTarget): string {
-  if (!isAutomationJobScrapeTarget(target)) {
-    return API_ENDPOINTS.scraperStudios;
-  }
-
-  return buildScraperJobsEndpoint(automationScrapeTargetToPortalId(target));
-}
 
 /**
  * Builds the cover-letter export endpoint for a cover-letter identifier.
@@ -298,24 +283,4 @@ export function buildAutomationScreenshotEndpoint(runId: string, index: number):
  */
 export function buildResumeDetailEndpoint(resumeId: string): string {
   return `${API_ENDPOINTS.resumes}/${encodeURIComponent(resumeId.trim())}`;
-}
-
-/**
- * Builds the AI-enhance endpoint for a resume identifier.
- *
- * @param resumeId Resume identifier.
- * @returns Canonical resume AI-enhancement endpoint path.
- */
-export function buildResumeEnhanceEndpoint(resumeId: string): string {
-  return `${buildResumeDetailEndpoint(resumeId)}/ai-enhance`;
-}
-
-/**
- * Builds the AI-score endpoint for a resume identifier.
- *
- * @param resumeId Resume identifier.
- * @returns Canonical resume AI-score endpoint path.
- */
-export function buildResumeScoreEndpoint(resumeId: string): string {
-  return `${buildResumeDetailEndpoint(resumeId)}/ai-score`;
 }

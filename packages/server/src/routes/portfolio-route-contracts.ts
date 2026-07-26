@@ -18,6 +18,7 @@ import {
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
 import { t } from "elysia";
 import type { Static } from "typebox";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export type PortfolioMetadataRecord = PortfolioMetadata;
 
@@ -158,32 +159,33 @@ export const portfolioProjectDeleteResponseSchema = t.Object({
 });
 
 export const portfolioResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
 };
 
 export const portfolioMutationResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
 };
 
 export const portfolioProjectMutationResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_CREATED]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
+  [HTTP_STATUS_OK]: portfolioProjectResponseSchema,
+  [HTTP_STATUS_CREATED]: portfolioProjectResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const portfolioProjectReorderResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
+  [HTTP_STATUS_OK]: portfolioResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };
 
 export const portfolioProjectDeleteResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
+  [HTTP_STATUS_OK]: portfolioProjectDeleteResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
+/** Export streams a generated document body, so only the error arms are typed. */
 export const portfolioExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
 };

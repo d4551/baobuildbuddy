@@ -10,5 +10,6 @@ export declare class AutomationRunScheduler {
     clear(runId: string): void;
     reclaimRunningRuns(): Promise<void>;
     restorePendingRuns(limit: number): Promise<void>;
+    private restorePendingRunsUnlocked;
     private markPendingRunWithoutScheduleMetadata;
 }

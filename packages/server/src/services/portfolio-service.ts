@@ -8,7 +8,7 @@ import type {
   PortfolioUpdatePayload,
   UpdatePortfolioProjectPayload,
 } from "./portfolio-service-contracts";
-import { toPortfolioData } from "./portfolio-service-normalizers";
+import { buildPortfolioData } from "./portfolio-service-normalizers";
 import {
   createProject,
   deleteProjectById,
@@ -29,7 +29,7 @@ export class PortfolioService {
   async getPortfolio(): Promise<PortfolioData> {
     const portfolio = (await getPortfolioRecord()) ?? (await getOrCreateDefaultPortfolioRecord());
     const projects = await this.getProjects(portfolio.id);
-    return toPortfolioData(portfolio, projects);
+    return buildPortfolioData(portfolio, projects);
   }
 
   /**
@@ -45,7 +45,7 @@ export class PortfolioService {
 
     const updated = await getOrCreateDefaultPortfolioRecord();
     const projects = await this.getProjects(portfolio.id);
-    return toPortfolioData(updated, projects);
+    return buildPortfolioData(updated, projects);
   }
 
   /**
@@ -120,7 +120,7 @@ export class PortfolioService {
     }
 
     const projects = await this.getProjects(portfolio.id);
-    return toPortfolioData(portfolio, projects);
+    return buildPortfolioData(portfolio, projects);
   }
 
   /**
@@ -129,7 +129,7 @@ export class PortfolioService {
   async getPortfolioPayload(): Promise<PortfolioData> {
     const portfolio = await getOrCreateDefaultPortfolioRecord();
     const projects = await this.getProjects(portfolio.id);
-    return toPortfolioData(portfolio, projects);
+    return buildPortfolioData(portfolio, projects);
   }
 }
 

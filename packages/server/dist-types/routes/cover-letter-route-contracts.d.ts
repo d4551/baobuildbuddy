@@ -124,17 +124,70 @@ export declare const coverLetterEntityResponses: {
     }>;
 };
 export declare const coverLetterDeleteResponses: {
-    200: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
+    200: import("typebox").TObject<{
+        success: import("typebox").TBoolean;
+        id: import("typebox").TString;
+    }>;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const generateCoverLetterResponses: {
-    200: import("typebox").TUnknown;
-    201: import("typebox").TUnknown;
-    500: import("typebox").TUnknown;
-    503: import("typebox").TUnknown;
+    200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        content: import("typebox").TObject<{
+            introduction: import("typebox").TString;
+            body: import("typebox").TString;
+            conclusion: import("typebox").TString;
+        }>;
+    }>;
+    201: import("typebox").TObject<{
+        message: import("typebox").TString;
+        coverLetter: import("typebox").TObject<{
+            id: import("typebox").TString;
+            company: import("typebox").TString;
+            position: import("typebox").TString;
+            jobInfo: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            content: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
+            template: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
+            createdAt: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+    }>;
+    500: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    503: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
+/** Export streams a generated document body, so only the error arms are typed. */
 export declare const coverLetterExportResponses: {
     200: import("typebox").TUnknown;
-    404: import("typebox").TUnknown;
-    500: import("typebox").TUnknown;
+    404: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
+    500: import("typebox").TObject<{
+        error: import("typebox").TString;
+        code: import("typebox").TOptional<import("typebox").TString>;
+        details: import("typebox").TOptional<import("typebox").TString>;
+        fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+        id: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };

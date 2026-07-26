@@ -13,7 +13,7 @@ import {
   HTTP_STATUS_OK,
   HTTP_STATUS_UNPROCESSABLE_ENTITY,
 } from "@bao/shared/constants/http";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import { toRouteError } from "../utils/automation-route-error";
 import { openapiDetail } from "../utils/openapi-detail";
 import { automationRateLimit } from "../utils/rate-limit";
@@ -29,8 +29,6 @@ import {
   handleVerifyAutomationContext,
 } from "./automation-route-actions";
 import {
-  type AutomationRunIdParams,
-  type AutomationRunQuery,
   automationCapabilitiesResponses,
   automationEmailResponseResponses,
   automationRunIdParamsSchema,
@@ -38,22 +36,14 @@ import {
   automationRunResponses,
   automationRunsListResponses,
   automationVerifyContextResponses,
-  type EmailResponseBody,
   emailResponseBodySchema,
-  type JobApplyBody,
   jobApplyBodySchema,
-  type ScheduledEmailResponseBody,
-  type ScheduledJobApplyBody,
-  type ScheduledScrapeBody,
-  type ScrapeBody,
   scheduledEmailResponseBodySchema,
   scheduledJobApplyBodySchema,
   scheduledScrapeBodySchema,
   scrapeBodySchema,
 } from "./automation-route-contracts";
 import { listAutomationRuns } from "./automation-route-support";
-
-type RouteStatus = typeof status;
 
 const hasText = (value: string | undefined): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -103,8 +93,13 @@ export const automationRoutes = new Elysia({
       ),
       response: automationVerifyContextResponses,
     },
-    async ({ status }: { status: RouteStatus }) => {
+    async ({ status }) => {
       const result = await handleVerifyAutomationContext();
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -115,7 +110,7 @@ export const automationRoutes = new Elysia({
       body: jobApplyBodySchema,
       response: automationRunResponses,
     },
-    async ({ body, status }: { body: JobApplyBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId))) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -130,6 +125,11 @@ export const automationRoutes = new Elysia({
         ...(body.jobId ? { jobId: body.jobId } : {}),
         ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
       });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -140,7 +140,7 @@ export const automationRoutes = new Elysia({
       body: scheduledJobApplyBodySchema,
       response: automationRunResponses,
     },
-    async ({ body, status }: { body: ScheduledJobApplyBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!(hasText(body.jobUrl) && hasText(body.resumeId) && hasText(body.runAt))) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -156,6 +156,11 @@ export const automationRoutes = new Elysia({
         ...(body.jobId ? { jobId: body.jobId } : {}),
         ...(body.customAnswers ? { customAnswers: body.customAnswers } : {}),
       });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -166,7 +171,7 @@ export const automationRoutes = new Elysia({
       body: emailResponseBodySchema,
       response: automationEmailResponseResponses,
     },
-    async ({ body, status }: { body: EmailResponseBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!(hasText(body.subject) && hasText(body.message))) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -184,6 +189,11 @@ export const automationRoutes = new Elysia({
           ? { deliverAfterGeneration: body.deliverAfterGeneration }
           : {}),
       });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -194,7 +204,7 @@ export const automationRoutes = new Elysia({
       body: scheduledEmailResponseBodySchema,
       response: automationRunResponses,
     },
-    async ({ body, status }: { body: ScheduledEmailResponseBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!(hasText(body.subject) && hasText(body.message) && hasText(body.runAt))) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -216,6 +226,11 @@ export const automationRoutes = new Elysia({
           ? { deliverAfterGeneration: body.deliverAfterGeneration }
           : {}),
       });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -226,7 +241,7 @@ export const automationRoutes = new Elysia({
       body: scrapeBodySchema,
       response: automationRunResponses,
     },
-    async ({ body, status }: { body: ScrapeBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!body.target) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -235,6 +250,11 @@ export const automationRoutes = new Elysia({
       }
 
       const result = await handleScrapeRoute({ target: body.target });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -245,7 +265,7 @@ export const automationRoutes = new Elysia({
       body: scheduledScrapeBodySchema,
       response: automationRunResponses,
     },
-    async ({ body, status }: { body: ScheduledScrapeBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       if (!(body.target && hasText(body.runAt))) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -257,6 +277,11 @@ export const automationRoutes = new Elysia({
         target: body.target,
         runAt: body.runAt,
       });
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -269,8 +294,13 @@ export const automationRoutes = new Elysia({
       ),
       response: automationCapabilitiesResponses,
     },
-    async ({ status }: { status: RouteStatus }) => {
+    async ({ status }) => {
       const result = await handleAutomationCapabilitiesRoute();
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   )
@@ -281,8 +311,7 @@ export const automationRoutes = new Elysia({
       query: automationRunQuerySchema,
       response: automationRunsListResponses,
     },
-    async ({ query, status }: { query: AutomationRunQuery; status: RouteStatus }) =>
-      status(HTTP_STATUS_OK, await listAutomationRuns(query)),
+    async ({ query, status }) => status(HTTP_STATUS_OK, await listAutomationRuns(query)),
   )
   .get(
     "/runs/:id",
@@ -291,7 +320,7 @@ export const automationRoutes = new Elysia({
       params: automationRunIdParamsSchema,
       response: automationRunResponses,
     },
-    async ({ params, status }: { params: AutomationRunIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       if (!hasText(params.id)) {
         return status(
           HTTP_STATUS_BAD_REQUEST,
@@ -300,6 +329,11 @@ export const automationRoutes = new Elysia({
       }
 
       const result = await handleAutomationRunByIdRoute(params.id);
+      // Success narrows to the payload schema; every other status carries the
+      // shared automation error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   );

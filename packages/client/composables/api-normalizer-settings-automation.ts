@@ -214,7 +214,7 @@ const normalizeSpeechSettings = (value: unknown): AutomationSettings["speech"] =
   };
 };
 
-export const normalizeAutomationSettings = (value: unknown): AutomationSettings | undefined => {
+export const parseAutomationSettings = (value: unknown): AutomationSettings | undefined => {
   if (!isRecord(value)) return;
 
   const legacyTimeoutSeconds = 30;

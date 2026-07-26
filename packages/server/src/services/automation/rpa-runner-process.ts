@@ -6,7 +6,7 @@ import {
 import { RPA_PROTOCOL_VERSION } from "@bao/shared/schemas/rpa-protocol.schema";
 import { config } from "../../config/env";
 import {
-  buildAutomationProcessEnv,
+  buildAutomationProcessEnvFromEnv,
   readAutomationScriptRunnerConfig,
   SCRAPER_DIR,
 } from "../../config/paths";
@@ -178,7 +178,7 @@ const spawnAutomationProcess = (
     stdin: "pipe",
     stdout: "pipe",
     stderr: "pipe",
-    env: buildAutomationProcessEnv(),
+    env: buildAutomationProcessEnvFromEnv(),
     signal,
     killSignal: killSignal ?? DEFAULT_KILL_SIGNAL,
   });

@@ -28,13 +28,13 @@ export type ScheduleScrapeRequestBody = {
 };
 export declare const RUN_ID_PATTERN: RegExp;
 export declare const AUTOMATION_TYPE_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
-export declare const AUTOMATION_STATUS_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>;
+export declare const AUTOMATION_STATUS_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">, import("typebox").TLiteral<"cancelled">]>;
 export declare const EMAIL_RESPONSE_TONE_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"professional">, import("typebox").TLiteral<"friendly">, import("typebox").TLiteral<"concise">]>;
 export declare const SCRAPE_TARGET_SCHEMA: import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>;
 export declare const automationRunEnvelopeBodySchema: import("typebox").TObject<{
     id: import("typebox").TString;
     type: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
-    status: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>;
+    status: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">, import("typebox").TLiteral<"cancelled">]>;
     jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
     userId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
     input: import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>;
@@ -58,6 +58,13 @@ export declare const automationRunEnvelopeBodySchema: import("typebox").TObject<
     aborted: import("typebox").TBoolean;
     executionMs: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
 }>;
+/**
+ * Spelled out as a literal tuple: `t.Union` over a mapped array loses the
+ * member literals and its Static collapses to `never`.
+ * `automation-route-capability-parity.test.ts` fails if this drifts from
+ * RPA_CAPABILITY_ISSUE_CODES, which stays the single source of truth.
+ */
+export declare const rpaCapabilityIssueCodeSchema: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
 export declare const capabilityAuditEntryBodySchema: import("typebox").TObject<{
     id: import("typebox").TString;
     category: import("typebox").TUnion<[import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"scrape">]>;
@@ -71,7 +78,7 @@ export declare const capabilityAuditEntryBodySchema: import("typebox").TObject<{
     runHistoryAvailable: import("typebox").TBoolean;
     liveUpdatesAvailable: import("typebox").TBoolean;
     issues: import("typebox").TArray<import("typebox").TObject<{
-        code: import("typebox").TUnion<import("typebox").TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
+        code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
         portalId: import("typebox").TOptional<import("typebox").TString>;
         portalName: import("typebox").TOptional<import("typebox").TString>;
     }>>;
@@ -99,7 +106,7 @@ export declare const capabilityAuditReportBodySchema: import("typebox").TObject<
         runHistoryAvailable: import("typebox").TBoolean;
         liveUpdatesAvailable: import("typebox").TBoolean;
         issues: import("typebox").TArray<import("typebox").TObject<{
-            code: import("typebox").TUnion<import("typebox").TLiteral<"portal_configuration_missing" | "portal_disabled" | "portal_fallback_url_missing" | "provider_settings_unavailable">[]>;
+            code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
             portalId: import("typebox").TOptional<import("typebox").TString>;
             portalName: import("typebox").TOptional<import("typebox").TString>;
         }>>;
@@ -164,7 +171,9 @@ export declare const automationRouteErrorResponses: {
     }>;
 };
 export declare const automationVerifyContextResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        resumeId: import("typebox").TString;
+    }>;
     readonly 204: import("typebox").TVoid;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TObject<{
@@ -224,7 +233,33 @@ export declare const automationRunResponses: {
             details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
         }>;
     }>;
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        type: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
+        status: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">, import("typebox").TLiteral<"cancelled">]>;
+        jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        userId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        input: import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>;
+        output: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>, import("typebox").TNull]>;
+        screenshots: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
+        error: import("typebox").TUnion<[import("typebox").TString, import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            source: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>, import("typebox").TNull]>;
+        progress: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        currentStep: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        totalSteps: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        startedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        completedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        createdAt: import("typebox").TString;
+        updatedAt: import("typebox").TString;
+        exitCode: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        timedOut: import("typebox").TBoolean;
+        aborted: import("typebox").TBoolean;
+        executionMs: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    }>;
 };
 export declare const automationEmailResponseResponses: {
     readonly 400: import("typebox").TObject<{
@@ -269,10 +304,48 @@ export declare const automationEmailResponseResponses: {
             details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
         }>;
     }>;
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        runId: import("typebox").TString;
+        status: import("typebox").TLiteral<"success">;
+        reply: import("typebox").TString;
+        provider: import("typebox").TString;
+        model: import("typebox").TString;
+        delivered: import("typebox").TBoolean;
+        recipientEmail: import("typebox").TOptional<import("typebox").TString>;
+        deliveredAt: import("typebox").TOptional<import("typebox").TString>;
+        messageId: import("typebox").TOptional<import("typebox").TString>;
+    }>;
 };
 export declare const automationCapabilitiesResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        generatedAt: import("typebox").TString;
+        summary: import("typebox").TObject<{
+            total: import("typebox").TNumber;
+            configured: import("typebox").TNumber;
+            manualRunAvailable: import("typebox").TNumber;
+            scheduledRunAvailable: import("typebox").TNumber;
+            runHistoryAvailable: import("typebox").TNumber;
+            liveUpdatesAvailable: import("typebox").TNumber;
+        }>;
+        capabilities: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            category: import("typebox").TUnion<[import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"scrape">]>;
+            name: import("typebox").TString;
+            target: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TLiteral<"studios">, import("typebox").TLiteral<"jobs_hitmarker">, import("typebox").TLiteral<"jobs_grackle">, import("typebox").TLiteral<"jobs_workwithindies">, import("typebox").TLiteral<"jobs_remotegamejobs">, import("typebox").TLiteral<"jobs_gamesjobsdirect">, import("typebox").TLiteral<"jobs_pocketgamer">]>, import("typebox").TNull]>;
+            implemented: import("typebox").TBoolean;
+            configured: import("typebox").TBoolean;
+            enabled: import("typebox").TBoolean;
+            manualRunAvailable: import("typebox").TBoolean;
+            scheduledRunAvailable: import("typebox").TBoolean;
+            runHistoryAvailable: import("typebox").TBoolean;
+            liveUpdatesAvailable: import("typebox").TBoolean;
+            issues: import("typebox").TArray<import("typebox").TObject<{
+                code: import("typebox").TUnion<[import("typebox").TLiteral<"provider_settings_unavailable">, import("typebox").TLiteral<"portal_configuration_missing">, import("typebox").TLiteral<"portal_disabled">, import("typebox").TLiteral<"portal_fallback_url_missing">]>;
+                portalId: import("typebox").TOptional<import("typebox").TString>;
+                portalName: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+        }>>;
+    }>;
     readonly 500: import("typebox").TObject<{
         error: import("typebox").TObject<{
             code: import("typebox").TString;
@@ -289,7 +362,33 @@ export declare const automationCapabilitiesResponses: {
     }>;
 };
 export declare const automationRunsListResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TArray<import("typebox").TObject<{
+        id: import("typebox").TString;
+        type: import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>;
+        status: import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">, import("typebox").TLiteral<"cancelled">]>;
+        jobId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        userId: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        input: import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>;
+        output: import("typebox").TUnion<[import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>, import("typebox").TNull]>;
+        screenshots: import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>;
+        error: import("typebox").TUnion<[import("typebox").TString, import("typebox").TObject<{
+            code: import("typebox").TString;
+            message: import("typebox").TString;
+            source: import("typebox").TString;
+            details: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        }>, import("typebox").TNull]>;
+        progress: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        currentStep: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        totalSteps: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        startedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        completedAt: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+        createdAt: import("typebox").TString;
+        updatedAt: import("typebox").TString;
+        exitCode: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+        timedOut: import("typebox").TBoolean;
+        aborted: import("typebox").TBoolean;
+        executionMs: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
+    }>>;
     readonly 429: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -345,7 +444,7 @@ export declare const scheduledScrapeBodySchema: import("typebox").TObject<{
 export type ScheduledScrapeBody = Static<typeof scheduledScrapeBodySchema>;
 export declare const automationRunQuerySchema: import("typebox").TObject<{
     type: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"scrape">, import("typebox").TLiteral<"job_apply">, import("typebox").TLiteral<"email">]>>;
-    status: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">]>>;
+    status: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"pending">, import("typebox").TLiteral<"running">, import("typebox").TLiteral<"success">, import("typebox").TLiteral<"error">, import("typebox").TLiteral<"cancelled">]>>;
 }>;
 export type AutomationRunQuery = Static<typeof automationRunQuerySchema>;
 export declare const automationRunIdParamsSchema: import("typebox").TObject<{

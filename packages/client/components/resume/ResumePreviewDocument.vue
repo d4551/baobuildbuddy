@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-layout";
+import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-resume-theme";
 import type { ResumeData } from "@bao/shared/types/resume";
 import {
   resolveResumeExportTemplate,

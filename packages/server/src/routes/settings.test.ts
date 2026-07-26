@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { API_ENDPOINT_PREFIX, API_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import { HTTP_STATUS_OK, HTTP_STATUS_UNPROCESSABLE_ENTITY } from "@bao/shared/constants/http";
 import { AI_ROUTING_PURPOSE_IDS } from "@bao/shared/types/ai";
 import {
   DEFAULT_AUTOMATION_SETTINGS,
@@ -58,6 +58,15 @@ const persistLegacyAutomationTimeout = () =>
     .where(eq(settings.id, DEFAULT_SETTINGS_ID));
 
 describe("settings read routes", () => {
+  // Regression: the settings response schema is enforced at runtime, so a
+  // shipped default that violates it (e.g. an empty hitmarkerDefaultLocation
+  // against a minLength constraint) fails the route with 422 instead of 200.
+  test("GET settings satisfies its declared response contract", async () => {
+    const res = await getSettings();
+    expect(res.status).not.toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
+    expect(res.status).toBe(HTTP_STATUS_OK);
+  });
+
   test("GET settings returns settings", async () => {
     const res = await getSettings();
     expect(res.status).toBe(HTTP_STATUS_OK);

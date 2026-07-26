@@ -78,27 +78,3 @@ Stay in character throughout the interview. Your behavior:
 
 Start with a brief introduction of yourself and the role, then ask your first question.`;
 }
-
-/**
- * Interview follow-up question prompt
- */
-export function interviewFollowUpPrompt(
-  question: string,
-  response: string,
-  previousQuestions: string[],
-): string {
-  return `Generate a contextual follow-up interview question based on the candidate's response.
-
-Original Question: ${question}
-Candidate's Response: ${response}
-Previous Questions Asked: ${previousQuestions.join("; ")}
-
-Create a follow-up that:
-1. Digs deeper into something specific they mentioned
-2. Tests a different angle of the same competency
-3. Avoids repeating topics from previous questions
-4. Feels natural and conversational
-5. Helps assess the candidate's depth of knowledge
-
-Return as JSON: { "followUp": string, "rationale": string, "competencyTested": string }`;
-}

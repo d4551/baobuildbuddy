@@ -413,7 +413,9 @@ const ensurePrewarmedCompileTargetDirectory = async (compileTarget: string): Pro
     (workingDirectory) => workingDirectory,
     (error: unknown) => {
       prewarmedCompileTargetDirectories.delete(compileTarget);
-      return Promise.reject(error instanceof Error ? error : new Error(toErrorMessage(error)));
+      return Promise.reject(
+        error instanceof Error ? error : new Error(toErrorMessage(error, "Unexpected error.")),
+      );
     },
   );
 
@@ -1066,7 +1068,7 @@ const main = async (): Promise<void> => {
 };
 
 await main().then(undefined, async (error: unknown) => {
-  const message = toErrorMessage(error);
+  const message = toErrorMessage(error, "Unexpected error.");
   await writeError(`desktop-runtime: preparation failed: ${message}`);
   process.exit(1);
 });

@@ -1,4 +1,4 @@
-import type { BaoExportData, ImportResult } from "./data-service-contracts";
+import type { BaoExportData, BaoImportData, ImportResult } from "./data-service-contracts";
 import { exportAllData } from "./data-service-export";
 import { importAllData } from "./data-service-import";
 
@@ -7,7 +7,7 @@ export class DataService {
     return exportAllData();
   }
 
-  async importAll(data: BaoExportData): Promise<ImportResult> {
+  async importAll(data: BaoImportData): Promise<ImportResult> {
     return importAllData(data);
   }
 }

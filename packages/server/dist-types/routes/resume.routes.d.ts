@@ -1,6 +1,3 @@
-import { type status } from "elysia";
-import { type ResumeIdParams, type ResumeScoreRouteBody } from "./resume-route-contracts";
-type RouteStatus = typeof status;
 export declare const resumeRoutes: import("elysia/types").AddRoute<string, "local", import("elysia/types").DefaultSingleton, {
     typebox: {};
     error: [];
@@ -17,7 +14,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        questions: {
+                            id: string;
+                            question: string;
+                            category: string;
+                        }[];
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -28,7 +31,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                         property?: string;
                         expected?: string;
                     };
-                    500: unknown;
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -50,7 +59,58 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    201: unknown;
+                    201: {
+                        id: string;
+                        name: string;
+                        personalInfo?: {
+                            name?: string | undefined;
+                            email?: string | undefined;
+                            phone?: string | undefined;
+                            location?: string | undefined;
+                            website?: string | undefined;
+                            linkedIn?: string | undefined;
+                            github?: string | undefined;
+                            portfolio?: string | undefined;
+                        } | undefined;
+                        summary: string;
+                        experience: {
+                            title: string;
+                            company: string;
+                            startDate: string;
+                            endDate?: string | undefined;
+                            location?: string | undefined;
+                            description?: string | undefined;
+                            achievements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                        }[];
+                        education: {
+                            degree: string;
+                            field: string;
+                            school: string;
+                            year: string;
+                            gpa?: string | undefined;
+                        }[];
+                        skills?: {
+                            technical?: string[] | undefined;
+                            soft?: string[] | undefined;
+                            gaming?: string[] | undefined;
+                        } | undefined;
+                        projects: {
+                            title: string;
+                            description: string;
+                            technologies?: string[] | undefined;
+                            link?: string | undefined;
+                        }[];
+                        gamingExperience?: {
+                            gameEngines?: string | undefined;
+                            platforms?: string | undefined;
+                            genres?: string | undefined;
+                            shippedTitles?: string | undefined;
+                        } | undefined;
+                        template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                        theme: "dark" | "light";
+                        isDefault: boolean;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -61,7 +121,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                         property?: string;
                         expected?: string;
                     };
-                    500: unknown;
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -75,7 +141,58 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
             query: unknown;
             headers: unknown;
             response: {
-                200: unknown;
+                200: {
+                    id: string;
+                    name: string;
+                    personalInfo?: {
+                        name?: string | undefined;
+                        email?: string | undefined;
+                        phone?: string | undefined;
+                        location?: string | undefined;
+                        website?: string | undefined;
+                        linkedIn?: string | undefined;
+                        github?: string | undefined;
+                        portfolio?: string | undefined;
+                    } | undefined;
+                    summary: string;
+                    experience: {
+                        title: string;
+                        company: string;
+                        startDate: string;
+                        endDate?: string | undefined;
+                        location?: string | undefined;
+                        description?: string | undefined;
+                        achievements?: string[] | undefined;
+                        technologies?: string[] | undefined;
+                    }[];
+                    education: {
+                        degree: string;
+                        field: string;
+                        school: string;
+                        year: string;
+                        gpa?: string | undefined;
+                    }[];
+                    skills?: {
+                        technical?: string[] | undefined;
+                        soft?: string[] | undefined;
+                        gaming?: string[] | undefined;
+                    } | undefined;
+                    projects: {
+                        title: string;
+                        description: string;
+                        technologies?: string[] | undefined;
+                        link?: string | undefined;
+                    }[];
+                    gamingExperience?: {
+                        gameEngines?: string | undefined;
+                        platforms?: string | undefined;
+                        genres?: string | undefined;
+                        shippedTitles?: string | undefined;
+                    } | undefined;
+                    template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                    theme: "dark" | "light";
+                    isDefault: boolean;
+                }[];
             };
             error: never;
         };
@@ -138,7 +255,58 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
             query: unknown;
             headers: unknown;
             response: {
-                201: unknown;
+                201: {
+                    id: string;
+                    name: string;
+                    personalInfo?: {
+                        name?: string | undefined;
+                        email?: string | undefined;
+                        phone?: string | undefined;
+                        location?: string | undefined;
+                        website?: string | undefined;
+                        linkedIn?: string | undefined;
+                        github?: string | undefined;
+                        portfolio?: string | undefined;
+                    } | undefined;
+                    summary: string;
+                    experience: {
+                        title: string;
+                        company: string;
+                        startDate: string;
+                        endDate?: string | undefined;
+                        location?: string | undefined;
+                        description?: string | undefined;
+                        achievements?: string[] | undefined;
+                        technologies?: string[] | undefined;
+                    }[];
+                    education: {
+                        degree: string;
+                        field: string;
+                        school: string;
+                        year: string;
+                        gpa?: string | undefined;
+                    }[];
+                    skills?: {
+                        technical?: string[] | undefined;
+                        soft?: string[] | undefined;
+                        gaming?: string[] | undefined;
+                    } | undefined;
+                    projects: {
+                        title: string;
+                        description: string;
+                        technologies?: string[] | undefined;
+                        link?: string | undefined;
+                    }[];
+                    gamingExperience?: {
+                        gameEngines?: string | undefined;
+                        platforms?: string | undefined;
+                        genres?: string | undefined;
+                        shippedTitles?: string | undefined;
+                    } | undefined;
+                    template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                    theme: "dark" | "light";
+                    isDefault: boolean;
+                };
                 422: {
                     type: 'validation';
                     title: 'Validation Error';
@@ -164,8 +332,65 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    404: unknown;
+                    200: {
+                        id: string;
+                        name: string;
+                        personalInfo?: {
+                            name?: string | undefined;
+                            email?: string | undefined;
+                            phone?: string | undefined;
+                            location?: string | undefined;
+                            website?: string | undefined;
+                            linkedIn?: string | undefined;
+                            github?: string | undefined;
+                            portfolio?: string | undefined;
+                        } | undefined;
+                        summary: string;
+                        experience: {
+                            title: string;
+                            company: string;
+                            startDate: string;
+                            endDate?: string | undefined;
+                            location?: string | undefined;
+                            description?: string | undefined;
+                            achievements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                        }[];
+                        education: {
+                            degree: string;
+                            field: string;
+                            school: string;
+                            year: string;
+                            gpa?: string | undefined;
+                        }[];
+                        skills?: {
+                            technical?: string[] | undefined;
+                            soft?: string[] | undefined;
+                            gaming?: string[] | undefined;
+                        } | undefined;
+                        projects: {
+                            title: string;
+                            description: string;
+                            technologies?: string[] | undefined;
+                            link?: string | undefined;
+                        }[];
+                        gamingExperience?: {
+                            gameEngines?: string | undefined;
+                            platforms?: string | undefined;
+                            genres?: string | undefined;
+                            shippedTitles?: string | undefined;
+                        } | undefined;
+                        template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                        theme: "dark" | "light";
+                        isDefault: boolean;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -232,8 +457,65 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    404: unknown;
+                    200: {
+                        id: string;
+                        name: string;
+                        personalInfo?: {
+                            name?: string | undefined;
+                            email?: string | undefined;
+                            phone?: string | undefined;
+                            location?: string | undefined;
+                            website?: string | undefined;
+                            linkedIn?: string | undefined;
+                            github?: string | undefined;
+                            portfolio?: string | undefined;
+                        } | undefined;
+                        summary: string;
+                        experience: {
+                            title: string;
+                            company: string;
+                            startDate: string;
+                            endDate?: string | undefined;
+                            location?: string | undefined;
+                            description?: string | undefined;
+                            achievements?: string[] | undefined;
+                            technologies?: string[] | undefined;
+                        }[];
+                        education: {
+                            degree: string;
+                            field: string;
+                            school: string;
+                            year: string;
+                            gpa?: string | undefined;
+                        }[];
+                        skills?: {
+                            technical?: string[] | undefined;
+                            soft?: string[] | undefined;
+                            gaming?: string[] | undefined;
+                        } | undefined;
+                        projects: {
+                            title: string;
+                            description: string;
+                            technologies?: string[] | undefined;
+                            link?: string | undefined;
+                        }[];
+                        gamingExperience?: {
+                            gameEngines?: string | undefined;
+                            platforms?: string | undefined;
+                            genres?: string | undefined;
+                            shippedTitles?: string | undefined;
+                        } | undefined;
+                        template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                        theme: "dark" | "light";
+                        isDefault: boolean;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -260,8 +542,17 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    404: unknown;
+                    200: {
+                        success: boolean;
+                        id: string;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -283,7 +574,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                     headers: unknown;
                     response: {
                         200: unknown;
-                        404: unknown;
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -294,7 +591,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                             property?: string;
                             expected?: string;
                         };
-                        500: unknown;
+                        500: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -315,8 +618,69 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: unknown;
-                        404: unknown;
+                        200: {
+                            resume: {
+                                id: string;
+                                name: string;
+                                personalInfo?: {
+                                    name?: string | undefined;
+                                    email?: string | undefined;
+                                    phone?: string | undefined;
+                                    location?: string | undefined;
+                                    website?: string | undefined;
+                                    linkedIn?: string | undefined;
+                                    github?: string | undefined;
+                                    portfolio?: string | undefined;
+                                } | undefined;
+                                summary: string;
+                                experience: {
+                                    title: string;
+                                    company: string;
+                                    startDate: string;
+                                    endDate?: string | undefined;
+                                    location?: string | undefined;
+                                    description?: string | undefined;
+                                    achievements?: string[] | undefined;
+                                    technologies?: string[] | undefined;
+                                }[];
+                                education: {
+                                    degree: string;
+                                    field: string;
+                                    school: string;
+                                    year: string;
+                                    gpa?: string | undefined;
+                                }[];
+                                skills?: {
+                                    technical?: string[] | undefined;
+                                    soft?: string[] | undefined;
+                                    gaming?: string[] | undefined;
+                                } | undefined;
+                                projects: {
+                                    title: string;
+                                    description: string;
+                                    technologies?: string[] | undefined;
+                                    link?: string | undefined;
+                                }[];
+                                gamingExperience?: {
+                                    gameEngines?: string | undefined;
+                                    platforms?: string | undefined;
+                                    genres?: string | undefined;
+                                    shippedTitles?: string | undefined;
+                                } | undefined;
+                                template: "classic" | "creative" | "executive" | "gaming" | "google-xyz" | "minimal" | "modern" | "technical";
+                                theme: "dark" | "light";
+                                isDefault: boolean;
+                            };
+                            suggestions: unknown[];
+                            section: string;
+                        };
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -327,7 +691,13 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                             property?: string;
                             expected?: string;
                         };
-                        500: unknown;
+                        500: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -346,16 +716,78 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
         jobId: import("typebox").TString;
     }>;
     response: {
-        200: import("typebox").TUnknown;
-        404: import("typebox").TUnknown;
-        500: import("typebox").TUnknown;
+        readonly 200: import("typebox").TObject<{
+            resumeId: import("typebox").TString;
+            jobId: import("typebox").TString;
+            score: import("typebox").TNumber;
+            strengths: import("typebox").TArray<import("typebox").TString>;
+            improvements: import("typebox").TArray<import("typebox").TString>;
+            keywords: import("typebox").TArray<import("typebox").TString>;
+            analysis: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+        }>;
+        readonly 404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        readonly 500: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
     };
-}, {}, `${string}/:id/ai-score`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, status, }: {
-    params: ResumeIdParams;
-    body: ResumeScoreRouteBody;
-    status: RouteStatus;
+}, {}, `${string}/:id/ai-score`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ params, body, status }: {
+    server: import("elysia").Server | null;
+    redirect: import("elysia").redirect;
+    set: {
+        headers: import("elysia").HTTPHeaders;
+        status?: number | keyof import("elysia").StatusMap;
+        cookie?: Record<string, import("elysia").BaseCookie>;
+    };
+    status: import("elysia").SelectiveStatus<{
+        readonly 200: {
+            resumeId: string;
+            jobId: string;
+            score: number;
+            strengths: string[];
+            improvements: string[];
+            keywords: string[];
+            analysis: Record<string, unknown>;
+        };
+        readonly 404: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+        readonly 500: {
+            error: string;
+            code?: string | undefined;
+            details?: string | undefined;
+            fields?: string[] | undefined;
+            id?: string | undefined;
+        };
+    }>;
+    readonly path: string;
+    route?: string;
+    rid?: string;
+    request: Request;
+    store: {};
+    body: {
+        jobId: string;
+    };
+    query: Record<string, string | undefined>;
+    params: {
+        id: string;
+    };
+    headers: Record<string, string | undefined>;
+    cookie: Record<string, import("elysia").Cookie<unknown>>;
 }) => Promise<import("elysia").ElysiaStatus<200, {
-    error?: undefined;
     resumeId: string;
     jobId: string;
     score: number;
@@ -376,4 +808,3 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
     details?: undefined;
     error: string;
 }, 500>>>;
-export {};

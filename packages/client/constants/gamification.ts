@@ -14,11 +14,6 @@ export const GAMIFICATION_DEFAULT_CHALLENGE_GOAL = 1;
 export const GAMIFICATION_LOADING_SKELETON_LINES = 8;
 
 /**
- * Progress pulse duration for XP bar animation.
- */
-export const XP_BAR_ANIMATION_DURATION_MS = 500;
-
-/**
  * Progressbar value floor used across gamification UI components.
  */
 export const GAMIFICATION_PROGRESS_MIN = 0;

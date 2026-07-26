@@ -12,7 +12,30 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
             query: unknown;
             headers: unknown;
             response: {
-                200: unknown;
+                200: {
+                    id?: string | undefined;
+                    metadata?: Record<string, unknown> | undefined;
+                    projects: {
+                        id?: string | undefined;
+                        portfolioId?: string | undefined;
+                        title: string;
+                        description: string;
+                        technologies?: string[] | null | undefined;
+                        image?: string | null | undefined;
+                        liveUrl?: string | null | undefined;
+                        githubUrl?: string | null | undefined;
+                        tags?: string[] | null | undefined;
+                        featured?: boolean | null | undefined;
+                        role?: string | null | undefined;
+                        platforms?: string[] | null | undefined;
+                        engines?: string[] | null | undefined;
+                        sortOrder?: number | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    }[];
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
             };
             error: never;
         };
@@ -27,7 +50,30 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
             query: unknown;
             headers: unknown;
             response: {
-                200: unknown;
+                200: {
+                    id?: string | undefined;
+                    metadata?: Record<string, unknown> | undefined;
+                    projects: {
+                        id?: string | undefined;
+                        portfolioId?: string | undefined;
+                        title: string;
+                        description: string;
+                        technologies?: string[] | null | undefined;
+                        image?: string | null | undefined;
+                        liveUrl?: string | null | undefined;
+                        githubUrl?: string | null | undefined;
+                        tags?: string[] | null | undefined;
+                        featured?: boolean | null | undefined;
+                        role?: string | null | undefined;
+                        platforms?: string[] | null | undefined;
+                        engines?: string[] | null | undefined;
+                        sortOrder?: number | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    }[];
+                    createdAt?: string | undefined;
+                    updatedAt?: string | undefined;
+                };
                 422: {
                     type: 'validation';
                     title: 'Validation Error';
@@ -64,9 +110,49 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
-                    201: unknown;
-                    404: unknown;
+                    200: {
+                        id?: string | undefined;
+                        portfolioId?: string | undefined;
+                        title: string;
+                        description: string;
+                        technologies?: string[] | null | undefined;
+                        image?: string | null | undefined;
+                        liveUrl?: string | null | undefined;
+                        githubUrl?: string | null | undefined;
+                        tags?: string[] | null | undefined;
+                        featured?: boolean | null | undefined;
+                        role?: string | null | undefined;
+                        platforms?: string[] | null | undefined;
+                        engines?: string[] | null | undefined;
+                        sortOrder?: number | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    201: {
+                        id?: string | undefined;
+                        portfolioId?: string | undefined;
+                        title: string;
+                        description: string;
+                        technologies?: string[] | null | undefined;
+                        image?: string | null | undefined;
+                        liveUrl?: string | null | undefined;
+                        githubUrl?: string | null | undefined;
+                        tags?: string[] | null | undefined;
+                        featured?: boolean | null | undefined;
+                        role?: string | null | undefined;
+                        platforms?: string[] | null | undefined;
+                        engines?: string[] | null | undefined;
+                        sortOrder?: number | null | undefined;
+                        createdAt?: string | undefined;
+                        updatedAt?: string | undefined;
+                    };
+                    404: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -77,7 +163,13 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                         property?: string;
                         expected?: string;
                     };
-                    500: unknown;
+                    500: {
+                        error: string;
+                        code?: string | undefined;
+                        details?: string | undefined;
+                        fields?: string[] | undefined;
+                        id?: string | undefined;
+                    };
                 };
                 error: never;
             };
@@ -95,7 +187,30 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: unknown;
+                        200: {
+                            id?: string | undefined;
+                            metadata?: Record<string, unknown> | undefined;
+                            projects: {
+                                id?: string | undefined;
+                                portfolioId?: string | undefined;
+                                title: string;
+                                description: string;
+                                technologies?: string[] | null | undefined;
+                                image?: string | null | undefined;
+                                liveUrl?: string | null | undefined;
+                                githubUrl?: string | null | undefined;
+                                tags?: string[] | null | undefined;
+                                featured?: boolean | null | undefined;
+                                role?: string | null | undefined;
+                                platforms?: string[] | null | undefined;
+                                engines?: string[] | null | undefined;
+                                sortOrder?: number | null | undefined;
+                                createdAt?: string | undefined;
+                                updatedAt?: string | undefined;
+                            }[];
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
+                        };
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -106,7 +221,13 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                             property?: string;
                             expected?: string;
                         };
-                        500: unknown;
+                        500: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -138,9 +259,49 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: unknown;
-                        201: unknown;
-                        404: unknown;
+                        200: {
+                            id?: string | undefined;
+                            portfolioId?: string | undefined;
+                            title: string;
+                            description: string;
+                            technologies?: string[] | null | undefined;
+                            image?: string | null | undefined;
+                            liveUrl?: string | null | undefined;
+                            githubUrl?: string | null | undefined;
+                            tags?: string[] | null | undefined;
+                            featured?: boolean | null | undefined;
+                            role?: string | null | undefined;
+                            platforms?: string[] | null | undefined;
+                            engines?: string[] | null | undefined;
+                            sortOrder?: number | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
+                        };
+                        201: {
+                            id?: string | undefined;
+                            portfolioId?: string | undefined;
+                            title: string;
+                            description: string;
+                            technologies?: string[] | null | undefined;
+                            image?: string | null | undefined;
+                            liveUrl?: string | null | undefined;
+                            githubUrl?: string | null | undefined;
+                            tags?: string[] | null | undefined;
+                            featured?: boolean | null | undefined;
+                            role?: string | null | undefined;
+                            platforms?: string[] | null | undefined;
+                            engines?: string[] | null | undefined;
+                            sortOrder?: number | null | undefined;
+                            createdAt?: string | undefined;
+                            updatedAt?: string | undefined;
+                        };
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                         422: {
                             type: 'validation';
                             title: 'Validation Error';
@@ -151,7 +312,13 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                             property?: string;
                             expected?: string;
                         };
-                        500: unknown;
+                        500: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -170,8 +337,17 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
                     query: unknown;
                     headers: unknown;
                     response: {
-                        200: unknown;
-                        404: unknown;
+                        200: {
+                            success: boolean;
+                            id: string;
+                        };
+                        404: {
+                            error: string;
+                            code?: string | undefined;
+                            details?: string | undefined;
+                            fields?: string[] | undefined;
+                            id?: string | undefined;
+                        };
                     };
                     error: never;
                 };
@@ -189,8 +365,20 @@ export declare const portfolioRoutes: import("elysia/types").AddRoute<string, "l
     }>;
     response: {
         200: import("typebox").TUnknown;
-        404: import("typebox").TUnknown;
-        500: import("typebox").TUnknown;
+        404: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
+        500: import("typebox").TObject<{
+            error: import("typebox").TString;
+            code: import("typebox").TOptional<import("typebox").TString>;
+            details: import("typebox").TOptional<import("typebox").TString>;
+            fields: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            id: import("typebox").TOptional<import("typebox").TString>;
+        }>;
     };
 }, {}, `${string}/export`>, import("elysia/types").MergeScopedSchemas<{}, {}, {}>>, {}, ({ body, status }: {
     body: PortfolioExportRouteBody;

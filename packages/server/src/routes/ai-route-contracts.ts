@@ -212,13 +212,13 @@ export const chatRouteResponses = {
 } as const;
 
 export const analyzeResumeResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: analyzeResumeResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
-export const generateCoverLetterResponses = {
+export const aiGenerateCoverLetterResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
@@ -232,17 +232,17 @@ export const matchJobsResponses = {
 } as const;
 
 export const aiModelsResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: aiModelsResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const aiUsageResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: aiUsageResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const automationActionResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: automationActionResponseSchema,
   [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
   [HTTP_STATUS_CONFLICT]: simpleErrorResponseSchema,

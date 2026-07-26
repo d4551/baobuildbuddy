@@ -114,16 +114,12 @@ export const UI_MODAL_SIZE_CLASS_BY_TOKEN: Record<UiModalSizeToken, string> = {
   full: "w-11/12 max-w-screen-xl",
 };
 
-/** Workspace navigator max-width at xl breakpoint. */
-export const WORKSPACE_NAV_MAX_WIDTH_XL_CLASS = "xl:max-w-4xl";
-
 /** Hero page title responsive sizing. */
 export const HERO_TITLE_RESPONSIVE_CLASS = "sm:text-5xl";
 
 /** Responsive padding tokens (breakpoint-prefixed; feature components must import these). */
 export const RESPONSIVE_PADDING_MD_P6_CLASS = "md:p-6";
 export const RESPONSIVE_PADDING_LG_P8_CLASS = "lg:p-8";
-export const RESPONSIVE_PADDING_SM_PX6_CLASS = "sm:px-6";
 
 /** Responsive width tokens. */
 export const RESPONSIVE_WIDTH_LG_W80_CLASS = "lg:w-80";
@@ -134,22 +130,9 @@ export const RESPONSIVE_FLEX_COL_SM_ROW_CLASS = "flex flex-col sm:flex-row";
 
 /** Responsive typography tokens. */
 export const RESPONSIVE_TEXT_MD_3XL_CLASS = "md:text-3xl";
-export const RESPONSIVE_TEXT_XL_4XL_CLASS = "xl:text-4xl";
-
-/** Dashboard welcome banner title responsive scale. */
-export const DASHBOARD_WELCOME_TITLE_RESPONSIVE_CLASS = "md:text-3xl xl:text-4xl";
 
 /** Chat panel horizontal padding at sm breakpoint. */
 export const CHAT_PANEL_PADDING_SM_PX6_CLASS = "sm:px-6";
-
-/** API docs endpoint navigator aside width at lg breakpoint. */
-export const API_DOCS_NAV_ASIDE_LG_CLASS = "lg:sticky lg:top-6 lg:w-80 lg:shrink-0";
-
-/** Dashboard onboarding card body padding at lg breakpoint. */
-export const DASHBOARD_ONBOARDING_BODY_LG_P8_CLASS = "lg:p-8";
-
-/** Brand settings card body padding (compact mobile, comfortable md+). */
-export const BRAND_CARD_BODY_RESPONSIVE_CLASS = "card-body p-4 md:p-6";
 
 /**
  * Dual-surface data lists: card stack below lg, dense table from lg up.

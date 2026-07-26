@@ -1,13 +1,11 @@
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { DEFAULT_AUTOMATION_SETTINGS } from "@bao/shared/types/settings-defaults";
 import { settle } from "@bao/shared/utils/promise";
 import type { Locator } from "playwright";
 import {
   type CaptureScreenshotOptions,
   type ResumeCandidateFields,
   RUN_SCREENSHOT_PREFIX,
-  type SelectorMapInput,
   type StepRecord,
   type StepStatus,
   type UploadResumeArtifactOptions,
@@ -177,11 +175,4 @@ export const captureScreenshot = async ({
   }
 
   addStep(steps, "screenshot", "error", label);
-};
-
-export const createDefaultAutomationSettings = () => DEFAULT_AUTOMATION_SETTINGS;
-
-export const getCustomSelectorValue = (selectorMap: SelectorMapInput, key: string): string[] => {
-  const selectors = selectorMap[key];
-  return Array.isArray(selectors) ? selectors.filter((selector) => selector.trim().length > 0) : [];
 };

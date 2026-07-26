@@ -4,13 +4,26 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
-import { RESUME_TEMPLATE_OPTIONS } from "@bao/shared/constants/resume";
 import { t } from "elysia";
 import type { Static } from "typebox";
+import { simpleErrorResponseSchema } from "./route-error-envelope";
 
-const resumeTemplateBodySchema = t.Union(
-  RESUME_TEMPLATE_OPTIONS.map((template) => t.Literal(template)),
-);
+/**
+ * Spelled out as a literal tuple: `t.Union` over a mapped array loses the member
+ * literals and its `Static` collapses to `never`, which silently widened every
+ * response embedding a template. `resume-route-template-parity.test.ts` asserts
+ * these members stay identical to RESUME_TEMPLATE_OPTIONS, which remains SSOT.
+ */
+export const resumeTemplateBodySchema = t.Union([
+  t.Literal("modern"),
+  t.Literal("classic"),
+  t.Literal("creative"),
+  t.Literal("minimal"),
+  t.Literal("google-xyz"),
+  t.Literal("gaming"),
+  t.Literal("executive"),
+  t.Literal("technical"),
+]);
 const resumeThemeBodySchema = t.Union([t.Literal("light"), t.Literal("dark")]);
 
 export const resumePersonalInfoResponseSchema = t.Object({
@@ -153,52 +166,53 @@ export const resumeScoreResponseSchema = t.Object(
 );
 
 export const resumeQuestionGenerateResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeQuestionGenerateResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeQuestionSynthesizeResponses = {
-  [HTTP_STATUS_CREATED]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
-};
+  [HTTP_STATUS_CREATED]: resumeEntityResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeListResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: t.Array(resumeEntityResponseSchema),
+} as const;
 
 export const resumeEntityResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeEntityResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeCreateResponses = {
-  [HTTP_STATUS_CREATED]: t.Unknown(),
-};
+  [HTTP_STATUS_CREATED]: resumeEntityResponseSchema,
+} as const;
 
 export const resumeUpdateResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeEntityResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeDeleteResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeDeleteResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+} as const;
 
+/** Export streams a generated document body, so only the error arms are typed. */
 export const resumeExportResponses = {
   [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
-};
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeEnhanceResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeEnhanceResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+} as const;
 
 export const resumeScoreResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
-  [HTTP_STATUS_NOT_FOUND]: t.Unknown(),
-  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: t.Unknown(),
-};
+  [HTTP_STATUS_OK]: resumeScoreResponseSchema,
+  [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
+  [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
+} as const;

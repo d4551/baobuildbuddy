@@ -18,8 +18,8 @@ import { createResumeUploadArtifact } from "./automation-job-apply-resume-artifa
 import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
 import {
   assertRunExists,
+  ensureRunArtifactDir,
   markRunFailed,
-  resolveRunArtifactDir,
 } from "./automation-run-persistence";
 import type { JobApplyRunPreparation } from "./automation-service-contracts";
 import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
@@ -150,7 +150,7 @@ export const prepareJobApplyRun = async (params: {
 
   const automationSettings = await loadAutomationSettings();
   await assertConcurrencyLimit(params.runId, resolveMaxConcurrentRuns(automationSettings));
-  const runArtifactDir = resolveRunArtifactDir(params.runId, params.invalidRunIdMessage);
+  const runArtifactDir = ensureRunArtifactDir(params.runId, params.invalidRunIdMessage);
 
   const resumeDetails = await loadResumeOrFail(
     params.runId,

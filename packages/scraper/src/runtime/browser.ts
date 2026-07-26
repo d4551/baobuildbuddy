@@ -7,7 +7,7 @@ import { settle } from "@bao/shared/utils/promise";
 import type { Browser, BrowserContext, Page } from "playwright";
 import {
   automationRuntimeConfig,
-  buildAutomationProcessEnv,
+  buildAutomationProcessEnvFromRuntimeEnv,
   sanitizePlaywrightBrowsersPathEnv,
 } from "./config";
 
@@ -39,7 +39,7 @@ const rejectLaunch = (
   failure: classifyAutomationBrowserLaunchFailure(
     reason,
     stage,
-    buildAutomationProcessEnv().PLAYWRIGHT_BROWSERS_PATH,
+    buildAutomationProcessEnvFromRuntimeEnv().PLAYWRIGHT_BROWSERS_PATH,
   ),
 });
 

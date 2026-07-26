@@ -10,7 +10,7 @@ import {
 } from "./interview-service-normalizers";
 import { buildInterviewerPersona } from "./interview-service-prompt-context";
 
-export async function toInterviewSession(row: DBInterviewSession): Promise<InterviewSession> {
+export async function toInterviewSessionFromRow(row: DBInterviewSession): Promise<InterviewSession> {
   const config = normalizeSessionConfig(row);
   const studio = await resolveStudioContext(row.studioId);
   const questions = normalizeQuestions(row.questions);

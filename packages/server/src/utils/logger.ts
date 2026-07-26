@@ -36,8 +36,3 @@ export const createServerLogger = (component: string): ServerLogger => {
     },
   };
 };
-
-/**
- * Default server logger for shared startup and infra messages.
- */
-export const serverLogger = createServerLogger("server");

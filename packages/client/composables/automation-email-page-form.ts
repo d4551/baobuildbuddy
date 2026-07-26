@@ -35,9 +35,6 @@ export const EMAIL_TONE_OPTIONS: readonly EmailResponseTone[] = [
   "concise",
 ] as const;
 
-export const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
 export const createEmailAutomationForm = () =>
   reactive<EmailFormState>({
     subject: "",

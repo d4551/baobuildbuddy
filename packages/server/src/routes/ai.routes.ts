@@ -1,10 +1,19 @@
 import { API_ENDPOINTS, toApiScopedPath } from "@bao/shared/constants/endpoints";
-import { HTTP_STATUS_OK } from "@bao/shared/constants/http";
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK,
+} from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
 import { Elysia, type status } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
+import {
+  toSerializableProviderDiagnostics,
+  toSerializableProviderRows,
+} from "../services/ai/control-plane";
 import { openapiDetail } from "../utils/openapi-detail";
+import { resolveKnownProvider } from "./settings-route-schema-ai-brand";
 import { rateLimit } from "../utils/rate-limit";
 import { resolveRateLimitClientKey } from "../utils/request";
 import {
@@ -15,8 +24,6 @@ import {
 } from "./ai-route-actions";
 import { handleAutomationActionRoute } from "./ai-route-automation";
 import {
-  type AnalyzeResumeRouteBody,
-  type AutomationActionRouteBody,
   aiModelsResponses,
   aiUsageResponses,
   analyzeResumeResponses,
@@ -27,7 +34,7 @@ import {
   chatRouteBodySchema,
   chatRouteResponses,
   type GenerateCoverLetterRouteBody,
-  generateCoverLetterResponses,
+  aiGenerateCoverLetterResponses,
   generateCoverLetterRouteBodySchema,
   type MatchJobsRouteBody,
   matchJobsResponses,
@@ -66,9 +73,16 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: analyzeResumeRouteBodySchema,
       response: analyzeResumeResponses,
     },
-    async ({ body, status }: { body: AnalyzeResumeRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await handleAnalyzeResumeRoute(body);
-      return status(result.status, result.body);
+      // Branch per status so each arm narrows to its declared response schema.
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      if (result.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -76,7 +90,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
     {
       detail: openapiDetail("AI", "Generate cover letter draft text with the AI provider."),
       body: generateCoverLetterRouteBodySchema,
-      response: generateCoverLetterResponses,
+      response: aiGenerateCoverLetterResponses,
     },
     async ({ body, status }: { body: GenerateCoverLetterRouteBody; status: RouteStatus }) => {
       const result = await handleGenerateCoverLetterRoute(body);
@@ -101,8 +115,22 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       detail: openapiDetail("AI", "List AI models available from configured providers."),
       response: aiModelsResponses,
     },
-    async ({ status }: { status: RouteStatus }) =>
-      status(HTTP_STATUS_OK, await buildProviderModelsResponse()),
+    async ({ status }) => {
+      const models = await buildProviderModelsResponse();
+      // The unconfigured arm carries no provider at all; the control-plane arm
+      // can still hold a null one, which this contract narrows to a known id.
+      return status(
+        HTTP_STATUS_OK,
+        "preferredProvider" in models
+          ? {
+              ...models,
+              preferredProvider: resolveKnownProvider(models.preferredProvider),
+              providerDiagnostics: toSerializableProviderDiagnostics(models.providerDiagnostics),
+              providers: toSerializableProviderRows(models.providers),
+            }
+          : models,
+      );
+    },
   )
   .get(
     "/usage",
@@ -110,7 +138,7 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       detail: openapiDetail("AI", "Retrieve AI token and request usage counters."),
       response: aiUsageResponses,
     },
-    async ({ status }: { status: RouteStatus }) => {
+    async ({ status }) => {
       const chatMessages = await db.select().from(chatHistory);
 
       return status(HTTP_STATUS_OK, {
@@ -133,8 +161,13 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: automationActionRouteBodySchema,
       response: automationActionResponses,
     },
-    async ({ body, status }: { body: AutomationActionRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await handleAutomationActionRoute(body);
+      // Only the success arm carries the action payload; every other status
+      // returns the simple error envelope declared in the response map.
+      if (result.status === HTTP_STATUS_OK) {
+        return status(HTTP_STATUS_OK, result.body);
+      }
       return status(result.status, result.body);
     },
   );

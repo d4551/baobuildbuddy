@@ -11,11 +11,6 @@ export const getJobTaxonomy = async (): Promise<JobTaxonomySettings> => {
   return taxonomyCache;
 };
 
-export const refreshJobTaxonomy = async (): Promise<JobTaxonomySettings> => {
-  taxonomyCache = readJobTaxonomy();
-  return taxonomyCache;
-};
-
 export const updateJobTaxonomy = async (
   taxonomy: JobTaxonomySettings,
 ): Promise<JobTaxonomySettings> => {

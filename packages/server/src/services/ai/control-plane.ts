@@ -45,6 +45,37 @@ export interface AIControlPlaneState {
   providers: AIControlPlaneProviderRow[];
 }
 
+/**
+ * Diagnostics carry readonly model lists, while the HTTP response contracts
+ * declare plain arrays. Routes serialize through here so settings and AI
+ * provider-discovery share one conversion.
+ */
+export const toSerializableProviderDiagnostics = (
+  diagnostics: AIProviderDiagnostics | undefined,
+) =>
+  diagnostics === undefined
+    ? undefined
+    : Object.fromEntries(
+        Object.entries(diagnostics).map(([provider, { availableModels, ...diagnostic }]) => [
+          provider,
+          // Destructured out rather than set to undefined: an explicit undefined
+          // fails TypeBox optional-property validation at runtime.
+          availableModels ? { ...diagnostic, availableModels: [...availableModels] } : diagnostic,
+        ]),
+      );
+
+/**
+ * Provider rows carry the same readonly model lists as diagnostics; routes
+ * serialize through here so the wire contract sees plain arrays.
+ */
+export const toSerializableProviderRows = (rows: readonly AIControlPlaneProviderRow[]) =>
+  // Destructured out rather than set to undefined: an explicit undefined fails
+  // TypeBox optional-property validation, and spreading the row back in would
+  // keep the readonly array type the wire contract rejects.
+  rows.map(({ availableModels, ...row }) =>
+    availableModels ? { ...row, availableModels: [...availableModels] } : row,
+  );
+
 const toProviderDiagnosticEntry = (status: AIProviderStatus): AIProviderDiagnostic => ({
   provider: status.provider,
   code: status.diagnosticCode ?? (status.available ? "healthy" : "error"),

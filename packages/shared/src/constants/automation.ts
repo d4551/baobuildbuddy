@@ -201,22 +201,18 @@ export interface RpaCapabilityAuditReport {
 /**
  * Canonical automation run status lifecycle values.
  */
-export const AUTOMATION_RUN_STATUSES = ["pending", "running", "success", "error"] as const;
+export const AUTOMATION_RUN_STATUSES = [
+  "pending",
+  "running",
+  "success",
+  "error",
+  "cancelled",
+] as const;
 
 /**
  * Union type for an automation run status.
  */
 export type AutomationRunStatus = (typeof AUTOMATION_RUN_STATUSES)[number];
-
-/**
- * Resolve the manual route segment for a scrape target.
- *
- * @param target Supported scrape target.
- * @returns Route segment used by `/api/scraper/...`.
- */
-export function automationScrapeTargetToRouteSegment(target: AutomationScrapeTarget): string {
-  return AUTOMATION_SCRAPE_TARGET_DETAILS[target].routeSegment;
-}
 
 /**
  * Resolve the stable action emitted for a scrape target.

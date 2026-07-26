@@ -4,13 +4,12 @@ import type { AIProviderType, AIRouting, AIRoutingPurpose } from "@bao/shared/ty
 import type { useI18n } from "vue-i18n";
 import type { SaveState } from "~/components/settings/save-state";
 import { resolveLocaleLabel } from "~/constants/i18n";
-import { resolveProviderModelOptions } from "~/utils/ai-control-plane";
 import { getErrorMessage } from "~/utils/errors";
 import { settlePromise } from "../async-flow";
 
 export type TranslateFn = ReturnType<typeof useI18n>["t"];
 
-export interface ToastApi {
+export interface ToastNotifier {
   error(message: string): void;
   success(message: string): void;
 }
@@ -34,7 +33,6 @@ export type ProviderInputConfig = {
 };
 
 export type ProviderTestState = { valid: boolean; message?: string } | null;
-type ProviderSettingsSnapshot = Parameters<typeof resolveProviderModelOptions>[1];
 
 export const providerFieldById = {
   local: "localModelEndpoint",
@@ -110,52 +108,6 @@ export function buildLanguageLabel(t: TranslateFn, value: AppLanguageCode): stri
   return resolveLocaleLabel(t, value);
 }
 
-function resolveDraftModelOptions(
-  providerId: AIProviderType,
-  settings: ProviderSettingsSnapshot,
-  localModelName: string,
-): string[] {
-  return resolveProviderModelOptions(
-    providerId,
-    settings,
-    providerId === "local" ? [localModelName] : [],
-  );
-}
-
-export function resolveRoutingModelOptionsMap(
-  draft: AIRoutingDraft,
-  settings: ProviderSettingsSnapshot,
-  localModelName: string,
-): Record<AIRoutingPurpose, string[]> {
-  return {
-    chat: resolveDraftModelOptions(draft.chat.provider, settings, localModelName),
-    interviewQuestions: resolveDraftModelOptions(
-      draft.interviewQuestions.provider,
-      settings,
-      localModelName,
-    ),
-    interviewFeedback: resolveDraftModelOptions(
-      draft.interviewFeedback.provider,
-      settings,
-      localModelName,
-    ),
-    resume: resolveDraftModelOptions(draft.resume.provider, settings, localModelName),
-    coverLetter: resolveDraftModelOptions(draft.coverLetter.provider, settings, localModelName),
-    emailResponse: resolveDraftModelOptions(draft.emailResponse.provider, settings, localModelName),
-    jobMatch: resolveDraftModelOptions(draft.jobMatch.provider, settings, localModelName),
-    scrapeEnrichment: resolveDraftModelOptions(
-      draft.scrapeEnrichment.provider,
-      settings,
-      localModelName,
-    ),
-    automationFieldMapping: resolveDraftModelOptions(
-      draft.automationFieldMapping.provider,
-      settings,
-      localModelName,
-    ),
-  };
-}
-
 export function browserOptionLabel(
   t: TranslateFn,
   browser: "chrome" | "chromium" | "edge",
@@ -185,14 +137,14 @@ export function emailTransportAuthModeLabel(t: TranslateFn, authMode: "login" | 
   return t("settings.emailDelivery.authOptions.plain");
 }
 
-export function showToastError(toast: ToastApi, error: unknown, fallback: string): void {
+export function showToastError(toast: ToastNotifier, error: unknown, fallback: string): void {
   toast.error(getErrorMessage(error, fallback));
 }
 
 export async function runToastTask<T>(
   task: Promise<T>,
   failureMessage: string,
-  toast: ToastApi,
+  toast: ToastNotifier,
 ): Promise<T | null> {
   const result = await settlePromise(task, failureMessage);
   if (!result.ok) {
@@ -207,7 +159,7 @@ interface StatefulSaveOptions<T> {
   readonly task: Promise<T>;
   readonly failureMessage: string;
   readonly successMessage: string;
-  readonly toast: ToastApi;
+  readonly toast: ToastNotifier;
 }
 
 export async function runStatefulSave<T>(options: StatefulSaveOptions<T>): Promise<T | null> {

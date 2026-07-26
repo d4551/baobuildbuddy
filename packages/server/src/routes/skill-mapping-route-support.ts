@@ -14,6 +14,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { skillMappings } from "../db/schema/skill-mappings";
 import { gamificationService } from "../services/gamification-service";
+import { normalizeDemandLevel } from "../services/skill-mapping-normalizers";
 import { skillMappingService } from "../services/skill-mapping-service";
 import type {
   SkillMappingMutationBody,
@@ -24,7 +25,6 @@ import type {
 import {
   clampConfidence,
   normalizeCategory,
-  normalizeDemandLevel,
   normalizeSkillEvidence,
   normalizeStringArray,
 } from "./skill-mapping-route-normalizers";

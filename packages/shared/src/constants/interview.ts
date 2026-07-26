@@ -79,16 +79,6 @@ export const JOB_PREVIEW_LIMIT = 12;
 export const INTERVIEW_HUB_RECENT_SESSION_LIMIT = 6;
 
 /**
- * Default minimum value for interview progress indicators.
- */
-export const INTERVIEW_PROGRESS_MIN = 0;
-
-/**
- * Maximum percentage value for interview progress indicators.
- */
-export const INTERVIEW_PROGRESS_MAX = 100;
-
-/**
  * Minimum response length required before submitting an interview answer.
  */
 export const INTERVIEW_MIN_RESPONSE_LENGTH = 10;

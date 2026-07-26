@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import {
-  HTTP_BAD_REQUEST as HTTP_STATUS_BAD_REQUEST,
-  HTTP_INTERNAL_ERROR as HTTP_STATUS_INTERNAL_SERVER_ERROR,
-} from "./constants/numeric-literals";
 import { collectMonolithViolationsForContent } from "./validate-no-monoliths";
 
 const NUM_450 = 450;
+/** Just over the 350-line Vue ceiling enforced by validate-no-monoliths. */
+const LINES_OVER_VUE_LIMIT = 400;
+/** Comfortably over the Vue ceiling, used by the softening-regression cases. */
+const LINES_WELL_OVER_VUE_LIMIT = 500;
 
 const COMPONENT_PATH = "packages/client/components/example/ExampleWidget.vue";
 const TS_PATH = "packages/server/src/routes/example.ts";
 
 describe("collectMonolithViolationsForContent", () => {
   test("flags a vue file exceeding 350 lines", () => {
-    const content = `<template>\n${"  <div />\n".repeat(HTTP_STATUS_BAD_REQUEST)}</template>`;
+    const content = `<template>\n${"  <div />\n".repeat(LINES_OVER_VUE_LIMIT)}</template>`;
     const violations = collectMonolithViolationsForContent(COMPONENT_PATH, content);
     expect(violations.some((v) => v.message.includes("File exceeds"))).toBe(true);
   });
@@ -40,7 +40,7 @@ describe("collectMonolithViolationsForContent", () => {
   });
 
   test("softening regression: does not skip vue monoliths", () => {
-    const content = `<template>\n${"  <div />\n".repeat(HTTP_STATUS_INTERNAL_SERVER_ERROR)}</template>`;
+    const content = `<template>\n${"  <div />\n".repeat(LINES_WELL_OVER_VUE_LIMIT)}</template>`;
     const violations = collectMonolithViolationsForContent(COMPONENT_PATH, content);
     expect(violations.length).toBeGreaterThan(0);
   });

@@ -12,10 +12,11 @@ import type { InterviewMode, VoiceSettings } from "@bao/shared/types/interview";
 import type { Job } from "@bao/shared/types/jobs";
 import type { ComputedRef } from "vue";
 import type { ComposerTranslation } from "vue-i18n";
-import type { LocationQueryValue, RouteLocationNormalizedLoaded } from "vue-router";
+import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { settlePromise } from "~/composables/async-flow";
 import type { InterviewHubSessionConfig } from "~/types/interview";
 import { getErrorMessage } from "~/utils/errors";
+import { queryValueToString } from "~/utils/route-query";
 
 export const INTERVIEW_CONFIG_DIALOG_TITLE_ID = "interview-hub-config-dialog-title";
 export const INTERVIEW_CONFIG_DIALOG_DESCRIPTION_ID = "interview-hub-config-dialog-description";
@@ -55,16 +56,6 @@ export function resolvePreferredOption<T>(
     return firstValue;
   }
   return fallback;
-}
-
-export function queryValueToString(
-  value: LocationQueryValue | LocationQueryValue[] | readonly LocationQueryValue[] | undefined,
-): string {
-  if (Array.isArray(value)) {
-    const [firstValue] = value;
-    return typeof firstValue === "string" ? firstValue : "";
-  }
-  return typeof value === "string" ? value : "";
 }
 
 export function normalizeRoleCandidate(value: string): string {

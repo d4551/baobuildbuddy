@@ -1,7 +1,8 @@
-import type { DailyChallenge, UserGamificationData } from "@bao/shared/types/gamification";
+import type { UserGamificationData } from "@bao/shared/types/gamification";
 import type { UserProfile } from "@bao/shared/types/user";
 import type { RouteLocationRaw } from "vue-router";
 import type { DashboardActivityType } from "~/constants/dashboard-pipeline";
+import type { DailyChallengesResponse as ClientDailyChallengesResponse } from "~/types/client-api-contracts";
 
 export interface DashboardActivity {
   readonly type: DashboardActivityType;
@@ -39,12 +40,8 @@ export interface DashboardViewModel {
   readonly metrics: DashboardMetrics;
 }
 
-export interface DailyChallengesResponse {
-  readonly challenges: DailyChallenge[];
-  readonly completedCount: number;
-  readonly totalCount: number;
-  readonly date: string;
-}
+/** Alias of the wire contract in `~/types/client-api-contracts` (single definition). */
+export type DailyChallengesResponse = ClientDailyChallengesResponse;
 
 export interface DashboardStatCardViewModel {
   readonly id: string;

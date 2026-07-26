@@ -74,14 +74,6 @@ export const SETTINGS_SECTION_ITEMS = [
 
 export type SettingsSectionItem = (typeof SETTINGS_SECTION_ITEMS)[number];
 
-export const SETTINGS_SECTION_COUNT = SETTINGS_SECTION_ITEMS.length;
-
-export function getSettingsSectionById(sectionId: SettingsSectionId): SettingsSectionItem {
-  return (
-    SETTINGS_SECTION_ITEMS.find((section) => section.id === sectionId) ?? SETTINGS_SECTION_ITEMS[0]
-  );
-}
-
 export function isSettingsSectionId(value: string): value is SettingsSectionId {
   return SETTINGS_SECTION_IDS.some((sectionId) => sectionId === value);
 }

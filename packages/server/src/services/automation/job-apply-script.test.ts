@@ -37,6 +37,8 @@ const TEST_RESUME_PDF_BYTES = new Uint8Array([
   PDF_MAGIC_SEVEN,
 ]);
 const JOB_APPLY_SCRIPT_TEST_TIMEOUT_MS = 60_000;
+/** Grace period for the fixture server to finish recording the POSTed form. */
+const SUBMISSION_WAIT_TIMEOUT_MS = 5_000;
 const FORM_FIELD_NAME_WORK_AUTHORIZATION = "workAuthorization";
 const FORM_FIELD_NAME_REMOTE_PREFERENCE = "remotePreference";
 const FORM_FIELD_NAME_TERMS_ACCEPTED = "termsAccepted";
@@ -109,7 +111,9 @@ async function runJobApplyScriptFixture(tempDirectory: string): Promise<{
 
     return {
       execution,
-      submittedPayload: server.submissions[0] ?? null,
+      // Awaited rather than sampled: the fixture records the submission from an
+      // async request handler that can still be in flight when the script ends.
+      submittedPayload: await server.waitForSubmission(SUBMISSION_WAIT_TIMEOUT_MS),
     };
   } finally {
     await server.stop();

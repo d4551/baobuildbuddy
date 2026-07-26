@@ -17,6 +17,7 @@ export const COUNT_SIX = 6;
 export const COUNT_SEVEN = 7;
 export const COUNT_EIGHT = 8;
 export const COUNT_NINE = 9;
+export const COUNT_TEN = 10;
 export const COUNT_TWELVE = 12;
 export const COUNT_THIRTEEN = 13;
 export const COUNT_FOURTEEN = 14;
@@ -43,22 +44,16 @@ export const COUNT_SEVENTY_ONE = 71;
 export const COUNT_SEVENTY_EIGHT = 78;
 export const COUNT_NINETY = 90;
 export const COUNT_ONE_TWENTY = 120;
-export const COUNT_ONE_TWENTY_SEVEN = 127;
 export const COUNT_ONE_THIRTY_SEVEN = 137;
 export const COUNT_ONE_FORTY = 140;
 export const COUNT_ONE_FIFTY = 150;
-export const COUNT_ONE_SIXTY_EIGHT = 168;
-export const COUNT_ONE_SIXTY_NINE = 169;
 export const COUNT_ONE_EIGHTY = 180;
-export const COUNT_ONE_NINETY_TWO = 192;
 export const COUNT_TWO_TWENTY = 220;
 export const COUNT_TWO_TWENTY_ONE = 221;
 export const COUNT_TWO_THIRTY_FIVE = 235;
 export const COUNT_TWO_FORTY = 240;
 export const COUNT_TWO_FIFTY = 250;
 export const COUNT_TWO_FIFTY_ONE = 251;
-export const COUNT_TWO_FIFTY_FOUR = 254;
-export const COUNT_TWO_FIFTY_FIVE = 255;
 export const COUNT_THREE_HUNDRED = 300;
 export const COUNT_THREE_THIRTY_FOUR = 334;
 export const COUNT_THREE_FIFTY_FOUR = 354;
@@ -66,8 +61,6 @@ export const COUNT_FOUR_HUNDRED = 400;
 export const COUNT_FIVE_HUNDRED = 500;
 export const COUNT_ONE_THOUSAND = 1000;
 export const COUNT_TWO_THOUSAND = 2000;
-export const COUNT_TWO_KILO = 2048;
-export const COUNT_FOUR_KILO = 4096;
 
 export const MS_TWO_SECONDS = 2_000;
 export const MS_ONE_AND_HALF_SECONDS = 1_500;
@@ -83,10 +76,7 @@ export const MS_FIVE_MINUTES = 300_000;
 export const BYTES_KILO = 1024;
 export const BYTES_TWO_KILO = 2048;
 export const BYTES_FOUR_KILO = 4096;
-export const BYTES_MEGA = BYTES_KILO * BYTES_KILO;
 
-/** Hex digit pad width for byte→hex string encoding (e.g. `toString(16).padStart(2, "0")`). */
-export const HEX_BYTE_PAD_WIDTH = COUNT_TWO;
 /** Base for `Number.toString(radix)` when encoding identifiers as base36. */
 export const RADIX_BASE36 = COUNT_THIRTY_SIX;
 
@@ -113,12 +103,6 @@ export const PDF_MAGIC_HYPHEN = 0x2d;
 export const PDF_MAGIC_ONE = 0x31;
 export const PDF_MAGIC_DOT = 0x2e;
 export const PDF_MAGIC_SEVEN = 0x37;
-
-/** PNG signature leading bytes (IHDR magic prefix). */
-export const PNG_SIGNATURE_BYTE_0 = COUNT_ONE_THIRTY_SEVEN;
-export const PNG_SIGNATURE_BYTE_1 = PERCENT_HIGH;
-export const PNG_SIGNATURE_BYTE_2 = COUNT_SEVENTY_EIGHT;
-export const PNG_SIGNATURE_BYTE_3 = COUNT_SEVENTY_ONE;
 
 /** JSON `\uXXXX` escape: hex digit count. */
 export const UNICODE_ESCAPE_HEX_DIGITS = COUNT_FOUR;

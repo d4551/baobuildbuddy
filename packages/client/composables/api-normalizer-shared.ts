@@ -1,5 +1,5 @@
 import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
-import { JOB_EXPERIENCE_LEVELS, JOB_TYPES } from "@bao/shared/constants/jobs";
+import { JOB_EXPERIENCE_LEVELS } from "@bao/shared/constants/jobs";
 import {
   RESUME_TEMPLATE_DEFAULT,
   RESUME_TEMPLATE_OPTIONS,
@@ -7,7 +7,7 @@ import {
 } from "@bao/shared/constants/resume";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import type { StudioCulture } from "@bao/shared/types/interview";
-import type { JobExperienceLevel, JobType } from "@bao/shared/types/jobs";
+import type { JobExperienceLevel } from "@bao/shared/types/jobs";
 import type {
   ResumeEducationItem,
   ResumeExperienceItem,
@@ -46,9 +46,6 @@ export const normalizeResumeTemplate = (value: unknown): ResumeTemplate =>
 
 export const normalizeJobExperienceLevel = (value: unknown): JobExperienceLevel | undefined =>
   asEnum(value, JOB_EXPERIENCE_LEVELS);
-
-export const normalizeJobType = (value: unknown): JobType =>
-  asEnum(value, JOB_TYPES) ?? "full-time";
 
 export const normalizeAIProvider = (value: unknown): AIProviderType =>
   asEnum(value, AI_PROVIDERS) ?? AI_PROVIDER_DEFAULT;

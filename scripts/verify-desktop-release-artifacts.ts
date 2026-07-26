@@ -841,7 +841,7 @@ const verifyCollectedEntries = async (
   const collectedEntriesResult = await captureResult(() => collectRelativeEntries(rootPath));
   if (!collectedEntriesResult.ok) {
     return {
-      details: toErrorMessage(collectedEntriesResult.error),
+      details: toErrorMessage(collectedEntriesResult.error, "Unexpected error."),
       label,
       ok: false,
     };
@@ -866,7 +866,7 @@ const verifyReleaseProvenance = async (
   if (!provenanceEntriesResult.ok) {
     return [
       {
-        details: toErrorMessage(provenanceEntriesResult.error),
+        details: toErrorMessage(provenanceEntriesResult.error, "Unexpected error."),
         label: "provenance:manifest",
         ok: false,
       },
@@ -1234,7 +1234,7 @@ const verifyPortableExecutableSignatureInZip = async (
       if (!extractResult.ok) {
         return [
           {
-            details: toErrorMessage(extractResult.error),
+            details: toErrorMessage(extractResult.error, "Unexpected error."),
             label: `artifact:${artifact.relativePath}:portable-signature`,
             ok: false,
           },
@@ -1515,7 +1515,7 @@ const readRuntimeManifestForVerification = async (
   if (!manifestResult.ok) {
     return {
       failure: {
-        details: toErrorMessage(manifestResult.error),
+        details: toErrorMessage(manifestResult.error, "Unexpected error."),
         label,
         ok: false,
       },
@@ -1590,7 +1590,7 @@ const verifyWindowsPortablePayload = async (
       if (!extractResult.ok) {
         return [
           {
-            details: toErrorMessage(extractResult.error),
+            details: toErrorMessage(extractResult.error, "Unexpected error."),
             label: "windows:portable-archive",
             ok: false,
           },
@@ -1828,7 +1828,7 @@ const verifyLinuxPackagePayload = async (
       if (!extractResult.ok) {
         return [
           {
-            details: toErrorMessage(extractResult.error),
+            details: toErrorMessage(extractResult.error, "Unexpected error."),
             label: `linux:${artifact.kind}-archive:${artifact.target}`,
             ok: false,
           },

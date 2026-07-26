@@ -5,7 +5,16 @@ type AuthFailure = {
     status: typeof HTTP_STATUS_UNAUTHORIZED;
 };
 /**
- * Validates a bearer API key against the persisted SHA-256 hash.
+ * Query parameter accepted as an alternative credential channel for clients
+ * that cannot set headers (browser WebSocket, <img> screenshot loads).
+ */
+export declare const AUTH_QUERY_TOKEN_PARAM = "token";
+/**
+ * Validates an API key credential against the persisted SHA-256 hash.
+ *
+ * The credential is read from the `Authorization: Bearer` header first; when
+ * the header is absent, the `?token=` query parameter is used instead so
+ * browser WebSocket handshakes and <img> screenshot loads can authenticate.
  *
  * The API key is hashed at creation and only the hash is stored in the
  * database. Verification re-hashes the provided bearer token and

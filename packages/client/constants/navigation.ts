@@ -216,13 +216,6 @@ export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
 ] as const;
 
 /**
- * Returns navigation items rendered in the desktop sidebar (registry order).
- */
-export function getSidebarNavigationItems(): readonly NavigationItem[] {
-  return NAVIGATION_ITEMS.filter((item) => item.includeInSidebar);
-}
-
-/**
  * Sidebar items bucketed by IA group (empty groups omitted).
  */
 export function getSidebarNavigationGroups(): readonly {

@@ -1,9 +1,4 @@
-type ApiError = unknown;
-
-export interface ApiEnvelope<TData = unknown> {
-  data: TData | null;
-  error: ApiError;
-}
+import type { ApiEnvelope } from "./client-api-contracts";
 
 type ApiRequest<TData = unknown> = Promise<ApiEnvelope<TData>>;
 

@@ -39,11 +39,6 @@ export const SKILLS_READINESS_THRESHOLD_HIGH = SCORE_PASS_THRESHOLD;
 export const SKILLS_READINESS_THRESHOLD_MEDIUM = SCORE_WARNING_THRESHOLD;
 
 /**
- * Reusable radial dial sizing for readiness visuals.
- */
-export const SKILLS_READINESS_DIAL_SIZE_REM = 7;
-
-/**
  * Readiness percentage bounds used in radial and bar-style readiness components.
  */
 export const SKILLS_READINESS_MIN = 0;

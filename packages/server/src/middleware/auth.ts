@@ -14,13 +14,19 @@ import { verifyApiKey } from "../utils/crypto";
 
 type AuthFailure = { error: string; status: typeof HTTP_STATUS_UNAUTHORIZED };
 
-function readBearerHeader(
-  request: Request,
-):
+/**
+ * Query parameter accepted as an alternative credential channel for clients
+ * that cannot set headers (browser WebSocket, <img> screenshot loads).
+ */
+export const AUTH_QUERY_TOKEN_PARAM = "token";
+
+type CredentialRead =
   | { kind: "missing" }
   | { kind: "wrong-scheme" }
   | { kind: "empty" }
-  | { kind: "ok"; token: string } {
+  | { kind: "ok"; token: string };
+
+function readBearerHeader(request: Request): CredentialRead {
   const raw = request.headers.get("authorization");
   if (raw === null) {
     return { kind: "missing" };
@@ -39,8 +45,32 @@ function readBearerHeader(
   return token.length > 0 ? { kind: "ok", token } : { kind: "empty" };
 }
 
+function readQueryToken(request: Request): CredentialRead {
+  if (!URL.canParse(request.url)) {
+    return { kind: "missing" };
+  }
+  const raw = new URL(request.url).searchParams.get(AUTH_QUERY_TOKEN_PARAM);
+  if (raw === null) {
+    return { kind: "missing" };
+  }
+  const token = raw.trim();
+  return token.length > 0 ? { kind: "ok", token } : { kind: "empty" };
+}
+
+function readCredential(request: Request): CredentialRead {
+  const bearer = readBearerHeader(request);
+  if (bearer.kind !== "missing") {
+    return bearer;
+  }
+  return readQueryToken(request);
+}
+
 /**
- * Validates a bearer API key against the persisted SHA-256 hash.
+ * Validates an API key credential against the persisted SHA-256 hash.
+ *
+ * The credential is read from the `Authorization: Bearer` header first; when
+ * the header is absent, the `?token=` query parameter is used instead so
+ * browser WebSocket handshakes and <img> screenshot loads can authenticate.
  *
  * The API key is hashed at creation and only the hash is stored in the
  * database. Verification re-hashes the provided bearer token and
@@ -53,7 +83,7 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
     return null;
   }
 
-  const parsed = readBearerHeader(request);
+  const parsed = readCredential(request);
   switch (parsed.kind) {
     case "missing":
     case "wrong-scheme":

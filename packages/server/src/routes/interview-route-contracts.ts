@@ -233,18 +233,16 @@ export const interviewStatsResponseSchema = t.Object({
   improvementTrend: t.Number(),
 });
 
-// Concrete `interviewSessionResponseSchema` is the payload SSOT. Response maps stay
-// open until handlers emit SelectiveStatus-compatible branches without dynamic envelopes.
 export const createInterviewSessionResponses = {
-  [HTTP_STATUS_CREATED]: t.Unknown(),
+  [HTTP_STATUS_CREATED]: interviewSessionResponseSchema,
 };
 
 export const interviewSessionsListResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: t.Array(interviewSessionResponseSchema),
 };
 
 export const interviewSessionResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: interviewSessionResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 

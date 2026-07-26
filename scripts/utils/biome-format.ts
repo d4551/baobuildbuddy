@@ -56,32 +56,6 @@ const formatTextWithBiomeFromStdin = async (
  *
  * @param filePaths Absolute or repo-relative file paths to format in place.
  */
-export const formatFilesWithBiome = async (filePaths: readonly string[]): Promise<void> => {
-  if (filePaths.length === 0) {
-    return;
-  }
-
-  const proc = Bun.spawn([...BIOME_COMMAND_PREFIX, "format", ...filePaths, "--write"], {
-    cwd: REPO_ROOT,
-    env: process.env,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const [exitCode, stdout, stderr] = await Promise.all([
-    proc.exited,
-    readStreamText(proc.stdout),
-    readStreamText(proc.stderr),
-  ]);
-
-  if (exitCode !== 0) {
-    const output = [stdout, stderr].filter((value) => value.length > 0).join("\n");
-    throw new Error(
-      output.length > 0
-        ? `Biome failed to format ${filePaths.join(", ")}.\n${output}`
-        : `Biome failed to format ${filePaths.join(", ")}.`,
-    );
-  }
-};
 
 /**
  * Serializes JSON with a trailing newline, then normalizes the file with Biome.

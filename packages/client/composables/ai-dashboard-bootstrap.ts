@@ -3,7 +3,7 @@ import type { AIProviderType } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import { PERCENT_MAX } from "~/constants/numeric-ui";
 import type {
-  DashboardStats,
+  AiDashboardStats,
   ProviderConfig,
   ProviderConnectivityResult,
 } from "~/types/ai-dashboard";
@@ -16,7 +16,7 @@ import {
 export type DashboardBootstrap = {
   activeModel: string;
   activeProvider: AIProviderType;
-  normalizedStats: DashboardStats;
+  normalizedStats: AiDashboardStats;
   resolvedProviders: ProviderConfig[];
 };
 
@@ -34,7 +34,7 @@ function readNumberField(payload: Record<string, unknown>, key: string): number 
 function normalizeDashboardStats(
   usagePayload: unknown,
   activeProvider: AIProviderType,
-): DashboardStats {
+): AiDashboardStats {
   if (!isRecord(usagePayload)) {
     return {
       totalRequests: 0,

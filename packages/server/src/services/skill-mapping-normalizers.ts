@@ -1,6 +1,7 @@
 import { COUNT_FIFTY } from "@bao/shared/constants/numeric";
 import {
   SKILL_CATEGORY_IDS,
+  SKILL_DEMAND_LEVEL_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
   type SkillCategory,
@@ -17,6 +18,9 @@ type DemandLevel = SkillMapping["demandLevel"];
 const isSkillCategory = (value: string | null): value is SkillCategory =>
   typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
 
+const isDemandLevel = (value: unknown): value is DemandLevel =>
+  typeof value === "string" && SKILL_DEMAND_LEVEL_IDS.some((levelId) => levelId === value);
+
 const isEvidenceType = (value: JsonValue | undefined): value is SkillEvidence["type"] =>
   typeof value === "string" && SKILL_EVIDENCE_TYPE_IDS.some((typeId) => typeId === value);
 
@@ -29,8 +33,8 @@ const isEvidenceStatus = (
 export const normalizeSkillCategory = (value: string | null): SkillCategory =>
   isSkillCategory(value) ? value : "technical";
 
-export const normalizeDemandLevel = (value: string | null): DemandLevel =>
-  value === "high" || value === "low" ? value : "medium";
+export const normalizeDemandLevel = (value: unknown): DemandLevel =>
+  isDemandLevel(value) ? value : "medium";
 
 const normalizeEvidenceType = (value: JsonValue | undefined): SkillEvidence["type"] =>
   isEvidenceType(value) ? value : "document";
@@ -64,7 +68,7 @@ export const normalizeEvidenceEntries = (value: JsonArray | null | undefined): S
   return entries;
 };
 
-export const toSkillMapping = (row: SkillMappingRow): SkillMapping => ({
+export const skillMappingFromRow = (row: SkillMappingRow): SkillMapping => ({
   id: row.id,
   gameExpression: row.gameExpression,
   transferableSkill: row.transferableSkill,

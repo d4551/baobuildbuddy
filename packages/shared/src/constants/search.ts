@@ -16,6 +16,3 @@ export const SEARCH_RESULT_TYPES = [
 export type SearchResultType = (typeof SEARCH_RESULT_TYPES)[number];
 
 export const DEFAULT_SEARCH_RESULT_TYPES: readonly SearchResultType[] = SEARCH_RESULT_TYPES;
-
-export const isSearchResultType = (value: string): value is SearchResultType =>
-  (SEARCH_RESULT_TYPES as readonly string[]).includes(value);

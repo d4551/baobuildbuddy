@@ -1,7 +1,7 @@
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { sqlite } from "../db/client";
-import type { BaoExportData, ImportResult } from "./data-service-contracts";
+import type { BaoImportData, ImportResult } from "./data-service-contracts";
 import { DATA_EXPORT_VERSION } from "./data-service-contracts";
 import {
   importChatHistorySection,
@@ -18,7 +18,7 @@ import {
 } from "./data-service-import-foundation";
 
 const executeImportTransaction = async (
-  data: BaoExportData,
+  data: BaoImportData,
   imported: Record<string, number>,
   errors: string[],
 ): Promise<void> => {
@@ -38,7 +38,7 @@ const executeImportTransaction = async (
  * Import data from a BaoBuildBuddy export JSON.
  * Uses a transaction for atomicity.
  */
-export const importAllData = async (data: BaoExportData): Promise<ImportResult> => {
+export const importAllData = async (data: BaoImportData): Promise<ImportResult> => {
   const imported: Record<string, number> = {};
   const skipped: Record<string, number> = {};
   const errors: string[] = [];

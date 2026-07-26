@@ -194,7 +194,8 @@ export const jobProviderSettingsBodySchema = t.Required(
     hitmarkerEnabled: t.Boolean(),
     hitmarkerApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
     hitmarkerDefaultQuery: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
-    hitmarkerDefaultLocation: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_ID }),
+    // Empty means "no location filter", which is the shipped default.
+    hitmarkerDefaultLocation: t.String({ maxLength: SCHEMA_MAX_LENGTH_ID }),
     greenhouseApiBaseUrl: t.String({ minLength: 1, maxLength: SCHEMA_MAX_LENGTH_SETTINGS_URL }),
     greenhouseMaxPages: t.Number({
       minimum: SCHEMA_MAX_PAGES_MIN,

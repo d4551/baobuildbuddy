@@ -225,5 +225,3 @@ export class JobAggregator {
     return getJobStats();
   }
 }
-
-export const jobAggregator = new JobAggregator();

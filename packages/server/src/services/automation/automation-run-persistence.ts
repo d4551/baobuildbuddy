@@ -17,7 +17,7 @@ import {
 } from "./automation-run-persistence-updates";
 import type { RpaScriptExecutionResult } from "./rpa-runner-contracts";
 
-export const resolveRunArtifactDir = (runId: string, invalidRunIdMessage: string): string => {
+export const ensureRunArtifactDir = (runId: string, invalidRunIdMessage: string): string => {
   const safeRunId = sanitizeRunId(runId, invalidRunIdMessage);
   const directory = resolveRunArtifactDirectory(safeRunId, invalidRunIdMessage);
   Bun.spawnSync(["mkdir", "-p", directory]);
@@ -29,7 +29,7 @@ export const normalizeExecutionResult = async (
   execution: RpaScriptExecutionResult,
   invalidRunIdMessage: string,
 ): Promise<RpaRunResult> => {
-  const runDir = resolveRunArtifactDir(runId, invalidRunIdMessage);
+  const runDir = ensureRunArtifactDir(runId, invalidRunIdMessage);
   Bun.spawnSync(["mkdir", "-p", runDir]);
   return normalizeExecutionArtifacts(runId, runDir, execution);
 };

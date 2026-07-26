@@ -54,7 +54,7 @@ export const rpaEventTypeSchema = z.enum(["progress", "result", "error"]);
 /**
  * Supported normalized step status values.
  */
-export const rpaStepStatusSchema = z.enum(["pending", "running", "success", "error"]);
+export const rpaStepStatusSchema = z.enum(["pending", "running", "success", "error", "cancelled"]);
 
 /**
  * Artifact categories emitted by automation scripts.

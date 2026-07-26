@@ -1,5 +1,4 @@
 import type { SpeechProviderOption } from "@bao/shared/constants/settings";
-import { ON_DEVICE_TTS_PROVIDER_OPTIONS } from "@bao/shared/constants/settings";
 
 /**
  * Resolves TTS provider. Product path is local Kokoro; browser Web Speech is fallback.
@@ -24,9 +23,3 @@ export const resolveSpeechTtsProvider = (
 /** Local Kokoro neural path (server → OpenAI-compatible Kokoro). */
 export const shouldUseLocalKokoroTts = (provider: SpeechProviderOption): boolean =>
   resolveSpeechTtsProvider(provider) === "local";
-
-export const isBrowserSpeechTts = (provider: SpeechProviderOption): boolean =>
-  resolveSpeechTtsProvider(provider) === "browser";
-
-export const listOnDeviceTtsProviders = (): readonly SpeechProviderOption[] =>
-  ON_DEVICE_TTS_PROVIDER_OPTIONS;

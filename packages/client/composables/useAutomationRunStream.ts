@@ -14,8 +14,10 @@ const TERMINAL_STATUSES = new Set<RpaRunExecutionEnvelope["status"]>(["success",
 const PROGRESS_STATUS_TO_RUN_STATUS = {
   pending: "pending",
   running: "running",
+  // A step reporting success does not end the run; the terminal result event does.
   success: "running",
   error: "error",
+  cancelled: "cancelled",
 } as const satisfies Record<
   Extract<RpaRunEvent, { eventType: "progress" }>["status"],
   RpaRunExecutionEnvelope["status"]

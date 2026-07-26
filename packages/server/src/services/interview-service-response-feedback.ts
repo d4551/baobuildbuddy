@@ -20,6 +20,7 @@ import type {
   InterviewResponse,
 } from "@bao/shared/types/interview";
 import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { interviewFeedbackPrompt, interviewPersonaPrompt } from "./ai/prompts-interview";
 import { withAiOperationTimeout } from "./interview-service-ai";
 import { createAIService, resolveCandidateInterviewContext } from "./interview-service-context";
@@ -31,7 +32,7 @@ import {
   buildJobPromptContext,
   buildStudioPromptContext,
 } from "./interview-service-prompt-context";
-import { isRecord, parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
+import { parseStringArray, safeParseJSON } from "./interview-service-value-parsers";
 
 function fallbackResponseScore(transcript: string): number {
   const normalizedTranscript = transcript.trim().toLowerCase();
@@ -65,6 +66,7 @@ function fallbackResponseFeedback(
       transcript.length < COUNT_ONE_FORTY
         ? ["Add specific examples and impact metrics."]
         : ["Keep responses concise and concrete."],
+    source: "heuristic",
   };
 }
 
@@ -136,6 +138,7 @@ function normalizeQuestionFeedback(
     feedback: typeof raw.feedback === "string" && raw.feedback.trim() ? raw.feedback.trim() : "",
     strengths: parseStringArray(raw.strengths),
     improvements: parseStringArray(raw.improvements),
+    source: "ai",
   };
 }
 
@@ -151,6 +154,7 @@ export async function generateResponseFeedback(
       feedback: "Response is empty and cannot be assessed.",
       strengths: [],
       improvements: ["Provide a complete and structured response."],
+      source: "heuristic",
     };
   }
 

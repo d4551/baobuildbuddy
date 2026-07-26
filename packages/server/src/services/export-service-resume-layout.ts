@@ -3,10 +3,10 @@ import {
   A4_PAGE_HEIGHT,
   A4_PAGE_WIDTH,
   RESUME_BODY_LINE_GAP,
-  RESUME_EXPORT_THEME_CONFIGS,
   RESUME_SECTION_HEADER_SPACING,
   RESUME_SECTION_SPACE,
 } from "@bao/shared/constants/export-layout";
+import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-resume-theme";
 import { RATIO_HALF } from "@bao/shared/constants/numeric";
 import { RESUME_TEMPLATE_DEFAULT, type ResumeTemplate } from "@bao/shared/constants/resume";
 import { resolveResumeExportTemplate } from "@bao/shared/utils/export-contract";

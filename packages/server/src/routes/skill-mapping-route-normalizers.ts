@@ -1,19 +1,17 @@
 import { PERCENT_MAX } from "@bao/shared/constants/numeric";
 import {
   SKILL_CATEGORY_IDS,
-  SKILL_DEMAND_LEVEL_IDS,
   SKILL_EVIDENCE_TYPE_IDS,
   SKILL_EVIDENCE_VERIFICATION_STATUS_IDS,
   SKILLS_DEFAULT_CONFIDENCE,
   type SkillCategory,
   type SkillEvidence,
-  type SkillMapping,
 } from "@bao/shared/types/skill-mapping";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";
+import { normalizeDemandLevel } from "../services/skill-mapping-normalizers";
 
-type DemandLevel = SkillMapping["demandLevel"];
 type SkillEvidenceType = SkillEvidence["type"];
 type SkillEvidenceVerificationStatus = SkillEvidence["verificationStatus"];
 
@@ -22,9 +20,6 @@ const asNonEmptyString = (value: JsonValue | undefined): string | null =>
 
 const isSkillCategory = (value: string): value is SkillCategory =>
   SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
-
-const isDemandLevel = (value: string): value is DemandLevel =>
-  SKILL_DEMAND_LEVEL_IDS.some((demandLevelId) => demandLevelId === value);
 
 const isSkillEvidenceType = (value: string): value is SkillEvidenceType =>
   SKILL_EVIDENCE_TYPE_IDS.some((evidenceTypeId) => evidenceTypeId === value);
@@ -38,9 +33,6 @@ const isSkillEvidenceVerificationStatus = (
 
 export const normalizeCategory = (value: JsonValue | undefined): SkillCategory =>
   typeof value === "string" && isSkillCategory(value) ? value : "technical";
-
-export const normalizeDemandLevel = (value: JsonValue | undefined): DemandLevel =>
-  typeof value === "string" && isDemandLevel(value) ? value : "medium";
 
 export const normalizeStringArray = (value: JsonValue | undefined): string[] =>
   Array.isArray(value)

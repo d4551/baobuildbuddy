@@ -37,5 +37,3 @@ export const asJsonArray = <T>(v: T): JsonValue[] | undefined => {
   const parsed = safeParseJson(JSON.stringify(v));
   return Array.isArray(parsed) ? parsed : undefined;
 };
-
-export const asUnknownArray = asJsonArray;

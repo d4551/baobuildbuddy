@@ -1,6 +1,7 @@
 import { AI_PROVIDER_TEST_STRATEGY_BY_ID } from "@bao/shared/constants/ai-provider";
 import { API_ERROR_UNKNOWN, API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
 import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveAppLanguageCode } from "@bao/shared/constants/settings";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {
   normalizeAutomationSettings,
@@ -9,14 +10,41 @@ import {
 import { validateLocalAiEndpoint } from "@bao/shared/utils/local-ai-endpoint";
 import { settle } from "@bao/shared/utils/promise";
 import type { settings as settingsTable } from "../db/schema/settings";
-import { buildAIControlPlaneState } from "../services/ai/control-plane";
+import {
+  buildAIControlPlaneState,
+  toSerializableProviderDiagnostics,
+} from "../services/ai/control-plane";
 import { normalizeAndPersistAutomationSettings } from "../services/automation/automation-settings-support";
 import { LocalProvider } from "../services/ai/local-provider";
 import { getJobTaxonomy } from "../services/jobs/job-taxonomy-service";
 import { decryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
 import { createServerLogger } from "../utils/logger";
+import { resolveKnownProvider } from "./settings-route-schema-ai-brand";
 
 const settingsProviderLogger = createServerLogger("settings-provider-test");
+
+type NotificationPreferences = {
+  achievements: boolean;
+  dailyChallenges: boolean;
+  jobAlerts: boolean;
+  levelUp: boolean;
+};
+
+/**
+ * The notifications column is a loose boolean map; the response contract
+ * declares the four known flags, so absent keys resolve to disabled.
+ */
+const resolveNotificationPreferences = (
+  value: Record<string, boolean> | null,
+): NotificationPreferences | null =>
+  value === null
+    ? null
+    : {
+        achievements: value.achievements === true,
+        dailyChallenges: value.dailyChallenges === true,
+        jobAlerts: value.jobAlerts === true,
+        levelUp: value.levelUp === true,
+      };
 
 const KEY_MASK_VISIBLE_CHARS = 4;
 
@@ -44,8 +72,12 @@ export const buildSettingsResponse = async (row: SettingsRow) => {
     automationSettings,
     localModelEndpoint: normalizeLocalModelEndpoint(row.localModelEndpoint),
     aiRouting: controlPlane.aiRouting,
-    providerDiagnostics: controlPlane.providerDiagnostics,
-    preferredProvider: controlPlane.preferredProvider,
+    providerDiagnostics: toSerializableProviderDiagnostics(controlPlane.providerDiagnostics),
+    // Narrowed at the boundary: the control plane can still hold a null/unknown
+    // provider, but the settings response contract guarantees a known one.
+    preferredProvider: resolveKnownProvider(controlPlane.preferredProvider),
+    language: resolveAppLanguageCode(row.language),
+    notifications: resolveNotificationPreferences(row.notifications),
     preferredModel: controlPlane.preferredModel,
     theme: normalizeAppDataTheme(row.theme),
     brandSettings: resolveBrandSettings(row.brandSettings),
@@ -107,7 +139,9 @@ export const testProviderConnection = async (body: {
       provider: body.provider,
       diagnosticCode: diagnostics.code,
       message: diagnostics.message,
-      availableModels: diagnostics.availableModels,
+      // Copied to a mutable array: the diagnostics list is readonly, while the
+      // response contract declares a plain array.
+      availableModels: diagnostics.availableModels ? [...diagnostics.availableModels] : undefined,
       selectedModel: diagnostics.selectedModel,
     };
   }

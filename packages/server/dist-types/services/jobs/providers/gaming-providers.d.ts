@@ -21,10 +21,6 @@ export declare class GamingPortalProvider implements JobProvider {
     fetchJobs(): Promise<RawJob[]>;
 }
 /**
- * Shared Hitmarker provider instance.
- */
-export declare const hitmarkerProvider: HitmarkerProvider;
-/**
  * Shared Hitmarker portal provider instance.
  */
 export declare const hitmarkerPortalProvider: GamingPortalProvider;

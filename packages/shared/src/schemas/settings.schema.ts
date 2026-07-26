@@ -60,11 +60,6 @@ export const brandThemePaletteSchema = brandThemePaletteSchemaDef;
 export const brandTypographySettingsPatchSchema = brandTypographySettingsPatchSchemaDef;
 export const brandTypographySettingsSchema = brandTypographySettingsSchemaDef;
 
-export const apiKeyConfigSchema = z.object({
-  provider: z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]),
-  key: z.string().min(1),
-});
-
 const aiProviderSchema = z.enum(AI_PROVIDER_ID_LIST as [AIProviderType, ...AIProviderType[]]);
 
 export const preferredModelsSchema = z.partialRecord(aiProviderSchema, z.string().min(1));
@@ -161,10 +156,10 @@ export const jobProviderSettingsSchema = z.object({
   gamingBoardResultLimit: z.number().int().min(1).max(SCHEMA_MAX_BOARD_RESULT_LIMIT),
   unknownLocationLabel: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_ID),
   unknownCompanyLabel: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_ID),
-  hitmarkerEnabled: z.boolean().default(DEFAULT_JOB_PROVIDER_SETTINGS.hitmarkerEnabled),
+  hitmarkerEnabled: z.boolean(),
   hitmarkerApiBaseUrl: z.string().url(),
   hitmarkerDefaultQuery: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_ID),
-  hitmarkerDefaultLocation: z.string().trim().min(1).max(SCHEMA_MAX_LENGTH_ID),
+  hitmarkerDefaultLocation: z.string().trim().max(SCHEMA_MAX_LENGTH_ID),
   greenhouseApiBaseUrl: z.string().url(),
   greenhouseMaxPages: z.number().int().min(SCHEMA_MAX_PAGES_MIN).max(SCHEMA_MAX_PAGES_MAX),
   greenhouseBoards: z.array(greenhouseBoardConfigSchema).max(SCHEMA_MAX_ITEMS_BOARDS),

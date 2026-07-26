@@ -6,7 +6,6 @@ export declare const normalizeStudioType: (value: string | null) => StudioType |
 export declare const normalizeGameGenres: (value: string[] | null) => GameGenre[] | undefined;
 export declare const normalizePlatforms: (value: string[] | null) => Platform[] | undefined;
 export declare const normalizeExperienceLevel: (value: string | null) => JobExperienceLevel | undefined;
-export declare const normalizeJobType: (value: string | null) => JobType;
 export declare const detectExperienceLevel: (title: string) => JobExperienceLevel | undefined;
 export declare const detectJobType: (title: string) => JobType;
 export declare const detectStudioType: (company: string) => Promise<StudioType>;

@@ -6,7 +6,6 @@ export const API_ERROR_UNKNOWN = "Unknown error";
 export const API_ERROR_SCRAPE_STUDIOS_FAILED = "Studio scrape failed";
 export const API_ERROR_SCRAPE_JOBS_FAILED = "Job scrape failed";
 export const API_ERROR_AUTOMATION_PROCESS_FAILED = "Failed to process automation request";
-export const API_ERROR_AUTOMATION_START_FAILED = "Failed to start automation";
 export const API_ERROR_GENERATE_QUESTIONS = "Failed to generate questions";
 export const API_ERROR_SYNTHESIZE_RESUME = "Failed to synthesize resume";
 export const API_ERROR_EXPORT_RESUME = "Failed to export resume";
@@ -55,7 +54,6 @@ export const API_ERROR_SKILL_MAPPING_NOT_FOUND = "Skill mapping not found";
 export const API_ERROR_PROJECT_NOT_FOUND = "Project not found";
 export const API_ERROR_PORTFOLIO_NOT_FOUND = "Portfolio not found";
 export const API_ERROR_SCREENSHOT_NOT_FOUND = "Screenshot not found";
-export const API_ERROR_SESSION_NOT_FOUND = "Session not found";
 export const API_ERROR_INTERVIEW_SESSION_NOT_FOUND = "Interview session not found";
 export const API_ERROR_COVER_LETTER_NOT_FOUND = "Cover letter not found";
 export const API_ERROR_STUDIO_NOT_FOUND = "Studio not found";
@@ -89,7 +87,6 @@ export const API_ERROR_JOB_URL_DISALLOWED_HOST = "jobUrl resolves to a disallowe
 export const API_ERROR_CUSTOM_ANSWERS_OBJECT = "customAnswers must be an object map";
 export const API_ERROR_CUSTOM_ANSWERS_KEYS = "customAnswers keys must not be empty";
 export const API_ERROR_CREATE_RESUME = "Failed to create resume";
-export const API_ERROR_CANNOT_MERGE_EMPTY_JOBS = "Cannot merge empty array of jobs";
 export const API_ERROR_CREATE_COVER_LETTER = "Failed to create cover letter";
 export const API_ERROR_CREATE_PROJECT = "Failed to create project";
 export const API_ERROR_INVALID_PROJECT_ID_REORDER = "Invalid project ID in reorder payload";
@@ -213,9 +210,6 @@ export const API_ERROR_RATE_LIMIT_EXCEEDED = "Rate limit exceeded";
 
 /** OpenAI Chat Completions: model id missing or unknown. */
 export const API_ERROR_OPENAI_V1_MODEL_NOT_FOUND = "The model does not exist";
-
-/** OpenAI Chat Completions: chat messages missing. */
-export const API_ERROR_OPENAI_V1_MESSAGES_REQUIRED = "messages is required";
 
 /** OpenAI Chat Completions: generation failed. */
 export const API_ERROR_OPENAI_V1_GENERATION_FAILED = "Failed to generate chat completion";

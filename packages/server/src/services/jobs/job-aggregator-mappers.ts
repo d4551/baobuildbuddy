@@ -1,4 +1,5 @@
 import type { Job, SalaryRange } from "@bao/shared/types/jobs";
+import { normalizeJobType } from "@bao/shared/utils/job-normalizers";
 import type { jobs } from "../../db/schema/jobs";
 import { generateContentHash } from "./deduplication";
 import {
@@ -14,7 +15,6 @@ import {
   generateTags,
   normalizeExperienceLevel,
   normalizeGameGenres,
-  normalizeJobType,
   normalizePlatforms,
   normalizeStudioType,
 } from "./job-aggregator-taxonomy";

@@ -26,14 +26,9 @@ import { gamificationService } from "../services/gamification-service";
 import { resumeService } from "../services/resume-service";
 import { openapiDetail } from "../utils/openapi-detail";
 import {
-  type ResumeEnhanceRouteBody,
   type ResumeExportRouteBody,
   type ResumeIdParams,
-  type ResumeMutationBody,
-  type ResumeQuestionGenerateRouteBody,
-  type ResumeQuestionSynthesizeRouteBody,
   type ResumeRouteSetState,
-  type ResumeScoreRouteBody,
   resumeEnhanceBodySchema,
   resumeExportBodySchema,
   resumeIdParamsSchema,
@@ -45,6 +40,7 @@ import {
 import {
   resumeCreateResponses,
   resumeDeleteResponses,
+  type ResumeEntityResponse,
   resumeEnhanceResponses,
   resumeEntityResponses,
   resumeExportResponses,
@@ -64,7 +60,7 @@ import {
 
 type RouteStatus = typeof status;
 
-const omitNullFields = <T extends Record<string, unknown>>(value: T): Partial<T> => {
+const omitNullFields = <T extends object>(value: T): Partial<T> => {
   const next: Partial<T> = {};
   for (const [key, entry] of Object.entries(value)) {
     if (entry === null || entry === undefined) {
@@ -75,13 +71,11 @@ const omitNullFields = <T extends Record<string, unknown>>(value: T): Partial<T>
   return next;
 };
 
-const toResumeEntityResponse = (resume: ResumeData) => ({
+const toResumeEntityResponse = (resume: ResumeData): ResumeEntityResponse => ({
   id: resume.id ?? "",
   name: resume.name ?? RESUME_DEFAULT_NAME,
   // JSON nulls in personalInfo fail TypeBox Optional(String) and strip the whole object.
-  personalInfo: resume.personalInfo
-    ? omitNullFields(resume.personalInfo as Record<string, unknown>)
-    : undefined,
+  personalInfo: resume.personalInfo ? omitNullFields(resume.personalInfo) : undefined,
   summary: resume.summary ?? "",
   experience: resume.experience ?? [],
   education: resume.education ?? [],
@@ -120,7 +114,7 @@ export const resumeRoutes = new Elysia({
       body: resumeQuestionGenerateBodySchema,
       response: resumeQuestionGenerateResponses,
     },
-    async ({ body, status }: { body: ResumeQuestionGenerateRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await settle(
         cvQuestionnaireService.generateQuestions({
           targetRole: body.targetRole,
@@ -144,7 +138,7 @@ export const resumeRoutes = new Elysia({
       body: resumeQuestionSynthesizeBodySchema,
       response: resumeQuestionSynthesizeResponses,
     },
-    async ({ body, status }: { body: ResumeQuestionSynthesizeRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const synthesizeResult = await settle(
         cvQuestionnaireService.synthesizeResume(body.questionsAndAnswers),
       );
@@ -184,7 +178,7 @@ export const resumeRoutes = new Elysia({
       ),
       response: resumeListResponses,
     },
-    async ({ status }: { status: RouteStatus }) =>
+    async ({ status }) =>
       status(HTTP_STATUS_OK, (await resumeService.getResumes()).map(toResumeEntityResponse)),
   )
   .post(
@@ -194,7 +188,7 @@ export const resumeRoutes = new Elysia({
       body: resumeMutationBodySchema,
       response: resumeCreateResponses,
     },
-    async ({ body, status }: { body: ResumeMutationBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const created = await resumeService.createResume(buildResumeCreatePayload(body));
       gamificationService.trackActionFireAndForget(
         "resumesGenerated",
@@ -211,7 +205,7 @@ export const resumeRoutes = new Elysia({
       params: resumeIdParamsSchema,
       response: resumeEntityResponses,
     },
-    async ({ params, status }: { params: ResumeIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const resume = await resumeService.getResume(params.id);
       if (!resume) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
@@ -230,15 +224,7 @@ export const resumeRoutes = new Elysia({
       body: resumeMutationBodySchema,
       response: resumeUpdateResponses,
     },
-    async ({
-      params,
-      body,
-      status,
-    }: {
-      params: ResumeIdParams;
-      body: ResumeMutationBody;
-      status: RouteStatus;
-    }) => {
+    async ({ params, body, status }) => {
       const updated = await resumeService.updateResume(params.id, buildResumeUpdatePayload(body));
       if (!updated) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
@@ -253,7 +239,7 @@ export const resumeRoutes = new Elysia({
       params: resumeIdParamsSchema,
       response: resumeDeleteResponses,
     },
-    async ({ params, status }: { params: ResumeIdParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const existing = await resumeService.getResume(params.id);
       if (!existing) {
         return status(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_RESUME_NOT_FOUND });
@@ -304,15 +290,7 @@ export const resumeRoutes = new Elysia({
       body: resumeEnhanceBodySchema,
       response: resumeEnhanceResponses,
     },
-    async ({
-      params,
-      body,
-      status,
-    }: {
-      params: ResumeIdParams;
-      body: ResumeEnhanceRouteBody;
-      status: RouteStatus;
-    }) => {
+    async ({ params, body, status }) => {
       const state: ResumeRouteSetState = {};
       const result = await enhanceResumeWithAi(params.id, body, state);
       if (state.status === HTTP_STATUS_NOT_FOUND) {
@@ -348,15 +326,7 @@ export const resumeRoutes = new Elysia({
       body: resumeScoreBodySchema,
       response: resumeScoreResponses,
     },
-    async ({
-      params,
-      body,
-      status,
-    }: {
-      params: ResumeIdParams;
-      body: ResumeScoreRouteBody;
-      status: RouteStatus;
-    }) => {
+    async ({ params, body, status }) => {
       const state: ResumeRouteSetState = {};
       const result = await handleResumeAiScore(params.id, body, state);
       if (state.status === HTTP_STATUS_NOT_FOUND) {
@@ -372,7 +342,15 @@ export const resumeRoutes = new Elysia({
         );
       }
       if ("score" in result && typeof result.score === "number") {
-        return status(HTTP_STATUS_OK, result);
+        return status(HTTP_STATUS_OK, {
+          resumeId: result.resumeId,
+          jobId: result.jobId,
+          score: result.score,
+          strengths: result.strengths,
+          improvements: result.improvements,
+          keywords: result.keywords,
+          analysis: result.analysis,
+        });
       }
       return status(
         HTTP_STATUS_INTERNAL_SERVER_ERROR,

@@ -58,30 +58,19 @@ export declare const openaiV1Routes: import("elysia/types").AddRoute<"/v1", "loc
                             object: "model";
                             created: number;
                             owned_by: string;
-                        } | {
+                        };
+                        401: {
                             error: {
                                 message: string;
                                 type: string;
-                                code: string | null;
-                            };
-                        };
-                        401: {
-                            readonly error: {
-                                readonly message: string;
-                                readonly type: "invalid_request_error";
-                                readonly code: string;
+                                code?: string | null | undefined;
                             };
                         };
                         404: {
-                            id: string;
-                            object: "model";
-                            created: number;
-                            owned_by: string;
-                        } | {
                             error: {
                                 message: string;
                                 type: string;
-                                code: string | null;
+                                code?: string | null | undefined;
                             };
                         };
                     };

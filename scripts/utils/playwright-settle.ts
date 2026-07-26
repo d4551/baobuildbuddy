@@ -21,6 +21,3 @@ export const settlePage = async (page: Page, timeoutMs: number): Promise<void> =
     () => undefined,
   );
 };
-
-/** Canonical navigation waitUntil for proof scripts (networkidle is banned). */
-export const PROOF_WAIT_UNTIL = "domcontentloaded" as const;

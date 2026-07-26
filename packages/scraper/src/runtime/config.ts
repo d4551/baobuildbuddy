@@ -47,9 +47,11 @@ export const sanitizePlaywrightBrowsersPathEnv = (): void => {
 
 /**
  * Builds a child-process env with a non-polluted Playwright browsers path
- * and PLAYWRIGHT_HOST_PLATFORM_OVERRIDE when missing.
+ * and PLAYWRIGHT_HOST_PLATFORM_OVERRIDE when missing. Binds the shared pure
+ * helper to the scraper runtime's own process.env (the server spawn-side
+ * binding lives in @bao/server config/paths).
  */
-export const buildAutomationProcessEnv = (
+export const buildAutomationProcessEnvFromRuntimeEnv = (
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv =>
   buildAutomationProcessEnvFromShared(

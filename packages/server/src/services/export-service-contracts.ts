@@ -1,13 +1,11 @@
 import {
-  COVER_LETTER_EXPORT_THEME,
   type CoverLetterExportLayout,
-  PORTFOLIO_EXPORT_THEME,
   type PortfolioExportLayout,
   resolveCoverLetterPdfPalette,
   resolvePortfolioPdfPalette,
 } from "@bao/shared/constants/export-document-theme";
-import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-layout";
 import { A4_PAGE_HEIGHT, A4_PAGE_SIZE, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
+import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-resume-theme";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { type Color, type PDFDocument, type PDFFont, type PDFPage, rgb } from "pdf-lib";
 
@@ -120,26 +118,6 @@ export interface PortfolioRenderContext {
 }
 
 const toStaticPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);
-
-export const COVER_LETTER_PDF_COLORS = {
-  primary: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.primary),
-  accent: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.accent),
-  text: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.text),
-  muted: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.muted),
-  subtle: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.subtle),
-  line: toStaticPdfColor(COVER_LETTER_EXPORT_THEME.pdf.colors.line),
-};
-
-export const PORTFOLIO_PDF_COLORS = {
-  primary: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.primary),
-  text: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.text),
-  accent: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.accent),
-  muted: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.muted),
-  subtle: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.subtle),
-  featured: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.featured),
-  line: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.line),
-  footer: toStaticPdfColor(PORTFOLIO_EXPORT_THEME.pdf.colors.footer),
-};
 
 export const toCoverLetterPdfColors = (template?: string | null): CoverLetterPdfColors => {
   const palette = resolveCoverLetterPdfPalette(template);

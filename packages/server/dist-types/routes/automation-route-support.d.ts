@@ -9,7 +9,7 @@ export declare const listAutomationRuns: (query: {
 }) => Promise<{
     id: string;
     type: "email" | "job_apply" | "scrape";
-    status: "error" | "pending" | "running" | "success";
+    status: "cancelled" | "error" | "pending" | "running" | "success";
     jobId: string | null;
     userId: string | null;
     input: JsonObject | null;

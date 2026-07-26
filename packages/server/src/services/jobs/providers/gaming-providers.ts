@@ -291,11 +291,6 @@ export class GamingPortalProvider implements JobProvider {
 }
 
 /**
- * Shared Hitmarker provider instance.
- */
-export const hitmarkerProvider = new HitmarkerProvider();
-
-/**
  * Shared Hitmarker portal provider instance.
  */
 export const hitmarkerPortalProvider = new GamingPortalProvider("hitmarker");

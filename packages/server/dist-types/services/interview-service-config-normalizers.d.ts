@@ -5,5 +5,5 @@ export declare function normalizeConversationStyle(value: unknown): InterviewCon
 export declare function normalizeCandidateContext(value: unknown): InterviewCandidateContext | undefined;
 export declare function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undefined;
 export declare function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined;
-export declare function normalizeExperienceLevel(value: string): string;
+export declare function normalizeInterviewExperienceLevel(value: string): string;
 export declare function normalizeConfig(raw: InterviewConfigInput): InterviewConfig;

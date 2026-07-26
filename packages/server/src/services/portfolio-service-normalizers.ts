@@ -89,7 +89,7 @@ export const toProject = (row: PortfolioProjectRecord): PortfolioProject => {
   return project;
 };
 
-export const toPortfolioData = (
+export const buildPortfolioData = (
   portfolio: PortfolioRecord,
   projects: PortfolioProject[],
 ): PortfolioData => ({

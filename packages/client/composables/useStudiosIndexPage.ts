@@ -9,14 +9,7 @@ import {
 } from "~/constants/studios";
 import { getErrorMessage } from "~/utils/errors";
 import { buildInterviewStudioNavigation } from "~/utils/interview-navigation";
-
-function queryValueToString(value: string | null | Array<string | null> | undefined): string {
-  if (Array.isArray(value)) {
-    const [firstValue] = value;
-    return typeof firstValue === "string" ? firstValue : "";
-  }
-  return typeof value === "string" ? value : "";
-}
+import { queryValueToString } from "~/utils/route-query";
 
 function sortUniqueOptions(values: string[]): string[] {
   return [...new Set(values.filter((value) => value.trim().length > 0))].sort((left, right) =>

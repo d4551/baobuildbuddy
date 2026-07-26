@@ -15,7 +15,6 @@ import type { gamification } from "../db/schema/gamification";
 import type { interviewSessions } from "../db/schema/interviews";
 import type { portfolioProjects, portfolios } from "../db/schema/portfolios";
 import type { resumes } from "../db/schema/resumes";
-import { DEFAULT_SETTINGS_ID } from "../db/schema/settings";
 import type { skillMappings } from "../db/schema/skill-mappings";
 import { encryptProviderKey, isEncryptionAvailable } from "../utils/crypto";
 import { normalizeEvidenceEntries } from "./skill-mapping-normalizers";
@@ -232,5 +231,3 @@ export const parseChatHistoryInsert = <T>(value: T): ChatHistoryInsert | null =>
 };
 
 export const resolveProfileId = (): string => DEFAULT_PROFILE_ID;
-
-export const resolveSettingsId = (): string => DEFAULT_SETTINGS_ID;

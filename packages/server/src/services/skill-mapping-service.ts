@@ -4,7 +4,7 @@ import type {
   ReadinessAssessment,
   SkillMapping,
 } from "@bao/shared/types/skill-mapping";
-import { toSkillMapping } from "./skill-mapping-normalizers";
+import { skillMappingFromRow } from "./skill-mapping-normalizers";
 import { buildCareerPathways } from "./skill-mapping-pathways";
 import { buildSkillReadinessAssessment } from "./skill-mapping-readiness";
 import {
@@ -18,7 +18,7 @@ import {
 export class SkillMappingService {
   async getMappings(): Promise<SkillMapping[]> {
     const rows = await listSkillMappingRows();
-    return rows.map(toSkillMapping);
+    return rows.map(skillMappingFromRow);
   }
 
   async createMapping(data: Omit<SkillMapping, "id">): Promise<SkillMapping> {
@@ -33,7 +33,7 @@ export class SkillMappingService {
 
   async getMapping(id: string): Promise<SkillMapping | null> {
     const row = await readSkillMappingRow(id);
-    return row ? toSkillMapping(row) : null;
+    return row ? skillMappingFromRow(row) : null;
   }
 
   async updateMapping(id: string, data: Partial<SkillMapping>): Promise<SkillMapping | null> {

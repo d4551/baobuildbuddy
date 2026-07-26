@@ -23,7 +23,13 @@ export type Finding = {
 };
 
 const NON_SLUG_RE = /[^\w-]+/gu;
-export const slugify = (value: string): string => value.replace(NON_SLUG_RE, "_").slice(0, NUM_80);
+/**
+ * Filename-safe token for screenshot artifacts. Distinct from the shared
+ * URL-slug `slugify` (validation.ts): keeps case, maps runs of non-word
+ * characters to underscores, and caps length for filesystem safety.
+ */
+export const toFilenameSlug = (value: string): string =>
+  value.replace(NON_SLUG_RE, "_").slice(0, NUM_80);
 
 export const mapSequential = async <TItem, TResult>(
   items: readonly TItem[],
@@ -62,7 +68,7 @@ export const captureFinding = async (
 ): Promise<void> => {
   let screenshot: string | null = null;
   if (severity === "error") {
-    screenshot = join(outDir, viewport, `${slugify(route)}__${slugify(action)}.png`);
+    screenshot = join(outDir, viewport, `${toFilenameSlug(route)}__${toFilenameSlug(action)}.png`);
     await mkdir(join(outDir, viewport), { recursive: true });
     await page.screenshot({ path: screenshot, fullPage: false });
   }
@@ -234,7 +240,7 @@ const clickOneLabel = async (
         outDir,
         viewport,
         route,
-        `click-${slugify(label)}`,
+        `click-${toFilenameSlug(label)}`,
         "control not found",
         "warn",
       );
@@ -252,7 +258,7 @@ const clickOneLabel = async (
       outDir,
       viewport,
       route,
-      `after-click-${slugify(label)}`,
+      `after-click-${toFilenameSlug(label)}`,
       pageErrorBucket[0] ?? "",
     );
   }

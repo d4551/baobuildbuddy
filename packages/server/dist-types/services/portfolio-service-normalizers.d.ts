@@ -3,7 +3,7 @@ import type { CreatePortfolioProjectPayload, PortfolioProjectInsert, PortfolioPr
 export declare const toMetadataOrDefault: (metadata?: Record<string, unknown> | null) => PortfolioMetadata;
 export declare const metadataToRecord: (metadata?: PortfolioMetadata) => Record<string, unknown>;
 export declare const toProject: (row: PortfolioProjectRecord) => PortfolioProject;
-export declare const toPortfolioData: (portfolio: PortfolioRecord, projects: PortfolioProject[]) => PortfolioData;
+export declare const buildPortfolioData: (portfolio: PortfolioRecord, projects: PortfolioProject[]) => PortfolioData;
 export declare const createProjectInsert: (options: {
     id: string;
     portfolioId: string;

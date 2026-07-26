@@ -1,4 +1,3 @@
-import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
 import type { BrandPromptIdentity } from "./prompt-contracts";
 
 /**
@@ -31,11 +30,6 @@ Remember:
 - Every person's career journey is unique
 - Technical skills matter, but so do soft skills and cultural fit`;
 }
-
-/**
- * Core system prompt defining the default assistant personality and expertise.
- */
-export const SYSTEM_PROMPT = buildSystemPrompt(DEFAULT_BRAND_SETTINGS);
 
 /**
  * Builds domain-specific system prompts for contextual AI conversations.
@@ -72,11 +66,6 @@ Important rules:
     general: `You are ${brand.assistantName}, the AI career assistant for ${brand.name}, specializing in the video game industry. You combine deep gaming industry knowledge with career coaching expertise. Be encouraging, specific, and actionable in your guidance.`,
   };
 }
-
-/**
- * Domain-specific system prompts for contextual AI conversations.
- */
-export const DOMAIN_SYSTEM_PROMPTS = buildDomainSystemPrompts(DEFAULT_BRAND_SETTINGS);
 
 /**
  * Gaming industry context constant for prompt injection

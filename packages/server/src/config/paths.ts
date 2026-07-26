@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { arch, homedir, platform, release } from "node:os";
 import { dirname, resolve } from "node:path";
 import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared/constants/paths";
+import { resolvePlaywrightChromiumExecutable } from "@bao/shared/utils/playwright-chromium-probe";
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
@@ -103,8 +104,9 @@ export const SCRAPER_DIR = resolveScraperDir();
 /**
  * Child-process env for RPA scripts. Rewrites incomplete agent-sandbox
  * Playwright browser caches and injects PLAYWRIGHT_HOST_PLATFORM_OVERRIDE.
+ * Binds the shared pure helper to this process's env, filesystem, and platform.
  */
-export const buildAutomationProcessEnv = (
+export const buildAutomationProcessEnvFromEnv = (
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv =>
   buildAutomationProcessEnvFromShared(
@@ -115,3 +117,21 @@ export const buildAutomationProcessEnv = (
     },
     resolvePlaywrightHostPlatformOverride(platform(), arch(), release()),
   );
+
+/**
+ * Absolute path to the installed Playwright Chromium build, or null when no
+ * browser is present. Reads the browser cache location from the automation
+ * child-process env this module already resolves, so the RPA capability audit
+ * never reports job-apply as configured without a browser to drive.
+ */
+export const resolveInstalledChromiumExecutable = (): string | null => {
+  const automationEnv = buildAutomationProcessEnvFromEnv();
+  const browsersPath =
+    automationEnv.PLAYWRIGHT_BROWSERS_PATH ??
+    defaultPlaywrightBrowsersPathForPlatform(platform(), HOME_DIRECTORY);
+
+  return resolvePlaywrightChromiumExecutable(browsersPath, platform(), {
+    pathExists: existsSync,
+    readDir: (directoryPath) => readdirSync(directoryPath),
+  });
+};

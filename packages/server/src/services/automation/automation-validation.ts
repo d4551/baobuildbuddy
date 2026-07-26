@@ -18,52 +18,14 @@ import {
   AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH,
   AUTOMATION_MAX_JOB_URL_LENGTH,
 } from "@bao/shared/constants/automation-limits";
-import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
-import {
-  COUNT_FOUR,
-  COUNT_ONE_NINETY_TWO,
-  COUNT_ONE_SIXTY_EIGHT,
-  COUNT_ONE_SIXTY_NINE,
-  COUNT_ONE_TWENTY_SEVEN,
-  COUNT_TWO_FIFTY_FIVE,
-  COUNT_TWO_FIFTY_FOUR,
-} from "@bao/shared/constants/numeric";
 import { DEFAULT_HOST, LOOPBACK_HOST_IPV4 } from "@bao/shared/constants/runtime";
+import { isLoopbackOrPrivateHost } from "@bao/shared/utils/private-host";
 import { config } from "../../config/env";
 
 /** Re-export shared limits for consumers that import from this module. */
-export const MAX_JOB_URL_LENGTH = AUTOMATION_MAX_JOB_URL_LENGTH;
 export const MAX_CUSTOM_ANSWER_KEY_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_KEY_LENGTH;
 export const MAX_CUSTOM_ANSWER_VALUE_LENGTH = AUTOMATION_MAX_CUSTOM_ANSWER_VALUE_LENGTH;
 export const MAX_CUSTOM_ANSWER_COUNT = AUTOMATION_MAX_CUSTOM_ANSWER_COUNT;
-
-const DISALLOWED_IPV4_PREFIXES = [
-  [COUNT_ONE_TWENTY_SEVEN, 0],
-  [10, 0],
-  [COUNT_ONE_SIXTY_NINE, COUNT_TWO_FIFTY_FOUR],
-  [COUNT_ONE_NINETY_TWO, COUNT_ONE_SIXTY_EIGHT],
-];
-
-const IP_SEGMENT_REGEX = /^\d+$/;
-const IPV6_SEGMENT_REGEX = /^[0-9a-f:.]+$/i;
-
-const DISALLOWED_HOST_PATTERNS = [
-  /^localhost$/i,
-  /^localhost\.localdomain$/i,
-  /^127\./,
-  /^10\./,
-  /^172\.(1[6-9]|2\d|3[01])\./,
-  /^192\.168\./,
-  /^169\.254\./,
-  /^::1$/i,
-  /^fc[0-9a-f]+/i,
-  /^fd[0-9a-f]+/i,
-  /^fe80/i,
-  /\.localhost$/i,
-  /\.internal$/i,
-];
-
-const DISALLOWED_IPV6_PREFIX_PATTERN = /^(fc|fd|fe80)/i;
 
 /**
  * Bypass SSRF guards when the process explicitly opts into private hosts.
@@ -163,6 +125,19 @@ export function sanitizeCustomAnswers(
   return normalized;
 }
 
+/**
+ * Pure host classification: true when the hostname is loopback, RFC 1918
+ * private space, or link-local. Separated from the opt-in policy below so the
+ * range boundaries are testable without mutating process environment.
+ */
+export function isPrivateOrLoopbackAutomationHost(hostname: string): boolean {
+  if (hostname === LOOPBACK_HOST_IPV4 || hostname === DEFAULT_HOST) {
+    return true;
+  }
+
+  return isLoopbackOrPrivateHost(hostname);
+}
+
 function isDisallowedAutomationHost(hostname: string): boolean {
   if (!hostname) {
     return true;
@@ -172,62 +147,5 @@ function isDisallowedAutomationHost(hostname: string): boolean {
     return false;
   }
 
-  if (hostname === LOOPBACK_HOST_IPV4 || hostname === DEFAULT_HOST) {
-    return true;
-  }
-
-  if (DISALLOWED_HOST_PATTERNS.some((pattern) => pattern.test(hostname))) {
-    return true;
-  }
-
-  if (isIpv4Address(hostname)) {
-    return isDisallowedIpv4(hostname);
-  }
-
-  if (isIpv6Address(hostname)) {
-    return isDisallowedIpv6(hostname);
-  }
-
-  return false;
-}
-
-function isDisallowedIpv4(hostname: string): boolean {
-  const segments = hostname.split(".").map((segment) => Number.parseInt(segment, DECIMAL_RADIX));
-  const [first, second] = segments;
-  if (Number.isNaN(first) || Number.isNaN(second)) {
-    return false;
-  }
-
-  return DISALLOWED_IPV4_PREFIXES.some(
-    ([disallowedFirst, disallowedSecond]) =>
-      first === disallowedFirst && (disallowedSecond === 0 ? true : second === disallowedSecond),
-  );
-}
-
-function isIpv4Address(hostname: string): boolean {
-  const segments = hostname.split(".");
-  if (segments.length !== COUNT_FOUR) {
-    return false;
-  }
-
-  for (const segment of segments) {
-    if (!IP_SEGMENT_REGEX.test(segment)) {
-      return false;
-    }
-
-    const parsed = Number.parseInt(segment, DECIMAL_RADIX);
-    if (Number.isNaN(parsed) || parsed < 0 || parsed > COUNT_TWO_FIFTY_FIVE) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function isIpv6Address(hostname: string): boolean {
-  return hostname.includes(":") && IPV6_SEGMENT_REGEX.test(hostname);
-}
-
-function isDisallowedIpv6(hostname: string): boolean {
-  return hostname === "::1" || DISALLOWED_IPV6_PREFIX_PATTERN.test(hostname);
+  return isPrivateOrLoopbackAutomationHost(hostname);
 }
