@@ -57,13 +57,17 @@ jobs:
         run: bun run automation:browsers:install
 
       - name: Run lint
+        timeout-minutes: 20
         run: bun run lint
 
       - name: Run tests
+        timeout-minutes: 20
         run: bun run test
 
       - name: Build production bundles
+        timeout-minutes: 25
         run: bun run build:verify
 
       - name: Verify SSR routes
+        timeout-minutes: 10
         run: bun run verify:pages
