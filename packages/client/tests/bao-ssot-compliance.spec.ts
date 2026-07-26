@@ -60,9 +60,9 @@ const SIDEBAR_WIDTH_LG_SHAPE = /^lg:w-\d+$/;
  */
 const readComposedCss = (): string => {
   const entry = readFileSync(join(CLIENT_ROOT, "assets/css/main.css"), "utf8");
-  const moduleNames = [...entry.matchAll(/@import "\.\/([\w.-]+\.css)";/g)].map(
-    (match) => match[1],
-  );
+  const moduleNames = [...entry.matchAll(/@import "\.\/([\w.-]+\.css)";/g)]
+    .map((match) => match[1])
+    .filter((name): name is string => typeof name === "string");
   const modules = moduleNames.map((file) =>
     readFileSync(join(CLIENT_ROOT, "assets/css", file), "utf8"),
   );

@@ -118,7 +118,7 @@ describe("handleGenerateCoverLetterRoute entity-context parity", () => {
 
     expect(result.status).toBe(HTTP_STATUS_OK);
     expect(generateSpy).toHaveBeenCalledTimes(1);
-    const prompt = generateSpy.mock.calls[0][0] as string;
+    const prompt = generateSpy.mock.calls[0][0];
     expect(prompt).toContain("Job context:");
     expect(prompt).toContain("Senior Gameplay Engineer");
     expect(prompt).toContain("Studio context:");
@@ -142,7 +142,7 @@ describe("handleGenerateCoverLetterRoute entity-context parity", () => {
     });
 
     expect(result.status).toBe(HTTP_STATUS_OK);
-    const prompt = generateSpy.mock.calls[0][0] as string;
+    const prompt = generateSpy.mock.calls[0][0];
     expect(prompt).not.toContain("Job context:");
     expect(prompt).not.toContain("Studio context:");
 
@@ -162,7 +162,7 @@ describe("handleAnalyzeResumeRoute entity-context parity", () => {
     const result = await handleAnalyzeResumeRoute({ resumeId, jobId });
 
     expect(result.status).toBe(HTTP_STATUS_OK);
-    const prompt = generateSpy.mock.calls[0][0] as string;
+    const prompt = generateSpy.mock.calls[0][0];
     expect(prompt).toContain("Senior Gameplay Engineer");
     expect(prompt).toContain("Studio context:");
     expect(prompt).toContain("Parity Studio");

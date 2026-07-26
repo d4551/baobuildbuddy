@@ -66,8 +66,8 @@ agentiflow/*
 .hardening/
 docs/assets/docs.generated.css
 
-# Docs site release manifest (generated from packages/desktop/releases)
-docs/releases.manifest.json
+# Docs site release manifest (generated from packages/desktop/releases into the
+# served path the docs site fetches: docs/releases/manifest.json).
 # Local docs-site preview staging (mirrors deployed /releases for local testing)
 docs/releases/
 

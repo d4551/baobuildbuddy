@@ -27,7 +27,7 @@ const isNonEmpty = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
 const readString = (record: Record<string, unknown>, key: string): string =>
-  isNonEmpty(record[key]) ? (record[key] as string).trim() : "";
+  isNonEmpty(record[key]) ? (record[key]).trim() : "";
 
 const appendProfileField = (entries: string[], key: string, value: string | null): void => {
   if (isNonEmpty(value)) {

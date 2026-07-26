@@ -73,13 +73,13 @@ export declare const testProviderConnection: (body: {
     availableModels: string[] | undefined;
     selectedModel: string | undefined;
 } | {
-    message?: undefined;
     availableModels?: undefined;
     selectedModel?: undefined;
     valid: boolean;
     provider: "claude" | "gemini" | "huggingface" | "openai";
     error: string;
     diagnosticCode?: undefined;
+    message?: undefined;
 } | {
     error?: undefined;
     availableModels?: undefined;

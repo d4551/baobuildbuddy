@@ -2,6 +2,20 @@ import { describe, expect, test } from "bun:test";
 import { getCandidateContextSummary } from "./smart-field-mapper-context";
 import type { SmartFieldAnalysisContext } from "./smart-field-mapper-contracts";
 
+type CandidateSummary = {
+  personalInfo?: { name?: string; email?: string };
+  summary?: string;
+  skills?: { technical?: string[] };
+  jobContext?: string;
+  studioContext?: string;
+  skillContext?: string;
+  profileContext?: string;
+  portfolioContext?: string;
+};
+
+const parseSummary = (summary: string): CandidateSummary =>
+  JSON.parse(summary) as CandidateSummary;
+
 const buildContext = (
   overrides: Partial<SmartFieldAnalysisContext> = {},
 ): SmartFieldAnalysisContext => ({
@@ -18,11 +32,11 @@ const buildContext = (
 describe("getCandidateContextSummary", () => {
   test("includes resume personal info, summary, and skills by default", () => {
     const summary = getCandidateContextSummary(buildContext());
-    const parsed = JSON.parse(summary);
-    expect(parsed.personalInfo.name).toBe("Jane Candidate");
-    expect(parsed.personalInfo.email).toBe("jane@example.test");
+    const parsed = parseSummary(summary);
+    expect(parsed.personalInfo?.name).toBe("Jane Candidate");
+    expect(parsed.personalInfo?.email).toBe("jane@example.test");
     expect(parsed.summary).toBe("Gameplay engineer");
-    expect(parsed.skills.technical).toContain("C++");
+    expect(parsed.skills?.technical).toContain("C++");
   });
 
   test("includes job, studio, skill, profile, and portfolio context when provided", () => {
@@ -35,7 +49,7 @@ describe("getCandidateContextSummary", () => {
         portfolioContext: "Portfolio:\n- Indie Roguelike | live: https://jane.example/roguelike",
       }),
     );
-    const parsed = JSON.parse(summary);
+    const parsed = parseSummary(summary);
     expect(parsed.jobContext).toContain("Senior Gameplay Engineer");
     expect(parsed.studioContext).toContain("Test Studio");
     expect(parsed.skillContext).toContain("C++");
@@ -45,7 +59,7 @@ describe("getCandidateContextSummary", () => {
 
   test("omits context fields when not provided so the AI is not handed undefined strings", () => {
     const summary = getCandidateContextSummary(buildContext());
-    const parsed = JSON.parse(summary);
+    const parsed = parseSummary(summary);
     expect(parsed.jobContext).toBeUndefined();
     expect(parsed.studioContext).toBeUndefined();
     expect(parsed.skillContext).toBeUndefined();

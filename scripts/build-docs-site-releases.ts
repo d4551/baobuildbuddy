@@ -1,5 +1,5 @@
 /**
- * Builds the website release manifest (`docs/releases.manifest.json`) from the
+ * Builds the website release manifest (`docs/releases/manifest.json`) from the
  * canonical desktop release tree (`packages/desktop/releases/` by default).
  *
  * SSOT chain:
@@ -10,13 +10,15 @@
  *                                                   Git LFS pointers (local dev) or
  *                                                   when generating from a remote tree
  *
- * Output: docs/releases.manifest.json — a website-ready, platform-grouped manifest
- * the docs site fetches at runtime so the download cards are data-driven instead of
- * hardcoded in HTML.
+ * Output: docs/releases/manifest.json — the website-ready, platform-grouped manifest
+ * the docs site fetches at runtime (index.html MANIFEST_URL = "releases/manifest.json")
+ * so the download cards are data-driven instead of hardcoded in HTML. Writing directly
+ * to the served path keeps a single manifest SSOT (no separate copy/deploy step that
+ * can drift stale).
  *
  * Env:
  *   RELEASES_ROOT  default "packages/desktop/releases"
- *   DOCS_MANIFEST  default "docs/releases.manifest.json"
+ *   DOCS_MANIFEST  default "docs/releases/manifest.json"
  */
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -28,7 +30,7 @@ const RELEASES_ROOT = resolve(
 );
 const DOCS_MANIFEST = resolve(
   ROOT_DIRECTORY,
-  process.env.DOCS_MANIFEST ?? "docs/releases.manifest.json",
+  process.env.DOCS_MANIFEST ?? "docs/releases/manifest.json",
 );
 
 const SCHEMA_VERSION = 1;
@@ -166,15 +168,21 @@ function deriveVersion(artifactNames: string[]): string {
 
 function fileSize(filePath: string, name: string, overrides: Record<string, number>): number {
   const override = overrides[name];
-  if (typeof override === "number" && override > 0) return override;
+  // The real binary on disk is the SSOT for its byte size. The sizes.json
+  // override is only a fallback for environments where the artifact is absent
+  // (generating from a remote tree) or checked out as a Git LFS pointer (local
+  // dev without `git lfs pull`). Letting the override win when the real binary
+  // is present would publish stale sizes — e.g. a dmg re-packed smaller while
+  // sizes.json still held the old larger value.
   if (!existsSync(filePath)) {
+    if (typeof override === "number" && override > 0) return override;
     throw new Error(
       `Missing release artifact: ${filePath}. Pull real binaries (git lfs pull) or provide sizes.json override for "${name}".`,
     );
   }
   const stat = statSync(filePath);
   if (stat.size <= LFS_POINTER_MAX_BYTES && isLfsPointer(filePath)) {
-    if (typeof override === "number") return override;
+    if (typeof override === "number" && override > 0) return override;
     throw new Error(
       `Artifact ${filePath} is a Git LFS pointer, not a real binary. Run \`git lfs pull\` or add a sizes.json override for "${name}".`,
     );

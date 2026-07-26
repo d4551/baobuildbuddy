@@ -29,6 +29,69 @@ const routeLiteralPattern = new RegExp(
   "gu",
 );
 
+const QUOTE_CHARACTERS = new Set(['"', "'", "`"]);
+
+const startsComment = (content: string, index: number): boolean =>
+  content[index] === "/" && (content[index + 1] === "/" || content[index + 1] === "*");
+
+const skipQuotedSpan = (content: string, start: number): number => {
+  const quote = content[start] ?? "";
+  let index = start + 1;
+  while (index < content.length) {
+    const character = content[index] ?? "";
+    if (character === "\\") {
+      index += 2;
+      continue;
+    }
+    index += 1;
+    if (character === quote) {
+      return index;
+    }
+  }
+  return index;
+};
+
+const findCommentEnd = (content: string, start: number): number => {
+  if (content[start + 1] === "/") {
+    const lineEnd = content.indexOf("\n", start);
+    return lineEnd === -1 ? content.length : lineEnd;
+  }
+  const blockEnd = content.indexOf("*/", start + 2);
+  return blockEnd === -1 ? content.length : blockEnd + 2;
+};
+
+/**
+ * Replaces comment characters with spaces while preserving length and newlines,
+ * so line numbers and offsets stay identical to the original content. Quoted
+ * spans (strings / template literals) are left intact so a route literal in a
+ * real string is still caught, while route literals mentioned in JSDoc / line /
+ * block comments (e.g. `` `/jobs/refresh` `` in prose) are no longer false
+ * positives.
+ */
+const maskComments = (content: string): string => {
+  const characters = content.split("");
+  let index = 0;
+  while (index < characters.length) {
+    const character = characters[index] ?? "";
+    if (QUOTE_CHARACTERS.has(character)) {
+      index = skipQuotedSpan(content, index);
+      continue;
+    }
+    if (startsComment(content, index)) {
+      const end = findCommentEnd(content, index);
+      for (let position = index; position < end; position += 1) {
+        if (characters[position] !== "\n") {
+          characters[position] = " ";
+        }
+      }
+      index = end;
+      continue;
+    }
+    index += 1;
+  }
+  return characters.join("");
+};
+
 const isAllowedRouteLiteralPath = (filePath: string): boolean =>
   filePath.includes("constants/routes") || filePath.includes("constants/endpoints");
 
@@ -49,8 +112,9 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
     }
 
     const violations: ValidationViolation[] = [];
+    const masked = maskComments(content);
     routeLiteralPattern.lastIndex = 0;
-    for (const match of content.matchAll(routeLiteralPattern)) {
+    for (const match of masked.matchAll(routeLiteralPattern)) {
       violations.push({
         filePath,
         line: getLineFromOffset(content, match.index ?? 0),

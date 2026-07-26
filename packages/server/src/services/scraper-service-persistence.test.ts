@@ -54,8 +54,11 @@ describe("upsertScrapedJob ingestion", () => {
 
     const row = await fetchJobRow(contentHash);
     expect(row).toBeDefined();
-    expect(row?.requirements).toEqual(expect.arrayContaining(["C++", "Unreal Engine"]));
-    expect(row?.technologies).toEqual(expect.arrayContaining(["Unreal Engine", "Git", "Perforce"]));
+    expect(row?.requirements ?? []).toContain("C++");
+    expect(row?.requirements ?? []).toContain("Unreal Engine");
+    expect(row?.technologies ?? []).toContain("Unreal Engine");
+    expect(row?.technologies ?? []).toContain("Git");
+    expect(row?.technologies ?? []).toContain("Perforce");
   });
 
   test("prefers provider-supplied requirements and technologies over extraction", async () => {
