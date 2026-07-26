@@ -904,10 +904,10 @@ const readPlaywrightWebsocketStatus = async (
   wsBase: string,
 ): Promise<BrowserCheckResult["websocketOpened"]> =>
   page.evaluate(
-    async ({ automationWebsocketEndpoint, runtimeWsBase }) => {
+    async ({ automationWebsocketEndpoint, runtimeWsBase, websocketOpenTimeoutMs }) => {
       const targetUrl = `${runtimeWsBase}${automationWebsocketEndpoint}`;
       return new Promise<boolean>((resolve) => {
-        const timeout = window.setTimeout(() => resolve(false), NUM_5000);
+        const timeout = window.setTimeout(() => resolve(false), websocketOpenTimeoutMs);
         const socket = new WebSocket(targetUrl);
 
         socket.onopen = () => {
@@ -924,6 +924,7 @@ const readPlaywrightWebsocketStatus = async (
     {
       automationWebsocketEndpoint: WS_ENDPOINTS.automation,
       runtimeWsBase: wsBase,
+      websocketOpenTimeoutMs: NUM_5000,
     },
   );
 

@@ -7,5 +7,6 @@ export declare class SkillMappingService {
     deleteMapping(id: string): Promise<boolean>;
     getPathways(): Promise<CareerPathway[]>;
     getReadiness(): Promise<ReadinessAssessment>;
+    getReadinessForJob(jobId: string): Promise<ReadinessAssessment | null>;
 }
 export declare const skillMappingService: SkillMappingService;

@@ -178,11 +178,13 @@ export class ConversationContextManager {
   }
 
   private async loadResumeContext(): Promise<string | null> {
-    const defaultResume = await db.select().from(resumes).limit(1);
-    if (defaultResume.length === 0) {
+    const defaultResumeRows = await db.select().from(resumes).where(eq(resumes.isDefault, true));
+    const resumeRows =
+      defaultResumeRows.length > 0 ? defaultResumeRows : await db.select().from(resumes).limit(1);
+    if (resumeRows.length === 0) {
       return null;
     }
-    const resume = defaultResume[0];
+    const resume = resumeRows[0];
     return `User's Resume: "${resume.name}"\nSummary: ${resume.summary || "Not set"}\nSkills: ${JSON.stringify(resume.skills || {})}`;
   }
 

@@ -20,13 +20,13 @@ export declare const updateSkillMappingFromBody: (id: string, body: SkillMapping
     error: string;
 }>;
 export declare const deleteSkillMappingById: (id: string, set: SkillMappingRouteSetState) => Promise<{
-    statusCode?: undefined;
     kind: "not-found";
     payload: {
         message?: undefined;
         error: string;
         id?: undefined;
     };
+    statusCode?: undefined;
 } | {
     kind: "gone";
     payload: {

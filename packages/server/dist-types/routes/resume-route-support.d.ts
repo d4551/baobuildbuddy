@@ -4,12 +4,16 @@ import type { ResumeEnhanceBody, ResumeExportBody, ResumeMutationBody, ResumeRou
 export declare const buildResumeCreatePayload: (body: ResumeMutationBody) => Omit<ResumeData, "id">;
 export declare const buildResumeUpdatePayload: (body: ResumeMutationBody) => Partial<ResumeData>;
 export declare const exportResumeAsset: (resumeId: string, body: ResumeExportBody, set: ResumeRouteSetState) => Promise<Response | {
-    details?: undefined;
     error: string;
+    details?: undefined;
 } | {
     error: string;
     details: string;
 }>;
+type ResumeEnhanceSuggestion = {
+    text: string;
+    section: string;
+};
 export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhanceBody, set: ResumeRouteSetState) => Promise<{
     error: string;
     resume?: undefined;
@@ -18,10 +22,7 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
 } | {
     error?: undefined;
     resume: ResumeData;
-    suggestions: {
-        text: string;
-        section: string;
-    }[];
+    suggestions: ResumeEnhanceSuggestion[];
     section: string;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{
@@ -43,3 +44,4 @@ export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBo
     keywords: string[];
     analysis: JsonObject;
 }>;
+export {};

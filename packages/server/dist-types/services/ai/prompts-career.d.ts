@@ -14,6 +14,13 @@ export declare function jobMatchPrompt(userProfile: {
     company: string;
     description: string;
     requirements: string[];
+    technologies?: string[];
+    enrichment?: {
+        summary?: string;
+        hiringSignals?: string[];
+        interviewFocusAreas?: string[];
+        candidatePitchAngles?: string[];
+    };
 }): string;
 /**
  * Skills analysis and mapping prompt

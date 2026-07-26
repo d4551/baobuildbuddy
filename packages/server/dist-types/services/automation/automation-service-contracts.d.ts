@@ -46,5 +46,10 @@ export interface AutofillAnalysisOptions {
     resume: ResumeData;
     coverLetter: typeof coverLetters.$inferSelect | null;
     existingAnswers: Record<string, string>;
+    jobContext?: string;
+    studioContext?: string;
+    skillContext?: string;
+    profileContext?: string;
+    portfolioContext?: string;
 }
 export type AutomationRunRow = typeof automationRuns.$inferSelect;

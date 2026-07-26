@@ -21,6 +21,11 @@ export interface SmartFieldAnalysisContext {
   readonly resume: Record<string, unknown>;
   readonly coverLetter?: Record<string, unknown> | null;
   readonly existingAnswers?: Record<string, string>;
+  readonly jobContext?: string;
+  readonly studioContext?: string;
+  readonly skillContext?: string;
+  readonly profileContext?: string;
+  readonly portfolioContext?: string;
 }
 
 export interface SmartFieldAnalysisResult {

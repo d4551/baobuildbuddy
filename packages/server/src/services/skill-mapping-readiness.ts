@@ -1,5 +1,6 @@
 import {
   COUNT_FIFTY,
+  COUNT_FIVE,
   COUNT_SEVENTY,
   COUNT_THREE,
   COUNT_TWENTY,
@@ -15,11 +16,19 @@ import {
 } from "@bao/shared/constants/score-thresholds";
 import type {
   ReadinessAssessment,
+  RoleReadiness,
   SkillMapping,
   SkillReadinessFeedbackId,
   SkillReadinessImprovementId,
   SkillReadinessNextStepId,
 } from "@bao/shared/types/skill-mapping";
+
+export interface ReadinessJobTarget {
+  readonly id: string;
+  readonly title: string;
+  readonly requirements: readonly string[];
+  readonly technologies: readonly string[];
+}
 
 type ReadinessMetrics = {
   technicalSkills: SkillMapping[];
@@ -204,3 +213,97 @@ export const buildSkillReadinessAssessment = (mappings: SkillMapping[]): Readine
   mappings.length === 0
     ? buildEmptyReadinessAssessment()
     : buildReadinessAssessment(calculateReadinessMetrics(mappings));
+
+const normalizeTargetSkill = (value: unknown): string => {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.toLowerCase() : "";
+};
+
+const collectJobTargetSkills = (job: ReadinessJobTarget): string[] => {
+  const combined = [...job.requirements, ...job.technologies];
+  const normalized = combined.map(normalizeTargetSkill).filter((entry) => entry.length > 0);
+  return Array.from(new Set(normalized));
+};
+
+const mappingCoversTarget = (mapping: SkillMapping, target: string): boolean => {
+  if (target.length === 0) {
+    return false;
+  }
+  const candidates = [
+    mapping.transferableSkill,
+    mapping.gameExpression,
+    ...mapping.industryApplications,
+  ]
+    .map((entry) => (typeof entry === "string" ? entry.trim().toLowerCase() : ""))
+    .filter((entry) => entry.length > 0);
+  return candidates.some((candidate) => target.includes(candidate) || candidate.includes(target));
+};
+
+const buildRecommendedActions = (matchingSkills: string[], missingSkills: string[]): string[] => {
+  const actions: string[] = [];
+  if (missingSkills.length > 0) {
+    const preview = missingSkills.slice(0, COUNT_THREE).join(", ");
+    actions.push(`Build skill mappings that cover: ${preview}`);
+  }
+  if (matchingSkills.length > 0) {
+    actions.push("Add evidence (clips, stats, achievements) for matched skills");
+  }
+  if (missingSkills.length === 0 && matchingSkills.length === 0) {
+    actions.push("Add requirements or technologies to this job posting, then re-run readiness");
+  }
+  return actions;
+};
+
+const estimateTimeToReady = (readinessScore: number): string => {
+  if (readinessScore >= SCORE_PASS_THRESHOLD) return "Ready now";
+  if (readinessScore >= SCORE_WARNING_THRESHOLD) return "1-2 weeks";
+  if (readinessScore >= SCORE_DEVELOPING_THRESHOLD) return "1-3 months";
+  return "3+ months";
+};
+
+/**
+ * Compares the candidate's skill mappings against a scraped job's requirements and
+ * technologies, producing a `RoleReadiness` entry the readiness route returns as
+ * `targetRoleReadiness`. The `?jobId` query used to be echoed back without reading
+ * the job, so the UI could never show job-targeted gaps even though the contract
+ * already declared the field.
+ */
+export const buildRoleReadiness = (
+  job: ReadinessJobTarget,
+  mappings: SkillMapping[],
+): RoleReadiness => {
+  const targetSkills = collectJobTargetSkills(job);
+  const matchingSkills: string[] = [];
+  const missingSkills: string[] = [];
+  for (const target of targetSkills) {
+    const hasMatch = mappings.some((mapping) => mappingCoversTarget(mapping, target));
+    if (hasMatch) {
+      matchingSkills.push(target);
+    } else {
+      missingSkills.push(target);
+    }
+  }
+  const totalSkills = matchingSkills.length + missingSkills.length;
+  const readinessScore =
+    totalSkills > 0 ? Math.round((matchingSkills.length / totalSkills) * PERCENT_MAX) : 0;
+  return {
+    roleId: job.id,
+    roleTitle: job.title,
+    readinessScore,
+    missingSkills: missingSkills.slice(0, COUNT_FIVE),
+    matchingSkills: matchingSkills.slice(0, COUNT_FIVE),
+    timeToReady: estimateTimeToReady(readinessScore),
+    recommendedActions: buildRecommendedActions(matchingSkills, missingSkills),
+  };
+};
+
+export const buildSkillReadinessAssessmentForJob = (
+  mappings: SkillMapping[],
+  job: ReadinessJobTarget,
+): ReadinessAssessment => ({
+  ...buildSkillReadinessAssessment(mappings),
+  targetRoleReadiness: [buildRoleReadiness(job, mappings)],
+});

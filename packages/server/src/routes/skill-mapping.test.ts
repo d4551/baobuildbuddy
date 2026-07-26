@@ -9,7 +9,20 @@ import {
   type SkillReadinessImprovementId,
   type SkillReadinessNextStepId,
 } from "@bao/shared/types/skill-mapping";
+import { generateId } from "@bao/shared/utils/validation";
+import { db } from "../db/client";
+import { jobs } from "../db/schema/jobs";
 import { requestJson } from "../test-utils";
+
+type TargetRoleReadiness = {
+  roleId: string;
+  roleTitle: string;
+  readinessScore: number;
+  missingSkills: string[];
+  matchingSkills: string[];
+  timeToReady?: string;
+  recommendedActions: string[];
+};
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 const SKILL_MAPPINGS_ROUTE = API_ENDPOINTS.skillMappings;
@@ -62,6 +75,19 @@ describe("skill-mapping list routes", () => {
   });
 });
 
+const seedJobForReadiness = async (jobId: string): Promise<void> => {
+  await db.insert(jobs).values({
+    id: jobId,
+    title: "Senior Gameplay Engineer",
+    company: "Test Studio",
+    location: "Remote",
+    description: "Build gameplay systems in Unreal Engine and C++.",
+    requirements: ["C++", "Leadership"],
+    technologies: ["Unreal Engine"],
+    postedDate: new Date().toISOString(),
+  });
+};
+
 describe("skill-mapping readiness route", () => {
   test("GET skill readiness returns typed readiness ids", async () => {
     const res = await requestJson<{
@@ -90,6 +116,55 @@ describe("skill-mapping readiness route", () => {
     for (const nextStep of res.body.nextSteps) {
       expect(SKILL_READINESS_NEXT_STEP_IDS).toContain(nextStep);
     }
+  });
+});
+
+describe("skill-mapping readiness jobId route", () => {
+  test("GET skill readiness without jobId omits targetRoleReadiness", async () => {
+    const res = await requestJson<{ targetRoleReadiness?: TargetRoleReadiness[] }>(
+      app,
+      "GET",
+      API_ENDPOINTS.skillReadiness,
+    );
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.targetRoleReadiness).toBeUndefined();
+  });
+
+  test("GET skill readiness with jobId pulls job requirements/technologies into targetRoleReadiness", async () => {
+    const jobId = generateId();
+    await seedJobForReadiness(jobId);
+
+    const mappingRes = await requestJson<{ id: string }>(app, "POST", SKILL_MAPPINGS_ROUTE, {
+      gameExpression: "Shipped a C++ title",
+      transferableSkill: "C++",
+      category: "technical",
+    });
+    expect(mappingRes.status).toBe(HTTP_STATUS_CREATED);
+
+    const readinessPath = `${API_ENDPOINTS.skillReadiness}?jobId=${encodeURIComponent(jobId)}`;
+    const res = await requestJson<{
+      jobId: string;
+      targetRoleReadiness?: TargetRoleReadiness[];
+    }>(app, "GET", readinessPath);
+
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.jobId).toBe(jobId);
+    expect(res.body.targetRoleReadiness).toBeDefined();
+    expect(res.body.targetRoleReadiness).toHaveLength(1);
+    const roleReadiness = res.body.targetRoleReadiness?.[0];
+    expect(roleReadiness?.roleId).toBe(jobId);
+    expect(roleReadiness?.matchingSkills).toContain("c++");
+    expect(roleReadiness?.missingSkills).toContain("unreal engine");
+    expect(roleReadiness?.recommendedActions.length).toBeGreaterThan(0);
+  });
+
+  test("GET skill readiness with unknown jobId falls back to base readiness without targetRoleReadiness", async () => {
+    const readinessPath = `${API_ENDPOINTS.skillReadiness}?jobId=${encodeURIComponent("nonexistent-job")}`;
+    const res = await requestJson<{
+      targetRoleReadiness?: TargetRoleReadiness[];
+    }>(app, "GET", readinessPath);
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.targetRoleReadiness).toBeUndefined();
   });
 });
 

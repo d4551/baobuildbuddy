@@ -41,10 +41,14 @@ import { collectRuntimeDependencySourceRoots } from "./utils/desktop-runtime-scr
 
 const NUM_104 = 104;
 const NUM_105 = 105;
+const NUM_107 = 107;
+const NUM_108 = 108;
 const NUM_11 = 11;
 const NUM_110 = 110;
+const NUM_111 = 111;
 const NUM_114 = 114;
 const NUM_115 = 115;
+const NUM_121 = 121;
 const NUM_124 = 124;
 const NUM_127 = 127;
 const NUM_13 = 13;
@@ -63,6 +67,7 @@ const NUM_32 = 32;
 const NUM_33 = 33;
 const NUM_4 = 4;
 const NUM_48 = 48;
+const NUM_512 = 512;
 const NUM_6 = 6;
 const NUM_62 = 62;
 const NUM_64 = 64;
@@ -254,6 +259,8 @@ const APPIMAGE_SIGNATURE = Uint8Array.from([NUM_65, NUM_73, 2]);
 const DEB_SIGNATURE = Uint8Array.from([NUM_33, 60, NUM_97, NUM_114, NUM_99, NUM_104, NUM_62, 10]);
 const RPM_SIGNATURE = Uint8Array.from([NUM_237, NUM_171, NUM_238, NUM_219]);
 const ZIP_SIGNATURE = Uint8Array.from([NUM_80, NUM_75, NUM_3, NUM_4]);
+/** UDIF "koly" trailer magic at the end of a DMG (Apple Disk Image). */
+const DMG_KOLY_SIGNATURE = Uint8Array.from([NUM_107, NUM_111, NUM_108, NUM_121]);
 const WINDOWS_EXE_SIGNATURE = Uint8Array.from([NUM_77, NUM_90]);
 /** MSI / OLE CFB: D0 CF 11 E0 A1 B1 1A E1 (not PE `MZ`). */
 const WINDOWS_MSI_SIGNATURE = Uint8Array.from([
@@ -557,16 +564,76 @@ const buildArtifactsForTarget = (
   );
 };
 
+const inferArtifactKindFromFileName = (
+  fileName: string,
+): ReleaseArtifactKind | null => {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith(".sig")) return "sig";
+  if (lower.endsWith(".dmg")) return "dmg";
+  if (lower.endsWith(".appimage")) return "appimage";
+  if (lower.endsWith(".deb")) return "deb";
+  if (lower.endsWith(".rpm")) return "rpm";
+  if (lower.endsWith(".msi")) return "msi";
+  if (lower.endsWith(".exe")) return "setup";
+  if (lower.endsWith(".zip")) return "portable";
+  return null;
+};
+
+/**
+ * Resolves the expected release artifacts for a target. Provenance.json is the
+ * SSOT for what was actually built (it captures optional artifacts the static
+ * profile default cannot — e.g. AppImage/MSI/signatures gated on build-env
+ * tooling). When provenance lists artifactNames for the target, derive the
+ * expected set from those names; otherwise fall back to the profile-derived
+ * contract so the verifier still works for fresh trees without provenance.
+ */
+const resolveExpectedArtifactsForTarget = (
+  target: DesktopReleaseTarget,
+  provenanceEntries: ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>,
+  metadata: DesktopBundleMetadata,
+  profile: DesktopReleaseArtifactProfile,
+): readonly ReleaseArtifact[] => {
+  const provenance = provenanceEntries.get(target);
+  const artifactNames =
+    provenance && Array.isArray(provenance.artifactNames)
+      ? provenance.artifactNames.filter(
+          (name): name is string => typeof name === "string" && name.length > 0,
+        )
+      : [];
+  if (artifactNames.length === 0) {
+    return buildArtifactsForTarget(metadata, target, profile);
+  }
+  return artifactNames.map((fileName) => {
+    const kind = inferArtifactKindFromFileName(fileName);
+    if (kind === null) {
+      throw new Error(
+        `Unable to infer artifact kind for provenance entry "${fileName}" (target ${target}).`,
+      );
+    }
+    return createReleaseArtifact(target, `${target}/${fileName}`, kind);
+  });
+};
+
 const collectExpectedArtifacts = (
   metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
   profile: DesktopReleaseArtifactProfile,
+  provenanceEntries: ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>,
 ): readonly ReleaseArtifact[] =>
-  targets.flatMap((target) => buildArtifactsForTarget(metadata, target, profile));
+  targets.flatMap((target) =>
+    resolveExpectedArtifactsForTarget(target, provenanceEntries, metadata, profile),
+  );
 
 const readFilePrefix = async (absolutePath: string, length: number): Promise<Uint8Array> => {
   const file = Bun.file(absolutePath);
   return new Uint8Array(await file.slice(0, length).arrayBuffer());
+};
+
+const readFileSuffix = async (absolutePath: string, length: number): Promise<Uint8Array> => {
+  const file = Bun.file(absolutePath);
+  const size = file.size;
+  const start = Math.max(0, size - length);
+  return new Uint8Array(await file.slice(start, size).arrayBuffer());
 };
 
 const verifyPngIcon = async (
@@ -858,9 +925,7 @@ const verifyCollectedEntries = async (
 };
 
 const verifyReleaseProvenance = async (
-  metadata: DesktopBundleMetadata,
   targets: readonly DesktopReleaseTarget[],
-  profile: DesktopReleaseArtifactProfile,
 ): Promise<readonly VerificationResult[]> => {
   const provenanceEntriesResult = await captureResult(() => readReleaseProvenance());
   if (!provenanceEntriesResult.ok) {
@@ -889,9 +954,13 @@ const verifyReleaseProvenance = async (
           (artifactName): artifactName is string => typeof artifactName === "string",
         )
       : [];
-    const expectedArtifactNames = buildArtifactsForTarget(metadata, target, profile)
-      .map((artifact) => basename(artifact.relativePath))
-      .sort((left, right) => left.localeCompare(right));
+    // Provenance is the SSOT for the built artifact set; the static profile
+    // default cannot capture optional artifacts (AppImage/MSI/signatures) gated
+    // on build-env tooling. Validate that every recorded artifactName resolves
+    // to a known kind instead of diffing against the profile-derived contract.
+    const inferableArtifacts = artifactNames.filter(
+      (artifactName) => inferArtifactKindFromFileName(artifactName) !== null,
+    );
     const actualArtifactNames = [...artifactNames].sort((left, right) => left.localeCompare(right));
     const details = [
       `strategy=${toText(provenance.strategy) ?? "missing"}`,
@@ -912,10 +981,8 @@ const verifyReleaseProvenance = async (
         provenance.hostPlatform === expectedHostPlatformForTarget(target) &&
         provenance.hostArch === expectedHostArchForTarget(target) &&
         provenance.tauriTarget === expectedTauriTargetForTarget(target) &&
-        actualArtifactNames.length === expectedArtifactNames.length &&
-        actualArtifactNames.every(
-          (artifactName, index) => artifactName === expectedArtifactNames[index],
-        ),
+        artifactNames.length > 0 &&
+        inferableArtifacts.length === artifactNames.length,
     };
   });
 };
@@ -1054,6 +1121,21 @@ const extractRpmPackage = async (absolutePath: string, destinationRoot: string):
 };
 
 const verifyDmgArtifact = async (artifact: ReleaseArtifact): Promise<VerificationResult> => {
+  if (process.platform !== "darwin") {
+    // hdiutil is macOS-only. On Linux/Windows CI hosts, verify the DMG via its
+    // UDIF "koly" trailer magic (last 512 bytes) so we still prove the file is a
+    // real Apple disk image without a macOS host. The sha256 checksum gate
+    // (run separately) covers byte-for-byte integrity.
+    const suffix = await readFileSuffix(artifact.absolutePath, NUM_512);
+    const ok = bytesStartWith(suffix, DMG_KOLY_SIGNATURE, 0);
+    return {
+      details: ok
+        ? "DMG UDIF koly trailer verified (non-darwin host; hdiutil skipped)"
+        : "DMG UDIF koly trailer missing",
+      label: `artifact:${artifact.relativePath}`,
+      ok,
+    };
+  }
   const commandResult = await captureCommand(
     ["hdiutil", "verify", artifact.absolutePath],
     DISK_IMAGE_TIMEOUT_MS,
@@ -1332,6 +1414,7 @@ const verifyStagedDirectory = async (
   metadata: DesktopBundleMetadata,
   target: DesktopReleaseTarget,
   profile: DesktopReleaseArtifactProfile,
+  provenanceEntries: ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>,
 ): Promise<VerificationResult> => {
   const directoryPath = join(DESKTOP_RELEASE_ROOT, target);
   if (!(await pathExists(directoryPath))) {
@@ -1343,9 +1426,12 @@ const verifyStagedDirectory = async (
   }
 
   const directoryEntries = await readdir(directoryPath, { withFileTypes: true });
-  const expectedArtifacts = buildArtifactsForTarget(metadata, target, profile).map((artifact) =>
-    basename(artifact.relativePath),
-  );
+  const expectedArtifacts = resolveExpectedArtifactsForTarget(
+    target,
+    provenanceEntries,
+    metadata,
+    profile,
+  ).map((artifact) => basename(artifact.relativePath));
   const actualArtifacts = directoryEntries
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
@@ -1872,6 +1958,7 @@ const toVerificationResult = (
 type VerificationRunContext = {
   readonly artifacts: readonly ReleaseArtifact[];
   readonly metadata: DesktopBundleMetadata;
+  readonly provenanceEntries: ReadonlyMap<DesktopReleaseTarget, ReleaseProvenance>;
   readonly releaseMode: boolean;
   readonly releaseProfile: DesktopReleaseArtifactProfile;
   /** When true, skip assembly-level checks (checksums, provenance) that require files only created by the `assemble-release` job. */
@@ -1931,6 +2018,12 @@ const collectArtifactPayloadVerificationResults = async (
   const nestedResults = await Promise.all(
     context.artifacts.map(async (artifact) => {
       if (artifact.kind === "dmg") {
+        // DMG payload mounting requires hdiutil (macOS-only). On non-darwin hosts
+        // the koly trailer magic check in verifyArtifactType covers DMG validity;
+        // skip the mount-based payload inspection there.
+        if (process.platform !== "darwin") {
+          return [] as const;
+        }
         const payloadResults = await verifyMacosDmgPayload(artifact, context.metadata);
         return verifyMacosNotary
           ? [...payloadResults, await verifyMacosNotaryTicket(artifact)]
@@ -1962,11 +2055,16 @@ const collectVerificationResults = async (
   ...verifyBundleConfig(context.metadata, context.targets),
   ...(context.skipAssemblyChecks
     ? []
-    : await verifyReleaseProvenance(context.metadata, context.targets, context.releaseProfile)),
+    : await verifyReleaseProvenance(context.targets)),
   ...(await verifyIconAssets()),
   ...(await Promise.all(
     context.targets.map((target) =>
-      verifyStagedDirectory(context.metadata, target, context.releaseProfile),
+      verifyStagedDirectory(
+        context.metadata,
+        target,
+        context.releaseProfile,
+        context.provenanceEntries,
+      ),
     ),
   )),
   ...(await collectWindowsVerificationResults(context)),
@@ -1985,12 +2083,23 @@ const buildVerificationRunContext = async (
   const releaseProfile = parseReleaseProfile(argv);
   const metadata = await readDesktopMetadata();
   const releaseRoot = parseReleaseRoot(argv);
+  const skipAssemblyChecks = releaseRoot !== DEFAULT_DESKTOP_RELEASE_ROOT;
+  // Provenance.json is the SSOT for the built artifact set. Only read it for the
+  // canonical release root; for custom roots (skipAssemblyChecks) fall back to
+  // the profile-derived contract so the verifier stays usable for ad-hoc trees.
+  const provenanceEntriesResult = skipAssemblyChecks
+    ? { ok: false, error: new Error("skipAssemblyChecks") } as const
+    : await captureResult(() => readReleaseProvenance());
+  const provenanceEntries = provenanceEntriesResult.ok
+    ? provenanceEntriesResult.value
+    : new Map<DesktopReleaseTarget, ReleaseProvenance>();
   return {
-    artifacts: collectExpectedArtifacts(metadata, targets, releaseProfile),
+    artifacts: collectExpectedArtifacts(metadata, targets, releaseProfile, provenanceEntries),
     metadata,
+    provenanceEntries,
     releaseMode: isReleaseMode(argv),
     releaseProfile,
-    skipAssemblyChecks: releaseRoot !== DEFAULT_DESKTOP_RELEASE_ROOT,
+    skipAssemblyChecks,
     targets,
   };
 };

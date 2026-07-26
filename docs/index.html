@@ -5,8 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BaoBuildBuddy | AI Help For Videogame Job Seekers</title>
     <meta name="description" content="BaoBuildBuddy helps videogame job seekers find roles, tailor applications, set up Ollama, and move through repetitive application steps faster." />
+    <link rel="canonical" href="https://baobuildbuddy.com/" />
+    <meta name="theme-color" content="#2d3570" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BaoBuildBuddy" />
+    <meta property="og:title" content="BaoBuildBuddy | AI Help For Videogame Job Seekers" />
+    <meta property="og:description" content="Download the app for your OS, connect Ollama in a few minutes, and get help pulling together game jobs, writing stronger applications, and handling repetitive applying steps." />
+    <meta property="og:url" content="https://baobuildbuddy.com/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BaoBuildBuddy | AI Help For Videogame Job Seekers" />
+    <meta name="twitter:description" content="Free open-source desktop app that helps videogame job seekers find roles, tailor applications, and run private local AI via Ollama." />
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link href="./assets/docs.generated.css" rel="stylesheet" />
-    
+
     <style>
       :root {
         --font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
@@ -27,14 +42,25 @@
         font-family: var(--font-mono);
       }
 
-      /* Fix anchor link scrolling to clear the sticky navbar */
       html {
         scroll-padding-top: 5rem;
       }
-      
-      /* Subtle background pattern replacing the broken reflection */
+
+      /* Skip-to-content link (a11y) */
+      .skip-link {
+        position: fixed;
+        top: 0.5rem;
+        left: 0.5rem;
+        z-index: 100;
+        transform: translateY(-150%);
+        transition: transform 0.15s ease-in-out;
+      }
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
       .bg-grid-pattern {
-        background-image: 
+        background-image:
           radial-gradient(oklch(var(--color-base-content) / 0.1) 1px, transparent 1px),
           radial-gradient(oklch(var(--color-base-content) / 0.1) 1px, transparent 1px);
         background-size: 40px 40px;
@@ -144,8 +170,22 @@
         outline-offset: 2px;
       }
 
+      /* Release card: sha row + verify affordance */
+      .release-sha {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+      }
+      .release-sha code {
+        display: inline-block;
+        max-width: 12rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: bottom;
+      }
+
       /* ── WCAG 2.1 AA contrast fixes for light theme ── */
-      /* badge-soft text colors darkened to meet 4.5:1 on their tinted backgrounds */
       [data-theme="corporate"] .badge-soft.badge-warning {
         color: oklch(0.42 0.16 75);
       }
@@ -161,14 +201,12 @@
       [data-theme="corporate"] .badge-soft.badge-secondary {
         color: oklch(0.42 0.17 330);
       }
-      /* badge-ghost: add visible border for 3:1 non-text contrast in both modes */
       .badge-ghost {
         border: 1px solid oklch(var(--color-base-content) / 0.22);
       }
       [data-theme="corporate"] .badge-ghost {
         color: oklch(var(--color-base-content) / 0.72);
       }
-      /* btn-ghost: ensure 3:1 interactive-boundary contrast in light mode */
       [data-theme="corporate"] .btn-ghost {
         color: oklch(var(--color-base-content) / 0.78);
       }
@@ -176,14 +214,12 @@
       [data-theme="corporate"] .btn-ghost:focus-visible {
         background-color: oklch(var(--color-base-content) / 0.1);
       }
-      /* btn-neutral btn-outline: enforce dark border on light backgrounds */
       [data-theme="corporate"] .btn-outline.btn-neutral {
         border-color: oklch(var(--color-neutral) / 0.6);
         color: oklch(0.28 0.02 270);
       }
 
       /* ── WCAG 2.1 AA contrast fixes for dark theme ── */
-      /* btn-neutral: add visible border so button boundary meets 3:1 on dark bg */
       [data-theme="business"] .btn-neutral {
         border: 1px solid oklch(var(--color-base-content) / 0.18);
       }
@@ -192,7 +228,6 @@
         border-color: oklch(var(--color-base-content) / 0.30);
         background-color: oklch(var(--color-neutral) / 0.85);
       }
-      /* btn-neutral btn-outline: boost border + text visibility in dark mode */
       [data-theme="business"] .btn-outline.btn-neutral {
         border-color: oklch(var(--color-base-content) / 0.35);
         color: oklch(var(--color-base-content) / 0.85);
@@ -202,12 +237,10 @@
         border-color: oklch(var(--color-base-content) / 0.5);
         background-color: oklch(var(--color-base-content) / 0.08);
       }
-      /* badge-soft badge-neutral: lighten bg + text so it's visible on dark bg */
       [data-theme="business"] .badge-soft.badge-neutral {
         background-color: oklch(var(--color-base-content) / 0.12);
         color: oklch(var(--color-base-content) / 0.82);
       }
-      /* badge-outline: boost border for 3:1 non-text contrast in dark mode */
       [data-theme="business"] .badge-outline {
         border-color: oklch(var(--color-base-content) / 0.30);
         color: oklch(var(--color-base-content) / 0.82);
@@ -218,16 +251,35 @@
           overflow-x: auto;
           padding-bottom: 0.25rem;
         }
-
         .downloads-tablist {
           width: max-content;
           min-width: 100%;
         }
       }
+
+      /* Respect reduced-motion preferences */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+          scroll-behavior: auto !important;
+        }
+        .surface-card,
+        .release-card-hover {
+          transform: none !important;
+        }
+      }
     </style>
   </head>
   <body class="bg-base-100 text-base-content min-h-screen flex flex-col pt-16 sm:pt-20 pb-20 sm:pb-0">
-    
+    <a href="#main" class="skip-link btn btn-primary btn-sm">Skip to content</a>
+
     <!-- Accessible Navbar -->
     <header class="fixed inset-x-0 top-0 z-50 border-b border-base-300 bg-base-100/88 backdrop-blur">
       <div class="navbar page-shell min-h-16 px-4 sm:min-h-20 sm:px-6 lg:px-8">
@@ -242,9 +294,10 @@
             <li><a href="#downloads">Downloads</a></li>
             <li><a href="#ollama">Set Up Ollama</a></li>
             <li><a href="#how-it-helps">How It Helps</a></li>
+            <li><a href="#verify">Verify Downloads</a></li>
           </ul>
         </details>
-        <a href="/" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
+        <a href="#main" class="btn btn-ghost text-xl font-display gap-2 h-auto py-1" aria-label="BaoBuildBuddy Home">
           <svg viewBox="0 0 64 64" class="w-8 h-8" aria-hidden="true" role="presentation">
             <circle cx="32" cy="32" r="30" fill="#2d3570" />
             <path d="M15 36c0-8.8 7.7-15.8 17-15.8S49 27.2 49 36c0 8.2-7.8 13.8-17 13.8S15 44.2 15 36Z" fill="#ffefcc" stroke="#e0a84f" stroke-linejoin="round" stroke-width="2.2" />
@@ -265,11 +318,9 @@
         </ul>
       </nav>
       <div class="navbar-end gap-3">
-        <!-- GitHub Link -->
         <a href="https://github.com/d4551/baobuildbuddy" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="View BaoBuildBuddy on GitHub">
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <!-- Theme Toggle -->
         <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="Toggle theme">
           <input type="checkbox" id="theme-toggle" class="theme-controller" value="business" aria-label="Toggle theme" />
           <svg aria-hidden="true" class="swap-off fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
@@ -284,28 +335,29 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center">
-      
-      <!-- Clean Accessible Hero -->
+    <main id="main" class="flex-grow flex flex-col items-center">
+
+      <!-- Hero -->
       <section class="relative isolate w-full overflow-hidden border-b border-base-300 bg-grid-pattern px-4 py-10 sm:px-6 sm:py-14 lg:px-8" aria-labelledby="hero-heading">
         <div class="hero-orb hero-orb-primary"></div>
         <div class="hero-orb hero-orb-accent"></div>
         <div class="section-shell grid items-center gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,24rem)]">
           <div class="text-center lg:text-left">
-          <fieldset class="flex flex-wrap items-center justify-center gap-2 mb-6 lg:justify-start" aria-label="Features">
+          <div class="flex flex-wrap items-center justify-center gap-2 mb-6 lg:justify-start" aria-label="Features">
             <span class="badge badge-soft badge-primary font-medium">Find jobs</span>
             <span class="badge badge-soft badge-neutral font-medium">Apply faster</span>
             <span class="badge badge-soft badge-info font-medium">Free Open Source</span>
-          </fieldset>
-          
+            <span class="badge badge-outline badge-neutral font-medium" data-app-version-badge>v0.1.0</span>
+          </div>
+
           <h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
             Use AI to move faster in videogame job hunting
           </h1>
-          
+
           <p class="py-6 text-lg md:text-xl text-base-content/80 text-balance max-w-2xl font-medium mx-auto lg:mx-0">
             Download the app for your OS, connect Ollama in a few minutes, and get help pulling together game jobs from different sites, writing stronger applications, and handling some of the repetitive applying steps.
           </p>
-          
+
           <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-6 lg:justify-start">
             <a href="#downloads" class="btn btn-primary btn-lg" aria-label="Jump to desktop app downloads">
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
@@ -338,7 +390,7 @@
         </div>
       </section>
 
-      <!-- Downloads Section with Logos -->
+      <!-- Downloads Section -->
       <section id="downloads" class="w-full bg-base-100 px-4 py-20 sm:px-6 lg:px-8" aria-labelledby="downloads-heading">
         <div class="section-shell">
         <div class="section-heading text-center mx-auto mb-12">
@@ -350,7 +402,7 @@
         <div class="surface-panel rounded-[2rem] p-4 sm:p-6 lg:p-8">
         <div class="downloads-tab-scroller">
         <div role="tablist" class="downloads-tablist tabs tabs-box tabs-lg grid gap-2 max-w-4xl mx-auto border border-base-content/10 p-1.5 bg-base-200/80" aria-label="Choose your computer type">
-          
+
           <!-- Windows Tab -->
           <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Windows Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-windows" checked="checked" />
@@ -363,8 +415,15 @@
               <h3 class="text-xl font-bold">Windows downloads</h3>
               <p class="text-sm text-base-content/70 mt-2">Most Windows people can start with the setup file.</p>
             </div>
-            <div class="release-grid grid gap-6" id="assets-windows" aria-live="polite">
+            <div class="release-grid grid gap-6" id="assets-windows" aria-live="polite" data-platform="windows">
               <div class="col-span-full flex justify-center py-12" role="status" aria-label="Loading Windows files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+              <noscript>
+                <div class="col-span-full">
+                  <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+                    JavaScript is off. <a class="link link-primary" href="releases/windows/">Browse Windows files</a> or see <a class="link link-primary" href="https://github.com/d4551/baobuildbuddy/releases" rel="noopener noreferrer">GitHub releases</a>.
+                  </div>
+                </div>
+              </noscript>
             </div>
             <div class="mt-8 text-center">
                <p class="text-base-content/70 text-sm font-medium">Choose the setup file for the normal install, or the portable ZIP if you want a self-contained folder.</p>
@@ -383,7 +442,16 @@
               <h3 class="text-xl font-bold">Mac downloads</h3>
               <p class="text-sm text-base-content/70 mt-2">Open the Mac file that matches your Mac. If only one shows up, use that one.</p>
             </div>
-            <div class="release-grid grid gap-6" id="assets-macos" aria-live="polite"></div>
+            <div class="release-grid grid gap-6" id="assets-macos" aria-live="polite" data-platform="macos">
+              <div class="col-span-full flex justify-center py-12" role="status" aria-label="Loading Mac files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+              <noscript>
+                <div class="col-span-full">
+                  <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+                    JavaScript is off. <a class="link link-primary" href="releases/macos/">Browse Mac files</a> or see <a class="link link-primary" href="https://github.com/d4551/baobuildbuddy/releases" rel="noopener noreferrer">GitHub releases</a>.
+                  </div>
+                </div>
+              </noscript>
+            </div>
             <div class="mt-8 text-center">
                <p class="text-base-content/70 text-sm font-medium">The Mac installer below opens the standard drag-and-install flow.</p>
             </div>
@@ -401,7 +469,16 @@
               <h3 class="text-xl font-bold">Linux downloads</h3>
               <p class="text-sm text-base-content/70 mt-2">Linux files can show up in separate x64 and ARM64 versions. Pick the one that matches your machine.</p>
             </div>
-            <div class="release-grid grid gap-6" id="assets-linux" aria-live="polite"></div>
+            <div class="release-grid grid gap-6" id="assets-linux" aria-live="polite" data-platform="linux">
+              <div class="col-span-full flex justify-center py-12" role="status" aria-label="Loading Linux files"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+              <noscript>
+                <div class="col-span-full">
+                  <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+                    JavaScript is off. <a class="link link-primary" href="releases/linux-x64/">Browse Linux x64 files</a>, <a class="link link-primary" href="releases/linux-arm64/">ARM64 files</a>, or see <a class="link link-primary" href="https://github.com/d4551/baobuildbuddy/releases" rel="noopener noreferrer">GitHub releases</a>.
+                  </div>
+                </div>
+              </noscript>
+            </div>
             <div class="mt-8 text-center">
                <p class="text-base-content/70 text-sm font-medium">Pick the Linux package that matches your machine and package manager.</p>
             </div>
@@ -419,7 +496,6 @@
             <div class="max-w-2xl text-left">
               <p class="section-kicker">Set Up Ollama</p>
               <h2 id="ollama-heading" class="text-3xl font-display font-bold mb-4 flex items-center gap-4 text-base-content">
-                <!-- Ollama custom simple SVG text or representation -->
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="text-base-content" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-11.5c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm4 0c-1.38 0-2.5 1.12-2.5 2.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5-1.12-2.5-2.5-2.5zm-2 6.5c1.66 0 3.14-.69 4.22-1.78l-1.41-1.41C14.03 14.53 13.06 15 12 15s-2.03-.47-2.81-1.19l-1.41 1.41C8.86 16.31 10.34 17 12 17z" fill="currentColor"/></svg>
                 Set up private AI help on your own computer
               </h2>
@@ -428,7 +504,7 @@
               </p>
             </div>
             <div class="flex-none pt-2">
-              <a href="https://ollama.com/download" target="_blank" class="btn btn-neutral btn-lg" aria-label="Download Ollama">Download Ollama</a>
+              <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" class="btn btn-neutral btn-lg" aria-label="Download Ollama">Download Ollama</a>
             </div>
           </div>
 
@@ -441,7 +517,7 @@
                 <p class="text-sm font-body text-base-content/70 w-full flex-grow">Download Ollama for your computer and finish the basic install.</p>
               </div>
             </div>
-            
+
             <!-- Step 2 -->
             <div class="card surface-card text-left hover:border-primary/50 hover:-translate-y-1 transition-all group">
               <div class="card-body flex flex-col items-start h-full">
@@ -580,13 +656,48 @@
         </div>
         </div>
       </section>
+
+      <!-- Verify Downloads -->
+      <section id="verify" class="w-full bg-base-200/50 px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="verify-heading">
+        <div class="section-shell">
+          <div class="surface-panel rounded-[2rem] p-6 sm:p-8 lg:p-10 grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(20rem,1fr)] items-center">
+            <div>
+              <p class="section-kicker">Integrity</p>
+              <h2 id="verify-heading" class="text-2xl md:text-3xl font-display font-bold mb-3 text-base-content">Verify your download</h2>
+              <p class="text-base-content/70 max-w-2xl">
+                Every release file ships with a SHA-256 checksum. After downloading, compare the hash on your machine against
+                <a class="link link-primary font-medium" href="releases/sha256.txt" rel="noopener noreferrer">releases/sha256.txt</a>
+                to confirm the file is intact and unmodified. Build provenance is recorded in
+                <a class="link link-primary font-medium" href="releases/provenance.json" rel="noopener noreferrer">provenance.json</a>.
+              </p>
+              <div class="mt-5 mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-content/10 flex items-center">
+                <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="shasum -a 256 BaoBuildBuddy_0.1.0_x64-setup.exe" aria-label="Copy verify command">Copy</button>
+                <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>shasum -a 256 BaoBuildBuddy_0.1.0_x64-setup.exe</code></pre>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3">
+              <a href="releases/sha256.txt" class="btn btn-neutral btn-outline" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" x2="15" y1="15" y2="15"/></svg>
+                Open sha256.txt
+              </a>
+              <a href="releases/provenance.json" class="btn btn-neutral btn-outline" rel="noopener noreferrer">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                Open provenance.json
+              </a>
+              <a href="https://github.com/d4551/baobuildbuddy/releases" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                What's new
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <!-- Accessible Footer -->
+    <!-- Footer -->
     <footer class="border-t border-base-300 bg-base-200 text-base-content mt-auto">
       <div class="section-shell px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          <!-- Brand -->
           <div class="sm:col-span-2 lg:col-span-2 flex flex-col gap-4">
             <div class="flex items-center gap-3">
               <svg viewBox="0 0 64 64" class="w-10 h-10 shrink-0" aria-hidden="true">
@@ -607,7 +718,6 @@
             </a>
           </div>
 
-          <!-- Navigation -->
           <nav aria-label="Footer navigation">
             <h6 class="footer-title text-base-content/50 text-xs font-semibold tracking-widest uppercase mb-4">Start Here</h6>
             <ul class="flex flex-col gap-3">
@@ -629,10 +739,15 @@
                   See how it helps
                 </a>
               </li>
+              <li>
+                <a href="#verify" class="link link-hover flex items-center gap-2 text-sm font-medium" aria-label="Go to verify downloads section">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 5-3.5 7.5-9 9-5.5-1.5-9-4-9-9V5l9-3 9 3z"/></svg>
+                  Verify downloads
+                </a>
+              </li>
             </ul>
           </nav>
 
-          <!-- Open Source -->
           <nav aria-label="Open source links">
             <h6 class="footer-title text-base-content/50 text-xs font-semibold tracking-widest uppercase mb-4">Open Source</h6>
             <ul class="flex flex-col gap-3">
@@ -659,7 +774,7 @@
         </div>
 
         <div class="border-t border-base-300 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-base-content/50">
-          <span>BaoBuildBuddy — free and open source, for videogame job seekers.</span>
+          <span>BaoBuildBuddy <span data-app-version>v0.1.0</span> — free and open source, for videogame job seekers.</span>
           <a href="https://github.com/d4551/baobuildbuddy" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 hover:text-base-content transition-colors" aria-label="View on GitHub">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
             GitHub
@@ -670,7 +785,7 @@
 
     <!-- Mobile Dock Navigation -->
     <nav class="dock sm:hidden border-t border-base-300 bg-base-100/95 backdrop-blur z-50 fixed bottom-0 w-full" aria-label="Mobile Navigation">
-      <a href="/" class="dock-item dock-active" data-dock-target="top" aria-label="Go to Home">
+      <a href="#main" class="dock-item dock-active" data-dock-target="top" aria-label="Go to Home">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span class="dock-label">Home</span>
       </a>
@@ -700,7 +815,7 @@
         }
       });
 
-      // Validating Theme Logic
+      // Theme logic
       const themeToggle = document.getElementById("theme-toggle");
       const htmlEl = document.documentElement;
       const tKey = "bao.builders.theme";
@@ -715,82 +830,10 @@
         localStorage.setItem(tKey, newTheme);
       });
 
-      const SECTION_IDS = ["downloads", "ollama", "how-it-helps"];
+      const SECTION_IDS = ["downloads", "ollama", "how-it-helps", "verify"];
       const COPY_BUTTON_RESET_DELAY_MS = 2000;
-      const RELEASE_DOWNLOAD_ROOT = "releases";
-      const PRIMARY_RELEASE_EXTENSIONS = new Set(["AppImage", "dmg", "exe"]);
-      const DOWNLOAD_PLATFORMS = [
-        {
-          id: "windows",
-          label: "Windows",
-          directories: [{ id: "windows", label: "Windows files" }],
-        },
-        {
-          id: "macos",
-          label: "Mac",
-          directories: [{ id: "macos", label: "Mac files" }],
-        },
-        {
-          id: "linux",
-          label: "Linux",
-          directories: [
-            { id: "linux-x64", label: "Linux x64 files" },
-            { id: "linux-arm64", label: "Linux ARM64 files" },
-          ],
-        },
-      ];
-      const RELEASE_ASSETS = {
-        windows: [
-          {
-            directoryId: "windows",
-            name: "BaoBuildBuddy_0.1.0_x64-setup.exe",
-            size: 62135430,
-          },
-          {
-            directoryId: "windows",
-            name: "BaoBuildBuddy_0.1.0_x64-portable.zip",
-            size: 92715954,
-          },
-        ],
-        macos: [
-          {
-            directoryId: "macos",
-            name: "BaoBuildBuddy_0.1.0_aarch64.dmg",
-            size: 69768452,
-          },
-        ],
-        linux: [
-          {
-            directoryId: "linux-x64",
-            name: "BaoBuildBuddy_0.1.0_amd64.AppImage",
-            size: 158759416,
-          },
-          {
-            directoryId: "linux-x64",
-            name: "BaoBuildBuddy_0.1.0_amd64.deb",
-            size: 86357636,
-          },
-          {
-            directoryId: "linux-x64",
-            name: "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
-            size: 86385304,
-          },
-          {
-            directoryId: "linux-arm64",
-            name: "BaoBuildBuddy_0.1.0_arm64.deb",
-            size: 86631074,
-          },
-          {
-            directoryId: "linux-arm64",
-            name: "BaoBuildBuddy-0.1.0-1.aarch64.rpm",
-            size: 86656472,
-          },
-        ],
-      };
-
-      function getReleaseFileHref(directoryId, file) {
-        return `${RELEASE_DOWNLOAD_ROOT}/${directoryId}/${encodeURIComponent(file.name)}`;
-      }
+      const MANIFEST_URL = "releases/manifest.json";
+      const FETCH_TIMEOUT_MS = 8000;
 
       function escapeHtml(value) {
         return value
@@ -802,10 +845,12 @@
       }
 
       function formatFileSize(bytes) {
-        return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+        const mb = bytes / 1024 / 1024;
+        if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
+        return `${mb.toFixed(1)} MB`;
       }
 
-      function getReleaseExtension(fileName) {
+      function getExtension(fileName) {
         return fileName.split(".").pop() || "file";
       }
 
@@ -828,35 +873,24 @@
       function bindCopyButtons() {
         const copyButtons = document.querySelectorAll("[data-copy-text]");
         for (const button of copyButtons) {
+          if (button.dataset.copyBound === "1") continue;
+          button.dataset.copyBound = "1";
           button.addEventListener("click", (event) => {
             const targetButton = event.currentTarget;
-            if (!(targetButton instanceof HTMLButtonElement)) {
-              return;
-            }
-
+            if (!(targetButton instanceof HTMLButtonElement)) return;
             const text = targetButton.dataset.copyText;
-            if (typeof text !== "string" || text.length === 0) {
-              return;
-            }
-
+            if (typeof text !== "string" || text.length === 0) return;
             const originalText = targetButton.innerText;
-            navigator.clipboard.writeText(text).then(
+            const writePromise = navigator.clipboard && navigator.clipboard.writeText
+              ? navigator.clipboard.writeText(text)
+              : Promise.reject(new Error("clipboard unavailable"));
+            writePromise.then(
               () => {
-                setCopyButtonState(targetButton, {
-                  text: "Copied!",
-                  addClassName: "btn-success",
-                  removeClassName: "btn-ghost",
-                  politeness: "polite",
-                });
+                setCopyButtonState(targetButton, { text: "Copied!", addClassName: "btn-success", removeClassName: "btn-ghost", politeness: "polite" });
                 resetCopyButtonState(targetButton, originalText);
               },
               () => {
-                setCopyButtonState(targetButton, {
-                  text: "Copy failed",
-                  addClassName: "btn-error",
-                  removeClassName: "btn-ghost",
-                  politeness: "assertive",
-                });
+                setCopyButtonState(targetButton, { text: "Copy failed", addClassName: "btn-error", removeClassName: "btn-ghost", politeness: "assertive" });
                 resetCopyButtonState(targetButton, originalText);
               },
             );
@@ -864,138 +898,42 @@
         }
       }
 
-      function createEmptyPlatformMarkup(platform) {
+      function createReleaseCardMarkup(file) {
+        const ext = getExtension(file.name);
+        const badgeClass = file.primary ? "badge-primary" : "badge-neutral";
+        const primaryTag = file.primary
+          ? `<span class="badge badge-soft badge-success badge-sm font-medium">Recommended</span>`
+          : "";
+        const archBadge = file.arch
+          ? `<span class="badge badge-outline badge-neutral badge-sm font-medium">${escapeHtml(file.arch)}</span>`
+          : "";
+        const shaBlock = file.sha256
+          ? `<div class="release-sha flex items-center gap-2 text-base-content/55">
+               <span class="uppercase font-mono text-[0.6rem] tracking-widest">sha256</span>
+               <code title="${escapeHtml(file.sha256)}">${escapeHtml(file.sha256)}</code>
+               <button type="button" class="btn btn-ghost btn-xs h-6 min-h-0 px-2" data-copy-text="${escapeHtml(file.sha256)}" aria-label="Copy SHA-256 for ${escapeHtml(file.name)}">Copy</button>
+             </div>`
+          : "";
         return `
-          <div class="col-span-full">
-            <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
-              No ${platform.label.toLowerCase()} files are listed yet.
-            </div>
-          </div>
-        `;
-      }
-
-      function createMissingPlatformMarkup(platform) {
-        return `
-          <div class="col-span-full">
-            <div class="alert alert-info text-sm" role="alert">
-              No ${platform.label.toLowerCase()} release folders are available yet.
-            </div>
-          </div>
-        `;
-      }
-
-      function getReleaseKind(fileName) {
-        const lowerFileName = fileName.toLowerCase();
-        const ext = getReleaseExtension(fileName).toLowerCase();
-
-        if (ext === "exe") {
-          return "Setup file";
-        }
-
-        if (ext === "zip") {
-          return "Portable file";
-        }
-
-        if (ext === "dmg") {
-          return "Mac installer";
-        }
-
-        if (ext === "deb") {
-          return "Debian package";
-        }
-
-        if (ext === "rpm") {
-          return "RPM package";
-        }
-
-        if (ext === "appimage") {
-          return "Portable Linux app";
-        }
-
-        if (lowerFileName.endsWith(".sig")) {
-          return "Signature file";
-        }
-
-        return "Download file";
-      }
-
-      function getReleaseArchitecture(fileName, directoryId) {
-        const value = `${directoryId} ${fileName}`.toLowerCase();
-
-        if (value.includes("universal")) {
-          return "Universal";
-        }
-
-        if (value.includes("arm64") || value.includes("aarch64")) {
-          return "ARM64";
-        }
-
-        if (value.includes("x64") || value.includes("x86_64") || value.includes("amd64")) {
-          return "x64";
-        }
-
-        return "";
-      }
-
-      function getReleaseDescription(platform, fileName) {
-        const ext = getReleaseExtension(fileName).toLowerCase();
-
-        if (platform.id === "windows" && ext === "exe") {
-          return "Best for most Windows people. This runs the usual setup.";
-        }
-
-        if (platform.id === "windows" && ext === "zip") {
-          return "Use this if you want a portable folder instead of a full install.";
-        }
-
-        if (platform.id === "macos" && ext === "dmg") {
-          return "Open this on your Mac to start the normal install flow.";
-        }
-
-        if (platform.id === "linux" && ext === "deb") {
-          return "Use this if your Linux system installs .deb packages.";
-        }
-
-        if (platform.id === "linux" && ext === "rpm") {
-          return "Use this if your Linux system installs .rpm packages.";
-        }
-
-        if (platform.id === "linux" && ext === "appimage") {
-          return "Use this if you want a portable Linux app file.";
-        }
-
-        return `Open this file if it matches your ${platform.label.toLowerCase()} computer.`;
-      }
-
-      function createReleaseCardMarkup(platform, directoryId, file) {
-        const ext = getReleaseExtension(file.name);
-        const fileUrl = getReleaseFileHref(directoryId, file);
-        const badgeClass = PRIMARY_RELEASE_EXTENSIONS.has(ext) ? "badge-primary" : "badge-neutral";
-        const architecture = getReleaseArchitecture(file.name, directoryId);
-        const releaseKind = getReleaseKind(file.name);
-        const releaseDescription = getReleaseDescription(platform, file.name);
-        const safeFileName = escapeHtml(file.name);
-        const safeReleaseKind = escapeHtml(releaseKind);
-        const safeReleaseDescription = escapeHtml(releaseDescription);
-        const safeArchitecture = escapeHtml(architecture);
-
-        return `
-          <article class="card surface-card h-full transition-all hover:-translate-y-1 hover:border-primary/50">
+          <article class="card surface-card release-card-hover h-full transition-all hover:-translate-y-1 hover:border-primary/50">
             <div class="card-body p-6">
               <div class="flex items-start justify-between gap-3">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="badge ${badgeClass} badge-soft badge-sm uppercase font-bold">${ext}</span>
-                  ${architecture ? `<span class="badge badge-outline badge-neutral badge-sm font-medium">${safeArchitecture}</span>` : ""}
+                  <span class="badge ${badgeClass} badge-soft badge-sm uppercase font-bold">${escapeHtml(ext)}</span>
+                  ${archBadge}
+                  ${primaryTag}
                 </div>
                 <span class="text-xs text-base-content/60 font-medium">${formatFileSize(file.size)}</span>
               </div>
               <div class="space-y-3">
-                <h4 class="card-title text-base text-base-content leading-tight">${safeReleaseKind}</h4>
-                <p class="text-sm text-base-content/70">${safeReleaseDescription}</p>
-                <p class="text-xs font-mono break-all text-base-content/60">${safeFileName}</p>
+                <h4 class="card-title text-base text-base-content leading-tight">${escapeHtml(file.kind)}</h4>
+                <p class="text-sm text-base-content/70">${escapeHtml(file.description)}</p>
+                <p class="text-xs font-mono break-all text-base-content/60">${escapeHtml(file.name)}</p>
+                ${shaBlock}
               </div>
               <div class="card-actions justify-start mt-auto pt-2">
-                <a href="${fileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm w-full font-medium" aria-label="Download ${safeFileName}">
+                <a href="${escapeHtml(file.href)}" download="${escapeHtml(file.name)}" class="btn btn-primary btn-sm w-full font-medium" aria-label="Download ${escapeHtml(file.name)}">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                   Download
                 </a>
               </div>
@@ -1004,58 +942,88 @@
         `;
       }
 
-      function sortPlatformReleaseFiles(platform, releaseFiles) {
-        return releaseFiles.sort((leftEntry, rightEntry) => {
-          const leftExt = getReleaseExtension(leftEntry.file.name);
-          const rightExt = getReleaseExtension(rightEntry.file.name);
-          const leftPriority = PRIMARY_RELEASE_EXTENSIONS.has(leftExt) ? 0 : 1;
-          const rightPriority = PRIMARY_RELEASE_EXTENSIONS.has(rightExt) ? 0 : 1;
-
-          if (leftPriority !== rightPriority) {
-            return leftPriority - rightPriority;
-          }
-
-          if (leftEntry.directoryId !== rightEntry.directoryId) {
-            const leftDirectoryIndex = platform.directories.findIndex(
-              (directory) => directory.id === leftEntry.directoryId,
-            );
-            const rightDirectoryIndex = platform.directories.findIndex(
-              (directory) => directory.id === rightEntry.directoryId,
-            );
-
-            return leftDirectoryIndex - rightDirectoryIndex;
-          }
-
-          return leftEntry.file.name.localeCompare(rightEntry.file.name);
-        });
+      function createEmptyPlatformMarkup(platform) {
+        return `
+          <div class="col-span-full">
+            <div class="alert border border-base-content/10 bg-base-100 text-sm" role="alert">
+              No ${escapeHtml(platform.label.toLowerCase())} files are listed yet. Check <a class="link link-primary" href="https://github.com/d4551/baobuildbuddy/releases" rel="noopener noreferrer">GitHub releases</a>.
+            </div>
+          </div>
+        `;
       }
 
-      function buildPlatformMarkup(platform) {
-        const releaseFiles = RELEASE_ASSETS[platform.id];
-
-        if (!Array.isArray(releaseFiles)) {
-          return createMissingPlatformMarkup(platform);
-        }
-
-        const sortedReleaseFiles = sortPlatformReleaseFiles(
-          platform,
-          releaseFiles.map((file) => ({ directoryId: file.directoryId, file })),
-        );
-        if (sortedReleaseFiles.length === 0) {
-          return createEmptyPlatformMarkup(platform);
-        }
-
-        return sortedReleaseFiles
-          .map(({ directoryId, file }) => createReleaseCardMarkup(platform, directoryId, file))
-          .join("");
+      function createErrorPlatformMarkup(platform, onRetry) {
+        const id = `retry-${platform.id}`;
+        window.setTimeout(() => {
+          const btn = document.getElementById(id);
+          if (btn) btn.addEventListener("click", onRetry);
+        }, 0);
+        return `
+          <div class="col-span-full">
+            <div class="alert alert-error text-sm" role="alert">
+              <div class="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:justify-between">
+                <span>Could not load ${escapeHtml(platform.label.toLowerCase())} files. Check your connection and try again.</span>
+                <button type="button" id="${id}" class="btn btn-sm btn-neutral self-start">Retry</button>
+              </div>
+            </div>
+          </div>
+        `;
       }
 
-      function renderPlatformAssets() {
-        for (const platform of DOWNLOAD_PLATFORMS) {
-          const container = document.getElementById(`assets-${platform.id}`);
-          if (container) {
-            container.innerHTML = buildPlatformMarkup(platform);
-          }
+      function renderPlatform(platform, onRetry) {
+        const container = document.querySelector(`[data-platform="${platform.id}"]`);
+        if (!container) return;
+        if (!Array.isArray(platform.files) || platform.files.length === 0) {
+          container.innerHTML = createEmptyPlatformMarkup(platform);
+        } else {
+          container.innerHTML = platform.files.map(createReleaseCardMarkup).join("");
+        }
+        bindCopyButtons();
+      }
+
+      function showPlatformError(platform) {
+        const container = document.querySelector(`[data-platform="${platform.id}"]`);
+        if (!container) return;
+        container.innerHTML = createErrorPlatformMarkup(platform, () => loadReleases());
+      }
+
+      function applyVersion(manifest) {
+        if (!manifest || !manifest.version) return;
+        for (const el of document.querySelectorAll("[data-app-version]")) el.textContent = manifest.version;
+        for (const el of document.querySelectorAll("[data-app-version-badge]")) el.textContent = `v${manifest.version}`;
+      }
+
+      async function fetchManifest() {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        try {
+          const res = await fetch(MANIFEST_URL, { cache: "no-cache", signal: controller.signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return await res.json();
+        } finally {
+          window.clearTimeout(timer);
+        }
+      }
+
+      async function loadReleases() {
+        let manifest;
+        try {
+          manifest = await fetchManifest();
+        } catch (err) {
+          console.error("Failed to load release manifest:", err);
+          const platforms = [
+            { id: "windows", label: "Windows" },
+            { id: "macos", label: "Mac" },
+            { id: "linux", label: "Linux" },
+          ];
+          for (const p of platforms) showPlatformError(p);
+          return;
+        }
+        applyVersion(manifest);
+        const platforms = Array.isArray(manifest.platforms) ? manifest.platforms : [];
+        for (const platform of platforms) renderPlatform(platform, loadReleases);
+        for (const platform of platforms) {
+          if (!Array.isArray(platform.files) || platform.files.length === 0) renderPlatform(platform, loadReleases);
         }
       }
 
@@ -1065,7 +1033,6 @@
           const isActive = link.getAttribute("data-nav-target") === sectionId;
           link.classList.toggle("menu-active", isActive);
         }
-
         const dockLinks = document.querySelectorAll("[data-dock-target]");
         for (const link of dockLinks) {
           const isActive =
@@ -1079,52 +1046,37 @@
         const sectionElements = SECTION_IDS
           .map((sectionId) => document.getElementById(sectionId))
           .filter((section) => section instanceof HTMLElement);
-
-        if (sectionElements.length === 0) {
-          return;
-        }
+        if (sectionElements.length === 0) return;
 
         const sectionObserver = new IntersectionObserver(
           (entries) => {
             const visibleEntry = entries
               .filter((entry) => entry.isIntersecting)
-              .sort((leftEntry, rightEntry) => rightEntry.intersectionRatio - leftEntry.intersectionRatio)[0];
-
+              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
             if (visibleEntry?.target instanceof HTMLElement) {
               setActiveSection(visibleEntry.target.id);
             }
           },
-          {
-            rootMargin: "-35% 0px -45% 0px",
-            threshold: [0.2, 0.45, 0.7],
-          },
+          { rootMargin: "-35% 0px -45% 0px", threshold: [0.2, 0.45, 0.7] },
         );
-
-        for (const sectionElement of sectionElements) {
-          sectionObserver.observe(sectionElement);
-        }
+        for (const sectionElement of sectionElements) sectionObserver.observe(sectionElement);
 
         const heroSection = document.getElementById("hero-heading")?.closest("section");
         if (heroSection instanceof HTMLElement) {
           const heroObserver = new IntersectionObserver(
             (entries) => {
               const [entry] = entries;
-              if (entry?.isIntersecting) {
-                setActiveSection("top");
-              }
+              if (entry?.isIntersecting) setActiveSection("top");
             },
-            {
-              threshold: 0.55,
-            },
+            { threshold: 0.55 },
           );
-
           heroObserver.observe(heroSection);
         }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
         bindCopyButtons();
-        renderPlatformAssets();
+        loadReleases();
         bindScrollNavigation();
       });
     </script>

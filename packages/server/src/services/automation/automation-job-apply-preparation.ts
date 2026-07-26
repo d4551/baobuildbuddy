@@ -14,13 +14,10 @@ import {
   normalizeGeneratedFieldAnswers,
   resolveAutofillAnalysis,
 } from "./automation-job-apply-autofill";
+import { loadJobApplyCandidateContext } from "./automation-job-apply-context";
 import { createResumeUploadArtifact } from "./automation-job-apply-resume-artifact";
 import type { JobApplyExecutionPayload, JobApplyPayload } from "./automation-run-inputs";
-import {
-  assertRunExists,
-  ensureRunArtifactDir,
-  markRunFailed,
-} from "./automation-run-persistence";
+import { assertRunExists, ensureRunArtifactDir, markRunFailed } from "./automation-run-persistence";
 import type { JobApplyRunPreparation } from "./automation-service-contracts";
 import { loadAutomationSettings, resolveMaxConcurrentRuns } from "./automation-settings-support";
 import { sanitizeAndValidateJobUrl, sanitizeCustomAnswers } from "./automation-validation";
@@ -163,12 +160,14 @@ export const prepareJobApplyRun = async (params: {
     normalized.coverLetterId,
     automationSettings,
   );
+  const candidateContext = await loadJobApplyCandidateContext(normalized.jobId);
   const autofillAnalysis = await resolveAutofillAnalysis({
     automationSettings,
     jobUrl: normalized.jobUrl,
     resume: resumeDetails.resume,
     coverLetter,
     existingAnswers: normalized.customAnswers,
+    ...candidateContext,
   });
   const generatedFieldAnswers = normalizeGeneratedFieldAnswers(autofillAnalysis.fieldAnswers);
 

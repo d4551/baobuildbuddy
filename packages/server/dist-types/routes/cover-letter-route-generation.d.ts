@@ -2,8 +2,8 @@ import type { RouteSetState } from "../types/route-state";
 import type { GenerateCoverLetterBody } from "./cover-letter-route-contracts";
 import { type GeneratedCoverLetterContent } from "./cover-letter-route-generation-support";
 export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, set: RouteSetState) => Promise<{
-    error: string;
     details?: undefined;
+    error: string;
     content?: undefined;
     message?: undefined;
     coverLetter?: undefined;
@@ -14,14 +14,14 @@ export declare const handleGenerateCoverLetter: (body: GenerateCoverLetterBody, 
     message?: undefined;
     coverLetter?: undefined;
 } | {
-    error?: undefined;
     details?: undefined;
+    error?: undefined;
     message: string;
     content: GeneratedCoverLetterContent;
     coverLetter?: undefined;
 } | {
-    error?: undefined;
     details?: undefined;
+    error?: undefined;
     content?: undefined;
     message: string;
     coverLetter: {

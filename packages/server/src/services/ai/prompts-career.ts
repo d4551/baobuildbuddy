@@ -27,8 +27,47 @@ Requirements:
  */
 export function jobMatchPrompt(
   userProfile: { skills: string[]; experience: string; goals: string },
-  job: { title: string; company: string; description: string; requirements: string[] },
+  job: {
+    title: string;
+    company: string;
+    description: string;
+    requirements: string[];
+    technologies?: string[];
+    enrichment?: {
+      summary?: string;
+      hiringSignals?: string[];
+      interviewFocusAreas?: string[];
+      candidatePitchAngles?: string[];
+    };
+  },
 ): string {
+  const technologiesLine =
+    job.technologies && job.technologies.length > 0
+      ? `\nTechnologies: ${job.technologies.join(", ")}`
+      : "";
+  const enrichmentSections: string[] = [];
+  if (job.enrichment) {
+    if (job.enrichment.summary) {
+      enrichmentSections.push(`Studio summary: ${job.enrichment.summary}`);
+    }
+    if (job.enrichment.hiringSignals && job.enrichment.hiringSignals.length > 0) {
+      enrichmentSections.push(`Hiring signals: ${job.enrichment.hiringSignals.join(", ")}`);
+    }
+    if (job.enrichment.interviewFocusAreas && job.enrichment.interviewFocusAreas.length > 0) {
+      enrichmentSections.push(
+        `Interview focus areas: ${job.enrichment.interviewFocusAreas.join(", ")}`,
+      );
+    }
+    if (job.enrichment.candidatePitchAngles && job.enrichment.candidatePitchAngles.length > 0) {
+      enrichmentSections.push(
+        `Candidate pitch angles: ${job.enrichment.candidatePitchAngles.join(", ")}`,
+      );
+    }
+  }
+  const enrichmentBlock =
+    enrichmentSections.length > 0
+      ? `\n\nScraped enrichment:\n${enrichmentSections.join("\n")}`
+      : "";
   return `Analyze how well this candidate matches this game industry job opportunity.
 
 Candidate Profile:
@@ -40,7 +79,7 @@ Job Opportunity:
 Position: ${job.title}
 Company: ${job.company}
 Description: ${job.description}
-Requirements: ${job.requirements.join(", ")}
+Requirements: ${job.requirements.join(", ")}${technologiesLine}${enrichmentBlock}
 
 Provide:
 1. Match Score (0-100)

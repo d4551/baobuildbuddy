@@ -6,6 +6,7 @@ import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
+import { extractRequirements, extractTechnologies } from "./jobs/job-aggregator-taxonomy";
 import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
 
 import type {
@@ -116,22 +117,48 @@ const resolveJobPostedDate = (job: JobSearchResult["jobs"][number]): string | nu
   return postedDate.length > 0 ? postedDate : null;
 };
 
-const buildScrapedJobWriteFields = (
+const isNonEmptyStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.length > 0;
+
+/**
+ * Requirements and technologies used to be written only by the `/jobs/refresh`
+ * aggregator path; the scraper API persisted raw postings with both columns
+ * empty, so any AI surface that read `jobs.requirements`/`jobs.technologies`
+ * (cover letters, resume scoring, skill readiness) was blind to scraped jobs
+ * until a refresh overwrote them. Prefer provider-supplied values when the
+ * scraper already classified them, otherwise extract from the description
+ * using the same taxonomy the aggregator uses — one ingestion contract.
+ */
+const resolveJobRequirements = async (job: JobSearchResult["jobs"][number]): Promise<string[]> =>
+  isNonEmptyStringArray(job.requirements) ? job.requirements : extractRequirements(job.description);
+
+const resolveJobTechnologies = async (job: JobSearchResult["jobs"][number]): Promise<string[]> =>
+  isNonEmptyStringArray(job.technologies) ? job.technologies : extractTechnologies(job.description);
+
+const buildScrapedJobWriteFields = async (
   job: JobSearchResult["jobs"][number],
   enrichment: ScrapePersonaEnrichment | undefined,
-) => ({
-  title: job.title,
-  company: job.company,
-  location: job.location,
-  remote: Boolean(job.remote),
-  hybrid: false,
-  description: job.description ?? null,
-  url: job.url ?? null,
-  source: resolveJobSource(job),
-  postedDate: resolveJobPostedDate(job),
-  type: DEFAULT_JOB_TYPE,
-  enrichment: enrichment ?? null,
-});
+) => {
+  const [requirements, technologies] = await Promise.all([
+    resolveJobRequirements(job),
+    resolveJobTechnologies(job),
+  ]);
+  return {
+    title: job.title,
+    company: job.company,
+    location: job.location,
+    remote: Boolean(job.remote),
+    hybrid: false,
+    description: job.description ?? null,
+    requirements,
+    technologies,
+    url: job.url ?? null,
+    source: resolveJobSource(job),
+    postedDate: resolveJobPostedDate(job),
+    type: DEFAULT_JOB_TYPE,
+    enrichment: enrichment ?? null,
+  };
+};
 
 export const upsertScrapedJob = async (
   job: JobSearchResult["jobs"][number],
@@ -139,7 +166,7 @@ export const upsertScrapedJob = async (
   enrichment?: ScrapePersonaEnrichment,
 ): Promise<void> => {
   const contentHash = resolveJobContentHash(job);
-  const writeFields = buildScrapedJobWriteFields(job, enrichment);
+  const writeFields = await buildScrapedJobWriteFields(job, enrichment);
 
   await db
     .insert(jobs)
