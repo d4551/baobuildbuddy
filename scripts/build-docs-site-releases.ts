@@ -6,9 +6,10 @@
  *   packages/desktop/releases/provenance.json  -> which artifacts exist per target
  *   packages/desktop/releases/sha256.txt        -> checksum per artifact
  *   <root>/<target>/<file>                       -> real byte size (stat)
- *   <root>/sizes.json (optional)                 -> size override when artifacts are
- *                                                   Git LFS pointers (local dev) or
- *                                                   when generating from a remote tree
+ *   <root>/sizes.json (committed SSOT)           -> size fallback when artifacts
+ *                                                   are Git LFS pointers (CI has
+ *                                                   no `git lfs pull`). Real
+ *                                                   binaries on disk still win.
  *
  * Output: docs/releases/manifest.json — the website-ready, platform-grouped manifest
  * the docs site fetches at runtime (index.html MANIFEST_URL = "releases/manifest.json")
@@ -168,12 +169,12 @@ function deriveVersion(artifactNames: string[]): string {
 
 function fileSize(filePath: string, name: string, overrides: Record<string, number>): number {
   const override = overrides[name];
-  // The real binary on disk is the SSOT for its byte size. The sizes.json
-  // override is only a fallback for environments where the artifact is absent
-  // (generating from a remote tree) or checked out as a Git LFS pointer (local
-  // dev without `git lfs pull`). Letting the override win when the real binary
-  // is present would publish stale sizes — e.g. a dmg re-packed smaller while
-  // sizes.json still held the old larger value.
+  // The real binary on disk is the SSOT for its byte size. The committed
+  // sizes.json is the fallback for environments where the artifact is checked
+  // out as a Git LFS pointer (CI does not run `git lfs pull`). Letting the
+  // override win when the real binary is present would publish stale sizes —
+  // e.g. a dmg re-packed smaller while sizes.json still held the old larger
+  // value — so sizes.json must be re-synced after every release.
   if (!existsSync(filePath)) {
     if (typeof override === "number" && override > 0) return override;
     throw new Error(

@@ -71,8 +71,12 @@ docs/assets/docs.generated.css
 # Local docs-site preview staging (mirrors deployed /releases for local testing)
 docs/releases/
 
-# Local release size overrides used when artifacts are Git LFS pointers
-packages/desktop/releases/sizes.json
+# Canonical release artifact sizes (committed SSOT). CI checkouts get Git LFS
+# pointers (no `git lfs pull`), so the docs-site manifest builder reads sizes
+# from this file when the on-disk artifact is a pointer. Real binaries on disk
+# (after `git lfs pull`) still win as the SSOT — see fileSize() in
+# scripts/build-docs-site-releases.ts. Keep this in sync after every release.
+# packages/desktop/releases/sizes.json  (intentionally tracked)
 
 # Desktop release staging (CI produces artifacts; do not commit local builds)
 .desktop-release-artifacts/
