@@ -160,6 +160,7 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
       title-key="jobDetail.notFoundTitle"
       description-key="jobDetail.notFoundBody"
       cta-label-key="jobDetail.backToJobs"
+      cta-aria-key="jobDetail.backToJobsAria"
       :cta-to="APP_ROUTES.jobs"
     />
 
@@ -168,6 +169,7 @@ const formatGameGenreLabel = (value: string): string => gameGenreLabel(t, value)
       title-key="jobDetail.invalidIdTitle"
       description-key="jobDetail.invalidIdBody"
       cta-label-key="jobDetail.backToJobs"
+      cta-aria-key="jobDetail.backToJobsAria"
       :cta-to="APP_ROUTES.jobs"
     />
 

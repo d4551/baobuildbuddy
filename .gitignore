@@ -69,5 +69,8 @@ docs/assets/docs.generated.css
 # Desktop release staging (CI produces artifacts; do not commit local builds)
 .desktop-release-artifacts/
 
+# Browser visual proof output (generated screenshots + reports)
+artifacts/
+
 # docs/ssot-ledger is tracked evidence SSOT (defect/improvement/baseline hashes)
 packages/desktop/src-tauri/tauri.conf.dev-existing.json

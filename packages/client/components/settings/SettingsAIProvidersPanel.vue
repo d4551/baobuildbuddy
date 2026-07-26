@@ -24,6 +24,7 @@ import {
   BADGE_NEUTRAL_SM_CLASS,
   BADGE_SUCCESS_SM_CLASS,
 } from "~/constants/layout-badges";
+import SettingsAiPreferredProviderCard from "./SettingsAiPreferredProviderCard.vue";
 import SettingsPanelHeader from "./SettingsPanelHeader.vue";
 
 type ProviderField =

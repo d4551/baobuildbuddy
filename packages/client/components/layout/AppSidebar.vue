@@ -14,6 +14,7 @@ import {
   MIN_HEIGHT_ZERO_CLASS,
   PADDING_TOKEN_CLASS,
   RADIUS_TOKEN_CLASS,
+  SHELL_SIDEBAR_ITEM_ACTIVE_CLASS,
   SHELL_SIDEBAR_ITEM_CLASS,
   SHELL_SIDEBAR_MENU_CLASS,
   TOUCH_TARGET_MIN_CLASS,
@@ -52,7 +53,10 @@ function resolveSidebarLabel(item: NavigationItem): string {
 }
 
 function sidebarLinkClass(item: NavigationItem): string[] {
-  return [SHELL_SIDEBAR_ITEM_CLASS, isSidebarItemActive(item) ? "menu-active font-medium" : ""];
+  return [
+    SHELL_SIDEBAR_ITEM_CLASS,
+    isSidebarItemActive(item) ? SHELL_SIDEBAR_ITEM_ACTIVE_CLASS : "",
+  ];
 }
 </script>
 

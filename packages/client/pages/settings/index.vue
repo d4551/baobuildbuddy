@@ -60,6 +60,8 @@ const {
   jobTaxonomyForm,
   jobProvidersSaveState,
   jobTaxonomySaveState,
+  providerKeysSaveState,
+  providerRoutingSaveState,
   emailTransportForm,
   emailTransportPasswordDraft,
   aiRoutingDraft,
@@ -226,6 +228,8 @@ watch(
             :test-results="testResults"
             :testing-provider="testingProvider"
             :show-ollama-hot-tip="showOllamaHotTip"
+            :provider-keys-save-state="providerKeysSaveState"
+            :provider-routing-save-state="providerRoutingSaveState"
             @save-preferred-provider="handleSavePreferredProvider"
             @save-routing="handleSaveRouting"
             @test-provider="handleTest"

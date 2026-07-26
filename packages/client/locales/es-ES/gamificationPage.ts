@@ -1,0 +1,58 @@
+const gamificationPage = {
+  gamificationPage: {
+    pageTitle: "Centro de Gamificación",
+    metricsSummary: "Motor de progresión y desafíos de {brand}",
+    seoTitle: "Centro de Gamificación de {brand}",
+    seoDescription:
+      "Seguimiento de progresión XP, completar desafíos diarios, rachas y desbloqueo de logros en una sola vista.",
+    loadErrorFallback: "Error al cargar datos de gamificación",
+    retryButtonLabel: "Reintentar",
+    retryAria: "Reintentar carga de datos de gamificación",
+    emptyStateTitle: "Sin datos de progresión aún",
+    emptyStateDescription:
+      "Completa tareas de configuración, inicia la práctica de entrevistas y realiza desafíos diarios para ganar XP y desbloquear logros.",
+    emptyStateCta: "Abrir Panel",
+    levelPrefix: "Nivel",
+    xpUntilLevelLabel: "XP hasta el nivel",
+    xpMaxLevelLabel: "Nivel máximo alcanzado — cada acción sigue sumando XP",
+    currentStreakTitle: "Racha Actual",
+    longestStreakTitle: "Racha Más Larga",
+    achievementsTitle: "Logros",
+    achievementsUnlockedLabel: "Desbloqueados",
+    achievementsLockedLabel: "Bloqueados",
+    dailyChallengesTitle: "Desafíos Diarios",
+    challengeClaimLabel: "Reclamar Recompensa",
+    challengeClaimAria: "Reclamar recompensa para el desafío {challenge}",
+    challengeDoneLabel: "Hecho",
+    challengeCompletionToast: "Desafío completado",
+    challengeCompleteErrorFallback: "Error al completar el desafío",
+    streakDaysSuffix: "días seguidos",
+    longestStreakDesc: "récord personal",
+    noChallengesTitle: "No hay desafíos diarios disponibles",
+    noChallengesDescription:
+      "Completa la configuración y acciones de carrera desde el panel para desbloquear los retos de hoy.",
+    a11y: {
+      levelProgress: "Progresión de nivel",
+      challengeProgress: "Progresión del desafío",
+    },
+    achievementBadgeAria: "Logro: {name}. {description}",
+    trends: {
+      title: "Tendencias de progreso",
+      description: "Impulso semanal y estadísticas mensuales de la gamificación en vivo.",
+      weeklyTitle: "Esta semana",
+      weeklyXp: "{xp} XP ganados",
+      weeklyActions: "{count} acciones registradas",
+      weeklyChallenges: "{count} desafíos completados",
+      weeklyEmpty: "Aún no hay actividad semanal: completa un desafío para iniciar la tendencia.",
+      topCategory: "Categoría principal: {category}",
+      monthlyTitle: "Este mes",
+      monthlyXp: "{xp} XP totales",
+      monthlyLevels: "{count} niveles ganados",
+      monthlyAchievements: "{count} logros desbloqueados",
+      monthlyStreak: "Racha de {days} días",
+      monthlyEmpty: "Aún no hay estadísticas mensuales: sigue practicando para llenar esta vista.",
+    },
+  },
+} as const;
+
+export default gamificationPage;

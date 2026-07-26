@@ -1,4 +1,5 @@
 import type { ResumeData } from "@bao/shared/types/resume";
+import type { JsonObject } from "@bao/shared/utils/json";
 import type { ResumeEnhanceBody, ResumeExportBody, ResumeMutationBody, ResumeRouteSetState, ResumeScoreBody } from "./resume-route-contracts";
 export declare const buildResumeCreatePayload: (body: ResumeMutationBody) => Omit<ResumeData, "id">;
 export declare const buildResumeUpdatePayload: (body: ResumeMutationBody) => Partial<ResumeData>;
@@ -17,7 +18,10 @@ export declare const enhanceResumeWithAi: (resumeId: string, body: ResumeEnhance
 } | {
     error?: undefined;
     resume: ResumeData;
-    suggestions: unknown[];
+    suggestions: {
+        text: string;
+        section: string;
+    }[];
     section: string;
 }>;
 export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBody, set: ResumeRouteSetState) => Promise<{
@@ -37,5 +41,5 @@ export declare const handleResumeAiScore: (resumeId: string, body: ResumeScoreBo
     strengths: string[];
     improvements: string[];
     keywords: string[];
-    analysis: Record<string, unknown>;
+    analysis: JsonObject;
 }>;

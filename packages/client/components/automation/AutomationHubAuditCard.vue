@@ -8,7 +8,6 @@ import { useI18n } from "vue-i18n";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   BADGE_GHOST_SM_CLASS,
-  BADGE_SOFT_SUCCESS_CLASS,
   FLEX_GAP_TOKEN_CLASS,
   GHOST_ACTION_DENSE_CLASS,
   ICON_SIZE_CLASS,
@@ -172,7 +171,17 @@ const readyEntries = computed(() =>
                         :run-history-available="capability.runHistoryAvailable"
                         :live-updates-available="capability.liveUpdatesAvailable"
                       />
-                      <ul class="text-secondary" :class="[TYPOGRAPHY_SCALE_CLASS.sm, STACK_SPACE_Y_TOKEN_CLASS.stack1]">
+                      <!-- Named list: assistive tech announced an unlabelled list of issues. -->
+                      <ul
+                        class="text-secondary"
+                        :class="[TYPOGRAPHY_SCALE_CLASS.sm, STACK_SPACE_Y_TOKEN_CLASS.stack1]"
+                        :aria-label="
+                          t('automation.hub.audit.issueSummaryAria', {
+                            capability: capabilityDisplayName(capability),
+                            count: capabilityIssueCount(capability),
+                          })
+                        "
+                      >
                         <li
                           v-for="(issue, issueIndex) in capabilityIssues(capability)"
                           :key="`${capability.id}-issue-detail-${issueIndex}`"
@@ -222,8 +231,19 @@ const readyEntries = computed(() =>
                           </span>
                         </span>
                         <p class="font-semibold">{{ capabilityDisplayName(capability) }}</p>
-                        <span :class="[BADGE_SOFT_SUCCESS_CLASS, 'whitespace-nowrap']">
-                          {{ t("automation.hub.audit.issueState.ready") }}
+                        <!--
+                          Same labeller as the attention group: the two groups used to
+                          carry different vocabularies for one concept (a fixed
+                          "ready" string here vs available/needsConfig/unavailable
+                          there), so status wording drifted by group.
+                        -->
+                        <span
+                          :class="[
+                            capabilityStatusClass(capability.configured, capabilityIssueCount(capability)),
+                            'whitespace-nowrap',
+                          ]"
+                        >
+                          {{ capabilityStatusLabel(capability.configured, capabilityIssueCount(capability)) }}
                         </span>
                       </div>
                       <span :class="BADGE_GHOST_SM_CLASS">{{ capabilityTypeLabel(capability) }}</span>

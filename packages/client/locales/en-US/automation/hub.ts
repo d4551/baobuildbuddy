@@ -32,7 +32,6 @@ const automationhub = {
       pipelineDescription:
         "Move from job discovery to scraping, customization, automation, and XP progression with a single flow.",
       pipelineAria: "Career work pipeline",
-      pipelineNextStepLabel: "Next workflow milestone: {step}",
       loadErrorFallback: "Failed to load automation hub metrics",
       retryButtonLabel: "Retry",
       retryAria: "Retry loading automation hub metrics",
@@ -66,10 +65,6 @@ const automationhub = {
         capabilities: {
           jobApply: "Job Apply",
           studios: "Studios",
-        },
-        issueState: {
-          ready: "Ready",
-          needsAttention: "Needs attention",
         },
         issueSummaryAria: "Open setup issues for {capability}. {count} issue needs attention.",
         coverageAria: "Automation capability coverage indicators",
@@ -113,18 +108,6 @@ const automationhub = {
           readyTitle: "Ready to run",
           readyDescription:
             "These capabilities are already configured and can be launched from their workflow pages.",
-        },
-        tableAria: "RPA capability audit details",
-        columns: {
-          name: "Capability",
-          configured: "Configured",
-          manual: "Manual",
-          scheduled: "Scheduled",
-          history: "History",
-          live: "Live",
-          coverage: "Coverage",
-          issues: "Issues",
-          actions: "Actions",
         },
       },
       cards: {

@@ -3,7 +3,6 @@ const studioAnalytics = {
     title: "Studio Analytics",
     description:
       "Review studio distribution, remote-work coverage, and shared technology trends from the indexed studio dataset.",
-    errorBannerAria: "Studio analytics error",
     retryAria: "Retry loading studio analytics",
     retryButton: "Retry",
     openDirectoryAria: "Open the studio directory",

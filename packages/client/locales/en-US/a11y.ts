@@ -2,7 +2,6 @@ const a11y = {
   a11y: {
     toggleSidebar: "Toggle sidebar",
     toggleTheme: "Toggle theme",
-    openSettings: "Open settings",
     primaryNavigation: "Primary navigation",
     mobilePrimaryNavigation: "Mobile primary navigation",
     toggleSidebarNavigation: "Toggle sidebar navigation",

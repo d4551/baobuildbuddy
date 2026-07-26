@@ -53,6 +53,22 @@ import { UI_GRID_CLASS_BY_TOKEN } from "../constants/ui-layout";
 const CLIENT_ROOT = join(import.meta.dirname, "..");
 const SIDEBAR_WIDTH_LG_SHAPE = /^lg:w-\d+$/;
 
+/**
+ * Reads the composed stylesheet: the entry file plus every local `@import "./x.css"`
+ * module it pulls in. `main.css` is composition-only (see its header), so token/class
+ * assertions must span the modules it imports — not the entry alone.
+ */
+const readComposedCss = (): string => {
+  const entry = readFileSync(join(CLIENT_ROOT, "assets/css/main.css"), "utf8");
+  const moduleNames = [...entry.matchAll(/@import "\.\/([\w.-]+\.css)";/g)].map(
+    (match) => match[1],
+  );
+  const modules = moduleNames.map((file) =>
+    readFileSync(join(CLIENT_ROOT, "assets/css", file), "utf8"),
+  );
+  return [entry, ...modules].join("\n");
+};
+
 describe("Layout SSOT — Glass surface tokens", () => {
   it("SURFACE_GLASS_CARD_CLASS value matches CSS class chain", () => {
     expect(SURFACE_GLASS_CARD_CLASS).toBe("card card-border card-glass glass-interactive");
@@ -70,7 +86,7 @@ describe("Layout SSOT — Glass surface tokens", () => {
   });
 
   it("CSS defines glass tokens and utility classes", () => {
-    const css = readFileSync(join(CLIENT_ROOT, "assets/css/main.css"), "utf8");
+    const css = readComposedCss();
     for (const token of [
       "--glass-bg-clear",
       "--glass-bg-standard",
@@ -104,7 +120,7 @@ describe("Layout SSOT — Glass surface tokens", () => {
   });
 
   it("CSS defines brand fonts and a11y features", () => {
-    const css = readFileSync(join(CLIENT_ROOT, "assets/css/main.css"), "utf8");
+    const css = readComposedCss();
     expect(css).toContain("--brand-font-display");
     expect(css).toContain("--brand-font-body");
     expect(css).toContain("--brand-font-mono");

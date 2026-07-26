@@ -107,11 +107,6 @@ const dashboard = {
         aiChat: "AI Chat",
       },
     },
-    relativeTime: {
-      minutesAgo: "{count}m ago",
-      hoursAgo: "{count}h ago",
-      daysAgo: "{count}d ago",
-    },
     errors: {
       profileLoadFallback: "Failed to load user profile",
       metricsLoadFallback: "Failed to load dashboard metrics",

@@ -221,7 +221,7 @@ const page = useJobsIndexPage();
                   </span>
 
                   <span v-if="job.remote" :class="BADGE_SUCCESS_SM_CLASS">
-                    {{ t("jobsPage.remoteBadge") }}
+                    {{ t("common.workMode.remote") }}
                   </span>
 
                   <span v-if="job.experienceLevel" :class="BADGE_OUTLINE_SM_CLASS">

@@ -19,3 +19,8 @@ export interface EntityPromptContextRequest {
     readonly includeSkills?: boolean;
 }
 export declare const loadEntityPromptContext: (request: EntityPromptContextRequest) => Promise<EntityPromptContext>;
+/**
+ * Flattens an entity context into a single prompt block. Returns undefined when
+ * no context is present so callers can skip the section entirely.
+ */
+export declare const serializeEntityPromptContext: (context: EntityPromptContext) => string | undefined;

@@ -244,11 +244,7 @@ export function useDashboardPage() {
     claimDailyChallenge,
     retryDashboardLoad: async () => refresh(),
     formatTimeAgo: (timestamp: Date) =>
-      formatRelativeTime(timestamp, (key, params) => t(key, params ?? {}), {
-        keyPrefix: "dashboard.relativeTime",
-        minOneUnit: true,
-        daysOnly: true,
-      }),
+      formatRelativeTime(timestamp, (key, params) => t(key, params ?? {})),
   };
 }
 

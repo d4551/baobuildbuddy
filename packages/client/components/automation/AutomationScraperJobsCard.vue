@@ -82,10 +82,10 @@ const { t } = useI18n();
               </div>
               <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                 <span v-if="job.remote" :class="[BADGE_GHOST_SM_CLASS]">
-                  {{ t("jobCard.remoteBadge") }}
+                  {{ t("common.workMode.remote") }}
                 </span>
                 <span v-if="job.hybrid" :class="[BADGE_GHOST_SM_CLASS]">
-                  {{ t("jobCard.hybridBadge") }}
+                  {{ t("common.workMode.hybrid") }}
                 </span>
               </div>
               <button
@@ -129,10 +129,10 @@ const { t } = useI18n();
                       </p>
                       <div class="flex flex-wrap" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
                         <span v-if="job.remote" :class="[BADGE_GHOST_SM_CLASS]">
-                          {{ t("jobCard.remoteBadge") }}
+                          {{ t("common.workMode.remote") }}
                         </span>
                         <span v-if="job.hybrid" :class="[BADGE_GHOST_SM_CLASS]">
-                          {{ t("jobCard.hybridBadge") }}
+                          {{ t("common.workMode.hybrid") }}
                         </span>
                         <span
                           v-for="focusArea in jobInterviewFocusAreas(job)"

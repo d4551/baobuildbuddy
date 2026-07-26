@@ -72,7 +72,11 @@ const emit = defineEmits<{
       :key="provider.id"
       class="collapse collapse-arrow border border-base-300 bg-base-100"
     >
-      <summary class="collapse-title flex items-center font-medium" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
+      <summary
+        class="collapse-title flex items-center font-medium"
+        :class="[FLEX_GAP_TOKEN_CLASS.gap2]"
+        :aria-label="t('settings.aiProviders.expandAria', { provider: provider.label })"
+      >
         <AIProviderIcon class="text-primary" :class="[ICON_SIZE_CLASS[5]]" :provider-id="provider.id"/>
         {{ provider.label }}
         <span v-if="providerConfiguredById[provider.id]" :class="BADGE_SUCCESS_SM_CLASS">

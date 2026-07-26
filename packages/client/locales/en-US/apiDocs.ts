@@ -23,7 +23,6 @@ const apiDocs = {
     },
     endpoint: {
       noDescription: "No description provided.",
-      deprecated: "Deprecated",
       methodLabel: "Method",
       operationIdLabel: "Operation ID",
       openTester: "Open tester",
@@ -41,7 +40,6 @@ const apiDocs = {
       noRequestBodyTemplate: "No body template was provided by the OpenAPI specification.",
       parameterLabel: "Parameter {name}",
       send: "Send request",
-      sending: "Sending",
       close: "Close",
       closeAria: "Close endpoint tester",
       responseTitle: "Response",
@@ -54,7 +52,6 @@ const apiDocs = {
       emptyResponseToast: "Request completed with an empty response body",
       requestSuccessToast: "Request completed successfully",
       emptyResponse: "Response returned no body payload.",
-      requestTraceTitle: "Request trace",
       requestMethodLabel: "Method",
       requestUrlLabel: "URL",
       steps: {
@@ -70,7 +67,6 @@ const apiDocs = {
         },
         responseStatus: "Status",
         duration: "Duration",
-        responseHeaders: "Response headers",
       },
       responseHeadersLabel: "Response headers",
       noResponseHeaders: "No response headers.",

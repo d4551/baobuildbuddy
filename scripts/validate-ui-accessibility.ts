@@ -40,7 +40,10 @@ type Violation = {
 
 const projectRoot = process.cwd();
 const clientRoot = "packages/client";
-const themeFilePath = `${clientRoot}/assets/css/main.css`;
+/** Owns the `@plugin "daisyui" { themes: … }` declaration. */
+const themeEntryFilePath = `${clientRoot}/assets/css/main.css`;
+/** Owns the `[data-theme=…]` WCAG override blocks that merge over daisyUI's stock themes. */
+const themeOverrideFilePath = `${clientRoot}/assets/css/tokens.css`;
 const daisyThemesPath = join(projectRoot, clientRoot, "node_modules", "daisyui", "themes.css");
 
 /**
@@ -248,15 +251,18 @@ const mergeColorMaps = (
   return merged;
 };
 
-const extractMainThemeOverrides = (mainCss: string, themeName: string): Map<string, OklchColor> => {
-  const match = mainCss.match(buildDataThemeBlockPattern(themeName));
+const extractMainThemeOverrides = (
+  overrideCss: string,
+  themeName: string,
+): Map<string, OklchColor> => {
+  const match = overrideCss.match(buildDataThemeBlockPattern(themeName));
   if (!match?.[1]) {
     return new Map();
   }
   return parseDaisyThemeColorMap(match[1]);
 };
 
-const collectContrastViolations = (themesCss: string, mainCss: string): string[] => {
+const collectContrastViolations = (themesCss: string, overrideCss: string): string[] => {
   const failures: string[] = [];
 
   for (const { name, role } of CONFIGURED_DAISY_THEMES) {
@@ -268,7 +274,7 @@ const collectContrastViolations = (themesCss: string, mainCss: string): string[]
 
     const colors = mergeColorMaps(
       parseDaisyThemeColorMap(block),
-      extractMainThemeOverrides(mainCss, name),
+      extractMainThemeOverrides(overrideCss, name),
     );
     for (const [backgroundToken, contentToken] of contrastPairs) {
       const background = colors.get(backgroundToken);
@@ -294,12 +300,13 @@ const collectContrastViolations = (themesCss: string, mainCss: string): string[]
 };
 
 const main = async (): Promise<void> => {
-  const mainCssText = await Bun.file(themeFilePath).text();
+  const mainCssText = await Bun.file(themeEntryFilePath).text();
   const mainCssMismatch = assertMainCssMatchesConfiguredThemes(mainCssText);
   if (mainCssMismatch) {
     await writeError(mainCssMismatch);
     process.exit(1);
   }
+  const themeOverrideCssText = await Bun.file(themeOverrideFilePath).text();
 
   const daisyThemesFile = Bun.file(daisyThemesPath);
   if (!(await daisyThemesFile.exists())) {
@@ -311,7 +318,7 @@ const main = async (): Promise<void> => {
 
   const themesCss = await daisyThemesFile.text();
   const hardcodedColorViolations = await collectHardcodedColorViolations();
-  const contrastViolations = collectContrastViolations(themesCss, mainCssText);
+  const contrastViolations = collectContrastViolations(themesCss, themeOverrideCssText);
 
   if (hardcodedColorViolations.length === 0 && contrastViolations.length === 0) {
     await writeOutput(

@@ -2,9 +2,6 @@ const floatingChat = {
   floatingChat: {
     contextBadge: "Context: {context}",
     focusedEntityBadge: "Focus: {entity}",
-    domainChip: "Scope: {context}",
-    sourceChip: "Surface: {source}",
-    routeBadge: "Route: {route}",
     entityChip: "{type}: {entity}",
     contextDomain: {
       resume: "Resume",
@@ -22,10 +19,6 @@ const floatingChat = {
       interviewSession: "Interview",
       automationRun: "Automation",
     },
-    sources: {
-      chatPage: "Full page",
-      floatingWidget: "Widget",
-    },
     stateChips: {
       resumes: "{count} resume | {count} resumes",
       jobs: "{count} tracked job | {count} tracked jobs",
@@ -35,7 +28,6 @@ const floatingChat = {
     },
     suggestionsAria: "Contextual assistant prompt suggestions",
     suggestionAria: "Use contextual prompt: {prompt}",
-    composerHint: "Enter sends · Shift+Enter adds a line.",
     prompts: {
       focusedEntity: "Give me focused coaching for {target}.",
       resume: "How can I improve this resume for {target}?",

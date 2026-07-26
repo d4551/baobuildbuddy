@@ -60,7 +60,11 @@ useSeoMeta({
       :t="t"
     />
 
-    <LoadingSkeleton v-if="isLoading && sortedRuns.length === 0" :lines="LOADING_SKELETON_LINES.long" />
+    <LoadingSkeleton
+      v-if="isLoading && sortedRuns.length === 0"
+      :lines="LOADING_SKELETON_LINES.long"
+      :label="t('automation.runs.loadingLabel')"
+    />
 
     <BootstrapErrorAlert
       v-else-if="error"

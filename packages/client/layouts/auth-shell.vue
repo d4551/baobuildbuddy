@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AUTH_CARD_SHELL_CLASS, AUTH_SHELL_OUTER_CLASS } from "~/constants/layout";
 
-const { initTheme, theme } = useTheme();
+const { initTheme } = useTheme();
 
 onMounted(() => {
   initTheme();
@@ -9,7 +9,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main :class="AUTH_SHELL_OUTER_CLASS" :data-theme="theme">
+  <main :class="AUTH_SHELL_OUTER_CLASS">
     <div :class="AUTH_CARD_SHELL_CLASS">
       <div class="card-body">
         <slot />

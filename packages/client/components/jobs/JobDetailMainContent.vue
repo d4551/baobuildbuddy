@@ -110,7 +110,7 @@ const { t } = useI18n();
             {{ job.location }}
           </span>
 
-          <span v-if="job.remote" :class="BADGE_SUCCESS_CLASS">{{ t("jobDetail.remoteBadge") }}</span>
+          <span v-if="job.remote" :class="BADGE_SUCCESS_CLASS">{{ t("common.workMode.remote") }}</span>
           <span v-if="job.experienceLevel" :class="BADGE_OUTLINE_CLASS">{{ jobExperienceLabel(job.experienceLevel) }}</span>
           <span v-if="job.salary" :class="BADGE_PRIMARY_CLASS">{{ job.salary }}</span>
         </div>

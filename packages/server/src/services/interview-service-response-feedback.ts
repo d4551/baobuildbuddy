@@ -2,7 +2,6 @@ import {
   AI_DEFAULT_TEMPERATURE_INTERVIEW,
   AI_MAX_TOKENS_FEEDBACK,
 } from "@bao/shared/constants/ai-generation";
-import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
 import {
   COUNT_EIGHT,
   COUNT_NINETY,
@@ -19,6 +18,7 @@ import type {
   InterviewQuestion,
   InterviewResponse,
 } from "@bao/shared/types/interview";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { interviewFeedbackPrompt, interviewPersonaPrompt } from "./ai/prompts-interview";
@@ -117,7 +117,8 @@ ${interviewFeedbackPrompt(question.question, responseText)}
 }
 
 function normalizeQuestionFeedback(
-  raw: unknown,
+  raw: JsonValue | null,
+  attribution: { provider: string; model: string },
 ): NonNullable<InterviewResponse["aiAnalysis"]> | null {
   if (!isRecord(raw)) {
     return null;
@@ -139,6 +140,10 @@ function normalizeQuestionFeedback(
     strengths: parseStringArray(raw.strengths),
     improvements: parseStringArray(raw.improvements),
     source: "ai",
+    // Attribution travels with the assessment so the UI can name the provider
+    // and model that produced it rather than asserting an unsourced "AI" badge.
+    provider: attribution.provider,
+    model: attribution.model,
   };
 }
 
@@ -172,21 +177,17 @@ export async function generateResponseFeedback(
     return fallbackResponseFeedback(transcript);
   }
 
-  const response = (await withAiOperationTimeout(() =>
+  // A timeout resolves to null; there is no provider response to attribute, so
+  // the heuristic fallback owns the assessment rather than a fabricated record.
+  const response = await withAiOperationTimeout(() =>
     aiServiceResult.value.generate(prompt, {
       purpose: "interviewFeedback",
       temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
       maxTokens: AI_MAX_TOKENS_FEEDBACK,
     }),
-  )) ?? {
-    error: API_ERROR_AI_OPERATION_TIMEOUT,
-    content: "",
-    provider: "none",
-    id: "",
-    timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-  };
+  );
 
-  if (response.error) {
+  if (!response || response.error) {
     return fallbackResponseFeedback(transcript);
   }
 
@@ -196,7 +197,10 @@ export async function generateResponseFeedback(
     strengths: [],
     improvements: [],
   };
-  const parsed = normalizeQuestionFeedback(parsedPayload);
+  const parsed = normalizeQuestionFeedback(parsedPayload, {
+    provider: response.provider,
+    model: response.model,
+  });
   if (!parsed) {
     return fallbackResponseFeedback(transcript);
   }

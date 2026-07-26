@@ -181,10 +181,14 @@ export function composeChatSystemPrompt(
   basePrompt: string,
   contextualPrompt: string,
   clientContext: AIChatContext | null,
+  entityEnrichment?: string,
 ): string {
   const promptSections = [basePrompt, contextualPrompt];
   if (clientContext) {
     promptSections.push(`Client UI Context:\n${serializeClientChatContext(clientContext)}`);
+  }
+  if (entityEnrichment) {
+    promptSections.push(`Focused Entity Context:\n${entityEnrichment}`);
   }
   return promptSections.join("\n\n");
 }

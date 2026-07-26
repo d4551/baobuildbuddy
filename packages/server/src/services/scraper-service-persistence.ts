@@ -79,10 +79,31 @@ export const upsertStudioRow = async (
     });
 };
 
-const resolveJobContentHash = (job: JobSearchResult["jobs"][number]): string => {
+/**
+ * Row identity for the `jobs_content_hash_idx` upsert target.
+ *
+ * The fallback used to be `job.id`, which is regenerated on every scrape run. When a
+ * provider produced no `contentHash`, each run therefore wrote a different identity,
+ * `onConflictDoUpdate` never matched, and re-scraping inserted a full duplicate set —
+ * the jobs list doubled on every run while the result still reported `upserted: N`.
+ * Verified against the live database: the same posting existed twice, once with a
+ * `hitmarker-…` hash and once with a bare `job.id` hash.
+ *
+ * The fallback is now derived from the posting's own stable fields, so identity is
+ * reproducible across runs even when a provider omits its hash.
+ */
+export const resolveJobContentHash = (job: JobSearchResult["jobs"][number]): string => {
   const rawContentHash = job.contentHash?.trim() ?? "";
-  const seed = rawContentHash.length > 0 ? rawContentHash : job.id;
-  return String(seed).slice(0, CONTENT_HASH_LENGTH);
+  if (rawContentHash.length > 0) {
+    return rawContentHash.slice(0, CONTENT_HASH_LENGTH);
+  }
+
+  const canonical = [job.url ?? "", job.title, job.company, job.location]
+    .map((part) => String(part).trim().toLowerCase())
+    .join("|");
+  const hasher = new Bun.CryptoHasher("sha256");
+  hasher.update(canonical);
+  return hasher.digest("hex").slice(0, CONTENT_HASH_LENGTH);
 };
 
 const resolveJobSource = (job: JobSearchResult["jobs"][number]): string => {

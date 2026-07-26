@@ -74,6 +74,7 @@ function createHandleTest(state: SettingsPageState) {
 function createHandleSaveRouting(state: SettingsPageState) {
   return async () => {
     const aiRouting = buildAiRoutingPayload(state.aiRoutingDraft);
+    state.providerRoutingSaveState.value = "saving";
     const savedRouting = await runToastTask(
       state.updateSettings({
         aiRouting,
@@ -84,9 +85,11 @@ function createHandleSaveRouting(state: SettingsPageState) {
       state.$toast,
     );
     if (savedRouting === null) {
+      state.providerRoutingSaveState.value = "error";
       return;
     }
 
+    state.providerRoutingSaveState.value = "success";
     state.preferredProviderSelection.value = aiRouting.chat.provider;
     state.$toast.success(state.t("settings.aiProviders.routingSaved"));
   };
@@ -105,16 +108,18 @@ function createHandleSavePreferredProvider(
 function createHandleSaveKeys(state: SettingsPageState) {
   return async () => {
     const payload = buildProviderKeysPayload(state);
-    const saveApiKeysErrorKey = `settings.errors.failedToSave${["Api", "Keys"].join("")}`;
+    state.providerKeysSaveState.value = "saving";
     const savedKeys = await runToastTask(
       state.updateApiKeys(payload),
-      state.t(saveApiKeysErrorKey),
+      state.t("settings.errors.failedToSaveApiKeys"),
       state.$toast,
     );
     if (savedKeys === null) {
+      state.providerKeysSaveState.value = "error";
       return;
     }
 
+    state.providerKeysSaveState.value = "success";
     state.$toast.success(state.t("settings.toasts.apiKeysSaved"));
   };
 }

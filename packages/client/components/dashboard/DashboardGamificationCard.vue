@@ -43,7 +43,7 @@ const { t } = useI18n();
             <IconSparkles class="text-primary" :class="[ICON_SIZE_CLASS['6']]" aria-hidden="true" />
             <div :class="[TRUNCATE_FLEX_CHILD_CLASS]">
               <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
-                {{ t("dashboard.levelLabel") }} {{ gamification.level }}
+                {{ t("xpBar.levelBadge", { level: gamification.level }) }}
               </p>
               <p :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.sm]">
                 {{

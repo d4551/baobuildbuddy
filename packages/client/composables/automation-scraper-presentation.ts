@@ -146,10 +146,7 @@ function createAutomationRunPresentation(
       });
     },
     relativePostedDate(date: string): string {
-      return formatRelativeTimeForDate(date, t, {
-        keyPrefix: "automation.scraper",
-        unknownKey: "automation.scraper.unknownPostedDate",
-      });
+      return formatRelativeTimeForDate(date, t);
     },
     runStateBadgeClass(state: AutomationScraperRunState): string {
       return RUN_STATE_BADGE_CLASS[state];

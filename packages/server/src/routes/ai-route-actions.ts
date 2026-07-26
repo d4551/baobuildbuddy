@@ -29,6 +29,10 @@ import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import { resumes } from "../db/schema/resumes";
 import { contextManager } from "../services/ai/context-manager";
+import {
+  loadEntityPromptContext,
+  serializeEntityPromptContext,
+} from "../services/ai/prompt-context-loader";
 import { buildSystemPrompt } from "../services/ai/prompts-system";
 import {
   type ChatContextPayload,
@@ -67,9 +71,8 @@ const createChatMessage = (
   sessionId,
 });
 
-const persistChatMessage = async (
-  message: ChatHistoryInsert,
-): Promise<PromiseSettledResult<unknown>> => settle(db.insert(chatHistory).values(message));
+const persistChatMessage = async (message: ChatHistoryInsert) =>
+  settle(db.insert(chatHistory).values(message));
 
 const buildChatRouteResponse = (
   assistantMessage: ChatHistoryInsert,
@@ -84,6 +87,21 @@ const buildChatRouteResponse = (
   followUps: contextManager.generateFollowUps(preferredDomain),
   contextDomain: preferredDomain,
 });
+
+const loadChatEntityEnrichment = async (
+  clientContext: ReturnType<typeof normalizeClientChatContext>,
+): Promise<string | undefined> => {
+  const entity = clientContext?.entity;
+  if (!entity) {
+    return undefined;
+  }
+  const entityContext = await loadEntityPromptContext({
+    jobId: entity.type === "job" ? entity.id : undefined,
+    studioId: entity.type === "studio" ? entity.id : undefined,
+    includeSkills: true,
+  });
+  return serializeEntityPromptContext(entityContext);
+};
 
 export const handleChatRoute = async (body: {
   message: string;
@@ -111,10 +129,12 @@ export const handleChatRoute = async (body: {
     preferredDomain,
     runtimeBrand,
   );
+  const entityEnrichment = await loadChatEntityEnrichment(clientContext);
   const systemPrompt = composeChatSystemPrompt(
     buildSystemPrompt(runtimeBrand),
     contextualConversation.systemPrompt,
     clientContext,
+    entityEnrichment,
   );
   const generationResult = await settle(
     aiService.generate(body.message, {

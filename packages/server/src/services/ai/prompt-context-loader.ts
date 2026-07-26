@@ -109,3 +109,14 @@ export const loadEntityPromptContext = async (
     ...(skills.length > 0 ? { skillContext: buildSkillPromptContext(skills) } : {}),
   };
 };
+
+/**
+ * Flattens an entity context into a single prompt block. Returns undefined when
+ * no context is present so callers can skip the section entirely.
+ */
+export const serializeEntityPromptContext = (context: EntityPromptContext): string | undefined => {
+  const sections = [context.studioContext, context.jobContext, context.skillContext].filter(
+    (section): section is string => typeof section === "string" && section.trim().length > 0,
+  );
+  return sections.length > 0 ? sections.join("\n\n") : undefined;
+};

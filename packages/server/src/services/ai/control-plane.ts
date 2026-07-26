@@ -2,6 +2,7 @@ import {
   AI_PROVIDER_CATALOG,
   AI_PROVIDER_DEFAULT,
   AI_PROVIDER_ID_LIST,
+  LOCAL_AI_DEFAULT_ENDPOINT,
   normalizeAIRouting,
 } from "@bao/shared/constants/ai-provider";
 import { API_MESSAGE_AI_NO_PROVIDERS } from "@bao/shared/constants/api-messages";
@@ -108,9 +109,21 @@ const buildProviderDiagnostics = (providerStatuses: AIProviderStatus[]): AIProvi
   );
 };
 
+/** Mirrors the local provider's own endpoint resolution so both agree on "configured". */
+const resolveLocalEndpoint = (persistedEndpoint: string | null): string => {
+  const trimmed = (persistedEndpoint ?? "").trim();
+  return trimmed.length > 0 ? trimmed : LOCAL_AI_DEFAULT_ENDPOINT;
+};
+
 const hasConfiguredProvider = (row: SettingsRow, providerId: AIProviderType): boolean => {
   if (providerId === "local") {
-    return typeof row.localModelEndpoint === "string" && row.localModelEndpoint.trim().length > 0;
+    // The local provider needs no credential and already falls back to
+    // LOCAL_AI_DEFAULT_ENDPOINT when the row holds none (`local-provider.ts`). Demanding
+    // a persisted endpoint here reported a reachable on-device runtime as
+    // "unconfigured", which emptied `configuredProviders`, made every generation fail
+    // with "All providers failed to generate", and degraded the OpenAI-compatible
+    // `/v1/models` list to static catalog hints instead of the live model.
+    return resolveLocalEndpoint(row.localModelEndpoint).length > 0;
   }
   if (providerId === "gemini") {
     return typeof row.geminiApiKey === "string" && row.geminiApiKey.trim().length > 0;

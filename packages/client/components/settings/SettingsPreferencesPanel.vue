@@ -3,7 +3,7 @@ import type { NotificationPreferences } from "@bao/shared/types/settings-contrac
 import { useI18n } from "vue-i18n";
 import {
   CHECKBOX_CONTROL_CLASS,
-  FLEX_GAP_TOKEN_CLASS,
+  CONTROL_TARGET_ROW_CLASS,
   FLUID_WIDTH_CLASS,
   MARGIN_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
@@ -44,7 +44,7 @@ const { t } = useI18n();
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
         <div class="flex items-center justify-between">
           <span>{{ t("settings.preferences.themeLabel") }}</span>
-          <label class="flex items-center cursor-pointer" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <label :class="[CONTROL_TARGET_ROW_CLASS]">
             <span :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{
               t("settings.preferences.lightTheme")
             }}</span>
@@ -85,7 +85,7 @@ const { t } = useI18n();
           <legend class="fieldset-legend">
             {{ t("settings.preferences.notificationsLegend") }}
           </legend>
-          <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <label class="justify-start" :class="[CONTROL_TARGET_ROW_CLASS]">
             <input 
               v-model="notificationForm.achievements"
               type="checkbox"
@@ -94,11 +94,11 @@ const { t } = useI18n();
                 t('settings.preferences.notifications.achievementsAria')
               "
             />
-            <span class="label">{{
+            <span>{{
               t("settings.preferences.notifications.achievements")
             }}</span>
           </label>
-          <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <label class="justify-start" :class="[CONTROL_TARGET_ROW_CLASS]">
             <input 
               v-model="notificationForm.dailyChallenges"
               type="checkbox"
@@ -109,11 +109,11 @@ const { t } = useI18n();
                 )
               "
             />
-            <span class="label">{{
+            <span>{{
               t("settings.preferences.notifications.dailyChallenges")
             }}</span>
           </label>
-          <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <label class="justify-start" :class="[CONTROL_TARGET_ROW_CLASS]">
             <input 
               v-model="notificationForm.levelUp"
               type="checkbox"
@@ -122,11 +122,11 @@ const { t } = useI18n();
                 t('settings.preferences.notifications.levelUpAria')
               "
             />
-            <span class="label">{{
+            <span>{{
               t("settings.preferences.notifications.levelUp")
             }}</span>
           </label>
-          <label class="label cursor-pointer justify-start" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
+          <label class="justify-start" :class="[CONTROL_TARGET_ROW_CLASS]">
             <input 
               v-model="notificationForm.jobAlerts"
               type="checkbox"
@@ -135,7 +135,7 @@ const { t } = useI18n();
                 t('settings.preferences.notifications.jobAlertsAria')
               "
             />
-            <span class="label">{{
+            <span>{{
               t("settings.preferences.notifications.jobAlerts")
             }}</span>
           </label>

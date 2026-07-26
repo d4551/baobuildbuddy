@@ -9,12 +9,6 @@ import type {
 } from "~/composables/jobs-index-page-contracts";
 import { gameGenreLabel, jobExperienceLabel, platformLabel, studioTypeLabel } from "~/utils/labels";
 
-const translateRelativeDate = (
-  t: JobsTranslate,
-  key: string,
-  params?: { count?: number },
-): string => (params ? t(key, params) : t(key));
-
 const filterJobs = (input: {
   jobs: ReturnType<typeof useJobs>["jobs"]["value"];
   filters: JobsFilterState;
@@ -147,9 +141,7 @@ export const createJobsDerivedState = (input: {
 
 export const createJobsLabels = (t: JobsTranslate) => ({
   formatDate(date: string) {
-    return formatRelativeTimeForDate(date, (key, params) => translateRelativeDate(t, key, params), {
-      keyPrefix: "jobsPage.date",
-    });
+    return formatRelativeTimeForDate(date, (key, params) => (params ? t(key, params) : t(key)));
   },
   experienceOptionLabel(value: FilterSelection<JobExperienceLevel>): string {
     if (value === JOB_FILTER_ALL_VALUE) return t("jobsPage.options.all");

@@ -1,0 +1,76 @@
+/*
+ * Element defaults and semantic text/geometry utilities.
+ * Consumes the token layer in `tokens.css` — no literals here.
+ */
+
+body {
+  font-family: var(--brand-font-body);
+  color: var(--text-primary);
+  /* Soft ambient canvas so glass-subtle/card-glass materials read as translucent. */
+  min-height: 100%;
+  background:
+    radial-gradient(
+      80rem 40rem at 12% -8%,
+      color-mix(in oklab, var(--color-primary) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      60rem 36rem at 92% 0%,
+      color-mix(in oklab, var(--color-secondary) 12%, transparent),
+      transparent 55%
+    ),
+    var(--color-base-200);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.card-title,
+.navbar .text-xl,
+.brand-display {
+  font-family: var(--brand-font-display);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--brand-font-mono);
+}
+
+/* Semantic text helpers — replace scattered `text-base-content/60|/70|/80` literals. */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-on-glass {
+  color: var(--text-on-glass);
+}
+
+.text-on-primary {
+  color: var(--text-on-primary);
+}
+
+/* Corner geometry wiring (§2.9). Nested-radius contract: inner < parent. */
+.btn-sm,
+.chip,
+.badge {
+  border-radius: var(--radius-control);
+}
+
+input,
+select,
+textarea {
+  border-radius: var(--radius-input);
+}

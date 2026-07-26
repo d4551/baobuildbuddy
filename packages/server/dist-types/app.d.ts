@@ -2223,7 +2223,10 @@ export declare const app: Elysia<"/api", "local", {
                                     theme: "dark" | "light";
                                     isDefault: boolean;
                                 };
-                                suggestions: unknown[];
+                                suggestions: {
+                                    text: string;
+                                    section: string;
+                                }[];
                                 section: string;
                             };
                             404: {
@@ -3151,6 +3154,9 @@ export declare const app: Elysia<"/api", "local", {
                                     feedback: string;
                                     strengths: string[];
                                     improvements: string[];
+                                    source: "ai" | "heuristic" | "unknown";
+                                    provider?: string | undefined;
+                                    model?: string | undefined;
                                 } | undefined;
                             }[];
                             finalAnalysis?: {
@@ -3159,6 +3165,13 @@ export declare const app: Elysia<"/api", "local", {
                                 improvements: string[];
                                 recommendations: string[];
                                 feedback?: string | undefined;
+                                analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                                aiAverageScore?: number | null | undefined;
+                                provenanceCounts?: {
+                                    ai: number;
+                                    heuristic: number;
+                                    unknown: number;
+                                } | undefined;
                             } | undefined;
                             interviewerPersona?: {
                                 name: string;
@@ -3274,6 +3287,9 @@ export declare const app: Elysia<"/api", "local", {
                                     feedback: string;
                                     strengths: string[];
                                     improvements: string[];
+                                    source: "ai" | "heuristic" | "unknown";
+                                    provider?: string | undefined;
+                                    model?: string | undefined;
                                 } | undefined;
                             }[];
                             finalAnalysis?: {
@@ -3282,6 +3298,13 @@ export declare const app: Elysia<"/api", "local", {
                                 improvements: string[];
                                 recommendations: string[];
                                 feedback?: string | undefined;
+                                analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                                aiAverageScore?: number | null | undefined;
+                                provenanceCounts?: {
+                                    ai: number;
+                                    heuristic: number;
+                                    unknown: number;
+                                } | undefined;
                             } | undefined;
                             interviewerPersona?: {
                                 name: string;
@@ -3390,6 +3413,9 @@ export declare const app: Elysia<"/api", "local", {
                                         feedback: string;
                                         strengths: string[];
                                         improvements: string[];
+                                        source: "ai" | "heuristic" | "unknown";
+                                        provider?: string | undefined;
+                                        model?: string | undefined;
                                     } | undefined;
                                 }[];
                                 finalAnalysis?: {
@@ -3398,6 +3424,13 @@ export declare const app: Elysia<"/api", "local", {
                                     improvements: string[];
                                     recommendations: string[];
                                     feedback?: string | undefined;
+                                    analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                                    aiAverageScore?: number | null | undefined;
+                                    provenanceCounts?: {
+                                        ai: number;
+                                        heuristic: number;
+                                        unknown: number;
+                                    } | undefined;
                                 } | undefined;
                                 interviewerPersona?: {
                                     name: string;

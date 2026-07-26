@@ -18,8 +18,6 @@ const apiErrors = {
       createFailed: "Failed to create resume",
       updateFailed: "Failed to update resume",
       deleteFailed: "Failed to delete resume",
-      exportFailed: "Failed to export resume",
-      exportOnePageFailed: "Failed to export one-page resume",
       enhanceFailed: "Failed to enhance resume",
       scoreFailed: "Failed to score resume",
       invalidPayload: "Invalid resume payload",
@@ -56,7 +54,6 @@ const apiErrors = {
     studios: {
       searchFailed: "Failed to search studios",
       fetchFailed: "Failed to fetch studio",
-      fetchAnalyticsFailed: "Failed to fetch studio analytics",
       createFailed: "Failed to create studio",
       updateFailed: "Failed to update studio",
       deleteFailed: "Failed to delete studio",
@@ -69,14 +66,12 @@ const apiErrors = {
       updateProjectFailed: "Failed to update project",
       deleteProjectFailed: "Failed to delete project",
       reorderFailed: "Failed to reorder projects",
-      exportFailed: "Failed to export portfolio",
     },
     settings: {
       fetchFailed: "Failed to fetch settings",
       updateFailed: "Failed to update settings",
       updateApiKeysFailed: "Failed to update API keys",
       invalidPayload: "Invalid settings payload",
-      loadFailed: "Failed to load settings",
       missingResponse: "Missing settings response",
       exportFailed: "Failed to export workspace data",
       importFailed: "Failed to import workspace data",
@@ -90,10 +85,6 @@ const apiErrors = {
       fetchDashboardFailed: "Failed to fetch dashboard stats",
       fetchWeeklyFailed: "Failed to fetch weekly activity",
       fetchCareerFailed: "Failed to fetch career progress",
-    },
-    search: {
-      searchFailed: "Failed to search",
-      autocompleteFailed: "Failed to fetch autocomplete suggestions",
     },
     ai: {
       sendMessageFailed: "Failed to send message",

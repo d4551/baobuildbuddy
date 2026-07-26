@@ -41,7 +41,7 @@ it("resolves chat routing from the canonical aiRouting contract", () => {
       chat: { provider: "openai", model: "gpt-4o-mini" },
     },
     preferredProvider: "claude",
-    preferredModel: "claude-sonnet-4-5-20250929",
+    preferredModel: "claude-sonnet-5",
   });
 
   expect(resolveAIRoutingPreference(settings, "chat")).toEqual({

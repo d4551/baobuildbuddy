@@ -8,7 +8,6 @@ const interviewSession = {
       "Use this workspace to track pacing, confirm the target context, and line up the next answer.",
     timeLabel: "Time",
     timeAria: "Elapsed interview time {minutes} minutes and {seconds} seconds",
-    avatarLabelAi: "AI",
     progressLabel: "Question {current} of {total}",
     progressAria: "Interview progress",
     progressStatTitle: "Progress",
@@ -19,8 +18,6 @@ const interviewSession = {
     voiceDisabled: "Keyboard",
     voiceDescriptionEnabled: "Speech capture is ready for hands-free answers.",
     voiceDescriptionDisabled: "Type your response directly in the workspace below.",
-    jobTargetBadge: "Job Target",
-    interviewerLabel: "Interviewer",
     interviewerTitle: "Interviewer Lens",
     interviewerDescription:
       "These cues shape the tone, scoring, and follow-up emphasis for the current session.",

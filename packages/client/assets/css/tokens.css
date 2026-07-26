@@ -1,0 +1,170 @@
+/*
+ * Canonical glassmorphic material system — token layer.
+ * Single source of truth for surfaces, blur, borders, shadows, text, motion,
+ * focus, and radius. Component designers MUST consume these tokens via the
+ * shared class constants in `packages/client/constants/layout.ts` or the
+ * `.glass-*` utility classes — never inline raw blur/opacity/edge values.
+ * Reference: docs/design.md (Glassmorphism: a complete UI/UX definition).
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Typography tokens (fonts may be overridden via brand CSS variables on the shell). */
+  --brand-font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --brand-font-body: "DM Sans", "Inter", "Segoe UI", sans-serif;
+  --brand-font-mono:
+    "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+
+  /* Glass material levels (§3). Tint opacity rises with content density. */
+  --glass-bg-clear: color-mix(in oklab, var(--color-base-100) 14%, transparent);
+  --glass-bg-subtle: color-mix(in oklab, var(--color-base-100) 82%, transparent);
+  --glass-bg-standard: color-mix(in oklab, var(--color-base-100) 88%, transparent);
+  --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 94%, transparent);
+  --glass-bg-modal: color-mix(in oklab, var(--color-base-100) 97%, transparent);
+  --glass-bg-fallback: var(--color-base-100);
+  --glass-bg-solid: var(--color-base-100);
+
+  /* Edge highlight + borders (§2.5). */
+  --glass-border-rest: color-mix(in oklab, var(--color-base-300) 60%, transparent);
+  --glass-border-hover: color-mix(in oklab, var(--color-base-300) 80%, transparent);
+  --glass-border-focus: var(--color-primary);
+  --glass-border-selected: color-mix(in oklab, var(--color-primary) 60%, transparent);
+  --glass-highlight: color-mix(in oklab, var(--color-base-100) 40%, transparent);
+
+  /* Backdrop blur (§2.3). Content-density-driven, not decorative. */
+  --glass-blur-clear: 12px;
+  --glass-blur-subtle: 8px;
+  --glass-blur-standard: 14px;
+  --glass-blur-strong: 22px;
+  --glass-blur-modal: 30px;
+  --glass-saturation: 135%;
+
+  /* Shadows (§2.6). Broad, diffuse, low-opacity; stronger on transient layers. */
+  --glass-shadow-low:
+    0 2px 8px color-mix(in oklab, var(--color-base-content) 8%, transparent),
+    inset 0 1px 0 var(--glass-highlight);
+  --glass-shadow-medium:
+    0 8px 24px color-mix(in oklab, var(--color-base-content) 12%, transparent),
+    inset 0 1px 0 var(--glass-highlight);
+  --glass-shadow-high:
+    0 16px 44px color-mix(in oklab, var(--color-base-content) 18%, transparent),
+    inset 0 1px 0 var(--glass-highlight);
+
+  /* Scrim layers (§5.8). Modal dialogs require dim + strong surface. */
+  --glass-scrim-nonmodal: color-mix(in oklab, var(--color-base-content) 32%, transparent);
+  --glass-scrim-modal: color-mix(in oklab, var(--color-base-content) 56%, transparent);
+
+  /* Typography hierarchy (§2.10). Calmer, sturdier than background. */
+  --text-primary: var(--color-base-content);
+  --text-secondary: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+  --text-muted: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  --text-on-glass: var(--color-base-content);
+  --text-on-primary: var(--color-primary-content);
+
+  /* Focus ring (§6 Focus + §9.4). Independent of hover and brand primary. */
+  --focus-color: var(--color-primary);
+  --focus-ring-offset: 3px;
+  --focus-ring-width: 2px;
+  --focus-ring-width-contrast: 3px;
+
+  /* Surface geometry + state metrics (§2.5, §6, §8.2). Consumed by glass.css/shell.css,
+   * which may not declare raw lengths — every length in the material system lives here. */
+  --glass-edge-width: 1px;
+  --glass-edge-width-contrast: 2px;
+  --glass-edge-opacity: 0.35;
+  --glass-edge-gradient: linear-gradient(135deg, var(--glass-highlight), transparent 30%);
+  --glass-line-height: 1.55;
+  --glass-lift-hover: -0.125rem;
+  --glass-lift-card-hover: -2px;
+  --glass-press-scale: 0.985;
+  --glass-disabled-saturation: 0.6;
+  --glass-disabled-opacity: 0.75;
+  --glass-error-inset: inset 0 0 0 1px color-mix(in oklab, var(--color-error) 30%, transparent);
+  --touch-target-min: 2.75rem;
+
+  /* Active navigation pill tint (§5.2). Replaces daisyUI's opaque neutral slab. */
+  --nav-active-tint: color-mix(in oklab, var(--color-primary) 18%, transparent);
+  --nav-active-inset: 2px;
+
+  /* Asymmetric split-grid templates consumed by the `@utility` rules in glass.css. */
+  --grid-split-chat-template: minmax(0, 1fr) 22rem;
+  --grid-split-providers-template: minmax(0, 1.35fr) minmax(0, 1fr);
+
+  /* CodeMirror editor chrome (AppCodeEditor) — color-mix stays in CSS SSOT. */
+  --code-editor-active-line: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  --code-editor-selection: color-mix(in oklab, var(--color-primary) 28%, transparent);
+
+  /* Motion (§7.2/§7.3). Shared easing vocabulary. */
+  --motion-fast: 120ms;
+  --motion-standard: 220ms;
+  --motion-slow: 320ms;
+  /* Floor used by prefers-reduced-motion — non-zero so transitionend still fires. */
+  --motion-instant: 1ms;
+  --ease-response: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Spatial motion offsets (§7.3). Enter travels up, exit travels away. */
+  --motion-travel-page: 0.5rem;
+  --motion-travel-page-exit: -0.25rem;
+  --motion-travel-text: 0.4rem;
+  --motion-travel-text-exit: -0.4rem;
+  --motion-travel-toast: -0.5rem;
+  --motion-travel-nudge: 1px;
+  --motion-scale-toast: 0.98;
+
+  /* Stagger cadence (§7.4). Indexed delay classes multiply these steps. */
+  --motion-stagger-step: 50ms;
+  --motion-stagger-step-stat: 60ms;
+
+  /* Corner geometry (§2.9). Nested-.radius contract: inner < parent. */
+  --radius-control: 0.625rem;
+  --radius-input: 0.75rem;
+  --radius-card: 1rem;
+  --radius-popover: 1.25rem;
+  --radius-panel: 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark glass needs greater opacity to suppress bright content (§3). */
+    --glass-bg-clear: color-mix(in oklab, var(--color-base-100) 42%, transparent);
+    --glass-bg-subtle: color-mix(in oklab, var(--color-base-100) 68%, transparent);
+    --glass-bg-standard: color-mix(in oklab, var(--color-base-100) 80%, transparent);
+    --glass-bg-strong: color-mix(in oklab, var(--color-base-100) 90%, transparent);
+    --glass-bg-modal: color-mix(in oklab, var(--color-base-100) 95%, transparent);
+    --glass-border-rest: color-mix(in oklab, var(--color-base-content) 18%, transparent);
+    --glass-border-hover: color-mix(in oklab, var(--color-base-content) 32%, transparent);
+    --glass-highlight: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+    --glass-shadow-low:
+      0 2px 10px color-mix(in oklab, var(--color-base-content) 22%, transparent),
+      inset 0 1px 0 var(--glass-highlight);
+    --glass-shadow-medium:
+      0 12px 32px color-mix(in oklab, var(--color-base-content) 32%, transparent),
+      inset 0 1px 0 var(--glass-highlight);
+    --glass-shadow-high:
+      0 20px 48px color-mix(in oklab, var(--color-base-content) 42%, transparent),
+      inset 0 1px 0 var(--glass-highlight);
+    --text-secondary: color-mix(in oklab, var(--color-base-content) 78%, transparent);
+    --text-muted: color-mix(in oklab, var(--color-base-content) 64%, transparent);
+    --focus-color: color-mix(in oklab, var(--color-primary) 80%, var(--color-base-content));
+  }
+}
+
+/* WCAG 2.1 AA text contrast (4.5:1) on semantic pairs — daisyUI stock corporate/business
+ * miss a few pairs; overrides merge with node_modules/daisyui/themes.css in validate-ui-accessibility.ts.
+ *
+ * These are floors for the stock themes only. `plugins/brand-css.client.ts` applies the
+ * configured brand palette to `documentElement`, which a nested `[data-theme=…]` match
+ * would silently override — see scripts/validate-theme-attribute-ownership.ts.
+ */
+[data-theme="corporate"] {
+  --color-primary: oklch(46% 0.15 241.966);
+  --color-accent: oklch(48% 0.11 184.704);
+  --color-info: oklch(48% 0.12 221.723);
+  --color-success: oklch(50% 0.18 149.214);
+}
+
+[data-theme="business"] {
+  --color-error: oklch(46% 0.14 29.674);
+}

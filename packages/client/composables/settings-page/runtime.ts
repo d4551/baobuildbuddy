@@ -165,6 +165,8 @@ export function createSettingsPageSaveRuntimeState() {
     brandSaveState: ref<SaveState>("idle"),
     jobProvidersSaveState: ref<SaveState>("idle"),
     jobTaxonomySaveState: ref<SaveState>("idle"),
+    providerKeysSaveState: ref<SaveState>("idle"),
+    providerRoutingSaveState: ref<SaveState>("idle"),
     notificationForm: createDefaultNotificationForm(),
     automationForm: createDefaultAutomationForm(),
     jobProviderForm: createDefaultJobProviderForm(),

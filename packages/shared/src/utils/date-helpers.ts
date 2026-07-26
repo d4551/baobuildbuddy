@@ -16,51 +16,54 @@ import {
 
 export type RelativeTimeTranslator = (key: string, params?: { count?: number }) => string;
 
-/** Options for formatRelativeTime. */
-export type FormatRelativeTimeOptions = {
-  /** i18n key prefix (e.g. "common.relativeTime", "dashboard.relativeTime"). Default: "common.relativeTime". */
-  keyPrefix?: string;
-  /** When true and seconds < 60, use minutesAgo with count 1 instead of justNow. For namespaces without justNow. */
-  minOneUnit?: boolean;
-  /** When true, use daysAgo for all day+ ranges instead of weeksAgo. For namespaces without weeksAgo. */
-  daysOnly?: boolean;
-};
-
-const DEFAULT_KEY_PREFIX = "common.relativeTime";
+/**
+ * Single canonical i18n namespace for every relative-time rendering in the app.
+ * Per-surface namespaces (`jobsPage.date`, `jobCard.relativeTime`,
+ * `dashboard.relativeTime`, `automation.scraper.*`) previously duplicated this
+ * copy; they were collapsed into this one SSOT so wording stays consistent and
+ * translators maintain a single set of strings.
+ */
+export const RELATIVE_TIME_KEY = {
+  justNow: "common.relativeTime.justNow",
+  minutesAgo: "common.relativeTime.minutesAgo",
+  hoursAgo: "common.relativeTime.hoursAgo",
+  today: "common.relativeTime.today",
+  yesterday: "common.relativeTime.yesterday",
+  daysAgo: "common.relativeTime.daysAgo",
+  weeksAgo: "common.relativeTime.weeksAgo",
+  monthsAgo: "common.relativeTime.monthsAgo",
+  unknown: "common.relativeTime.unknown",
+} as const;
 
 /**
- * Returns a translated relative time string using the provided translation function.
- * Use this for i18n-aware relative time display.
+ * Returns a translated relative time string at sub-day granularity
+ * (just now / minutes / hours), falling back to day, week, and locale-date
+ * ranges. Use this for chat and activity timestamps.
  */
-export function formatRelativeTime(
-  date: string | Date,
-  t: RelativeTimeTranslator,
-  options?: FormatRelativeTimeOptions,
-): string {
+export function formatRelativeTime(date: string | Date, t: RelativeTimeTranslator): string {
   const d = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) {
+    return t(RELATIVE_TIME_KEY.unknown);
+  }
   const seconds = Math.floor((Date.now() - d.getTime()) / MS_PER_SECOND);
-  const prefix = options?.keyPrefix ?? DEFAULT_KEY_PREFIX;
 
   if (seconds < SECONDS_PER_MINUTE) {
-    if (options?.minOneUnit) {
-      return t(`${prefix}.minutesAgo`, { count: 1 });
-    }
-    return t(`${prefix}.justNow`);
+    return t(RELATIVE_TIME_KEY.justNow);
   }
   if (seconds < SECONDS_PER_HOUR)
-    return t(`${prefix}.minutesAgo`, {
+    return t(RELATIVE_TIME_KEY.minutesAgo, {
       count: Math.max(1, Math.floor(seconds / SECONDS_PER_MINUTE)),
     });
   if (seconds < SECONDS_PER_DAY)
-    return t(`${prefix}.hoursAgo`, {
+    return t(RELATIVE_TIME_KEY.hoursAgo, {
       count: Math.max(1, Math.floor(seconds / SECONDS_PER_HOUR)),
     });
-  if (options?.daysOnly || seconds < SECONDS_PER_WEEK)
-    return t(`${prefix}.daysAgo`, {
+  if (seconds < SECONDS_PER_WEEK)
+    return t(RELATIVE_TIME_KEY.daysAgo, {
       count: Math.max(1, Math.floor(seconds / SECONDS_PER_DAY)),
     });
   if (seconds < SECONDS_PER_30_DAYS)
-    return t(`${prefix}.weeksAgo`, { count: Math.floor(seconds / SECONDS_PER_WEEK) });
+    return t(RELATIVE_TIME_KEY.weeksAgo, { count: Math.floor(seconds / SECONDS_PER_WEEK) });
   return d.toLocaleDateString();
 }
 
@@ -73,40 +76,29 @@ export function formatDate(date: string | Date, locale?: string): string {
   });
 }
 
-/** Options for formatRelativeTimeForDate. */
-export type FormatRelativeTimeForDateOptions = {
-  /** i18n key prefix (e.g. "jobsPage.date", "jobCard.relativeTime"). */
-  keyPrefix: string;
-  /** Key for invalid/missing dates. Defaults to `${keyPrefix}.unknown`. */
-  unknownKey?: string;
-};
-
 /**
- * Returns a translated relative date string (day granularity) using the provided translator.
- * Single source for job-posted-date, scraper dates, etc.
- * Use formatRelativeTime for sub-day granularity (chat, activity timestamps).
+ * Returns a translated relative date string at day granularity
+ * (today / yesterday / days / weeks / months). Single source for
+ * job-posted dates, scraper dates, and any other calendar-day display.
+ * Use formatRelativeTime for sub-day granularity.
  */
-export function formatRelativeTimeForDate(
-  date: string | Date,
-  t: RelativeTimeTranslator,
-  options: FormatRelativeTimeForDateOptions,
-): string {
+export function formatRelativeTimeForDate(date: string | Date, t: RelativeTimeTranslator): string {
   const d = typeof date === "string" ? new Date(date) : date;
   if (Number.isNaN(d.getTime())) {
-    return t(options.unknownKey ?? `${options.keyPrefix}.unknown`);
+    return t(RELATIVE_TIME_KEY.unknown);
   }
 
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - d.getTime()) / MS_PER_DAY);
 
-  if (diffDays <= 0) return t(`${options.keyPrefix}.today`);
-  if (diffDays === 1) return t(`${options.keyPrefix}.yesterday`);
-  if (diffDays < DAYS_PER_WEEK) return t(`${options.keyPrefix}.daysAgo`, { count: diffDays });
+  if (diffDays <= 0) return t(RELATIVE_TIME_KEY.today);
+  if (diffDays === 1) return t(RELATIVE_TIME_KEY.yesterday);
+  if (diffDays < DAYS_PER_WEEK) return t(RELATIVE_TIME_KEY.daysAgo, { count: diffDays });
   if (diffDays < DAYS_PER_MONTH_APPROX)
-    return t(`${options.keyPrefix}.weeksAgo`, {
+    return t(RELATIVE_TIME_KEY.weeksAgo, {
       count: Math.floor(diffDays / DAYS_PER_WEEK),
     });
-  return t(`${options.keyPrefix}.monthsAgo`, {
+  return t(RELATIVE_TIME_KEY.monthsAgo, {
     count: Math.floor(diffDays / DAYS_PER_MONTH_APPROX),
   });
 }

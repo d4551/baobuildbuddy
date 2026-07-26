@@ -6,6 +6,7 @@
 export const LAYOUT_PUBLIC_SURFACE = "layout" as const;
 
 import * as chrome from "./layout-chrome";
+import * as controls from "./layout-controls";
 import * as extras from "./layout-public-extras";
 import * as tokens from "./layout-tokens";
 
@@ -55,6 +56,7 @@ export const SVG_SIZE_13 = chrome.SVG_SIZE_13;
 export const SVG_SIZE_24 = chrome.SVG_SIZE_24;
 export const SIDEBAR_WIDTH_LG_CLASS = chrome.SIDEBAR_WIDTH_LG_CLASS;
 export const SHELL_SIDEBAR_ITEM_CLASS = chrome.SHELL_SIDEBAR_ITEM_CLASS;
+export const SHELL_SIDEBAR_ITEM_ACTIVE_CLASS = chrome.SHELL_SIDEBAR_ITEM_ACTIVE_CLASS;
 export const SHELL_NAVBAR_DROPDOWN_CLASS = chrome.SHELL_NAVBAR_DROPDOWN_CLASS;
 export const DROPDOWN_MENU_WIDTH_CLASS = chrome.DROPDOWN_MENU_WIDTH_CLASS;
 export const STAT_CARD_ICON_BADGE_CLASS = chrome.STAT_CARD_ICON_BADGE_CLASS;
@@ -207,8 +209,9 @@ export const RADIUS_TOKEN_CLASS = tokens.RADIUS_TOKEN_CLASS;
 export type RadiusToken = tokens.RadiusToken;
 export const CIRCULAR_BADGE_CLASS = tokens.CIRCULAR_BADGE_CLASS;
 export const AVATAR_PLACEHOLDER_CLASS = tokens.AVATAR_PLACEHOLDER_CLASS;
-export const TOGGLE_CONTROL_CLASS = tokens.TOGGLE_CONTROL_CLASS;
-export const CHECKBOX_CONTROL_CLASS = tokens.CHECKBOX_CONTROL_CLASS;
+export const TOGGLE_CONTROL_CLASS = controls.TOGGLE_CONTROL_CLASS;
+export const CHECKBOX_CONTROL_CLASS = controls.CHECKBOX_CONTROL_CLASS;
+export const CONTROL_TARGET_ROW_CLASS = controls.CONTROL_TARGET_ROW_CLASS;
 export const FORM_WIDTH_10_CLASS = tokens.FORM_WIDTH_10_CLASS;
 export const FORM_WIDTH_16_CLASS = tokens.FORM_WIDTH_16_CLASS;
 export const FORM_WIDTH_20_CLASS = tokens.FORM_WIDTH_20_CLASS;

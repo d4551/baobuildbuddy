@@ -1094,15 +1094,15 @@
       "reason": null
     },
     {
-      "slug": "nav-3-_cover-letter",
-      "route": "/cover-letter",
+      "slug": "nav-3-_portfolio",
+      "route": "/portfolio",
       "viewport": "desktop-nav",
-      "title": "Cover Letters | BaoBuildBuddy",
-      "h1": "Cover Letters",
+      "title": "Portfolio Builder | BaoBuildBuddy",
+      "h1": "Portfolio Builder",
       "mainCount": 1,
       "consoleErrors": [],
       "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-3-_cover-letter.png",
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-3-_portfolio.png",
       "ok": true,
       "reason": null
     },
@@ -1133,15 +1133,15 @@
       "reason": null
     },
     {
-      "slug": "nav-6-_portfolio",
-      "route": "/portfolio",
+      "slug": "nav-6-_cover-letter",
+      "route": "/cover-letter",
       "viewport": "desktop-nav",
-      "title": "Portfolio Builder | BaoBuildBuddy",
-      "h1": "Portfolio Builder",
+      "title": "Cover Letters | BaoBuildBuddy",
+      "h1": "Cover Letters",
       "mainCount": 1,
       "consoleErrors": [],
       "pageErrors": [],
-      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-6-_portfolio.png",
+      "screenshot": "/Users/brandon/Downloads/baobuildbuddy/artifacts/baseline/browser-smoke/desktop-nav-nav-6-_cover-letter.png",
       "ok": true,
       "reason": null
     },

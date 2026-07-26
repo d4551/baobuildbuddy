@@ -99,7 +99,6 @@ const interviewHub = {
       },
     },
     config: {
-      dialogAria: "Configure interview session dialog",
       title: "Configure Interview Session",
       subtitle: "Pick a context, tune session options, then launch your practice run.",
       switchToJobAria: "Switch to scraped job mode",
@@ -122,8 +121,6 @@ const interviewHub = {
       selectedButton: "Selected",
       selectButton: "Select",
       studioLegend: "Studio",
-      studioAria: "Studio",
-      selectStudioOption: "Select a studio",
       noStudiosHint: "No studios found yet. Run studio scraping or create a studio profile first.",
       roleLegend: "Role",
       roleAria: "Role",

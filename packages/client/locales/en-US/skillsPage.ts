@@ -126,7 +126,6 @@ const skillsPage = {
       cancelButton: "Cancel",
     },
     toasts: {
-      mappingAdded: "Skill mapping added",
       mappingAddedWithXp: "Skill mapping added (+{xp} XP)",
       mappingDeleted: "Skill mapping deleted",
       analysisCompleted: "Skills analyzed successfully",

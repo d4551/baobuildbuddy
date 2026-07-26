@@ -151,11 +151,33 @@ const interviewSessionStatusResponseSchema = t.Union([
   t.Literal("cancelled"),
 ]);
 
+const interviewAnalysisSourceResponseSchema = t.Union([
+  t.Literal("ai"),
+  t.Literal("heuristic"),
+  t.Literal("unknown"),
+]);
+
+const interviewAnalysisAggregateSourceResponseSchema = t.Union([
+  t.Literal("ai"),
+  t.Literal("heuristic"),
+  t.Literal("mixed"),
+  t.Literal("unknown"),
+]);
+
+const interviewAnalysisProvenanceCountsResponseSchema = t.Object({
+  ai: t.Number(),
+  heuristic: t.Number(),
+  unknown: t.Number(),
+});
+
 const interviewAiAnalysisResponseSchema = t.Object({
   score: t.Number(),
   feedback: t.String(),
   strengths: t.Array(t.String()),
   improvements: t.Array(t.String()),
+  source: interviewAnalysisSourceResponseSchema,
+  provider: t.Optional(t.String()),
+  model: t.Optional(t.String()),
 });
 
 const interviewQuestionResponseSchema = t.Object({
@@ -186,6 +208,9 @@ const interviewFinalAnalysisResponseSchema = t.Object({
   improvements: t.Array(t.String()),
   recommendations: t.Array(t.String()),
   feedback: t.Optional(t.String()),
+  analysisSource: t.Optional(interviewAnalysisAggregateSourceResponseSchema),
+  aiAverageScore: t.Optional(t.Union([t.Number(), t.Null()])),
+  provenanceCounts: t.Optional(interviewAnalysisProvenanceCountsResponseSchema),
 });
 
 const interviewerPersonaResponseSchema = t.Object({
@@ -246,14 +271,19 @@ export const interviewSessionResponses = {
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
+export const interviewSessionWithMessageResponseSchema = t.Intersect([
+  interviewSessionResponseSchema,
+  t.Object({ message: t.String() }),
+]);
+
 export const submitInterviewResponseResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: interviewSessionWithMessageResponseSchema,
   [HTTP_STATUS_BAD_REQUEST]: simpleErrorResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 
 export const completeInterviewSessionResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: interviewSessionWithMessageResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
 };
 

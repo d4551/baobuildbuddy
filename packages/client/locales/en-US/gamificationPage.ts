@@ -31,7 +31,6 @@ const gamificationPage = {
     challengeCompleteErrorFallback: "Failed to complete challenge",
     streakDaysSuffix: "days in a row",
     longestStreakDesc: "personal best",
-    noChallengesLabel: "No daily challenges available.",
     noChallengesTitle: "No daily challenges available",
     noChallengesDescription:
       "Complete setup and career actions from the dashboard to unlock today's challenge set.",

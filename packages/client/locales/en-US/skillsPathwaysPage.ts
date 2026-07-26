@@ -67,7 +67,6 @@ const skillsPathwaysPage = {
         step_learn_careers: "Learn about career options in the gaming industry.",
         step_setup_profile: "Set up your professional profile.",
       },
-      emptyState: "Readiness data is not available yet. Add skill mappings and run analysis first.",
       emptyStateTitle: "Readiness data is not available yet",
       emptyStateDescription:
         "Add more mapped skill evidence and rerun readiness analysis to populate this section.",
@@ -84,7 +83,6 @@ const skillsPathwaysPage = {
         stable: "Stable",
         declining: "Declining",
       },
-      emptyState: "No pathways available yet. Add more mapped skills to generate recommendations.",
       emptyStateTitle: "No pathways available yet",
       emptyStateDescription:
         "Expand your mapped skills to unlock stronger role recommendations and pathway coverage.",

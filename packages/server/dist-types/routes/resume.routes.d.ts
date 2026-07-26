@@ -673,7 +673,10 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
                                 theme: "dark" | "light";
                                 isDefault: boolean;
                             };
-                            suggestions: unknown[];
+                            suggestions: {
+                                text: string;
+                                section: string;
+                            }[];
                             section: string;
                         };
                         404: {
@@ -796,7 +799,7 @@ export declare const resumeRoutes: import("elysia/types").AddRoute<string, "loca
     strengths: string[];
     improvements: string[];
     keywords: string[];
-    analysis: Record<string, unknown>;
+    analysis: import("@bao/shared/utils/json").JsonObject;
 }, 200> | import("elysia").ElysiaStatus<404, {
     error: string;
     details: string;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import {
   FLEX_GAP_TOKEN_CLASS,
   HEIGHT_TOKEN_CLASS,
@@ -12,24 +13,38 @@ import { UI_GRID_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 type LoadingSkeletonVariant = "text" | "cards" | "stats";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     lines?: number;
     width?: string;
     variant?: LoadingSkeletonVariant;
+    /** Accessible name for the busy region; defaults to the shared loading string. */
+    label?: string;
   }>(),
   {
     lines: 3,
     width: "w-full",
     variant: "text",
+    label: "",
   },
 );
+
+const { t } = useI18n();
+
+/**
+ * Every variant is a `role="status"` live region, and a status region with no
+ * accessible name is announced as an empty update — so assistive tech reported
+ * nothing at all while content loaded. Named by default rather than per call site,
+ * because all 32 call sites previously passed nothing.
+ */
+const accessibleLabel = computed(() => (props.label.length > 0 ? props.label : t("common.loading")));
 
 const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
 </script>
 
 <template>
   <div v-if="variant === 'cards'" :class="cardsGridClass" role="status" aria-live="polite" aria-busy="true">
+    <span class="sr-only">{{ accessibleLabel }}</span>
     <div v-for="index in LOADING_SKELETON_LINES.long" :key="index" :class="[SURFACE_GLASS_CARD_CLASS, 'h-full']">
       <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap3]">
         <div class="skeleton w-2/3" :class="[HEIGHT_TOKEN_CLASS.h5]"></div>
@@ -51,6 +66,7 @@ const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
     aria-live="polite"
     aria-busy="true"
   >
+    <span class="sr-only">{{ accessibleLabel }}</span>
     <div v-for="index in LOADING_SKELETON_LINES.compact" :key="index" class="stat">
       <div class="skeleton" :class="[MARGIN_TOKEN_CLASS.mb2, HEIGHT_TOKEN_CLASS.h4, WIDTH_TOKEN_CLASS.w20]"></div>
       <div class="skeleton" :class="[HEIGHT_TOKEN_CLASS.h8, WIDTH_TOKEN_CLASS.w16]"></div>
@@ -59,6 +75,7 @@ const cardsGridClass = UI_GRID_CLASS_BY_TOKEN.threeColumn;
   </div>
 
   <div class="flex flex-col" :class="[FLEX_GAP_TOKEN_CLASS.gap3]" v-else role="status" aria-live="polite" aria-busy="true">
+    <span class="sr-only">{{ accessibleLabel }}</span>
     <div class="skeleton" v-for="i in lines" :key="i" :class="[i === lines ? 'w-3/4' : width, HEIGHT_TOKEN_CLASS.h4]"/>
   </div>
 </template>

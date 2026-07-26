@@ -240,7 +240,14 @@ export const SIDEBAR_WIDTH_LG_CLASS = "lg:w-64";
 
 /** Sidebar item surface inside the floating drawer (WCAG 2.5.5 / AAA 44px target). */
 export const SHELL_SIDEBAR_ITEM_CLASS =
-  "box-border flex h-11 min-h-11 min-w-11 items-center gap-2 rounded-box px-2 py-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:justify-center is-drawer-close:px-0";
+  "sidebar-active-indicator box-border flex h-11 min-h-11 min-w-11 items-center gap-2 rounded-box px-2 py-0 transition-colors duration-[var(--motion-fast)] ease-[var(--ease-response)] is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:justify-center is-drawer-close:px-0";
+
+/**
+ * Active-state classes for a sidebar item. `menu-active` stays for daisyUI's
+ * semantic state contract; `shell.css` repaints it as the designed primary pill
+ * instead of daisyUI's opaque neutral slab.
+ */
+export const SHELL_SIDEBAR_ITEM_ACTIVE_CLASS = "menu-active font-medium";
 
 /** Navbar dropdown (no menu-sm — keeps locale rows ≥44px). */
 export const SHELL_NAVBAR_DROPDOWN_CLASS =

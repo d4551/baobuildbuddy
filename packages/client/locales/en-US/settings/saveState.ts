@@ -1,7 +1,6 @@
 const settingssaveState = {
   settings: {
     saveState: {
-      idle: "Idle",
       saving: "Saving",
       success: "Saved",
       error: "Error",

@@ -5,6 +5,7 @@ import { buildBrandedLocaleMessages } from "~/utils/brand-overrides";
 
 const { settings, fetchSettings } = useSettings();
 const { resolvedBrand } = useBrand();
+const { theme } = useTheme();
 const i18n = useI18n();
 const { t, locale } = i18n;
 
@@ -33,6 +34,9 @@ watchEffect(() => {
 useHead(() => ({
   titleTemplate: (titleChunk) =>
     titleChunk ? `${titleChunk} | ${resolvedBrand.value.name}` : resolvedBrand.value.name,
+  // Sole owner of `data-theme`. Declaring it on any descendant re-matches daisyUI's
+  // `[data-theme=…]` palette block and discards the brand palette inherited from <html>.
+  htmlAttrs: { "data-theme": theme.value },
   link: [
     { rel: "icon", type: "image/svg+xml", href: resolvedBrand.value.faviconPath },
     { rel: "alternate icon", href: resolvedBrand.value.faviconPath },

@@ -10,7 +10,6 @@ const resumePreview = {
     retryButton: "Retry",
     retryAria: "Retry loading resume preview",
     loadError: "Failed to load resume preview.",
-    notFound: "Resume not found. Please select a resume to preview.",
     notFoundTitle: "Resume not found",
     notFoundDescription: "Select a saved resume from the resume workspace to open this preview.",
     website: "Website",
@@ -19,12 +18,6 @@ const resumePreview = {
     linkedinLinkAria: "Open LinkedIn profile",
     github: "GitHub",
     githubLinkAria: "Open GitHub profile",
-    experience: "Experience",
-    education: "Education",
-    skills: "Skills",
-    technicalSkills: "Technical Skills",
-    softSkills: "Soft Skills",
-    gamingIndustrySkills: "Gaming Industry Skills",
   },
 } as const;
 

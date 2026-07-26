@@ -28,20 +28,14 @@ import interviewHistory from "./interviewHistory";
 import interviewHub from "./interviewHub";
 import interviewScoreCard from "./interviewScoreCard";
 import interviewSession from "./interviewSession";
-import jobCard from "./jobCard";
 import jobDetail from "./jobDetail";
 import jobsPage from "./jobsPage";
 import layout from "./layout";
 import meta from "./meta";
 import nav from "./nav";
 import portfolioPage from "./portfolioPage";
-import portfolioProjectCard from "./portfolioProjectCard";
 import quickFab from "./quickFab";
 import resumeBuildPage from "./resumeBuildPage";
-import resumeComponentEducation from "./resumeComponentEducation";
-import resumeComponentExperience from "./resumeComponentExperience";
-import resumeComponentPersonalInfo from "./resumeComponentPersonalInfo";
-import resumeComponentSkills from "./resumeComponentSkills";
 import resumePage from "./resumePage";
 import resumePreview from "./resumePreview";
 import settingsaiProviders from "./settings/aiProviders";
@@ -85,7 +79,6 @@ type EnglishLocaleCatalog = typeof meta &
   typeof dashboard &
   typeof gamificationPage &
   typeof jobsPage &
-  typeof jobCard &
   typeof resumePreview &
   typeof skillsPage &
   typeof skillsPathwaysPage &
@@ -94,15 +87,10 @@ type EnglishLocaleCatalog = typeof meta &
   typeof coverLetterPage &
   typeof coverLetterDetailPage &
   typeof portfolioPage &
-  typeof portfolioProjectCard &
   typeof interviewChatComponent &
   typeof interviewScoreCard &
   typeof dailyChallengeCard &
   typeof xpBar &
-  typeof resumeComponentPersonalInfo &
-  typeof resumeComponentExperience &
-  typeof resumeComponentEducation &
-  typeof resumeComponentSkills &
   typeof jobDetail &
   typeof studioDetail &
   typeof studiosIndex &
@@ -158,7 +146,6 @@ const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   dashboard,
   gamificationPage,
   jobsPage,
-  jobCard,
   resumePreview,
   skillsPage,
   skillsPathwaysPage,
@@ -167,15 +154,10 @@ const enUSCatalog = mergeLocaleCatalog<EnglishLocaleCatalog>(
   coverLetterPage,
   coverLetterDetailPage,
   portfolioPage,
-  portfolioProjectCard,
   interviewChatComponent,
   interviewScoreCard,
   dailyChallengeCard,
   xpBar,
-  resumeComponentPersonalInfo,
-  resumeComponentExperience,
-  resumeComponentEducation,
-  resumeComponentSkills,
   jobDetail,
   studioDetail,
   studiosIndex,

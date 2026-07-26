@@ -1,0 +1,240 @@
+/*
+ * Motion vocabulary (§7). Page/route transitions, component entrances, and the
+ * reduced-motion kill switch. Durations, easings, travel distances and stagger
+ * cadence all resolve through `tokens.css`.
+ */
+
+.page-enter-active {
+  transition:
+    opacity var(--motion-slow) var(--ease-enter),
+    transform var(--motion-slow) var(--ease-enter);
+}
+
+.page-leave-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-exit),
+    transform var(--motion-standard) var(--ease-exit);
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter-from {
+    transform: translateY(var(--motion-travel-page));
+  }
+
+  .page-leave-to {
+    transform: translateY(var(--motion-travel-page-exit));
+  }
+}
+
+.hero-text-rotate-enter-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-enter),
+    transform var(--motion-standard) var(--ease-enter);
+}
+
+.hero-text-rotate-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-exit),
+    transform var(--motion-fast) var(--ease-exit);
+}
+
+.toast-motion-enter-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-enter),
+    transform var(--motion-standard) var(--ease-enter);
+}
+
+.toast-motion-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-exit),
+    transform var(--motion-fast) var(--ease-exit);
+}
+
+.toast-motion-move {
+  transition: transform var(--motion-standard) var(--ease-response);
+}
+
+.hero-text-rotate-enter-from,
+.toast-motion-enter-from {
+  opacity: 0;
+}
+
+.hero-text-rotate-leave-to,
+.toast-motion-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-text-rotate-enter-from {
+    transform: translateY(var(--motion-travel-text));
+  }
+
+  .hero-text-rotate-leave-to {
+    transform: translateY(var(--motion-travel-text-exit));
+  }
+
+  .toast-motion-enter-from,
+  .toast-motion-leave-to {
+    transform: translateY(var(--motion-travel-toast)) scale(var(--motion-scale-toast));
+  }
+}
+
+/* Navbar tagline fade on scroll (§5.1). */
+.navbar-tagline-enter-active,
+.navbar-tagline-leave-active {
+  transition:
+    opacity var(--motion-standard) var(--ease-response),
+    transform var(--motion-standard) var(--ease-response);
+}
+.navbar-tagline-enter-from,
+.navbar-tagline-leave-to {
+  opacity: 0;
+  transform: translateY(var(--motion-travel-page-exit));
+}
+
+/* Breadcrumb link hover — subtle color shift + micro-lift. */
+.breadcrumbs a {
+  transition:
+    color var(--motion-fast) var(--ease-response),
+    transform var(--motion-fast) var(--ease-response);
+}
+@media (hover: hover) and (pointer: fine) {
+  .breadcrumbs a:hover {
+    color: var(--color-primary);
+    transform: translateX(var(--motion-travel-nudge));
+  }
+}
+
+/* Glass card hover lift — unified card interaction elevation. */
+.glass-card-hover {
+  transition:
+    transform var(--motion-fast) var(--ease-response),
+    box-shadow var(--motion-fast) var(--ease-response);
+}
+@media (hover: hover) and (pointer: fine) {
+  .glass-card-hover:hover {
+    transform: translateY(var(--glass-lift-card-hover));
+    box-shadow: var(--glass-shadow-medium);
+  }
+}
+
+/* Dashboard stat card entrance — staggered fade-up. */
+@keyframes stat-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-travel-page));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stat-card-enter {
+  animation: stat-card-enter var(--motion-slow) var(--ease-enter) both;
+}
+.stat-card-enter:nth-child(1) {
+  animation-delay: calc(var(--motion-stagger-step-stat) * 0);
+}
+.stat-card-enter:nth-child(2) {
+  animation-delay: calc(var(--motion-stagger-step-stat) * 1);
+}
+.stat-card-enter:nth-child(3) {
+  animation-delay: calc(var(--motion-stagger-step-stat) * 2);
+}
+.stat-card-enter:nth-child(4) {
+  animation-delay: calc(var(--motion-stagger-step-stat) * 3);
+}
+
+/* Glass card entrance — staggered fade-up for list grids. */
+@keyframes glass-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-travel-page));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.glass-card-enter {
+  animation: glass-card-enter var(--motion-slow) var(--ease-enter) both;
+}
+/* Indexed stagger delays used by UiGlassCard staggerIndex prop. */
+.glass-card-enter-0 {
+  animation-delay: calc(var(--motion-stagger-step) * 0);
+}
+.glass-card-enter-1 {
+  animation-delay: calc(var(--motion-stagger-step) * 1);
+}
+.glass-card-enter-2 {
+  animation-delay: calc(var(--motion-stagger-step) * 2);
+}
+.glass-card-enter-3 {
+  animation-delay: calc(var(--motion-stagger-step) * 3);
+}
+.glass-card-enter-4 {
+  animation-delay: calc(var(--motion-stagger-step) * 4);
+}
+.glass-card-enter-5 {
+  animation-delay: calc(var(--motion-stagger-step) * 5);
+}
+.glass-card-enter-6 {
+  animation-delay: calc(var(--motion-stagger-step) * 6);
+}
+.glass-card-enter-7 {
+  animation-delay: calc(var(--motion-stagger-step) * 7);
+}
+.glass-card-enter-8 {
+  animation-delay: calc(var(--motion-stagger-step) * 8);
+}
+.glass-card-enter-9 {
+  animation-delay: calc(var(--motion-stagger-step) * 9);
+}
+.glass-card-enter-10 {
+  animation-delay: calc(var(--motion-stagger-step) * 10);
+}
+.glass-card-enter-11 {
+  animation-delay: calc(var(--motion-stagger-step) * 11);
+}
+
+/* Chat bubble entrance — slide in from below. */
+@keyframes chat-bubble-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-travel-page)) scale(var(--motion-scale-toast));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.chat-bubble-enter {
+  animation: chat-bubble-enter var(--motion-standard) var(--ease-enter) both;
+}
+
+/* Reduced motion — universal kill of nonessential spatial motion (§7.6). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    animation-duration: var(--motion-instant);
+    animation-iteration-count: 1;
+  }
+
+  :root {
+    --motion-fast: var(--motion-instant);
+    --motion-standard: var(--motion-instant);
+    --motion-slow: var(--motion-instant);
+  }
+
+  .glass-interactive:hover,
+  .glass-interactive:active {
+    transform: none;
+  }
+}

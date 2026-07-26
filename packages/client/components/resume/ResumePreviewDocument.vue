@@ -20,6 +20,7 @@ import {
 import {
   BADGE_OUTLINE_CLASS,
 } from "~/constants/layout-badges";
+import { UI_GRID_CLASS_BY_TOKEN } from "~/constants/ui-layout";
 
 const props = defineProps<{
   resume: ResumeData;
@@ -47,7 +48,7 @@ const headerClass = computed(() => {
 
 const skillsClass = computed(() =>
   theme.value.layout.skillsLayout === "2-column"
-    ? "grid grid-cols-1 gap-2 sm:grid-cols-2"
+    ? UI_GRID_CLASS_BY_TOKEN.twoColumnSmGap2
     : "flex flex-wrap",
 );
 </script>
@@ -78,6 +79,22 @@ const skillsClass = computed(() =>
           :aria-label="t('resumePreview.linkedinLinkAria')"
         >
           {{ t("resumePreview.linkedin") }}
+        </a>
+        <!--
+          GitHub sits in `ResumePersonalInfo` next to linkedIn/portfolio and had copy
+          waiting in `resumePreview.github`, but the preview never rendered it — so a
+          candidate's GitHub link silently vanished from their own resume preview and
+          from the exported document.
+        -->
+        <a
+          v-if="resume.personalInfo?.github"
+          :href="resume.personalInfo.github"
+          class="link link-hover"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="t('resumePreview.githubLinkAria')"
+        >
+          {{ t("resumePreview.github") }}
         </a>
         <a
           v-if="resume.personalInfo?.portfolio"

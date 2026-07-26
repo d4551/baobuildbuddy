@@ -60,11 +60,7 @@ const resumePage = {
       complete: "All sections completed. Your resume is ready for final polish.",
       quickActions: {
         coverLetter: "Cover Letter",
-        coverLetterAria: "Open cover-letter builder with this resume context",
         portfolio: "Portfolio",
-        portfolioAria: "Open portfolio builder",
-        interview: "Interview Prep",
-        interviewAria: "Open interview prep hub",
       },
     },
     filters: {
@@ -233,8 +229,6 @@ const resumePage = {
       resumeExportFailed: "Failed to export resume",
       resumeEnhanced: "Resume enhanced",
       resumeEnhancedWithXp: "Resume enhanced (+{xp} XP)",
-      aiSuggestionsReady: "AI suggestions ready",
-      aiSuggestionsReadyWithXp: "AI suggestions ready (+{xp} XP)",
       resumeEnhanceFailed: "Failed to enhance resume",
       resumeScored: "Resume scored",
       resumeScoreFailed: "Failed to score resume",

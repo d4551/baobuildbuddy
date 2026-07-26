@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/d4551/baobuildbuddy/tree/main/packages/client",
   "scripts": {
-    "dev": "bun --bun run nuxt dev",
+    "dev": "bun run prepare:workspace-types && bun --bun run nuxt dev",
     "build": "bun --bun run nuxt build",
     "generate": "bun --bun run nuxt generate",
     "preview": "bun --bun run nuxt preview",

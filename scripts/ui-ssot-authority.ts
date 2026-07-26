@@ -14,7 +14,15 @@ export const UI_SSOT_AUTHORITY_PATHS = new Set<string>([
   "packages/client/constants/layout-public-extras.ts",
   "packages/client/constants/ui-layout.ts",
   "packages/client/constants/chat.ts",
+  // Stylesheet modules composed by main.css. tokens.css is the only one permitted
+  // raw design-token values; the rest consume it via var().
   "packages/client/assets/css/main.css",
+  "packages/client/assets/css/tokens.css",
+  "packages/client/assets/css/base.css",
+  "packages/client/assets/css/glass.css",
+  "packages/client/assets/css/motion.css",
+  "packages/client/assets/css/a11y-preferences.css",
+  "packages/client/assets/css/shell.css",
   // Generated from RESUME_EXPORT_THEME_CONFIGS; drift locked by validate:resume-preview-css.
   "packages/client/assets/css/resume-preview.generated.css",
 ]);

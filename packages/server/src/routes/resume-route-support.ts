@@ -26,6 +26,7 @@ import {
 } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
 import { safeParseJson } from "@bao/shared/utils/json";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -51,7 +52,7 @@ import type {
 } from "./resume-route-contracts";
 
 type ResumeScoreDetails = {
-  analysis: Record<string, unknown>;
+  analysis: JsonObject;
   score: number;
   strengths: string[];
   improvements: string[];
@@ -65,7 +66,7 @@ const toResumeTemplateOrUndefined = (
   value: string | undefined,
 ): ResumeData["template"] | undefined => (isResumeTemplate(value) ? value : undefined);
 
-const formatJobRequirements = (value: unknown): string => {
+const formatJobRequirements = (value: JsonValue): string => {
   if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }
@@ -100,8 +101,8 @@ Type: ${job.type || DEFAULT_UNSPECIFIED_LABEL}
 
 const parseResumeScoreDetails = (content: string): ResumeScoreDetails => {
   const parsedAnalysis = safeParseJson(content);
-  const analysisRecord: Record<string, unknown> =
-    parsedAnalysis && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
+  const analysisRecord: JsonObject =
+    parsedAnalysis !== null && typeof parsedAnalysis === "object" && !Array.isArray(parsedAnalysis)
       ? parsedAnalysis
       : {
           score: DEFAULT_SCORE_NEUTRAL,
@@ -245,15 +246,24 @@ export const enhanceResumeWithAi = async (
 
   const parsed = safeParseJson(response.content);
   const parsedRecord =
-    parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
-  let suggestions: unknown[];
-  if (parsedRecord && Array.isArray(parsedRecord.suggestions)) {
-    suggestions = parsedRecord.suggestions;
-  } else if (parsedRecord) {
-    suggestions = [parsedRecord];
-  } else {
-    suggestions = [{ text: response.content, section }];
-  }
+    parsed !== null && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  const rawSuggestions: JsonValue[] =
+    parsedRecord !== null && Array.isArray(parsedRecord.suggestions)
+      ? parsedRecord.suggestions
+      : parsedRecord !== null
+        ? [parsedRecord]
+        : [{ text: response.content, section }];
+  const suggestions = rawSuggestions.map((item) => {
+    if (item !== null && typeof item === "object" && !Array.isArray(item)) {
+      const textValue = item.text;
+      const sectionValue = item.section;
+      return {
+        text: typeof textValue === "string" ? textValue : JSON.stringify(item),
+        section: typeof sectionValue === "string" ? sectionValue : section,
+      };
+    }
+    return { text: typeof item === "string" ? item : JSON.stringify(item), section };
+  });
 
   return {
     resume,

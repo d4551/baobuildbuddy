@@ -48,6 +48,9 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
           {{ t("interviewSession.targetTitle") }}
         </summary>
         <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+            {{ t("interviewSession.targetDescription") }}
+          </p>
           <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
             <p class="text-base font-semibold text-base-content">
               {{ targetJob?.title ?? activeSession.role }}
@@ -98,6 +101,9 @@ const interviewerPersona = computed(() => props.activeSession.interviewerPersona
           {{ t("interviewSession.interviewerTitle") }}
         </summary>
         <div class="collapse-content" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
+          <p class="text-muted" :class="[TYPOGRAPHY_SCALE_CLASS.sm]">
+            {{ t("interviewSession.interviewerDescription") }}
+          </p>
           <template v-if="interviewerPersona">
             <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack1]">
               <p class="text-base font-semibold text-base-content">{{ interviewerPersona.name }}</p>

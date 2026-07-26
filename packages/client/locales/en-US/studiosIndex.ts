@@ -7,10 +7,8 @@ const studiosIndex = {
     subtitle:
       "Browse studio profiles, filter by operational attributes, and move directly into interview practice.",
     errorTitle: "Studio directory unavailable",
-    errorBannerAria: "Studio directory error",
     retryAria: "Retry loading studios",
     retryButton: "Retry",
-    emptyState: "No studios match your current search and filters.",
     emptyTitle: "No studios match these filters",
     emptyDescription:
       "Adjust the current search or filter combination to surface another studio profile.",
@@ -65,7 +63,6 @@ const studiosIndex = {
       loadMoreAria: "Load more studio results",
     },
     card: {
-      remoteBadge: "Remote",
       unknownType: "Unknown type",
       unknownSize: "Unknown size",
       unknownLocation: "Unknown location",
@@ -76,10 +73,8 @@ const studiosIndex = {
       viewAria: "View studio details for {studio}",
     },
     preview: {
-      dialogAria: "Studio quick preview dialog",
       closeButtonAria: "Close studio preview dialog",
       closeButton: "Close",
-      closeBackdropAria: "Close studio preview backdrop",
       closeBackdropButton: "Close",
       remoteYes: "Yes",
       remoteNo: "No",

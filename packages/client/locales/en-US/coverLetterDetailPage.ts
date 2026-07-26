@@ -47,7 +47,6 @@ const coverLetterDetailPage = {
     editor: {
       title: "Content Editor",
       info: "Edit the draft directly. Regenerate when you want a fresh version from the current company, role, and template inputs.",
-      placeholder: "Cover-letter content appears here...",
       aria: "Cover-letter content editor",
       characterCount: "{count} characters",
       clearButton: "Clear",
@@ -65,11 +64,6 @@ const coverLetterDetailPage = {
       confirmButton: "Regenerate",
       cancelButton: "Cancel",
     },
-    export: {
-      fallbackCompany: "company",
-      fallbackPosition: "position",
-      suffix: "cover-letter",
-    },
     toasts: {
       loadFailed: "Failed to load cover letter",
       companyMinLength: "Company name must be at least {count} characters",
@@ -77,9 +71,7 @@ const coverLetterDetailPage = {
       saved: "Cover letter saved",
       saveFailed: "Failed to save cover letter",
       regenerated: "Cover letter regenerated",
-      regenerateFailed: "Failed to regenerate cover letter",
       regenerateMissingContent: "Generation completed but returned no content",
-      exportEmpty: "Add content before exporting",
       exported: "Cover letter exported",
       exportFailed: "Failed to export cover letter",
     },

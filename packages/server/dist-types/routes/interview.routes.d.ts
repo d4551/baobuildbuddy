@@ -125,6 +125,9 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                                 feedback: string;
                                 strengths: string[];
                                 improvements: string[];
+                                source: "ai" | "heuristic" | "unknown";
+                                provider?: string | undefined;
+                                model?: string | undefined;
                             } | undefined;
                         }[];
                         finalAnalysis?: {
@@ -133,6 +136,13 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                             improvements: string[];
                             recommendations: string[];
                             feedback?: string | undefined;
+                            analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                            aiAverageScore?: number | null | undefined;
+                            provenanceCounts?: {
+                                ai: number;
+                                heuristic: number;
+                                unknown: number;
+                            } | undefined;
                         } | undefined;
                         interviewerPersona?: {
                             name: string;
@@ -248,6 +258,9 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                                 feedback: string;
                                 strengths: string[];
                                 improvements: string[];
+                                source: "ai" | "heuristic" | "unknown";
+                                provider?: string | undefined;
+                                model?: string | undefined;
                             } | undefined;
                         }[];
                         finalAnalysis?: {
@@ -256,6 +269,13 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                             improvements: string[];
                             recommendations: string[];
                             feedback?: string | undefined;
+                            analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                            aiAverageScore?: number | null | undefined;
+                            provenanceCounts?: {
+                                ai: number;
+                                heuristic: number;
+                                unknown: number;
+                            } | undefined;
                         } | undefined;
                         interviewerPersona?: {
                             name: string;
@@ -364,6 +384,9 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                                     feedback: string;
                                     strengths: string[];
                                     improvements: string[];
+                                    source: "ai" | "heuristic" | "unknown";
+                                    provider?: string | undefined;
+                                    model?: string | undefined;
                                 } | undefined;
                             }[];
                             finalAnalysis?: {
@@ -372,6 +395,13 @@ export declare const interviewRoutes: import("elysia/types").AddRoute<string, "l
                                 improvements: string[];
                                 recommendations: string[];
                                 feedback?: string | undefined;
+                                analysisSource?: "ai" | "heuristic" | "mixed" | "unknown" | undefined;
+                                aiAverageScore?: number | null | undefined;
+                                provenanceCounts?: {
+                                    ai: number;
+                                    heuristic: number;
+                                    unknown: number;
+                                } | undefined;
                             } | undefined;
                             interviewerPersona?: {
                                 name: string;

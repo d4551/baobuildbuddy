@@ -144,7 +144,15 @@ export const resumeDeleteResponseSchema = t.Object(
 export const resumeEnhanceResponseSchema = t.Object(
   {
     resume: resumeEntityResponseSchema,
-    suggestions: t.Array(t.Unknown()),
+    suggestions: t.Array(
+      t.Object(
+        {
+          text: t.String(),
+          section: t.String(),
+        },
+        { required: ["text", "section"] },
+      ),
+    ),
     section: t.String(),
   },
   { required: ["resume", "suggestions", "section"] },

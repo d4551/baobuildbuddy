@@ -1,17 +1,5 @@
 # Don't code? No problem! The easy install guide is available at [bao.builders](https://bao.builders/)
 
-
-
-```text ascii-box
-    ____              ____        _ _     _ ____            _     _
-   | __ )  __ _  ___ | __ ) _   _(_) | __| | __ ) _   _  __| | __| |_   _
-   |  _ \ / _` |/ _ \|  _ \| | | | | |/ _` |  _ \| | | |/ _` |/ _` | | | |
-   | |_) | (_| | (_) | |_) | |_| | | | (_| | |_) | |_| | (_| | (_| | |_| |
-   |____/ \__,_|\___/|____/ \__,_|_|_|\__,_|____/ \__,_|\__,_|\__,_|\__, |
-                                                                    |___/
-                        Local Operations Manual
-```
-
 # BaoBuildBuddy
 
 [![Bun](https://img.shields.io/badge/Bun-1.3.14-1f2937?logo=bun&logoColor=white)](https://bun.sh/)
@@ -40,17 +28,47 @@ No cloud TTS required. Cloud AI keys are optional — local-first is the default
 
 BaoBuildBuddy is a full-stack toolkit for game-industry job seekers. It aggregates job listings, helps you build resumes and cover letters, runs AI-powered mock interviews, automates job applications with browser RPA, and tracks your progress with a gamification system.
 
-```text ascii-box
-/------------------------------\
-|           BAO WORLD          |
-|     Press START to begin!    |
-|------------------------------|
-| 1) Prepare environment       |
-| 2) Configure services        |
-| 3) Start server and client   |
-| 4) Verify contracts          |
-| 5) Run your automation       |
-\------------------------------/
+```mermaid
+graph TD
+    subgraph Client["Nuxt 4 Client :3001"]
+        UI[daisyUI 5 Components]
+        I18N[i18n: en/es/fr/ja]
+        PWA[SSR + Hydration]
+    end
+
+    subgraph Server["Elysia API :3000"]
+        Routes[REST Routes]
+        AI[AI Service]
+        RPA[RPA Runner]
+        Speech[Speech TTS/STT]
+        Gamify[Gamification XP]
+    end
+
+    subgraph Data["Data Layer"]
+        DB[(SQLite bun:sqlite)]
+        ORM[Drizzle ORM]
+    end
+
+    subgraph External["External Services"]
+        Ollama[Ollama Local LLM]
+        Kokoro[Kokoro TTS]
+        Whisper[Whisper STT]
+        Playwright[Playwright RPA]
+        JobBoards[Job Boards API]
+    end
+
+    UI --> Routes
+    Routes --> ORM
+    ORM --> DB
+    Routes --> AI
+    Routes --> RPA
+    Routes --> Speech
+    Routes --> Gamify
+    AI --> Ollama
+    Speech --> Kokoro
+    Speech --> Whisper
+    RPA --> Playwright
+    RPA --> JobBoards
 ```
 
 ## Pick Your Guide

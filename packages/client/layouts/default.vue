@@ -13,7 +13,7 @@ import {
   SHELL_SKIP_LINK_CLASS,
 } from "~/constants/layout";
 
-const { initTheme, theme, setTheme } = useTheme();
+const { initTheme, setTheme } = useTheme();
 const { settings } = useSettings();
 const { t } = useI18n();
 const route = useRoute();
@@ -80,7 +80,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="drawer" :class="SHELL_DRAWER_CLASS" :data-theme="theme">
+  <div class="drawer" :class="SHELL_DRAWER_CLASS">
     <input
       id="app-drawer"
       type="checkbox"

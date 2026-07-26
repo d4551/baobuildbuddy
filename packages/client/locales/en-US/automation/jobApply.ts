@@ -30,7 +30,6 @@ const automationjobApply = {
       runButtonAria: "Run job application automation",
       submitErrorTitle: "Submission failed",
       submitErrorFallback: "Failed to start job application automation",
-      runStartedTitle: "Run started",
       runIdLabel: "Run ID: {id}",
       statusLabel: "Status: {status}",
       openRunDetailLink: "Open run detail",

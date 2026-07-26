@@ -1,3 +1,4 @@
+import { isUiSsotAuthority } from "./ui-ssot-authority";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { getLineFromOffset, shouldIgnorePath } from "./utils/validation-helpers";
 
@@ -25,7 +26,8 @@ const SSOT_ALLOWLIST_PATHS = new Set<string>([
   "packages/client/components/ui/PageHeaderBlock.vue",
 ]);
 
-const isSsotSource = (filePath: string): boolean => SSOT_ALLOWLIST_PATHS.has(filePath);
+const isSsotSource = (filePath: string): boolean =>
+  SSOT_ALLOWLIST_PATHS.has(filePath) || isUiSsotAuthority(filePath);
 
 const modalSizeLiteralPattern =
   /modal-box[^\n"']*\b(?:w-11\/12|max-w-(?:sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|screen-[a-z0-9-]+))\b/gu;

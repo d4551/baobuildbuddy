@@ -11,7 +11,13 @@ import {
   brandSettingsSchema,
   emailTransportSettingsSchema,
 } from "@bao/shared/schemas/settings.schema";
-import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
+import {
+  AI_ROUTING_PURPOSE_IDS,
+  type AIProviderType,
+  type AIRouting,
+  type AIRoutingPurpose,
+  type AIRoutingTarget,
+} from "@bao/shared/types/ai";
 import type {
   AutomationSettings,
   BrandSettings,
@@ -144,6 +150,43 @@ interface SettingsUpdateInput {
   emailTransportSettings?: Partial<EmailTransportSettings>;
 }
 
+/**
+ * `normalizeAIRouting` treats a per-purpose provider/model already present in the
+ * persisted routing as authoritative and only falls back to the top-level values.
+ * So a request carrying just `preferredModel` was silently discarded — the stored
+ * `aiRouting.chat.model` won — while the route still answered `{ success: true }`.
+ * Changing the model from the API or the settings UI was therefore impossible once a
+ * routing entry existed.
+ *
+ * When the caller sets the top-level fields and does NOT send an explicit
+ * `aiRouting`, they are stating intent for every purpose, so clear the persisted
+ * per-purpose overrides and let the top-level values apply.
+ */
+type PartialAIRouting = Partial<Record<AIRoutingPurpose, Partial<AIRoutingTarget> | undefined>>;
+
+const clearRoutingOverrides = (
+  routing: SettingsRow["aiRouting"],
+  clearProvider: boolean,
+  clearModel: boolean,
+): PartialAIRouting | null => {
+  if (!routing || (!clearProvider && !clearModel)) {
+    return routing;
+  }
+
+  const cleared: PartialAIRouting = {};
+  for (const purpose of AI_ROUTING_PURPOSE_IDS) {
+    const target = routing[purpose];
+    if (!target) {
+      continue;
+    }
+    cleared[purpose] = {
+      ...(clearProvider ? {} : { provider: target.provider }),
+      ...(clearModel ? {} : { model: target.model }),
+    };
+  }
+  return cleared;
+};
+
 const resolveRoutingUpdate = (existingRow: SettingsRow, body: SettingsUpdateInput) => {
   const nextPreferredProvider =
     body.preferredProvider ?? resolveKnownProvider(existingRow.preferredProvider);
@@ -157,11 +200,15 @@ const resolveRoutingUpdate = (existingRow: SettingsRow, body: SettingsUpdateInpu
     return;
   }
 
-  const aiRouting = normalizeAIRouting(
-    body.aiRouting ?? existingRow.aiRouting,
-    nextPreferredProvider,
-    nextPreferredModel,
-  );
+  const baseRouting =
+    body.aiRouting ??
+    clearRoutingOverrides(
+      existingRow.aiRouting,
+      body.preferredProvider !== undefined,
+      body.preferredModel !== undefined,
+    );
+
+  const aiRouting = normalizeAIRouting(baseRouting, nextPreferredProvider, nextPreferredModel);
 
   return {
     aiRouting,

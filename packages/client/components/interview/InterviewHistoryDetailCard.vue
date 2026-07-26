@@ -2,6 +2,7 @@
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import type { InterviewSession } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import InterviewScoreCard from "~/components/interview/InterviewScoreCard.vue";
 import CloseIcon from "~/components/ui/CloseIcon.vue";
 import UiRadialMeter from "~/components/ui/UiRadialMeter.vue";
 import {
@@ -117,6 +118,12 @@ const { t } = useI18n();
             </p>
             <p :class="[TYPOGRAPHY_SCALE_CLASS.sm]">{{ selectedSession.overallFeedback }}</p>
           </div>
+
+          <InterviewScoreCard
+            v-if="selectedSession.finalAnalysis"
+            :analysis="selectedSession.finalAnalysis"
+            :responses="selectedSession.responses"
+          />
         </div>
       </div>
     </UiGlassCard>

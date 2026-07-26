@@ -1,5 +1,5 @@
 import { type AppDataTheme } from "@bao/shared/constants/branding";
-import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
+import { type AIProviderType, type AIRouting } from "@bao/shared/types/ai";
 import type { AutomationSettings, BrandSettingsPatch, EmailTransportSettings, NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import type { settings as settingsTable } from "../db/schema/settings";
 type SettingsRow = typeof settingsTable.$inferSelect;

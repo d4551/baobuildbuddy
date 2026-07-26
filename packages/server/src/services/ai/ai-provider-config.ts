@@ -2,6 +2,7 @@ import {
   AI_PROVIDER_DEFAULT_ORDER,
   HUGGING_FACE_DEFAULT_MODEL,
   LOCAL_AI_AUTO_DETECT_MODEL,
+  LOCAL_AI_DEFAULT_ENDPOINT,
   normalizeAIRouting,
 } from "@bao/shared/constants/ai-provider";
 import type { AIProviderConfig, AIProviderType, AIRouting } from "@bao/shared/types/ai";
@@ -57,7 +58,12 @@ export const buildProviderConfigs = (settings?: AIServiceSettings): AIProviderCo
     {
       provider: "local",
       enabled: true,
-      ...(localModelEndpoint ? { baseUrl: localModelEndpoint } : {}),
+      // Always carry an endpoint. `canCreateLocalProvider` requires a parseable
+      // `baseUrl`, so omitting it when settings held none meant the local provider was
+      // never registered — despite `LocalProvider` defaulting to this very endpoint.
+      // Out of the box that made every AI feature fail with "All providers failed to
+      // generate" and degraded the OpenAI-compatible `/v1/models` list to static hints.
+      baseUrl: localModelEndpoint ?? LOCAL_AI_DEFAULT_ENDPOINT,
       ...(localModelName ? { model: localModelName } : {}),
     },
   ];

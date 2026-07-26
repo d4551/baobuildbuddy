@@ -253,19 +253,6 @@ export type RadiusToken = keyof typeof RADIUS_TOKEN_CLASS;
 export const CIRCULAR_BADGE_CLASS = RADIUS_TOKEN_CLASS.full;
 
 /**
- * Touch-safe daisyUI toggle.
- *
- * A bare `toggle` computes to 40×24 in every size variant, and the input is not
- * wrapped in a larger label hit area — so the real target was 24px tall, 20px under
- * the Apple HIG / WCAG 2.5.5 floor that `TOUCH_TARGET_MIN_CLASS` enforces everywhere
- * else. Measured in-browser at 44×80 with these utilities.
- */
-export const TOGGLE_CONTROL_CLASS = "toggle toggle-primary h-11 min-h-11 w-20";
-
-/** Square sibling of {@link TOGGLE_CONTROL_CLASS}; daisyUI checkboxes are equally undersized. */
-export const CHECKBOX_CONTROL_CLASS = "checkbox checkbox-primary h-11 min-h-11 w-11";
-
-/**
  * daisyUI 5 letter-avatar container. v4's bare `placeholder` modifier was renamed
  * to `avatar-placeholder`; the old name is dead CSS, so the grid/flex centering
  * never applies and the initial renders off-centre against the circle.

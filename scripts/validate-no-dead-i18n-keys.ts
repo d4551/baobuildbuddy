@@ -51,10 +51,34 @@ const isLocaleDefinition = (filePath: string): boolean =>
 const ALLOWLIST_PATH = "scripts/no-dead-i18n-keys-allowlist.json";
 
 /**
+ * Ratchet check for the real on-disk allowlist.
+ *
+ * Deliberately not part of `lintAllowlist`: that function lints entry *semantics*
+ * (expiry, staleness, duplicates) and is the unit-test seam, so tests inject
+ * synthetic allowlists. Enforcing a size cap there made every semantics test fail
+ * the moment the cap reached zero, which would have pressured the cap back up.
+ */
+const lintAllowlistSize = (allowlist: readonly AllowlistEntry[]): ValidationViolation[] =>
+  allowlist.length > MAX_ALLOWLIST_ENTRIES
+    ? [
+        allowlistViolation(
+          `Allowlist has ${allowlist.length} entries, above the ratchet cap of ${MAX_ALLOWLIST_ENTRIES}. Prune entries; the cap may only shrink.`,
+        ),
+      ]
+    : [];
+
+/**
  * Allowlist size ratchet: the entry count may never exceed this ceiling.
  * Lower the constant whenever entries are pruned; never raise it.
+ *
+ * Now zero. The allowlist previously held 247 entries sharing one boilerplate
+ * reason ("dynamic or deferred consumers"), which disabled this gate wholesale and
+ * concealed abandoned namespaces, superseded designs, and genuinely unwired UI —
+ * a resume preview that never rendered GitHub links, and unnamed loading regions.
+ * Every entry was resolved by wiring the consumer or deleting the copy, so any new
+ * entry must now justify itself against an empty baseline.
  */
-const MAX_ALLOWLIST_ENTRIES = 247;
+const MAX_ALLOWLIST_ENTRIES = 0;
 
 const EXPIRES_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 
@@ -207,13 +231,6 @@ const lintAllowlist = (
   today: string,
 ): ValidationViolation[] => {
   const violations: ValidationViolation[] = [];
-  if (allowlist.length > MAX_ALLOWLIST_ENTRIES) {
-    violations.push(
-      allowlistViolation(
-        `Allowlist has ${allowlist.length} entries, above the ratchet cap of ${MAX_ALLOWLIST_ENTRIES}. Prune entries; the cap may only shrink.`,
-      ),
-    );
-  }
   const seen = new Set<string>();
   for (const entry of allowlist) {
     if (seen.has(entry.key)) {
@@ -267,7 +284,7 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
   // path string; `t(`a.b.${x}`)` surfaces a dynamic prefix `a.b`.
   const corpus = consumerFiles.map((entry) => entry.content).join("\n");
   const today = new Date().toISOString().slice(0, 10);
-  return findDeadKeys(referenceKeys, corpus, allowlist, today);
+  return [...lintAllowlistSize(allowlist), ...findDeadKeys(referenceKeys, corpus, allowlist, today)];
 };
 
 /**

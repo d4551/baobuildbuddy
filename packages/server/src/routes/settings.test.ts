@@ -158,6 +158,41 @@ describe("settings write routes - preferences", () => {
     expect(updated.body.preferredProvider).toBe("openai");
     expect(updated.body.preferredModel).toBe("gpt-4o-mini");
   });
+
+  /**
+   * Runs after the test above has populated `aiRouting.chat.model`, which is the
+   * condition that triggered the bug: `normalizeAIRouting` treated the persisted
+   * per-purpose model as authoritative, so a top-level `preferredModel` was dropped
+   * while the route still answered `{ success: true }`. Only the aiRouting-supplied
+   * path was covered, so changing the model from the API or UI silently did nothing.
+   */
+  test("PUT settings applies a top-level preferredModel over persisted routing", async () => {
+    const res = await requestJson<{ success: boolean }>(app, "PUT", API_ENDPOINTS.settings, {
+      preferredProvider: "local",
+      preferredModel: "qwen2.5:0.5b",
+    });
+    expect(res.status).toBe(HTTP_STATUS_OK);
+    expect(res.body.success).toBe(true);
+
+    const updated = await getSettings();
+    expect(updated.body.preferredProvider).toBe("local");
+    expect(updated.body.preferredModel).toBe("qwen2.5:0.5b");
+    expect(updated.body.aiRouting?.chat).toEqual({
+      provider: "local",
+      model: "qwen2.5:0.5b",
+    });
+  });
+
+  test("PUT settings with only preferredModel keeps the existing provider", async () => {
+    const res = await requestJson<{ success: boolean }>(app, "PUT", API_ENDPOINTS.settings, {
+      preferredModel: "qwen2.5:1.5b",
+    });
+    expect(res.status).toBe(HTTP_STATUS_OK);
+
+    const updated = await getSettings();
+    expect(updated.body.preferredModel).toBe("qwen2.5:1.5b");
+    expect(updated.body.preferredProvider).toBe("local");
+  });
 });
 
 describe("settings write routes - api keys", () => {

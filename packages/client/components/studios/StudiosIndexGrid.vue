@@ -81,7 +81,7 @@ function studioLocation(location: string): string {
             <span :class="BADGE_PRIMARY_SM_CLASS">{{ studioTypeLabel(t, studio.type) }}</span>
             <span :class="BADGE_OUTLINE_SM_CLASS">{{ studioSizeLabel(t, studio.size) }}</span>
             <span v-if="studio.remoteWork" :class="BADGE_SUCCESS_SM_CLASS">
-              {{ t("studiosIndex.card.remoteBadge") }}
+              {{ t("common.workMode.remote") }}
             </span>
           </div>
 

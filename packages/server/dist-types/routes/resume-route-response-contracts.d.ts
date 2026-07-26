@@ -173,7 +173,10 @@ export declare const resumeEnhanceResponseSchema: import("typebox").TObject<{
         theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
         isDefault: import("typebox").TBoolean;
     }>;
-    suggestions: import("typebox").TArray<import("typebox").TUnknown>;
+    suggestions: import("typebox").TArray<import("typebox").TObject<{
+        text: import("typebox").TString;
+        section: import("typebox").TString;
+    }>>;
     section: import("typebox").TString;
 }>;
 export declare const resumeScoreResponseSchema: import("typebox").TObject<{
@@ -577,7 +580,10 @@ export declare const resumeEnhanceResponses: {
             theme: import("typebox").TUnion<[import("typebox").TLiteral<"light">, import("typebox").TLiteral<"dark">]>;
             isDefault: import("typebox").TBoolean;
         }>;
-        suggestions: import("typebox").TArray<import("typebox").TUnknown>;
+        suggestions: import("typebox").TArray<import("typebox").TObject<{
+            text: import("typebox").TString;
+            section: import("typebox").TString;
+        }>>;
         section: import("typebox").TString;
     }>;
     readonly 404: import("typebox").TObject<{

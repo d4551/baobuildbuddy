@@ -15,6 +15,7 @@ import type {
   InterviewResponse,
 } from "@bao/shared/types/interview";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { createServerLogger } from "../utils/logger";
 import { withAiOperationTimeout } from "./interview-service-ai";
@@ -34,12 +35,12 @@ import { safeParseJSON } from "./interview-service-value-parsers";
 
 const interviewServiceQuestionsLogger = createServerLogger("interview-service-questions");
 
-const mapQuestionSetToConfig = (raw: unknown): InterviewQuestion[] => {
+const mapQuestionSetToConfig = (raw: string): InterviewQuestion[] => {
   const parsed = safeParseJSON(raw);
   return normalizeQuestions(Array.isArray(parsed) ? parsed : []);
 };
 
-const normalizeSingleQuestion = (raw: unknown): InterviewQuestion | null =>
+const normalizeSingleQuestion = (raw: JsonValue | null): InterviewQuestion | null =>
   normalizeQuestions([raw])[0] ?? null;
 
 const filterGeneratedQuestions = (
@@ -58,14 +59,6 @@ const filterGeneratedQuestions = (
     }
     return true;
   });
-
-const createTimedOutQuestionResponse = () => ({
-  error: API_ERROR_AI_OPERATION_TIMEOUT,
-  content: "",
-  provider: "none",
-  id: "",
-  timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-});
 
 const buildGeneratedQuestionSlice = (
   parsedQuestions: InterviewQuestion[],
@@ -89,15 +82,17 @@ const tryGenerateQuestions = async (input: {
   config: InterviewConfig;
   candidateContext: CandidateInterviewContext;
 }): Promise<InterviewQuestion[]> => {
-  const response =
-    (await withAiOperationTimeout(() =>
-      input.aiService.generate(input.prompt, {
-        purpose: "interviewQuestions",
-        temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
-        maxTokens: AI_MAX_TOKENS_ANALYSIS,
-      }),
-    )) ?? createTimedOutQuestionResponse();
+  const response = await withAiOperationTimeout(() =>
+    input.aiService.generate(input.prompt, {
+      purpose: "interviewQuestions",
+      temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW_QUESTIONS,
+      maxTokens: AI_MAX_TOKENS_ANALYSIS,
+    }),
+  );
 
+  if (!response) {
+    throw new Error(API_ERROR_AI_OPERATION_TIMEOUT);
+  }
   if (response.error) {
     throw new Error(response.error);
   }

@@ -1,0 +1,59 @@
+/*
+ * App shell chrome (§5). Navbar elevation, sidebar active state, and the
+ * coarse-pointer control floor. Values resolve through `tokens.css`.
+ */
+
+/* Scroll-aware navbar elevation (§5.1, §7.5). Content passing beneath the
+ * sticky navbar increases tint + shadow for depth consistency. */
+.navbar.glass-subtle[data-scrolled] {
+  border-bottom-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-medium);
+}
+@supports ((backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0))) {
+  .navbar.glass-subtle[data-scrolled] {
+    background: var(--glass-bg-standard);
+    backdrop-filter: blur(var(--glass-blur-standard)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur-standard)) saturate(var(--glass-saturation));
+  }
+}
+
+/*
+ * Active sidebar indicator — subtle primary-tinted pill (§5.2).
+ *
+ * daisyUI's `menu-active` paints a solid `--color-neutral` slab plus a matching
+ * drop shadow, which reads as an opaque dark block punched through the glass rail.
+ * These rules are deliberately unlayered: unlayered declarations outrank every
+ * `@layer daisyui` rule, so the slab is replaced by the designed pill with no
+ * priority flag and no specificity escalation.
+ */
+.sidebar-active-indicator {
+  position: relative;
+}
+.sidebar-active-indicator::before {
+  content: "";
+  position: absolute;
+  inset: var(--nav-active-inset);
+  border-radius: var(--radius-control);
+  background: var(--nav-active-tint);
+  transition: opacity var(--motion-fast) var(--ease-response);
+  opacity: 0;
+}
+.sidebar-active-indicator.menu-active {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: var(--color-primary);
+}
+.sidebar-active-indicator.menu-active::before {
+  opacity: 1;
+}
+
+/* Touch-optimized hit targets for coarse pointers (§8.2). */
+@media (pointer: coarse) {
+  .btn,
+  .btn-sm,
+  .navbar .btn-ghost.btn-circle {
+    min-block-size: var(--touch-target-min);
+    min-inline-size: var(--touch-target-min);
+  }
+}

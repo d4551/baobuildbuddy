@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "assembledAt": "2026-07-25T10:29:59.856Z",
+  "assembledAt": "2026-07-26T15:31:50.587Z",
   "sourceRoot": ".desktop-release-artifacts",
   "targets": {
     "macos": {
@@ -17,7 +17,7 @@
         "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin",
         "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
       ],
-      "builtAt": "2026-04-01T14:54:39.663Z",
+      "builtAt": "2026-07-26T15:31:50.089Z",
       "ci": {
         "workflow": null,
         "runId": null,

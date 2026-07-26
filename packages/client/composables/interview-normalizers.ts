@@ -1,5 +1,7 @@
 import { INTERVIEW_DEFAULT_DURATION_MINUTES } from "@bao/shared/constants/interview";
 import type {
+  InterviewAnalysisAggregateSource,
+  InterviewAnalysisProvenanceCounts,
   InterviewCandidateContext,
   InterviewConfig,
   InterviewConversationStyle,
@@ -8,6 +10,7 @@ import type {
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
 import { resolveInterviewAnalysisSource } from "@bao/shared/utils/interview-analysis-provenance";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { normalizeScrapePersonaEnrichment } from "@bao/shared/utils/scrape-enrichment";
 import {
   asBoolean,
@@ -158,6 +161,8 @@ const toResponseAnalysis = (
     // Sessions stored before provenance tracking carry no marker, so the
     // analysis is reported as "unknown" rather than claimed as AI-generated.
     source: resolveInterviewAnalysisSource(value.source),
+    ...(asString(value.provider) === undefined ? {} : { provider: asString(value.provider) }),
+    ...(asString(value.model) === undefined ? {} : { model: asString(value.model) }),
   };
 };
 
@@ -263,11 +268,36 @@ const toFinalAnalysis = (value: unknown): InterviewSession["finalAnalysis"] | un
     strengths: asStringArray(value.strengths),
     improvements: asStringArray(value.improvements),
     recommendations: asStringArray(value.recommendations),
+    // Provenance drives the "assessed by" attribution the score card renders;
+    // dropping it here would leave the UI unable to distinguish AI from heuristic.
+    analysisSource: toAnalysisAggregateSource(value.analysisSource),
   };
   if (feedback !== undefined) {
     analysis.feedback = feedback;
   }
+  const aiAverageScore = asNumber(value.aiAverageScore);
+  analysis.aiAverageScore = aiAverageScore === undefined ? null : aiAverageScore;
+  const counts = toProvenanceCounts(value.provenanceCounts);
+  if (counts) {
+    analysis.provenanceCounts = counts;
+  }
   return analysis;
+};
+
+const toAnalysisAggregateSource = (value: JsonValue | undefined): InterviewAnalysisAggregateSource =>
+  value === "ai" || value === "heuristic" || value === "mixed" ? value : "unknown";
+
+const toProvenanceCounts = (value: JsonValue | undefined): InterviewAnalysisProvenanceCounts | undefined => {
+  if (!isRecord(value)) {
+    return;
+  }
+  const aiCount = asNumber(value.ai);
+  const heuristicCount = asNumber(value.heuristic);
+  const unknownCount = asNumber(value.unknown);
+  if (aiCount === undefined || heuristicCount === undefined || unknownCount === undefined) {
+    return;
+  }
+  return { ai: aiCount, heuristic: heuristicCount, unknown: unknownCount };
 };
 
 const toInterviewerPersona = (

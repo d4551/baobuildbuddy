@@ -1,5 +1,5 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonValue, safeParseJson } from "@bao/shared/utils/json";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
@@ -58,10 +58,6 @@ export function parseStringArray(value: unknown): string[] {
 }
 
 export function extractJSON(text: string): string {
-  if (typeof text !== "string") {
-    return text;
-  }
-
   const codeFenceMatch = text.match(JSON_CODE_FENCE_PATTERN);
   if (codeFenceMatch?.[1]) {
     return codeFenceMatch[1].trim();
@@ -80,9 +76,10 @@ export function extractJSON(text: string): string {
   return text.trim();
 }
 
-export function safeParseJSON(payload: unknown): unknown {
-  if (typeof payload !== "string") {
-    return null;
-  }
+/**
+ * Parses a model-authored payload (optionally fenced) into a typed JSON value.
+ * Returns null when the payload is not parseable JSON.
+ */
+export function safeParseJSON(payload: string): JsonValue | null {
   return safeParseJson(extractJSON(payload));
 }

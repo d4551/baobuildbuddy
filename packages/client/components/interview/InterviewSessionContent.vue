@@ -6,6 +6,7 @@ import type {
   InterviewTargetJob,
 } from "@bao/shared/types/interview";
 import { useI18n } from "vue-i18n";
+import InterviewScoreCard from "~/components/interview/InterviewScoreCard.vue";
 import SectionGrid from "~/components/ui/SectionGrid.vue";
 import {
   BTN_VARIANT_CLASS,
@@ -87,7 +88,7 @@ const { t } = useI18n();
         <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="SVG_STROKE_WIDTH_DEFAULT" d="m5 13 4 4L19 7" />
       </svg>
       <span>{{ t("interviewSession.toasts.completed") }}</span>
-      <button 
+      <button
         type="button"
         :class="[TOUCH_TARGET_MIN_CLASS, 'btn btn-success btn-sm']"
         :aria-label="t('interviewHistory.viewSessionAria', { id: sessionId })"
@@ -96,6 +97,12 @@ const { t } = useI18n();
         {{ t("interviewHistory.viewButton") }}
       </button>
     </div>
+
+    <InterviewScoreCard
+      v-if="completionState === 'completed' && activeSession.finalAnalysis"
+      :analysis="activeSession.finalAnalysis"
+      :responses="activeSession.responses"
+    />
 
     <SectionGrid grid-token="twoColumnWide" extra-class="items-start">
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">

@@ -2,7 +2,6 @@ import {
   AI_DEFAULT_TEMPERATURE_INTERVIEW,
   AI_MAX_TOKENS_QUESTION,
 } from "@bao/shared/constants/ai-generation";
-import { API_ERROR_AI_OPERATION_TIMEOUT } from "@bao/shared/constants/api-errors";
 import { COUNT_FIVE } from "@bao/shared/constants/numeric";
 import {
   SCORE_PASS_THRESHOLD,
@@ -121,7 +120,7 @@ Return strict JSON only:
 `;
 }
 
-function normalizeFinalFromAI(raw: unknown): InterviewAnalysis | null {
+function normalizeFinalFromAI(raw: string): InterviewAnalysis | null {
   const parsed = safeParseJSON(raw) ?? {
     overallScore: Number.NaN,
     strengths: [],
@@ -181,21 +180,15 @@ export async function generateFinalAnalysis(
     return withAnalysisProvenance(calculateDefaultAnalysis(session.responses), session.responses);
   }
 
-  const response = (await withAiOperationTimeout(() =>
+  const response = await withAiOperationTimeout(() =>
     aiServiceResult.value.generate(prompt, {
       purpose: "interviewFeedback",
       temperature: AI_DEFAULT_TEMPERATURE_INTERVIEW,
       maxTokens: AI_MAX_TOKENS_QUESTION,
     }),
-  )) ?? {
-    error: API_ERROR_AI_OPERATION_TIMEOUT,
-    content: "",
-    provider: "none",
-    id: "",
-    timing: { startedAt: 0, completedAt: 0, totalTime: 0 },
-  };
+  );
 
-  if (response.error) {
+  if (!response || response.error) {
     return withAnalysisProvenance(calculateDefaultAnalysis(session.responses), session.responses);
   }
 

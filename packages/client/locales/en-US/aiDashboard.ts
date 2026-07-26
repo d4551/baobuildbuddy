@@ -31,7 +31,6 @@ const aiDashboard = {
       refreshAria: "Refresh AI provider dashboard data",
     },
     providerCard: {
-      configuredBadge: "Configured",
       notConfiguredBadge: "Not configured",
       testButton: "Test Connection",
       testAria: "Test {provider} connectivity",
@@ -68,8 +67,6 @@ const aiDashboard = {
     errors: {
       usageLoadFailed: "Failed to load AI usage metrics.",
       modelsLoadFailed: "Failed to load AI model catalog.",
-      localConnectivityFailed: "Failed to verify local provider connectivity.",
-      providerTestFailed: "Provider test request failed.",
       preferenceSaveFailed: "Failed to save AI preference.",
     },
     toasts: {

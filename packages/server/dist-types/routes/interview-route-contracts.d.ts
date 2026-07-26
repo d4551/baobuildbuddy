@@ -179,6 +179,9 @@ export declare const interviewSessionResponseSchema: import("typebox").TObject<{
             feedback: import("typebox").TString;
             strengths: import("typebox").TArray<import("typebox").TString>;
             improvements: import("typebox").TArray<import("typebox").TString>;
+            source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+            model: import("typebox").TOptional<import("typebox").TString>;
         }>>;
     }>>;
     finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
@@ -187,6 +190,13 @@ export declare const interviewSessionResponseSchema: import("typebox").TObject<{
         improvements: import("typebox").TArray<import("typebox").TString>;
         recommendations: import("typebox").TArray<import("typebox").TString>;
         feedback: import("typebox").TOptional<import("typebox").TString>;
+        analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+        aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+        provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+            ai: import("typebox").TNumber;
+            heuristic: import("typebox").TNumber;
+            unknown: import("typebox").TNumber;
+        }>>;
     }>>;
     interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
         name: import("typebox").TString;
@@ -290,6 +300,9 @@ export declare const createInterviewSessionResponses: {
                 feedback: import("typebox").TString;
                 strengths: import("typebox").TArray<import("typebox").TString>;
                 improvements: import("typebox").TArray<import("typebox").TString>;
+                source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+                model: import("typebox").TOptional<import("typebox").TString>;
             }>>;
         }>>;
         finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
@@ -298,6 +311,13 @@ export declare const createInterviewSessionResponses: {
             improvements: import("typebox").TArray<import("typebox").TString>;
             recommendations: import("typebox").TArray<import("typebox").TString>;
             feedback: import("typebox").TOptional<import("typebox").TString>;
+            analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+            aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+            provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+                ai: import("typebox").TNumber;
+                heuristic: import("typebox").TNumber;
+                unknown: import("typebox").TNumber;
+            }>>;
         }>>;
         interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
             name: import("typebox").TString;
@@ -391,6 +411,9 @@ export declare const interviewSessionsListResponses: {
                 feedback: import("typebox").TString;
                 strengths: import("typebox").TArray<import("typebox").TString>;
                 improvements: import("typebox").TArray<import("typebox").TString>;
+                source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+                model: import("typebox").TOptional<import("typebox").TString>;
             }>>;
         }>>;
         finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
@@ -399,6 +422,13 @@ export declare const interviewSessionsListResponses: {
             improvements: import("typebox").TArray<import("typebox").TString>;
             recommendations: import("typebox").TArray<import("typebox").TString>;
             feedback: import("typebox").TOptional<import("typebox").TString>;
+            analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+            aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+            provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+                ai: import("typebox").TNumber;
+                heuristic: import("typebox").TNumber;
+                unknown: import("typebox").TNumber;
+            }>>;
         }>>;
         interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
             name: import("typebox").TString;
@@ -492,6 +522,9 @@ export declare const interviewSessionResponses: {
                 feedback: import("typebox").TString;
                 strengths: import("typebox").TArray<import("typebox").TString>;
                 improvements: import("typebox").TArray<import("typebox").TString>;
+                source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+                model: import("typebox").TOptional<import("typebox").TString>;
             }>>;
         }>>;
         finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
@@ -500,6 +533,13 @@ export declare const interviewSessionResponses: {
             improvements: import("typebox").TArray<import("typebox").TString>;
             recommendations: import("typebox").TArray<import("typebox").TString>;
             feedback: import("typebox").TOptional<import("typebox").TString>;
+            analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+            aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+            provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+                ai: import("typebox").TNumber;
+                heuristic: import("typebox").TNumber;
+                unknown: import("typebox").TNumber;
+            }>>;
         }>>;
         interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
             name: import("typebox").TString;

@@ -31,4 +31,4 @@ export declare const aiPreferenceSchema: import("typebox").TRecord<"^.*$", impor
 export type ChatContextPayload = Static<typeof chatContextSchema>;
 export declare function normalizeClientChatContext(context?: ChatContextPayload): AIChatContext | null;
 export declare function serializeClientChatContext(context: AIChatContext): string;
-export declare function composeChatSystemPrompt(basePrompt: string, contextualPrompt: string, clientContext: AIChatContext | null): string;
+export declare function composeChatSystemPrompt(basePrompt: string, contextualPrompt: string, clientContext: AIChatContext | null, entityEnrichment?: string): string;
