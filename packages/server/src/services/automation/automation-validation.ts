@@ -131,6 +131,11 @@ export function sanitizeCustomAnswers(
  * range boundaries are testable without mutating process environment.
  */
 export function isPrivateOrLoopbackAutomationHost(hostname: string): boolean {
+  // Fail closed: an empty host is never a legitimate automation target.
+  if (!hostname) {
+    return true;
+  }
+
   if (hostname === LOOPBACK_HOST_IPV4 || hostname === DEFAULT_HOST) {
     return true;
   }

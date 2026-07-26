@@ -14,7 +14,7 @@ case "${PLAYWRIGHT_BROWSERS_PATH:-}" in *cursor-sandbox-cache*) unset PLAYWRIGHT
 
 PORT=3100 bun run packages/server/dist/index.js >> "$LOG" 2>&1 &
 SERVER_PID=$!
-PORT=3101 NUXT_PUBLIC_API_BASE=http://127.0.0.1:3100 bun packages/client/.output/server/index.mjs >> "$LOG" 2>&1 &
+PORT=3001 NUXT_PUBLIC_API_BASE=http://127.0.0.1:3100 bun packages/client/.output/server/index.mjs >> "$LOG" 2>&1 &
 CLIENT_PID=$!
 
 cleanup() {
@@ -29,7 +29,7 @@ trap cleanup EXIT INT TERM
 
 ready=0
 for _ in $(seq 1 45); do
-  if curl -sf http://127.0.0.1:3101/ >/dev/null 2>&1 && curl -sf http://127.0.0.1:3100/api/health >/dev/null 2>&1; then
+  if curl -sf http://127.0.0.1:3001/ >/dev/null 2>&1 && curl -sf http://127.0.0.1:3100/api/health >/dev/null 2>&1; then
     ready=1; break
   fi
   sleep 2
@@ -37,9 +37,9 @@ done
 if [ "$ready" != "1" ]; then
   echo "STACK FAILED TO BOOT"; tail -20 "$LOG"; exit 1
 fi
-echo "STACK UP (server:3100 client:3101)"
+echo "STACK UP (server:3100 client:3001)"
 
-PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3101 bun run "$PROOF_SCRIPT"
+PAGE_PROOF_CLIENT_BASE=http://127.0.0.1:3001 bun run "$PROOF_SCRIPT"
 PROOF_EXIT=$?
 echo "PROOF_EXIT:$PROOF_EXIT"
 exit "$PROOF_EXIT"

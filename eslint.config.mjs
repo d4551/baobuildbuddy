@@ -16,6 +16,9 @@ const ignoredPaths = [
   "**/.output/**",
   "**/.venv/**",
   ".tmp*/**",
+  // Audit/hardening scratch output, not project source and outside every tsconfig.
+  ".audit/**",
+  ".hardening/**",
   "packages/client/**",
   "packages/desktop/**",
 ];

@@ -1,0 +1,22 @@
+{
+  "CLIENT_BASE": "http://127.0.0.1:3001",
+  "viewports": [
+    "mobile",
+    "tablet",
+    "desktop"
+  ],
+  "findings": [
+    {
+      "viewport": "mobile",
+      "route": "/portfolio/preview",
+      "action": "click-Export_DOCX",
+      "severity": "warn",
+      "detail": "control not found",
+      "screenshot": null
+    }
+  ],
+  "errorCount": 0,
+  "ledgerOk": 79,
+  "ledgerTotal": 81,
+  "ledgerFailures": 2
+}

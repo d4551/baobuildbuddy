@@ -1,0 +1,1055 @@
+[
+  {
+    "viewport": "mobile",
+    "route": "/",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/jobs",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_jobs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/resume",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_resume.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/resume/build",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_resume_build.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/resume/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_resume_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/cover-letter",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_cover-letter.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/portfolio",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_portfolio.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/portfolio/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_portfolio_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "FAIL: console=2 page=0 findings=0"
+    },
+    "ok": false
+  },
+  {
+    "viewport": "mobile",
+    "route": "/interview",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_interview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/interview/history",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_interview_history.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/interview/session",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_interview_session.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/skills",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_skills.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/skills/pathways",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_skills_pathways.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/studios",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_studios.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/studios/analytics",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_studios_analytics.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/ai",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_ai.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/ai/dashboard",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_ai_dashboard.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/ai/chat",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_ai_chat.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/automation",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_automation.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/automation/job-apply",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_automation_job-apply.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/automation/scraper",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_automation_scraper.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/automation/email",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_automation_email.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/automation/runs",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_automation_runs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/gamification",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_gamification.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/docs/api",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_docs_api.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/settings",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_settings.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "mobile",
+    "route": "/setup",
+    "screenshot": "artifacts/baseline/browser-burndown/mobile/_setup.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/jobs",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_jobs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/resume",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_resume.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/resume/build",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_resume_build.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/resume/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_resume_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/cover-letter",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_cover-letter.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/portfolio",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_portfolio.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/portfolio/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_portfolio_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/interview",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_interview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/interview/history",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_interview_history.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/interview/session",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_interview_session.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/skills",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_skills.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/skills/pathways",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_skills_pathways.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/studios",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_studios.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/studios/analytics",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_studios_analytics.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/ai",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_ai.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/ai/dashboard",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_ai_dashboard.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/ai/chat",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_ai_chat.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/automation",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_automation.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/automation/job-apply",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_automation_job-apply.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/automation/scraper",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_automation_scraper.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/automation/email",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_automation_email.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/automation/runs",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_automation_runs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 3",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/gamification",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_gamification.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/docs/api",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_docs_api.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/settings",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_settings.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "tablet",
+    "route": "/setup",
+    "screenshot": "artifacts/baseline/browser-burndown/tablet/_setup.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/jobs",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_jobs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/resume",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_resume.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/resume/build",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_resume_build.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/resume/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_resume_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/cover-letter",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_cover-letter.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/portfolio",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_portfolio.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/portfolio/preview",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_portfolio_preview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "FAIL: console=2 page=0 findings=0"
+    },
+    "ok": false
+  },
+  {
+    "viewport": "desktop",
+    "route": "/interview",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_interview.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/interview/history",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_interview_history.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/interview/session",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_interview_session.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/skills",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_skills.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/skills/pathways",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_skills_pathways.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/studios",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_studios.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/studios/analytics",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_studios_analytics.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/ai",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_ai.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/ai/dashboard",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_ai_dashboard.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/ai/chat",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_ai_chat.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/automation",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_automation.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/automation/job-apply",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_automation_job-apply.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/automation/scraper",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_automation_scraper.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/automation/email",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_automation_email.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 2",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/automation/runs",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_automation_runs.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 3",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/gamification",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_gamification.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/docs/api",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_docs_api.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/settings",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_settings.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 4",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  },
+  {
+    "viewport": "desktop",
+    "route": "/setup",
+    "screenshot": "artifacts/baseline/browser-burndown/desktop/_setup.png",
+    "fiveQ": {
+      "shouldBeHere": "landmarks ok",
+      "ssotUx": "layout ok",
+      "interactions": "clicked 1",
+      "glassDry": "no raw glass; chrome copy unique",
+      "logs": "0 console/page errors"
+    },
+    "ok": true
+  }
+]

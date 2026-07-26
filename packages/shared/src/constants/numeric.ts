@@ -17,7 +17,6 @@ export const COUNT_SIX = 6;
 export const COUNT_SEVEN = 7;
 export const COUNT_EIGHT = 8;
 export const COUNT_NINE = 9;
-export const COUNT_TEN = 10;
 export const COUNT_TWELVE = 12;
 export const COUNT_THIRTEEN = 13;
 export const COUNT_FOURTEEN = 14;
@@ -54,6 +53,8 @@ export const COUNT_TWO_THIRTY_FIVE = 235;
 export const COUNT_TWO_FORTY = 240;
 export const COUNT_TWO_FIFTY = 250;
 export const COUNT_TWO_FIFTY_ONE = 251;
+/** Maximum value of an IPv4 octet. */
+export const COUNT_TWO_FIFTY_FIVE = 255;
 export const COUNT_THREE_HUNDRED = 300;
 export const COUNT_THREE_THIRTY_FOUR = 334;
 export const COUNT_THREE_FIFTY_FOUR = 354;

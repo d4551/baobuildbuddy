@@ -10,6 +10,8 @@
     "includes": [
       "**",
       "!**/node_modules",
+      "!.audit",
+      "!.hardening",
       "!**/dist",
       "!**/dist-types",
       "!**/.nuxt",
