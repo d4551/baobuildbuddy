@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_JSON="$REPO_ROOT/package.json"
-DEFAULT_BUN_VERSION="1.3.11"
+DEFAULT_BUN_VERSION="1.3.14"
 
 if [[ ! -f "$PACKAGE_JSON" ]]; then
   printf '%s\n' "$DEFAULT_BUN_VERSION"

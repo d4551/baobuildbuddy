@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, mock, spyOn, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, mock, spyOn, test } from "bun:test";
 import { Database } from "bun:sqlite";
 import { API_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import {
@@ -59,11 +59,30 @@ const sqlite = new Database(":memory:");
 sqlite.exec("PRAGMA foreign_keys = ON;");
 const db = drizzle({ client: sqlite, schema });
 
+// Destructured before the mock is installed so the real bindings are copied
+// rather than read back through the (by then replaced) namespace.
+const {
+  db: realDb,
+  sqlite: realSqlite,
+  HEALTHCHECK_PROBE_SQL: realHealthcheckProbeSql,
+} = await import("../db/client");
+
 await mock.module("../db/client", () => ({
   db,
   sqlite,
   HEALTHCHECK_PROBE_SQL: "SELECT 1",
 }));
+
+// `mock.module` swaps the module for the whole test process and `mock.restore()`
+// does not undo it, so without this every later file that imports `db/client`
+// would silently run against this file's in-memory database.
+afterAll(async () => {
+  await mock.module("../db/client", () => ({
+    db: realDb,
+    sqlite: realSqlite,
+    HEALTHCHECK_PROBE_SQL: realHealthcheckProbeSql,
+  }));
+});
 
 let app: { handle: (request: Request) => Response | Promise<Response> };
 
@@ -109,7 +128,6 @@ describe("speech transcribe request validation", () => {
     expect(res.status).toBe(HTTP_STATUS_BAD_REQUEST);
     expect(res.body.error).toContain("empty or invalid");
   });
-
 });
 
 describe("speech transcribe provider behaviour", () => {
@@ -192,7 +210,6 @@ describe("speech synthesize request validation", () => {
     });
     expect(res.status).toBe(HTTP_STATUS_UNPROCESSABLE_ENTITY);
   });
-
 });
 
 describe("speech synthesize provider behaviour", () => {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import type * as StatisticsServiceModule from "./statistics-service";
 
@@ -25,6 +25,10 @@ const logger = {
 };
 
 const realDbClient = await import("../db/client");
+// Captured (and destructured, so the binding is copied) before the mock is
+// installed, so `afterAll` can hand the real module back to the files that run
+// after this one.
+const { createServerLogger: realCreateServerLogger } = await import("../utils/logger");
 // Bound so restoring it cannot detach `this` from the Drizzle client.
 const originalSelect = realDbClient.db.select.bind(realDbClient.db);
 
@@ -51,6 +55,15 @@ beforeEach(() => {
 
 afterEach(() => {
   realDbClient.db.select = originalSelect;
+});
+
+// `mock.module` replaces the module for the whole test process, not just this
+// file, and `mock.restore()` does not undo it. Left in place it silently neutered
+// every later logger assertion — the cover-letter secret-redaction guard among
+// them, which then passed on an empty log stream. Re-mocking with the captured
+// real namespace hands the real logger back to the files that run next.
+afterAll(async () => {
+  await mock.module("../utils/logger", () => ({ createServerLogger: realCreateServerLogger }));
 });
 
 describe("statistics service degradation logging", () => {
