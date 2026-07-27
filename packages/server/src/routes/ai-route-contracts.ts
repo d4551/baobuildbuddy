@@ -202,11 +202,8 @@ export const automationActionResponseSchema = t.Object({
   message: t.String(),
 });
 
-// Concrete body schemas above are the SSOT for AI payloads. Response maps stay
-// open until route handlers return SelectiveStatus-compatible status/body branches
-// instead of dynamic `status(result.status, result.body)` helper envelopes.
 export const chatRouteResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: chatRouteResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
@@ -219,14 +216,14 @@ export const analyzeResumeResponses = {
 } as const;
 
 export const aiGenerateCoverLetterResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: generateCoverLetterResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;
 
 export const matchJobsResponses = {
-  [HTTP_STATUS_OK]: t.Unknown(),
+  [HTTP_STATUS_OK]: matchJobsResponseSchema,
   [HTTP_STATUS_INTERNAL_SERVER_ERROR]: simpleErrorResponseSchema,
   [HTTP_STATUS_TOO_MANY_REQUESTS]: simpleErrorResponseSchema,
 } as const;

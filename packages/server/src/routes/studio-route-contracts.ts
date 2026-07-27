@@ -14,6 +14,7 @@ import {
 } from "@bao/shared/constants/schema-limits";
 import { t } from "elysia";
 import type { Static } from "typebox";
+import { scrapePersonaEnrichmentResponseSchema } from "./jobs-route-contracts";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
 export const studioListQuerySchema = t.Object({
@@ -94,10 +95,10 @@ export const studioEntityResponseSchema = t.Object({
   description: t.Union([t.String(), t.Null()]),
   games: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
   technologies: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
-  culture: t.Optional(t.Union([t.Unknown(), t.Null()])),
+  culture: t.Optional(t.Union([t.Record(t.String(), t.Unknown()), t.Null()])),
   interviewStyle: t.Optional(t.Union([t.String(), t.Null()])),
   remoteWork: t.Optional(t.Union([t.Boolean(), t.Null()])),
-  enrichment: t.Optional(t.Union([t.Unknown(), t.Null()])),
+  enrichment: t.Optional(t.Union([scrapePersonaEnrichmentResponseSchema, t.Null()])),
   createdAt: t.Optional(t.String()),
   updatedAt: t.Optional(t.String()),
 });

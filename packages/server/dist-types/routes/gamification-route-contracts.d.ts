@@ -23,7 +23,32 @@ export declare const gamificationProgressResponseSchema: import("typebox").TObje
     longestStreak: import("typebox").TNumber;
     currentStreak: import("typebox").TNumber;
     lastActiveDate: import("typebox").TOptional<import("typebox").TString>;
-    stats: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+    stats: import("typebox").TObject<{
+        profileComplete: import("typebox").TOptional<import("typebox").TNumber>;
+        skillsMapped: import("typebox").TOptional<import("typebox").TNumber>;
+        portfolioItems: import("typebox").TOptional<import("typebox").TNumber>;
+        jobApplications: import("typebox").TOptional<import("typebox").TNumber>;
+        chatSessions: import("typebox").TOptional<import("typebox").TNumber>;
+        resumesGenerated: import("typebox").TOptional<import("typebox").TNumber>;
+        coverLettersGenerated: import("typebox").TOptional<import("typebox").TNumber>;
+        savedJobs: import("typebox").TOptional<import("typebox").TNumber>;
+        jobsSaved: import("typebox").TOptional<import("typebox").TNumber>;
+        interviewScore: import("typebox").TOptional<import("typebox").TNumber>;
+        dataExported: import("typebox").TOptional<import("typebox").TNumber>;
+        earlyLogin: import("typebox").TOptional<import("typebox").TNumber>;
+        totalTimeSpent: import("typebox").TOptional<import("typebox").TNumber>;
+        featuresUsed: import("typebox").TOptional<import("typebox").TNumber>;
+        dailyStreak: import("typebox").TOptional<import("typebox").TNumber>;
+        weeklyProgress: import("typebox").TOptional<import("typebox").TNumber>;
+        interviewsCompleted: import("typebox").TOptional<import("typebox").TNumber>;
+        studiosExplored: import("typebox").TOptional<import("typebox").TNumber>;
+        actionHistory: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+            action: import("typebox").TString;
+            xpGained: import("typebox").TNumber;
+            multiplier: import("typebox").TOptional<import("typebox").TNumber>;
+            timestamp: import("typebox").TString;
+        }>>>;
+    }>;
     xpForNextLevel: import("typebox").TOptional<import("typebox").TNumber>;
     streak: import("typebox").TOptional<import("typebox").TNumber>;
 }>;
@@ -134,7 +159,32 @@ export declare const gamificationProgressResponses: {
         longestStreak: import("typebox").TNumber;
         currentStreak: import("typebox").TNumber;
         lastActiveDate: import("typebox").TOptional<import("typebox").TString>;
-        stats: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+        stats: import("typebox").TObject<{
+            profileComplete: import("typebox").TOptional<import("typebox").TNumber>;
+            skillsMapped: import("typebox").TOptional<import("typebox").TNumber>;
+            portfolioItems: import("typebox").TOptional<import("typebox").TNumber>;
+            jobApplications: import("typebox").TOptional<import("typebox").TNumber>;
+            chatSessions: import("typebox").TOptional<import("typebox").TNumber>;
+            resumesGenerated: import("typebox").TOptional<import("typebox").TNumber>;
+            coverLettersGenerated: import("typebox").TOptional<import("typebox").TNumber>;
+            savedJobs: import("typebox").TOptional<import("typebox").TNumber>;
+            jobsSaved: import("typebox").TOptional<import("typebox").TNumber>;
+            interviewScore: import("typebox").TOptional<import("typebox").TNumber>;
+            dataExported: import("typebox").TOptional<import("typebox").TNumber>;
+            earlyLogin: import("typebox").TOptional<import("typebox").TNumber>;
+            totalTimeSpent: import("typebox").TOptional<import("typebox").TNumber>;
+            featuresUsed: import("typebox").TOptional<import("typebox").TNumber>;
+            dailyStreak: import("typebox").TOptional<import("typebox").TNumber>;
+            weeklyProgress: import("typebox").TOptional<import("typebox").TNumber>;
+            interviewsCompleted: import("typebox").TOptional<import("typebox").TNumber>;
+            studiosExplored: import("typebox").TOptional<import("typebox").TNumber>;
+            actionHistory: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+                action: import("typebox").TString;
+                xpGained: import("typebox").TNumber;
+                multiplier: import("typebox").TOptional<import("typebox").TNumber>;
+                timestamp: import("typebox").TString;
+            }>>>;
+        }>;
         xpForNextLevel: import("typebox").TOptional<import("typebox").TNumber>;
         streak: import("typebox").TOptional<import("typebox").TNumber>;
     }>;

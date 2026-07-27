@@ -1,10 +1,12 @@
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { AvailableLocale } from "~/constants/i18n-catalog";
 import { I18N_MESSAGE_CATALOG } from "~/constants/i18n-catalog";
 
-type MessageNode = Record<string, unknown>;
+type MessageNode = JsonObject;
 
 function cloneMessageNode<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+  return structuredClone(value);
 }
 
 function setByPath(target: MessageNode, path: string, value: string): void {
@@ -19,11 +21,11 @@ function setByPath(target: MessageNode, path: string, value: string): void {
 
   let cursor: MessageNode = target;
   for (const segment of segments.slice(0, -1)) {
-    const next = cursor[segment];
-    if (typeof next !== "object" || next === null || Array.isArray(next)) {
+    const next: JsonValue | undefined = cursor[segment];
+    if (!isRecord(next)) {
       cursor[segment] = {};
     }
-    cursor = next as Record<string, unknown>;
+    cursor = cursor[segment] as MessageNode;
   }
 
   const leafKey = segments[segments.length - 1];

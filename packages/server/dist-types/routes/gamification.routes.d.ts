@@ -18,7 +18,32 @@ export declare const gamificationRoutes: import("elysia/types").AddRoute<string,
                         longestStreak: number;
                         currentStreak: number;
                         lastActiveDate?: string | undefined;
-                        stats: Record<string, unknown>;
+                        stats: {
+                            profileComplete?: number | undefined;
+                            skillsMapped?: number | undefined;
+                            portfolioItems?: number | undefined;
+                            jobApplications?: number | undefined;
+                            chatSessions?: number | undefined;
+                            resumesGenerated?: number | undefined;
+                            coverLettersGenerated?: number | undefined;
+                            savedJobs?: number | undefined;
+                            jobsSaved?: number | undefined;
+                            interviewScore?: number | undefined;
+                            dataExported?: number | undefined;
+                            earlyLogin?: number | undefined;
+                            totalTimeSpent?: number | undefined;
+                            featuresUsed?: number | undefined;
+                            dailyStreak?: number | undefined;
+                            weeklyProgress?: number | undefined;
+                            interviewsCompleted?: number | undefined;
+                            studiosExplored?: number | undefined;
+                            actionHistory?: {
+                                action: string;
+                                xpGained: number;
+                                multiplier?: number | undefined;
+                                timestamp: string;
+                            }[] | undefined;
+                        };
                         xpForNextLevel?: number | undefined;
                         streak?: number | undefined;
                     };

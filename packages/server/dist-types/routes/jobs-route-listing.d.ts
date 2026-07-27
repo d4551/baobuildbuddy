@@ -69,7 +69,7 @@ export declare const listJobs: (query: JobListQuery) => Promise<{
         postedDate: string | null;
         remote: boolean | null;
         requirements: string[] | null;
-        salary: Record<string, unknown> | null;
+        salary: Record<string, string | number> | null;
         source: string | null;
         studioType: string | null;
         tags: string[] | null;
@@ -90,7 +90,7 @@ export declare const getJobById: (id: string) => Promise<{
     location: string;
     remote: boolean | null;
     hybrid: boolean | null;
-    salary: Record<string, unknown> | null;
+    salary: Record<string, string | number> | null;
     description: string | null;
     requirements: string[] | null;
     technologies: string[] | null;
@@ -126,7 +126,7 @@ export declare const listSavedJobs: () => Promise<{
         location: string;
         remote: boolean | null;
         hybrid: boolean | null;
-        salary: Record<string, unknown> | null;
+        salary: Record<string, string | number> | null;
         description: string | null;
         requirements: string[] | null;
         technologies: string[] | null;
@@ -155,7 +155,7 @@ export declare const listApplications: () => Promise<{
     status: string | null;
     appliedDate: string;
     notes: string | null;
-    timeline: unknown[] | null;
+    timeline: import("@bao/shared/types/jobs").ApplicationTimelineEntry[] | null;
     createdAt: string;
     updatedAt: string;
     job: {
@@ -165,7 +165,7 @@ export declare const listApplications: () => Promise<{
         location: string;
         remote: boolean | null;
         hybrid: boolean | null;
-        salary: Record<string, unknown> | null;
+        salary: Record<string, string | number> | null;
         description: string | null;
         requirements: string[] | null;
         technologies: string[] | null;

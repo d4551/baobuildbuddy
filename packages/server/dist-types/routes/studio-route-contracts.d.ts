@@ -51,10 +51,18 @@ export declare const studioEntityResponseSchema: import("typebox").TObject<{
     description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
     games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
     technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-    culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+    culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
     interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
     remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+    enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TObject<{
+        summary: import("typebox").TString;
+        hiringSignals: import("typebox").TArray<import("typebox").TString>;
+        interviewFocusAreas: import("typebox").TArray<import("typebox").TString>;
+        candidatePitchAngles: import("typebox").TArray<import("typebox").TString>;
+        provider: import("typebox").TOptional<import("typebox").TString>;
+        model: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+    }>, import("typebox").TNull]>>;
     createdAt: import("typebox").TOptional<import("typebox").TString>;
     updatedAt: import("typebox").TOptional<import("typebox").TString>;
 }>;
@@ -84,10 +92,18 @@ export declare const studioListResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TObject<{
+            summary: import("typebox").TString;
+            hiringSignals: import("typebox").TArray<import("typebox").TString>;
+            interviewFocusAreas: import("typebox").TArray<import("typebox").TString>;
+            candidatePitchAngles: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+            model: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        }>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>>;
@@ -104,10 +120,18 @@ export declare const studioEntityResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TObject<{
+            summary: import("typebox").TString;
+            hiringSignals: import("typebox").TArray<import("typebox").TString>;
+            interviewFocusAreas: import("typebox").TArray<import("typebox").TString>;
+            candidatePitchAngles: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+            model: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        }>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;
@@ -122,10 +146,18 @@ export declare const studioEntityResponses: {
         description: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
         games: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
         technologies: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TArray<import("typebox").TString>, import("typebox").TNull]>>;
-        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        culture: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TRecord<"^.*$", import("typebox").TUnknown>, import("typebox").TNull]>>;
         interviewStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>>;
         remoteWork: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TBoolean, import("typebox").TNull]>>;
-        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TUnknown, import("typebox").TNull]>>;
+        enrichment: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TObject<{
+            summary: import("typebox").TString;
+            hiringSignals: import("typebox").TArray<import("typebox").TString>;
+            interviewFocusAreas: import("typebox").TArray<import("typebox").TString>;
+            candidatePitchAngles: import("typebox").TArray<import("typebox").TString>;
+            provider: import("typebox").TOptional<import("typebox").TString>;
+            model: import("typebox").TOptional<import("typebox").TString>;
+            updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        }>, import("typebox").TNull]>>;
         createdAt: import("typebox").TOptional<import("typebox").TString>;
         updatedAt: import("typebox").TOptional<import("typebox").TString>;
     }>;

@@ -29,6 +29,18 @@ export interface ScrapeEnrichmentRunSummary {
 }
 
 /**
+ * One application lifecycle event persisted on an application row.
+ */
+export interface ApplicationTimelineEntry {
+  id?: string;
+  status?: string;
+  type?: string;
+  date?: string;
+  notes?: string;
+  description?: string;
+}
+
+/**
  * Canonical result envelope returned by scraper routes and persisted by automation runs.
  */
 export interface ScraperOperationResult {

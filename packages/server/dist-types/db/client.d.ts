@@ -105,7 +105,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "applications";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: unknown[];
+                data: import("@bao/shared/types/jobs").ApplicationTimelineEntry[];
                 driverParam: string;
                 notNull: false;
                 hasDefault: true;
@@ -117,7 +117,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: unknown[];
+                $type: import("@bao/shared/types/jobs").ApplicationTimelineEntry[];
             }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";
@@ -1729,7 +1729,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 tableName: "jobs";
                 dataType: "json";
                 columnType: "SQLiteTextJson";
-                data: Record<string, unknown>;
+                data: Record<string, string | number>;
                 driverParam: string;
                 notNull: false;
                 hasDefault: false;
@@ -1741,7 +1741,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
                 identity: undefined;
                 generated: undefined;
             }, {}, {
-                $type: Record<string, unknown>;
+                $type: Record<string, string | number>;
             }>;
             description: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "description";

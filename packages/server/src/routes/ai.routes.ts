@@ -5,7 +5,7 @@ import {
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { MS_PER_MINUTE } from "@bao/shared/constants/time";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
 import {
@@ -30,20 +30,15 @@ import {
   analyzeResumeRouteBodySchema,
   automationActionResponses,
   automationActionRouteBodySchema,
-  type ChatRouteBody,
   chatRouteBodySchema,
   chatRouteResponses,
-  type GenerateCoverLetterRouteBody,
   aiGenerateCoverLetterResponses,
   generateCoverLetterRouteBodySchema,
-  type MatchJobsRouteBody,
   matchJobsResponses,
   matchJobsRouteBodySchema,
   usageTailLimit,
 } from "./ai-route-contracts";
 import { buildProviderModelsResponse } from "./ai-route-support";
-
-type RouteStatus = typeof status;
 
 export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBase) })
   .use(
@@ -61,9 +56,12 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: chatRouteBodySchema,
       response: chatRouteResponses,
     },
-    async ({ body, status }: { body: ChatRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await handleChatRoute(body);
-      return status(result.status, result.body);
+      if (result.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -92,9 +90,15 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: generateCoverLetterRouteBodySchema,
       response: aiGenerateCoverLetterResponses,
     },
-    async ({ body, status }: { body: GenerateCoverLetterRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await handleGenerateCoverLetterRoute(body);
-      return status(result.status, result.body);
+      if (result.status === HTTP_STATUS_NOT_FOUND) {
+        return status(HTTP_STATUS_NOT_FOUND, result.body);
+      }
+      if (result.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .post(
@@ -104,9 +108,12 @@ export const aiRoutes = new Elysia({ prefix: toApiScopedPath(API_ENDPOINTS.aiBas
       body: matchJobsRouteBodySchema,
       response: matchJobsResponses,
     },
-    async ({ body, status }: { body: MatchJobsRouteBody; status: RouteStatus }) => {
+    async ({ body, status }) => {
       const result = await handleMatchJobsRoute(body);
-      return status(result.status, result.body);
+      if (result.status === HTTP_STATUS_INTERNAL_SERVER_ERROR) {
+        return status(HTTP_STATUS_INTERNAL_SERVER_ERROR, result.body);
+      }
+      return status(HTTP_STATUS_OK, result.body);
     },
   )
   .get(

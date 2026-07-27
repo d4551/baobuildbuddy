@@ -29,6 +29,35 @@ export const challengeIdParams = challengeIdParamsSchema;
 
 const jsonNumberRecordSchema = t.Record(t.String(), t.Number());
 
+const gamificationActionHistoryEntrySchema = t.Object({
+  action: t.String(),
+  xpGained: t.Number(),
+  multiplier: t.Optional(t.Number()),
+  timestamp: t.String(),
+});
+
+const gamificationStatsResponseSchema = t.Object({
+  profileComplete: t.Optional(t.Number()),
+  skillsMapped: t.Optional(t.Number()),
+  portfolioItems: t.Optional(t.Number()),
+  jobApplications: t.Optional(t.Number()),
+  chatSessions: t.Optional(t.Number()),
+  resumesGenerated: t.Optional(t.Number()),
+  coverLettersGenerated: t.Optional(t.Number()),
+  savedJobs: t.Optional(t.Number()),
+  jobsSaved: t.Optional(t.Number()),
+  interviewScore: t.Optional(t.Number()),
+  dataExported: t.Optional(t.Number()),
+  earlyLogin: t.Optional(t.Number()),
+  totalTimeSpent: t.Optional(t.Number()),
+  featuresUsed: t.Optional(t.Number()),
+  dailyStreak: t.Optional(t.Number()),
+  weeklyProgress: t.Optional(t.Number()),
+  interviewsCompleted: t.Optional(t.Number()),
+  studiosExplored: t.Optional(t.Number()),
+  actionHistory: t.Optional(t.Array(gamificationActionHistoryEntrySchema)),
+});
+
 export const gamificationProgressResponseSchema = t.Object({
   xp: t.Number(),
   level: t.Number(),
@@ -37,7 +66,7 @@ export const gamificationProgressResponseSchema = t.Object({
   longestStreak: t.Number(),
   currentStreak: t.Number(),
   lastActiveDate: t.Optional(t.String()),
-  stats: t.Record(t.String(), t.Unknown()),
+  stats: gamificationStatsResponseSchema,
   xpForNextLevel: t.Optional(t.Number()),
   streak: t.Optional(t.Number()),
 });

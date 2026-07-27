@@ -3,6 +3,8 @@ import type {
   DailyChallenge,
   UserGamificationData,
 } from "@bao/shared/types/gamification";
+import type { JsonValue } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { ApiEnvelope } from "~/types/client-api-contracts";
 import { getErrorMessage } from "~/utils/errors";
 
@@ -30,45 +32,43 @@ export interface GamificationHubData {
   readonly monthly: GamificationMonthlyTrend | null;
 }
 
-export function toWeeklyTrend(value: unknown): GamificationWeeklyTrend | null {
-  if (!value || typeof value !== "object") return null;
-  const row = value as Record<string, unknown>;
+export function toWeeklyTrend(value: JsonValue): GamificationWeeklyTrend | null {
+  if (!isRecord(value)) return null;
   if (
-    typeof row.challengesCompleted !== "number" ||
-    typeof row.xpEarned !== "number" ||
-    typeof row.actionsCount !== "number" ||
-    typeof row.topCategory !== "string"
+    typeof value.challengesCompleted !== "number" ||
+    typeof value.xpEarned !== "number" ||
+    typeof value.actionsCount !== "number" ||
+    typeof value.topCategory !== "string"
   ) {
     return null;
   }
   return {
-    challengesCompleted: row.challengesCompleted,
-    xpEarned: row.xpEarned,
-    actionsCount: row.actionsCount,
-    topCategory: row.topCategory,
+    challengesCompleted: value.challengesCompleted,
+    xpEarned: value.xpEarned,
+    actionsCount: value.actionsCount,
+    topCategory: value.topCategory,
   };
 }
 
-export function toMonthlyTrend(value: unknown): GamificationMonthlyTrend | null {
-  if (!value || typeof value !== "object") return null;
-  const row = value as Record<string, unknown>;
+export function toMonthlyTrend(value: JsonValue): GamificationMonthlyTrend | null {
+  if (!isRecord(value)) return null;
   if (
-    typeof row.totalXP !== "number" ||
-    typeof row.levelsGained !== "number" ||
-    typeof row.achievementsUnlocked !== "number" ||
-    typeof row.challengesCompleted !== "number" ||
-    typeof row.actionsCount !== "number" ||
-    typeof row.streakDays !== "number"
+    typeof value.totalXP !== "number" ||
+    typeof value.levelsGained !== "number" ||
+    typeof value.achievementsUnlocked !== "number" ||
+    typeof value.challengesCompleted !== "number" ||
+    typeof value.actionsCount !== "number" ||
+    typeof value.streakDays !== "number"
   ) {
     return null;
   }
   return {
-    totalXP: row.totalXP,
-    levelsGained: row.levelsGained,
-    achievementsUnlocked: row.achievementsUnlocked,
-    challengesCompleted: row.challengesCompleted,
-    actionsCount: row.actionsCount,
-    streakDays: row.streakDays,
+    totalXP: value.totalXP,
+    levelsGained: value.levelsGained,
+    achievementsUnlocked: value.achievementsUnlocked,
+    challengesCompleted: value.challengesCompleted,
+    actionsCount: value.actionsCount,
+    streakDays: value.streakDays,
   };
 }
 
@@ -80,10 +80,15 @@ export async function requestGamificationData<T>(
   if (response.error) {
     throw new Error(getErrorMessage(response.error, fallbackMessage));
   }
-  return response.data as T;
+  if (response.data === null) {
+    throw new Error(fallbackMessage);
+  }
+  return response.data;
 }
 
-export async function fetchOptionalTrend(request: Promise<ApiEnvelope<unknown>>): Promise<unknown> {
+export async function fetchOptionalTrend(
+  request: Promise<ApiEnvelope<JsonValue>>,
+): Promise<JsonValue | null> {
   const response = await request;
   if (response.error) {
     return null;

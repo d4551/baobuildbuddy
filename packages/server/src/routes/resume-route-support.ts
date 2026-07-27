@@ -25,6 +25,7 @@ import {
   RESUME_TEMPLATE_DEFAULT,
 } from "@bao/shared/constants/resume";
 import type { ResumeData } from "@bao/shared/types/resume";
+import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
@@ -93,7 +94,7 @@ Projects: ${JSON.stringify(resume.projects, null, 2)}
 ${resume.gamingExperience ? `Gaming Experience: ${JSON.stringify(resume.gamingExperience, null, 2)}` : ""}
 `.trim();
 
-const formatStringList = (values: unknown): string => {
+const formatStringList = (values: JsonValue): string => {
   if (!Array.isArray(values) || values.length === 0) {
     return DEFAULT_UNSPECIFIED_LABEL;
   }
@@ -101,22 +102,19 @@ const formatStringList = (values: unknown): string => {
   return normalized.length > 0 ? normalized.join(", ") : DEFAULT_UNSPECIFIED_LABEL;
 };
 
-const formatEnrichment = (enrichment: unknown): string => {
-  if (!enrichment || typeof enrichment !== "object") {
+const formatEnrichment = (enrichment: ScrapePersonaEnrichment | null): string => {
+  if (!enrichment) {
     return "";
   }
-  const record = enrichment as Record<string, unknown>;
   const sections: string[] = [];
-  if (typeof record.summary === "string" && record.summary.trim().length > 0) {
-    sections.push(`Summary: ${record.summary.trim()}`);
+  if (enrichment.summary.trim().length > 0) {
+    sections.push(`Summary: ${enrichment.summary.trim()}`);
   }
-  const hiringSignals = Array.isArray(record.hiringSignals) ? record.hiringSignals : [];
-  if (hiringSignals.length > 0) {
-    sections.push(`Hiring signals: ${hiringSignals.join(", ")}`);
+  if (enrichment.hiringSignals.length > 0) {
+    sections.push(`Hiring signals: ${enrichment.hiringSignals.join(", ")}`);
   }
-  const focusAreas = Array.isArray(record.interviewFocusAreas) ? record.interviewFocusAreas : [];
-  if (focusAreas.length > 0) {
-    sections.push(`Interview focus areas: ${focusAreas.join(", ")}`);
+  if (enrichment.interviewFocusAreas.length > 0) {
+    sections.push(`Interview focus areas: ${enrichment.interviewFocusAreas.join(", ")}`);
   }
   return sections.length > 0 ? `\nEnrichment:\n${sections.join("\n")}` : "";
 };

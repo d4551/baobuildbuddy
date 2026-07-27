@@ -2,6 +2,7 @@ import {
   AI_CHAT_CONTEXT_AUTOMATION_RUNS_LIMIT,
   AI_CHAT_CONTEXT_AVAILABLE_RESUMES_LIMIT,
   AI_CHAT_CONTEXT_INTERVIEW_SESSIONS_LIMIT,
+  AI_CHAT_CONTEXT_PORTFOLIO_DESCRIPTION_SNIPPET_LENGTH,
   AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT,
   AI_CHAT_CONTEXT_SAVED_JOBS_LIMIT,
   AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
@@ -12,13 +13,14 @@ import type { AIChatContextDomain, ChatMessage } from "@bao/shared/types/ai";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { settle } from "@bao/shared/utils/promise";
+import { asString, isRecord } from "@bao/shared/utils/type-guards";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { automationRuns } from "../../db/schema/automation-runs";
 import { chatHistory } from "../../db/schema/chat-history";
 import { interviewSessions } from "../../db/schema/interviews";
 import { jobs, savedJobs } from "../../db/schema/jobs";
-import { portfolioProjects } from "../../db/schema/portfolios";
+import { portfolios, portfolioProjects } from "../../db/schema/portfolios";
 import { resumes } from "../../db/schema/resumes";
 import { skillMappings } from "../../db/schema/skill-mappings";
 import { userProfile } from "../../db/schema/user";
@@ -213,14 +215,43 @@ export class ConversationContextManager {
   }
 
   private async loadPortfolioContext(): Promise<string | null> {
-    const projects = await db
-      .select()
-      .from(portfolioProjects)
-      .limit(AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT);
-    if (projects.length === 0) {
+    const [portfolioRows, projects, skills] = await Promise.all([
+      db.select().from(portfolios).limit(1),
+      db.select().from(portfolioProjects).limit(AI_CHAT_CONTEXT_PORTFOLIO_PROJECTS_LIMIT),
+      db.select().from(skillMappings).limit(AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT),
+    ]);
+    if (projects.length === 0 && portfolioRows.length === 0) {
       return null;
     }
-    return `Portfolio Projects:\n${projects.map((project) => `- ${project.title}: ${project.technologies?.join(", ") || "No tech listed"}`).join("\n")}`;
+    const parts: string[] = [];
+    const metadata = portfolioRows[0]?.metadata;
+    if (isRecord(metadata)) {
+      const headline = asString(metadata.headline);
+      const bio = asString(metadata.bio);
+      const targetRole = asString(metadata.targetRole);
+      if (headline) parts.push(`Headline: ${headline}`);
+      if (targetRole) parts.push(`Target Role: ${targetRole}`);
+      if (bio) parts.push(`Bio: ${bio}`);
+    }
+    if (projects.length > 0) {
+      parts.push(
+        "Portfolio Projects:",
+        ...projects.map((project) => {
+          const tech = project.technologies?.join(", ") || "No tech listed";
+          const desc = project.description
+            ? ` — ${project.description.slice(0, AI_CHAT_CONTEXT_PORTFOLIO_DESCRIPTION_SNIPPET_LENGTH)}`
+            : "";
+          return `- ${project.title} (${tech})${desc}`;
+        }),
+      );
+    }
+    if (skills.length > 0) {
+      parts.push(
+        "Transferable Skills:",
+        ...skills.map((s) => `- ${s.gameExpression} → ${s.transferableSkill}`),
+      );
+    }
+    return parts.length > 0 ? parts.join("\n") : null;
   }
 
   private async loadSkillsContext(): Promise<string | null> {

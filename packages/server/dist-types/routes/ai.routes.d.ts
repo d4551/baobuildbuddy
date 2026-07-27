@@ -46,7 +46,15 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        message: string;
+                        sessionId: string;
+                        timestamp: string;
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                        model: string;
+                        followUps: string[];
+                        contextDomain: string;
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';
@@ -151,7 +159,16 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        message: string;
+                        content: {
+                            introduction: string;
+                            body: string;
+                            conclusion: string;
+                        };
+                        provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
+                        model: string;
+                    };
                     404: {
                         error: string;
                         code?: string | undefined;
@@ -201,7 +218,21 @@ export declare const aiRoutes: import("elysia/types").AddRoute<string, "local", 
                 query: unknown;
                 headers: unknown;
                 response: {
-                    200: unknown;
+                    200: {
+                        message: string;
+                        matches: {
+                            jobId: string;
+                            title: string;
+                            company: string;
+                            location: string | null;
+                            remote: boolean;
+                            score: number;
+                            strengths: string[];
+                            concerns: string[];
+                            highlightSkills: string[];
+                        }[];
+                        recommendations: string[];
+                    };
                     422: {
                         type: 'validation';
                         title: 'Validation Error';

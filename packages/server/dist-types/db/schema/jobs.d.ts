@@ -1,4 +1,4 @@
-import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
+import type { ApplicationTimelineEntry, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
     name: "jobs";
     schema: undefined;
@@ -118,7 +118,7 @@ export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColu
             tableName: "jobs";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: Record<string, unknown>;
+            data: Record<string, string | number>;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -130,7 +130,7 @@ export declare const jobs: import("drizzle-orm/sqlite-core").SQLiteTableWithColu
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: Record<string, unknown>;
+            $type: Record<string, string | number>;
         }>;
         description: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "description";
@@ -645,7 +645,7 @@ export declare const applications: import("drizzle-orm/sqlite-core").SQLiteTable
             tableName: "applications";
             dataType: "json";
             columnType: "SQLiteTextJson";
-            data: unknown[];
+            data: ApplicationTimelineEntry[];
             driverParam: string;
             notNull: false;
             hasDefault: true;
@@ -657,7 +657,7 @@ export declare const applications: import("drizzle-orm/sqlite-core").SQLiteTable
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: unknown[];
+            $type: ApplicationTimelineEntry[];
         }>;
         createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
             name: "created_at";

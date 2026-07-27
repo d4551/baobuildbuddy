@@ -27,7 +27,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         location: string;
                         remote?: boolean | null | undefined;
                         hybrid?: boolean | null | undefined;
-                        salary?: unknown;
+                        salary?: Record<string, string | number> | null | undefined;
                         description?: string | null | undefined;
                         requirements?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
@@ -43,7 +43,15 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         tags?: string[] | null | undefined;
                         companyLogo?: string | null | undefined;
                         applicationUrl?: string | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                         matchScore?: number | undefined;
@@ -86,7 +94,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         location: string;
                         remote?: boolean | null | undefined;
                         hybrid?: boolean | null | undefined;
-                        salary?: unknown;
+                        salary?: Record<string, string | number> | null | undefined;
                         description?: string | null | undefined;
                         requirements?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
@@ -102,7 +110,15 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         tags?: string[] | null | undefined;
                         companyLogo?: string | null | undefined;
                         applicationUrl?: string | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                         matchScore?: number | undefined;
@@ -212,7 +228,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             location: string;
                             remote?: boolean | null | undefined;
                             hybrid?: boolean | null | undefined;
-                            salary?: unknown;
+                            salary?: Record<string, string | number> | null | undefined;
                             description?: string | null | undefined;
                             requirements?: string[] | null | undefined;
                             technologies?: string[] | null | undefined;
@@ -228,7 +244,15 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             tags?: string[] | null | undefined;
                             companyLogo?: string | null | undefined;
                             applicationUrl?: string | null | undefined;
-                            enrichment?: unknown;
+                            enrichment?: {
+                                summary: string;
+                                hiringSignals: string[];
+                                interviewFocusAreas: string[];
+                                candidatePitchAngles: string[];
+                                provider?: string | undefined;
+                                model?: string | undefined;
+                                updatedAt?: string | undefined;
+                            } | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
                             matchScore?: number | undefined;
@@ -261,7 +285,14 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             status: string | null;
                             appliedDate?: string | null | undefined;
                             notes?: string | null | undefined;
-                            timeline?: unknown[] | null | undefined;
+                            timeline?: {
+                                id?: string | undefined;
+                                status?: string | undefined;
+                                type?: string | undefined;
+                                date?: string | undefined;
+                                notes?: string | undefined;
+                                description?: string | undefined;
+                            }[] | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
                         } | undefined;
@@ -270,7 +301,14 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         status?: string | undefined;
                         appliedDate?: string | undefined;
                         notes?: string | undefined;
-                        timeline?: unknown[] | undefined;
+                        timeline?: {
+                            id?: string | undefined;
+                            status?: string | undefined;
+                            type?: string | undefined;
+                            date?: string | undefined;
+                            notes?: string | undefined;
+                            description?: string | undefined;
+                        }[] | undefined;
                     };
                     201: {
                         id: string;
@@ -278,7 +316,14 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         status: string | null;
                         appliedDate?: string | null | undefined;
                         notes?: string | null | undefined;
-                        timeline?: unknown[] | null | undefined;
+                        timeline?: {
+                            id?: string | undefined;
+                            status?: string | undefined;
+                            type?: string | undefined;
+                            date?: string | undefined;
+                            notes?: string | undefined;
+                            description?: string | undefined;
+                        }[] | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     };
@@ -325,7 +370,14 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             status: string | null;
                             appliedDate?: string | null | undefined;
                             notes?: string | null | undefined;
-                            timeline?: unknown[] | null | undefined;
+                            timeline?: {
+                                id?: string | undefined;
+                                status?: string | undefined;
+                                type?: string | undefined;
+                                date?: string | undefined;
+                                notes?: string | undefined;
+                                description?: string | undefined;
+                            }[] | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
                         };
@@ -367,7 +419,14 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                         status: string | null;
                         appliedDate?: string | null | undefined;
                         notes?: string | null | undefined;
-                        timeline?: unknown[] | null | undefined;
+                        timeline?: {
+                            id?: string | undefined;
+                            status?: string | undefined;
+                            type?: string | undefined;
+                            date?: string | undefined;
+                            notes?: string | undefined;
+                            description?: string | undefined;
+                        }[] | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     }[];
@@ -393,7 +452,7 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             location: string;
                             remote?: boolean | null | undefined;
                             hybrid?: boolean | null | undefined;
-                            salary?: unknown;
+                            salary?: Record<string, string | number> | null | undefined;
                             description?: string | null | undefined;
                             requirements?: string[] | null | undefined;
                             technologies?: string[] | null | undefined;
@@ -409,7 +468,15 @@ export declare const jobsRoutes: import("elysia/types").AddRoute<string, "local"
                             tags?: string[] | null | undefined;
                             companyLogo?: string | null | undefined;
                             applicationUrl?: string | null | undefined;
-                            enrichment?: unknown;
+                            enrichment?: {
+                                summary: string;
+                                hiringSignals: string[];
+                                interviewFocusAreas: string[];
+                                candidatePitchAngles: string[];
+                                provider?: string | undefined;
+                                model?: string | undefined;
+                                updatedAt?: string | undefined;
+                            } | null | undefined;
                             createdAt?: string | undefined;
                             updatedAt?: string | undefined;
                             matchScore?: number | undefined;

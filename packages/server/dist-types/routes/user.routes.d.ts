@@ -25,8 +25,33 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
                         yearsExperience: number | null;
                         technicalSkills: string[];
                         softSkills: string[];
-                        gamingExperience: Record<string, unknown>;
-                        careerGoals: Record<string, unknown>;
+                        gamingExperience: {
+                            yearsInGaming?: number | undefined;
+                            experienceLevel?: "director" | "entry" | "junior" | "lead" | "mid" | "principal" | "senior" | undefined;
+                            specializations?: string[] | undefined;
+                            gameEngines?: string[] | undefined;
+                            platforms?: string[] | undefined;
+                            genres?: string[] | undefined;
+                            shippedTitles?: {
+                                name: string;
+                                platforms: string[];
+                                releaseDate?: string | undefined;
+                                role: string;
+                                teamSize?: number | undefined;
+                            }[] | undefined;
+                        };
+                        careerGoals: {
+                            desiredRoles?: string[] | undefined;
+                            preferredCompanySize?: string[] | undefined;
+                            preferredLocations?: string[] | undefined;
+                            remotePreference?: "flexible" | "hybrid" | "onsite" | "remote" | undefined;
+                            salaryRange?: {
+                                min: number;
+                                max: number;
+                                currency?: string | undefined;
+                            } | undefined;
+                            willingToRelocate?: boolean | undefined;
+                        };
                         createdAt: string;
                         updatedAt: string;
                     };
@@ -82,8 +107,33 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
         yearsExperience: import("typebox").TOptional<import("typebox").TNumber>;
         technicalSkills: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
         softSkills: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-        gamingExperience: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
-        careerGoals: import("typebox").TOptional<import("typebox").TRecord<"^.*$", import("typebox").TUnknown>>;
+        gamingExperience: import("typebox").TOptional<import("typebox").TObject<{
+            yearsInGaming: import("typebox").TOptional<import("typebox").TNumber>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"entry">, import("typebox").TLiteral<"junior">, import("typebox").TLiteral<"mid">, import("typebox").TLiteral<"senior">, import("typebox").TLiteral<"lead">, import("typebox").TLiteral<"principal">, import("typebox").TLiteral<"director">]>>;
+            specializations: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            gameEngines: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            platforms: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            genres: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            shippedTitles: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+                name: import("typebox").TString;
+                platforms: import("typebox").TArray<import("typebox").TString>;
+                releaseDate: import("typebox").TOptional<import("typebox").TString>;
+                role: import("typebox").TString;
+                teamSize: import("typebox").TOptional<import("typebox").TNumber>;
+            }>>>;
+        }>>;
+        careerGoals: import("typebox").TOptional<import("typebox").TObject<{
+            desiredRoles: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            preferredCompanySize: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            preferredLocations: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            remotePreference: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"onsite">, import("typebox").TLiteral<"hybrid">, import("typebox").TLiteral<"remote">, import("typebox").TLiteral<"flexible">]>>;
+            salaryRange: import("typebox").TOptional<import("typebox").TObject<{
+                min: import("typebox").TNumber;
+                max: import("typebox").TNumber;
+                currency: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+            willingToRelocate: import("typebox").TOptional<import("typebox").TBoolean>;
+        }>>;
     }>;
     response: {
         400: import("typebox").TObject<{
@@ -129,8 +179,33 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
             yearsExperience: import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>;
             technicalSkills: import("typebox").TArray<import("typebox").TString>;
             softSkills: import("typebox").TArray<import("typebox").TString>;
-            gamingExperience: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
-            careerGoals: import("typebox").TRecord<"^.*$", import("typebox").TUnknown>;
+            gamingExperience: import("typebox").TObject<{
+                yearsInGaming: import("typebox").TOptional<import("typebox").TNumber>;
+                experienceLevel: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"entry">, import("typebox").TLiteral<"junior">, import("typebox").TLiteral<"mid">, import("typebox").TLiteral<"senior">, import("typebox").TLiteral<"lead">, import("typebox").TLiteral<"principal">, import("typebox").TLiteral<"director">]>>;
+                specializations: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                gameEngines: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                platforms: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                genres: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                shippedTitles: import("typebox").TOptional<import("typebox").TArray<import("typebox").TObject<{
+                    name: import("typebox").TString;
+                    platforms: import("typebox").TArray<import("typebox").TString>;
+                    releaseDate: import("typebox").TOptional<import("typebox").TString>;
+                    role: import("typebox").TString;
+                    teamSize: import("typebox").TOptional<import("typebox").TNumber>;
+                }>>>;
+            }>;
+            careerGoals: import("typebox").TObject<{
+                desiredRoles: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                preferredCompanySize: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                preferredLocations: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                remotePreference: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"onsite">, import("typebox").TLiteral<"hybrid">, import("typebox").TLiteral<"remote">, import("typebox").TLiteral<"flexible">]>>;
+                salaryRange: import("typebox").TOptional<import("typebox").TObject<{
+                    min: import("typebox").TNumber;
+                    max: import("typebox").TNumber;
+                    currency: import("typebox").TOptional<import("typebox").TString>;
+                }>>;
+                willingToRelocate: import("typebox").TOptional<import("typebox").TBoolean>;
+            }>;
             createdAt: import("typebox").TString;
             updatedAt: import("typebox").TString;
         }>;
@@ -187,8 +262,33 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
             yearsExperience: number | null;
             technicalSkills: string[];
             softSkills: string[];
-            gamingExperience: Record<string, unknown>;
-            careerGoals: Record<string, unknown>;
+            gamingExperience: {
+                yearsInGaming?: number | undefined;
+                experienceLevel?: "director" | "entry" | "junior" | "lead" | "mid" | "principal" | "senior" | undefined;
+                specializations?: string[] | undefined;
+                gameEngines?: string[] | undefined;
+                platforms?: string[] | undefined;
+                genres?: string[] | undefined;
+                shippedTitles?: {
+                    name: string;
+                    platforms: string[];
+                    releaseDate?: string | undefined;
+                    role: string;
+                    teamSize?: number | undefined;
+                }[] | undefined;
+            };
+            careerGoals: {
+                desiredRoles?: string[] | undefined;
+                preferredCompanySize?: string[] | undefined;
+                preferredLocations?: string[] | undefined;
+                remotePreference?: "flexible" | "hybrid" | "onsite" | "remote" | undefined;
+                salaryRange?: {
+                    min: number;
+                    max: number;
+                    currency?: string | undefined;
+                } | undefined;
+                willingToRelocate?: boolean | undefined;
+            };
             createdAt: string;
             updatedAt: string;
         };
@@ -212,8 +312,33 @@ export declare const userRoutes: import("elysia/types").AddRoute<string, "local"
         yearsExperience?: number | undefined;
         technicalSkills?: string[] | undefined;
         softSkills?: string[] | undefined;
-        gamingExperience?: Record<string, unknown> | undefined;
-        careerGoals?: Record<string, unknown> | undefined;
+        gamingExperience?: {
+            yearsInGaming?: number | undefined;
+            experienceLevel?: "director" | "entry" | "junior" | "lead" | "mid" | "principal" | "senior" | undefined;
+            specializations?: string[] | undefined;
+            gameEngines?: string[] | undefined;
+            platforms?: string[] | undefined;
+            genres?: string[] | undefined;
+            shippedTitles?: {
+                name: string;
+                platforms: string[];
+                releaseDate?: string | undefined;
+                role: string;
+                teamSize?: number | undefined;
+            }[] | undefined;
+        } | undefined;
+        careerGoals?: {
+            desiredRoles?: string[] | undefined;
+            preferredCompanySize?: string[] | undefined;
+            preferredLocations?: string[] | undefined;
+            remotePreference?: "flexible" | "hybrid" | "onsite" | "remote" | undefined;
+            salaryRange?: {
+                min: number;
+                max: number;
+                currency?: string | undefined;
+            } | undefined;
+            willingToRelocate?: boolean | undefined;
+        } | undefined;
     };
     query: Record<string, string | undefined>;
     params: {};

@@ -568,7 +568,115 @@ export declare const interviewSessionResponses: {
     }>;
 };
 export declare const submitInterviewResponseResponses: {
-    200: import("typebox").TUnknown;
+    200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        studioId: import("typebox").TString;
+        config: import("typebox").TObject<{
+            roleType: import("typebox").TOptional<import("typebox").TString>;
+            roleCategory: import("typebox").TOptional<import("typebox").TString>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TString>;
+            focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            duration: import("typebox").TOptional<import("typebox").TInteger>;
+            questionCount: import("typebox").TOptional<import("typebox").TInteger>;
+            includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
+            includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
+            includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
+            enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
+            technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
+                microphoneId: import("typebox").TOptional<import("typebox").TString>;
+                speakerId: import("typebox").TOptional<import("typebox").TString>;
+                voiceId: import("typebox").TOptional<import("typebox").TString>;
+                rate: import("typebox").TOptional<import("typebox").TNumber>;
+                pitch: import("typebox").TOptional<import("typebox").TNumber>;
+                volume: import("typebox").TOptional<import("typebox").TNumber>;
+                language: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+            interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
+            conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
+            targetJob: import("typebox").TOptional<import("typebox").TObject<{
+                id: import("typebox").TString;
+                title: import("typebox").TString;
+                company: import("typebox").TString;
+                location: import("typebox").TString;
+                description: import("typebox").TOptional<import("typebox").TString>;
+                requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                source: import("typebox").TOptional<import("typebox").TString>;
+                postedDate: import("typebox").TOptional<import("typebox").TString>;
+                url: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+            candidateContext: import("typebox").TOptional<import("typebox").TObject<{
+                resumeId: import("typebox").TOptional<import("typebox").TString>;
+                coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+                portfolioId: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+        }>;
+        questions: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
+            question: import("typebox").TString;
+            followUps: import("typebox").TArray<import("typebox").TString>;
+            expectedDuration: import("typebox").TNumber;
+            difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
+            tags: import("typebox").TArray<import("typebox").TString>;
+            score: import("typebox").TOptional<import("typebox").TNumber>;
+            feedback: import("typebox").TOptional<import("typebox").TString>;
+            response: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+        currentQuestionIndex: import("typebox").TNumber;
+        totalQuestions: import("typebox").TNumber;
+        startTime: import("typebox").TNumber;
+        endTime: import("typebox").TOptional<import("typebox").TNumber>;
+        status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
+        responses: import("typebox").TArray<import("typebox").TObject<{
+            questionId: import("typebox").TString;
+            transcript: import("typebox").TString;
+            duration: import("typebox").TNumber;
+            timestamp: import("typebox").TNumber;
+            confidence: import("typebox").TNumber;
+            aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
+                score: import("typebox").TNumber;
+                feedback: import("typebox").TString;
+                strengths: import("typebox").TArray<import("typebox").TString>;
+                improvements: import("typebox").TArray<import("typebox").TString>;
+                source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+        }>>;
+        finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
+            overallScore: import("typebox").TNumber;
+            strengths: import("typebox").TArray<import("typebox").TString>;
+            improvements: import("typebox").TArray<import("typebox").TString>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            feedback: import("typebox").TOptional<import("typebox").TString>;
+            analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+            aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+            provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+                ai: import("typebox").TNumber;
+                heuristic: import("typebox").TNumber;
+                unknown: import("typebox").TNumber;
+            }>>;
+        }>>;
+        interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
+            name: import("typebox").TString;
+            role: import("typebox").TString;
+            studioName: import("typebox").TString;
+            background: import("typebox").TString;
+            style: import("typebox").TString;
+            experience: import("typebox").TString;
+        }>>;
+        role: import("typebox").TOptional<import("typebox").TString>;
+        studioName: import("typebox").TOptional<import("typebox").TString>;
+        score: import("typebox").TOptional<import("typebox").TNumber>;
+        duration: import("typebox").TOptional<import("typebox").TString>;
+        overallFeedback: import("typebox").TOptional<import("typebox").TString>;
+        totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        message: import("typebox").TOptional<import("typebox").TString>;
+    }>;
     400: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -585,7 +693,115 @@ export declare const submitInterviewResponseResponses: {
     }>;
 };
 export declare const completeInterviewSessionResponses: {
-    200: import("typebox").TUnknown;
+    200: import("typebox").TObject<{
+        id: import("typebox").TString;
+        studioId: import("typebox").TString;
+        config: import("typebox").TObject<{
+            roleType: import("typebox").TOptional<import("typebox").TString>;
+            roleCategory: import("typebox").TOptional<import("typebox").TString>;
+            experienceLevel: import("typebox").TOptional<import("typebox").TString>;
+            focusAreas: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            duration: import("typebox").TOptional<import("typebox").TInteger>;
+            questionCount: import("typebox").TOptional<import("typebox").TInteger>;
+            includeTechnical: import("typebox").TOptional<import("typebox").TBoolean>;
+            includeBehavioral: import("typebox").TOptional<import("typebox").TBoolean>;
+            includeStudioSpecific: import("typebox").TOptional<import("typebox").TBoolean>;
+            enableVoiceMode: import("typebox").TOptional<import("typebox").TBoolean>;
+            technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+            voiceSettings: import("typebox").TOptional<import("typebox").TObject<{
+                microphoneId: import("typebox").TOptional<import("typebox").TString>;
+                speakerId: import("typebox").TOptional<import("typebox").TString>;
+                voiceId: import("typebox").TOptional<import("typebox").TString>;
+                rate: import("typebox").TOptional<import("typebox").TNumber>;
+                pitch: import("typebox").TOptional<import("typebox").TNumber>;
+                volume: import("typebox").TOptional<import("typebox").TNumber>;
+                language: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+            interviewMode: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"studio">, import("typebox").TLiteral<"job">]>>;
+            conversationStyle: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"natural">, import("typebox").TLiteral<"structured">]>>;
+            targetJob: import("typebox").TOptional<import("typebox").TObject<{
+                id: import("typebox").TString;
+                title: import("typebox").TString;
+                company: import("typebox").TString;
+                location: import("typebox").TString;
+                description: import("typebox").TOptional<import("typebox").TString>;
+                requirements: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                technologies: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
+                source: import("typebox").TOptional<import("typebox").TString>;
+                postedDate: import("typebox").TOptional<import("typebox").TString>;
+                url: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+            candidateContext: import("typebox").TOptional<import("typebox").TObject<{
+                resumeId: import("typebox").TOptional<import("typebox").TString>;
+                coverLetterId: import("typebox").TOptional<import("typebox").TString>;
+                portfolioId: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+        }>;
+        questions: import("typebox").TArray<import("typebox").TObject<{
+            id: import("typebox").TString;
+            type: import("typebox").TUnion<[import("typebox").TLiteral<"behavioral">, import("typebox").TLiteral<"technical">, import("typebox").TLiteral<"studio-specific">, import("typebox").TLiteral<"intro">, import("typebox").TLiteral<"closing">]>;
+            question: import("typebox").TString;
+            followUps: import("typebox").TArray<import("typebox").TString>;
+            expectedDuration: import("typebox").TNumber;
+            difficulty: import("typebox").TUnion<[import("typebox").TLiteral<"easy">, import("typebox").TLiteral<"medium">, import("typebox").TLiteral<"hard">]>;
+            tags: import("typebox").TArray<import("typebox").TString>;
+            score: import("typebox").TOptional<import("typebox").TNumber>;
+            feedback: import("typebox").TOptional<import("typebox").TString>;
+            response: import("typebox").TOptional<import("typebox").TString>;
+        }>>;
+        currentQuestionIndex: import("typebox").TNumber;
+        totalQuestions: import("typebox").TNumber;
+        startTime: import("typebox").TNumber;
+        endTime: import("typebox").TOptional<import("typebox").TNumber>;
+        status: import("typebox").TUnion<[import("typebox").TLiteral<"preparing">, import("typebox").TLiteral<"active">, import("typebox").TLiteral<"paused">, import("typebox").TLiteral<"completed">, import("typebox").TLiteral<"cancelled">]>;
+        responses: import("typebox").TArray<import("typebox").TObject<{
+            questionId: import("typebox").TString;
+            transcript: import("typebox").TString;
+            duration: import("typebox").TNumber;
+            timestamp: import("typebox").TNumber;
+            confidence: import("typebox").TNumber;
+            aiAnalysis: import("typebox").TOptional<import("typebox").TObject<{
+                score: import("typebox").TNumber;
+                feedback: import("typebox").TString;
+                strengths: import("typebox").TArray<import("typebox").TString>;
+                improvements: import("typebox").TArray<import("typebox").TString>;
+                source: import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"unknown">]>;
+                provider: import("typebox").TOptional<import("typebox").TString>;
+                model: import("typebox").TOptional<import("typebox").TString>;
+            }>>;
+        }>>;
+        finalAnalysis: import("typebox").TOptional<import("typebox").TObject<{
+            overallScore: import("typebox").TNumber;
+            strengths: import("typebox").TArray<import("typebox").TString>;
+            improvements: import("typebox").TArray<import("typebox").TString>;
+            recommendations: import("typebox").TArray<import("typebox").TString>;
+            feedback: import("typebox").TOptional<import("typebox").TString>;
+            analysisSource: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TLiteral<"ai">, import("typebox").TLiteral<"heuristic">, import("typebox").TLiteral<"mixed">, import("typebox").TLiteral<"unknown">]>>;
+            aiAverageScore: import("typebox").TOptional<import("typebox").TUnion<[import("typebox").TNumber, import("typebox").TNull]>>;
+            provenanceCounts: import("typebox").TOptional<import("typebox").TObject<{
+                ai: import("typebox").TNumber;
+                heuristic: import("typebox").TNumber;
+                unknown: import("typebox").TNumber;
+            }>>;
+        }>>;
+        interviewerPersona: import("typebox").TOptional<import("typebox").TObject<{
+            name: import("typebox").TString;
+            role: import("typebox").TString;
+            studioName: import("typebox").TString;
+            background: import("typebox").TString;
+            style: import("typebox").TString;
+            experience: import("typebox").TString;
+        }>>;
+        role: import("typebox").TOptional<import("typebox").TString>;
+        studioName: import("typebox").TOptional<import("typebox").TString>;
+        score: import("typebox").TOptional<import("typebox").TNumber>;
+        duration: import("typebox").TOptional<import("typebox").TString>;
+        overallFeedback: import("typebox").TOptional<import("typebox").TString>;
+        totalResponses: import("typebox").TOptional<import("typebox").TNumber>;
+        createdAt: import("typebox").TOptional<import("typebox").TString>;
+        updatedAt: import("typebox").TOptional<import("typebox").TString>;
+        message: import("typebox").TOptional<import("typebox").TString>;
+    }>;
     404: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;

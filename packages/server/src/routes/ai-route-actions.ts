@@ -78,9 +78,10 @@ const buildChatRouteResponse = (
   assistantMessage: ChatHistoryInsert,
   response: AIResponse,
   preferredDomain: AIChatContextDomain,
+  sessionId: string,
 ) => ({
   message: assistantMessage.content,
-  sessionId: assistantMessage.sessionId,
+  sessionId,
   timestamp: assistantMessage.timestamp,
   provider: response.provider,
   model: response.model,
@@ -166,7 +167,7 @@ export const handleChatRoute = async (body: {
 
   return routeResult(
     HTTP_STATUS_OK,
-    buildChatRouteResponse(assistantMessage, response, preferredDomain),
+    buildChatRouteResponse(assistantMessage, response, preferredDomain, sessionId),
   );
 };
 

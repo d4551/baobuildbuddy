@@ -1,4 +1,6 @@
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { asRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../../db/client";
 import { portfolioProjects, portfolios } from "../../db/schema/portfolios";
@@ -23,11 +25,11 @@ export interface JobApplyCandidateContext {
 
 const PORTFOLIO_PROJECT_LIMIT = 3;
 
-const isNonEmpty = (value: unknown): value is string =>
+const isNonEmpty = (value: JsonValue): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
-const readString = (record: Record<string, unknown>, key: string): string =>
-  isNonEmpty(record[key]) ? (record[key]).trim() : "";
+const readString = (record: JsonObject, key: string): string =>
+  isNonEmpty(record[key]) ? record[key].trim() : "";
 
 const appendProfileField = (entries: string[], key: string, value: string | null): void => {
   if (isNonEmpty(value)) {
@@ -58,11 +60,12 @@ const buildProfileContext = async (): Promise<string | undefined> => {
   return `User profile (fallback for resume personalInfo):\n${entries.join("\n")}`;
 };
 
-const readMetadataString = (metadata: unknown, key: string): string => {
-  if (!metadata || typeof metadata !== "object") {
+const readMetadataString = (metadata: JsonValue, key: string): string => {
+  const record = asRecord(metadata);
+  if (!record) {
     return "";
   }
-  return readString(metadata as Record<string, unknown>, key);
+  return readString(record, key);
 };
 
 const buildPortfolioContext = async (): Promise<string | undefined> => {
@@ -72,9 +75,10 @@ const buildPortfolioContext = async (): Promise<string | undefined> => {
     return undefined;
   }
   const lines: string[] = [];
-  const portfolioUrl =
-    readMetadataString(portfolioRow.metadata, "url") ||
-    readMetadataString(portfolioRow.metadata, "website");
+  const metadata = asRecord(portfolioRow.metadata);
+  const portfolioUrl = metadata
+    ? readMetadataString(metadata, "url") || readMetadataString(metadata, "website")
+    : "";
   if (portfolioUrl.length > 0) {
     lines.push(`Portfolio URL: ${portfolioUrl}`);
   }

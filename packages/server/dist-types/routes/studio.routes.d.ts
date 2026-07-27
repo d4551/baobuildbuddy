@@ -35,10 +35,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                     description: string | null;
                     games?: string[] | null | undefined;
                     technologies?: string[] | null | undefined;
-                    culture?: unknown;
+                    culture?: Record<string, unknown> | null | undefined;
                     interviewStyle?: string | null | undefined;
                     remoteWork?: boolean | null | undefined;
-                    enrichment?: unknown;
+                    enrichment?: {
+                        summary: string;
+                        hiringSignals: string[];
+                        interviewFocusAreas: string[];
+                        candidatePitchAngles: string[];
+                        provider?: string | undefined;
+                        model?: string | undefined;
+                        updatedAt?: string | undefined;
+                    } | null | undefined;
                     createdAt?: string | undefined;
                     updatedAt?: string | undefined;
                 }[];
@@ -102,10 +110,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         description: string | null;
                         games?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
-                        culture?: unknown;
+                        culture?: Record<string, unknown> | null | undefined;
                         interviewStyle?: string | null | undefined;
                         remoteWork?: boolean | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     };
@@ -120,10 +136,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         description: string | null;
                         games?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
-                        culture?: unknown;
+                        culture?: Record<string, unknown> | null | undefined;
                         interviewStyle?: string | null | undefined;
                         remoteWork?: boolean | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     };
@@ -171,10 +195,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                     description: string | null;
                     games?: string[] | null | undefined;
                     technologies?: string[] | null | undefined;
-                    culture?: unknown;
+                    culture?: Record<string, unknown> | null | undefined;
                     interviewStyle?: string | null | undefined;
                     remoteWork?: boolean | null | undefined;
-                    enrichment?: unknown;
+                    enrichment?: {
+                        summary: string;
+                        hiringSignals: string[];
+                        interviewFocusAreas: string[];
+                        candidatePitchAngles: string[];
+                        provider?: string | undefined;
+                        model?: string | undefined;
+                        updatedAt?: string | undefined;
+                    } | null | undefined;
                     createdAt?: string | undefined;
                     updatedAt?: string | undefined;
                 };
@@ -189,10 +221,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                     description: string | null;
                     games?: string[] | null | undefined;
                     technologies?: string[] | null | undefined;
-                    culture?: unknown;
+                    culture?: Record<string, unknown> | null | undefined;
                     interviewStyle?: string | null | undefined;
                     remoteWork?: boolean | null | undefined;
-                    enrichment?: unknown;
+                    enrichment?: {
+                        summary: string;
+                        hiringSignals: string[];
+                        interviewFocusAreas: string[];
+                        candidatePitchAngles: string[];
+                        provider?: string | undefined;
+                        model?: string | undefined;
+                        updatedAt?: string | undefined;
+                    } | null | undefined;
                     createdAt?: string | undefined;
                     updatedAt?: string | undefined;
                 };
@@ -252,10 +292,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         description: string | null;
                         games?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
-                        culture?: unknown;
+                        culture?: Record<string, unknown> | null | undefined;
                         interviewStyle?: string | null | undefined;
                         remoteWork?: boolean | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     };
@@ -270,10 +318,18 @@ export declare const studioRoutes: import("elysia/types").AddRoute<string, "loca
                         description: string | null;
                         games?: string[] | null | undefined;
                         technologies?: string[] | null | undefined;
-                        culture?: unknown;
+                        culture?: Record<string, unknown> | null | undefined;
                         interviewStyle?: string | null | undefined;
                         remoteWork?: boolean | null | undefined;
-                        enrichment?: unknown;
+                        enrichment?: {
+                            summary: string;
+                            hiringSignals: string[];
+                            interviewFocusAreas: string[];
+                            candidatePitchAngles: string[];
+                            provider?: string | undefined;
+                            model?: string | undefined;
+                            updatedAt?: string | undefined;
+                        } | null | undefined;
                         createdAt?: string | undefined;
                         updatedAt?: string | undefined;
                     };

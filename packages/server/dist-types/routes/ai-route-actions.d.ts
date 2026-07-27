@@ -8,7 +8,7 @@ export declare const handleChatRoute: (body: {
     status: 200;
     body: {
         message: string;
-        sessionId: string | null | undefined;
+        sessionId: string;
         timestamp: string;
         provider: "claude" | "gemini" | "huggingface" | "local" | "openai";
         model: string;

@@ -15,6 +15,33 @@ import { t } from "elysia";
 import type { Static } from "typebox";
 import { simpleErrorResponseSchema } from "./route-error-envelope";
 
+/**
+ * AI-generated hiring/interview context derived from a scraped job or studio.
+ * Mirrors `ScrapePersonaEnrichment` in `@bao/shared/types/jobs`.
+ */
+export const scrapePersonaEnrichmentResponseSchema = t.Object({
+  summary: t.String(),
+  hiringSignals: t.Array(t.String()),
+  interviewFocusAreas: t.Array(t.String()),
+  candidatePitchAngles: t.Array(t.String()),
+  provider: t.Optional(t.String()),
+  model: t.Optional(t.String()),
+  updatedAt: t.Optional(t.String()),
+});
+
+/**
+ * One application lifecycle event. The DB stores these as opaque JSON rows, so
+ * the schema stays open-valued but keeps the known keys typed for consumers.
+ */
+export const applicationTimelineEntrySchema = t.Object({
+  id: t.Optional(t.String()),
+  status: t.Optional(t.String()),
+  type: t.Optional(t.String()),
+  date: t.Optional(t.String()),
+  notes: t.Optional(t.String()),
+  description: t.Optional(t.String()),
+});
+
 export type JobListQuery = {
   q?: string;
   location?: string;
@@ -93,7 +120,7 @@ export const jobEntityResponseSchema = t.Object({
   location: t.String(),
   remote: t.Optional(t.Union([t.Boolean(), t.Null()])),
   hybrid: t.Optional(t.Union([t.Boolean(), t.Null()])),
-  salary: t.Optional(t.Union([t.Unknown(), t.Null()])),
+  salary: t.Optional(t.Union([t.Record(t.String(), t.Union([t.String(), t.Number()])), t.Null()])),
   description: t.Optional(t.Union([t.String(), t.Null()])),
   requirements: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
   technologies: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
@@ -109,7 +136,7 @@ export const jobEntityResponseSchema = t.Object({
   tags: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
   companyLogo: t.Optional(t.Union([t.String(), t.Null()])),
   applicationUrl: t.Optional(t.Union([t.String(), t.Null()])),
-  enrichment: t.Optional(t.Union([t.Unknown(), t.Null()])),
+  enrichment: t.Optional(t.Union([scrapePersonaEnrichmentResponseSchema, t.Null()])),
   createdAt: t.Optional(t.String()),
   updatedAt: t.Optional(t.String()),
   matchScore: t.Optional(t.Number()),
@@ -136,7 +163,7 @@ export const applicationResponseSchema = t.Object({
   status: t.Union([t.String(), t.Null()]),
   appliedDate: t.Optional(t.Union([t.String(), t.Null()])),
   notes: t.Optional(t.Union([t.String(), t.Null()])),
-  timeline: t.Optional(t.Union([t.Array(t.Unknown()), t.Null()])),
+  timeline: t.Optional(t.Union([t.Array(applicationTimelineEntrySchema), t.Null()])),
   createdAt: t.Optional(t.String()),
   updatedAt: t.Optional(t.String()),
 });
@@ -197,7 +224,7 @@ export const applyJobResponses = {
     status: t.Optional(t.String()),
     appliedDate: t.Optional(t.String()),
     notes: t.Optional(t.String()),
-    timeline: t.Optional(t.Array(t.Unknown())),
+    timeline: t.Optional(t.Array(applicationTimelineEntrySchema)),
   }),
   [HTTP_STATUS_CREATED]: applicationResponseSchema,
   [HTTP_STATUS_NOT_FOUND]: simpleErrorResponseSchema,

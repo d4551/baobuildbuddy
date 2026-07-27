@@ -204,7 +204,15 @@ export declare const automationActionResponseSchema: import("typebox").TObject<{
     message: import("typebox").TString;
 }>;
 export declare const chatRouteResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        sessionId: import("typebox").TString;
+        timestamp: import("typebox").TString;
+        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+        model: import("typebox").TString;
+        followUps: import("typebox").TArray<import("typebox").TString>;
+        contextDomain: import("typebox").TString;
+    }>;
     readonly 500: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -257,7 +265,16 @@ export declare const analyzeResumeResponses: {
     }>;
 };
 export declare const aiGenerateCoverLetterResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        content: import("typebox").TObject<{
+            introduction: import("typebox").TString;
+            body: import("typebox").TString;
+            conclusion: import("typebox").TString;
+        }>;
+        provider: import("typebox").TUnion<[import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">, import("typebox").TLiteral<"claude" | "gemini" | "huggingface" | "local" | "openai">]>;
+        model: import("typebox").TString;
+    }>;
     readonly 404: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;
@@ -281,7 +298,21 @@ export declare const aiGenerateCoverLetterResponses: {
     }>;
 };
 export declare const matchJobsResponses: {
-    readonly 200: import("typebox").TUnknown;
+    readonly 200: import("typebox").TObject<{
+        message: import("typebox").TString;
+        matches: import("typebox").TArray<import("typebox").TObject<{
+            jobId: import("typebox").TString;
+            title: import("typebox").TString;
+            company: import("typebox").TString;
+            location: import("typebox").TUnion<[import("typebox").TString, import("typebox").TNull]>;
+            remote: import("typebox").TBoolean;
+            score: import("typebox").TNumber;
+            strengths: import("typebox").TArray<import("typebox").TString>;
+            concerns: import("typebox").TArray<import("typebox").TString>;
+            highlightSkills: import("typebox").TArray<import("typebox").TString>;
+        }>>;
+        recommendations: import("typebox").TArray<import("typebox").TString>;
+    }>;
     readonly 500: import("typebox").TObject<{
         error: import("typebox").TString;
         code: import("typebox").TOptional<import("typebox").TString>;

@@ -25,6 +25,11 @@ import { parseResponsePayload, sessionConfigFromUi } from "./interview-route-con
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 import { sessionWithDerivedFields } from "./interview-route-presentation";
 
+const routeResult = <const Status extends number, Body>(status: Status, body: Body) => ({
+  status,
+  body,
+});
+
 const buildDefaultResponse = (questionId: string, answer: string): InterviewResponse => ({
   questionId,
   transcript: answer,
@@ -54,79 +59,54 @@ export const createInterviewSession = async (
   const resolvedStudioId = asString(studioId) || INTERVIEW_FALLBACK_STUDIO_ID;
   const created = await interviewService.startSession(resolvedStudioId, normalizedConfig);
   const response = await sessionWithDerivedFields(created);
-  return {
-    status: HTTP_STATUS_CREATED,
-    body: {
-      ...response,
-      message: API_MESSAGE_INTERVIEW_SESSION_CREATED,
-    },
-  };
+  return routeResult(HTTP_STATUS_CREATED, {
+    ...response,
+    message: API_MESSAGE_INTERVIEW_SESSION_CREATED,
+  });
 };
 
 export const getInterviewSession = async (id: string) => {
   const session = await interviewService.getSession(id);
   if (!session) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
-      body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
-    };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND });
   }
-  return {
-    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
-    body: await sessionWithDerivedFields(session),
-  };
+  return routeResult(HTTP_STATUS_OK, await sessionWithDerivedFields(session));
 };
 
 export const submitInterviewResponse = async (id: string, body: SubmitResponseBody) => {
   const session = await interviewService.getSession(id);
   if (!session) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
-      body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
-    };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND });
   }
 
   const payload = parseResponsePayload(body);
   if (!payload) {
-    return {
-      status: HTTP_STATUS_BAD_REQUEST as typeof HTTP_STATUS_BAD_REQUEST,
-      body: { error: API_ERROR_INTERVIEW_RESPONSE_REQUIRED },
-    };
+    return routeResult(HTTP_STATUS_BAD_REQUEST, { error: API_ERROR_INTERVIEW_RESPONSE_REQUIRED });
   }
 
   const resolvedQuestionId = resolveQuestionId(session, payload);
   if (!resolvedQuestionId) {
-    return {
-      status: HTTP_STATUS_BAD_REQUEST as typeof HTTP_STATUS_BAD_REQUEST,
-      body: { error: API_ERROR_INTERVIEW_QUESTION_UNRESOLVED },
-    };
+    return routeResult(HTTP_STATUS_BAD_REQUEST, {
+      error: API_ERROR_INTERVIEW_QUESTION_UNRESOLVED,
+    });
   }
 
   const response = buildDefaultResponse(resolvedQuestionId, payload.response);
   const updated = await interviewService.addResponse(id, response);
   if (!updated) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
-      body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
-    };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND });
   }
 
-  return {
-    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
-    body: {
-      ...(await sessionWithDerivedFields(updated)),
-      message: API_MESSAGE_RESPONSE_RECORDED,
-    },
-  };
+  return routeResult(HTTP_STATUS_OK, {
+    ...(await sessionWithDerivedFields(updated)),
+    message: API_MESSAGE_RESPONSE_RECORDED,
+  });
 };
 
 export const completeInterviewSession = async (id: string) => {
   const completed = await interviewService.completeSession(id);
   if (!completed) {
-    return {
-      status: HTTP_STATUS_NOT_FOUND as typeof HTTP_STATUS_NOT_FOUND,
-      body: { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND },
-    };
+    return routeResult(HTTP_STATUS_NOT_FOUND, { error: API_ERROR_INTERVIEW_SESSION_NOT_FOUND });
   }
 
   gamificationService.trackActionFireAndForget(
@@ -135,11 +115,8 @@ export const completeInterviewSession = async (id: string) => {
     "interview_completed",
   );
 
-  return {
-    status: HTTP_STATUS_OK as typeof HTTP_STATUS_OK,
-    body: {
-      ...(await sessionWithDerivedFields(completed)),
-      message: API_MESSAGE_INTERVIEW_COMPLETED,
-    },
-  };
+  return routeResult(HTTP_STATUS_OK, {
+    ...(await sessionWithDerivedFields(completed)),
+    message: API_MESSAGE_INTERVIEW_COMPLETED,
+  });
 };

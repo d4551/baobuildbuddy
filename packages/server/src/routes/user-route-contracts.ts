@@ -11,6 +11,51 @@ import {
 import { t } from "elysia";
 import type { Static } from "typebox";
 
+const experienceLevelSchema = t.Union([
+  t.Literal("entry"),
+  t.Literal("junior"),
+  t.Literal("mid"),
+  t.Literal("senior"),
+  t.Literal("lead"),
+  t.Literal("principal"),
+  t.Literal("director"),
+]);
+
+const shippedTitleSchema = t.Object({
+  name: t.String(),
+  platforms: t.Array(t.String()),
+  releaseDate: t.Optional(t.String()),
+  role: t.String(),
+  teamSize: t.Optional(t.Number()),
+});
+
+const gamingExperienceSchema = t.Object({
+  yearsInGaming: t.Optional(t.Number()),
+  experienceLevel: t.Optional(experienceLevelSchema),
+  specializations: t.Optional(t.Array(t.String())),
+  gameEngines: t.Optional(t.Array(t.String())),
+  platforms: t.Optional(t.Array(t.String())),
+  genres: t.Optional(t.Array(t.String())),
+  shippedTitles: t.Optional(t.Array(shippedTitleSchema)),
+});
+
+const careerGoalsSchema = t.Object({
+  desiredRoles: t.Optional(t.Array(t.String())),
+  preferredCompanySize: t.Optional(t.Array(t.String())),
+  preferredLocations: t.Optional(t.Array(t.String())),
+  remotePreference: t.Optional(
+    t.Union([t.Literal("onsite"), t.Literal("hybrid"), t.Literal("remote"), t.Literal("flexible")]),
+  ),
+  salaryRange: t.Optional(
+    t.Object({
+      min: t.Number(),
+      max: t.Number(),
+      currency: t.Optional(t.String()),
+    }),
+  ),
+  willingToRelocate: t.Optional(t.Boolean()),
+});
+
 export const userProfileUpdateBodySchema = t.Object({
   name: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_SHORT })),
   email: t.Optional(t.String({ maxLength: SCHEMA_MAX_LENGTH_EMAIL })),
@@ -33,8 +78,8 @@ export const userProfileUpdateBodySchema = t.Object({
       maxItems: SCHEMA_MAX_ITEMS_LARGE,
     }),
   ),
-  gamingExperience: t.Optional(t.Record(t.String(), t.Unknown())),
-  careerGoals: t.Optional(t.Record(t.String(), t.Unknown())),
+  gamingExperience: t.Optional(gamingExperienceSchema),
+  careerGoals: t.Optional(careerGoalsSchema),
 });
 
 export type UserProfileUpdateRouteBody = Static<typeof userProfileUpdateBodySchema>;
@@ -54,8 +99,8 @@ export const userProfileResponseSchema = t.Object({
   yearsExperience: t.Union([t.Number(), t.Null()]),
   technicalSkills: t.Array(t.String()),
   softSkills: t.Array(t.String()),
-  gamingExperience: t.Record(t.String(), t.Unknown()),
-  careerGoals: t.Record(t.String(), t.Unknown()),
+  gamingExperience: gamingExperienceSchema,
+  careerGoals: careerGoalsSchema,
   createdAt: t.String(),
   updatedAt: t.String(),
 });

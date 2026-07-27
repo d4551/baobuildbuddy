@@ -1,8 +1,7 @@
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from "@bao/shared/constants/http";
 import type { InterviewResponse } from "@bao/shared/types/interview";
 import type { CreateSessionConfigInput, SubmitResponseBody } from "./interview-route-contracts";
 export declare const createInterviewSession: (studioId: string | undefined, config: CreateSessionConfigInput | undefined) => Promise<{
-    status: number;
+    status: 201;
     body: {
         id: string;
         studioId: string;
@@ -28,26 +27,16 @@ export declare const createInterviewSession: (studioId: string | undefined, conf
     };
 }>;
 export declare const getInterviewSession: (id: string) => Promise<{
-    status: typeof HTTP_STATUS_NOT_FOUND;
+    status: 200;
+    body: import("./interview-route-contracts").SessionPayload;
+} | {
+    status: 404;
     body: {
         error: string;
     };
-} | {
-    status: typeof HTTP_STATUS_OK;
-    body: import("./interview-route-contracts").SessionPayload;
 }>;
 export declare const submitInterviewResponse: (id: string, body: SubmitResponseBody) => Promise<{
-    status: typeof HTTP_STATUS_NOT_FOUND;
-    body: {
-        error: string;
-    };
-} | {
-    status: typeof HTTP_STATUS_BAD_REQUEST;
-    body: {
-        error: string;
-    };
-} | {
-    status: typeof HTTP_STATUS_OK;
+    status: 200;
     body: {
         id: string;
         studioId: string;
@@ -69,17 +58,21 @@ export declare const submitInterviewResponse: (id: string, body: SubmitResponseB
         totalResponses?: number;
         createdAt?: string;
         updatedAt?: string;
-        error?: undefined;
         message: string;
+    };
+} | {
+    status: 400;
+    body: {
+        error: string;
+    };
+} | {
+    status: 404;
+    body: {
+        error: string;
     };
 }>;
 export declare const completeInterviewSession: (id: string) => Promise<{
-    status: typeof HTTP_STATUS_NOT_FOUND;
-    body: {
-        error: string;
-    };
-} | {
-    status: typeof HTTP_STATUS_OK;
+    status: 200;
     body: {
         id: string;
         studioId: string;
@@ -101,7 +94,11 @@ export declare const completeInterviewSession: (id: string) => Promise<{
         totalResponses?: number;
         createdAt?: string;
         updatedAt?: string;
-        error?: undefined;
         message: string;
+    };
+} | {
+    status: 404;
+    body: {
+        error: string;
     };
 }>;

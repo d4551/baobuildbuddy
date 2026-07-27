@@ -5,19 +5,17 @@ import {
   HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
-import { Elysia, type status } from "elysia";
+import { Elysia } from "elysia";
 import { interviewService } from "../services/interview-service";
 import { openapiDetail } from "../utils/openapi-detail";
 import {
   completeInterviewSessionResponses,
   createInterviewSessionResponses,
   createSessionBodySchema,
-  type InterviewSessionParams,
   interviewSessionParamsSchema,
   interviewSessionResponses,
   interviewSessionsListResponses,
   interviewStatsResponses,
-  type SubmitResponseRouteBody,
   submitInterviewResponseResponses,
   submitResponseBodySchema,
 } from "./interview-route-contracts";
@@ -29,8 +27,6 @@ import {
   getInterviewSession,
   submitInterviewResponse,
 } from "./interview-route-support";
-
-type RouteStatus = typeof status;
 
 export const interviewRoutes = new Elysia({
   prefix: toApiScopedPath(API_ENDPOINTS.interviewBase),
@@ -93,15 +89,7 @@ export const interviewRoutes = new Elysia({
       body: submitResponseBodySchema,
       response: submitInterviewResponseResponses,
     },
-    async ({
-      params,
-      body,
-      status,
-    }: {
-      params: InterviewSessionParams;
-      body: SubmitResponseRouteBody;
-      status: RouteStatus;
-    }) => {
+    async ({ params, body, status }) => {
       const result = await submitInterviewResponse(params.id, body);
       if (result.status === HTTP_STATUS_NOT_FOUND) {
         return status(HTTP_STATUS_NOT_FOUND, result.body);
@@ -122,7 +110,7 @@ export const interviewRoutes = new Elysia({
       params: interviewSessionParamsSchema,
       response: completeInterviewSessionResponses,
     },
-    async ({ params, status }: { params: InterviewSessionParams; status: RouteStatus }) => {
+    async ({ params, status }) => {
       const result = await completeInterviewSession(params.id);
       if (result.status === HTTP_STATUS_NOT_FOUND) {
         return status(HTTP_STATUS_NOT_FOUND, result.body);
