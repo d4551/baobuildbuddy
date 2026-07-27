@@ -13,6 +13,36 @@ const CLAUDE_TEST_MAX_TOKENS = 1;
 const CLAUDE_TEST_MODEL = "claude-sonnet-5";
 const ANTHROPIC_API_VERSION = "2023-06-01";
 
+/**
+ * Claude model-id prefixes whose Messages API dropped the sampling parameters.
+ *
+ * Anthropic removed `temperature` / `top_p` / `top_k` from Claude Opus 4.7 onward
+ * (Opus 4.7/4.8/5, Sonnet 5, Fable 5, Mythos 5). Sending any of them to one of
+ * these models is a `400 invalid_request_error`, so a caller that always supplies
+ * a default temperature cannot talk to the current model family at all — the
+ * parameter has to be omitted, not defaulted. Older Claude models still accept it.
+ */
+const CLAUDE_MODEL_PREFIXES_WITHOUT_SAMPLING_PARAMETERS = [
+  "claude-fable-5",
+  "claude-mythos-5",
+  "claude-mythos-preview",
+  "claude-opus-5",
+  "claude-opus-4-8",
+  "claude-opus-4-7",
+  "claude-sonnet-5",
+] as const;
+
+/**
+ * True when the Claude model still accepts `temperature` (and the other sampling
+ * parameters). Callers must omit the parameter entirely when this returns false.
+ */
+export const claudeModelAcceptsSamplingParameters = (model: string): boolean => {
+  const normalized = model.trim().toLowerCase();
+  return !CLAUDE_MODEL_PREFIXES_WITHOUT_SAMPLING_PARAMETERS.some((prefix) =>
+    normalized.startsWith(prefix),
+  );
+};
+
 export { AI_ROUTING_PURPOSE_IDS };
 
 /**

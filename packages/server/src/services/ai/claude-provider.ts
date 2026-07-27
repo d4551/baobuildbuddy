@@ -3,6 +3,7 @@ import {
   AI_DEFAULT_MAX_TOKENS_CLAUDE,
   AI_DEFAULT_TEMPERATURE_CREATIVE,
 } from "@bao/shared/constants/ai-generation";
+import { claudeModelAcceptsSamplingParameters } from "@bao/shared/constants/ai-provider";
 import { API_ERROR_AI_STREAMING_FAILED } from "@bao/shared/constants/api-errors";
 import type { AIResponse, GenerateOptions } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
@@ -29,6 +30,22 @@ export class ClaudeProvider extends BaseAIProvider {
       : this.model;
   }
 
+  /**
+   * Sampling parameters were removed from the Messages API on Claude Opus 4.7 and
+   * every model after it, and the provider's default model is one of them — so
+   * always sending `temperature` made every request a `400`. Spread this instead
+   * of setting the field, so the key is absent (not `undefined`) on those models.
+   */
+  private resolveSamplingParameters(
+    model: string,
+    options?: GenerateOptions,
+  ): { temperature?: number } {
+    if (!claudeModelAcceptsSamplingParameters(model)) {
+      return {};
+    }
+    return { temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE };
+  }
+
   async generate(prompt: string, options?: GenerateOptions): Promise<AIResponse> {
     const startTime = Date.now();
     const model = this.resolveModel(options);
@@ -36,7 +53,7 @@ export class ClaudeProvider extends BaseAIProvider {
       this.client.messages.create({
         model,
         max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_CLAUDE,
-        temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+        ...this.resolveSamplingParameters(model, options),
         system: options?.systemPrompt,
         messages: [
           {
@@ -82,7 +99,7 @@ export class ClaudeProvider extends BaseAIProvider {
         this.client.messages.stream({
           model,
           max_tokens: options?.maxTokens ?? AI_DEFAULT_MAX_TOKENS_CLAUDE,
-          temperature: options?.temperature ?? AI_DEFAULT_TEMPERATURE_CREATIVE,
+          ...this.resolveSamplingParameters(model, options),
           system: options?.systemPrompt,
           messages: [
             {

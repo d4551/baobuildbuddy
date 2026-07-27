@@ -14,13 +14,13 @@ import {
   COUNT_FIVE_HUNDRED,
   COUNT_FOUR,
   HTTP_OK,
-  MS_EIGHT_HUNDRED,
   MS_FOUR_SECONDS,
   MS_ONE_TWO_HUNDRED,
   MS_THREE_HUNDRED,
   VIEWPORT_HEIGHT_DESKTOP,
   VIEWPORT_WIDTH_DESKTOP,
 } from "./constants/numeric-literals";
+import { pollUntil } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
@@ -36,11 +36,23 @@ const SERVER_BASE = (resolveProofEnv("PAGE_PROOF_SERVER_BASE") ?? "http://127.0.
   /\/$/u,
   "",
 );
-const OUT = resolveProofOutDir(
-  "KOKORO_PROOF_OUT",
-  artifactDir("live-capabilities", "kokoro-tts"),
-);
+const OUT = resolveProofOutDir("KOKORO_PROOF_OUT", artifactDir("live-capabilities", "kokoro-tts"));
 const RE_SAVE_SPEECH = /Save Speech Profile|Save speech/i;
+const SETTINGS_SAVE_TIMEOUT_MS = 20_000;
+
+/** Stored TTS provider, so the proof can wait for the save instead of guessing. */
+const readStoredTtsProvider = async (): Promise<string | null> => {
+  const response = await fetch(new URL(API_ENDPOINTS.settings, SERVER_BASE).toString(), {
+    signal: AbortSignal.timeout(SETTINGS_SAVE_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const body = (await response.json()) as {
+    automationSettings?: { speech?: { tts?: { provider?: string } } };
+  };
+  return body.automationSettings?.speech?.tts?.provider ?? null;
+};
 const RE_VOICE_SETTINGS = /Speech|Voice|音声|Voix|Voz/i;
 const DESKTOP_VIEWPORT = {
   width: VIEWPORT_WIDTH_DESKTOP,
@@ -118,7 +130,18 @@ const probeUiTestSpeaker = async (
   const saveBtn = page.getByRole("button", { name: RE_SAVE_SPEECH });
   if ((await saveBtn.count()) > 0) {
     await saveBtn.click();
-    await wait(page, MS_EIGHT_HUNDRED);
+    // `wait()` only bounds a load-state check and returns immediately, so the
+    // Test speaker click below used to race the save and hit the API while the
+    // stored provider was still the previous one, yielding a 422.
+    const persisted = await pollUntil({
+      probe: async () => ((await readStoredTtsProvider()) === "local" ? true : null),
+      intervalMs: MS_THREE_HUNDRED,
+      timeoutMs: SETTINGS_SAVE_TIMEOUT_MS,
+      sleep: (milliseconds) => Bun.sleep(milliseconds),
+    });
+    if (!persisted) {
+      findings.push("Speech profile save never persisted tts.provider=local");
+    }
   }
   await page.screenshot({ path: join(OUT, "stills", "01-kokoro-settings.png") });
   const testTts = page.getByTestId("on-device-tts-test");
@@ -141,7 +164,6 @@ const main = async (): Promise<void> => {
   await mkdir(join(OUT, "raw"), { recursive: true });
   await mkdir(join(OUT, "audio"), { recursive: true });
   const findings: string[] = [];
-  await probeSynthesizeApi(findings);
   const browser = await chromium.launch({
     headless: false,
     args: ["--disable-dev-shm-usage"],
@@ -158,6 +180,10 @@ const main = async (): Promise<void> => {
     }
   });
   await probeUiTestSpeaker(page, findings, () => synthesizeCalls);
+  // Probe the API only after the UI has selected and persisted TTS=local;
+  // running it first made the proof depend on whatever the database happened
+  // to hold, so a prior run that left another provider stored failed it.
+  await probeSynthesizeApi(findings);
   const video = page.video();
   await context.close();
   await browser.close();

@@ -67,6 +67,13 @@ let loadJobProviderSettingsImpl: () => Promise<ProviderSettings> = () =>
   Promise.resolve(createJobProviderSettings());
 let fetchImpl: FetchImpl = () => Promise.resolve(new Response("[]", { status: 200 }));
 
+// Destructured before the mocks are installed so the real bindings are copied
+// rather than read back through the (by then replaced) namespaces.
+const { loadJobProviderSettings: realLoadJobProviderSettings } = await import(
+  "./provider-settings"
+);
+const { createServerLogger: realCreateServerLogger } = await import("../../../utils/logger");
+
 await mock.module("./provider-settings", () => ({
   loadJobProviderSettings: () => loadJobProviderSettingsImpl(),
 }));
@@ -111,9 +118,18 @@ beforeEach(() => {
   fetchImpl = () => Promise.resolve(new Response("[]", { status: 200 }));
 });
 
-afterAll(() => {
+// `mock.module` swaps the module for the whole test process and `mock.restore()`
+// does not undo it, so the replacements have to be handed back explicitly or every
+// later file inherits this file's provider settings and silenced logger.
+afterAll(async () => {
   globalThis.fetch = originalFetch;
   mock.restore();
+  await mock.module("./provider-settings", () => ({
+    loadJobProviderSettings: realLoadJobProviderSettings,
+  }));
+  await mock.module("../../../utils/logger", () => ({
+    createServerLogger: realCreateServerLogger,
+  }));
 });
 
 describe("company board provider failure logging", () => {

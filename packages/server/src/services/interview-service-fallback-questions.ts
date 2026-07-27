@@ -180,7 +180,7 @@ const FALLBACK_QUESTION_BUILDERS: Record<
     tags: [...seed.tags, "studio-context", "scrape-enrichment"],
   }),
   technical: (seed, context) => ({
-    question: `Walk me through a system from ${context.projectHighlight} where you used ${context.primaryTechnology} in a way that would transfer directly to the ${context.roleTarget} scope at ${context.interviewEntity}.`,
+    question: `Walk me through ${context.projectHighlight} where you used ${context.primaryTechnology} in a way that would transfer directly to the ${context.roleTarget} scope at ${context.interviewEntity}.`,
     followUps: [
       `What constraints shaped your use of ${context.primaryTechnology}?`,
       "What telemetry, QA checks, or player signals told you the solution was healthy?",
@@ -229,14 +229,23 @@ export function buildFallbackQuestions(
   const pool = filtered.length > 0 ? filtered : FALLBACK_INTERVIEW_QUESTIONS;
   const context = buildFallbackInterviewContext(studio, config, candidateContext);
   const questions: InterviewQuestion[] = [];
+  const askedQuestions = new Set<string>();
 
   while (questions.length < normalizedQuestionCount) {
     const seed = pool[questions.length % pool.length];
     const contextualized = buildFallbackQuestionText(seed, context);
+    // Builders render from the seed's `type` plus the shared context, so two
+    // seeds of the same type — and any pass where the pool wraps — collapse to
+    // identical text. Fall back to the seed's own wording so a practice run
+    // never asks the same question twice in a row.
+    const question = askedQuestions.has(contextualized.question)
+      ? seed.question
+      : contextualized.question;
+    askedQuestions.add(question);
     questions.push({
       ...seed,
       id: `fallback-${questions.length + 1}`,
-      question: contextualized.question,
+      question,
       followUps: contextualized.followUps,
       tags: contextualized.tags,
     });

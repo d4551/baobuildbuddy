@@ -1,8 +1,9 @@
 const NUM_12 = 12;
+const NUM_1000 = 1_000;
+const NUM_120000 = 120_000;
 const NUM_1500 = 1_500;
 const NUM_2000 = 2_000;
 const NUM_250 = 250;
-const NUM_3000 = 3_000;
 const NUM_40 = 40;
 const NUM_45000 = 45_000;
 const NUM_800 = 800;
@@ -25,6 +26,7 @@ import {
   wait,
   waitForEnabled,
 } from "./browser-record-product-demo-shared";
+import { pollUntil } from "./utils/async-control";
 
 const openInterviewConfig = async (page: Page): Promise<void> => {
   await page.goto(`${CLIENT_BASE}${APP_ROUTES.interview}`, {
@@ -56,24 +58,52 @@ const configureStudioAndVoice = async (page: Page): Promise<void> => {
   }
 };
 
+const INTERVIEW_ANSWER =
+  "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.";
+
+/**
+ * Natural-conversation sessions generate one question at a time, and
+ * `InterviewChat` clears `currentResponse` whenever the composer is disabled.
+ * Typing before the composer is ready therefore loses the answer and leaves
+ * "Submit & Next" disabled, so wait for each gate on a real clock — the shared
+ * `wait()` helper only bounds a load-state check and returns immediately.
+ */
 const startAndAnswerInterview = async (page: Page): Promise<void> => {
   const start = page.getByRole("button", { name: RE_START_INTERVIEW_SESSION }).first();
   await start.waitFor({ state: "visible", timeout: 10_000 });
   await waitForEnabled(page, start, NUM_40, NUM_250);
   if (await start.isDisabled()) return;
   await start.click({ timeout: 8_000 });
-  await wait(page, NUM_3000);
   await shot(page, "17-interview-session");
+
   const response = page.locator("textarea:visible").first();
-  const current = (await response.inputValue()).trim();
-  if (current.length < NUM_12) {
-    await response.fill(
-      "In my last role I owned encounter pacing for a co-op combat sandbox. I partnered with design to define readability goals, shipped iteration tooling that cut balance cycles by half, and validated changes with playtests before live deploy.",
-    );
+  await response.waitFor({ state: "visible", timeout: NUM_120000 });
+  const composerReady = await pollUntil({
+    probe: async () => ((await response.isDisabled()) ? null : true),
+    intervalMs: NUM_1000,
+    timeoutMs: NUM_120000,
+    sleep: (milliseconds) => Bun.sleep(milliseconds),
+  });
+  if (!composerReady) {
+    throw new Error("Interview composer stayed disabled — no question was ready to answer.");
+  }
+
+  if ((await response.inputValue()).trim().length < NUM_12) {
+    await response.fill(INTERVIEW_ANSWER);
   }
   const submit = page.locator("button", { hasText: RE_SUBMIT_RESPONSE }).first();
+  const submitReady = await pollUntil({
+    probe: async () => ((await submit.isDisabled()) ? null : true),
+    intervalMs: NUM_1000,
+    timeoutMs: NUM_45000,
+    sleep: (milliseconds) => Bun.sleep(milliseconds),
+  });
+  if (!submitReady) {
+    await shot(page, "18-interview-submit-blocked");
+    throw new Error("Interview submit stayed disabled after typing an answer.");
+  }
   await submit.click({ timeout: 8_000 });
-  await wait(page, NUM_45000);
+  await Bun.sleep(NUM_45000);
   await shot(page, "18-interview-feedback");
 };
 

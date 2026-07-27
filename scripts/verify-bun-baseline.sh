@@ -5,6 +5,14 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 BASELINE="bun@1.3.14"
+# Previous pin. Kept as a literal so a half-finished bump is caught; the pattern is
+# passed through a variable because inlining it under single quotes double-escaped
+# the dots and the scan silently matched nothing.
+STALE_VERSION="1.3.11"
+# Dots are escaped: the pattern is an extended regex for rg/grep, so a bare "."
+# would match any character and make the scan both over- and under-eager.
+STALE_VERSION_PATTERN="${STALE_VERSION//./\\.}"
+STALE_PATTERN="bun@${STALE_VERSION_PATTERN}|\"${STALE_VERSION_PATTERN}\""
 CURRENT="$(bun pm pkg get packageManager | tr -d '[:space:]')"
 
 if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then
@@ -22,7 +30,7 @@ read_stale_bun_refs_with_rg() {
     -g '!**/.git/**' \
     -g '!**/.bun/**' \
     -g '!scripts/verify-bun-baseline.sh' \
-    -e 'bun@1\\.3\\.11|\"1\\.3\\.11\"' .)"
+    -e "$STALE_PATTERN" .)"
   status=$?
   set -e
 
@@ -49,7 +57,7 @@ read_stale_bun_refs_with_grep() {
       \( -path './node_modules' -o -path './.git' -o -path './.bun' \) -prune \
       -o -type f \
       ! -path './scripts/verify-bun-baseline.sh' \
-      -exec grep -InE 'bun@1\\.3\\.11|\"1\\.3\\.11\"' {} +
+      -exec grep -InE "$STALE_PATTERN" {} +
   )"
   status=$?
   set -e
@@ -73,9 +81,9 @@ else
   STALE_LINES="$(read_stale_bun_refs_with_grep)"
 fi
 if [[ -n "$STALE_LINES" ]]; then
-  echo "❌ Found stale Bun 1.3.11 references:"
+  echo "❌ Found stale Bun ${STALE_VERSION} references:"
   echo "$STALE_LINES"
   exit 1
 fi
 
-echo "✅ Bun baseline and stale 1.3.9 reference checks passed"
+echo "✅ Bun baseline and stale ${STALE_VERSION} reference checks passed"

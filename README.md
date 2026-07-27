@@ -83,6 +83,7 @@ Not sure where to start? Choose the guide that matches your goal:
 | Learn the automation and RPA flows        | [Automation Guide](docs/AUTOMATION.md)                         |
 | Run the full proof and verification pass  | [Verification Runbook](docs/VERIFICATION_RUNBOOK.md)           |
 | Deploy to Railway                         | [Railway Deployment Guide](docs/RAILWAY.md)                    |
+| Publish the download site                 | [Docs Site Deployment](docs/DOCS_SITE_DEPLOY.md)               |
 | Install a desktop app (no dev setup)      | [Non-Technical Install](#non-technical-install)                |
 | Read the full technical reference         | Keep reading this file                                         |
 | Resolve conflicting “audit” stack claims  | [Stack contract](docs/STACK-CONTRACT.md) (Drizzle + Nuxt, not Prisma + htmx) |
@@ -336,6 +337,27 @@ flowchart TB
   Export --> PDF --> SQLite
   AIChat --> SQLite
 ```
+
+**Provisioning the speech services.** Both servers are Python and neither ships
+its dependencies or model weights, so `speech:whisper:serve` and
+`speech:kokoro:serve` exit immediately until you install them once:
+
+```bash
+# Whisper STT (:8090) — real faster-whisper inference
+pip install faster-whisper fastapi uvicorn python-multipart
+bun run speech:whisper:serve            # downloads the `tiny` model on first run
+
+# Kokoro TTS (:8880) — on-device ONNX, weights are not bundled
+pip install kokoro-onnx
+mkdir -p ~/.bao/kokoro && cd ~/.bao/kokoro
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+bun run speech:kokoro:serve             # 54 voices, af_heart by default
+```
+
+Override the model/voice locations with `KOKORO_MODEL_PATH` / `KOKORO_VOICES_PATH`
+and the Whisper size with `WHISPER_MODEL`. The headed proofs additionally need an
+X server and an encoder — `xvfb-run` (or `DISPLAY=:99` with `Xvfb`) plus `ffmpeg`.
 
 **Fail-closed proofs (no speechSynthesis-only greens):**
 
@@ -592,6 +614,8 @@ bun run --cwd packages/client dev -- --host 127.0.0.1 --port 3001
 | Release desktop (Linux x64) | `bun run release:desktop:linux-x64`                    | Native Linux x64 release artifacts                  |
 | Release desktop (Linux ARM) | `bun run release:desktop:linux-arm64`                  | Native Linux ARM64 release artifacts                |
 | Release refresh (all staged OSes) | `bun run release:refresh:all-os`                | Assemble staged release artifacts + checksums       |
+| Docs site bundle            | `bun run docs-site:bundle`                             | Stage the deployable site into `dist/docs-site`     |
+| Docs site deploy            | `bun run docs-site:deploy`                             | Publish `dist/docs-site` over FTPS (env credentials) |
 | Verify pages                | `bun run verify:pages`                                 | Validate SSR routes return proper HTML              |
 | Browser visual smoke        | `bun run proof:browser-smoke`                          | Playwright screenshots @ mobile/tablet/desktop      |
 | Browser interaction burndown| `bun run proof:browser-burndown`                       | Click/fill probe + 5Q ledger per route × viewport   |
@@ -1325,6 +1349,29 @@ bun run verify:desktop-releases -- --targets macos,windows,linux-arm64
 **Output locations:**
 - Raw build output: `packages/desktop/src-tauri/target/release/bundle`
 - Release artifacts: `packages/desktop/releases/{macos,windows,linux-x64,linux-arm64}`
+
+### Publishing the download site
+
+The installers above are only downloadable once they are on the public site. `docs/index.html`
+links to `releases/<platform>/<file>`, `releases/sha256.txt` and `releases/provenance.json`,
+all of which live in the canonical release tree rather than in `docs/` — so the page and the
+release tree have to be published together:
+
+```bash
+git lfs pull                   # release binaries are LFS objects
+bun run docs-site:bundle       # stage docs/ + release tree into dist/docs-site
+bun run docs-site:deploy       # upload over FTPS (credentials from the environment)
+```
+
+`docs-site:deploy -- --dry-run` prints the upload plan without connecting. The bundler fails
+closed if any artifact is still an LFS pointer, so a checkout without `git lfs pull` cannot
+publish 133-byte files as installers; pass `-- --skip-artifacts` for a page-only update.
+
+In CI, `.github/workflows/deploy-docs-site.yml` publishes automatically after a successful
+`desktop-release` run on `main` — consuming that run's assembled all-OS artifact set — and on
+pushes that touch the site. Credentials come from repository secrets
+(`BAO_DOCS_FTP_HOST`, `BAO_DOCS_FTP_USER`, `BAO_DOCS_FTP_PASSWORD`); see
+[docs/DOCS_SITE_DEPLOY.md](docs/DOCS_SITE_DEPLOY.md).
 - Checksums: `packages/desktop/releases/sha256.txt`
 
 ### Platform notes

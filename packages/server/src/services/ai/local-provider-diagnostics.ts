@@ -217,6 +217,15 @@ export async function detectFirstLocalProviderModel(baseUrl: string): Promise<st
   return diagnostics.availableModels?.[0] ?? null;
 }
 
+/**
+ * Model ids the local server actually serves. Used to reject a per-request model
+ * the endpoint does not have installed before it turns into a 404.
+ */
+export async function listLocalProviderModelIds(baseUrl: string): Promise<readonly string[]> {
+  const diagnostics = await inspectLocalProviderEndpoint(baseUrl);
+  return diagnostics.availableModels ?? [];
+}
+
 export async function detectLocalProviderServers(): Promise<
   Array<{
     id?: string;

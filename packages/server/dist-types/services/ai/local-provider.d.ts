@@ -9,6 +9,16 @@ export declare class LocalProvider extends BaseAIProvider {
     model: string;
     private client;
     constructor(baseUrl?: string, model?: string, apiKey?: string);
+    /**
+     * Per-request model wins, but only if the local server actually serves it.
+     *
+     * Routing fills the per-request model from `preferredModel`, which is a
+     * cross-provider preference seeded with a default name. When that name is not
+     * installed locally the server 404s and the whole call fails with "All providers
+     * failed to generate" — even though the operator had configured a working model
+     * under `localModelName`. Falling back to the configured (or auto-detected) model
+     * keeps an explicit local configuration authoritative for the local provider.
+     */
     private resolveRequestedModel;
     private createCompletion;
     generate(prompt: string, options?: GenerateOptions): Promise<AIResponse>;
@@ -20,6 +30,8 @@ export declare class LocalProvider extends BaseAIProvider {
      * Returns null if the server is unreachable or has no models.
      */
     static detectFirstModel(baseUrl: string): Promise<string | null>;
+    /** Model ids the configured local endpoint serves. */
+    static listModelIds(baseUrl: string): Promise<readonly string[]>;
     /**
      * Inspect a local OpenAI Chat Completions endpoint and return structured diagnostics.
      */

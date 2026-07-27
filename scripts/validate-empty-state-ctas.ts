@@ -79,8 +79,8 @@ const collectViolations = async (): Promise<ValidationViolation[]> => {
 
 if (import.meta.main) {
   await reportViolations(
-    "Empty-state CTA SSOT",
+    "Empty-state CTA SSOT validation failed (wire non-empty cta-label-key plus cta-to or @cta on every EmptyState):",
     await collectViolations(),
-    "Wire non-empty cta-label-key (+ cta-to or @cta) on every EmptyState.",
+    "Empty-state CTA validation passed.",
   );
 }

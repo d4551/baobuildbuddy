@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import { jobProviderSettingsSchema } from "@bao/shared/schemas/settings.schema";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
@@ -86,6 +86,16 @@ let scrapeRemoteGameJobsImpl: ScrapeImpl = () => Promise.resolve([]);
 let scrapeGamesJobsDirectImpl: ScrapeImpl = () => Promise.resolve([]);
 let scrapePocketGamerImpl: ScrapeImpl = () => Promise.resolve([]);
 
+// Destructured before the mocks are installed so the real bindings are copied
+// rather than read back through the (by then replaced) namespaces.
+const { loadJobProviderSettings: realLoadJobProviderSettings } = await import(
+  "./provider-settings"
+);
+const { scraperService: realScraperService, ScraperService: RealScraperService } = await import(
+  "../../scraper-service"
+);
+const { createServerLogger: realCreateServerLogger } = await import("../../../utils/logger");
+
 await mock.module("./provider-settings", () => ({
   loadJobProviderSettings: () => loadJobProviderSettingsImpl(),
 }));
@@ -129,6 +139,22 @@ beforeEach(() => {
   scrapeRemoteGameJobsImpl = () => Promise.resolve([]);
   scrapeGamesJobsDirectImpl = () => Promise.resolve([]);
   scrapePocketGamerImpl = () => Promise.resolve([]);
+});
+
+// `mock.module` swaps the module for the whole test process and `mock.restore()`
+// does not undo it, so the replacements have to be handed back explicitly or every
+// later file inherits this file's stubbed scraper service and silenced logger.
+afterAll(async () => {
+  await mock.module("./provider-settings", () => ({
+    loadJobProviderSettings: realLoadJobProviderSettings,
+  }));
+  await mock.module("../../scraper-service", () => ({
+    scraperService: realScraperService,
+    ScraperService: RealScraperService,
+  }));
+  await mock.module("../../../utils/logger", () => ({
+    createServerLogger: realCreateServerLogger,
+  }));
 });
 
 describe("portal-backed gaming providers", () => {

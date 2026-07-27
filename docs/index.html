@@ -527,7 +527,7 @@
                 <div class="w-full mt-auto">
                   <div class="mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-content/10 flex items-center">
                      <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="ollama pull llama3.2" aria-label="Copy to clipboard">Copy</button>
-                     <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>ollama pull llama3.2</code></pre>
+                     <pre data-prefix="$" class="pr-20 m-0 min-w-0 overflow-x-auto whitespace-pre"><code>ollama pull llama3.2</code></pre>
                   </div>
                 </div>
               </div>
@@ -661,7 +661,10 @@
       <section id="verify" class="w-full bg-base-200/50 px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="verify-heading">
         <div class="section-shell">
           <div class="surface-panel rounded-[2rem] p-6 sm:p-8 lg:p-10 grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(20rem,1fr)] items-center">
-            <div>
+            <!-- min-w-0: grid items default to min-width:auto, so without it the
+                 verify command's code block sets this column's floor and the whole
+                 page scrolls sideways on phones. -->
+            <div class="min-w-0">
               <p class="section-kicker">Integrity</p>
               <h2 id="verify-heading" class="text-2xl md:text-3xl font-display font-bold mb-3 text-base-content">Verify your download</h2>
               <p class="text-base-content/70 max-w-2xl">
@@ -672,7 +675,7 @@
               </p>
               <div class="mt-5 mockup-code bg-neutral text-neutral-content text-[11px] sm:text-xs rounded-box w-full p-2 py-4 pl-4 before:hidden relative border border-base-content/10 flex items-center">
                 <button type="button" class="btn btn-ghost min-h-0 h-8 absolute top-1.5 right-1.5 px-3 z-10 text-neutral-content hover:bg-neutral-content/20" data-copy-text="shasum -a 256 BaoBuildBuddy_0.1.0_x64-setup.exe" aria-label="Copy verify command">Copy</button>
-                <pre data-prefix="$" class="pr-20 m-0 overflow-x-auto whitespace-pre"><code>shasum -a 256 BaoBuildBuddy_0.1.0_x64-setup.exe</code></pre>
+                <pre data-prefix="$" class="pr-20 m-0 min-w-0 overflow-x-auto whitespace-pre"><code>shasum -a 256 BaoBuildBuddy_0.1.0_x64-setup.exe</code></pre>
               </div>
             </div>
             <div class="flex flex-col gap-3">

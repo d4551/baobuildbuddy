@@ -111,9 +111,15 @@ export async function generateNextNaturalQuestion(
   previousQuestion: InterviewQuestion,
 ): Promise<InterviewQuestion | null> {
   const candidateContext = await resolveCandidateInterviewContext(session.config);
+  // `session.responses` excludes the answer being processed, so indexing the
+  // fallback pool by it re-asks the question the candidate just answered.
+  const answeredSession = {
+    config: session.config,
+    responses: [...session.responses, latestResponse],
+  };
   const aiServiceResult = await settle(createAIService());
   if (aiServiceResult.status === "rejected") {
-    return buildFallbackNaturalQuestion(session, studio, candidateContext);
+    return buildFallbackNaturalQuestion(answeredSession, studio, candidateContext);
   }
 
   const prompt = buildNaturalNextQuestionPrompt({
@@ -122,7 +128,7 @@ export async function generateNextNaturalQuestion(
     candidateContext,
     previousQuestion,
     latestResponse,
-    responses: [...session.responses, latestResponse],
+    responses: answeredSession.responses,
   });
 
   const response =
@@ -135,7 +141,7 @@ export async function generateNextNaturalQuestion(
     )) ?? null;
 
   if (!response || response.error) {
-    return buildFallbackNaturalQuestion(session, studio, candidateContext);
+    return buildFallbackNaturalQuestion(answeredSession, studio, candidateContext);
   }
 
   const parsed = normalizeSingleQuestion(safeParseJSON(response.content));
@@ -146,7 +152,7 @@ export async function generateNextNaturalQuestion(
     };
   }
 
-  return buildFallbackNaturalQuestion(session, studio, candidateContext);
+  return buildFallbackNaturalQuestion(answeredSession, studio, candidateContext);
 }
 
 export async function generateQuestions(

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LOCAL_AI_DEFAULT_ENDPOINT } from "@bao/shared/constants/ai-provider";
 import { OPENAI_V1_ENDPOINT_PREFIX } from "@bao/shared/constants/endpoints";
+import { DEFAULT_SERVER_PORT } from "@bao/shared/constants/ports";
 import type { AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import { useI18n } from "vue-i18n";
 import SectionGrid from "~/components/ui/SectionGrid.vue";

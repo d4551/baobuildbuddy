@@ -55,6 +55,9 @@ const requiredPackageRoot = await realpath(
 );
 
 const nodeModule: typeof NodeModuleNamespace = await import("node:module");
+// Copied eagerly: after the mock is installed the namespace no longer yields the
+// real implementation, so `afterAll` could not hand it back.
+const realNodeModuleExports = { ...nodeModule };
 await mock.module("node:module", () => ({
   ...nodeModule,
   createRequire: () => ({
@@ -95,7 +98,11 @@ describe("collectRuntimeDependencySourceRoots", () => {
   });
 });
 
+// `mock.restore()` does not undo `mock.module`, so `node:module` has to be handed
+// back explicitly or every later file in this package resolves packages through
+// this file's fixture-only `createRequire`.
 afterAll(async () => {
   mock.restore();
+  await mock.module("node:module", () => realNodeModuleExports);
   await rm(fixtureRoot, { recursive: true, force: true });
 });

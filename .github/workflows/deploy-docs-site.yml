@@ -1,0 +1,106 @@
+name: deploy-docs-site
+
+# Publishes the marketing/download site to the FTP-backed static host.
+#
+# The bundle is assembled from `docs/` plus the canonical desktop release tree, so
+# the download cards, checksums and provenance the page links to ship together with
+# the page itself.
+#
+# Where the binaries come from depends on the trigger:
+#   workflow_run  -> the `desktop-releases` artifact built by `desktop-release`,
+#                    so a fresh all-OS build reaches the site without a commit.
+#   push/dispatch -> the committed release tree, pulled from Git LFS.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "packages/desktop/releases/**"
+      - "scripts/build-docs-site-*.ts"
+      - "scripts/deploy-docs-site-ftp.ts"
+      - ".github/workflows/deploy-docs-site.yml"
+  workflow_run:
+    workflows: ["desktop-release"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_artifacts:
+        default: false
+        description: "Publish the page without the release binaries (page-only hotfix)"
+        required: false
+        type: boolean
+
+concurrency:
+  group: deploy-docs-site-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish:
+    # A failed desktop-release must not publish a half-built release set.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: docs-site
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          # LFS objects are only needed when the binaries come from the commit.
+          lfs: ${{ github.event_name != 'workflow_run' }}
+
+      - name: Download freshly built desktop releases
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: desktop-releases
+          path: packages/desktop/releases
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Get Bun version from package.json
+        id: bun-version
+        shell: bash
+        run: echo "version=$(bash scripts/read-bun-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ steps.bun-version.outputs.version }}
+
+      - name: Install workspace dependencies
+        run: bun ci
+
+      - name: Verify desktop release artifacts
+        timeout-minutes: 15
+        run: bun run verify:desktop-releases
+
+      - name: Stage docs site bundle
+        timeout-minutes: 10
+        run: |
+          if [ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_artifacts == 'true' }}" = "true" ]; then
+            bun run docs-site:bundle -- --skip-artifacts
+          else
+            bun run docs-site:bundle
+          fi
+
+      - name: Show upload plan
+        run: bun run docs-site:deploy -- --dry-run
+
+      - name: Publish over FTPS
+        timeout-minutes: 20
+        env:
+          BAO_DOCS_FTP_HOST: ${{ secrets.BAO_DOCS_FTP_HOST }}
+          BAO_DOCS_FTP_USER: ${{ secrets.BAO_DOCS_FTP_USER }}
+          BAO_DOCS_FTP_PASSWORD: ${{ secrets.BAO_DOCS_FTP_PASSWORD }}
+          BAO_DOCS_FTP_REMOTE_ROOT: ${{ vars.BAO_DOCS_FTP_REMOTE_ROOT || '/' }}
+          BAO_DOCS_FTP_PORT: ${{ vars.BAO_DOCS_FTP_PORT || '21' }}
+          BAO_DOCS_FTP_SECURE: ${{ vars.BAO_DOCS_FTP_SECURE || 'true' }}
+        run: bun run docs-site:deploy

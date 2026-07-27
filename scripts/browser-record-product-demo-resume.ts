@@ -1,3 +1,10 @@
+const QUESTION_STEP_FALLBACK = 12;
+// CPU-only local inference is the target environment for these proofs: the same
+// guided-build generate measured 66s idle and 243s under load on one machine, so
+// the budget has to cover the slow case or the gate reports a defect that is not one.
+const RESUME_SYNTHESIS_TIMEOUT_MS = 900_000;
+const RE_QUESTION_TOTAL = /Question\s+\d+\s+of\s+(\d+)/iu;
+
 const NUM_1200 = 1_200;
 const NUM_15000 = 15_000;
 const NUM_1800 = 1_800;
@@ -24,17 +31,43 @@ import {
   RE_PDF,
   RE_QUESTION_PROGRESS,
   RE_SYNTHESIZE_RESUME,
+  SERVER_BASE,
   shot,
   wait,
   waitForEnabled,
 } from "./browser-record-product-demo-shared";
+import { pollUntil } from "./utils/async-control";
 import { writeOutput } from "./utils/cli-output";
 
-const completeResumeQuestionSteps = async (page: Page, step = 0): Promise<void> => {
-  if (step >= 10) return;
-  const visibleAnswer = page.locator("textarea:visible").first();
+/**
+ * The guided-build answer field is an `AppProseField`, which only renders a raw
+ * `<textarea>` as its SSR fallback — after hydration `ClientOnly` swaps in
+ * `AppCodeEditor`, so `.cm-content` is the surface that actually accepts input.
+ */
+const answerEditor = (page: Page) => page.locator(".cm-content:visible").first();
+
+/**
+ * The model decides how many questions to ask, so the walk has to be bounded by
+ * the progress label rather than a fixed count — a short cap stops on a middle
+ * question, never reaches the "Create Resume" step, and silently persists nothing.
+ */
+const readQuestionTotal = async (page: Page): Promise<number> => {
+  const label = await page.getByText(RE_QUESTION_PROGRESS).first().innerText();
+  const parsed = Number(RE_QUESTION_TOTAL.exec(label)?.[1] ?? "");
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : QUESTION_STEP_FALLBACK;
+};
+
+const completeResumeQuestionSteps = async (
+  page: Page,
+  totalSteps: number,
+  step = 0,
+): Promise<void> => {
+  if (step >= totalSteps) return;
+  const visibleAnswer = answerEditor(page);
   if ((await visibleAnswer.count()) === 0) return;
-  await visibleAnswer.fill(
+  await visibleAnswer.click();
+  await page.keyboard.press("Control+a");
+  await page.keyboard.type(
     `Alex Rivera, Gameplay Programmer — shipped combat pacing on a live co-op title. Answer ${String(step + 1)}.`,
   );
   await wait(page, NUM_400);
@@ -52,7 +85,7 @@ const completeResumeQuestionSteps = async (page: Page, step = 0): Promise<void> 
   if (await next.isDisabled()) return;
   await next.click();
   await wait(page, NUM_600);
-  return completeResumeQuestionSteps(page, step + 1);
+  return completeResumeQuestionSteps(page, totalSteps, step + 1);
 };
 
 const fillResumeTargetForm = async (page: Page): Promise<void> => {
@@ -92,7 +125,7 @@ const runGenerateQuestions = async (page: Page): Promise<void> => {
     (response) =>
       response.url().includes(API_ENDPOINTS.resumeFromQuestionsGenerate) &&
       response.request().method() === "POST",
-    { timeout: 300_000 },
+    { timeout: RESUME_SYNTHESIS_TIMEOUT_MS },
   );
   await generate.click({ timeout: 10_000 });
   await writeOutput("clicked Generate Questions; waiting for AI question UI");
@@ -148,13 +181,46 @@ const finishResumePreviewExport = async (page: Page): Promise<void> => {
   await settle(downloadPromise);
 };
 
+const countResumesViaApi = async (): Promise<number> => {
+  const response = await fetch(new URL(API_ENDPOINTS.resumes, SERVER_BASE).toString(), {
+    signal: AbortSignal.timeout(NUM_15000),
+  });
+  if (!response.ok) {
+    throw new Error(`GET ${API_ENDPOINTS.resumes} → ${String(response.status)}`);
+  }
+  const body: unknown = await response.json();
+  return Array.isArray(body) ? body.length : 0;
+};
+
+/**
+ * Synthesis is a live model call, so the run has to wait for the resume to land
+ * before navigating on — otherwise the in-flight request is torn down with the
+ * page and the guided build "passes" having persisted nothing.
+ */
+const waitForResumePersisted = async (before: number): Promise<void> => {
+  const created = await pollUntil({
+    probe: async () => ((await countResumesViaApi()) > before ? true : null),
+    intervalMs: NUM_2000,
+    timeoutMs: RESUME_SYNTHESIS_TIMEOUT_MS,
+    sleep: (milliseconds) => Bun.sleep(milliseconds),
+  });
+  if (!created) {
+    throw new Error(
+      `Guided build finished without persisting a resume (still ${String(before)} after synthesis).`,
+    );
+  }
+  await writeOutput(`resume persisted (count ${String(before)} → ${String(before + 1)})`);
+};
+
 export const demoResumeGuidedBuild = async (page: Page): Promise<boolean> => {
+  const resumesBefore = await countResumesViaApi();
   await fillResumeTargetForm(page);
   await runGenerateQuestions(page);
   await page.getByText(RE_QUESTION_PROGRESS).first().waitFor({ state: "visible", timeout: 30_000 });
-  await page.locator("textarea:visible").first().waitFor({ state: "visible", timeout: 15_000 });
+  await answerEditor(page).waitFor({ state: "visible", timeout: NUM_15000 });
   await shot(page, "03-resume-questions");
-  await completeResumeQuestionSteps(page);
+  await completeResumeQuestionSteps(page, await readQuestionTotal(page));
+  await waitForResumePersisted(resumesBefore);
   await finishResumePreviewExport(page);
   return true;
 };
