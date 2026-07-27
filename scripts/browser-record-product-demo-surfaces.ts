@@ -4,7 +4,6 @@ const NUM_1800 = 1_800;
 const NUM_2000 = 2_000;
 const NUM_2500 = 2_500;
 const NUM_30000 = 30_000;
-const NUM_45000 = 45_000;
 
 /**
  * Portfolio / cover-letter / AI-chat demo surfaces (complexity split).
@@ -35,8 +34,10 @@ const RE_SUBMIT_COVER_LETTER = /^Generate cover letter$/i;
 const RE_COMPANY = /company/i;
 const RE_POSITION_ROLE = /position|role/i;
 const RE_JOB_DESCRIPTION = /job description|description/i;
+const RE_CHAT_BUSY = /Generating a response|Generating response/i;
 
 const COVER_LETTER_TIMEOUT_MS = 300_000;
+const CHAT_REPLY_TIMEOUT_MS = 300_000;
 
 const countCoverLettersViaApi = async (): Promise<number> => {
   const response = await fetch(new URL(API_ENDPOINTS.coverLetters, SERVER_BASE).toString(), {
@@ -167,6 +168,15 @@ export const demoAiChat = async (page: Page): Promise<void> => {
       "Help me prepare a 60-second pitch for a gameplay programmer role focused on combat systems.",
     );
   await page.locator("button", { hasText: RE_SEND_SUBMIT }).first().click({ timeout: 8_000 });
-  await wait(page, NUM_45000);
+  // Capture the reply, not the spinner: the chat streams, so poll the busy
+  // status away before screenshotting rather than relying on `wait()`, which
+  // resolves as soon as the document is loaded.
+  const busyStatus = page.getByText(RE_CHAT_BUSY).first();
+  await pollUntil({
+    probe: async () => ((await busyStatus.count()) === 0 ? true : null),
+    intervalMs: NUM_2000,
+    timeoutMs: CHAT_REPLY_TIMEOUT_MS,
+    sleep: (milliseconds) => Bun.sleep(milliseconds),
+  });
   await shot(page, "14-ai-chat-response");
 };
