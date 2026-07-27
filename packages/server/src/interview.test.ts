@@ -272,7 +272,11 @@ function registerInterviewNaturalFollowUpTest(): void {
     expect(updated?.responses).toHaveLength(1);
     expect(updated?.questions).toHaveLength(2);
     expect(updated?.questions[1]?.id).not.toBe(firstQuestion?.id);
-    expect(updated?.questions[1]?.question).toContain("Gameplay Engineer");
+    // A distinct id is not enough: the follow-up used to be a verbatim repeat of
+    // the question just answered, because the fallback pool was indexed by the
+    // response count taken before the new answer was appended.
+    expect(updated?.questions[1]?.question).not.toBe(firstQuestion?.question);
+    expect((updated?.questions[1]?.question ?? "").length).toBeGreaterThan(0);
     expect(updated?.currentQuestionIndex).toBe(1);
   });
 }
