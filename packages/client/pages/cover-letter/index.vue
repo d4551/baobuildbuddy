@@ -73,7 +73,7 @@ const bootstrapErrorMessage = computed(() =>
     ? getErrorMessage(bootstrapError.value, t("coverLetterPage.toasts.fetchFailed"))
     : "",
 );
-const hasCoverLetters = computed(() => coverLetters.length > 0);
+const hasCoverLetters = computed(() => coverLetters.value.length > 0);
 </script>
 
 <template>

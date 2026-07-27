@@ -100,7 +100,7 @@ export const shot = async (page: Page, name: string): Promise<void> => {
  * Type into a field that may be either a native control or an `AppCodeEditor`.
  *
  * `AppProseField` renders a real `<textarea>` only as its SSR fallback; once
- * `ClientOnly` hydrates, the labelled element is the `.cm-editor` wrapper —
+ * `ClientOnly` hydrates, the labelled element is the outer `.cm-editor` host —
  * a `role="textbox"` div that is not itself `[contenteditable]`, so Playwright's
  * `fill()` rejects it. The editable surface is the inner `.cm-content`.
  */
