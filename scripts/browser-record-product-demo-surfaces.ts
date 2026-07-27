@@ -36,8 +36,8 @@ const RE_POSITION_ROLE = /position|role/i;
 const RE_JOB_DESCRIPTION = /job description|description/i;
 const RE_CHAT_BUSY = /Generating a response|Generating response/i;
 
-const COVER_LETTER_TIMEOUT_MS = 300_000;
-const CHAT_REPLY_TIMEOUT_MS = 300_000;
+const COVER_LETTER_TIMEOUT_MS = 900_000;
+const CHAT_REPLY_TIMEOUT_MS = 900_000;
 
 const countCoverLettersViaApi = async (): Promise<number> => {
   const response = await fetch(new URL(API_ENDPOINTS.coverLetters, SERVER_BASE).toString(), {

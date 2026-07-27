@@ -1,5 +1,8 @@
 const QUESTION_STEP_FALLBACK = 12;
-const RESUME_SYNTHESIS_TIMEOUT_MS = 300_000;
+// CPU-only local inference is the target environment for these proofs: the same
+// guided-build generate measured 66s idle and 243s under load on one machine, so
+// the budget has to cover the slow case or the gate reports a defect that is not one.
+const RESUME_SYNTHESIS_TIMEOUT_MS = 900_000;
 const RE_QUESTION_TOTAL = /Question\s+\d+\s+of\s+(\d+)/iu;
 
 const NUM_1200 = 1_200;
@@ -122,7 +125,7 @@ const runGenerateQuestions = async (page: Page): Promise<void> => {
     (response) =>
       response.url().includes(API_ENDPOINTS.resumeFromQuestionsGenerate) &&
       response.request().method() === "POST",
-    { timeout: 300_000 },
+    { timeout: RESUME_SYNTHESIS_TIMEOUT_MS },
   );
   await generate.click({ timeout: 10_000 });
   await writeOutput("clicked Generate Questions; waiting for AI question UI");
